@@ -186,57 +186,13 @@ bool CEisenhowerUIExtensionBridgeWindow::DoIdleProcessing()
 	return m_wnd->DoIdleProcessing();
 }
 
-// bool CEisenhowerUIExtensionBridgeWindow::Map(IUI_APPCOMMAND nCmd, EisenhowerControl::ExpandNode% expand)
-// {
-// 	switch (nCmd)
-// 	{
-// 	case IUI_COLLAPSEALL:
-// 		expand = EisenhowerControl::ExpandNode::CollapseAll;
-// 		return true;
-// 
-// 	case IUI_COLLAPSESELECTED:
-// 		expand = EisenhowerControl::ExpandNode::CollapseSelection;
-// 		return true;
-// 
-// 	case IUI_EXPANDALL:
-// 		expand = EisenhowerControl::ExpandNode::ExpandAll;
-// 		return true;
-// 
-// 	case IUI_EXPANDSELECTED:
-// 		expand = EisenhowerControl::ExpandNode::ExpandSelectionAll;
-// 		return true;
-// 	}
-// 
-// 	// all else
-// 	return false;
-// }
 
 bool CEisenhowerUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 {
 	switch (nCmd)
 	{
-	case IUI_COLLAPSEALL:
-	case IUI_COLLAPSESELECTED:
-	case IUI_EXPANDALL:
-	case IUI_EXPANDSELECTED:
-		{
-// 			EisenhowerControl::ExpandNode expand;
-// 
-// 			if (Map(nCmd, expand))
-// 				return m_wnd->Expand(expand);
-			return false;
-		}
-		break;
-
 	case IUI_SETFOCUS:
 		return m_wnd->Focus();
-
-	case IUI_MOVETASK:
-		if (pData)
-		{
-			return m_wnd->MoveTask(pData->move.dwSelectedTaskID, pData->move.dwParentID, pData->move.dwAfterSiblingID);
-		}
-		return true;
 
 	case IUI_GETNEXTTASK:
 	case IUI_GETPREVTASK:
@@ -316,19 +272,6 @@ bool CEisenhowerUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd, co
 {
 	switch (nCmd)
 	{
-	case IUI_COLLAPSEALL:
-	case IUI_COLLAPSESELECTED:
-	case IUI_EXPANDALL:
-	case IUI_EXPANDSELECTED:
-		{
-			return false;
-// 			EisenhowerControl::ExpandNode expand;
-// 
-// 			if (Map(nCmd, expand))
-// 				return m_wnd->CanExpand(expand);
-		}
-		break;
-
 	case IUI_SELECTFIRSTTASK:
 	case IUI_SELECTNEXTTASK:
 	case IUI_SELECTNEXTTASKINCLCURRENT:
@@ -338,11 +281,6 @@ bool CEisenhowerUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd, co
 
 	case IUI_SETFOCUS:
 		return !m_wnd->Focused;
-
-	case IUI_MOVETASK:
-		if (pData)
-			return m_wnd->CanMoveTask(pData->move.dwSelectedTaskID, pData->move.dwParentID, pData->move.dwAfterSiblingID);
-		break;
 
 	case IUI_GETNEXTTASK:
 	case IUI_GETPREVTASK:

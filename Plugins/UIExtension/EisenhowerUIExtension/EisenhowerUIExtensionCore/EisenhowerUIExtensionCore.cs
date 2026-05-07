@@ -22,7 +22,7 @@ namespace EisenhowerUIExtension
 		public bool SelectTask(UInt32 dwTaskID)
 		{
 			return false;
-			//return m_Eisenhower.SetSelectedNode(dwTaskID);
+			//return m_EisenhowerCtrl.SetSelectedNode(dwTaskID);
 		}
 
 		public bool SelectTasks(UInt32[] pdwTaskIDs)
@@ -32,36 +32,33 @@ namespace EisenhowerUIExtension
 
 		public bool SelectTask(String text, UIExtension.SelectTask selectTask, bool caseSensitive, bool wholeWord, bool findReplace)
 		{
-			return false;
-			//return m_Eisenhower.SelectTask(text, selectTask, caseSensitive, wholeWord, findReplace);
+			return m_EisenhowerCtrl.SelectTask(text, selectTask, caseSensitive, wholeWord, findReplace);
 		}
 
 		public bool ScrollToSelectedTask()
 		{
-			// 			if (CanScrollToSelectedTask())
-			// 			{
-			// 				m_Eisenhower.EnsureSelectionVisible();
-			// 				return true;
-			// 			}
+			if (CanScrollToSelectedTask())
+			{
+				m_EisenhowerCtrl.EnsureSelectionVisible();
+				return true;
+			}
 
 			return false;
 		}
 
 		public bool CanScrollToSelectedTask()
 		{
-			return false;
-			//return m_Eisenhower.HasSelection;
+			return m_EisenhowerCtrl.HasSelection;
 		}
 
 		public void UpdateTasks(TaskList tasks, UIExtension.UpdateType type)
 		{
-			//m_Eisenhower.UpdateTasks(tasks, type);
+			m_EisenhowerCtrl.UpdateTasks(tasks, type);
 		}
 
 		public bool WantTaskUpdate(Task.Attribute attrib)
 		{
-			return true;
-			//return m_Eisenhower.WantTaskUpdate(attrib);
+			return m_EisenhowerCtrl.WantTaskUpdate(attrib);
 		}
 
 		public bool WantSortUpdate(Task.Attribute attrib)
@@ -81,45 +78,43 @@ namespace EisenhowerUIExtension
 
 		public bool DoIdleProcessing()
 		{
-			return false;
-			//return m_Eisenhower.DoIdleProcessing();
+			return m_EisenhowerCtrl.DoIdleProcessing();
 		}
 
 		public bool GetLabelEditRect(ref Int32 left, ref Int32 top, ref Int32 right, ref Int32 bottom)
 		{
-			return false;
-			// 			Rectangle labelRect = m_Eisenhower.GetSelectedItemLabelRect();
-			// 
-			// 			if (labelRect.IsEmpty)
-			// 				return false;
-			// 
-			// 			labelRect = m_Eisenhower.RectangleToScreen(labelRect);
-			// 
-			// 			left = labelRect.Left;
-			// 			top = labelRect.Top;
-			// 			right = labelRect.Right;
-			// 			bottom = labelRect.Bottom;
-			// 
-			//             return true;
+			Rectangle labelRect = m_EisenhowerCtrl.GetSelectedItemLabelRect();
+			
+			if (labelRect.IsEmpty)
+				return false;
+			
+			labelRect = m_EisenhowerCtrl.RectangleToScreen(labelRect);
+			
+			left = labelRect.Left;
+			top = labelRect.Top;
+			right = labelRect.Right;
+			bottom = labelRect.Bottom;
+			
+			  return true;
 		}
 
 		public UIExtension.HitTestResult HitTest(Int32 xPos, Int32 yPos, UIExtension.HitTestReason reason)
 		{
-			// 			var ptScreen = new Point(xPos, yPos);
-			// 
-			// 			if (m_Eisenhower.HitTestTask(ptScreen) != 0)
-			// 				return UIExtension.HitTestResult.Task;
-			// 
-			// 			// else
-			// 			if (m_Eisenhower.RectangleToScreen(m_Eisenhower.ClientRectangle).Contains(ptScreen))
-			// 				return UIExtension.HitTestResult.Tasklist;
+			var ptScreen = new Point(xPos, yPos);
+			
+			if (m_EisenhowerCtrl.HitTestTask(ptScreen) != 0)
+				return UIExtension.HitTestResult.Task;
+			
+			// else
+			if (m_EisenhowerCtrl.RectangleToScreen(m_EisenhowerCtrl.ClientRectangle).Contains(ptScreen))
+				return UIExtension.HitTestResult.Tasklist;
 
 			return UIExtension.HitTestResult.Nowhere;
 		}
 
 		public UInt32 HitTestTask(Int32 xPos, Int32 yPos, UIExtension.HitTestReason reason)
 		{
-			return 0;//m_Eisenhower.HitTestTask(new Point(xPos, yPos));
+			return m_EisenhowerCtrl.HitTestTask(new Point(xPos, yPos));
 		}
 
 		public void SetUITheme(UITheme theme)
@@ -131,12 +126,12 @@ namespace EisenhowerUIExtension
 
 		public void SetTaskFont(String faceName, int pointSize)
 		{
-			// 			m_Eisenhower.SetFont(faceName, pointSize);
+			m_EisenhowerCtrl.SetFont(faceName, pointSize);
 		}
 
 		public void SetReadOnly(bool bReadOnly)
 		{
-			//             m_Eisenhower.ReadOnly = bReadOnly;
+			m_EisenhowerCtrl.ReadOnly = bReadOnly;
 		}
 
 		public void SavePreferences(Preferences prefs, String key)
@@ -147,21 +142,6 @@ namespace EisenhowerUIExtension
 		public void LoadPreferences(Preferences prefs, String key, bool appOnly)
 		{
 			m_EisenhowerCtrl.LoadPreferences(prefs, key, appOnly);
-			//             if (!appOnly)
-			//             {
-			// 				// private settings
-			// 				m_Eisenhower.LoadPreferences(prefs, key);
-			// 
-			// 				m_AlignmentCombo.SelectedAlignment = m_Eisenhower.Alignment;
-			// 				m_OptionsCombo.SelectedOptions = m_Eisenhower.Options;
-			// 			}
-			// 
-			// 			m_Eisenhower.TaskColorIsBackground = prefs.GetProfileBool("Preferences", "ColorTaskBackground", false);
-			// 			m_Eisenhower.ShowParentsAsFolders = prefs.GetProfileBool("Preferences", "ShowParentsAsFolders", false);
-			//             m_Eisenhower.ShowCompletionCheckboxes = prefs.GetProfileBool("Preferences", "AllowCheckboxAgainstTreeItem", false);
-			//             m_Eisenhower.ShowMixedCompletionState = prefs.GetProfileBool("Preferences", "ShowMixedCompletionState", true);
-			// 			
-			// 			m_Eisenhower.SetStrikeThruDone(prefs.GetProfileBool("Preferences", "StrikethroughDone", true));
 		}
 
 		public new Boolean Focus()
@@ -170,55 +150,37 @@ namespace EisenhowerUIExtension
 				return false;
 
 			// else
-			return false;//m_Eisenhower.Focus();
+			return m_EisenhowerCtrl.Focus();
 		}
 
 		public new Boolean Focused
 		{
-			// get { m_Eisenhower.Focused; }
-			get { return false; }
+			get { return m_EisenhowerCtrl.Focused; }
 		}
-
-		// 		public Boolean Expand(EisenhowerControl.ExpandNode expand)
-		// 		{
-		// 			return false;
-		// 			//return m_Eisenhower.Expand(expand);
-		// 		}
-		// 
-		// 		public Boolean CanExpand(EisenhowerControl.ExpandNode expand)
-		// 		{
-		// 			return false;
-		// 			//return m_Eisenhower.CanExpand(expand);
-		// 		}
 
 		public Boolean CanMoveTask(UInt32 taskId, UInt32 destParentId, UInt32 destPrevSiblingId)
 		{
 			return false;
-			//return m_Eisenhower.CanMoveTask(taskId, destParentId, destPrevSiblingId);
 		}
 
 		public Boolean MoveTask(UInt32 taskId, UInt32 destParentId, UInt32 destPrevSiblingId)
 		{
 			return false;
-			//return m_Eisenhower.MoveTask(taskId, destParentId, destPrevSiblingId);
 		}
 
 		public bool GetTask(UIExtension.GetTask getTask, ref UInt32 taskID)
 		{
-			return false;
-			//return m_Eisenhower.GetTask(getTask, ref taskID);
+			return m_EisenhowerCtrl.GetTask(getTask, ref taskID);
 		}
 
 		public Bitmap SaveToImage()
 		{
-			return null;
-			//return m_Eisenhower.SaveToImage();
+			return m_EisenhowerCtrl.SaveToImage();
 		}
 
 		public Boolean CanSaveToImage()
 		{
-			return false;
-			//return m_Eisenhower.CanSaveToImage();
+			return m_EisenhowerCtrl.CanSaveToImage();
 		}
 
 		// Message handlers ---------------------------------------------------
