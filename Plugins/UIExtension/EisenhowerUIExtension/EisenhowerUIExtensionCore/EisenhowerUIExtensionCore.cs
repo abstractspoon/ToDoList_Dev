@@ -124,16 +124,9 @@ namespace EisenhowerUIExtension
 
 		public void SetUITheme(UITheme theme)
 		{
-			BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackDark);
-			// 
-			// 			m_OptionsLabel.ForeColor = theme.GetAppDrawingColor(UITheme.AppColor.AppText);
-			// 			m_AlignmentLabel.ForeColor = theme.GetAppDrawingColor(UITheme.AppColor.AppText);
-			// 
-			// 			// Connection colour
-			// 			var color = theme.GetAppDrawingColor(UITheme.AppColor.AppLinesDark);
-			// 
-			//             // Make sure it's dark enough
-			//             m_Eisenhower.ConnectionColor = DrawingColor.SetLuminance(color, 0.6f);
+			BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight);
+
+			m_EisenhowerCtrl.SetUITheme(theme);
 		}
 
 		public void SetTaskFont(String faceName, int pointSize)

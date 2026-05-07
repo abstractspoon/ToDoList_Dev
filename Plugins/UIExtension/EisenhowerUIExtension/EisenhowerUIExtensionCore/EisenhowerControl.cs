@@ -7,6 +7,9 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
+using Abstractspoon.Tdl.PluginHelpers;
+using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
+
 namespace EisenhowerUIExtension
 {
 	public partial class EisenhowerControl : UserControl
@@ -23,6 +26,17 @@ namespace EisenhowerUIExtension
 		{
 			InitializeComponent();
 		}
+
+		public void SetUITheme(UITheme theme)
+		{
+			BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackDark);
+
+			m_TopLeftPane.BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight);
+			m_TopRightPane.BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight);
+			m_BotLeftPane.BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight);
+			m_BotRightPane.BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight);
+		}
+
 
 		// Message handlers --------------------------------
 
@@ -45,7 +59,7 @@ namespace EisenhowerUIExtension
 
 			topRightRect.X = topLeftRect.Right + SplitWidth;
 			topRightRect.Y = topLeftRect.Y;
-			topRightRect.Width = (Width - (topLeftRect.Width + SplitWidth));
+			topRightRect.Width = (Width - topRightRect.X);
 			topRightRect.Height = topLeftRect.Height;
 
 			m_TopRightPane.Bounds = topRightRect;
@@ -55,7 +69,7 @@ namespace EisenhowerUIExtension
 
 			botLeftRect.Y = topLeftRect.Bottom + SplitWidth;
 			botLeftRect.Width = topLeftRect.Width;
-			botLeftRect.Height = (Height - (topLeftRect.Height + SplitWidth));
+			botLeftRect.Height = (Height - botLeftRect.Y);
 
 			m_BotLeftPane.Bounds = botLeftRect;
 
