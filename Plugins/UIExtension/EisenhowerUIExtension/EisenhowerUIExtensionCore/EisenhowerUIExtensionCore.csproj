@@ -53,6 +53,7 @@
     <Compile Include="EisenhowerControl.Designer.cs">
       <DependentUpon>EisenhowerControl.cs</DependentUpon>
     </Compile>
+    <Compile Include="EisenhowerFilter.cs" />
     <Compile Include="EisenhowerPane.cs">
       <SubType>UserControl</SubType>
     </Compile>

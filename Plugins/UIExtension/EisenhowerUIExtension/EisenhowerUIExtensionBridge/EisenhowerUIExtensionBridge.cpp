@@ -105,7 +105,7 @@ BOOL CEisenhowerUIExtensionBridgeWindow::Create(UINT nCtrlID, DWORD nStyle,
 	msclr::auto_gcroot<String^> typeID = gcnew String(EISENHOWER_GUID);
 	msclr::auto_gcroot<String^> uiName = gcnew String(EISENHOWER_NAME);
 
-	m_wnd = gcnew EisenhowerUIExtension::EisenhowerUIExtensionCore(/*typeID.get(), uiName.get(), static_cast<IntPtr>(hwndParent), trans.get()*/);
+	m_wnd = gcnew EisenhowerUIExtension::EisenhowerUIExtensionCore(typeID.get(), uiName.get(), static_cast<IntPtr>(hwndParent), trans.get());
 
 	HWND hWnd = GetHwnd();
 

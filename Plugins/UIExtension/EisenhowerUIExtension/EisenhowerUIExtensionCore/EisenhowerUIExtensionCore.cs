@@ -14,20 +14,35 @@ namespace EisenhowerUIExtension
 {
 	public partial class EisenhowerUIExtensionCore : UserControl, IUIExtension
 	{
-		public EisenhowerUIExtensionCore()
+		string m_TypeID;
+		string m_UiName;
+		IntPtr m_ParentHandle;
+//		Translator m_Trans;
+		private UIExtension.TaskIcon m_TaskIcons;
+
+		// ------------------------------------------------
+
+		public EisenhowerUIExtensionCore(string typeID, string uiName, IntPtr parentHandle, Translator trans)
 		{
 			InitializeComponent();
+
+			m_TypeID = typeID;
+			m_UiName = uiName;
+//			m_Trans = trans;
+			m_ParentHandle = parentHandle;
+			m_TaskIcons = new UIExtension.TaskIcon(parentHandle);
+
+			m_EisenhowerCtrl.Initialize(trans, m_TaskIcons);
 		}
 
-		public bool SelectTask(UInt32 dwTaskID)
+		public bool SelectTask(uint taskID)
 		{
-			return false;
-			//return m_EisenhowerCtrl.SetSelectedNode(dwTaskID);
+			return m_EisenhowerCtrl.SelectTask(taskID);
 		}
 
-		public bool SelectTasks(UInt32[] pdwTaskIDs)
+		public bool SelectTasks(uint[] taskIDs)
 		{
-			return false;
+			return m_EisenhowerCtrl.SelectTasks(taskIDs);
 		}
 
 		public bool SelectTask(String text, UIExtension.SelectTask selectTask, bool caseSensitive, bool wholeWord, bool findReplace)

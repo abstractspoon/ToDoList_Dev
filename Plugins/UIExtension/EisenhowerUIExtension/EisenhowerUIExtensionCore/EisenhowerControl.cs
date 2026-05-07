@@ -6,7 +6,6 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
-using System.Windows.Forms.VisualStyles;
 
 using Abstractspoon.Tdl.PluginHelpers;
 using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
@@ -27,17 +26,12 @@ namespace EisenhowerUIExtension
 
 		// From Parent
 		private Translator m_Trans;
-		private UIExtension.TaskIcon m_TaskIcons;
-		private TaskItems m_Items = new TaskItems();
+		private TaskItems m_Tasks;
+		private LabelTip m_LabelTip;
 
-		private bool m_ShowParentAsFolder;
-		private bool m_TaskColorIsBkgnd;
-		private bool m_ShowMixedCompletionState;
-		private bool m_ShowCompletionCheckboxes;
 		private bool m_DraggingHorzSplitBar, m_DraggingVertSplitBar;
 
 		private DragImage m_DragImage;
-		private LabelTip m_LabelTip;
 		private Point m_SplitPos = new Point(50, 50); // 0-100
 
 		// ---------------------------------------------
@@ -47,14 +41,113 @@ namespace EisenhowerUIExtension
 			InitializeComponent();
 		}
 
-		public EisenhowerControl(Translator trans, UIExtension.TaskIcon icons) : this()
+		public void Initialize(Translator trans, UIExtension.TaskIcon icons)
 		{
 			m_Trans = trans;
-			m_TaskIcons = icons;
 
-			m_Items = new TaskItems();
+			m_Tasks = new TaskItems();
 			m_DragImage = new DragImage();
 			m_LabelTip = new LabelTip(this);
+
+			// Top-left => High Attrib1 - High Attrib2
+			{
+				// Dummy filter to get us started
+				var filter = new EisenhowerPaneFilter()
+				{
+					Attribute1 = new EisenhowerPaneFilterAttribute(Task.Attribute.Priority)
+					{
+						MaxValue = 10,
+						MaxValueOperator = EisenhowerPaneFilterOperator.LTEQ,
+						MinValue = 5,
+						MinValueOperator = EisenhowerPaneFilterOperator.GTEQ
+					},
+
+					Attribute2 = new EisenhowerPaneFilterAttribute(Task.Attribute.Risk)
+					{
+						MaxValue = 10,
+						MaxValueOperator = EisenhowerPaneFilterOperator.LTEQ,
+						MinValue = 5,
+						MinValueOperator = EisenhowerPaneFilterOperator.GTEQ
+					}
+				};
+
+				m_TopLeftPane.Initialize(m_Trans, m_Tasks, icons, filter);
+			}
+
+			// Top-right => Low Attrib1 - High Attrib2
+			{
+				// Dummy filter to get us started
+				var filter = new EisenhowerPaneFilter()
+				{
+					Attribute1 = new EisenhowerPaneFilterAttribute(Task.Attribute.Priority)
+					{
+						MaxValue = 5,
+						MaxValueOperator = EisenhowerPaneFilterOperator.LT,
+						MinValue = -2,
+						MinValueOperator = EisenhowerPaneFilterOperator.GTEQ
+					},
+
+					Attribute2 = new EisenhowerPaneFilterAttribute(Task.Attribute.Risk)
+					{
+						MaxValue = 10,
+						MaxValueOperator = EisenhowerPaneFilterOperator.LTEQ,
+						MinValue = 5,
+						MinValueOperator = EisenhowerPaneFilterOperator.GTEQ
+					}
+				};
+
+				m_TopRightPane.Initialize(m_Trans, m_Tasks, icons, filter);
+			}
+
+			// Bottom-left => High Attrib1 - Low Attrib2
+			{
+				// Dummy filter to get us started
+				var filter = new EisenhowerPaneFilter()
+				{
+					Attribute1 = new EisenhowerPaneFilterAttribute(Task.Attribute.Priority)
+					{
+						MaxValue = 10,
+						MaxValueOperator = EisenhowerPaneFilterOperator.LTEQ,
+						MinValue = 5,
+						MinValueOperator = EisenhowerPaneFilterOperator.GTEQ
+					},
+
+					Attribute2 = new EisenhowerPaneFilterAttribute(Task.Attribute.Risk)
+					{
+						MaxValue = 5,
+						MaxValueOperator = EisenhowerPaneFilterOperator.LT,
+						MinValue = -2,
+						MinValueOperator = EisenhowerPaneFilterOperator.GTEQ
+					}
+				};
+
+				m_BotLeftPane.Initialize(m_Trans, m_Tasks, icons, filter);
+			}
+
+			// Bottom-right => Low Attrib1 - Low Attrib2
+			{
+				// Dummy filter to get us started
+				var filter = new EisenhowerPaneFilter()
+				{
+					Attribute1 = new EisenhowerPaneFilterAttribute(Task.Attribute.Priority)
+					{
+						MaxValue = 5,
+						MaxValueOperator = EisenhowerPaneFilterOperator.LT,
+						MinValue = -2,
+						MinValueOperator = EisenhowerPaneFilterOperator.GTEQ
+					},
+
+					Attribute2 = new EisenhowerPaneFilterAttribute(Task.Attribute.Risk)
+					{
+						MaxValue = 5,
+						MaxValueOperator = EisenhowerPaneFilterOperator.LT,
+						MinValue = -2,
+						MinValueOperator = EisenhowerPaneFilterOperator.GTEQ
+					}
+				};
+
+				m_BotRightPane.Initialize(m_Trans, m_Tasks, icons, filter);
+			}
 		}
 
 		public void SetUITheme(UITheme theme)
@@ -89,12 +182,31 @@ namespace EisenhowerUIExtension
 
 		public void EnsureSelectionVisible()
 		{
+			// TODO
+		}
 
+		public bool SelectTask(UInt32 taskID)
+		{
+			return m_TopLeftPane.SelectTask(taskID) ||
+				   m_TopRightPane.SelectTask(taskID) ||
+				   m_BotLeftPane.SelectTask(taskID) ||
+				   m_BotRightPane.SelectTask(taskID);
+		}
+
+		public bool SelectTasks(uint[] taskIDs)
+		{
+			return m_TopLeftPane.SelectTasks(taskIDs) ||
+				   m_TopRightPane.SelectTasks(taskIDs) ||
+				   m_BotLeftPane.SelectTasks(taskIDs) ||
+				   m_BotRightPane.SelectTasks(taskIDs);
 		}
 
 		public bool HasSelection
 		{
-			get { return false; }
+			get { return m_TopLeftPane.HasSelection ||
+						 m_TopRightPane.HasSelection ||
+						 m_BotLeftPane.HasSelection ||
+						 m_BotRightPane.HasSelection; }
 		}
 
 		public bool ReadOnly { get; set; }
@@ -117,53 +229,45 @@ namespace EisenhowerUIExtension
 
 		public bool TaskColorIsBackground
 		{
-			get { return m_TaskColorIsBkgnd; }
 			set
 			{
-				if (m_TaskColorIsBkgnd != value)
-				{
-					m_TaskColorIsBkgnd = value;
-					Invalidate();
-				}
+				m_TopLeftPane.TaskColorIsBackground = value;
+				m_TopRightPane.TaskColorIsBackground = value;
+				m_BotLeftPane.TaskColorIsBackground = value;
+				m_BotRightPane.TaskColorIsBackground = value;
 			}
 		}
 
 		public bool ShowMixedCompletionState
 		{
-			get { return m_ShowMixedCompletionState; }
 			set
 			{
-				if (m_ShowMixedCompletionState != value)
-				{
-					m_ShowMixedCompletionState = value;
-					Invalidate();
-				}
+				m_TopLeftPane.ShowMixedCompletionState = value;
+				m_TopRightPane.ShowMixedCompletionState = value;
+				m_BotLeftPane.ShowMixedCompletionState = value;
+				m_BotRightPane.ShowMixedCompletionState = value;
 			}
 		}
 
 		public bool ShowParentsAsFolders
 		{
-			get { return m_ShowParentAsFolder; }
 			set
 			{
-				if (m_ShowParentAsFolder != value)
-				{
-					m_ShowParentAsFolder = value;
-					Invalidate();
-				}
+				m_TopLeftPane.ShowParentsAsFolders = value;
+				m_TopRightPane.ShowParentsAsFolders = value;
+				m_BotLeftPane.ShowParentsAsFolders = value;
+				m_BotRightPane.ShowParentsAsFolders = value;
 			}
 		}
 
 		public bool ShowCompletionCheckboxes
 		{
-			get { return m_ShowCompletionCheckboxes; }
 			set
 			{
-				if (m_ShowCompletionCheckboxes != value)
-				{
-					m_ShowCompletionCheckboxes = value;
-					Invalidate();
-				}
+				m_TopLeftPane.ShowCompletionCheckboxes = value;
+				m_TopRightPane.ShowCompletionCheckboxes = value;
+				m_BotLeftPane.ShowCompletionCheckboxes = value;
+				m_BotRightPane.ShowCompletionCheckboxes = value;
 			}
 		}
 
@@ -374,7 +478,7 @@ namespace EisenhowerUIExtension
 
 		public bool CanSaveToImage()
 		{
-			return (m_Items.Count != 0);
+			return (m_Tasks.Count != 0);
 		}
 
 		public Bitmap SaveToImage()
@@ -580,6 +684,16 @@ namespace EisenhowerUIExtension
 
 			while (task.IsValid() && ProcessTaskUpdate(task, changedTaskIds))
 				task = task.GetNextTask();
+
+			// Only Update the panes if the attributes we are tracking were changed
+			// TODO
+			if (changedTaskIds.Count > 0)
+			{
+				m_TopLeftPane.RefreshList();
+				m_TopRightPane.RefreshList();
+				m_BotLeftPane.RefreshList();
+				m_BotRightPane.RefreshList();
+			}
 		}
 
 		private bool ProcessTaskUpdate(Task task, HashSet<UInt32> taskIds)
@@ -588,7 +702,7 @@ namespace EisenhowerUIExtension
 				return false;
 
             UInt32 taskId = task.GetID();
-			TaskItem item = m_Items.GetItem(taskId, true);
+			TaskItem item = m_Tasks.GetItem(taskId, true);
 
 			if (!item.ProcessTaskUpdate(task))
 				return false;
@@ -641,178 +755,6 @@ namespace EisenhowerUIExtension
 			return true;
 		}
 */
-
-// 		protected override Color GetNodeBackgroundColor(Object itemData)
-// 		{
-// 			if (m_TaskColorIsBkgnd)
-// 			{
-// 				var taskItem = (itemData as TaskItem);
-// 
-// 				if (!taskItem.TextColor.IsEmpty)
-// 					return taskItem.TextColor;
-// 			}
-// 
-// 			// all else
-// 			return base.GetNodeBackgroundColor(itemData);
-// 		}
-
-// 		protected void DrawItemLabel(Graphics graphics, TaskItem taskItem, Rectangle rect,
-// 									  NodeDrawState nodeState, NodeDrawPos nodePos,
-//                                       Font nodeFont, bool isDragImage)
-// 		{
-// 			var realItem = GetRealTaskItem(taskItem);
-// 
-// 			bool isSelected = (nodeState != NodeDrawState.None);
-// 			bool showCheckBoxes = (m_ShowCompletionCheckboxes && !isDragImage);
-// 
-// 			Rectangle iconRect = Rectangle.Empty;
-// 
-//             if (taskItem.IsTask) // not root
-//             {
-//                 // Checkbox
-//                 Rectangle checkRect = CalcCheckboxRect(rect);
-// 
-//                 if (showCheckBoxes)
-// 				{
-// 					if (!IsZoomed)
-// 					{
-// 						CheckBoxRenderer.DrawCheckBox(graphics, checkRect.Location, GetItemCheckboxState(realItem));
-// 					}
-// 					else
-// 					{
-// 						var tempImage = new Bitmap(m_CheckboxSize.Width, m_CheckboxSize.Height); // original size
-// 
-// 						using (var gTemp = Graphics.FromImage(tempImage))
-// 						{
-// 							CheckBoxRenderer.DrawCheckBox(gTemp, new Point(0, 0), GetItemCheckboxState(realItem));
-// 							ImageUtils.DrawZoomedImage(tempImage, graphics, checkRect, rect);
-// 						}
-// 					}
-// 				}
-// 
-// 				// Task icon
-// 				if (TaskHasIcon(realItem))
-//                 {
-//                     iconRect = CalcIconRect(rect);
-// 
-//                     if (m_TaskIcons.Get(realItem.ID))
-// 					{
-// 						if (!IsZoomed)
-// 						{
-// 							m_TaskIcons.Draw(graphics, iconRect.X, iconRect.Y);
-// 						}
-// 						else
-// 						{
-// 							int imageSize = ScaleByDPIFactor(16);
-// 							var tempImage = new Bitmap(imageSize, imageSize); // original size
-// 
-// 							using (var gTemp = Graphics.FromImage(tempImage))
-// 							{
-// 								gTemp.FillRectangle(SystemBrushes.Window, 0, 0, imageSize, imageSize);
-// 								m_TaskIcons.Draw(gTemp, 0, 0);
-// 
-// 								ImageUtils.DrawZoomedImage(tempImage, graphics, iconRect, rect);
-// 							}
-// 						}
-// 					}
-// 
-// 					rect.Width = (rect.Right - iconRect.Right - 2);
-//                     rect.X = iconRect.Right + 2;
-//                 }
-//                 else if (showCheckBoxes)
-//                 {
-//                     rect.Width = (rect.Right - checkRect.Right - 2);
-//                     rect.X = checkRect.Right + 2;
-//                 }
-//             }
-// 
-// 			// Text Colour
-// 			Color textColor = SystemColors.WindowText;
-// 
-// 			if (isSelected)
-// 			{
-// 				if (SystemInformation.HighContrast)
-// 					textColor = SystemColors.HighlightText;
-// 				else
-// 					textColor = UIExtension.SelectionRect.GetTextColor(UIExtension.SelectionRect.Style.Selected, taskItem.TextColor);
-// 			}
-// 			else if (!taskItem.TextColor.IsEmpty)
-// 			{
-// 				if (m_TaskColorIsBkgnd)
-// 					textColor = DrawingColor.GetBestTextColor(taskItem.TextColor, true);
-//                 else
-//                     textColor = taskItem.TextColor;
-//             }
-// 
-// 			switch (nodeState)
-// 			{
-// 				case NodeDrawState.Selected:
-//                     UIExtension.SelectionRect.Draw(this.Handle, 
-// 													graphics, 
-// 													rect.X, 
-// 													rect.Y, 
-// 													rect.Width, 
-// 													rect.Height, 
-// 													false); // opaque
-// 					break;
-// 
-// 				case NodeDrawState.DropTarget:
-//                     UIExtension.SelectionRect.Draw(this.Handle, 
-// 													graphics, 
-// 													rect.X, 
-// 													rect.Y, 
-// 													rect.Width, 
-// 													rect.Height,
-// 													UIExtension.SelectionRect.Style.DropHighlighted,
-// 													false); // opaque
-// 					break;
-// 			}
-// 
-// 			if (DebugMode())
-//                graphics.DrawRectangle(new Pen(Color.Green), rect);
-// 
-// 			// Text
-// 			var format = DefaultLabelFormat(nodePos, isSelected);
-// 
-//             graphics.DrawString(taskItem.Title, nodeFont, new SolidBrush(textColor), rect, format);
-// 
-// 			// Draw Windows shortcut icon if task is a reference
-// 			if (taskItem.IsReference)
-// 			{
-// 				if (iconRect == Rectangle.Empty)
-// 					iconRect = rect;
-// 				else
-// 					iconRect.Y = (rect.Bottom - iconRect.Height); // don't want shortcut icon centred vertically
-// 
-// 				UIExtension.ShortcutOverlay.Draw(graphics, iconRect.X, iconRect.Y, iconRect.Width, iconRect.Height);
-// 			}
-// 		}
-
-        CheckBoxState GetItemCheckboxState(TaskItem taskItem)
-        {
-            if (taskItem.SomeSubtasksDone && ShowMixedCompletionState)
-                return CheckBoxState.MixedNormal;
-
-            // else
-            return CheckBoxState.UncheckedNormal;
-        }
-
-		private bool TaskHasIcon(TaskItem taskItem)
-		{
-			if ((m_TaskIcons == null) || (taskItem == null))
-				return false;
-
-			return (taskItem.HasIcon || (m_ShowParentAsFolder && taskItem.IsParent));
-		}
-
-// 		protected override void OnMouseDoubleClick(MouseEventArgs e)
-// 		{
-// 			if (base.HandleMouseDoubleClick(e) || (EditTaskLabel == null))
-// 				return;
-// 
-// 			if (HitTestPositions(e.Location) != null)
-// 				EditTaskLabel(this, UniqueID(SelectedNode));
-// 		}
 
 		protected override void OnMouseClick(MouseEventArgs e)
 		{

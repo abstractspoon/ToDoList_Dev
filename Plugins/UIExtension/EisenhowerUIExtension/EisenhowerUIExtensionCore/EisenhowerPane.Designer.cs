@@ -28,40 +28,60 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
-			this.listView1 = new System.Windows.Forms.ListView();
-			this.label1 = new System.Windows.Forms.Label();
+			this.m_List = new System.Windows.Forms.ListView();
+			this.m_TitleBar = new System.Windows.Forms.Label();
+			this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+			this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+			this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.SuspendLayout();
 			// 
-			// listView1
+			// m_List
 			// 
-			this.listView1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+			this.m_List.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-			this.listView1.GridLines = true;
-			this.listView1.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.None;
-			this.listView1.Location = new System.Drawing.Point(0, 18);
-			this.listView1.Margin = new System.Windows.Forms.Padding(0);
-			this.listView1.Name = "listView1";
-			this.listView1.Size = new System.Drawing.Size(433, 356);
-			this.listView1.TabIndex = 0;
-			this.listView1.UseCompatibleStateImageBehavior = false;
-			this.listView1.View = System.Windows.Forms.View.Details;
+			this.m_List.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.columnHeader1,
+            this.columnHeader2,
+            this.columnHeader3});
+			this.m_List.GridLines = true;
+			this.m_List.Location = new System.Drawing.Point(0, 18);
+			this.m_List.Margin = new System.Windows.Forms.Padding(0);
+			this.m_List.Name = "m_List";
+			this.m_List.Size = new System.Drawing.Size(433, 356);
+			this.m_List.TabIndex = 0;
+			this.m_List.UseCompatibleStateImageBehavior = false;
+			this.m_List.View = System.Windows.Forms.View.Details;
 			// 
-			// label1
+			// m_TitleBar
 			// 
-			this.label1.AutoSize = true;
-			this.label1.Location = new System.Drawing.Point(3, 2);
-			this.label1.Name = "label1";
-			this.label1.Size = new System.Drawing.Size(69, 13);
-			this.label1.TabIndex = 1;
-			this.label1.Text = "Pane title bar";
+			this.m_TitleBar.AutoSize = true;
+			this.m_TitleBar.Location = new System.Drawing.Point(3, 2);
+			this.m_TitleBar.Name = "m_TitleBar";
+			this.m_TitleBar.Size = new System.Drawing.Size(69, 13);
+			this.m_TitleBar.TabIndex = 1;
+			this.m_TitleBar.Text = "Pane title bar";
+			// 
+			// columnHeader1
+			// 
+			this.columnHeader1.Text = "Task";
+			this.columnHeader1.Width = 116;
+			// 
+			// columnHeader2
+			// 
+			this.columnHeader2.Text = "Attribute 1";
+			this.columnHeader2.Width = 80;
+			// 
+			// columnHeader3
+			// 
+			this.columnHeader3.Text = "Attribute 2";
 			// 
 			// EisenhowerPane
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.Controls.Add(this.label1);
-			this.Controls.Add(this.listView1);
+			this.Controls.Add(this.m_TitleBar);
+			this.Controls.Add(this.m_List);
 			this.Margin = new System.Windows.Forms.Padding(0);
 			this.Name = "EisenhowerPane";
 			this.Size = new System.Drawing.Size(433, 374);
@@ -72,7 +92,10 @@
 
 		#endregion
 
-		private System.Windows.Forms.ListView listView1;
-		private System.Windows.Forms.Label label1;
+		private System.Windows.Forms.ListView m_List;
+		private System.Windows.Forms.Label m_TitleBar;
+		private System.Windows.Forms.ColumnHeader columnHeader1;
+		private System.Windows.Forms.ColumnHeader columnHeader2;
+		private System.Windows.Forms.ColumnHeader columnHeader3;
 	}
 }
