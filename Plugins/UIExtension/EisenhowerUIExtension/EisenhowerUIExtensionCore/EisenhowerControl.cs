@@ -99,6 +99,296 @@ namespace EisenhowerUIExtension
 
 		public bool ReadOnly { get; set; }
 
+		public void UpdateTasks(TaskList tasks, UIExtension.UpdateType type)
+		{
+			switch (type)
+			{
+			case UIExtension.UpdateType.All:
+			case UIExtension.UpdateType.Edit:
+			case UIExtension.UpdateType.New:
+				UpdateTaskAttributes(tasks);
+				break;
+
+			case UIExtension.UpdateType.Delete:
+				// TODO
+				break;
+			}
+		}
+
+		public bool TaskColorIsBackground
+		{
+			get { return m_TaskColorIsBkgnd; }
+			set
+			{
+				if (m_TaskColorIsBkgnd != value)
+				{
+					m_TaskColorIsBkgnd = value;
+					Invalidate();
+				}
+			}
+		}
+
+		public bool ShowMixedCompletionState
+		{
+			get { return m_ShowMixedCompletionState; }
+			set
+			{
+				if (m_ShowMixedCompletionState != value)
+				{
+					m_ShowMixedCompletionState = value;
+					Invalidate();
+				}
+			}
+		}
+
+		public bool ShowParentsAsFolders
+		{
+			get { return m_ShowParentAsFolder; }
+			set
+			{
+				if (m_ShowParentAsFolder != value)
+				{
+					m_ShowParentAsFolder = value;
+					Invalidate();
+				}
+			}
+		}
+
+		public bool ShowCompletionCheckboxes
+		{
+			get { return m_ShowCompletionCheckboxes; }
+			set
+			{
+				if (m_ShowCompletionCheckboxes != value)
+				{
+					m_ShowCompletionCheckboxes = value;
+					Invalidate();
+				}
+			}
+		}
+
+		public bool WantTaskUpdate(Task.Attribute attrib)
+		{
+			switch (attrib)
+			{
+			// Note: lock state is always provided
+			case Task.Attribute.Title:
+			case Task.Attribute.Icon:
+			case Task.Attribute.Flag:
+			case Task.Attribute.Color:
+			case Task.Attribute.DoneDate:
+			case Task.Attribute.Position:
+			case Task.Attribute.SubtaskDone:
+			case Task.Attribute.CustomAttribute:
+			case Task.Attribute.Priority:
+			case Task.Attribute.Risk:
+				return true;
+			}
+
+			// all else
+			return false;
+		}
+
+		public UInt32 HitTestTask(Point screenPos)
+		{
+			// var clientPos = PointToClient(screenPos);
+			// var node = HitTestPositions(clientPos);
+			// 
+			// if (node != null)
+			// 	return UniqueID(node);
+
+			// else
+			return 0;
+		}
+
+		public Rectangle GetSelectedItemLabelRect()
+		{
+			// EnsureItemVisible(SelectedItem);
+			// return GetItemLabelRect(SelectedNode);
+			return Rectangle.Empty;
+		}
+
+		public Rectangle GetItemLabelRect(TreeNode node)
+		{
+			// var labelRect = base.GetItemLabelRect(node);
+			// 
+			// labelRect.X -= LabelPadding;
+			// labelRect.X += GetExtraWidth(node);
+			// 
+			// // Make sure the rect is big enough for the unscaled font
+			// labelRect.Height = Math.Max(labelRect.Height, (this.Font.Height + (2 * LabelPadding))); 
+			// 
+			// return labelRect;
+			return Rectangle.Empty;
+		}
+
+		public bool SelectTask(String text, UIExtension.SelectTask selectTask, bool caseSensitive, bool wholeWord, bool findReplace)
+		{
+			// if ((text == String.Empty) || IsEmpty())
+			//     return false;
+			// 
+			// TreeNode node = null; // start node
+			// bool forward = true;
+			// 
+			// switch (selectTask)
+			//    {
+			//    case UIExtension.SelectTask.SelectFirstTask:
+			// 	node = RootNode.Nodes[0];
+			//        break;
+			// 
+			//    case UIExtension.SelectTask.SelectNextTask:
+			// 	node = TreeCtrl.GetNextItem(SelectedNode, false); // no wrap
+			//        break;
+			// 
+			//    case UIExtension.SelectTask.SelectNextTaskInclCurrent:
+			// 	node = SelectedNode;
+			// 	break;
+			// 
+			//    case UIExtension.SelectTask.SelectPrevTask:
+			// 	node = TreeCtrl.GetPrevItem(SelectedNode, false); // no wrap
+			// 
+			// 	if ((node == null) || ((node == RootNode) && !NodeIsTask(RootNode)))
+			// 		node = LastNode;
+			// 
+			// 	forward = false;
+			// 	break;
+			// 
+			//    case UIExtension.SelectTask.SelectLastTask:
+			// 	node = LastNode;
+			// 	forward = false;
+			// 	break;
+			//    }
+			// 
+			// // Avoid recursion
+			// while (node != null)
+			// { 
+			// 	if (StringUtil.Find(node.Text, text, caseSensitive, wholeWord))
+			// 	{
+			// 		SelectedNode = node;
+			// 		return true;
+			// 	}
+			// 
+			// 	if (forward)
+			// 		node = TreeCtrl.GetNextItem(node, false); // no wrap
+			// 	else
+			// 		node = TreeCtrl.GetPrevItem(node, false); // no wrap
+			// }
+
+			return false;
+		}
+
+		protected bool SelectNextTask(string startingWith)
+		{
+			// if (IsEmpty())
+			// 	return false;
+			// 
+			// TreeNode next = TreeCtrl.GetNextVisibleItem(SelectedNode, true); // wrap
+			// 
+			// while ((next != null) && (next != SelectedNode))
+			// {
+			// 	if (TaskItem(next).ID == 0)
+			// 	{
+			// 		// Skip root node
+			// 	}
+			// 	else if (next.Text.StartsWith(startingWith, StringComparison.InvariantCultureIgnoreCase))
+			// 	{
+			// 		SelectedNode = next;
+			// 		return true;
+			// 	}
+			// 
+			// 	next = TreeCtrl.GetNextVisibleItem(next, true); // wrap
+			// }
+
+			return false;
+		}
+
+		public bool GetTask(UIExtension.GetTask getTask, ref UInt32 taskID)
+		{
+			// TreeNode node = FindNode(taskID);
+			// 
+			// if (node == null)
+			// 	return false;
+			// 
+			// switch (getTask)
+			// {
+			// 	case UIExtension.GetTask.GetNextTask:
+			// 		if (node.NextNode != null)
+			// 		{
+			// 			taskID = UniqueID(node.NextNode);
+			// 			return true;
+			// 		}
+			// 		break;
+			// 
+			// 	case UIExtension.GetTask.GetPrevTask:
+			// 		if (node.PrevNode != null)
+			// 		{
+			// 			taskID = UniqueID(node.PrevNode);
+			// 			return true;
+			// 		}
+			// 		break;
+			// 
+			// 	case UIExtension.GetTask.GetNextVisibleTask:
+			// 		if (node.NextVisibleNode != null)
+			// 		{
+			// 			taskID = UniqueID(node.NextVisibleNode);
+			// 			return true;
+			// 		}
+			// 		break;
+			// 
+			// 	case UIExtension.GetTask.GetPrevVisibleTask:
+			// 		if (node.PrevVisibleNode != null)
+			// 		{
+			// 			taskID = UniqueID(node.PrevVisibleNode);
+			// 			return true;
+			// 		}
+			// 		break;
+			// 
+			// 	case UIExtension.GetTask.GetNextTopLevelTask:
+			// 		{
+			// 			var topLevelParent = TopLevelParent(node);
+			// 
+			// 			if ((topLevelParent != null) && (topLevelParent.NextNode != null))
+			// 			{
+			// 				taskID = UniqueID(topLevelParent.NextNode);
+			// 				return true;
+			// 			}
+			// 		}
+			// 		break;
+			// 
+			// 	case UIExtension.GetTask.GetPrevTopLevelTask:
+			// 		{
+			// 			var topLevelParent = TopLevelParent(node);
+			// 
+			// 			if ((topLevelParent != null) && (topLevelParent.PrevNode != null))
+			// 			{
+			// 				taskID = UniqueID(topLevelParent.PrevNode);
+			// 				return true;
+			// 			}
+			// 		}
+			// 		break;
+			// }
+
+			// all else
+			return false;
+		}
+
+		public bool CanSaveToImage()
+		{
+			return (m_Items.Count != 0);
+		}
+
+		public Bitmap SaveToImage()
+		{
+			// TODO
+			return null;
+		}
+
+		public bool DoIdleProcessing()
+		{
+			// TODO
+			return false;
+		}
+		
 		// Message handlers --------------------------------
 
 		protected override void OnSizeChanged(EventArgs e)
@@ -281,296 +571,6 @@ namespace EisenhowerUIExtension
 			FormsUtil.FixThumbScrolling(ref m);
 
 			base.WndProc(ref m);
-		}
-
-		public void UpdateTasks(TaskList tasks, UIExtension.UpdateType type)
-		{
-			switch (type)
-			{
-			case UIExtension.UpdateType.All:
-			case UIExtension.UpdateType.Edit:
-			case UIExtension.UpdateType.New:
-				UpdateTaskAttributes(tasks);
-				break;
-
-			case UIExtension.UpdateType.Delete:
-				// TODO
-				break;
-			}
-		}
-
-		public bool TaskColorIsBackground
-		{
-			get { return m_TaskColorIsBkgnd; }
-			set
-			{
-				if (m_TaskColorIsBkgnd != value)
-				{
-					m_TaskColorIsBkgnd = value;
-					Invalidate();
-				}
-			}
-		}
-
-		public bool ShowMixedCompletionState
-		{
-			get { return m_ShowMixedCompletionState; }
-			set
-			{
-				if (m_ShowMixedCompletionState != value)
-				{
-					m_ShowMixedCompletionState = value;
-					Invalidate();
-				}
-			}
-		}
-
-		public bool ShowParentsAsFolders
-		{
-			get { return m_ShowParentAsFolder; }
-			set
-			{
-				if (m_ShowParentAsFolder != value)
-				{
-					m_ShowParentAsFolder = value;
-					Invalidate();
-				}
-			}
-		}
-
-        public bool ShowCompletionCheckboxes
-        {
-            get { return m_ShowCompletionCheckboxes; }
-            set
-            {
-                if (m_ShowCompletionCheckboxes != value)
-                {
-                    m_ShowCompletionCheckboxes = value;
-					Invalidate();
-                }
-            }
-        }
-
-        public bool WantTaskUpdate(Task.Attribute attrib)
-        {
-            switch (attrib)
-            {
-                // Note: lock state is always provided
-                case Task.Attribute.Title:
-                case Task.Attribute.Icon:
-                case Task.Attribute.Flag:
-                case Task.Attribute.Color:
-                case Task.Attribute.DoneDate:
-			    case Task.Attribute.Position:
-			    case Task.Attribute.SubtaskDone:
-			    case Task.Attribute.CustomAttribute:
-			    case Task.Attribute.Priority:
-			    case Task.Attribute.Risk:
-					return true;
-            }
-
-            // all else
-            return false;
-        }
-        		
-		public UInt32 HitTestTask(Point screenPos)
-		{
-// 			var clientPos = PointToClient(screenPos);
-// 			var node = HitTestPositions(clientPos);
-// 
-// 			if (node != null)
-// 				return UniqueID(node);
-			
-			// else
-			return 0;
-		}
-
-		public Rectangle GetSelectedItemLabelRect()
-		{
-// 			EnsureItemVisible(SelectedItem);
-// 			return GetItemLabelRect(SelectedNode);
-			return Rectangle.Empty;
-		}
-
-		public Rectangle GetItemLabelRect(TreeNode node)
-		{
-// 			var labelRect = base.GetItemLabelRect(node);
-// 
-// 			labelRect.X -= LabelPadding;
-// 			labelRect.X += GetExtraWidth(node);
-// 
-// 			// Make sure the rect is big enough for the unscaled font
-// 			labelRect.Height = Math.Max(labelRect.Height, (this.Font.Height + (2 * LabelPadding))); 
-// 
-// 			return labelRect;
-			return Rectangle.Empty;
-		}
-
-        public bool SelectTask(String text, UIExtension.SelectTask selectTask, bool caseSensitive, bool wholeWord, bool findReplace)
-        {
-//          if ((text == String.Empty) || IsEmpty())
-//              return false;
-// 
-// 			TreeNode node = null; // start node
-// 			bool forward = true;
-// 
-// 			switch (selectTask)
-//             {
-//             case UIExtension.SelectTask.SelectFirstTask:
-// 				node = RootNode.Nodes[0];
-//                 break;
-// 
-//             case UIExtension.SelectTask.SelectNextTask:
-// 				node = TreeCtrl.GetNextItem(SelectedNode, false); // no wrap
-//                 break;
-// 
-//             case UIExtension.SelectTask.SelectNextTaskInclCurrent:
-// 				node = SelectedNode;
-// 				break;
-// 
-//             case UIExtension.SelectTask.SelectPrevTask:
-// 				node = TreeCtrl.GetPrevItem(SelectedNode, false); // no wrap
-// 
-// 				if ((node == null) || ((node == RootNode) && !NodeIsTask(RootNode)))
-// 					node = LastNode;
-// 
-// 				forward = false;
-// 				break;
-// 
-//             case UIExtension.SelectTask.SelectLastTask:
-// 				node = LastNode;
-// 				forward = false;
-// 				break;
-//             }
-// 			
-// 			// Avoid recursion
-// 			while (node != null)
-// 			{ 
-// 				if (StringUtil.Find(node.Text, text, caseSensitive, wholeWord))
-// 				{
-// 					SelectedNode = node;
-// 					return true;
-// 				}
-// 
-// 				if (forward)
-// 					node = TreeCtrl.GetNextItem(node, false); // no wrap
-// 				else
-// 					node = TreeCtrl.GetPrevItem(node, false); // no wrap
-// 			}
-
-			return false;
-		}
-
-		protected bool SelectNextTask(string startingWith)
-		{
-// 			if (IsEmpty())
-// 				return false;
-// 
-// 			TreeNode next = TreeCtrl.GetNextVisibleItem(SelectedNode, true); // wrap
-// 
-// 			while ((next != null) && (next != SelectedNode))
-// 			{
-// 				if (TaskItem(next).ID == 0)
-// 				{
-// 					// Skip root node
-// 				}
-// 				else if (next.Text.StartsWith(startingWith, StringComparison.InvariantCultureIgnoreCase))
-// 				{
-// 					SelectedNode = next;
-// 					return true;
-// 				}
-// 
-// 				next = TreeCtrl.GetNextVisibleItem(next, true); // wrap
-// 			}
-
-			return false;
-		}
-
-		public bool GetTask(UIExtension.GetTask getTask, ref UInt32 taskID)
-		{
-// 			TreeNode node = FindNode(taskID);
-// 
-// 			if (node == null)
-// 				return false;
-// 
-// 			switch (getTask)
-// 			{
-// 				case UIExtension.GetTask.GetNextTask:
-// 					if (node.NextNode != null)
-// 					{
-// 						taskID = UniqueID(node.NextNode);
-// 						return true;
-// 					}
-// 					break;
-// 
-// 				case UIExtension.GetTask.GetPrevTask:
-// 					if (node.PrevNode != null)
-// 					{
-// 						taskID = UniqueID(node.PrevNode);
-// 						return true;
-// 					}
-// 					break;
-// 
-// 				case UIExtension.GetTask.GetNextVisibleTask:
-// 					if (node.NextVisibleNode != null)
-// 					{
-// 						taskID = UniqueID(node.NextVisibleNode);
-// 						return true;
-// 					}
-// 					break;
-// 
-// 				case UIExtension.GetTask.GetPrevVisibleTask:
-// 					if (node.PrevVisibleNode != null)
-// 					{
-// 						taskID = UniqueID(node.PrevVisibleNode);
-// 						return true;
-// 					}
-// 					break;
-// 
-// 				case UIExtension.GetTask.GetNextTopLevelTask:
-// 					{
-// 						var topLevelParent = TopLevelParent(node);
-// 
-// 						if ((topLevelParent != null) && (topLevelParent.NextNode != null))
-// 						{
-// 							taskID = UniqueID(topLevelParent.NextNode);
-// 							return true;
-// 						}
-// 					}
-// 					break;
-// 
-// 				case UIExtension.GetTask.GetPrevTopLevelTask:
-// 					{
-// 						var topLevelParent = TopLevelParent(node);
-// 
-// 						if ((topLevelParent != null) && (topLevelParent.PrevNode != null))
-// 						{
-// 							taskID = UniqueID(topLevelParent.PrevNode);
-// 							return true;
-// 						}
-// 					}
-// 					break;
-// 			}
-
-			// all else
-			return false;
-		}
-
-        public bool CanSaveToImage()
-        {
-            return (m_Items.Count != 0);
-        }
-
-        public Bitmap SaveToImage()
-        {
-			// TODO
-            return null; 
-        }
-
-		public bool DoIdleProcessing()
-		{
-			// TODO
-			return false;
 		}
 
 		private void UpdateTaskAttributes(TaskList tasks)
