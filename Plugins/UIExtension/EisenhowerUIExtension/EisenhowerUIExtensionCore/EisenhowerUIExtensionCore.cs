@@ -141,11 +141,12 @@ namespace EisenhowerUIExtension
 
 		public void SavePreferences(Preferences prefs, String key)
 		{
-			// 			m_Eisenhower.SavePreferences(prefs, key);
+			m_EisenhowerCtrl.SavePreferences(prefs, key);
 		}
 
 		public void LoadPreferences(Preferences prefs, String key, bool appOnly)
 		{
+			m_EisenhowerCtrl.LoadPreferences(prefs, key, appOnly);
 			//             if (!appOnly)
 			//             {
 			// 				// private settings
