@@ -112,16 +112,10 @@ namespace EisenhowerUIExtension
 
 			if (e.Button == MouseButtons.Left)
 			{
-				if (GetHorzSplitBarRect().Contains(e.Location))
-				{
-					m_DraggingHorzSplitBar = true;
-					Capture = true;
-				}
-				else if (GetVertSplitBarRect().Contains(e.Location))
-				{
-					m_DraggingVertSplitBar = true;
-					Capture = true;
-				}
+				m_DraggingHorzSplitBar = GetHorzSplitBarRect().Contains(e.Location);
+				m_DraggingVertSplitBar = GetVertSplitBarRect().Contains(e.Location);
+
+				Capture = (m_DraggingHorzSplitBar || m_DraggingVertSplitBar);
 			}
 		}
 
@@ -137,23 +131,30 @@ namespace EisenhowerUIExtension
 		{
 			base.OnMouseMove(e);
 
-			if (m_DraggingHorzSplitBar)
+			if (m_DraggingHorzSplitBar || m_DraggingVertSplitBar)
 			{
-				m_SplitPos.Y = Math.Max(0, Math.Min(100, ((e.Y * 100) / Height)));
-				RecalcPaneRects();
-			}
-			else if (m_DraggingVertSplitBar)
-			{
-				m_SplitPos.X = Math.Max(0, Math.Min(100, ((e.X * 100) / Width)));
+				if (m_DraggingHorzSplitBar)
+					m_SplitPos.Y = Math.Max(0, Math.Min(100, ((e.Y * 100) / Height)));
+
+				if (m_DraggingVertSplitBar)
+					m_SplitPos.X = Math.Max(0, Math.Min(100, ((e.X * 100) / Width)));
+
 				RecalcPaneRects();
 			}
 			else // Set split cursor
 			{
-				if (GetHorzSplitBarRect().Contains(e.Location))
+				bool inHorzSplit = GetHorzSplitBarRect().Contains(e.Location);
+				bool inVertSplit = GetVertSplitBarRect().Contains(e.Location);
+
+				if (inHorzSplit && inVertSplit)
+				{
+					Cursor = Cursors.SizeAll;
+				}
+				else if (inHorzSplit)
 				{
 					Cursor = Cursors.SizeNS;
 				}
-				else if (GetVertSplitBarRect().Contains(e.Location))
+				else if (inVertSplit)
 				{
 					Cursor = Cursors.SizeWE;
 				}
