@@ -17,7 +17,7 @@ namespace EisenhowerUIExtension
 	public partial class EisenhowerPane : UserControl
 	{
 		private TaskItems m_Tasks;
-		private UIExtension.TaskIcon m_Icons;
+		private UIExtension.TaskIcon m_TaskIcons;
 		private Translator m_Trans;
 		private EisenhowerPaneFilter m_Filter;
 
@@ -36,12 +36,14 @@ namespace EisenhowerUIExtension
 		public void Initialize(Translator trans, 
 							   TaskItems taskItems, 
 							   UIExtension.TaskIcon taskIcons,
+							   Bitmap paneIcon,
 							   EisenhowerPaneFilter filter = null)
 		{
 			m_Trans = trans;
 			m_Tasks = taskItems;
-			m_Icons = taskIcons;
+			m_TaskIcons = taskIcons;
 			m_Filter = filter;
+			m_Icon.Image = paneIcon;
 
 			if (m_Filter != null)
 				RefreshList();
@@ -164,12 +166,10 @@ namespace EisenhowerUIExtension
 
 		private bool TaskHasIcon(TaskItem taskItem)
 		{
-			if ((m_Icons == null) || (taskItem == null))
+			if ((m_TaskIcons == null) || (taskItem == null))
 				return false;
 
 			return (taskItem.HasIcon || (m_ShowParentAsFolder && taskItem.IsParent));
 		}
-
-
 	}
 }

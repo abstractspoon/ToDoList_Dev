@@ -33,9 +33,11 @@
 			// 
 			// m_EisenhowerCtrl
 			// 
-			this.m_EisenhowerCtrl.Location = new System.Drawing.Point(0, 32);
+			this.m_EisenhowerCtrl.Location = new System.Drawing.Point(0, 0);
+			this.m_EisenhowerCtrl.Margin = new System.Windows.Forms.Padding(0);
 			this.m_EisenhowerCtrl.Name = "m_EisenhowerCtrl";
-			this.m_EisenhowerCtrl.Size = new System.Drawing.Size(613, 415);
+			this.m_EisenhowerCtrl.ReadOnly = false;
+			this.m_EisenhowerCtrl.Size = new System.Drawing.Size(613, 447);
 			this.m_EisenhowerCtrl.TabIndex = 0;
 			// 
 			// EisenhowerUIExtensionCore

@@ -71,7 +71,7 @@ namespace EisenhowerUIExtension
 					}
 				};
 
-				m_TopLeftPane.Initialize(m_Trans, m_Tasks, icons, filter);
+				m_TopLeftPane.Initialize(m_Trans, m_Tasks, icons, Properties.Resources.TopLeftPane, filter);
 			}
 
 			// Top-right => Low Attrib1 - High Attrib2
@@ -96,7 +96,7 @@ namespace EisenhowerUIExtension
 					}
 				};
 
-				m_TopRightPane.Initialize(m_Trans, m_Tasks, icons, filter);
+				m_TopRightPane.Initialize(m_Trans, m_Tasks, icons, Properties.Resources.TopRightPane, filter);
 			}
 
 			// Bottom-left => High Attrib1 - Low Attrib2
@@ -121,7 +121,7 @@ namespace EisenhowerUIExtension
 					}
 				};
 
-				m_BotLeftPane.Initialize(m_Trans, m_Tasks, icons, filter);
+				m_BotLeftPane.Initialize(m_Trans, m_Tasks, icons, Properties.Resources.BotLeftPane, filter);
 			}
 
 			// Bottom-right => Low Attrib1 - Low Attrib2
@@ -146,7 +146,7 @@ namespace EisenhowerUIExtension
 					}
 				};
 
-				m_BotRightPane.Initialize(m_Trans, m_Tasks, icons, filter);
+				m_BotRightPane.Initialize(m_Trans, m_Tasks, icons, Properties.Resources.BotRightPane, filter);
 			}
 		}
 

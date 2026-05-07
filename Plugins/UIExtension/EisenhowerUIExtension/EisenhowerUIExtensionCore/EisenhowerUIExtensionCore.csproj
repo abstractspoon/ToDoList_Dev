@@ -108,6 +108,12 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\Eisenhower.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\BotLeftPane.png" />
+    <EmbeddedResource Include="Resources\BotRightPane.png" />
+    <EmbeddedResource Include="Resources\TopLeftPane.png" />
+    <EmbeddedResource Include="Resources\TopRightPane.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>mkdir "$(SolutionDir)$(ConfigurationName)"
