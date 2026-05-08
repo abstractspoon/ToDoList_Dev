@@ -12,9 +12,9 @@ using Gma.CodeCloud.Controls.TextAnalyses.Blacklist;
 
 namespace WordCloudUIExtension
 {
-	public class CloudTaskItem
+	public class CloudTaskItem : ITaskBase
 	{
-		public CloudTaskItem(UInt32 id)
+		public CloudTaskItem(uint id)
 		{
 			Id = id;
 			m_WordAttribute = Task.Attribute.Unknown;
@@ -25,25 +25,30 @@ namespace WordCloudUIExtension
 			return Title;
 		}
         
-		public readonly UInt32 Id;
-		public string Title;
-		public string DoneDate;
-		public string DueDate;
-		public string StartDate;
-		public string AllocBy;
-		public string Status;
-		public string Comments;
-		public string CreationDate;
-		public string CreatedBy;
-		public string Version;
-		public List<string> AllocTo;
-		public List<string> Category;
-		public List<string> Tags;
-		public Boolean HasIcon;
-		public Boolean IsParent;
-        public Boolean IsLocked;
-        public Boolean IsGoodAsDone;
-        public Boolean HasSomeSubtasksDone;
+		// ITaskBase
+		public uint Id { get; private set; }
+		public String Title { get; private set; }
+		public String Position	{ get { return String.Empty; } } // not applicable
+		public int Depth { get { return 0; } } // not applicable
+		public bool HasIcon { get; private set; }
+
+		// Local attributes
+		public String DoneDate;
+		public String DueDate;
+		public String StartDate;
+		public String AllocBy;
+		public String Status;
+		public String Comments;
+		public String CreationDate;
+		public String CreatedBy;
+		public String Version;
+		public List<String> AllocTo;
+		public List<String> Category;
+		public List<String> Tags;
+		public bool IsParent;
+        public bool IsLocked;
+        public bool IsGoodAsDone;
+        public bool HasSomeSubtasksDone;
 
         private System.Drawing.Color taskTextColor = System.Drawing.Color.Empty;
             
@@ -53,7 +58,7 @@ namespace WordCloudUIExtension
             set { taskTextColor = value; }
         }
 
-        public System.Drawing.Color GetTextColor(Boolean isSelected, Boolean taskColorIsBkgnd)
+        public System.Drawing.Color GetTextColor(bool isSelected, bool taskColorIsBkgnd)
         {
 			if (isSelected)
 			{
@@ -71,7 +76,7 @@ namespace WordCloudUIExtension
 			return System.Drawing.SystemColors.WindowText;
         }
 
-        public System.Drawing.Color GetBackColor(Boolean taskColorIsBkgnd)
+        public System.Drawing.Color GetBackColor(bool taskColorIsBkgnd)
         {
             if (!taskTextColor.IsEmpty && taskColorIsBkgnd)
                 return TextColor;
@@ -80,7 +85,7 @@ namespace WordCloudUIExtension
             return System.Drawing.Color.Empty;
         }
 
-        public Boolean IsDone(Boolean includeGoodAsDone)
+        public bool IsDone(bool includeGoodAsDone)
         {
             if (includeGoodAsDone && IsGoodAsDone)
                 return true;
@@ -89,7 +94,7 @@ namespace WordCloudUIExtension
             return (DoneDate != String.Empty);
         }
 
-        public Boolean SetDone(Boolean done)
+        public bool SetDone(bool done)
         {
 			if (done == IsDone(false))
 				return false;
@@ -103,13 +108,13 @@ namespace WordCloudUIExtension
             return true;
         }
         
-		private List<string> m_Words;
+		private List<String> m_Words;
 		private Task.Attribute m_WordAttribute;
 
 		static readonly char[] WordDelims = { ',', ' ', '\t', '\r', '\n' };
 		static readonly char[] WordTrim = { '\'', '\"', '{', '}', '(', ')', ':', ';', '.', '[', ']' };
 
-		public void ProcessTaskUpdate(Task task, UIExtension.UpdateType type, Boolean newTask)
+		public void ProcessTaskUpdate(Task task, UIExtension.UpdateType type, bool newTask)
 		{
             IsParent = task.IsParent();
             IsLocked = task.IsLocked(true);
@@ -184,9 +189,9 @@ namespace WordCloudUIExtension
 			}
 		}
 
-		static string SplitDate(string date)
+		static String SplitDate(String date)
 		{
-			string[] parts = date.Split(new char[] { ' ' }, 2);
+			String[] parts = date.Split(new char[] { ' ' }, 2);
 
 			if (parts.Length > 0)
 				return parts[0];
@@ -195,7 +200,7 @@ namespace WordCloudUIExtension
 			return "";
 		}
 
-		public Boolean Matches(String words, Boolean caseSensitive, Boolean wholeWord, Boolean titleOnly)
+		public bool Matches(String words, bool caseSensitive, bool wholeWord, bool titleOnly)
 		{
 			var searchIn = new List<String> { Title };
 
@@ -210,7 +215,7 @@ namespace WordCloudUIExtension
 
                 while (find >= 0)
                 {
-                    Boolean match = true;
+                    bool match = true;
 
                     if (wholeWord)
                     {
@@ -238,7 +243,7 @@ namespace WordCloudUIExtension
 			return false;
 		}
 
-		public static List<string> ToWords(String text, IBlacklist exclusions)
+		public static List<String> ToWords(String text, IBlacklist exclusions)
 		{
 			var words = ToWords(text, 2);
 
@@ -248,9 +253,9 @@ namespace WordCloudUIExtension
 			return words;
 		}
 
-		public static List<string> ToWords(String text, int minWordLength = 0)
+		public static List<String> ToWords(String text, int minWordLength = 0)
 		{
-			List<string> words = text.Split(WordDelims, StringSplitOptions.RemoveEmptyEntries).ToList();
+			List<String> words = text.Split(WordDelims, StringSplitOptions.RemoveEmptyEntries).ToList();
 
 			words = words.Select(p => p.Trim(WordTrim)).ToList();
 			words = words.Distinct(StringComparer.CurrentCultureIgnoreCase).ToList();
@@ -260,7 +265,7 @@ namespace WordCloudUIExtension
 			return words;
 		}
 
-		public List<string> GetWords(Task.Attribute attrib, IBlacklist exclusions, Boolean force)
+		public List<String> GetWords(Task.Attribute attrib, IBlacklist exclusions, bool force)
 		{
 			if (force || (attrib != m_WordAttribute))
 			{
@@ -271,9 +276,9 @@ namespace WordCloudUIExtension
 			return m_Words;
 		}
 
-		public List<string> GetAttributeValues(Task.Attribute attrib, IBlacklist exclusions)
+		public List<String> GetAttributeValues(Task.Attribute attrib, IBlacklist exclusions)
 		{
-			var values = new List<string>();
+			var values = new List<String>();
 
 			switch (attrib)
 			{
@@ -302,7 +307,7 @@ namespace WordCloudUIExtension
 			return values;
 		}
 
-		public Boolean AttributeHasValue(Task.Attribute attrib, String value, IBlacklist exclusions)
+		public bool AttributeHasValue(Task.Attribute attrib, String value, IBlacklist exclusions)
 		{
 			var words = GetWords(attrib, exclusions, false);
 
