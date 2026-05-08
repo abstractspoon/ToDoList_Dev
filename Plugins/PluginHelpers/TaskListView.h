@@ -28,9 +28,20 @@ namespace Abstractspoon
 			public ref class TaskListView : Windows::Forms::ListView, ILabelTipHandler
 			{
 			public:
+				ref class NoTrackHeaderControl : Windows::Forms::NativeWindow
+				{
+				public:
+					NoTrackHeaderControl(TaskListView^ lv);
+
+				protected:
+					void WndProc(Windows::Forms::Message% m) override;
+				};
+
+			public:
 				TaskListView();
 
 				void Initialize(Translator^ trans, UIExtension::TaskIcon^ taskIcons);
+				IntPtr GetHeaderHandle();
 
 				property UInt32 SelectedTaskId { UInt32 get(); }
 				property String^ SelectedTaskTitle { String^ get(); }
@@ -71,6 +82,7 @@ namespace Abstractspoon
 				void OnMouseDoubleClick(Windows::Forms::MouseEventArgs^ e) override;
 				void OnMouseMove(Windows::Forms::MouseEventArgs^ e) override;
 				void OnBeforeLabelEdit(Windows::Forms::LabelEditEventArgs^ e) override;
+				void OnColumnWidthChanging(Windows::Forms::ColumnWidthChangingEventArgs^ e) override;
 
 			protected:
 // 				void OnMeasureItem(Windows::Forms::MeasureItemEventArgs^ e) override;

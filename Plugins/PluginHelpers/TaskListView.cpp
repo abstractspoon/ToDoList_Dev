@@ -20,6 +20,25 @@ using namespace Abstractspoon::Tdl::PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
+TaskListView::NoTrackHeaderControl::NoTrackHeaderControl(TaskListView^ lv)
+{
+	AssignHandle(lv->GetHeaderHandle());
+}
+
+void TaskListView::NoTrackHeaderControl::WndProc(Message% m)
+{
+	switch (m.Msg)
+	{
+	case WM_SETCURSOR:
+		Win32::SetArrowCursor();
+		return;
+	}
+
+	NativeWindow::WndProc(m);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
 const int IMAGE_SIZE = DPIScaling::Scale(16);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -59,6 +78,11 @@ void TaskListView::Initialize(Translator^ trans, UIExtension::TaskIcon^ taskIcon
 {
 	m_Trans = trans;
 	m_TaskIcons = taskIcons;
+}
+
+IntPtr TaskListView::GetHeaderHandle()
+{
+	return IntPtr(Win32::SendMessage(Handle, LVM_GETHEADER, UIntPtr::Zero, IntPtr::Zero));
 }
 
 String^ TaskListView::Translate(String^ text, Translator::Type type)
@@ -455,4 +479,16 @@ void TaskListView::OnBeforeLabelEdit(LabelEditEventArgs^ e)
 	}
 
 	ListView::OnBeforeLabelEdit(e);
+}
+
+// The other part of making NoTrackHeaderControl work
+void TaskListView::OnColumnWidthChanging(ColumnWidthChangingEventArgs^ e)
+{
+	NativeWindow^ header = NativeWindow::FromHandle(GetHeaderHandle());
+
+	if (ISTYPE(header, NoTrackHeaderControl))
+	{
+		e->Cancel = true;
+		e->NewWidth = Columns[e->ColumnIndex]->Width;
+	}
 }

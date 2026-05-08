@@ -12,43 +12,14 @@ using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 namespace WordCloudUIExtension
 {
 	[System.ComponentModel.DesignerCategory("")]
-	internal class NoTrackHeaderControl : NativeWindow
-	{
-		public NoTrackHeaderControl(ListView lv)
-		{
-			const uint LVM_GETHEADER = (0x1000 + 31);
-
-			//Get the header control handle
-			IntPtr header = new IntPtr(Win32.SendMessage(lv.Handle, LVM_GETHEADER, UIntPtr.Zero, IntPtr.Zero));
-			this.AssignHandle(header);
-		}
-
-		protected override void WndProc(ref Message m)
-		{
-			const int WM_SETCURSOR = 0x0020;
-
-			switch (m.Msg)
-			{
-			case WM_SETCURSOR:
-				Win32.SetArrowCursor();
-				return;
-			}
-
-			base.WndProc(ref m);
-		}
-	}
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	[System.ComponentModel.DesignerCategory("")]
-	class TaskMatchesListView : TaskListView//, ILabelTipHandler
+	class TaskMatchesListView : TaskListView
 	{
 		const int DefaultMaxTaskId = 100;
 
 		// -------------------------------------------------------------
 
 		private uint m_MaxTaskId = DefaultMaxTaskId;
-		private NoTrackHeaderControl m_Header;
+		private TaskListView.NoTrackHeaderControl m_Header;
 
 		public TaskMatchesListView() : base()
 		{
@@ -58,7 +29,8 @@ namespace WordCloudUIExtension
 		{
 			base.OnHandleCreated(e);
 
-			m_Header = new NoTrackHeaderControl(this);
+			// Prevent column resizing to save us having to save/restore the widths
+			m_Header = new TaskListView.NoTrackHeaderControl(this);
 		}
 
 		private int MinTaskMatchesWidth
@@ -85,14 +57,6 @@ namespace WordCloudUIExtension
 
             return true;
         }
-
-		// The other part of NoTrackHeaderControl
-		protected override void OnColumnWidthChanging(ColumnWidthChangingEventArgs e)
-		{
-			// Prevent column resizing to save us having to save/restore the widths
-			e.Cancel = true;
-			e.NewWidth = Columns[e.ColumnIndex].Width;
-		}
 
 		public new void EndUpdate()
 		{
