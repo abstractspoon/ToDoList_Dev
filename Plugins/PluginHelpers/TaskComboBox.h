@@ -4,6 +4,7 @@
 
 #include "Translator.h"
 #include "UIExtension.h"
+#include "ITaskBase.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -17,18 +18,6 @@ namespace Abstractspoon
 	{
 		namespace PluginHelpers
 		{
-			public interface class ITask
-			{
-			public:
-				virtual property UInt32 Id			{ UInt32 get(); }
-				virtual property String^ Title		{ String^ get(); }
-				virtual property String^ Position	{ String^ get(); }
-				virtual property int Depth			{ int get(); }
-				virtual property bool HasIcon		{ bool get(); }
-			};
-
-			// --------------------------------------------------------
-
 			public delegate void SearchUpdated(Object^ sender, EventArgs^ args);
 
 			// --------------------------------------------------------
@@ -38,14 +27,14 @@ namespace Abstractspoon
 			public:
 				TaskComboBox();
 
-				void Initialise(IEnumerable<ITask^>^ taskItems, 
+				void Initialise(IEnumerable<ITaskBase^>^ taskItems, 
 								UIExtension::TaskIcon^ taskIcons, 
 								UInt32 selTaskId);
 
-				void Initialise(IEnumerable<ITask^>^ taskItems,
+				void Initialise(IEnumerable<ITaskBase^>^ taskItems,
 								UIExtension::TaskIcon^ taskIcons,
 								UInt32 selTaskId, 
-								ITask^ noneTask);
+								ITaskBase^ noneTask);
 
 				property UInt32 SelectedTaskId { UInt32 get(); }
 				property String^ SelectedTaskTitle { String^ get(); }
@@ -56,7 +45,7 @@ namespace Abstractspoon
 
 			private:
 				UIExtension::TaskIcon^ m_TaskIcons;
-				ITask^ m_NoneTask;
+				ITaskBase^ m_NoneTask;
 				Drawing::Font^ m_BoldFont;
 
 				int m_OrgSelectedIndex;
