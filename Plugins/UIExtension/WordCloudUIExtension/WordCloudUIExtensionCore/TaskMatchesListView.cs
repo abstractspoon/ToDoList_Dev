@@ -45,7 +45,7 @@ namespace WordCloudUIExtension
 	public delegate Boolean EditTaskCompletionEventHandler(object sender, UInt32 taskId, bool completed);
 
 	[System.ComponentModel.DesignerCategory("")]
-	class TaskMatchesListView : ListView, ILabelTipHandler
+	class TaskMatchesListView : TaskListView//, ILabelTipHandler
 	{
 		public event EditTaskLabelEventHandler EditTaskLabel;
 		public event EditTaskIconEventHandler EditTaskIcon;
@@ -57,28 +57,11 @@ namespace WordCloudUIExtension
 
 		// -------------------------------------------------------------
 
-		private UIExtension.TaskIcon m_TaskIcons;
-
-		private ImageList m_ilItemHeight;
-		private Size m_CheckBoxSize = Size.Empty;
-		private LabelTip m_LabelTip;
 		private uint m_MaxTaskId = DefaultMaxTaskId;
 		private NoTrackHeaderControl m_Header;
 
-		private Boolean m_TaskMatchesHaveIcons;
-		private Boolean m_ShowParentAsFolder;
-		private Boolean m_TaskColorIsBkgnd;
-		private Boolean m_ShowCompletionCheckboxes;
-		private Boolean m_ShowMixedCompletionState;
-
-		public TaskMatchesListView(IntPtr hwndParent)
+		public TaskMatchesListView() : base()
 		{
-			m_TaskIcons = new UIExtension.TaskIcon(hwndParent);
-
-			m_ilItemHeight = new ImageList();
-			m_ilItemHeight.ImageSize = new Size(1, DPIScaling.Scale(17)); // minimum height
-
-			m_LabelTip = new LabelTip(this);
 		}
 
 		protected override void OnHandleCreated(EventArgs e)
@@ -87,120 +70,6 @@ namespace WordCloudUIExtension
 
 			m_Header = new NoTrackHeaderControl(this);
 		}
-
-		// ILabelTipHandler implementation
-        public Control GetOwner()
-        {
-            return this;
-        }
-
-        public LabelTipInfo ToolHitTest(Point ptScreen)
-        {
-            var pt = PointToClient(ptScreen);
-            var hit = HitTest(pt);
-
-            if ((hit == null) || (hit.Item == null))
-                return null;
-
-            // Only interested in first (label) column
-            var labelRect = LabelTextRect(hit.Item.GetBounds(ItemBoundsPortion.Entire));
-
-            if (!labelRect.Contains(pt))
-                return null;
-
-            var item = (hit.Item.Tag as CloudTaskItem);
-
-            if (item == null)
-                return null;
-
-			// Check if there's enough room already
-			if (m_LabelTip.CalcTipHeight(item.Title, Font, labelRect.Width) <= labelRect.Height)
-				return null;
-
-			labelRect.Offset(-1, -1);
-
-			return new LabelTipInfo()
-			{
-				Id = item.Id,
-				Text = item.Title,
-				MultiLine = false,
-				Rect = labelRect,
-				Font = Font,
-			};
-        }
-
-        public Boolean TaskColorIsBackground
-		{
-			get { return m_TaskColorIsBkgnd; }
-			set
-			{
-				if (m_TaskColorIsBkgnd != value)
-				{
-					m_TaskColorIsBkgnd = value;
-					Invalidate();
-				}
-			}
-		}
-
-		public Boolean ShowParentsAsFolders
-		{
-			get { return m_ShowParentAsFolder; }
-			set
-			{
-				if (m_ShowParentAsFolder != value)
-				{
-					m_ShowParentAsFolder = value;
-					Invalidate();
-				}
-			}
-		}
-
-		public Boolean ShowCompletionCheckboxes
-		{
-			get { return m_ShowCompletionCheckboxes; }
-			set
-			{
-				if (m_ShowCompletionCheckboxes != value)
-				{
-					m_ShowCompletionCheckboxes = value;
-					Invalidate();
-				}
-			}
-		}
-
-		public bool ShowMixedCompletionState
-		{
-			get { return m_ShowMixedCompletionState; }
-			set
-			{
-				if (m_ShowMixedCompletionState != value)
-				{
-					m_ShowMixedCompletionState = value;
-					Invalidate();
-				}
-			}
-		}
-
-		public bool ShowLabelTips
-		{
-			set { m_LabelTip.Active = value; }
-			get { return m_LabelTip.Active; }
-		}
-
-		private int TextIconOffset
-        {
-            get { return (m_TaskMatchesHaveIcons ? (ImageSize + 2) : 0); }
-        }
-
-        private int CheckboxOffset
-        {
-            get { return (m_ShowCompletionCheckboxes ? (m_CheckBoxSize.Width + 2) : 0); }
-        }
-
-        private int ImageSize
-        {
-            get { return DPIScaling.Scale(16); }
-        }
 
 		private int MinTaskMatchesWidth
 		{
@@ -212,26 +81,16 @@ namespace WordCloudUIExtension
 			get { return DPIScaling.Scale(4); }
 		}
 		
-		public bool Initialise(Translator trans)
+		public new bool Initialize(Translator trans, UIExtension.TaskIcon taskIcons)
         {
 			if (this.Columns.Count == 0) // once only
 			{
-				this.Columns.Add(trans.Translate("Task Matches", Translator.Type.Header));
-				this.Columns.Add(trans.Translate("ID", Translator.Type.Header));
+				base.Initialize(trans, taskIcons);
+
+				this.Columns.Add(Translate("Task Matches", Translator.Type.Header));
+				this.Columns.Add(Translate("ID", Translator.Type.Header));
 
 				Columns[1].Width = -2; // Header width
-
-				this.View = View.Details;
-				this.MultiSelect = false;
-				this.FullRowSelect = true;
-				this.HideSelection = false;
-				this.OwnerDraw = true;
-				this.Sorting = SortOrder.Ascending;
-				this.HeaderStyle = ColumnHeaderStyle.Clickable;
-				this.DoubleBuffered = true;
-				this.HotTracking = false;
-                this.StateImageList = m_ilItemHeight;
-                this.LabelEdit = true;
 			}
 
             return true;
@@ -281,10 +140,10 @@ namespace WordCloudUIExtension
 			lvItem.SubItems.Add(item.Id.ToString());
             lvItem.Checked = item.IsDone(false);
 
-			if ((item.IsParent && m_ShowParentAsFolder) || item.HasIcon)
+			if ((item.IsParent && ShowParentsAsFolders) || item.HasIcon)
 			{
 				lvItem.ImageIndex = 1;
-				m_TaskMatchesHaveIcons = true;
+				ItemsHaveIcons = true;
 			}
 
 			m_MaxTaskId = Math.Max(m_MaxTaskId, item.Id);
@@ -300,7 +159,7 @@ namespace WordCloudUIExtension
 			Items.Clear();
 			SelectedItems.Clear();
 
-			m_TaskMatchesHaveIcons = false;
+			ItemsHaveIcons = false;
 			m_MaxTaskId = DefaultMaxTaskId;
 		}
 
@@ -325,10 +184,10 @@ namespace WordCloudUIExtension
 						someUpdated = true;
 					}
 
-                    if ((item.IsParent && m_ShowParentAsFolder) || item.HasIcon)
+                    if ((item.IsParent && ShowParentsAsFolders) || item.HasIcon)
                     {
                         lvItem.ImageIndex = 1;
-                        m_TaskMatchesHaveIcons = true;
+                        ItemsHaveIcons = true;
  
  						someUpdated = true;
                     }
@@ -338,7 +197,7 @@ namespace WordCloudUIExtension
 
                         if (Items.Count == 1)
                         {
-                            m_TaskMatchesHaveIcons = false;
+                            ItemsHaveIcons = false;
                             someUpdated = true;
                         }
                     }
@@ -500,25 +359,9 @@ namespace WordCloudUIExtension
 			Rectangle editRect = new Rectangle(0, 0, 0, 0);
 
 			if (SelectedItems.Count > 0)
-				editRect = LabelTextRect(SelectedItems[0].GetBounds(ItemBoundsPortion.Label));
+				editRect = CalcLabelTextRect(SelectedItems[0].GetBounds(ItemBoundsPortion.Label), false);
 
 			return editRect;
-		}
-
-		public Rectangle LabelTextRect(Rectangle labelRect, bool includeIdColumn = false)
-		{
-			Rectangle textRect = labelRect;
-
-			textRect.X = 2;
-			textRect.X += CheckboxOffset;
-			textRect.X += TextIconOffset;
-
-			textRect.Width = (Columns[0].Width - textRect.X);
-
-            if (includeIdColumn)
-                textRect.Width += Columns[1].Width;
-
-			return textRect;
 		}
 
 		protected ListViewItem FindItem(UInt32 matchId)
@@ -537,37 +380,10 @@ namespace WordCloudUIExtension
 
 		protected override void WndProc(ref Message m)
 		{
-            if (m_LabelTip != null)
-                m_LabelTip.ProcessMessage(m);
-
-			// Suppress mouse clicks OUTSIDE of the items area
-			const int WM_LBUTTONDOWN   = 0x0201;
-			const int WM_LBUTTONUP     = 0x0202;
-			const int WM_LBUTTONDBLCLK = 0x0203;
-
 			const int LVM_GETTOPINDEX  = 0x1039;
 			
 			switch (m.Msg)
 			{
-				case WM_LBUTTONDOWN:
-				case WM_LBUTTONUP:
-				case WM_LBUTTONDBLCLK:
-				{
-					Point pos = new Point(m.LParam.ToInt32() & 0xffff, m.LParam.ToInt32() >> 16);
-
-					switch (this.HitTest(pos).Location)
-					{
-						case ListViewHitTestLocations.AboveClientArea:
-						case ListViewHitTestLocations.BelowClientArea:
-						case ListViewHitTestLocations.LeftOfClientArea:
-						case ListViewHitTestLocations.RightOfClientArea:
-						case ListViewHitTestLocations.None:
-							Focus();
-							return; // eat
-					}
-				}
-				break;
-
 			case LVM_GETTOPINDEX:
 				{
 					// There's a very strange bug where the first
@@ -607,7 +423,7 @@ namespace WordCloudUIExtension
                     {
                         cursor = UIExtension.AppCursor(UIExtension.AppCursorType.LockedTask);
                     }
-                    else if (IconRect(hit.Item.Bounds).Contains(e.Location))
+                    else if (CalcIconRect(hit.Item.Bounds).Contains(e.Location))
                     {
                         cursor = UIExtension.HandCursor();
                     }
@@ -640,7 +456,7 @@ namespace WordCloudUIExtension
 			if (e.Button != MouseButtons.Left)
 				return;
 
-			if (!m_TaskMatchesHaveIcons && !m_ShowCompletionCheckboxes && !doubleClick)
+			if (!ItemsHaveIcons && !ShowCompletionCheckboxes && !doubleClick)
 				return;
 
 			var hit = HitTest(e.Location);
@@ -653,12 +469,12 @@ namespace WordCloudUIExtension
 			if ((item == null) || item.IsLocked)
 				return;
 
-			if (CheckboxRect(hit.Item.Bounds).Contains(e.Location))
+			if (CalcCheckboxRect(hit.Item.Bounds).Contains(e.Location))
 			{
 				if (EditTaskDone != null)
 					EditTaskDone(this, item.Id, !item.IsDone(false));
 			}
-			else if (IconRect(hit.Item.Bounds).Contains(e.Location))
+			else if (CalcIconRect(hit.Item.Bounds).Contains(e.Location))
 			{
 				if (EditTaskIcon != null)
 					EditTaskIcon(this, item.Id);
@@ -713,12 +529,12 @@ namespace WordCloudUIExtension
 			// Draw the background
 			var item = (e.Item.Tag as CloudTaskItem);
 
-            var textColor = item.GetTextColor(e.Item.Selected, m_TaskColorIsBkgnd);
-            var backColor = item.GetBackColor(m_TaskColorIsBkgnd);
+            var textColor = item.GetTextColor(e.Item.Selected, TaskColorIsBackground);
+            var backColor = item.GetBackColor(TaskColorIsBackground);
 
 			Brush textBrush = new SolidBrush(textColor);
 
-			if (m_TaskColorIsBkgnd)
+			if (TaskColorIsBackground)
 			{
 				using (Brush backBrush = new SolidBrush(backColor))
 					e.Graphics.FillRectangle(backBrush, e.Bounds);
@@ -731,7 +547,7 @@ namespace WordCloudUIExtension
 			if (e.Item.Selected)
 			{
 				// Selection rect just around text label
-				Rectangle labelRect = LabelTextRect(e.Bounds, true);
+				Rectangle labelRect = CalcLabelTextRect(e.Bounds, true);
 
 				UIExtension.SelectionRect.Draw(Handle, 
 												e.Graphics, 
@@ -754,12 +570,12 @@ namespace WordCloudUIExtension
 
 				if (colIndex == 0)
                 {
-                    if (m_ShowCompletionCheckboxes)
+                    if (ShowCompletionCheckboxes)
                     {
-                        if (m_CheckBoxSize.IsEmpty)
-                            m_CheckBoxSize = CheckBoxRenderer.GetGlyphSize(e.Graphics, CheckBoxState.UncheckedNormal);
+//                         if (m_CheckBoxSize.IsEmpty)
+//                             m_CheckBoxSize = CheckBoxRenderer.GetGlyphSize(e.Graphics, CheckBoxState.UncheckedNormal);
 
-                        var checkRect = CheckboxRect(itemRect);
+                        var checkRect = CalcCheckboxRect(itemRect);
 
                         CheckBoxRenderer.DrawCheckBox(e.Graphics, checkRect.Location, GetItemCheckboxState(item));
 
@@ -767,15 +583,15 @@ namespace WordCloudUIExtension
                         itemRect.Width -= CheckboxOffset;
                     }
 
-                    if (m_TaskMatchesHaveIcons)
+                    if (ItemsHaveIcons)
                     {
-                        if ((e.Item.ImageIndex != -1) && m_TaskIcons.Get(item.Id))
+                        if ((e.Item.ImageIndex != -1) && TaskIcons.Get(item.Id))
                         {
                             int imageSize = ImageSize;
                             Rectangle iconRect = new Rectangle(itemRect.Location, new Size(imageSize, imageSize));
                             iconRect.Y += ((itemRect.Height - imageSize) / 2);
 
-                            m_TaskIcons.Draw(e.Graphics, iconRect.Left, iconRect.Top);
+                            TaskIcons.Draw(e.Graphics, iconRect.Left, iconRect.Top);
                         }
 
                         itemRect.X += TextIconOffset;
@@ -814,30 +630,6 @@ namespace WordCloudUIExtension
 
 			graphics.DrawString(text, this.Font, brush, rect, format);
 		}
-
-		private Rectangle CheckboxRect(Rectangle labelRect)
-        {
-            if (!m_ShowCompletionCheckboxes)
-                return Rectangle.Empty;
-
-            int top = (((labelRect.Top + labelRect.Bottom) / 2) - (m_CheckBoxSize.Height / 2));
-
-            return new Rectangle(labelRect.X, top, m_CheckBoxSize.Width, m_CheckBoxSize.Height);
-        }
-
-		private Rectangle IconRect(Rectangle labelRect)
-        {
-            if (!m_TaskMatchesHaveIcons)
-                return Rectangle.Empty;
-
-            if (m_ShowCompletionCheckboxes)
-                labelRect.X += (m_CheckBoxSize.Width + 2);
-
-            int imageSize = ImageSize;
-            int top = (((labelRect.Top + labelRect.Bottom) / 2) - (imageSize / 2));
-
-            return new Rectangle(labelRect.X, top, imageSize, imageSize);
-        }
 
 		protected override void OnDrawColumnHeader(DrawListViewColumnHeaderEventArgs e)
 		{

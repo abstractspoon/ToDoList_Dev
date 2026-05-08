@@ -43,6 +43,7 @@ namespace WordCloudUIExtension
         private Task.Attribute m_Attrib;
 		private Translator m_Trans;
 		private String m_TypeId, m_UiName;
+		private UIExtension.TaskIcon m_TaskIcons;
 
 		private bool m_Splitting;
 		private Color m_SplitterColor;
@@ -81,6 +82,7 @@ namespace WordCloudUIExtension
             m_ExcludedWords = new CommonWords(); // English by default
 
 			m_ControlsFont = new Font(FontName, 8, FontStyle.Regular);
+			m_TaskIcons = new UIExtension.TaskIcon(hwndParent);
 
 			m_CommentsTimer = new Timer();
 			m_CommentsTimer.Interval = 2000;
@@ -639,8 +641,8 @@ namespace WordCloudUIExtension
 
 		private void CreateTaskMatchesListView()
 		{
-			m_TaskMatchesList = new TaskMatchesListView(m_HwndParent);
-			m_TaskMatchesList.Initialise(m_Trans);
+			m_TaskMatchesList = new TaskMatchesListView();
+			m_TaskMatchesList.Initialize(m_Trans, m_TaskIcons);
 
 			m_TaskMatchesList.Font = m_ControlsFont;
 			m_TaskMatchesList.Location = new Point(0, ComboTop);
