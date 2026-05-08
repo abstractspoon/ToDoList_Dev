@@ -26,11 +26,22 @@ namespace WordCloudUIExtension
 		}
         
 		// ITaskBase
-		public uint Id { get; private set; }
-		public String Title { get; private set; }
-		public String Position	{ get { return String.Empty; } } // not applicable
-		public int Depth { get { return 0; } } // not applicable
-		public bool HasIcon { get; private set; }
+		public uint Id			{ get; private set; }
+		public String Title		{ get; set; }
+		public bool HasIcon		{ get; set; }
+		public bool IsLocked	{ get; set; }
+
+		public String Position	{ get { return String.Empty; } } // not relevant
+		public int Depth		{ get { return 0; } } // not relevant
+
+        public bool IsDone(bool includeGoodAsDone)
+        {
+            if (includeGoodAsDone && IsGoodAsDone)
+                return true;
+
+            // else
+            return (DoneDate != String.Empty);
+        }
 
 		// Local attributes
 		public String DoneDate;
@@ -46,7 +57,6 @@ namespace WordCloudUIExtension
 		public List<String> Category;
 		public List<String> Tags;
 		public bool IsParent;
-        public bool IsLocked;
         public bool IsGoodAsDone;
         public bool HasSomeSubtasksDone;
 
@@ -83,15 +93,6 @@ namespace WordCloudUIExtension
 
             // else
             return System.Drawing.Color.Empty;
-        }
-
-        public bool IsDone(bool includeGoodAsDone)
-        {
-            if (includeGoodAsDone && IsGoodAsDone)
-                return true;
-
-            // else
-            return (DoneDate != String.Empty);
         }
 
         public bool SetDone(bool done)

@@ -351,3 +351,108 @@ void TaskListView::WndProc(Message% m)
 	// else default handling
 	ListView::WndProc(m);
 }
+
+void TaskListView::OnMouseDown(MouseEventArgs^ e)
+{
+	// disable label editing if not on the item text
+	int leftMargin = (CheckboxOffset + TextIconOffset);
+	int rightMargin = Columns[0]->Width;
+
+	LabelEdit = ((e->Location.X > leftMargin) && (e->Location.X < rightMargin));
+
+	ListView::OnMouseDown(e);
+}
+
+void TaskListView::HandleMouseClick(MouseEventArgs^ e, bool doubleClick)
+{
+	if (e->Button != Windows::Forms::MouseButtons::Left)
+		return;
+
+	if (!ItemsHaveIcons && !ShowCompletionCheckboxes && !doubleClick)
+		return;
+
+	auto hit = HitTest(e->Location);
+
+	if (hit->Item == nullptr)
+		return;
+
+	auto item = ASTYPE(hit->Item->Tag, ITaskBase);
+
+	if ((item == nullptr) || item->IsLocked)
+		return;
+
+	if (CalcCheckboxRect(hit->Item->Bounds).Contains(e->Location))
+	{
+		EditTaskDone(this, item->Id, !item->IsDone(false));
+	}
+	else if (CalcIconRect(hit->Item->Bounds).Contains(e->Location))
+	{
+		EditTaskIcon(this, item->Id);
+	}
+	else if (doubleClick)
+	{
+		EditTaskLabel(this, item->Id);
+	}
+}
+
+void TaskListView::OnMouseClick(MouseEventArgs^ e)
+{
+	ListView::OnMouseClick(e);
+
+	HandleMouseClick(e, false);
+}
+
+void TaskListView::OnMouseDoubleClick(MouseEventArgs^ e)
+{
+	ListView::OnMouseDoubleClick(e);
+
+	HandleMouseClick(e, true);
+}
+
+void TaskListView::OnMouseMove(MouseEventArgs^ e)
+{
+	ListView::OnMouseMove(e);
+
+	auto hit = HitTest(e->Location);
+
+	if (hit->Item != nullptr)
+	{
+		auto item = ASTYPE(hit->Item->Tag, ITaskBase);
+
+		if (item != nullptr)
+		{
+			if (item->IsLocked)
+			{
+				Cursor = UIExtension::AppCursor(UIExtension::AppCursorType::LockedTask);
+				return;
+			}
+			
+			if (CalcIconRect(hit->Item->Bounds).Contains(e->Location))
+			{
+				Cursor = UIExtension::HandCursor();
+				return;
+			}
+		}
+	}
+
+	// all else
+	Cursor = Cursors::Arrow;
+}
+
+void TaskListView::OnBeforeLabelEdit(LabelEditEventArgs^ e)
+{
+	if (e->Item != -1)
+	{
+		auto item = ASTYPE(Items[e->Item]->Tag, ITaskBase);
+
+		if (item != nullptr)
+		{
+			EditTaskLabel(this, item->Id);
+			e->CancelEdit = true;
+
+			return;
+		}
+	}
+
+	ListView::OnBeforeLabelEdit(e);
+}

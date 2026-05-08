@@ -19,6 +19,12 @@ namespace Abstractspoon
 	{
 		namespace PluginHelpers
 		{
+			public delegate bool EditTaskLabelEventHandler(Object^ sender, UInt32 taskId);
+			public delegate bool EditTaskIconEventHandler(Object^ sender, UInt32 taskId);
+			public delegate bool EditTaskCompletionEventHandler(Object^ sender, UInt32 taskId, bool completed);
+
+			// ---------------------------------------------
+
 			public ref class TaskListView : Windows::Forms::ListView, ILabelTipHandler
 			{
 			public:
@@ -39,6 +45,11 @@ namespace Abstractspoon
 				virtual Windows::Forms::Control^ GetOwner();
 				virtual LabelTipInfo^ ToolHitTest(Drawing::Point ptScreen);
 
+				// Callbacks
+				event EditTaskLabelEventHandler^ EditTaskLabel;
+				event EditTaskIconEventHandler^ EditTaskIcon;
+				event EditTaskCompletionEventHandler^ EditTaskDone;
+
 			private:
 				Translator^ m_Trans;
 				UIExtension::TaskIcon^ m_TaskIcons;
@@ -55,6 +66,12 @@ namespace Abstractspoon
 			protected:
 				void WndProc(Windows::Forms::Message% m) override;
 
+				void OnMouseDown(Windows::Forms::MouseEventArgs^ e) override;
+				void OnMouseClick(Windows::Forms::MouseEventArgs^ e) override;
+				void OnMouseDoubleClick(Windows::Forms::MouseEventArgs^ e) override;
+				void OnMouseMove(Windows::Forms::MouseEventArgs^ e) override;
+				void OnBeforeLabelEdit(Windows::Forms::LabelEditEventArgs^ e) override;
+
 			protected:
 // 				void OnMeasureItem(Windows::Forms::MeasureItemEventArgs^ e) override;
 // 				void OnDrawItem(Windows::Forms::DrawItemEventArgs^ e) override;
@@ -63,6 +80,7 @@ namespace Abstractspoon
 				Drawing::Rectangle CalcIconRect(Drawing::Rectangle labelRect);
 
 				String^ Translate(String^ text, Translator::Type type);
+				void HandleMouseClick(Windows::Forms::MouseEventArgs^ e, bool doubleClick);
 
 				property UIExtension::TaskIcon^ TaskIcons { UIExtension::TaskIcon^ get() { return m_TaskIcons; } }
 				property bool ItemsHaveIcons { bool get(); void set(bool value); };

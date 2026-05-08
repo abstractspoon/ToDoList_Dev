@@ -39,16 +39,23 @@ public:
 		m_ITask = task;
 	}
 
-	String^ ToString() override { return Title; }
-
+	// ITaskBase
 	virtual property UInt32 Id { UInt32 get()			{ return m_ITask->Id ; } }
 	virtual property String^ Title { String^ get()		{ return m_ITask->Title; }; }
 	virtual property String^ Position { String^ get()	{ return m_ITask->Position; } }
 	virtual property int Depth { int get()				{ return m_ITask->Depth; } }
 	virtual property bool HasIcon { bool get()			{ return m_ITask->HasIcon; } }
+	virtual property bool IsLocked { bool get()			{ return m_ITask->IsLocked; } }
+
+	virtual bool IsDone(bool includeAsGoodAsDone)		{ return m_ITask->IsDone(includeAsGoodAsDone); }
+
+	// Local attributes
+	String^ ToString() override { return Title; }
 
 	property bool IsTopLevel { bool get()				{ return (Depth == 0); } }
 	property bool IsNone { bool get()					{ return (Id == 0); } }
+
+
 
 private: 
 	ITaskBase^ m_ITask;

@@ -40,19 +40,9 @@ namespace WordCloudUIExtension
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public delegate Boolean EditTaskLabelEventHandler(object sender, UInt32 taskId);
-	public delegate Boolean EditTaskIconEventHandler(object sender, UInt32 taskId);
-	public delegate Boolean EditTaskCompletionEventHandler(object sender, UInt32 taskId, bool completed);
-
 	[System.ComponentModel.DesignerCategory("")]
 	class TaskMatchesListView : TaskListView//, ILabelTipHandler
 	{
-		public event EditTaskLabelEventHandler EditTaskLabel;
-		public event EditTaskIconEventHandler EditTaskIcon;
-		public event EditTaskCompletionEventHandler EditTaskDone;
-
-		// -------------------------------------------------------------
-
 		const int DefaultMaxTaskId = 100;
 
 		// -------------------------------------------------------------
@@ -404,119 +394,6 @@ namespace WordCloudUIExtension
 		}
 
 		private bool m_IgnoreNextItemDraw = false;
-
-        protected override void OnMouseMove(MouseEventArgs e)
-        {
-            base.OnMouseMove(e);
-
-            var hit = HitTest(e.Location);
-
-            if (hit.Item != null)
-            {
-                var item = (hit.Item.Tag as CloudTaskItem);
-
-                if (item != null)
-                {
-                    Cursor cursor = null;
-
-                    if (item.IsLocked)
-                    {
-                        cursor = UIExtension.AppCursor(UIExtension.AppCursorType.LockedTask);
-                    }
-                    else if (CalcIconRect(hit.Item.Bounds).Contains(e.Location))
-                    {
-                        cursor = UIExtension.HandCursor();
-                    }
-
-                    if (cursor != null)
-                    {
-                        Cursor = cursor;
-                        return;
-                    }
-                }
-            }
-
-            // all else
-            Cursor = Cursors.Arrow;
-        }
-
-		protected override void OnMouseDown(MouseEventArgs e)
-        {
-			// disable label editing if not on the item text
-			int leftMargin = (CheckboxOffset + TextIconOffset);
-            int rightMargin = Columns[0].Width;
-
-            this.LabelEdit = ((e.Location.X > leftMargin) && (e.Location.X < rightMargin));
-            
-            base.OnMouseDown(e);
-        }
-
-		private void HandleMouseClick(MouseEventArgs e, bool doubleClick)
-		{
-			if (e.Button != MouseButtons.Left)
-				return;
-
-			if (!ItemsHaveIcons && !ShowCompletionCheckboxes && !doubleClick)
-				return;
-
-			var hit = HitTest(e.Location);
-
-			if (hit.Item == null)
-				return;
-
-			var item = (hit.Item.Tag as CloudTaskItem);
-
-			if ((item == null) || item.IsLocked)
-				return;
-
-			if (CalcCheckboxRect(hit.Item.Bounds).Contains(e.Location))
-			{
-				if (EditTaskDone != null)
-					EditTaskDone(this, item.Id, !item.IsDone(false));
-			}
-			else if (CalcIconRect(hit.Item.Bounds).Contains(e.Location))
-			{
-				if (EditTaskIcon != null)
-					EditTaskIcon(this, item.Id);
-			}
-			else if (doubleClick)
-			{
-				if (EditTaskLabel != null)
-					EditTaskLabel(this, item.Id);
-			}
-		}
-
-		protected override void OnMouseClick(MouseEventArgs e)
-        {
-            base.OnMouseClick(e);
-
-			HandleMouseClick(e, false);
-        }
-
-		protected override void OnMouseDoubleClick(MouseEventArgs e)
-		{
-			base.OnMouseDoubleClick(e);
-
-			HandleMouseClick(e, true);
-		}
-
-		protected override void OnBeforeLabelEdit(LabelEditEventArgs e)
-        {
-            if ((e.Item != -1) && (EditTaskLabel != null))
-            {
-                var item = (Items[e.Item].Tag as CloudTaskItem);
-
-                if (item != null)
-                {
-                    EditTaskLabel(this, item.Id);
-
-                    e.CancelEdit = true;
-                    return;
-                }
-            }
-
-            base.OnBeforeLabelEdit(e);
-        }
 
 		protected override void OnDrawItem(DrawListViewItemEventArgs e)
 		{
