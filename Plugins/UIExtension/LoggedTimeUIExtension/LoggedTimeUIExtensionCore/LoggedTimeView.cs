@@ -1113,7 +1113,7 @@ namespace LoggedTimeUIExtension
 			{
 				if (!ReadOnly && (IconHitTest(PointToScreen(e.Location)) > 0))
 				{
-					if (appt.Locked)
+					if (appt.IsLocked)
 						return UIExtension.AppCursor(UIExtension.AppCursorType.LockedTask);
 
 					return UIExtension.HandCursor();
@@ -1137,7 +1137,7 @@ namespace LoggedTimeUIExtension
 				}
 				else
 				{
-					if (appt.Locked)
+					if (appt.IsLocked)
 						return UIExtension.AppCursor(UIExtension.AppCursorType.LockedTask);
 
 					if (mode == Calendar.SelectionTool.Mode.Move)

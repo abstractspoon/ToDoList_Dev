@@ -243,7 +243,7 @@ namespace Calendar
                     Color start = InterpolateColors(appt.BarColor, Color.White, 0.4f);
                     Color end = InterpolateColors(appt.BarColor, Color.FromArgb(191, 210, 234), 0.7f);
                     // if appt is locked, draw different background pattern
-                    if ((appt.Locked))
+                    if ((appt.IsLocked))
                     {
                         // Draw back
                         using (Brush m_Brush = new System.Drawing.Drawing2D.HatchBrush(System.Drawing.Drawing2D.HatchStyle.LargeConfetti, Color.Blue, appt.BarColor))

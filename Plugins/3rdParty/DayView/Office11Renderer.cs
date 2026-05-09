@@ -102,7 +102,7 @@ namespace Calendar
                     format.Alignment = StringAlignment.Near;
                     format.LineAlignment = StringAlignment.Near;
 
-                    if ((appt.Locked) && isSelected)
+                    if ((appt.IsLocked) && isSelected)
                     {
                         // Draw back
                         using (Brush m_Brush = new System.Drawing.Drawing2D.HatchBrush(System.Drawing.Drawing2D.HatchStyle.Wave, Color.LightGray, appt.BarColor))

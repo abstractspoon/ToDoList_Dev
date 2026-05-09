@@ -142,7 +142,7 @@ namespace DayViewUIExtension
 
 	// ---------------------------------------------------------------
 
-	public class TaskItem : Calendar.Appointment, ITask
+	public class TaskItem : Calendar.Appointment, ITaskBase
 	{
 		private Calendar.AppointmentDates m_OrgDates = new Calendar.AppointmentDates();
 		private DateTime m_PrevDueDate = NullDate;
@@ -430,7 +430,7 @@ namespace DayViewUIExtension
 
 			// Always
 			TaskTextColor = task.GetTextDrawingColor();
-			Locked = task.IsLocked(true);
+			IsLocked = task.IsLocked(true);
 			IsParent = task.IsParent();
 			IsTopLevel = (task.GetParentID() == 0);
 

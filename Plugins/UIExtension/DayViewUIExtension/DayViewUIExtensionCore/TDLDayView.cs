@@ -1718,7 +1718,7 @@ namespace DayViewUIExtension
 			if (appt == null)
 				return false;
 			
-			if (appt.Locked)
+			if (appt.IsLocked)
 				return false;
 			
 			if (appt is TaskFutureOccurrence)
@@ -1852,7 +1852,7 @@ namespace DayViewUIExtension
 
 				if (!ReadOnly && (IconHitTest(PointToScreen(e.Location)) > 0))
 				{
-					if (realAppt.Locked)
+					if (realAppt.IsLocked)
 						return UIExtension.AppCursor(UIExtension.AppCursorType.LockedTask);
 
 					return UIExtension.HandCursor();
@@ -1880,7 +1880,7 @@ namespace DayViewUIExtension
 				}
 				else
 				{
-					if (realAppt.Locked)
+					if (realAppt.IsLocked)
 						return UIExtension.AppCursor(UIExtension.AppCursorType.LockedTask);
 
 					if (mode == Calendar.SelectionTool.Mode.Move)

@@ -34,7 +34,7 @@ namespace DayViewUIExtension
 	{
 		public TaskFutureOccurrence(TaskItem item, UInt32 id, DateTime start, DateTime end) : base(item, id)
 		{
-			Locked = true; // always (for now)
+			IsLocked = true; // always (for now)
 
 			StartDate = start;
 			EndDate = TaskItem.CheckGetEndOfDay(end);
@@ -55,7 +55,7 @@ namespace DayViewUIExtension
 			AttributeId = attribId;
 			StartDate = OriginalDate = date;
 			EndDate = StartDate.AddDays(1);
-			Locked = item.Locked;
+			IsLocked = item.IsLocked;
 
 			if (EndDate == EndDate.Date)
 				EndDate = EndDate.AddSeconds(-1); // end of day before
@@ -113,7 +113,7 @@ namespace DayViewUIExtension
 
 		public TaskTimeBlock(TaskItem item, UInt32 id, TimeBlock block) : base(item, id)
 		{
-			Locked = false; // Never
+			IsLocked = false; // Never
 
 			// Copy dates
 			StartDate = m_OrgDates.Start = block.Start;

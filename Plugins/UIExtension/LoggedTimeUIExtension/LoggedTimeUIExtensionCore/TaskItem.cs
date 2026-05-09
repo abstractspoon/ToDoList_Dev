@@ -30,83 +30,7 @@ namespace LoggedTimeUIExtension
 
 	// ---------------------------------------------------------------
 
-/*
-	public class DateSortedTasks
-	{
-		public class TaskList : List<TaskItem>
-		{
-			public int FindItem(uint taskID)
-			{
-				return FindIndex(x => (x.Id == taskID));
-			}
-
-			public int NextIndex(uint taskID, bool forwards)
-			{
-				return NextIndex(FindItem(taskID), forwards);
-			}
-
-			public int NextIndex(int item, bool forwards)
-			{
-				if (item == -1)
-					return -1;
-
-				item = (forwards ? item + 1 : item - 1);
-
-				if ((item < 0) || (item >= Count))
-					return -1;
-
-				return item;
-			}
-		}
-
-		// ------------------
-
-		private TaskList m_SortedTaskList;
-		private TaskItems m_TaskItems; // read-only
-		private bool m_NeedsResort = true;
-
-		// ------------------
-
-		public DateSortedTasks(TaskItems items)
-		{
-			m_TaskItems = items;
-			m_SortedTaskList = new TaskList();
-			m_NeedsResort = true;
-		}
-
-		public TaskList Items
-		{
-			get
-			{
-				if (m_SortedTaskList.Count == 0)
-					m_SortedTaskList.AddRange(m_TaskItems.Values);
-
-				if (m_NeedsResort)
-				{
-					m_NeedsResort = false;
-					m_SortedTaskList.Sort((a, b) => TaskItem.CompareDates(a, b));
-				}
-
-				return m_SortedTaskList;
-			}
-		}
-
-		public void SetNeedsRebuild()
-		{
-			m_SortedTaskList.Clear();
-			m_NeedsResort = true;
-		}
-
-		public void SetNeedsResort()
-		{
-			m_NeedsResort = true;
-		}
-	}
-*/
-
-	// ---------------------------------------------------------------
-
-	public class TaskItem : ITask
+	public class TaskItem : ITaskBase
 	{
 		public TaskItem()
 		{
@@ -154,7 +78,7 @@ namespace LoggedTimeUIExtension
 		public string Title { get; private set; }
 		public string Position { get; private set; }
 		public uint Id { get; private set; }
-		public bool Locked { get; private set; }
+		public bool IsLocked { get; private set; }
 		public bool IsParent { get; private set; }
 		public bool HasIcon { get; private set; }
         public bool IsDone { get; private set; }
@@ -173,7 +97,7 @@ namespace LoggedTimeUIExtension
 
 			// Always
 			TaskTextColor = task.GetTextDrawingColor();
-			Locked = task.IsLocked(true);
+			IsLocked = task.IsLocked(true);
 			IsParent = task.IsParent();
 			Position = task.GetPositionString();
 

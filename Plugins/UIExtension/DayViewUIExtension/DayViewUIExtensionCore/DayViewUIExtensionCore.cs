@@ -934,7 +934,7 @@ namespace DayViewUIExtension
 			// Handle icon click on all types
 			var realAppt = m_DayView.GetRealAppointment(appt);
 
-			if (!m_DayView.ReadOnly && !realAppt.Locked &&
+			if (!m_DayView.ReadOnly && !realAppt.IsLocked &&
 				(m_DayView.IconHitTest(m_DayView.PointToScreen(e.Location)) > 0))
 			{
 				var notify = new UIExtension.ParentNotify(m_HwndParent);
@@ -948,7 +948,7 @@ namespace DayViewUIExtension
 			{
 				if (appt is TaskItem)
 				{
-					if (!m_DayView.ReadOnly && !appt.Locked)
+					if (!m_DayView.ReadOnly && !appt.IsLocked)
 					{
 						var notify = new UIExtension.ParentNotify(m_HwndParent);
 						notify.NotifyEditLabel();

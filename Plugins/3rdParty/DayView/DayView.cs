@@ -1491,7 +1491,7 @@ namespace Calendar
 
         public void StartEditing()
         {
-            if (!selectedAppointment.Locked && appointmentViews.ContainsKey(selectedAppointment))
+            if (!selectedAppointment.IsLocked && appointmentViews.ContainsKey(selectedAppointment))
             {
                 Rectangle editBounds = appointmentViews[selectedAppointment].Rectangle;
 

@@ -91,7 +91,7 @@ namespace Calendar
 
 			Appointment selection = m_dayView.SelectedAppointment;
 
-			if ((selection == null) || selection.Locked || (m_mode == Mode.None))
+			if ((selection == null) || selection.IsLocked || (m_mode == Mode.None))
 				return false;
 
 			return true;
@@ -379,7 +379,7 @@ namespace Calendar
 			if (m_mode != Mode.None)
 				return m_mode;
 
-			if ((appt == null) || appt.Locked)
+			if ((appt == null) || appt.IsLocked)
 				return Mode.None;
 
 			Rectangle apptRect = Rectangle.Empty;
