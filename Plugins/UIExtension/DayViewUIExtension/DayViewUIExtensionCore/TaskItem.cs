@@ -296,14 +296,12 @@ namespace DayViewUIExtension
 		public bool IsTopLevel { get; private set; }
 		public bool HasIcon { get; private set; }
         public bool IsDone { get; private set; }
-        public bool IsGoodAsDone { get; private set; }
+		public bool IsDoneOrGoodAsDone { get; private set; }
 		public bool HasDependencies { get; private set; }
 		public bool IsRecurring { get; private set; }
 		public double TimeEstimate { get; private set; }
         public Task.TimeUnits TimeEstUnits { get; private set; }
 		public Color TaskTextColor { get; private set; }
-
-		public bool IsDoneOrGoodAsDone { get { return IsDone || IsGoodAsDone; } }
 
 		public bool HasTag(string tag)
 		{
@@ -453,7 +451,7 @@ namespace DayViewUIExtension
 				m_UsingCalculatedParentStartDate = (IsParent && task.HasCalculatedAttribute(Task.Attribute.StartDate));
 
 				IsDone = task.IsDone();
-                IsGoodAsDone = task.IsGoodAsDone();
+                IsDoneOrGoodAsDone = (IsDone || task.IsGoodAsDone());
 
 				var dueDate = task.GetDueDate(IsParent);
 				m_UsingCalculatedParentEndDate = (IsParent && task.HasCalculatedAttribute(Task.Attribute.DueDate));
@@ -515,7 +513,7 @@ namespace DayViewUIExtension
 					bool wasDone = IsDone;
 
 				    IsDone = task.IsDone();
-                    IsGoodAsDone = task.IsGoodAsDone();
+                    IsDoneOrGoodAsDone = (IsDone || task.IsGoodAsDone());
 
 					if (IsDone)
 					{

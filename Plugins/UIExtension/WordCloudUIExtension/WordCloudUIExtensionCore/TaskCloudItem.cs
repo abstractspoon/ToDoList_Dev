@@ -31,9 +31,9 @@ namespace WordCloudUIExtension
 		public bool HasIcon			{ get; set; }
 		public bool IsLocked		{ get; set; }
         public bool IsDone			{ get; set; }
-        public bool IsGoodAsDone	{ get; set; }
 		public bool IsParent		{ get; set; }
 
+		// Not required
 		public String Position		{ get { return String.Empty; } } // not relevant
 
 		// Local attributes -------------------------------
@@ -110,7 +110,6 @@ namespace WordCloudUIExtension
 		{
             IsParent = task.IsParent();
             IsLocked = task.IsLocked(true);
-            IsGoodAsDone = task.IsGoodAsDone();
             HasSomeSubtasksDone = task.HasSomeSubtasksDone();
 
 			if (newTask)
