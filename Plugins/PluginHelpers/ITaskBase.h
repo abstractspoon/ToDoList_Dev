@@ -19,10 +19,11 @@ namespace Abstractspoon
 				virtual property String^ Title		{ String^ get(); }
 				virtual property String^ Position	{ String^ get(); }
 				virtual property int Depth			{ int get(); }
+
 				virtual property bool HasIcon		{ bool get(); }
 				virtual property bool IsLocked		{ bool get(); }
-
-				virtual bool IsDone(bool includeAsGoodAsDone);
+				virtual property bool IsDone		{ bool get(); }
+				virtual property bool IsGoodAsDone	{ bool get(); }
 			};
 		}
 	}

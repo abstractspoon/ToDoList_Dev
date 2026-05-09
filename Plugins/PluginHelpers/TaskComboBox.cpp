@@ -46,16 +46,14 @@ public:
 	virtual property int Depth { int get()				{ return m_ITask->Depth; } }
 	virtual property bool HasIcon { bool get()			{ return m_ITask->HasIcon; } }
 	virtual property bool IsLocked { bool get()			{ return m_ITask->IsLocked; } }
-
-	virtual bool IsDone(bool includeAsGoodAsDone)		{ return m_ITask->IsDone(includeAsGoodAsDone); }
+	virtual property bool IsDone { bool get()			{ return m_ITask->IsDone; } }
+	virtual property bool IsGoodAsDone { bool get()		{ return m_ITask->IsGoodAsDone; } }
 
 	// Local attributes
 	String^ ToString() override { return Title; }
 
 	property bool IsTopLevel { bool get()				{ return (Depth == 0); } }
 	property bool IsNone { bool get()					{ return (Id == 0); } }
-
-
 
 private: 
 	ITaskBase^ m_ITask;

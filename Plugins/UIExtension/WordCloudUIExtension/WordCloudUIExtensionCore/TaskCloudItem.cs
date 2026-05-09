@@ -25,25 +25,18 @@ namespace WordCloudUIExtension
 			return Title;
 		}
         
-		// ITaskBase
-		public uint Id			{ get; private set; }
-		public String Title		{ get; set; }
-		public bool HasIcon		{ get; set; }
-		public bool IsLocked	{ get; set; }
+		// ITaskBase --------------------------------------
+		public uint Id				{ get; private set; }
+		public String Title			{ get; set; }
+		public bool HasIcon			{ get; set; }
+		public bool IsLocked		{ get; set; }
+        public bool IsDone			{ get; set; }
+        public bool IsGoodAsDone	{ get; set; }
 
-		public String Position	{ get { return String.Empty; } } // not relevant
-		public int Depth		{ get { return 0; } } // not relevant
+		public String Position		{ get { return String.Empty; } } // not relevant
+		public int Depth			{ get { return 0; } } // not relevant
 
-        public bool IsDone(bool includeGoodAsDone)
-        {
-            if (includeGoodAsDone && IsGoodAsDone)
-                return true;
-
-            // else
-            return (DoneDate != String.Empty);
-        }
-
-		// Local attributes
+		// Local attributes -------------------------------
 		public String DoneDate;
 		public String DueDate;
 		public String StartDate;
@@ -57,7 +50,6 @@ namespace WordCloudUIExtension
 		public List<String> Category;
 		public List<String> Tags;
 		public bool IsParent;
-        public bool IsGoodAsDone;
         public bool HasSomeSubtasksDone;
 
         private System.Drawing.Color taskTextColor = System.Drawing.Color.Empty;
@@ -97,7 +89,7 @@ namespace WordCloudUIExtension
 
         public bool SetDone(bool done)
         {
-			if (done == IsDone(false))
+			if (done == IsDone)
 				return false;
 
             // else
