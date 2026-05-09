@@ -109,7 +109,7 @@ namespace WordCloudUIExtension
 			if (m_Attrib == Task.Attribute.Unknown)
 				return false;
 
-			if (!m_TaskMatchesList.HasMatchId(taskId))
+			if (!m_TaskMatchesList.HasTaskId(taskId))
 			{
 				// Get the Cloud items having this id
 				CloudTaskItem item;
@@ -142,7 +142,7 @@ namespace WordCloudUIExtension
 				RebuldMatchList();
 			}
 
-			m_TaskMatchesList.SetSelectedMatchId(taskId);
+			m_TaskMatchesList.SelectTask(taskId);
 			return true;
 		}
 
@@ -164,7 +164,7 @@ namespace WordCloudUIExtension
 
 		public bool CanScrollToSelectedTask()
 		{
-			return (m_TaskMatchesList.GetSelectedMatchId() != 0);
+			return (m_TaskMatchesList.SelectedTaskId != 0);
 		}
 
 		public void UpdateTasks(TaskList tasks, UIExtension.UpdateType type)
@@ -251,20 +251,20 @@ namespace WordCloudUIExtension
 
 				// If the selected match also changed then we may
 				// may need to change the currently selected word
-				if (changedTaskIds.Contains(m_TaskMatchesList.GetSelectedMatchId()))
+				if (changedTaskIds.Contains(m_TaskMatchesList.SelectedTaskId))
 					FixupWordCloudSelection();
 			}
 			else
 			{
 				// Pick a word that ensures the currently selected
 				// item in the match list will be preserved
-				var selMatch = m_TaskMatchesList.GetSelectedMatch();
-				var selWord = FixupWordCloudSelection(selMatch);
+				var selMatch = m_TaskMatchesList.SelectedTask;
+				var selWord = FixupWordCloudSelection(selMatch as CloudTaskItem);
 				
 				RebuldMatchList();
 
 				if (selMatch != null)
-					m_TaskMatchesList.SetSelectedMatchId(selMatch.Id);
+					m_TaskMatchesList.SelectTask(selMatch.Id);
 			}
 
             m_TaskMatchesList.EnsureSelectionVisible();
@@ -316,12 +316,12 @@ namespace WordCloudUIExtension
 			{
 				case UIExtension.GetTask.GetNextTask:
 				case UIExtension.GetTask.GetNextVisibleTask:
-					taskId = m_TaskMatchesList.GetNextSelectedMatchId();
+					taskId = m_TaskMatchesList.GetNextTaskId(m_TaskMatchesList.SelectedTaskId, true);
 					break;
 
 				case UIExtension.GetTask.GetPrevTask:
 				case UIExtension.GetTask.GetPrevVisibleTask:
-					taskId = m_TaskMatchesList.GetPrevSelectedMatchId();
+					taskId = m_TaskMatchesList.GetNextTaskId(m_TaskMatchesList.SelectedTaskId, false);
 					break;
 			}
 
@@ -355,7 +355,7 @@ namespace WordCloudUIExtension
             }
 
 			// Then on the match list
-			if (m_TaskMatchesList.SelectMatch(text, selectTask, caseSensitive, wholeWord, findReplace))
+			if (m_TaskMatchesList.SelectTaskEx(text, selectTask, caseSensitive, wholeWord, findReplace))
 			{
 				return true;
 			}
@@ -418,7 +418,7 @@ namespace WordCloudUIExtension
 
 		public bool GetLabelEditRect(ref Int32 left, ref Int32 top, ref Int32 right, ref Int32 bottom)
 		{
-			Rectangle editRect = m_TaskMatchesList.GetSelectedMatchEditRect();
+			Rectangle editRect = m_TaskMatchesList.SelectedTaskLabelRect;
 
 			if (!editRect.IsEmpty)
 			{
@@ -930,7 +930,7 @@ namespace WordCloudUIExtension
 			if (selWord != null)
 			{
 				CloudTaskItem selItem = null;
-				UInt32 selItemId = m_TaskMatchesList.GetSelectedMatchId();
+				UInt32 selItemId = m_TaskMatchesList.SelectedTaskId;
 
 				// Build a list of task items containing this value
 				m_TaskMatchesList.BeginUpdate();
@@ -953,7 +953,7 @@ namespace WordCloudUIExtension
 				if (m_TaskMatchesList.Items.Count > 0)
 				{
 					// See if our currently selected task is in the new match list
-					selItemId = m_TaskMatchesList.SetSelectedMatchId(selItemId);
+					selItemId = m_TaskMatchesList.SelectTask(selItemId);
 
 					if ((selItem == null) || (selItemId != selItem.Id))
 						NotifyParentSelChange(selItemId);
@@ -1042,7 +1042,7 @@ namespace WordCloudUIExtension
 			String selWord = m_WordCloud.SelectedWord;
 
 			if (selMatch == null)
-				selMatch = m_TaskMatchesList.GetSelectedMatch();
+				selMatch = (m_TaskMatchesList.SelectedTask as CloudTaskItem);
 
 			if ((selMatch != null) && (selWord != null))
 			{
@@ -1069,7 +1069,7 @@ namespace WordCloudUIExtension
 
 		private void OnTaskMatchesSelChanged(object sender, EventArgs args)
 		{
-			UInt32 selTaskId = m_TaskMatchesList.GetSelectedMatchId();
+			UInt32 selTaskId = m_TaskMatchesList.SelectedTaskId;
 
 			if (selTaskId != 0)
 				NotifyParentSelChange(selTaskId);

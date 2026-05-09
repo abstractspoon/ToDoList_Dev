@@ -42,9 +42,18 @@ namespace Abstractspoon
 
 				void Initialize(Translator^ trans, UIExtension::TaskIcon^ taskIcons);
 				IntPtr GetHeaderHandle();
+				UInt32 GetNextTaskId(UInt32 taskId, bool next);
+				bool HasTaskId(UInt32 taskId);
+				void EnsureSelectionVisible();
+				Windows::Forms::ListViewItem^ AddTask(ITaskBase^ base);
+
+				UInt32 SelectTask(UInt32 taskId);
+				bool SelectTaskEx(String^ words, UIExtension::SelectTask selectTask, bool caseSensitive, bool wholeWord, bool findReplace);
 
 				property UInt32 SelectedTaskId { UInt32 get(); }
 				property String^ SelectedTaskTitle { String^ get(); }
+				property ITaskBase^ SelectedTask { ITaskBase^ get(); }
+				property Drawing::Rectangle SelectedTaskLabelRect { Drawing::Rectangle get(); }
 
 				property bool TaskColorIsBackground { bool get(); void set(bool value); }
 				property bool ShowParentsAsFolders { bool get(); void set(bool value); }
@@ -93,6 +102,13 @@ namespace Abstractspoon
 
 				String^ Translate(String^ text, Translator::Type type);
 				void HandleMouseClick(Windows::Forms::MouseEventArgs^ e, bool doubleClick);
+				Windows::Forms::ListViewItem^ FindLVItem(UInt32 taskId);
+				UInt32 GetTaskId(int index);
+				ITaskBase^ GetTask(int index);
+				int FindTask(String^ phrase, int startIndex, bool forward, bool caseSensitive, bool wholeWord, bool findReplace);
+				
+				// Derived classes override
+				virtual bool TaskMatches(ITaskBase^ task, String^ phrase, bool caseSensitive, bool wholeWord, bool findReplace);
 
 				property UIExtension::TaskIcon^ TaskIcons { UIExtension::TaskIcon^ get() { return m_TaskIcons; } }
 				property bool ItemsHaveIcons { bool get(); void set(bool value); };

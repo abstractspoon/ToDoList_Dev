@@ -117,11 +117,6 @@ namespace WordCloudUIExtension
 			m_MaxTaskId = DefaultMaxTaskId;
 		}
 
-		public bool HasMatchId(UInt32 matchId)
-		{
-			return (FindItem(matchId) != null);
-		}
-
 		public bool UpdateMatchItems(HashSet<UInt32> matchIds)
 		{
 			bool someUpdated = false;
@@ -163,174 +158,15 @@ namespace WordCloudUIExtension
 			return someUpdated;
 		}
 
-        public void EnsureSelectionVisible()
-        {
-            if ((SelectedIndices.Count == 0) || (Items.Count == 0))
-                return;
-
-            int itemIndex = SelectedItems.Count;
-
-            while (itemIndex-- > 0)
-            {
-                Rectangle itemRect = SelectedItems[itemIndex].Bounds;
-
-                if (Rectangle.Intersect(ClientRectangle, itemRect) == itemRect)
-                    return;
-            }
-
-            // else
-            EnsureVisible(SelectedIndices[0]);
-        }
-
-        public UInt32 SetSelectedMatchId(UInt32 matchId)
-        {
-			SelectedItems.Clear();
-			SelectedIndices.Clear();
-
-			if (Items.Count == 0)
-				return 0;
-
-			ListViewItem selLVItem = FindItem(matchId);
-
-			if (selLVItem == null)
-				selLVItem = Items[0];
-
-			selLVItem.Selected = true;
-            EnsureSelectionVisible();
-
-			return (selLVItem.Tag as CloudTaskItem).Id;
-		}
-
-		public bool SelectMatch(String words, UIExtension.SelectTask selectTask, bool caseSensitive, bool wholeWord, bool findReplace)
+		protected override bool TaskMatches(ITaskBase task, String phrase, bool caseSensitive, bool wholeWord, bool findReplace)
 		{
-			if (Items.Count == 0)
+			var item = (task as CloudTaskItem);
+
+			if (item == null)
 				return false;
 
-			if (SelectedIndices.Count == 0)
-				SelectedIndices.Add(0);
-
-			int selIndex = SelectedIndices[0];
-			int matchIndex = -1;
-
-			switch (selectTask)
-			{
-				case UIExtension.SelectTask.SelectFirstTask:
-					matchIndex = FindTask(words, 0, true, caseSensitive, wholeWord, findReplace);
-					break;
-
-				case UIExtension.SelectTask.SelectNextTask:
-                    matchIndex = FindTask(words, (selIndex + 1), true, caseSensitive, wholeWord, findReplace);
-					break;
-
-				case UIExtension.SelectTask.SelectNextTaskInclCurrent:
-                    matchIndex = FindTask(words, selIndex, true, caseSensitive, wholeWord, findReplace);
-					break;
-
-				case UIExtension.SelectTask.SelectPrevTask:
-                    matchIndex = FindTask(words, (selIndex - 1), false, caseSensitive, wholeWord, findReplace);
-					break;
-
-				case UIExtension.SelectTask.SelectLastTask:
-                    matchIndex = FindTask(words, (Items.Count - 1), false, caseSensitive, wholeWord, findReplace);
-					break;
-			}
-
-			if (matchIndex != -1)
-			{
-				SelectedIndices.Clear();
-				SelectedIndices.Add(matchIndex);
-
-                EnsureSelectionVisible();
-				return true;
-			}
-
-			return false;
+			return item.Matches(phrase, caseSensitive, wholeWord, findReplace);
 		}
-
-		private int FindTask(String words, int startIndex, bool forward, bool caseSensitive, bool wholeWord, bool findReplace)
-		{
-			int fromIndex = startIndex;
-			int toIndex = forward ? Items.Count : -1;
-			int increment = forward ? 1 : -1;
-
-			for (int i = fromIndex; i != toIndex; i += increment)
-			{
-				var item = (Items[i].Tag as CloudTaskItem);
-
-                if (item.Matches(words, caseSensitive, wholeWord, findReplace))
-					return i;
-			}
-
-			return -1; // no match
-		}
-		
-		public UInt32 GetSelectedMatchId()
-		{
-			if (SelectedItems.Count == 0)
-				return 0;
-
-			return (SelectedItems[0].Tag as CloudTaskItem).Id;
-		}
-
-		public UInt32 GetNextSelectedMatchId()
-		{
-			if ((SelectedItems.Count > 0) && (Items.Count > 1))
-			{
-				var nextIndex = (SelectedItems[0].Index + 1);
-
-				if (nextIndex < Items.Count)
-					return (Items[nextIndex].Tag as CloudTaskItem).Id;
-			}
-
-			// all else 
-			return 0;
-		}
-
-		public UInt32 GetPrevSelectedMatchId()
-		{
-            if ((SelectedItems.Count > 0) && (Items.Count > 1))
-            {
-                var prevIndex = (SelectedItems[0].Index - 1);
-
-				if (prevIndex >= 0)
-					return (Items[prevIndex].Tag as CloudTaskItem).Id;
-			}
-
-			// all else 
-			return 0;
-		}
-
-		public CloudTaskItem GetSelectedMatch()
-		{
-			if (SelectedItems.Count == 0)
-				return null;
-
-			return (SelectedItems[0].Tag as CloudTaskItem);
-		}
-
-		public Rectangle GetSelectedMatchEditRect()
-		{
-			Rectangle editRect = new Rectangle(0, 0, 0, 0);
-
-			if (SelectedItems.Count > 0)
-				editRect = CalcLabelTextRect(SelectedItems[0].GetBounds(ItemBoundsPortion.Label), false);
-
-			return editRect;
-		}
-
-		protected ListViewItem FindItem(UInt32 matchId)
-		{
-			foreach (ListViewItem lvItem in Items)
-			{
-				var item = (lvItem.Tag as CloudTaskItem);
-
-				if ((item != null) && (item.Id == matchId))
-					return lvItem;
-			}
-
-			// else
-            return null;
-        }
 
 		protected override void WndProc(ref Message m)
 		{
@@ -500,7 +336,7 @@ namespace WordCloudUIExtension
 
         CheckBoxState GetItemCheckboxState(CloudTaskItem taskItem)
         {
-            if (taskItem.IsDone(false))
+            if (taskItem.IsDone)
                 return CheckBoxState.CheckedNormal;
 
             if (taskItem.HasSomeSubtasksDone && ShowMixedCompletionState)

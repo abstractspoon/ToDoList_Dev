@@ -85,6 +85,118 @@ IntPtr TaskListView::GetHeaderHandle()
 	return IntPtr(Win32::SendMessage(Handle, LVM_GETHEADER, UIntPtr::Zero, IntPtr::Zero));
 }
 
+bool TaskListView::HasTaskId(UInt32 taskId)
+{
+	return (FindLVItem(taskId) != nullptr);
+}
+
+UInt32 TaskListView::GetNextTaskId(UInt32 taskId, bool next)
+{
+	auto lvItem = FindLVItem(taskId);
+
+	if (lvItem == nullptr)
+		return 0;
+
+	int nextIndex = (next ? (lvItem->Index + 1) : (lvItem->Index - 1));
+	return GetTaskId(nextIndex);
+}
+
+ITaskBase^ TaskListView::GetTask(int index)
+{
+	if ((index < 0) || (index >= Items->Count))
+		return nullptr;
+
+	return ASTYPE(Items[index]->Tag, ITaskBase);
+}
+
+UInt32 TaskListView::GetTaskId(int index)
+{
+	auto task = GetTask(index);
+	return ((task == nullptr) ? 0 : task->Id);
+}
+
+UInt32 TaskListView::SelectedTaskId::get()
+{
+	auto selTask = SelectedTask;
+	return (selTask == nullptr ? 0 : selTask->Id);
+}
+
+UInt32 TaskListView::SelectTask(UInt32 taskId)
+{
+	SelectedItems->Clear();
+	SelectedIndices->Clear();
+
+	if (Items->Count == 0)
+		return 0;
+
+	ListViewItem^ selLVItem = FindLVItem(taskId);
+
+	if (selLVItem == nullptr)
+		selLVItem = Items[0];
+
+	selLVItem->Selected = true;
+	EnsureSelectionVisible();
+
+	return ASTYPE(selLVItem->Tag, ITaskBase)->Id;
+}
+
+void TaskListView::EnsureSelectionVisible()
+{
+	if ((SelectedIndices->Count == 0) || (Items->Count == 0))
+		return;
+
+	int itemIndex = SelectedItems->Count;
+
+	while (itemIndex-- > 0)
+	{
+		Drawing::Rectangle itemRect = SelectedItems[itemIndex]->Bounds;
+
+		if (Drawing::Rectangle::Intersect(ClientRectangle, itemRect) == itemRect)
+			return;
+	}
+
+	// else
+	EnsureVisible(SelectedIndices[0]);
+}
+
+String^ TaskListView::SelectedTaskTitle::get()
+{
+	auto selTask = SelectedTask;
+	return (selTask == nullptr ? String::Empty : selTask->Title);
+}
+
+ITaskBase^ TaskListView::SelectedTask::get()
+{
+	if (SelectedItems->Count == 0)
+		return nullptr;
+
+	return ASTYPE(SelectedItems[0]->Tag, ITaskBase);
+}
+
+Drawing::Rectangle TaskListView::SelectedTaskLabelRect::get()
+{
+	auto labelRect = Drawing::Rectangle::Empty;
+
+	if (SelectedItems->Count > 0)
+		labelRect = CalcLabelTextRect(SelectedItems[0]->GetBounds(ItemBoundsPortion::Label), false);
+
+	return labelRect;
+}
+
+ListViewItem^ TaskListView::FindLVItem(UInt32 taskId)
+{
+	for each(ListViewItem^ lvItem in Items)
+	{
+		auto item = ASTYPE(lvItem->Tag, ITaskBase);
+
+		if ((item != nullptr) && (item->Id == taskId))
+			return lvItem;
+	}
+
+	// else
+	return nullptr;
+}
+
 String^ TaskListView::Translate(String^ text, Translator::Type type)
 {
 	if (m_Trans == nullptr)
@@ -173,23 +285,6 @@ Drawing::Rectangle TaskListView::CalcIconRect(Drawing::Rectangle labelRect)
 	int top = (((labelRect.Top + labelRect.Bottom) / 2) - (imageSize / 2));
 
 	return Drawing::Rectangle(labelRect.X, top, imageSize, imageSize);
-}
-
-UInt32 TaskListView::SelectedTaskId::get()
-{
-// 	auto selItem = ASTYPE(SelectedItem, ITaskBase);
-// 
-// 	return ((selItem == nullptr) ? 0 : selItem->Id);
-	return 0L;
-}
-
-String^ TaskListView::SelectedTaskTitle::get()
-{
-// 	if (SelectedTaskId::get() == 0)
-// 		return String::Empty;
-// 
-// 	return ASTYPE(SelectedItem, ITaskBase)->Title;
-	return String::Empty;
 }
 
 bool TaskListView::TaskColorIsBackground::get()
@@ -407,7 +502,7 @@ void TaskListView::HandleMouseClick(MouseEventArgs^ e, bool doubleClick)
 
 	if (CalcCheckboxRect(hit->Item->Bounds).Contains(e->Location))
 	{
-		EditTaskDone(this, item->Id, !item->IsDone(false));
+		EditTaskDone(this, item->Id, !item->IsDone);
 	}
 	else if (CalcIconRect(hit->Item->Bounds).Contains(e->Location))
 	{
@@ -491,4 +586,71 @@ void TaskListView::OnColumnWidthChanging(ColumnWidthChangingEventArgs^ e)
 		e->Cancel = true;
 		e->NewWidth = Columns[e->ColumnIndex]->Width;
 	}
+}
+
+bool TaskListView::SelectTaskEx(String^ words, UIExtension::SelectTask selectTask, 
+							    bool caseSensitive, bool wholeWord, bool findReplace)
+{
+	if (Items->Count == 0)
+		return false;
+
+	if (SelectedIndices->Count == 0)
+		SelectedIndices->Add(0);
+
+	int selIndex = SelectedIndices[0];
+	int matchIndex = -1;
+
+	switch (selectTask)
+	{
+	case UIExtension::SelectTask::SelectFirstTask:
+		matchIndex = FindTask(words, 0, true, caseSensitive, wholeWord, findReplace);
+		break;
+
+	case UIExtension::SelectTask::SelectNextTask:
+		matchIndex = FindTask(words, (selIndex + 1), true, caseSensitive, wholeWord, findReplace);
+		break;
+
+	case UIExtension::SelectTask::SelectNextTaskInclCurrent:
+		matchIndex = FindTask(words, selIndex, true, caseSensitive, wholeWord, findReplace);
+		break;
+
+	case UIExtension::SelectTask::SelectPrevTask:
+		matchIndex = FindTask(words, (selIndex - 1), false, caseSensitive, wholeWord, findReplace);
+		break;
+
+	case UIExtension::SelectTask::SelectLastTask:
+		matchIndex = FindTask(words, (Items->Count - 1), false, caseSensitive, wholeWord, findReplace);
+		break;
+	}
+
+	if (matchIndex != -1)
+	{
+		SelectedIndices->Clear();
+		SelectedIndices->Add(matchIndex);
+
+		EnsureSelectionVisible();
+		return true;
+	}
+
+	return false;
+}
+
+int TaskListView::FindTask(String^ phrase, int startIndex, bool forward, bool caseSensitive, bool wholeWord, bool findReplace)
+{
+	int fromIndex = startIndex;
+	int toIndex = (forward ? Items->Count : -1);
+	int increment = (forward ? 1 : -1);
+
+	for (int i = fromIndex; i != toIndex; i += increment)
+	{
+		if (TaskMatches(GetTask(i), phrase, caseSensitive, wholeWord, findReplace))
+			return i;
+	}
+
+	return -1; // no match
+}
+
+bool TaskListView::TaskMatches(ITaskBase^ task, String^ phrase, bool caseSensitive, bool wholeWord, bool /*findReplace*/)
+{
+	return ((task != nullptr) && StringUtil::Find(task->Title, phrase, caseSensitive, wholeWord));
 }
