@@ -756,6 +756,7 @@ namespace EisenhowerUIExtension
 		}
 */
 
+/*
 		protected override void OnMouseClick(MouseEventArgs e)
 		{
 			base.OnMouseClick(e);
@@ -823,6 +824,7 @@ namespace EisenhowerUIExtension
 			return false;
         }
 
+*/
 // 		private void OnEditLabelTimer(object sender, EventArgs e)
 // 		{
 // 			m_EditTimer.Stop();
