@@ -668,7 +668,7 @@ namespace MindMapUIExtension
 
 			if (taskItem.IsTask) // else non-task root item
             {
-				bool isDone = taskItem.IsDone();
+				bool isDone = taskItem.IsDone;
 
                 if (taskItem.ParentID == 0)
                 {
@@ -1175,7 +1175,7 @@ namespace MindMapUIExtension
 
         CheckBoxState GetItemCheckboxState(MindMapTaskItem taskItem)
         {
-            if (taskItem.IsDone())
+            if (taskItem.IsDone)
                 return CheckBoxState.CheckedNormal;
 
             if (taskItem.HasSomeSubtasksDone && ShowMixedCompletionState)
@@ -1567,7 +1567,7 @@ namespace MindMapUIExtension
                 if (HitTestCheckbox(node, e.Location))
                 {
 					if (EditTaskDone != null)
-						EditTaskDone(this, taskItem.ID, !taskItem.IsDone());
+						EditTaskDone(this, taskItem.ID, !taskItem.IsDone);
 				}
                 else if (HitTestIcon(node, e.Location))
                 {
