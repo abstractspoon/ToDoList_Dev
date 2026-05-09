@@ -765,7 +765,7 @@ namespace LoggedTimeUIExtension
 			// Update the tasks
 			Task task = tasks.GetFirstTask();
 
-			while (ProcessTaskUpdate(task, type, 0))
+			while (ProcessTaskUpdate(task, type))
 				task = task.GetNextTask();
 
             Invalidate();
@@ -864,7 +864,7 @@ namespace LoggedTimeUIExtension
 			};
 		}
 
-		private bool ProcessTaskUpdate(Task task, UIExtension.UpdateType type, int depth)
+		private bool ProcessTaskUpdate(Task task, UIExtension.UpdateType type)
 		{
 			if (!task.IsValid())
 				return false;
@@ -874,12 +874,12 @@ namespace LoggedTimeUIExtension
 			bool newTask = (m_TaskItems.ContainsKey(taskId) == false);
 
 			var taskItem = m_TaskItems.GetItem(taskId, newTask);
-			taskItem.UpdateTaskAttributes(task, type, newTask, depth);
+			taskItem.UpdateTaskAttributes(task, type, newTask);
 
 			// Process children
 			Task subtask = task.GetFirstSubtask();
 
-			while (ProcessTaskUpdate(subtask, type, (depth + 1)))
+			while (ProcessTaskUpdate(subtask, type))
 				subtask = subtask.GetNextTask();
 
 			return true;

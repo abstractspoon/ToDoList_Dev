@@ -301,7 +301,6 @@ namespace DayViewUIExtension
 		public bool IsRecurring { get; private set; }
 		public double TimeEstimate { get; private set; }
         public Task.TimeUnits TimeEstUnits { get; private set; }
-		public int Depth { get; private set; }
 		public Color TaskTextColor { get; private set; }
 
 		public bool IsDoneOrGoodAsDone { get { return IsDone || IsGoodAsDone; } }
@@ -421,7 +420,7 @@ namespace DayViewUIExtension
 			}
 		}
 
-		public bool UpdateTaskAttributes(Task task, List<CustomAttributeDefinition> dateAttribs, UIExtension.UpdateType type, bool newTask, string metaDataKey, int depth)
+		public bool UpdateTaskAttributes(Task task, List<CustomAttributeDefinition> dateAttribs, UIExtension.UpdateType type, bool newTask, string metaDataKey)
 		{
 			if (!task.IsValid())
 				return false;
@@ -442,7 +441,6 @@ namespace DayViewUIExtension
 				DrawBorder = true;
 				HasDependencies = (task.GetDependency().Count > 0);
 				IsRecurring = task.IsRecurring();
-				Depth = depth;
 				Position = task.GetPositionString();
 
 				m_Tags = task.GetTag();
@@ -537,7 +535,6 @@ namespace DayViewUIExtension
 			}
 
 			UpdateOriginalDates();
-
 			return true;
 		}
 

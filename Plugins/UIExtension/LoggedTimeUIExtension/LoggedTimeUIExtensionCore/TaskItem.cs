@@ -83,12 +83,11 @@ namespace LoggedTimeUIExtension
 		public bool HasIcon { get; private set; }
         public bool IsDone { get; private set; }
         public bool IsGoodAsDone { get; private set; }
-		public int Depth { get; private set; }
 		public Color TaskTextColor { get; private set; }
 
 		public bool IsDoneOrGoodAsDone { get { return IsDone || IsGoodAsDone; } }
 
-		public bool UpdateTaskAttributes(Task task, UIExtension.UpdateType type, bool newTask, int depth)
+		public bool UpdateTaskAttributes(Task task, UIExtension.UpdateType type, bool newTask)
 		{
 			if (!task.IsValid())
 				return false;
@@ -106,7 +105,6 @@ namespace LoggedTimeUIExtension
 				Title = task.GetTitle();
 				HasIcon = task.HasIcon();
 				Id = taskID;
-				Depth = depth;
 				IsDone = task.IsDone();
                 IsGoodAsDone = task.IsGoodAsDone();
 			}

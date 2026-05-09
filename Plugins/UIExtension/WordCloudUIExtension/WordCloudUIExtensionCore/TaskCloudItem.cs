@@ -35,7 +35,6 @@ namespace WordCloudUIExtension
 		public bool IsParent		{ get; set; }
 
 		public String Position		{ get { return String.Empty; } } // not relevant
-		public int Depth			{ get { return 0; } } // not relevant
 
 		// Local attributes -------------------------------
 		public String DoneDate;

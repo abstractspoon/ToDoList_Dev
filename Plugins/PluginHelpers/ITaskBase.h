@@ -18,7 +18,6 @@ namespace Abstractspoon
 				virtual property UInt32 Id			{ UInt32 get(); }
 				virtual property String^ Title		{ String^ get(); }
 				virtual property String^ Position	{ String^ get(); }
-				virtual property int Depth			{ int get(); }
 
 				virtual property bool HasIcon		{ bool get(); }
 				virtual property bool IsLocked		{ bool get(); }
