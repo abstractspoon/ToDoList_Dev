@@ -22,6 +22,7 @@ namespace Abstractspoon
 
 				virtual property bool HasIcon		{ bool get(); }
 				virtual property bool IsLocked		{ bool get(); }
+				virtual property bool IsParent		{ bool get(); }
 				virtual property bool IsDone		{ bool get(); }
 				virtual property bool IsGoodAsDone	{ bool get(); }
 			};

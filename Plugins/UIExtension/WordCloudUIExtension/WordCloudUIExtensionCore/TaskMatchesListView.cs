@@ -87,24 +87,12 @@ namespace WordCloudUIExtension
 
 		public bool AddMatch(CloudTaskItem item)
 		{
-			var lvItem = new ListViewItem(item.Title);
+			var lvItem = AddTask(item);
 
-			lvItem.Tag = item;
-			lvItem.Selected = false;
-			lvItem.SubItems.Add(item.Id.ToString());
-            lvItem.Checked = item.IsDone(false);
-
-			if ((item.IsParent && ShowParentsAsFolders) || item.HasIcon)
-			{
-				lvItem.ImageIndex = 1;
-				ItemsHaveIcons = true;
-			}
-
-			m_MaxTaskId = Math.Max(m_MaxTaskId, item.Id);
-
-			if (this.Items.Add(lvItem) == null)
+			if (lvItem == null)
 				return false;
 
+			m_MaxTaskId = Math.Max(m_MaxTaskId, item.Id);
 			return true;
 		}
 

@@ -32,6 +32,7 @@ namespace WordCloudUIExtension
 		public bool IsLocked		{ get; set; }
         public bool IsDone			{ get; set; }
         public bool IsGoodAsDone	{ get; set; }
+		public bool IsParent		{ get; set; }
 
 		public String Position		{ get { return String.Empty; } } // not relevant
 		public int Depth			{ get { return 0; } } // not relevant
@@ -49,7 +50,6 @@ namespace WordCloudUIExtension
 		public List<String> AllocTo;
 		public List<String> Category;
 		public List<String> Tags;
-		public bool IsParent;
         public bool HasSomeSubtasksDone;
 
         private System.Drawing.Color taskTextColor = System.Drawing.Color.Empty;

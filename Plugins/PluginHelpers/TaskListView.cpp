@@ -80,6 +80,23 @@ void TaskListView::Initialize(Translator^ trans, UIExtension::TaskIcon^ taskIcon
 	m_TaskIcons = taskIcons;
 }
 
+ListViewItem^ TaskListView::AddTask(ITaskBase^ task)
+{
+	auto lvItem = gcnew ListViewItem(task->Title);
+
+	lvItem->Tag = task;
+	lvItem->Selected = false;
+	lvItem->Checked = task->IsDone;
+
+	if ((task->IsParent && ShowParentsAsFolders) || task->HasIcon)
+	{
+		lvItem->ImageIndex = 1; // placeholder only
+		ItemsHaveIcons = true;
+	}
+
+	return Items->Add(lvItem);
+}
+
 IntPtr TaskListView::GetHeaderHandle()
 {
 	return IntPtr(Win32::SendMessage(Handle, LVM_GETHEADER, UIntPtr::Zero, IntPtr::Zero));
