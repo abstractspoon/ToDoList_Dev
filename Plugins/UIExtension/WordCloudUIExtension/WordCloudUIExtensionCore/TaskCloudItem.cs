@@ -30,8 +30,9 @@ namespace WordCloudUIExtension
 		public String Title			{ get; set; }
 		public bool HasIcon			{ get; set; }
 		public bool IsLocked		{ get; set; }
-        public bool IsDone			{ get; set; }
 		public bool IsParent		{ get; set; }
+		public Color TextColor		{ get; set; }
+        public bool IsDone			{ get { return (DoneDate != String.Empty); } }
 
 		// Not required
 		public String Position		{ get { return String.Empty; } } // not relevant
@@ -50,41 +51,6 @@ namespace WordCloudUIExtension
 		public List<String> Category;
 		public List<String> Tags;
         public bool HasSomeSubtasksDone;
-
-        private System.Drawing.Color taskTextColor = System.Drawing.Color.Empty;
-            
-        public System.Drawing.Color TextColor
-        {
-            get { return taskTextColor; }
-            set { taskTextColor = value; }
-        }
-
-        public System.Drawing.Color GetTextColor(bool isSelected, bool taskColorIsBkgnd)
-        {
-			if (isSelected)
-			{
-				if (SystemInformation.HighContrast)
-					return SystemColors.HighlightText;
-
-				// else
-				return UIExtension.SelectionRect.GetTextColor(UIExtension.SelectionRect.Style.Selected, taskTextColor);
-			}
-
-            if (!taskTextColor.IsEmpty)
-                return (taskColorIsBkgnd ? DrawingColor.GetBestTextColor(TextColor, true) : taskTextColor);
-
-			// else
-			return System.Drawing.SystemColors.WindowText;
-        }
-
-        public System.Drawing.Color GetBackColor(bool taskColorIsBkgnd)
-        {
-            if (!taskTextColor.IsEmpty && taskColorIsBkgnd)
-                return TextColor;
-
-            // else
-            return System.Drawing.Color.Empty;
-        }
 
         public bool SetDone(bool done)
         {

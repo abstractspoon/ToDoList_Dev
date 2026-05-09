@@ -67,7 +67,7 @@ namespace LoggedTimeUIExtension
 
 		public bool HasTaskTextColor
 		{
-			get { return !TaskTextColor.IsEmpty; }
+			get { return !TextColor.IsEmpty; }
 		}
 
 		static public TaskItem None(string title)
@@ -82,7 +82,7 @@ namespace LoggedTimeUIExtension
 		public bool IsParent { get; private set; }
 		public bool HasIcon { get; private set; }
         public bool IsDone { get; private set; }
-		public Color TaskTextColor { get; private set; }
+		public Color TextColor { get; private set; }
 
 		public bool UpdateTaskAttributes(Task task, UIExtension.UpdateType type, bool newTask)
 		{
@@ -92,7 +92,7 @@ namespace LoggedTimeUIExtension
 			UInt32 taskID = task.GetID();
 
 			// Always
-			TaskTextColor = task.GetTextDrawingColor();
+			TextColor = task.GetTextDrawingColor();
 			IsLocked = task.IsLocked(true);
 			IsParent = task.IsParent();
 			Position = task.GetPositionString();

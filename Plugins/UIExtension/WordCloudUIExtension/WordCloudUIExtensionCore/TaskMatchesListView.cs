@@ -19,6 +19,8 @@ namespace WordCloudUIExtension
 		// -------------------------------------------------------------
 
 		private uint m_MaxTaskId = DefaultMaxTaskId;
+		private bool m_ShowMixedCompletionState;
+
 		private TaskListView.NoTrackHeaderControl m_Header;
 
 		public TaskMatchesListView() : base()
@@ -85,6 +87,34 @@ namespace WordCloudUIExtension
 			RefreshIDColumnWidth();
 		}
 
+		public bool ShowMixedCompletionState
+		{
+			get { return m_ShowMixedCompletionState; }
+
+			set
+			{
+				if (m_ShowMixedCompletionState != value)
+				{
+					m_ShowMixedCompletionState = value;
+					Invalidate();
+				}
+			}
+		}
+
+		protected override CheckBoxState GetTaskCheckboxState(ITaskBase task)
+		{
+			if (m_ShowMixedCompletionState)
+			{
+				var item = (task as CloudTaskItem);
+
+				if ((item != null) && item.HasSomeSubtasksDone)
+					return CheckBoxState.MixedNormal;
+			}
+
+			// all else
+			return base.GetTaskCheckboxState(task);
+		}
+
 		public bool AddMatch(CloudTaskItem item)
 		{
 			var lvItem = AddTask(item);
@@ -92,7 +122,9 @@ namespace WordCloudUIExtension
 			if (lvItem == null)
 				return false;
 
+			lvItem.SubItems.Add(item.Id.ToString());
 			m_MaxTaskId = Math.Max(m_MaxTaskId, item.Id);
+
 			return true;
 		}
 
@@ -156,146 +188,6 @@ namespace WordCloudUIExtension
 			return item.Matches(phrase, caseSensitive, wholeWord, findReplace);
 		}
 
-		protected override void WndProc(ref Message m)
-		{
-			const int LVM_GETTOPINDEX  = 0x1039;
-			
-			switch (m.Msg)
-			{
-			case LVM_GETTOPINDEX:
-				{
-					// There's a very strange bug where the first
-					// mouseover of an item causes it to be redrawn
-					// and it flickers regardless of whether we are
-					// double-buffered or not. The workaround is to
-					// not draw the item under these circumstances.
-					// See also OnDrawItem()
-					m_IgnoreNextItemDraw = true;
-					base.WndProc(ref m);
-					m_IgnoreNextItemDraw = false;
-				}
-				return;
-			}
-
-			// else default handling
-			base.WndProc(ref m);
-		}
-
-		private bool m_IgnoreNextItemDraw = false;
-
-		protected override void OnDrawItem(DrawListViewItemEventArgs e)
-		{
-			if (e.Item == null)
-				return;
-
-			if (m_IgnoreNextItemDraw && RectangleToScreen(e.Item.Bounds).Contains(MousePosition))
-				return;
-
-			// Draw the background
-			var item = (e.Item.Tag as CloudTaskItem);
-
-            var textColor = item.GetTextColor(e.Item.Selected, TaskColorIsBackground);
-            var backColor = item.GetBackColor(TaskColorIsBackground);
-
-			Brush textBrush = new SolidBrush(textColor);
-
-			if (TaskColorIsBackground)
-			{
-				using (Brush backBrush = new SolidBrush(backColor))
-					e.Graphics.FillRectangle(backBrush, e.Bounds);
-			}
-			else if (!e.Item.Selected)
-			{
-				e.DrawBackground();
-			}
-
-			if (e.Item.Selected)
-			{
-				// Selection rect just around text label
-				Rectangle labelRect = CalcLabelTextRect(e.Bounds, true);
-
-				UIExtension.SelectionRect.Draw(Handle, 
-												e.Graphics, 
-												labelRect.X, 
-												labelRect.Y, 
-												labelRect.Width, 
-												labelRect.Height, 
-												false); // opaque
-			}
-
-			// Draw subitems
-			Rectangle itemRect = e.Bounds;
-
-			for (int colIndex = 0; colIndex < e.Item.SubItems.Count; colIndex++)
-			{
-				var horzAlign = StringAlignment.Near;
-
-				itemRect.X += 2;
-				itemRect.Width = (Columns[colIndex].Width - 2);
-
-				if (colIndex == 0)
-                {
-                    if (ShowCompletionCheckboxes)
-                    {
-//                         if (m_CheckBoxSize.IsEmpty)
-//                             m_CheckBoxSize = CheckBoxRenderer.GetGlyphSize(e.Graphics, CheckBoxState.UncheckedNormal);
-
-                        var checkRect = CalcCheckboxRect(itemRect);
-
-                        CheckBoxRenderer.DrawCheckBox(e.Graphics, checkRect.Location, GetItemCheckboxState(item));
-
-                        itemRect.X += CheckboxOffset;
-                        itemRect.Width -= CheckboxOffset;
-                    }
-
-                    if (ItemsHaveIcons)
-                    {
-                        if ((e.Item.ImageIndex != -1) && TaskIcons.Get(item.Id))
-                        {
-                            int imageSize = ImageSize;
-                            Rectangle iconRect = new Rectangle(itemRect.Location, new Size(imageSize, imageSize));
-                            iconRect.Y += ((itemRect.Height - imageSize) / 2);
-
-                            TaskIcons.Draw(e.Graphics, iconRect.Left, iconRect.Top);
-                        }
-
-                        itemRect.X += TextIconOffset;
-                        itemRect.Width -= TextIconOffset;
-                    }
-				}
-				else
-				{
-					horzAlign = StringAlignment.Far;
-				}
-
-				itemRect.Y++;
-				itemRect.Height--;
-
-				DrawText(e.Graphics, 
-						e.Item.SubItems[colIndex].Text, 
-						itemRect, 
-						textBrush, 
-						horzAlign,
-						(colIndex == 0));
-
-				// next subitem
-				itemRect.X += itemRect.Width;
-			}
-		}
-
-		protected void DrawText(Graphics graphics, String text, Rectangle rect, Brush brush, StringAlignment horzAlign, bool endEllipsis)
-		{
-			StringFormat format = new StringFormat()
-			{
-				Alignment = horzAlign,
-				LineAlignment = StringAlignment.Center,
-				FormatFlags = StringFormatFlags.NoWrap,
-				Trimming = (endEllipsis ? StringTrimming.EllipsisCharacter : StringTrimming.None)
-			};
-
-			graphics.DrawString(text, this.Font, brush, rect, format);
-		}
-
 		protected override void OnDrawColumnHeader(DrawListViewColumnHeaderEventArgs e)
 		{
 			e.DrawBackground();
@@ -321,18 +213,6 @@ namespace WordCloudUIExtension
 			Columns[0].Width = (ClientRectangle.Width - Columns[1].Width - 2);
 			base.EndUpdate();
 		}
-
-        CheckBoxState GetItemCheckboxState(CloudTaskItem taskItem)
-        {
-            if (taskItem.IsDone)
-                return CheckBoxState.CheckedNormal;
-
-            if (taskItem.HasSomeSubtasksDone && ShowMixedCompletionState)
-                return CheckBoxState.MixedNormal;
-
-            // else
-            return CheckBoxState.UncheckedNormal;
-        }
 	}
 }
 

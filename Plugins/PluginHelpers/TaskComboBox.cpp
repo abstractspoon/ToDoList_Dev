@@ -49,6 +49,8 @@ public:
 	virtual property bool IsParent { bool get()			{ return m_ITask->IsParent; } }
 	virtual property bool IsDone { bool get()			{ return m_ITask->IsDone; } }
 
+	virtual property Drawing::Color TextColor { Drawing::Color get() { return m_ITask->TextColor; } }
+
 	// Local attributes
 	String^ ToString() override { return Title; }
 

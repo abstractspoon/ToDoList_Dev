@@ -3,6 +3,7 @@
 #include "TaskListView.h"
 #include "Win32.h"
 #include "DPIScaling.h"
+#include "ColorUtil.h"
 
 #include <shared\Clipboard.h>
 #include <shared\Misc.h>
@@ -15,8 +16,10 @@ using namespace System::Drawing;
 using namespace System::Linq;
 using namespace System::Collections::Generic;
 using namespace System::Windows::Forms;
+using namespace System::Windows::Forms::VisualStyles;
 
 using namespace Abstractspoon::Tdl::PluginHelpers;
+using namespace Abstractspoon::Tdl::PluginHelpers::ColorUtil;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -54,7 +57,7 @@ TaskListView::TaskListView()
 	m_ShowParentAsFolder(false),
 	m_TaskColorIsBkgnd(false),
 	m_ShowCompletionCheckboxes(false),
-	m_ShowMixedCompletionState(false)
+	m_SkipNextItemDraw(false)
 {
 	m_LabelTip = gcnew LabelTip(this);
 
@@ -86,7 +89,7 @@ ListViewItem^ TaskListView::AddTask(ITaskBase^ task)
 
 	lvItem->Tag = task;
 	lvItem->Selected = false;
-	lvItem->Checked = task->IsDone;
+//	lvItem->Checked = task->IsDone;
 
 	if ((task->IsParent && ShowParentsAsFolders) || task->HasIcon)
 	{
@@ -346,20 +349,6 @@ void TaskListView::ShowCompletionCheckboxes::set(bool value)
 	}
 }
 
-bool TaskListView::ShowMixedCompletionState::get()
-{
-	return m_ShowMixedCompletionState;
-}
-
-void TaskListView::ShowMixedCompletionState::set(bool value)
-{
-	if (m_ShowMixedCompletionState != value)
-	{
-		m_ShowMixedCompletionState = value;
-		Invalidate();
-	}
-}
-
 bool TaskListView::ShowLabelTips::get()
 {
 	return ((m_LabelTip != nullptr) ? m_LabelTip->Active : false);
@@ -396,52 +385,145 @@ int TaskListView::CheckboxOffset::get()
 	return (ShowCompletionCheckboxes ? ImageSize : 0);
 }
 
-// void TaskListView::OnMeasureItem(MeasureItemEventArgs^ e)
-// {
-// 	ComboBox::OnMeasureItem(e);
-// 
-// 	e->ItemHeight = UIExtension::TaskIcon::IconSize;
-// }
-// 
-// void TaskListView::OnDrawItem(DrawItemEventArgs^ e)
-// {
-// 	ListView::OnDrawItem(e);
-// 
-// 	if (e->Index < 0)
+void TaskListView::OnDrawItem(DrawListViewItemEventArgs^ e)
+{
+	if (e->Item == nullptr)
+		return;
+
+// 	if (m_IgnoreNextItemDraw && RectangleToScreen(e->Item->Bounds).Contains(MousePosition))
 // 		return;
-// 
-// 	auto taskItem = ASTYPE(Items[e->Index], WrappedITask);
-// 
-// 	if (taskItem != nullptr)
-// 	{
-// 		auto rect = e->Bounds;
-// 
-// 		bool hasIcon = (taskItem->HasIcon && m_TaskIcons->Get(taskItem->Id));
-// 		bool listItem = !(e->State.HasFlag(DrawItemState::ComboBoxEdit));
-// 
-// 		if (listItem)
-// 		{
-// 			rect.X += GetListItemTextOffset(Items[e->Index]);
-// 
-// 			// Icon needs to be drawn BEFORE text
-// 			if (hasIcon)
-// 				rect.X -= UIExtension::TaskIcon::IconSize;
-// 		}
-// 
-// 		if (hasIcon)
-// 		{
-// 			m_TaskIcons->Draw(e->Graphics, rect.X, rect.Y);
-// 			rect.X += UIExtension::TaskIcon::IconSize;
-// 		}
-// 
-// 		auto brush = TextBrush(e);
-// 		auto font = ((!taskItem->IsNone && taskItem->IsTopLevel) ? m_BoldFont : Font);
-// 
-// 		e->Graphics->DrawString(taskItem->Title, font, brush, rect);
-// 		e->DrawFocusRectangle();
-// 	}
-// }
-// 
+
+	// Draw the background
+	auto task = ASTYPE(e->Item->Tag, ITaskBase);
+	bool selected = e->Item->Selected;
+
+	auto textColor = GetTextColor(task, e->Item->Selected);
+	auto backColor = GetBackColor(task);
+
+	auto textBrush = gcnew SolidBrush(textColor);
+
+	if (TaskColorIsBackground)
+	{
+		auto backBrush = gcnew SolidBrush(backColor);
+		e->Graphics->FillRectangle(backBrush, e->Bounds);
+	}
+	else if (!selected)
+	{
+		e->DrawBackground();
+	}
+
+	if (selected)
+	{
+		// Selection rect just around text label
+		Drawing::Rectangle labelRect = CalcLabelTextRect(e->Bounds, true);
+
+		UIExtension::SelectionRect::Draw(Handle,
+										 e->Graphics,
+										 labelRect.X,
+										 labelRect.Y,
+										 labelRect.Width,
+										 labelRect.Height,
+										 false); // opaque
+	}
+
+	// Draw subitems
+	Drawing::Rectangle itemRect = e->Bounds;
+
+	for (int colIndex = 0; colIndex < e->Item->SubItems->Count; colIndex++)
+	{
+		auto horzAlign = StringAlignment::Near;
+
+		itemRect.X += 2;
+		itemRect.Width = (Columns[colIndex]->Width - 2);
+
+		if (colIndex == 0)
+		{
+			if (ShowCompletionCheckboxes)
+			{
+				//  if (m_CheckBoxSize.IsEmpty)
+				//    m_CheckBoxSize = CheckBoxRenderer.GetGlyphSize(e->Graphics, CheckBoxState.UncheckedNormal);
+
+				auto checkRect = CalcCheckboxRect(itemRect);
+
+				CheckBoxRenderer::DrawCheckBox(e->Graphics, checkRect.Location, GetTaskCheckboxState(task));
+
+				itemRect.X += CheckboxOffset;
+				itemRect.Width -= CheckboxOffset;
+			}
+
+			if (ItemsHaveIcons)
+			{
+				if ((e->Item->ImageIndex != -1) && m_TaskIcons->Get(task->Id))
+				{
+					int imageSize = ImageSize;
+					auto iconRect = Drawing::Rectangle(itemRect.Location, Drawing::Size(imageSize, imageSize));
+					iconRect.Y += ((itemRect.Height - imageSize) / 2);
+
+					m_TaskIcons->Draw(e->Graphics, iconRect.Left, iconRect.Top);
+				}
+
+				itemRect.X += TextIconOffset;
+				itemRect.Width -= TextIconOffset;
+			}
+		}
+		else
+		{
+			horzAlign = StringAlignment::Far;
+		}
+
+		itemRect.Y++;
+		itemRect.Height--;
+
+		DrawText(e->Graphics,
+				 e->Item->SubItems[colIndex]->Text,
+				 itemRect,
+				 textBrush,
+				 horzAlign,
+				 (colIndex == 0));
+
+		// next subitem
+		itemRect.X += itemRect.Width;
+	}
+}
+
+void TaskListView::DrawText(Graphics^ graphics, String^ text, Drawing::Rectangle rect, Brush^ brush, StringAlignment horzAlign, bool endEllipsis)
+{
+	StringFormat^ format = gcnew StringFormat();
+
+	format->Alignment = horzAlign;
+	format->LineAlignment = StringAlignment::Center;
+	format->FormatFlags = StringFormatFlags::NoWrap;
+	format->Trimming = (endEllipsis ? StringTrimming::EllipsisCharacter : StringTrimming::None);
+
+	graphics->DrawString(text, Font, brush, rect, format);
+}
+
+Drawing::Color TaskListView::GetTextColor(ITaskBase^ task, bool selected)
+{
+	if (selected)
+	{
+		if (SystemInformation::HighContrast)
+			return SystemColors::HighlightText;
+
+		// else
+		return UIExtension::SelectionRect::GetTextColor(UIExtension::SelectionRect::Style::Selected, task->TextColor);
+	}
+
+	if (!task->TextColor.IsEmpty)
+		return (TaskColorIsBackground ? DrawingColor::GetBestTextColor(task->TextColor, true) : task->TextColor);
+
+	// else
+	return SystemColors::WindowText;
+}
+
+Drawing::Color TaskListView::GetBackColor(ITaskBase^ task)
+{
+	if (!task->TextColor.IsEmpty && TaskColorIsBackground)
+		return task->TextColor;
+
+	// else
+	return Drawing::Color::Empty;
+}
 
 void TaskListView::WndProc(Message% m)
 {
@@ -468,20 +550,22 @@ void TaskListView::WndProc(Message% m)
 			}
 		}
 		break;
-// 
-// 	case LVM_GETTOPINDEX:
-// 		{
-// 			// There's a very strange bug where the first
-// 			// mouseover of an item causes it to be redrawn
-// 			// and it flickers regardless of whether we are
-// 			// double-buffered or not. The workaround is to
-// 			// not draw the item under these circumstances.
-// 			// See also OnDrawItem()
-// 			m_IgnoreNextItemDraw = true;
-// 			base.WndProc(ref m);
-// 			m_IgnoreNextItemDraw = false;
-// 		}
-// 		return;
+
+	case LVM_GETTOPINDEX:
+		{
+			// There's a very strange bug where the first
+			// mouseover of an item causes it to be redrawn
+			// and it flickers regardless of whether we are
+			// double-buffered or not. The workaround is to
+			// not draw the item under these circumstances.
+			// See also OnDrawItem()
+			m_SkipNextItemDraw = true;
+
+			ListView::WndProc(m);
+
+			m_SkipNextItemDraw = false;
+		}
+		return;
 	}
 
 	// else default handling
@@ -512,22 +596,22 @@ void TaskListView::HandleMouseClick(MouseEventArgs^ e, bool doubleClick)
 	if (hit->Item == nullptr)
 		return;
 
-	auto item = ASTYPE(hit->Item->Tag, ITaskBase);
+	auto task = ASTYPE(hit->Item->Tag, ITaskBase);
 
-	if ((item == nullptr) || item->IsLocked)
+	if ((task == nullptr) || task->IsLocked)
 		return;
 
 	if (CalcCheckboxRect(hit->Item->Bounds).Contains(e->Location))
 	{
-		EditTaskDone(this, item->Id, !item->IsDone);
+		EditTaskDone(this, task->Id, !task->IsDone);
 	}
 	else if (CalcIconRect(hit->Item->Bounds).Contains(e->Location))
 	{
-		EditTaskIcon(this, item->Id);
+		EditTaskIcon(this, task->Id);
 	}
 	else if (doubleClick)
 	{
-		EditTaskLabel(this, item->Id);
+		EditTaskLabel(this, task->Id);
 	}
 }
 
@@ -670,4 +754,9 @@ int TaskListView::FindTask(String^ phrase, int startIndex, bool forward, bool ca
 bool TaskListView::TaskMatches(ITaskBase^ task, String^ phrase, bool caseSensitive, bool wholeWord, bool /*findReplace*/)
 {
 	return ((task != nullptr) && StringUtil::Find(task->Title, phrase, caseSensitive, wholeWord));
+}
+
+CheckBoxState TaskListView::GetTaskCheckboxState(ITaskBase^ task)
+{
+	return (task->IsDone ? CheckBoxState::CheckedNormal : CheckBoxState::UncheckedNormal);
 }

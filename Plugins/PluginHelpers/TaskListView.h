@@ -58,7 +58,6 @@ namespace Abstractspoon
 				property bool TaskColorIsBackground { bool get(); void set(bool value); }
 				property bool ShowParentsAsFolders { bool get(); void set(bool value); }
 				property bool ShowCompletionCheckboxes { bool get(); void set(bool value); }
-				property bool ShowMixedCompletionState { bool get(); void set(bool value); }
 				property bool ShowLabelTips { bool get(); void set(bool value); }
 
 				// ILabelTipHandler
@@ -81,7 +80,8 @@ namespace Abstractspoon
 				bool m_ShowParentAsFolder;
 				bool m_TaskColorIsBkgnd;
 				bool m_ShowCompletionCheckboxes;
-				bool m_ShowMixedCompletionState;
+
+				bool m_SkipNextItemDraw; // see WndProc
 
 			protected:
 				void WndProc(Windows::Forms::Message% m) override;
@@ -92,10 +92,9 @@ namespace Abstractspoon
 				void OnMouseMove(Windows::Forms::MouseEventArgs^ e) override;
 				void OnBeforeLabelEdit(Windows::Forms::LabelEditEventArgs^ e) override;
 				void OnColumnWidthChanging(Windows::Forms::ColumnWidthChangingEventArgs^ e) override;
+				void OnDrawItem(Windows::Forms::DrawListViewItemEventArgs^ e) override;
 
 			protected:
-// 				void OnMeasureItem(Windows::Forms::MeasureItemEventArgs^ e) override;
-// 				void OnDrawItem(Windows::Forms::DrawItemEventArgs^ e) override;
 				Drawing::Rectangle CalcLabelTextRect(Drawing::Rectangle labelRect, bool includeIdColumn);
 				Drawing::Rectangle CalcCheckboxRect(Drawing::Rectangle labelRect);
 				Drawing::Rectangle CalcIconRect(Drawing::Rectangle labelRect);
@@ -106,9 +105,13 @@ namespace Abstractspoon
 				UInt32 GetTaskId(int index);
 				ITaskBase^ GetTask(int index);
 				int FindTask(String^ phrase, int startIndex, bool forward, bool caseSensitive, bool wholeWord, bool findReplace);
+				void DrawText(Drawing::Graphics^ graphics, String^ text, Drawing::Rectangle rect, Drawing::Brush^ brush, Drawing::StringAlignment horzAlign, bool endEllipsis);
+				Drawing::Color GetTextColor(ITaskBase^ task, bool selected);
+				Drawing::Color GetBackColor(ITaskBase^ task);
 				
-				// Derived classes override
+				// Derived classes optionally override
 				virtual bool TaskMatches(ITaskBase^ task, String^ phrase, bool caseSensitive, bool wholeWord, bool findReplace);
+				virtual Windows::Forms::VisualStyles::CheckBoxState GetTaskCheckboxState(ITaskBase^ task);
 
 				property UIExtension::TaskIcon^ TaskIcons { UIExtension::TaskIcon^ get() { return m_TaskIcons; } }
 				property bool ItemsHaveIcons { bool get(); void set(bool value); };
