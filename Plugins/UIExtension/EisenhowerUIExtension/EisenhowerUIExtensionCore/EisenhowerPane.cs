@@ -13,13 +13,21 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 namespace EisenhowerUIExtension
 {
-
+	public delegate void TaskSelectionEventHandler(Object sender, UInt32 taskId);
+	
 	public partial class EisenhowerPane : UserControl
 	{
 		private TaskItems m_Tasks;
 		private EisenhowerPaneFilter m_Filter;
 
 		private bool m_ShowMixedCompletionState;
+
+		// ---------------------------------------------
+
+		public event EditTaskLabelEventHandler EditTaskLabel;
+		public event EditTaskIconEventHandler EditTaskIcon;
+		public event EditTaskCompletionEventHandler EditTaskDone;
+		public event TaskSelectionEventHandler SelectionChange;
 
 		// ---------------------------------------------
 
@@ -39,6 +47,18 @@ namespace EisenhowerUIExtension
 			m_Icon.Image = paneIcon;
 
 			m_List.Initialize(trans, taskIcons);
+
+			m_List.EditTaskDone += new EditTaskCompletionEventHandler(OnTaskMatchesEditTaskDone);
+			m_List.EditTaskIcon += new EditTaskIconEventHandler(OnTaskMatchesEditTaskIcon);
+			m_List.EditTaskLabel += new EditTaskLabelEventHandler(OnTaskMatchesEditTaskLabel);
+
+			m_List.SelectedIndexChanged += (s, e) =>
+			{
+				UInt32 selTaskId = m_List.SelectedTaskId;
+
+				if (selTaskId != 0)
+					SelectionChange?.Invoke(this, selTaskId);
+			};
 
 			if (m_Filter != null)
 				RefreshList();
@@ -124,21 +144,36 @@ namespace EisenhowerUIExtension
 		// --------------------------------------------------------
 		// Message Handlers
 
-// 		private CheckBoxState GetItemCheckboxState(TaskItem taskItem)
-// 		{
-// 			if (taskItem.SomeSubtasksDone && ShowMixedCompletionState)
-// 				return CheckBoxState.MixedNormal;
-// 
-// 			// else
-// 			return CheckBoxState.UncheckedNormal;
-// 		}
-// 
-// 		private bool TaskHasIcon(TaskItem taskItem)
-// 		{
-// 			if ((m_TaskIcons == null) || (taskItem == null))
-// 				return false;
-// 
-// 			return (taskItem.HasIcon || (m_ShowParentAsFolder && taskItem.IsParent));
-// 		}
+		private bool OnTaskMatchesEditTaskDone(object sender, UInt32 taskId, bool completed)
+		{
+			return (bool)EditTaskDone?.Invoke(sender, taskId, completed);
+		}
+
+		private bool OnTaskMatchesEditTaskIcon(object sender, UInt32 taskId)
+		{
+			return (bool)EditTaskIcon?.Invoke(sender, taskId);
+		}
+
+		private bool OnTaskMatchesEditTaskLabel(object sender, UInt32 taskId)
+		{
+			return (bool)EditTaskLabel?.Invoke(sender, taskId);
+		}
+
+		// 		private CheckBoxState GetItemCheckboxState(TaskItem taskItem)
+		// 		{
+		// 			if (taskItem.SomeSubtasksDone && ShowMixedCompletionState)
+		// 				return CheckBoxState.MixedNormal;
+		// 
+		// 			// else
+		// 			return CheckBoxState.UncheckedNormal;
+		// 		}
+		// 
+		// 		private bool TaskHasIcon(TaskItem taskItem)
+		// 		{
+		// 			if ((m_TaskIcons == null) || (taskItem == null))
+		// 				return false;
+		// 
+		// 			return (taskItem.HasIcon || (m_ShowParentAsFolder && taskItem.IsParent));
+		// 		}
 	}
 }

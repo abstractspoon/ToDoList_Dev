@@ -16,7 +16,7 @@ namespace EisenhowerUIExtension
 	{
 		string m_TypeID;
 		string m_UiName;
-		IntPtr m_ParentHandle;
+		IntPtr m_HwndParent;
 //		Translator m_Trans;
 		private UIExtension.TaskIcon m_TaskIcons;
 
@@ -29,10 +29,15 @@ namespace EisenhowerUIExtension
 			m_TypeID = typeID;
 			m_UiName = uiName;
 //			m_Trans = trans;
-			m_ParentHandle = parentHandle;
+			m_HwndParent = parentHandle;
 			m_TaskIcons = new UIExtension.TaskIcon(parentHandle);
 
 			m_EisenhowerCtrl.Initialize(trans, m_TaskIcons);
+
+			m_EisenhowerCtrl.EditTaskDone += new EditTaskCompletionEventHandler(OnEisenhowerCtrlEditTaskDone);
+			m_EisenhowerCtrl.EditTaskIcon += new EditTaskIconEventHandler(OnEisenhowerCtrlEditTaskIcon);
+			m_EisenhowerCtrl.EditTaskLabel += new EditTaskLabelEventHandler(OnEisenhowerCtrlEditTaskLabel);
+			m_EisenhowerCtrl.SelectionChange += new TaskSelectionEventHandler(OnEisenhowerCtrlSelectionChange);
 		}
 
 		public bool SelectTask(uint taskID)
@@ -159,7 +164,7 @@ namespace EisenhowerUIExtension
 			m_EisenhowerCtrl.LoadPreferences(prefs, key, appOnly);
 		}
 
-		public new Boolean Focus()
+		public new bool Focus()
 		{
 			if (Focused)
 				return false;
@@ -168,17 +173,17 @@ namespace EisenhowerUIExtension
 			return m_EisenhowerCtrl.Focus();
 		}
 
-		public new Boolean Focused
+		public new bool Focused
 		{
 			get { return m_EisenhowerCtrl.Focused; }
 		}
 
-		public Boolean CanMoveTask(UInt32 taskId, UInt32 destParentId, UInt32 destPrevSiblingId)
+		public bool CanMoveTask(UInt32 taskId, UInt32 destParentId, UInt32 destPrevSiblingId)
 		{
 			return false;
 		}
 
-		public Boolean MoveTask(UInt32 taskId, UInt32 destParentId, UInt32 destPrevSiblingId)
+		public bool MoveTask(UInt32 taskId, UInt32 destParentId, UInt32 destPrevSiblingId)
 		{
 			return false;
 		}
@@ -193,12 +198,13 @@ namespace EisenhowerUIExtension
 			return m_EisenhowerCtrl.SaveToImage();
 		}
 
-		public Boolean CanSaveToImage()
+		public bool CanSaveToImage()
 		{
 			return m_EisenhowerCtrl.CanSaveToImage();
 		}
 
 		// Message handlers ---------------------------------------------------
+
 		protected override void OnSizeChanged(EventArgs e)
 		{
 			base.OnSizeChanged(e);
@@ -211,6 +217,34 @@ namespace EisenhowerUIExtension
 
 			m_EisenhowerCtrl.Bounds = rCtrl;
 		}
+
+		private bool OnEisenhowerCtrlEditTaskDone(object sender, UInt32 taskId, bool completed)
+		{
+			var notify = new UIExtension.ParentNotify(m_HwndParent);
+
+			return notify.NotifyMod(Task.Attribute.DoneDate,
+									(completed ? DateTime.Now : DateTime.MinValue));
+		}
+
+		private bool OnEisenhowerCtrlEditTaskIcon(object sender, UInt32 taskId)
+		{
+			var notify = new UIExtension.ParentNotify(m_HwndParent);
+			return notify.NotifyEditIcon();
+		}
+
+		private bool OnEisenhowerCtrlEditTaskLabel(object sender, UInt32 taskId)
+		{
+			var notify = new UIExtension.ParentNotify(m_HwndParent);
+			return notify.NotifyEditLabel();
+		}
+
+		private void OnEisenhowerCtrlSelectionChange(object sender, UInt32 taskId)
+		{
+			var notify = new UIExtension.ParentNotify(m_HwndParent);
+			notify.NotifySelChange(taskId);
+		}
+
+
 	}
 
 

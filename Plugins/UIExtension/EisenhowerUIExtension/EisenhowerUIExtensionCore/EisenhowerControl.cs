@@ -14,12 +14,6 @@ namespace EisenhowerUIExtension
 {
 	public partial class EisenhowerControl : UserControl, IDragRenderer, ILabelTipHandler
 	{
-		public delegate bool EditTaskLabelEventHandler(object sender, UInt32 taskId);
-		public delegate bool EditTaskIconEventHandler(object sender, UInt32 taskId);
-		public delegate bool EditTaskCompletionEventHandler(object sender, UInt32 taskId, bool completed);
-
-		// ---------------------------------------------
-
 		const int SplitWidth = 6;
 
 		// ---------------------------------------------
@@ -35,6 +29,13 @@ namespace EisenhowerUIExtension
 		private Point m_SplitPos = new Point(50, 50); // 0-100
 
 		private List<EisenhowerPane> m_Panes;
+
+		// ---------------------------------------------
+
+		public event EditTaskLabelEventHandler EditTaskLabel;
+		public event EditTaskIconEventHandler EditTaskIcon;
+		public event EditTaskCompletionEventHandler EditTaskDone;
+		public event TaskSelectionEventHandler SelectionChange;
 
 		// ---------------------------------------------
 
@@ -152,6 +153,14 @@ namespace EisenhowerUIExtension
 
 				m_BotRightPane.Initialize(m_Trans, m_Tasks, icons, Properties.Resources.BotRightPane, filter);
 			}
+
+			m_Panes.ForEach(p => 
+			{
+				p.EditTaskDone += new EditTaskCompletionEventHandler(OnPaneEditTaskDone);
+				p.EditTaskIcon += new EditTaskIconEventHandler(OnPaneEditTaskIcon);
+				p.EditTaskLabel += new EditTaskLabelEventHandler(OnPaneEditTaskLabel);
+				p.SelectionChange += new TaskSelectionEventHandler(OnPaneSelectionChange);
+			});
 		}
 
 		public void SetUITheme(UITheme theme)
@@ -487,6 +496,26 @@ namespace EisenhowerUIExtension
 		}
 		
 		// Message handlers --------------------------------
+
+		private bool OnPaneEditTaskDone(object sender, UInt32 taskId, bool completed)
+		{
+			return (bool)EditTaskDone?.Invoke(sender, taskId, completed);
+		}
+
+		private bool OnPaneEditTaskIcon(object sender, UInt32 taskId)
+		{
+			return (bool)EditTaskIcon?.Invoke(sender, taskId);
+		}
+
+		private bool OnPaneEditTaskLabel(object sender, UInt32 taskId)
+		{
+			return (bool)EditTaskLabel?.Invoke(sender, taskId);
+		}
+
+		private void OnPaneSelectionChange(object sender, UInt32 taskId)
+		{
+			SelectionChange?.Invoke(sender, taskId);
+		}
 
 		protected override void OnSizeChanged(EventArgs e)
 		{
