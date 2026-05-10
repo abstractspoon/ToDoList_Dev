@@ -56,27 +56,14 @@ namespace EisenhowerUIExtension
 			}
 		}
 
-		public Color GridlineColor
-		{
-			get { return m_List.GridlineColor; }
-			set	{ m_List.GridlineColor = value; }
-		}
-
-		public Color AlternateLineColor
-		{
-			get { return m_List.AlternateLineColor; }
-			set { m_List.AlternateLineColor = value; }
-		}
-
-		public bool TaskColorIsBackground
-		{
-			get { return m_List.TaskColorIsBackground; }
-			set	{ m_List.TaskColorIsBackground = value; }
-		}
+		public Color GridlineColor				{ set { m_List.GridlineColor = value; } }
+		public Color AlternateLineColor			{ set { m_List.AlternateLineColor = value; } }
+		public bool TaskColorIsBackground		{ set { m_List.TaskColorIsBackground = value; } }
+		public bool ShowParentsAsFolders		{ set { m_List.ShowParentsAsFolders = value; } }
+		public bool ShowCompletionCheckboxes	{ set { m_List.ShowCompletionCheckboxes = value; } }
 
 		public bool ShowMixedCompletionState
 		{
-			get { return m_ShowMixedCompletionState; }
 			set
 			{
 				if (m_ShowMixedCompletionState != value)
@@ -85,18 +72,6 @@ namespace EisenhowerUIExtension
 					Invalidate();
 				}
 			}
-		}
-
-		public bool ShowParentsAsFolders
-		{
-			get { return m_List.ShowParentsAsFolders; }
-			set { m_List.ShowParentsAsFolders = value; }
-		}
-
-		public bool ShowCompletionCheckboxes
-		{
-			get { return m_List.ShowCompletionCheckboxes; }
-			set { m_List.ShowCompletionCheckboxes = value; }
 		}
 
 		public bool SelectTask(uint taskID)

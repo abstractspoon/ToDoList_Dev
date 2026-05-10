@@ -34,11 +34,15 @@ namespace EisenhowerUIExtension
 		private DragImage m_DragImage;
 		private Point m_SplitPos = new Point(50, 50); // 0-100
 
+		private List<EisenhowerPane> m_Panes;
+
 		// ---------------------------------------------
 
 		public EisenhowerControl() // For designer
 		{
 			InitializeComponent();
+
+			m_Panes = new List<EisenhowerPane>() { m_TopLeftPane, m_TopRightPane, m_BotLeftPane, m_BotRightPane };
 		}
 
 		public void Initialize(Translator trans, UIExtension.TaskIcon icons)
@@ -154,10 +158,7 @@ namespace EisenhowerUIExtension
 		{
 			BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackDark);
 
-			m_TopLeftPane.BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight);
-			m_TopRightPane.BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight);
-			m_BotLeftPane.BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight);
-			m_BotRightPane.BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight);
+			m_Panes.ForEach(p => p.BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight));
 		}
 
 		public void SavePreferences(Preferences prefs, String key)
@@ -203,26 +204,38 @@ namespace EisenhowerUIExtension
 
 		public bool SelectTask(UInt32 taskID)
 		{
-			return m_TopLeftPane.SelectTask(taskID) ||
-				   m_TopRightPane.SelectTask(taskID) ||
-				   m_BotLeftPane.SelectTask(taskID) ||
-				   m_BotRightPane.SelectTask(taskID);
+			foreach (var p in m_Panes)
+			{
+				if (p.SelectTask(taskID))
+					return true;
+			}
+
+			return false;
 		}
 
 		public bool SelectTasks(uint[] taskIDs)
 		{
-			return m_TopLeftPane.SelectTasks(taskIDs) ||
-				   m_TopRightPane.SelectTasks(taskIDs) ||
-				   m_BotLeftPane.SelectTasks(taskIDs) ||
-				   m_BotRightPane.SelectTasks(taskIDs);
+			foreach (var p in m_Panes)
+			{
+				if (p.SelectTasks(taskIDs))
+					return true;
+			}
+
+			return false;
 		}
 
 		public bool HasSelection
 		{
-			get { return m_TopLeftPane.HasSelection ||
-						 m_TopRightPane.HasSelection ||
-						 m_BotLeftPane.HasSelection ||
-						 m_BotRightPane.HasSelection; }
+			get
+			{
+				foreach (var p in m_Panes)
+				{
+					if (p.HasSelection)
+						return true;
+				}
+
+				return false;
+			}
 		}
 
 		public bool ReadOnly { get; set; }
@@ -243,71 +256,13 @@ namespace EisenhowerUIExtension
 			}
 		}
 
-		public bool TaskColorIsBackground
-		{
-			set
-			{
-				m_TopLeftPane.TaskColorIsBackground = value;
-				m_TopRightPane.TaskColorIsBackground = value;
-				m_BotLeftPane.TaskColorIsBackground = value;
-				m_BotRightPane.TaskColorIsBackground = value;
-			}
-		}
+		public bool TaskColorIsBackground		{ set { m_Panes.ForEach(p => p.TaskColorIsBackground = value); } }
+		public bool ShowMixedCompletionState	{ set { m_Panes.ForEach(p => p.ShowMixedCompletionState = value); } }
+		public bool ShowParentsAsFolders		{ set {	m_Panes.ForEach(p => p.ShowParentsAsFolders = value); } }
+		public bool ShowCompletionCheckboxes	{ set {	m_Panes.ForEach(p => p.ShowCompletionCheckboxes = value); } }
 
-		public bool ShowMixedCompletionState
-		{
-			set
-			{
-				m_TopLeftPane.ShowMixedCompletionState = value;
-				m_TopRightPane.ShowMixedCompletionState = value;
-				m_BotLeftPane.ShowMixedCompletionState = value;
-				m_BotRightPane.ShowMixedCompletionState = value;
-			}
-		}
-
-		public bool ShowParentsAsFolders
-		{
-			set
-			{
-				m_TopLeftPane.ShowParentsAsFolders = value;
-				m_TopRightPane.ShowParentsAsFolders = value;
-				m_BotLeftPane.ShowParentsAsFolders = value;
-				m_BotRightPane.ShowParentsAsFolders = value;
-			}
-		}
-
-		public bool ShowCompletionCheckboxes
-		{
-			set
-			{
-				m_TopLeftPane.ShowCompletionCheckboxes = value;
-				m_TopRightPane.ShowCompletionCheckboxes = value;
-				m_BotLeftPane.ShowCompletionCheckboxes = value;
-				m_BotRightPane.ShowCompletionCheckboxes = value;
-			}
-		}
-
-		public Color AlternateLineColor
-		{
-			set
-			{
-				m_TopLeftPane.AlternateLineColor = value;
-				m_TopRightPane.AlternateLineColor = value;
-				m_BotLeftPane.AlternateLineColor = value;
-				m_BotRightPane.AlternateLineColor = value;
-			}
-		}
-
-		public Color GridlineColor
-		{
-			set
-			{
-				m_TopLeftPane.GridlineColor = value;
-				m_TopRightPane.GridlineColor = value;
-				m_BotLeftPane.GridlineColor = value;
-				m_BotRightPane.GridlineColor = value;
-			}
-		}
+		public Color AlternateLineColor			{ set { m_Panes.ForEach(p => p.AlternateLineColor = value); } }
+		public Color GridlineColor				{ set { m_Panes.ForEach(p => p.GridlineColor = value); } }
 
 		public bool WantTaskUpdate(Task.Attribute attrib)
 		{
@@ -581,6 +536,8 @@ namespace EisenhowerUIExtension
 			botRightRect.Height = botLeftRect.Height;
 
 			m_BotRightPane.Bounds = botRightRect;
+
+			Update();
 		}
 
 		protected override void OnMouseDown(MouseEventArgs e)
