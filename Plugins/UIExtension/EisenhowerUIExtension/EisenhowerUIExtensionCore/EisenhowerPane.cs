@@ -17,14 +17,9 @@ namespace EisenhowerUIExtension
 	public partial class EisenhowerPane : UserControl
 	{
 		private TaskItems m_Tasks;
-		private UIExtension.TaskIcon m_TaskIcons;
-		private Translator m_Trans;
 		private EisenhowerPaneFilter m_Filter;
 
-		private bool m_ShowParentAsFolder;
-		private bool m_TaskColorIsBkgnd;
 		private bool m_ShowMixedCompletionState;
-		private bool m_ShowCompletionCheckboxes;
 
 		// ---------------------------------------------
 
@@ -39,11 +34,11 @@ namespace EisenhowerUIExtension
 							   Bitmap paneIcon,
 							   EisenhowerPaneFilter filter = null)
 		{
-			m_Trans = trans;
 			m_Tasks = taskItems;
-			m_TaskIcons = taskIcons;
 			m_Filter = filter;
 			m_Icon.Image = paneIcon;
+
+			m_List.Initialize(trans, taskIcons);
 
 			if (m_Filter != null)
 				RefreshList();
@@ -63,15 +58,8 @@ namespace EisenhowerUIExtension
 
 		public bool TaskColorIsBackground
 		{
-			get { return m_TaskColorIsBkgnd; }
-			set
-			{
-				if (m_TaskColorIsBkgnd != value)
-				{
-					m_TaskColorIsBkgnd = value;
-					Invalidate();
-				}
-			}
+			get { return m_List.TaskColorIsBackground; }
+			set	{ m_List.TaskColorIsBackground = value; }
 		}
 
 		public bool ShowMixedCompletionState
@@ -89,28 +77,14 @@ namespace EisenhowerUIExtension
 
 		public bool ShowParentsAsFolders
 		{
-			get { return m_ShowParentAsFolder; }
-			set
-			{
-				if (m_ShowParentAsFolder != value)
-				{
-					m_ShowParentAsFolder = value;
-					Invalidate();
-				}
-			}
+			get { return m_List.ShowParentsAsFolders; }
+			set { m_List.ShowParentsAsFolders = value; }
 		}
 
 		public bool ShowCompletionCheckboxes
 		{
-			get { return m_ShowCompletionCheckboxes; }
-			set
-			{
-				if (m_ShowCompletionCheckboxes != value)
-				{
-					m_ShowCompletionCheckboxes = value;
-					Invalidate();
-				}
-			}
+			get { return m_List.ShowCompletionCheckboxes; }
+			set { m_List.ShowCompletionCheckboxes = value; }
 		}
 
 		public bool SelectTask(uint taskID)
@@ -146,7 +120,15 @@ namespace EisenhowerUIExtension
 			foreach (var task in m_Tasks.Values)
 			{
 				if (m_Filter.TaskMatches(task))
-					m_List.Items.Add(task.ToString());
+				{
+					var lvItem = m_List.AddTask(task);
+
+					if (lvItem != null)
+					{
+						lvItem.SubItems.Add(m_Filter.Attribute1.MaxValue.ToString());
+						lvItem.SubItems.Add(m_Filter.Attribute2.MaxValue.ToString());
+					}
+				}
 			}
 
 			return true;

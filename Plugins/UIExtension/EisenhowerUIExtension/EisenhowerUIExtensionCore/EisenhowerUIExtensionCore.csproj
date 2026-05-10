@@ -60,6 +60,9 @@
     <Compile Include="EisenhowerPane.Designer.cs">
       <DependentUpon>EisenhowerPane.cs</DependentUpon>
     </Compile>
+    <Compile Include="EisenhowerPaneListView.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="TaskItem.cs" />
     <Compile Include="EisenhowerUIExtensionCore.cs">
       <SubType>UserControl</SubType>

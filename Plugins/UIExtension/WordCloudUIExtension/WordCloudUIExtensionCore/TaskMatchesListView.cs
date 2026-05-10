@@ -191,7 +191,7 @@ namespace WordCloudUIExtension
 		protected override void OnDrawColumnHeader(DrawListViewColumnHeaderEventArgs e)
 		{
 			e.DrawBackground();
-			e.DrawText(TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter |TextFormatFlags.SingleLine);
+			e.DrawText(TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.SingleLine);
 		}
 
 		protected override void OnColumnClick(ColumnClickEventArgs e)
