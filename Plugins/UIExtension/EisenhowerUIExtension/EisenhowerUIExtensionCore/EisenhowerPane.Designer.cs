@@ -28,7 +28,7 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
-			this.m_List = new EisenhowerPaneListView();
+			this.m_List = new EisenhowerUIExtension.EisenhowerPaneListView();
 			this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -39,19 +39,30 @@
 			// 
 			// m_List
 			// 
+			this.m_List.AlternateLineColor = System.Drawing.Color.Empty;
 			this.m_List.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+			this.m_List.CausesValidation = false;
 			this.m_List.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader1,
             this.columnHeader2,
             this.columnHeader3});
-			this.m_List.GridLines = true;
+			this.m_List.GridlineColor = System.Drawing.Color.Empty;
+			this.m_List.HideSelection = false;
+			this.m_List.LabelWrap = false;
 			this.m_List.Location = new System.Drawing.Point(0, 18);
 			this.m_List.Margin = new System.Windows.Forms.Padding(0);
+			this.m_List.MultiSelect = false;
 			this.m_List.Name = "m_List";
+			this.m_List.OwnerDraw = true;
+			this.m_List.ShowCompletionCheckboxes = false;
+			this.m_List.ShowGroups = false;
+			this.m_List.ShowLabelTips = false;
+			this.m_List.ShowParentsAsFolders = false;
 			this.m_List.Size = new System.Drawing.Size(433, 356);
 			this.m_List.TabIndex = 0;
+			this.m_List.TaskColorIsBackground = false;
 			this.m_List.UseCompatibleStateImageBehavior = false;
 			this.m_List.View = System.Windows.Forms.View.Details;
 			// 

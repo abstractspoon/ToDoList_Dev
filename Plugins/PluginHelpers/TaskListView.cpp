@@ -57,7 +57,6 @@ TaskListView::TaskListView()
 	m_ShowParentAsFolder(false),
 	m_TaskColorIsBkgnd(false),
 	m_ShowCompletionCheckboxes(false),
-	m_SkipNextItemDraw(false),
 	m_CheckBoxSize(-1)
 {
 	m_LabelTip = gcnew LabelTip(this);
@@ -75,14 +74,20 @@ void TaskListView::Initialize(Translator^ trans, UIExtension::TaskIcon^ taskIcon
 	MultiSelect = false;
 	FullRowSelect = true;
 	HideSelection = false;
-	OwnerDraw = true;
+	OwnerDraw = false;
 	Sorting = SortOrder::Ascending;
 	HeaderStyle = ColumnHeaderStyle::Clickable;
 	DoubleBuffered = true;
 	HotTracking = false;
+	HoverSelection = false;
 	LabelEdit = true;
 	GridLines = false;
 	StateImageList = m_ilItemHeight;
+
+	SetStyle(ControlStyles::OptimizedDoubleBuffer, true);
+	SetStyle(ControlStyles::UserPaint, true);
+	SetStyle(ControlStyles::AllPaintingInWmPaint, true);
+
 }
 
 ListViewItem^ TaskListView::AddTask(ITaskBase^ task)
@@ -268,6 +273,27 @@ LabelTipInfo^ TaskListView::ToolHitTest(Drawing::Point ptScreen)
 	return tip;
 }
 
+void TaskListView::OnGotFocus(EventArgs^ e)
+{
+	ListView::OnGotFocus(e);
+
+	Invalidate();
+}
+
+void TaskListView::OnLostFocus(EventArgs^ e)
+{
+	ListView::OnLostFocus(e);
+
+	Invalidate();
+}
+
+void TaskListView::OnSizeChanged(EventArgs^ e)
+{
+	ListView::OnSizeChanged(e);
+
+	Invalidate();
+}
+
 Drawing::Rectangle TaskListView::CalcLabelTextRect(Drawing::Rectangle labelRect, bool includeIdSubItems)
 {
 	Drawing::Rectangle textRect = labelRect;
@@ -291,9 +317,6 @@ Drawing::Rectangle TaskListView::CalcCheckboxRect(Drawing::Rectangle labelRect)
 {
 	if (!ShowCompletionCheckboxes)
 		return Rectangle::Empty;
-
-	if (m_CheckBoxSize == -1)
-		m_CheckBoxSize = CheckBoxRenderer::GetGlyphSize(e->Graphics, CheckBoxState::UncheckedNormal).Width;
 
 	int top = (((labelRect.Top + labelRect.Bottom) / 2) - (m_CheckBoxSize / 2));
 
@@ -420,31 +443,66 @@ void TaskListView::AlternateLineColor::set(Color value)
 	}
 }
 
+void TaskListView::OnPaint(PaintEventArgs^ e)
+{
+	// Do our own drawing because the base class flicker is HORRIFIC
+	if (Items->Count > 0)
+	{
+		// Find the first item intersecting the clip rect
+		int i = TopItem->Index;
+
+		while (i < Items->Count)
+		{
+			if (e->ClipRectangle.IntersectsWith(Items[i]->Bounds))
+				break;
+
+			i++;
+		}
+
+		// Draw until an item does not intersect the clip rect
+		while (i < Items->Count)
+		{
+			auto lvItem = Items[i];
+
+			if (!e->ClipRectangle.IntersectsWith(lvItem->Bounds))
+				break;
+
+			auto lvDrawArgs = gcnew DrawListViewItemEventArgs(e->Graphics, lvItem, lvItem->Bounds, lvItem->Index, ListViewItemStates::Default);
+			OnDrawItem(lvDrawArgs);
+
+			i++;
+		}
+	}
+}
+
 void TaskListView::OnDrawItem(DrawListViewItemEventArgs^ e)
 {
+	e->DrawDefault = false;
+
 	if (e->Item == nullptr)
 		return;
 
-	e->DrawDefault = false;
-
-	if (m_SkipNextItemDraw && RectangleToScreen(e->Item->Bounds).Contains(MousePosition))
-		return;
-
-	// Draw the background
+	// Background color full width
 	auto task = ASTYPE(e->Item->Tag, ITaskBase);
-	bool selected = e->Item->Selected;
 
 	auto backColor = GetBackColor(task, e->Item->Index);
-	e->Graphics->FillRectangle(gcnew SolidBrush(backColor), 0, e->Bounds.Top+1, Width, e->Bounds.Bottom);
+	auto itemRect = e->Item->Bounds;
 
-	// Then the grid lines
+	e->Graphics->FillRectangle(gcnew SolidBrush(backColor), 0, itemRect.Top + 1, Width, itemRect.Bottom);
+
+	// Horizontal grid line full width
+	Pen^ gridPen = nullptr;
+
 	if (!m_GridlineColor.IsEmpty)
-		e->Graphics->DrawLine(gcnew Pen(m_GridlineColor), 0, e->Bounds.Bottom, Width, e->Bounds.Bottom);
-
-	// Then the selection if any
-	if (selected)
 	{
-		Drawing::Rectangle labelRect = CalcLabelTextRect(e->Bounds, true);
+		gridPen = gcnew Pen(m_GridlineColor);
+		e->Graphics->DrawLine(gridPen, 0, itemRect.Bottom, Width, itemRect.Bottom);
+	}
+
+	// Selection highlight
+	if (e->Item->Selected)
+	{
+		Drawing::Rectangle labelRect = CalcLabelTextRect(itemRect, true);
 
 		UIExtension::SelectionRect::Draw(Handle,
 										 e->Graphics,
@@ -459,10 +517,9 @@ void TaskListView::OnDrawItem(DrawListViewItemEventArgs^ e)
 	auto textColor = GetTextColor(task, e->Item->Selected);
 	auto textBrush = gcnew SolidBrush(textColor);
 
-	Drawing::Rectangle itemRect = e->Bounds;
-
 	for (int colIndex = 0; colIndex < e->Item->SubItems->Count; colIndex++)
 	{
+		auto subItem = e->Item->SubItems[colIndex];
 		auto horzAlign = StringAlignment::Near;
 
 		itemRect.X += 2;
@@ -472,8 +529,10 @@ void TaskListView::OnDrawItem(DrawListViewItemEventArgs^ e)
 		{
 			if (ShowCompletionCheckboxes)
 			{
-				auto checkRect = CalcCheckboxRect(itemRect);
+				if (m_CheckBoxSize == -1)
+					m_CheckBoxSize = CheckBoxRenderer::GetGlyphSize(e->Graphics, CheckBoxState::UncheckedNormal).Width;
 
+				auto checkRect = CalcCheckboxRect(itemRect);
 				CheckBoxRenderer::DrawCheckBox(e->Graphics, checkRect.Location, GetTaskCheckboxState(task));
 
 				itemRect.X += CheckboxOffset;
@@ -504,7 +563,7 @@ void TaskListView::OnDrawItem(DrawListViewItemEventArgs^ e)
 		itemRect.Height--;
 
 		DrawText(e->Graphics,
-				 e->Item->SubItems[colIndex]->Text,
+				 subItem->Text,
 				 itemRect,
 				 textBrush,
 				 horzAlign,
@@ -512,6 +571,10 @@ void TaskListView::OnDrawItem(DrawListViewItemEventArgs^ e)
 
 		// next subitem
 		itemRect.X += itemRect.Width;
+
+		// Vertical gridline
+		if (gridPen != nullptr)
+			e->Graphics->DrawLine(gridPen, itemRect.Left - 1, itemRect.Top, itemRect.Left - 1, itemRect.Bottom);
 	}
 }
 
@@ -586,22 +649,6 @@ void TaskListView::WndProc(Message% m)
 			}
 		}
 		break;
-
-	case LVM_GETTOPINDEX:
-		{
-			// There's a very strange bug where the first
-			// mouseover of an item causes it to be redrawn
-			// and it flickers regardless of whether we are
-			// double-buffered or not. The workaround is to
-			// not draw the item under these circumstances.
-			// See also OnDrawItem()
-			m_SkipNextItemDraw = true;
-
-			ListView::WndProc(m);
-
-			m_SkipNextItemDraw = false;
-		}
-		return;
 	}
 
 	// else default handling

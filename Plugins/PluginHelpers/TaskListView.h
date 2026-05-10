@@ -88,8 +88,6 @@ namespace Abstractspoon
 				bool m_ShowCompletionCheckboxes;
 				int m_CheckBoxSize;
 
-				bool m_SkipNextItemDraw; // see WndProc
-
 			protected:
 				void WndProc(Windows::Forms::Message% m) override;
 
@@ -101,10 +99,13 @@ namespace Abstractspoon
 				void OnColumnWidthChanging(Windows::Forms::ColumnWidthChangingEventArgs^ e) override;
 				void OnDrawItem(Windows::Forms::DrawListViewItemEventArgs^ e) override;
 				void OnDrawColumnHeader(Windows::Forms::DrawListViewColumnHeaderEventArgs^ e) override;
-
+				void OnGotFocus(EventArgs^ e) override;
+				void OnLostFocus(EventArgs^ e) override;
+				void OnSizeChanged(EventArgs^ e) override;
+				void OnPaint(Windows::Forms::PaintEventArgs^ e) override;
 
 			protected:
-				Drawing::Rectangle CalcLabelTextRect(Drawing::Rectangle labelRect, bool includeIdColumn);
+				Drawing::Rectangle CalcLabelTextRect(Drawing::Rectangle labelRect, bool includeSubItems);
 				Drawing::Rectangle CalcCheckboxRect(Drawing::Rectangle labelRect);
 				Drawing::Rectangle CalcIconRect(Drawing::Rectangle labelRect);
 
