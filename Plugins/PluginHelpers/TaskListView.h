@@ -60,6 +60,9 @@ namespace Abstractspoon
 				property bool ShowCompletionCheckboxes { bool get(); void set(bool value); }
 				property bool ShowLabelTips { bool get(); void set(bool value); }
 
+				property Drawing::Color GridlineColor { Drawing::Color get(); void set(Drawing::Color value); }
+				property Drawing::Color AlternateLineColor { Drawing::Color get(); void set(Drawing::Color value); }
+
 				// ILabelTipHandler
 				virtual Windows::Forms::Control^ GetOwner();
 				virtual LabelTipInfo^ ToolHitTest(Drawing::Point ptScreen);
@@ -74,12 +77,16 @@ namespace Abstractspoon
 				UIExtension::TaskIcon^ m_TaskIcons;
 				LabelTip^ m_LabelTip;
 				Windows::Forms::ImageList^ m_ilItemHeight;
+
 				Drawing::Font^ m_BoldFont;
+				Drawing::Color m_GridlineColor;
+				Drawing::Color m_AlternateLineColor;
 
 				bool m_ItemsHaveIcons;
 				bool m_ShowParentAsFolder;
 				bool m_TaskColorIsBkgnd;
 				bool m_ShowCompletionCheckboxes;
+				int m_CheckBoxSize;
 
 				bool m_SkipNextItemDraw; // see WndProc
 
@@ -93,6 +100,8 @@ namespace Abstractspoon
 				void OnBeforeLabelEdit(Windows::Forms::LabelEditEventArgs^ e) override;
 				void OnColumnWidthChanging(Windows::Forms::ColumnWidthChangingEventArgs^ e) override;
 				void OnDrawItem(Windows::Forms::DrawListViewItemEventArgs^ e) override;
+				void OnDrawColumnHeader(Windows::Forms::DrawListViewColumnHeaderEventArgs^ e) override;
+
 
 			protected:
 				Drawing::Rectangle CalcLabelTextRect(Drawing::Rectangle labelRect, bool includeIdColumn);
@@ -107,7 +116,7 @@ namespace Abstractspoon
 				int FindTask(String^ phrase, int startIndex, bool forward, bool caseSensitive, bool wholeWord, bool findReplace);
 				void DrawText(Drawing::Graphics^ graphics, String^ text, Drawing::Rectangle rect, Drawing::Brush^ brush, Drawing::StringAlignment horzAlign, bool endEllipsis);
 				Drawing::Color GetTextColor(ITaskBase^ task, bool selected);
-				Drawing::Color GetBackColor(ITaskBase^ task);
+				Drawing::Color GetBackColor(ITaskBase^ task, int row);
 				
 				// Derived classes optionally override
 				virtual bool TaskMatches(ITaskBase^ task, String^ phrase, bool caseSensitive, bool wholeWord, bool findReplace);

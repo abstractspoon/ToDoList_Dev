@@ -56,6 +56,18 @@ namespace EisenhowerUIExtension
 			}
 		}
 
+		public Color GridlineColor
+		{
+			get { return m_List.GridlineColor; }
+			set	{ m_List.GridlineColor = value; }
+		}
+
+		public Color AlternateLineColor
+		{
+			get { return m_List.AlternateLineColor; }
+			set { m_List.AlternateLineColor = value; }
+		}
+
 		public bool TaskColorIsBackground
 		{
 			get { return m_List.TaskColorIsBackground; }
@@ -137,21 +149,21 @@ namespace EisenhowerUIExtension
 		// --------------------------------------------------------
 		// Message Handlers
 
-		private CheckBoxState GetItemCheckboxState(TaskItem taskItem)
-		{
-			if (taskItem.SomeSubtasksDone && ShowMixedCompletionState)
-				return CheckBoxState.MixedNormal;
-
-			// else
-			return CheckBoxState.UncheckedNormal;
-		}
-
-		private bool TaskHasIcon(TaskItem taskItem)
-		{
-			if ((m_TaskIcons == null) || (taskItem == null))
-				return false;
-
-			return (taskItem.HasIcon || (m_ShowParentAsFolder && taskItem.IsParent));
-		}
+// 		private CheckBoxState GetItemCheckboxState(TaskItem taskItem)
+// 		{
+// 			if (taskItem.SomeSubtasksDone && ShowMixedCompletionState)
+// 				return CheckBoxState.MixedNormal;
+// 
+// 			// else
+// 			return CheckBoxState.UncheckedNormal;
+// 		}
+// 
+// 		private bool TaskHasIcon(TaskItem taskItem)
+// 		{
+// 			if ((m_TaskIcons == null) || (taskItem == null))
+// 				return false;
+// 
+// 			return (taskItem.HasIcon || (m_ShowParentAsFolder && taskItem.IsParent));
+// 		}
 	}
 }

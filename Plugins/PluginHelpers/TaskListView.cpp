@@ -57,12 +57,19 @@ TaskListView::TaskListView()
 	m_ShowParentAsFolder(false),
 	m_TaskColorIsBkgnd(false),
 	m_ShowCompletionCheckboxes(false),
-	m_SkipNextItemDraw(false)
+	m_SkipNextItemDraw(false),
+	m_CheckBoxSize(-1)
 {
 	m_LabelTip = gcnew LabelTip(this);
 
 	m_ilItemHeight = gcnew ImageList();
 	m_ilItemHeight->ImageSize = Drawing::Size(1, DPIScaling::Scale(17)); // minimum height
+}
+
+void TaskListView::Initialize(Translator^ trans, UIExtension::TaskIcon^ taskIcons)
+{
+	m_Trans = trans;
+	m_TaskIcons = taskIcons;
 
 	View = System::Windows::Forms::View::Details;
 	MultiSelect = false;
@@ -74,13 +81,8 @@ TaskListView::TaskListView()
 	DoubleBuffered = true;
 	HotTracking = false;
 	LabelEdit = true;
+	GridLines = false;
 	StateImageList = m_ilItemHeight;
-}
-
-void TaskListView::Initialize(Translator^ trans, UIExtension::TaskIcon^ taskIcons)
-{
-	m_Trans = trans;
-	m_TaskIcons = taskIcons;
 }
 
 ListViewItem^ TaskListView::AddTask(ITaskBase^ task)
@@ -89,7 +91,6 @@ ListViewItem^ TaskListView::AddTask(ITaskBase^ task)
 
 	lvItem->Tag = task;
 	lvItem->Selected = false;
-//	lvItem->Checked = task->IsDone;
 
 	if ((task->IsParent && ShowParentsAsFolders) || task->HasIcon)
 	{
@@ -267,7 +268,7 @@ LabelTipInfo^ TaskListView::ToolHitTest(Drawing::Point ptScreen)
 	return tip;
 }
 
-Drawing::Rectangle TaskListView::CalcLabelTextRect(Drawing::Rectangle labelRect, bool includeIdColumn)
+Drawing::Rectangle TaskListView::CalcLabelTextRect(Drawing::Rectangle labelRect, bool includeIdSubItems)
 {
 	Drawing::Rectangle textRect = labelRect;
 
@@ -277,8 +278,11 @@ Drawing::Rectangle TaskListView::CalcLabelTextRect(Drawing::Rectangle labelRect,
 
 	textRect.Width = (Columns[0]->Width - textRect.X);
 
-	if (includeIdColumn)
-		textRect.Width += Columns[1]->Width;
+	if (includeIdSubItems)
+	{
+		for (int i = 1; i < Columns->Count; i++)
+			textRect.Width += Columns[i]->Width;
+	}
 
 	return textRect;
 }
@@ -288,9 +292,12 @@ Drawing::Rectangle TaskListView::CalcCheckboxRect(Drawing::Rectangle labelRect)
 	if (!ShowCompletionCheckboxes)
 		return Rectangle::Empty;
 
-	int top = (((labelRect.Top + labelRect.Bottom) / 2) - (ImageSize / 2));
+	if (m_CheckBoxSize == -1)
+		m_CheckBoxSize = CheckBoxRenderer::GetGlyphSize(e->Graphics, CheckBoxState::UncheckedNormal).Width;
 
-	return Drawing::Rectangle(labelRect.X, top, ImageSize, ImageSize);
+	int top = (((labelRect.Top + labelRect.Bottom) / 2) - (m_CheckBoxSize / 2));
+
+	return Drawing::Rectangle(labelRect.X, top, m_CheckBoxSize, m_CheckBoxSize);
 }
 
 Drawing::Rectangle TaskListView::CalcIconRect(Drawing::Rectangle labelRect)
@@ -385,36 +392,58 @@ int TaskListView::CheckboxOffset::get()
 	return (ShowCompletionCheckboxes ? ImageSize : 0);
 }
 
+Color TaskListView::GridlineColor::get()
+{ 
+	return m_GridlineColor;
+}
+
+void TaskListView::GridlineColor::set(Color value)
+{
+	if (m_GridlineColor != value)
+	{
+		m_GridlineColor = value;
+		Invalidate();
+	}
+}
+
+Color TaskListView::AlternateLineColor::get() 
+{ 
+	return m_AlternateLineColor;
+}
+
+void TaskListView::AlternateLineColor::set(Color value)
+{
+	if (m_AlternateLineColor != value)
+	{
+		m_AlternateLineColor = value;
+		Invalidate();
+	}
+}
+
 void TaskListView::OnDrawItem(DrawListViewItemEventArgs^ e)
 {
 	if (e->Item == nullptr)
 		return;
 
-// 	if (m_IgnoreNextItemDraw && RectangleToScreen(e->Item->Bounds).Contains(MousePosition))
-// 		return;
+	e->DrawDefault = false;
+
+	if (m_SkipNextItemDraw && RectangleToScreen(e->Item->Bounds).Contains(MousePosition))
+		return;
 
 	// Draw the background
 	auto task = ASTYPE(e->Item->Tag, ITaskBase);
 	bool selected = e->Item->Selected;
 
-	auto textColor = GetTextColor(task, e->Item->Selected);
-	auto backColor = GetBackColor(task);
+	auto backColor = GetBackColor(task, e->Item->Index);
+	e->Graphics->FillRectangle(gcnew SolidBrush(backColor), 0, e->Bounds.Top+1, Width, e->Bounds.Bottom);
 
-	auto textBrush = gcnew SolidBrush(textColor);
+	// Then the grid lines
+	if (!m_GridlineColor.IsEmpty)
+		e->Graphics->DrawLine(gcnew Pen(m_GridlineColor), 0, e->Bounds.Bottom, Width, e->Bounds.Bottom);
 
-	if (TaskColorIsBackground)
-	{
-		auto backBrush = gcnew SolidBrush(backColor);
-		e->Graphics->FillRectangle(backBrush, e->Bounds);
-	}
-	else if (!selected)
-	{
-		e->DrawBackground();
-	}
-
+	// Then the selection if any
 	if (selected)
 	{
-		// Selection rect just around text label
 		Drawing::Rectangle labelRect = CalcLabelTextRect(e->Bounds, true);
 
 		UIExtension::SelectionRect::Draw(Handle,
@@ -423,10 +452,13 @@ void TaskListView::OnDrawItem(DrawListViewItemEventArgs^ e)
 										 labelRect.Y,
 										 labelRect.Width,
 										 labelRect.Height,
-										 false); // opaque
+										 true); // transparent
 	}
 
-	// Draw subitems
+	// Finally the column values
+	auto textColor = GetTextColor(task, e->Item->Selected);
+	auto textBrush = gcnew SolidBrush(textColor);
+
 	Drawing::Rectangle itemRect = e->Bounds;
 
 	for (int colIndex = 0; colIndex < e->Item->SubItems->Count; colIndex++)
@@ -440,9 +472,6 @@ void TaskListView::OnDrawItem(DrawListViewItemEventArgs^ e)
 		{
 			if (ShowCompletionCheckboxes)
 			{
-				//  if (m_CheckBoxSize.IsEmpty)
-				//    m_CheckBoxSize = CheckBoxRenderer.GetGlyphSize(e->Graphics, CheckBoxState.UncheckedNormal);
-
 				auto checkRect = CalcCheckboxRect(itemRect);
 
 				CheckBoxRenderer::DrawCheckBox(e->Graphics, checkRect.Location, GetTaskCheckboxState(task));
@@ -516,13 +545,20 @@ Drawing::Color TaskListView::GetTextColor(ITaskBase^ task, bool selected)
 	return SystemColors::WindowText;
 }
 
-Drawing::Color TaskListView::GetBackColor(ITaskBase^ task)
+Drawing::Color TaskListView::GetBackColor(ITaskBase^ task, int row)
 {
 	if (!task->TextColor.IsEmpty && TaskColorIsBackground)
 		return task->TextColor;
 
-	// else
-	return Drawing::Color::Empty;
+	if (((row % 2) == 0) && !m_AlternateLineColor.IsEmpty)
+		return m_AlternateLineColor;
+
+	return SystemColors::Window;
+}
+
+void TaskListView::OnDrawColumnHeader(DrawListViewColumnHeaderEventArgs^ e)
+{
+	e->DrawDefault = true;
 }
 
 void TaskListView::WndProc(Message% m)

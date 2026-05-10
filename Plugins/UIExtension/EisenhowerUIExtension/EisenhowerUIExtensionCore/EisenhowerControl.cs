@@ -173,6 +173,22 @@ namespace EisenhowerUIExtension
 			ShowCompletionCheckboxes = prefs.GetProfileBool("Preferences", "AllowCheckboxAgainstTreeItem", false);
 			ShowMixedCompletionState = prefs.GetProfileBool("Preferences", "ShowMixedCompletionState", true);
 
+			// Alternate line color
+			int color = -1;
+
+			if (prefs.GetProfileBool("Preferences", "AlternateLineColor", true))
+				color = prefs.GetProfileInt("Preferences\\Colors", "AlternateLines", -1);
+
+			AlternateLineColor = DrawingColor.ToColor((UInt32)color);
+
+			// Grid color
+			color = -1;
+
+			if (prefs.GetProfileBool("Preferences", "SpecifyGridColor", true))
+				color = prefs.GetProfileInt("Preferences\\Colors", "GridLines", -1);
+
+			GridlineColor = DrawingColor.ToColor((UInt32)color);
+
 			if (!appOnly)
 			{
 				m_SplitPos.X = prefs.GetProfileInt(key, "XSplit", 50);
@@ -268,6 +284,28 @@ namespace EisenhowerUIExtension
 				m_TopRightPane.ShowCompletionCheckboxes = value;
 				m_BotLeftPane.ShowCompletionCheckboxes = value;
 				m_BotRightPane.ShowCompletionCheckboxes = value;
+			}
+		}
+
+		public Color AlternateLineColor
+		{
+			set
+			{
+				m_TopLeftPane.AlternateLineColor = value;
+				m_TopRightPane.AlternateLineColor = value;
+				m_BotLeftPane.AlternateLineColor = value;
+				m_BotRightPane.AlternateLineColor = value;
+			}
+		}
+
+		public Color GridlineColor
+		{
+			set
+			{
+				m_TopLeftPane.GridlineColor = value;
+				m_TopRightPane.GridlineColor = value;
+				m_BotLeftPane.GridlineColor = value;
+				m_BotRightPane.GridlineColor = value;
 			}
 		}
 
