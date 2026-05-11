@@ -144,6 +144,13 @@ namespace EisenhowerUIExtension
 		// --------------------------------------------------------
 		// Message Handlers
 
+		protected override void OnFontChanged(EventArgs e)
+		{
+			base.OnFontChanged(e);
+
+			m_List.Font = Font;
+		}
+
 		private bool OnTaskMatchesEditTaskDone(object sender, UInt32 taskId, bool completed)
 		{
 			return (bool)EditTaskDone?.Invoke(sender, taskId, completed);

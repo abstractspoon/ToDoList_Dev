@@ -50,7 +50,7 @@ namespace EisenhowerUIExtension
 		{
 			Title = label;
 			Id = id;
-//             ParentID = 0;
+			Position = string.Empty;
 			TextColor = new Color();
 			HasIcon = false;
 			IsFlagged = false;
@@ -66,7 +66,6 @@ namespace EisenhowerUIExtension
 			Title = task.GetTitle();
 			Position = task.GetPositionString();
 			Id = task.GetID();
-// 			ParentID = task.GetParentID();
 			TextColor = task.GetTextDrawingColor();
 			HasIcon = (task.GetIcon().Length > 0);
 			IsFlagged = task.IsFlagged(false);

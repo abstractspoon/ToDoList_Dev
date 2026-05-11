@@ -102,6 +102,7 @@ namespace Abstractspoon
 				void OnGotFocus(EventArgs^ e) override;
 				void OnLostFocus(EventArgs^ e) override;
 				void OnSizeChanged(EventArgs^ e) override;
+				void OnFontChanged(EventArgs^ e) override;
 				void OnPaint(Windows::Forms::PaintEventArgs^ e) override;
 
 			protected:
@@ -115,7 +116,6 @@ namespace Abstractspoon
 				UInt32 GetTaskId(int index);
 				ITaskBase^ GetTask(int index);
 				int FindTask(String^ phrase, int startIndex, bool forward, bool caseSensitive, bool wholeWord, bool findReplace);
-				void DrawText(Drawing::Graphics^ graphics, String^ text, Drawing::Rectangle rect, Drawing::Brush^ brush, Drawing::StringAlignment horzAlign, bool endEllipsis);
 				Drawing::Color GetTextColor(ITaskBase^ task, bool selected);
 				Drawing::Color GetBackColor(ITaskBase^ task, int row);
 				

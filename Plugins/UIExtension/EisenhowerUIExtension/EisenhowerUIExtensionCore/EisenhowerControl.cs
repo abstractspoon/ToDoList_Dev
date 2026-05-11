@@ -648,9 +648,11 @@ namespace EisenhowerUIExtension
 			return rect;
 		}
 
-				public void SetFont(String fontName, int fontSize)
+		public void SetFont(String fontName, int fontSize)
 		{
-			// TODO
+			Font font = new Font(fontName, fontSize);
+
+			m_Panes.ForEach(p => p.Font = font);
 		}
 
 		// ILabelTipHandler implementation

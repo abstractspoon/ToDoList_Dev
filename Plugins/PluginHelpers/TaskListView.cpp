@@ -57,6 +57,8 @@ TaskListView::TaskListView()
 	m_ShowParentAsFolder(false),
 	m_TaskColorIsBkgnd(false),
 	m_ShowCompletionCheckboxes(false),
+	m_GridlineColor(Color::Gray),
+	m_AlternateLineColor(Color::Pink),
 	m_CheckBoxSize(-1)
 {
 	m_LabelTip = gcnew LabelTip(this);
@@ -87,7 +89,6 @@ void TaskListView::Initialize(Translator^ trans, UIExtension::TaskIcon^ taskIcon
 	SetStyle(ControlStyles::OptimizedDoubleBuffer, true);
 	SetStyle(ControlStyles::UserPaint, true);
 	SetStyle(ControlStyles::AllPaintingInWmPaint, true);
-
 }
 
 ListViewItem^ TaskListView::AddTask(ITaskBase^ task)
@@ -294,6 +295,14 @@ void TaskListView::OnSizeChanged(EventArgs^ e)
 	Invalidate();
 }
 
+void TaskListView::OnFontChanged(EventArgs^ e)
+{
+	ListView::OnFontChanged(e);
+
+	m_BoldFont = gcnew Drawing::Font(Font, FontStyle::Bold);
+	Invalidate();
+}
+
 Drawing::Rectangle TaskListView::CalcLabelTextRect(Drawing::Rectangle labelRect, bool includeIdSubItems)
 {
 	Drawing::Rectangle textRect = labelRect;
@@ -318,7 +327,7 @@ Drawing::Rectangle TaskListView::CalcCheckboxRect(Drawing::Rectangle labelRect)
 	if (!ShowCompletionCheckboxes)
 		return Rectangle::Empty;
 
-	int top = (((labelRect.Top + labelRect.Bottom) / 2) - (m_CheckBoxSize / 2));
+	int top = ((labelRect.Top + labelRect.Bottom - m_CheckBoxSize) / 2) + (labelRect.Height % 2);
 
 	return Drawing::Rectangle(labelRect.X, top, m_CheckBoxSize, m_CheckBoxSize);
 }
@@ -328,13 +337,9 @@ Drawing::Rectangle TaskListView::CalcIconRect(Drawing::Rectangle labelRect)
 	if (!m_ItemsHaveIcons)
 		return Drawing::Rectangle::Empty;
 
-	if (m_ShowCompletionCheckboxes)
-		labelRect.X += CheckboxOffset;
+	int top = ((labelRect.Top + labelRect.Bottom - ImageSize) / 2) + (labelRect.Height % 2);
 
-	int imageSize = ImageSize;
-	int top = (((labelRect.Top + labelRect.Bottom) / 2) - (imageSize / 2));
-
-	return Drawing::Rectangle(labelRect.X, top, imageSize, imageSize);
+	return Drawing::Rectangle(labelRect.X + CheckboxOffset, top, ImageSize, ImageSize);
 }
 
 bool TaskListView::TaskColorIsBackground::get()
@@ -517,16 +522,23 @@ void TaskListView::OnDrawItem(DrawListViewItemEventArgs^ e)
 	auto textColor = GetTextColor(task, e->Item->Selected);
 	auto textBrush = gcnew SolidBrush(textColor);
 
+	auto subItemRect = itemRect;
+
 	for (int colIndex = 0; colIndex < e->Item->SubItems->Count; colIndex++)
 	{
 		auto subItem = e->Item->SubItems[colIndex];
 		auto horzAlign = StringAlignment::Near;
 
-		itemRect.X += 2;
-		itemRect.Width = (Columns[colIndex]->Width - 2);
+		subItemRect.Width = Columns[colIndex]->Width;
+
+		auto textFont = Font;
+		auto textRect = Rectangle::Inflate(subItemRect, -2, -1);
+		auto flags = (TextFormatFlags::SingleLine | TextFormatFlags::Bottom | TextFormatFlags::Left);
 
 		if (colIndex == 0)
 		{
+			flags = (flags | TextFormatFlags::EndEllipsis);
+
 			if (ShowCompletionCheckboxes)
 			{
 				if (m_CheckBoxSize == -1)
@@ -535,59 +547,45 @@ void TaskListView::OnDrawItem(DrawListViewItemEventArgs^ e)
 				auto checkRect = CalcCheckboxRect(itemRect);
 				CheckBoxRenderer::DrawCheckBox(e->Graphics, checkRect.Location, GetTaskCheckboxState(task));
 
-				itemRect.X += CheckboxOffset;
-				itemRect.Width -= CheckboxOffset;
+				textRect.X += CheckboxOffset;
+				textRect.Width -= CheckboxOffset;
 			}
 
 			if (ItemsHaveIcons)
 			{
 				if ((e->Item->ImageIndex != -1) && m_TaskIcons->Get(task->Id))
 				{
-					int imageSize = ImageSize;
-					auto iconRect = Drawing::Rectangle(itemRect.Location, Drawing::Size(imageSize, imageSize));
-					iconRect.Y += ((itemRect.Height - imageSize) / 2);
-
+					auto iconRect = CalcIconRect(itemRect);
 					m_TaskIcons->Draw(e->Graphics, iconRect.Left, iconRect.Top);
 				}
 
-				itemRect.X += TextIconOffset;
-				itemRect.Width -= TextIconOffset;
+				textRect.X += TextIconOffset;
+				textRect.Width -= TextIconOffset;
 			}
+
+			if (task->Position->IndexOf('.') == -1)
+				textFont = m_BoldFont;
 		}
-		else
+		else // numbers
 		{
-			horzAlign = StringAlignment::Far;
+			flags = (flags | TextFormatFlags::Right);
 		}
 
-		itemRect.Y++;
-		itemRect.Height--;
 
-		DrawText(e->Graphics,
-				 subItem->Text,
-				 itemRect,
-				 textBrush,
-				 horzAlign,
-				 (colIndex == 0));
-
-		// next subitem
-		itemRect.X += itemRect.Width;
+		TextRenderer::DrawText(e->Graphics, 
+							   subItem->Text, 
+							   textFont, 
+							   textRect, 
+							   textColor, 
+							   flags);
 
 		// Vertical gridline
 		if (gridPen != nullptr)
-			e->Graphics->DrawLine(gridPen, itemRect.Left - 1, itemRect.Top, itemRect.Left - 1, itemRect.Bottom);
+			e->Graphics->DrawLine(gridPen, subItemRect.Right, itemRect.Top, subItemRect.Right, itemRect.Bottom);
+
+		// next subitem
+		subItemRect.X = subItemRect.Right;
 	}
-}
-
-void TaskListView::DrawText(Graphics^ graphics, String^ text, Drawing::Rectangle rect, Brush^ brush, StringAlignment horzAlign, bool endEllipsis)
-{
-	StringFormat^ format = gcnew StringFormat();
-
-	format->Alignment = horzAlign;
-	format->LineAlignment = StringAlignment::Center;
-	format->FormatFlags = StringFormatFlags::NoWrap;
-	format->Trimming = (endEllipsis ? StringTrimming::EllipsisCharacter : StringTrimming::None);
-
-	graphics->DrawString(text, Font, brush, rect, format);
 }
 
 Drawing::Color TaskListView::GetTextColor(ITaskBase^ task, bool selected)
