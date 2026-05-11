@@ -51,20 +51,16 @@ TaskListView::TaskListView()
 	ListView(),
 	m_TaskIcons(nullptr),
 	m_LabelTip(nullptr),
-	m_ilItemHeight(nullptr),
 	m_BoldFont(nullptr),
 	m_ItemsHaveIcons(false),
 	m_ShowParentAsFolder(false),
 	m_TaskColorIsBkgnd(false),
 	m_ShowCompletionCheckboxes(false),
-	m_GridlineColor(Color::Gray),
-	m_AlternateLineColor(Color::Pink),
+	m_GridlineColor(Color::Empty),
+	m_AlternateLineColor(Color::Empty),
 	m_CheckBoxSize(-1)
 {
 	m_LabelTip = gcnew LabelTip(this);
-
-	m_ilItemHeight = gcnew ImageList();
-	m_ilItemHeight->ImageSize = Drawing::Size(1, DPIScaling::Scale(17)); // minimum height
 }
 
 void TaskListView::Initialize(Translator^ trans, UIExtension::TaskIcon^ taskIcons)
@@ -76,7 +72,7 @@ void TaskListView::Initialize(Translator^ trans, UIExtension::TaskIcon^ taskIcon
 	MultiSelect = false;
 	FullRowSelect = true;
 	HideSelection = false;
-	OwnerDraw = false;
+	OwnerDraw = true;
 	Sorting = SortOrder::Ascending;
 	HeaderStyle = ColumnHeaderStyle::Clickable;
 	DoubleBuffered = true;
@@ -84,11 +80,6 @@ void TaskListView::Initialize(Translator^ trans, UIExtension::TaskIcon^ taskIcon
 	HoverSelection = false;
 	LabelEdit = true;
 	GridLines = false;
-	StateImageList = m_ilItemHeight;
-
-	SetStyle(ControlStyles::OptimizedDoubleBuffer, true);
-	SetStyle(ControlStyles::UserPaint, true);
-	SetStyle(ControlStyles::AllPaintingInWmPaint, true);
 }
 
 ListViewItem^ TaskListView::AddTask(ITaskBase^ task)
@@ -448,36 +439,9 @@ void TaskListView::AlternateLineColor::set(Color value)
 	}
 }
 
-void TaskListView::OnPaint(PaintEventArgs^ e)
+void TaskListView::OnMeasureItem(Windows::Forms::MeasureItemEventArgs^ e)
 {
-	// Do our own drawing because the base class flicker is HORRIFIC
-	if (Items->Count > 0)
-	{
-		// Find the first item intersecting the clip rect
-		int i = TopItem->Index;
-
-		while (i < Items->Count)
-		{
-			if (e->ClipRectangle.IntersectsWith(Items[i]->Bounds))
-				break;
-
-			i++;
-		}
-
-		// Draw until an item does not intersect the clip rect
-		while (i < Items->Count)
-		{
-			auto lvItem = Items[i];
-
-			if (!e->ClipRectangle.IntersectsWith(lvItem->Bounds))
-				break;
-
-			auto lvDrawArgs = gcnew DrawListViewItemEventArgs(e->Graphics, lvItem, lvItem->Bounds, lvItem->Index, ListViewItemStates::Default);
-			OnDrawItem(lvDrawArgs);
-
-			i++;
-		}
-	}
+	e->ItemHeight = Math::Max(17, Font->Height); // minimum height;
 }
 
 void TaskListView::OnDrawItem(DrawListViewItemEventArgs^ e)
@@ -570,7 +534,6 @@ void TaskListView::OnDrawItem(DrawListViewItemEventArgs^ e)
 		{
 			flags = (flags | TextFormatFlags::Right);
 		}
-
 
 		TextRenderer::DrawText(e->Graphics, 
 							   subItem->Text, 

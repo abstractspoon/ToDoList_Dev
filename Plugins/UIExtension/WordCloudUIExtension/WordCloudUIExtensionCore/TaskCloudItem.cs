@@ -32,10 +32,8 @@ namespace WordCloudUIExtension
 		public bool IsLocked		{ get; set; }
 		public bool IsParent		{ get; set; }
 		public Color TextColor		{ get; set; }
+		public String Position		{ get; set; }
         public bool IsDone			{ get { return (DoneDate != String.Empty); } }
-
-		// Not required
-		public String Position		{ get { return String.Empty; } } // not relevant
 
 		// Local attributes -------------------------------
 		public String DoneDate;
@@ -77,6 +75,7 @@ namespace WordCloudUIExtension
             IsParent = task.IsParent();
             IsLocked = task.IsLocked(true);
             HasSomeSubtasksDone = task.HasSomeSubtasksDone();
+			Position = task.GetPositionString();
 
 			if (newTask)
 			{

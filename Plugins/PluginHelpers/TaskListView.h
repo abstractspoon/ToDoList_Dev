@@ -76,7 +76,6 @@ namespace Abstractspoon
 				Translator^ m_Trans;
 				UIExtension::TaskIcon^ m_TaskIcons;
 				LabelTip^ m_LabelTip;
-				Windows::Forms::ImageList^ m_ilItemHeight;
 
 				Drawing::Font^ m_BoldFont;
 				Drawing::Color m_GridlineColor;
@@ -97,13 +96,13 @@ namespace Abstractspoon
 				void OnMouseMove(Windows::Forms::MouseEventArgs^ e) override;
 				void OnBeforeLabelEdit(Windows::Forms::LabelEditEventArgs^ e) override;
 				void OnColumnWidthChanging(Windows::Forms::ColumnWidthChangingEventArgs^ e) override;
+				void OnMeasureItem(Windows::Forms::MeasureItemEventArgs^ e) override;
 				void OnDrawItem(Windows::Forms::DrawListViewItemEventArgs^ e) override;
 				void OnDrawColumnHeader(Windows::Forms::DrawListViewColumnHeaderEventArgs^ e) override;
 				void OnGotFocus(EventArgs^ e) override;
 				void OnLostFocus(EventArgs^ e) override;
 				void OnSizeChanged(EventArgs^ e) override;
 				void OnFontChanged(EventArgs^ e) override;
-				void OnPaint(Windows::Forms::PaintEventArgs^ e) override;
 
 			protected:
 				Drawing::Rectangle CalcLabelTextRect(Drawing::Rectangle labelRect, bool includeSubItems);
