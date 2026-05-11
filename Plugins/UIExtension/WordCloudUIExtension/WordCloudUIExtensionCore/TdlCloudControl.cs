@@ -31,7 +31,7 @@ namespace WordCloudUIExtension
 		private Translator m_Trans;
 		private string m_SelectedWord;
 		private IntPtr m_hWnd;
-		private Boolean m_SavingToImage = false;
+		private bool m_SavingToImage = false;
 
 		public TdlCloudControl(IntPtr hWnd, Translator trans)
 		{
@@ -331,9 +331,9 @@ namespace WordCloudUIExtension
 
     public class TdlTypewriterLayout : TypewriterLayout
     {
-		private Boolean m_SavingToImage = false;
+		private bool m_SavingToImage = false;
 
-        public TdlTypewriterLayout(SizeF size, Boolean savingToImage) : base(size)
+        public TdlTypewriterLayout(SizeF size, bool savingToImage) : base(size)
         {
 			m_SavingToImage = savingToImage;
         }

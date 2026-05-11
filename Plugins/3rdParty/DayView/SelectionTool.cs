@@ -21,7 +21,7 @@ namespace Calendar
 
 		private Mode m_mode = Mode.None;
 
-		public Boolean IsEditing
+		public bool IsEditing
 		{
 			get { return (m_mode != Mode.None); }
 		}

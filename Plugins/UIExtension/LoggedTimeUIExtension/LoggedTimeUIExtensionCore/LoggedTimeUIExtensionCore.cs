@@ -263,7 +263,7 @@ namespace LoggedTimeUIExtension
 			return false; // not supported
 		}
 
-		public new Boolean Focus()
+		public new bool Focus()
         {
             if (Focused)
                 return false;
@@ -271,7 +271,7 @@ namespace LoggedTimeUIExtension
             return m_TimeLog.Focus();
         }
 
-        public new Boolean Focused
+        public new bool Focused
         {
             get { return base.Focused || m_TimeLog.Focused; }
         }
@@ -829,7 +829,7 @@ namespace LoggedTimeUIExtension
 			return m_TimeLog.SaveToImage();
 		}
 
-		public Boolean CanSaveToImage()
+		public bool CanSaveToImage()
 		{
 			return m_TimeLog.CanSaveToImage();
 		}

@@ -34,7 +34,7 @@ namespace HTMLContentControl
 
 		private Timer m_TextChangeTimer;
         private String m_PrevTextChange = "";
-		private Boolean m_SettingContent = false;
+		private bool m_SettingContent = false;
 		private HtmlElement m_CurrentHRef = null;
 
 		private TDLDropTarget m_DragDrop;

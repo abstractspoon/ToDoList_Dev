@@ -193,7 +193,7 @@ namespace MindMapUIExtension
 			m_MindMap.SetStrikeThruDone(prefs.GetProfileBool("Preferences", "StrikethroughDone", true));
         }
 
-		public new Boolean Focus()
+		public new bool Focus()
 		{
 			if (Focused)
 				return false;
@@ -202,27 +202,27 @@ namespace MindMapUIExtension
 			return m_MindMap.Focus();
 		}
 
-		public new Boolean Focused
+		public new bool Focused
 		{
 			get { return m_MindMap.Focused; }
 		}
 
-		public Boolean Expand(MindMapControl.ExpandNode expand)
+		public bool Expand(MindMapControl.ExpandNode expand)
 		{
 			return m_MindMap.Expand(expand);
 		}
 
-		public Boolean CanExpand(MindMapControl.ExpandNode expand)
+		public bool CanExpand(MindMapControl.ExpandNode expand)
 		{
 			return m_MindMap.CanExpand(expand);
 		}
 
-		public Boolean CanMoveTask(UInt32 taskId, UInt32 destParentId, UInt32 destPrevSiblingId)
+		public bool CanMoveTask(UInt32 taskId, UInt32 destParentId, UInt32 destPrevSiblingId)
 		{
 			return m_MindMap.CanMoveTask(taskId, destParentId, destPrevSiblingId);
 		}
 
-		public Boolean MoveTask(UInt32 taskId, UInt32 destParentId, UInt32 destPrevSiblingId)
+		public bool MoveTask(UInt32 taskId, UInt32 destParentId, UInt32 destPrevSiblingId)
 		{
 			return m_MindMap.MoveTask(taskId, destParentId, destPrevSiblingId);
 		}
@@ -237,7 +237,7 @@ namespace MindMapUIExtension
             return m_MindMap.SaveToImage();
         }
 
-        public Boolean CanSaveToImage()
+        public bool CanSaveToImage()
         {
             return m_MindMap.CanSaveToImage();
         }
@@ -337,14 +337,14 @@ namespace MindMapUIExtension
 				m_MindMap.Options = m_OptionsCombo.SelectedOptions;
 		}
 
-		Boolean OnMindMapEditTaskLabel(object sender, UInt32 taskId)
+		bool OnMindMapEditTaskLabel(object sender, UInt32 taskId)
 		{
 			var notify = new UIExtension.ParentNotify(m_HwndParent);
 
 			return notify.NotifyEditLabel();
 		}
 
-        Boolean OnMindMapEditTaskCompletion(object sender, UInt32 taskId, bool completed)
+        bool OnMindMapEditTaskCompletion(object sender, UInt32 taskId, bool completed)
         {
             var notify = new UIExtension.ParentNotify(m_HwndParent);
 
@@ -352,7 +352,7 @@ namespace MindMapUIExtension
                                     (completed ? DateTime.Now : DateTime.MinValue));
         }
 
-        Boolean OnMindMapEditTaskIcon(object sender, UInt32 taskId)
+        bool OnMindMapEditTaskIcon(object sender, UInt32 taskId)
         {
             var notify = new UIExtension.ParentNotify(m_HwndParent);
 
@@ -367,7 +367,7 @@ namespace MindMapUIExtension
 			notify.NotifySelChange(taskItem.ID);
 		}
 
-		Boolean OnMindMapDragDrop(object sender, MindMapDragEventArgs e)
+		bool OnMindMapDragDrop(object sender, MindMapDragEventArgs e)
 		{
 			var notify = new UIExtension.ParentNotify(m_HwndParent);
 

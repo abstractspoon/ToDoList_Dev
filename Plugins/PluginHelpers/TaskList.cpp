@@ -215,7 +215,7 @@ String^ TaskList::GetMetaData(String^ sKey)
 	return GETSTR_ARG(GetMetaData, MS(sKey));
 }
 
-Boolean TaskList::HasCustomAttributes()
+bool TaskList::HasCustomAttributes()
 {
 	return (GetCustomAttributeCount() > 0);
 }
@@ -313,7 +313,7 @@ String^ TaskList::GetCustomAttributeListData(int nIndex)
 	return GETSTR_ARG(GetCustomAttributeListData, nIndex);
 }
 
-Boolean TaskList::IsCustomAttributeEnabled(int nIndex)
+bool TaskList::IsCustomAttributeEnabled(int nIndex)
 {
 	return GETVAL_ARG(IsCustomAttributeEnabled, nIndex, false);
 }
@@ -331,7 +331,7 @@ UInt32 TaskList::GetTaskCount()
 	return GETVAL(GetTaskCount, 0);
 }
 
-Boolean TaskList::HasTask(UInt32 dwTaskID)
+bool TaskList::HasTask(UInt32 dwTaskID)
 {
 	HTASKITEM hTask = GETVAL_ARG(FindTask, dwTaskID, NULL);
 
@@ -488,7 +488,7 @@ bool Task::IsValid()
 	return ((m_pConstTaskList || m_pTaskList) && (m_hTask != nullptr));
 }
 
-Boolean Task::IsAttributeAvailable(Attribute attrib)
+bool Task::IsAttributeAvailable(Attribute attrib)
 {
 	TDC_ATTRIBUTE nAttrib = MapAttribute(attrib);
 
@@ -634,7 +634,7 @@ String^ Task::GetIcon()
 	return GETTASKSTR(GetTaskIcon);
 }
 
-Boolean Task::HasIcon()
+bool Task::HasIcon()
 {
 	LPCWSTR szIcon = GETTASKVAL(GetTaskIcon, NULL);
 	return (szIcon && *szIcon);
@@ -975,38 +975,38 @@ String^ Task::GetLastModifiedBy()
 	return GETTASKSTR(GetTaskLastModifiedBy);
 }
 
-Boolean Task::IsDone()
+bool Task::IsDone()
 {
 	return GETTASKVAL(IsTaskDone, false);
 }
 
-Boolean Task::IsDue()
+bool Task::IsDue()
 {
 	return GETTASKVAL(IsTaskDue, false);
 }
 
-Boolean Task::IsGoodAsDone()
+bool Task::IsGoodAsDone()
 {
 	return GETTASKVAL(IsTaskGoodAsDone, false);
 }
 
-Boolean Task::HasSomeSubtasksDone()
+bool Task::HasSomeSubtasksDone()
 {
 	LPCWSTR szSubtasks = GETTASKVAL(GetTaskSubtaskCompletion, NULL);
 	return (szSubtasks && *szSubtasks && (szSubtasks[0] != '0'));
 }
 
-Boolean Task::IsFlagged(bool calculated)
+bool Task::IsFlagged(bool calculated)
 {
 	return GETTASKVAL_ARG(IsTaskFlagged, calculated, false);
 }
 
-Boolean Task::IsParent()
+bool Task::IsParent()
 {
 	return GETTASKVAL(IsTaskParent, false);
 }
 
-Boolean Task::IsLocked(bool calculated)
+bool Task::IsLocked(bool calculated)
 {
 	return GETTASKVAL_ARG(IsTaskLocked, calculated, false);
 }
@@ -1035,12 +1035,12 @@ double Task::GetTimeSpent(TimeUnits% cUnits, bool calculated)
 	return dTime;
 }
 
-Boolean Task::IsRecurring()
+bool Task::IsRecurring()
 {
 	return GETTASKVAL(IsTaskRecurring, false);
 }
 
-Boolean Task::IsReference()
+bool Task::IsReference()
 {
 	return GETTASKVAL(IsTaskReference, false);
 }
@@ -1091,17 +1091,17 @@ Task^ TaskList::NewTask(String^ sTitle)
 	return gcnew Task(m_pTaskList, hTask);
 }
 
-Boolean TaskList::AddCustomAttribute(String^ sID, String^ sLabel, String^ sColumn)
+bool TaskList::AddCustomAttribute(String^ sID, String^ sLabel, String^ sColumn)
 {
 	return (m_pTaskList ? m_pTaskList->AddCustomAttribute(MS(sID), MS(sLabel), MS(sColumn)) : false);
 }
 
-Boolean TaskList::SetMetaData(String^ sKey, String^ sValue)
+bool TaskList::SetMetaData(String^ sKey, String^ sValue)
 {
 	return (m_pTaskList ? m_pTaskList->SetMetaData(MS(sKey), MS(sValue)) : false);
 }
 
-Boolean TaskList::ClearMetaData(String^ sKey)
+bool TaskList::ClearMetaData(String^ sKey)
 {
 	return (m_pTaskList ? m_pTaskList->ClearMetaData(MS(sKey)) : false);
 }
@@ -1123,157 +1123,157 @@ Task^ Task::NewSubtask(String^ sTitle)
 	return gcnew Task(m_pTaskList, hTask);
 }
 
-Boolean Task::SetTitle(String^ sTitle)
+bool Task::SetTitle(String^ sTitle)
 {
 	return SETTASKSTR(SetTaskTitle, sTitle);
 }
 
-Boolean Task::SetComments(String^ sComments)
+bool Task::SetComments(String^ sComments)
 {
 	return SETTASKSTR(SetTaskComments, sComments);
 }
 
-Boolean Task::SetAllocatedBy(String^ sAllocBy)
+bool Task::SetAllocatedBy(String^ sAllocBy)
 {
 	return SETTASKSTR(SetTaskAllocatedBy, sAllocBy);
 }
 
-Boolean Task::SetStatus(String^ sStatus)
+bool Task::SetStatus(String^ sStatus)
 {
 	return SETTASKSTR(SetTaskStatus, sStatus);
 }
 
-Boolean Task::SetVersion(String^ sVersion)
+bool Task::SetVersion(String^ sVersion)
 {
 	return SETTASKSTR(SetTaskVersion, sVersion);
 }
 
-Boolean Task::SetExternalID(String^ sExternalID)
+bool Task::SetExternalID(String^ sExternalID)
 {
 	return SETTASKSTR(SetTaskExternalID, sExternalID);
 }
 
-Boolean Task::SetCreatedBy(String^ sCreatedBy)
+bool Task::SetCreatedBy(String^ sCreatedBy)
 {
 	return SETTASKSTR(SetTaskCreatedBy, sCreatedBy);
 }
 
-Boolean Task::SetPosition(String^ sPosition)
+bool Task::SetPosition(String^ sPosition)
 {
 	return SETTASKSTR(SetTaskPosition, sPosition);
 }
 
-Boolean Task::SetIcon(String^ sIcon)
+bool Task::SetIcon(String^ sIcon)
 {
 	return SETTASKSTR(SetTaskIcon, sIcon);
 }
 
-Boolean Task::AddAllocatedTo(String^ sAllocTo)
+bool Task::AddAllocatedTo(String^ sAllocTo)
 {
 	return SETTASKSTR(AddTaskAllocatedTo, sAllocTo);
 }
 
-Boolean Task::AddCategory(String^ sCategory)
+bool Task::AddCategory(String^ sCategory)
 {
 	return SETTASKSTR(AddTaskCategory, sCategory);
 }
 
-Boolean Task::AddTag(String^ sTag)
+bool Task::AddTag(String^ sTag)
 {
 	return SETTASKSTR(AddTaskTag, sTag);
 }
 
-Boolean Task::AddDependency(String^ sDependency)
+bool Task::AddDependency(String^ sDependency)
 {
 	return SETTASKSTR(AddTaskDependency, sDependency);
 }
 
-Boolean Task::AddFileLink(String^ sFileLink)
+bool Task::AddFileLink(String^ sFileLink)
 {
 	return SETTASKSTR(AddTaskFileLink, sFileLink);
 }
 
-Boolean Task::SetColor(UInt32 color)
+bool Task::SetColor(UInt32 color)
 {
 	return SETTASKVAL(SetTaskColor, color);
 }
 
-Boolean Task::SetPriority(Byte nPriority)
+bool Task::SetPriority(Byte nPriority)
 {
 	return SETTASKVAL(SetTaskPriority, nPriority);
 }
 
-Boolean Task::SetRisk(Byte Risk)
+bool Task::SetRisk(Byte Risk)
 {
 	return SETTASKVAL(SetTaskRisk, Risk);
 }
 
-Boolean Task::SetPercentDone(Byte nPercent)
+bool Task::SetPercentDone(Byte nPercent)
 {
 	return SETTASKVAL(SetTaskPercentDone, nPercent);
 }
 
-Boolean Task::SetCost(double dCost, bool isRate)
+bool Task::SetCost(double dCost, bool isRate)
 {
 	return (m_pTaskList ? m_pTaskList->SetTaskCost(m_hTask, dCost, isRate) : false);
 }
 
-Boolean Task::SetFlag(Boolean bFlag)
+bool Task::SetFlag(bool bFlag)
 {
 	return SETTASKVAL(SetTaskFlag, bFlag);
 }
 
-Boolean Task::SetLastModified(DateTime^ dtLastMod)
+bool Task::SetLastModified(DateTime^ dtLastMod)
 {
 	return SETTASKVAL(SetTaskLastModified64, MapDate(dtLastMod));
 }
 
-Boolean Task::SetDoneDate(DateTime^ dtCompletion)
+bool Task::SetDoneDate(DateTime^ dtCompletion)
 {
 	return SETTASKVAL(SetTaskDoneDate64, MapDate(dtCompletion));
 }
 
-Boolean Task::SetDueDate(DateTime^ dtDue)
+bool Task::SetDueDate(DateTime^ dtDue)
 {
 	return SETTASKVAL(SetTaskDueDate64, MapDate(dtDue));
 }
 
-Boolean Task::SetStartDate(DateTime^ dtStart)
+bool Task::SetStartDate(DateTime^ dtStart)
 {
 	return SETTASKVAL(SetTaskStartDate64, MapDate(dtStart));
 }
 
-Boolean Task::SetCreationDate(DateTime^ dtCreation)
+bool Task::SetCreationDate(DateTime^ dtCreation)
 {
 	return SETTASKVAL(SetTaskCreationDate64, MapDate(dtCreation));
 }
 
-Boolean Task::SetTimeEstimate(double dTime, TimeUnits cUnits)
+bool Task::SetTimeEstimate(double dTime, TimeUnits cUnits)
 {
 	return (m_pTaskList ? m_pTaskList->SetTaskTimeEstimate(m_hTask, dTime, MapUnits(cUnits)) : false);
 }
 
-Boolean Task::SetTimeSpent(double dTime, TimeUnits cUnits)
+bool Task::SetTimeSpent(double dTime, TimeUnits cUnits)
 {
 	return (m_pTaskList ? m_pTaskList->SetTaskTimeSpent(m_hTask, dTime, MapUnits(cUnits)) : false);
 }
 
-Boolean Task::SetCustomAttributeValue(String^ sID, String^ sValue)
+bool Task::SetCustomAttributeValue(String^ sID, String^ sValue)
 {
 	return (m_pTaskList ? m_pTaskList->SetTaskCustomAttributeData(m_hTask, MS(sID), MS(sValue)) : false);
 }
 
-Boolean Task::ClearCustomAttributeValue(String^ sID)
+bool Task::ClearCustomAttributeValue(String^ sID)
 {
 	return (m_pTaskList ? m_pTaskList->ClearTaskCustomAttributeData(m_hTask, MS(sID)) : false);
 }
 
-Boolean Task::SetMetaDataValue(String^ sKey, String^ sValue)
+bool Task::SetMetaDataValue(String^ sKey, String^ sValue)
 {
 	return (m_pTaskList ? m_pTaskList->SetTaskMetaData(m_hTask, MS(sKey), MS(sValue)) : false);
 }
 
-Boolean Task::ClearMetaDataValue(String^ sKey)
+bool Task::ClearMetaDataValue(String^ sKey)
 {
 	return (m_pTaskList ? m_pTaskList->ClearTaskMetaData(m_hTask, MS(sKey)) : false);
 }

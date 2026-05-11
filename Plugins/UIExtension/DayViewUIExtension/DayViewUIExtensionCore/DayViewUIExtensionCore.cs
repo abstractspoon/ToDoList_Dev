@@ -324,7 +324,7 @@ namespace DayViewUIExtension
 			return (m_SelectedTaskId != 0);
 		}
 
-		public new Boolean Focus()
+		public new bool Focus()
         {
             if (Focused)
                 return false;
@@ -332,7 +332,7 @@ namespace DayViewUIExtension
             return m_DayView.Focus();
         }
 
-        public new Boolean Focused
+        public new bool Focused
         {
             get { return m_DayView.Focused; }
         }
@@ -1238,7 +1238,7 @@ namespace DayViewUIExtension
 			return m_DayView.SaveToImage();
 		}
 
-		public Boolean CanSaveToImage()
+		public bool CanSaveToImage()
 		{
 			return m_DayView.CanSaveToImage();
 		}

@@ -99,7 +99,7 @@ namespace WordCloudUIExtension
 
 		// IUIExtension ------------------------------------------------------------------
 
-		public new Boolean Focused
+		public new bool Focused
         {
             get { return m_TaskMatchesList.Focused; }
         }
@@ -1075,7 +1075,7 @@ namespace WordCloudUIExtension
 				NotifyParentSelChange(selTaskId);
 		}
 
-        private Boolean OnTaskMatchesEditTaskDone(object sender, UInt32 taskId, bool completed)
+        private bool OnTaskMatchesEditTaskDone(object sender, UInt32 taskId, bool completed)
         {
             var notify = new UIExtension.ParentNotify(m_HwndParent);
 
@@ -1083,14 +1083,13 @@ namespace WordCloudUIExtension
                                     (completed ? DateTime.Now : DateTime.MinValue));
         }
 
-        private Boolean OnTaskMatchesEditTaskIcon(object sender, UInt32 taskId)
+        private bool OnTaskMatchesEditTaskIcon(object sender, UInt32 taskId)
         {
             var notify = new UIExtension.ParentNotify(m_HwndParent);
 
             return notify.NotifyEditIcon();
         }
 
-        private Boolean OnTaskMatchesEditTaskLabel(object sender, UInt32 taskId)
         {
             var notify = new UIExtension.ParentNotify(m_HwndParent);
 
