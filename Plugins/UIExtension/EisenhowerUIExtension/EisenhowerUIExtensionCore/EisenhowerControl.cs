@@ -608,6 +608,22 @@ namespace EisenhowerUIExtension
 			}
 		}
 
+		protected override void OnMouseDoubleClick(MouseEventArgs e)
+		{
+			base.OnMouseDown(e);
+
+			if (e.Button == MouseButtons.Left)
+			{
+				if (GetHorzSplitBarRect().Contains(e.Location))
+					m_SplitPos.Y = 50;
+
+				if (GetVertSplitBarRect().Contains(e.Location))
+					m_SplitPos.X = 50;
+
+				RecalcPaneRects();
+			}
+		}
+
 		protected override void OnMouseUp(MouseEventArgs e)
 		{
 			base.OnMouseUp(e);
