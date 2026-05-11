@@ -69,7 +69,7 @@
 			// columnHeader1
 			// 
 			this.columnHeader1.Text = "Task";
-			this.columnHeader1.Width = 116;
+			this.columnHeader1.Width = 200;
 			// 
 			// columnHeader2
 			// 
@@ -79,6 +79,7 @@
 			// columnHeader3
 			// 
 			this.columnHeader3.Text = "Attribute 2";
+			this.columnHeader3.Width = 80;
 			// 
 			// m_TitleBar
 			// 

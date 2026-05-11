@@ -139,23 +139,20 @@ UInt32 TaskListView::SelectedTaskId::get()
 	return (selTask == nullptr ? 0 : selTask->Id);
 }
 
-UInt32 TaskListView::SelectTask(UInt32 taskId)
+bool TaskListView::SelectTask(UInt32 taskId)
 {
 	SelectedItems->Clear();
 	SelectedIndices->Clear();
 
-	if (Items->Count == 0)
-		return 0;
+	ListViewItem^ lvItem = FindLVItem(taskId);
 
-	ListViewItem^ selLVItem = FindLVItem(taskId);
+	if (lvItem == nullptr)
+		return false;
 
-	if (selLVItem == nullptr)
-		selLVItem = Items[0];
-
-	selLVItem->Selected = true;
+	lvItem->Selected = true;
 	EnsureSelectionVisible();
 
-	return ASTYPE(selLVItem->Tag, ITaskBase)->Id;
+	return true;
 }
 
 void TaskListView::EnsureSelectionVisible()
@@ -469,7 +466,9 @@ void TaskListView::OnDrawItem(DrawListViewItemEventArgs^ e)
 	}
 
 	// Selection highlight
-	if (e->Item->Selected)
+	bool selected = IsItemSelected(e->Item);
+
+	if (selected)
 	{
 		Drawing::Rectangle labelRect = CalcLabelTextRect(itemRect, true);
 
@@ -483,7 +482,7 @@ void TaskListView::OnDrawItem(DrawListViewItemEventArgs^ e)
 	}
 
 	// Finally the column values
-	auto textColor = GetTextColor(task, e->Item->Selected);
+	auto textColor = GetTextColor(task, selected);
 	auto textBrush = gcnew SolidBrush(textColor);
 
 	auto subItemRect = itemRect;

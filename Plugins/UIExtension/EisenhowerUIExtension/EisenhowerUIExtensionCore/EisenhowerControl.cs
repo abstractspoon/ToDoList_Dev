@@ -154,12 +154,18 @@ namespace EisenhowerUIExtension
 				m_BotRightPane.Initialize(m_Trans, m_Tasks, icons, Properties.Resources.BotRightPane, filter);
 			}
 
+			// Callbacks
 			m_Panes.ForEach(p => 
 			{
 				p.EditTaskDone += new EditTaskCompletionEventHandler(OnPaneEditTaskDone);
 				p.EditTaskIcon += new EditTaskIconEventHandler(OnPaneEditTaskIcon);
 				p.EditTaskLabel += new EditTaskLabelEventHandler(OnPaneEditTaskLabel);
 				p.SelectionChange += new TaskSelectionEventHandler(OnPaneSelectionChange);
+
+				p.GotFocus += (s, e) =>
+				{
+					SelectedPane = (s as EisenhowerPane);
+				};
 			});
 		}
 
@@ -211,10 +217,32 @@ namespace EisenhowerUIExtension
 			foreach (var p in m_Panes)
 			{
 				if (p.SelectTask(taskID))
+				{
+					SelectedPane = p;
 					return true;
+				}
 			}
 
 			return false;
+		}
+
+		protected EisenhowerPane SelectedPane
+		{
+			get
+			{
+				foreach (var p in m_Panes)
+				{
+					if (p.Selected)
+						return p;
+				}
+
+				return null;
+			}
+
+			set
+			{
+				m_Panes.ForEach(p => p.Selected = (p == value));
+			}
 		}
 
 		public bool SelectTasks(uint[] taskIDs)
@@ -222,7 +250,10 @@ namespace EisenhowerUIExtension
 			foreach (var p in m_Panes)
 			{
 				if (p.SelectTasks(taskIDs))
+				{
+					SelectedPane = p;
 					return true;
+				}
 			}
 
 			return false;

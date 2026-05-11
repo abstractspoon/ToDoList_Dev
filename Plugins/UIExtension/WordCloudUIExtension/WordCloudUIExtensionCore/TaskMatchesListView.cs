@@ -115,6 +115,26 @@ namespace WordCloudUIExtension
 			return base.GetTaskCheckboxState(task);
 		}
 
+		public new UInt32 SelectTask(UInt32 taskId)
+		{
+			if (!base.SelectTask(taskId))
+			{
+				if (Items.Count == 0)
+				{
+					taskId = 0;
+				}
+				else
+				{
+					Items[0].Selected = true;
+					EnsureSelectionVisible();
+
+					taskId = GetTaskId(0);
+				}
+			}
+
+			return taskId;
+		}
+
 		public bool AddMatch(CloudTaskItem item)
 		{
 			var lvItem = AddTask(item);

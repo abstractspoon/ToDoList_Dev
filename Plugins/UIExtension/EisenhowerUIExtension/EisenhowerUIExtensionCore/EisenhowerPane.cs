@@ -29,6 +29,8 @@ namespace EisenhowerUIExtension
 		public event EditTaskCompletionEventHandler EditTaskDone;
 		public event TaskSelectionEventHandler SelectionChange;
 
+		new public event EventHandler GotFocus;
+
 		// ---------------------------------------------
 
 		public EisenhowerPane()
@@ -60,6 +62,8 @@ namespace EisenhowerUIExtension
 					SelectionChange?.Invoke(this, selTaskId);
 			};
 
+			m_List.GotFocus += (s, e) => { GotFocus?.Invoke(this, new EventArgs()); };
+
 			if (m_Filter != null)
 				RefreshList();
 		}
@@ -73,6 +77,19 @@ namespace EisenhowerUIExtension
 					m_Filter = value;
 					RefreshList();
 				}
+			}
+		}
+
+		public bool Selected
+		{
+			get { return m_List.Selected; }
+
+			set
+			{
+				if (value != m_List.Selected)
+					m_TitleBar.Font = new Font(Font, (value ? FontStyle.Bold : FontStyle.Regular));
+
+				m_List.Selected = value;
 			}
 		}
 
@@ -96,8 +113,7 @@ namespace EisenhowerUIExtension
 
 		public bool SelectTask(uint taskID)
 		{
-			// TODO 
-			return true;
+			return m_List.SelectTask(taskID);
 		}
 
 		public bool SelectTasks(uint[] taskIDs)
@@ -165,22 +181,5 @@ namespace EisenhowerUIExtension
 		{
 			return (bool)EditTaskLabel?.Invoke(sender, taskId);
 		}
-
-		// 		private CheckBoxState GetItemCheckboxState(TaskItem taskItem)
-		// 		{
-		// 			if (taskItem.SomeSubtasksDone && ShowMixedCompletionState)
-		// 				return CheckBoxState.MixedNormal;
-		// 
-		// 			// else
-		// 			return CheckBoxState.UncheckedNormal;
-		// 		}
-		// 
-		// 		private bool TaskHasIcon(TaskItem taskItem)
-		// 		{
-		// 			if ((m_TaskIcons == null) || (taskItem == null))
-		// 				return false;
-		// 
-		// 			return (taskItem.HasIcon || (m_ShowParentAsFolder && taskItem.IsParent));
-		// 		}
 	}
 }
