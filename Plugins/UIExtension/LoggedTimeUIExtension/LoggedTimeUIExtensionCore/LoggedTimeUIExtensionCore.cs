@@ -207,12 +207,10 @@ namespace LoggedTimeUIExtension
 			m_WorkWeek.Load(prefs);
             m_TimeLog.WeekendDays = m_WorkWeek.WeekendDays();
 
-            int gridColor = -1;
-
             if (prefs.GetProfileBool("Preferences", "SpecifyGridColor", true))
-                gridColor = prefs.GetProfileInt("Preferences\\Colors", "GridLines", -1);
-
-            m_TimeLog.GridlineColor = ((gridColor == -1) ? DefGridColor : DrawingColor.ToColor((UInt32)gridColor));
+                m_TimeLog.GridlineColor = prefs.GetProfileColor("Preferences\\Colors", "GridLines", DefGridColor);
+			else
+				m_TimeLog.GridlineColor = DefGridColor;
             
             if (appOnly)
 			{

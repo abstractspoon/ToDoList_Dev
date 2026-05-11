@@ -178,26 +178,21 @@ namespace EisenhowerUIExtension
 
 		public void LoadPreferences(Preferences prefs, String key, bool appOnly)
 		{
+			// App settings
 			TaskColorIsBackground = prefs.GetProfileBool("Preferences", "ColorTaskBackground", false);
 			ShowParentsAsFolders = prefs.GetProfileBool("Preferences", "ShowParentsAsFolders", false);
 			ShowCompletionCheckboxes = prefs.GetProfileBool("Preferences", "AllowCheckboxAgainstTreeItem", false);
 			ShowMixedCompletionState = prefs.GetProfileBool("Preferences", "ShowMixedCompletionState", true);
 
-			// Alternate line color
-			int color = -1;
-
 			if (prefs.GetProfileBool("Preferences", "AlternateLineColor", true))
-				color = prefs.GetProfileInt("Preferences\\Colors", "AlternateLines", -1);
-
-			AlternateLineColor = DrawingColor.ToColor((UInt32)color);
-
-			// Grid color
-			color = -1;
+				AlternateLineColor = prefs.GetProfileColor("Preferences\\Colors", "AlternateLines", Color.Empty);
+			else
+				AlternateLineColor = Color.Empty;
 
 			if (prefs.GetProfileBool("Preferences", "SpecifyGridColor", true))
-				color = prefs.GetProfileInt("Preferences\\Colors", "GridLines", -1);
-
-			GridlineColor = DrawingColor.ToColor((UInt32)color);
+				GridlineColor = prefs.GetProfileColor("Preferences\\Colors", "GridLines", Color.Empty);
+			else
+				GridlineColor = Color.Empty;
 
 			if (!appOnly)
 			{

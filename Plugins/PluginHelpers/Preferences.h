@@ -41,6 +41,9 @@ namespace Abstractspoon
 				double GetProfileDouble(String^ sSection, String^ sEntry, double dDefault);
 				bool WriteProfileDouble(String^ sSection, String^ sEntry, double dValue);
 
+				Drawing::Color GetProfileColor(String^ sSection, String^ sEntry, Drawing::Color defColor);
+				bool WriteProfileColor(String^ sSection, String^ sEntry, Drawing::Color color);
+
 				generic <typename T>
 				T GetProfileEnum(String^ sSection, String^ sEntry, T nDefault)
 				{

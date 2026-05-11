@@ -574,6 +574,18 @@ namespace WordCloudUIExtension
 			m_TaskMatchesList.ShowLabelTips = !prefs.GetProfileBool("Preferences", "ShowInfoTips", false);
 			m_TaskMatchesList.ShowMixedCompletionState = prefs.GetProfileBool("Preferences", "ShowMixedCompletionState", true);
 
+			// Alternate line color
+			if (prefs.GetProfileBool("Preferences", "AlternateLineColor", true))
+				m_TaskMatchesList.AlternateLineColor = prefs.GetProfileColor("Preferences\\Colors", "AlternateLines", Color.Empty);
+			else
+				m_TaskMatchesList.AlternateLineColor = Color.Empty;
+
+			// Grid color
+			if (prefs.GetProfileBool("Preferences", "SpecifyGridColor", true))
+				m_TaskMatchesList.GridlineColor = prefs.GetProfileColor("Preferences\\Colors", "GridLines", Color.Empty);
+			else
+				m_TaskMatchesList.GridlineColor = Color.Empty;
+
 			UpdateBlacklist();
         }
 
@@ -1090,6 +1102,7 @@ namespace WordCloudUIExtension
             return notify.NotifyEditIcon();
         }
 
+        private bool OnTaskMatchesEditTaskLabel(object sender, UInt32 taskId)
         {
             var notify = new UIExtension.ParentNotify(m_HwndParent);
 

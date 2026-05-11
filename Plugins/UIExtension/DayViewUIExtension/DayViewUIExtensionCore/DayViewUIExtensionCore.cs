@@ -268,12 +268,10 @@ namespace DayViewUIExtension
 			m_WorkWeek.Load(prefs);
             m_DayView.WeekendDays = m_WorkWeek.WeekendDays();
 
-            int gridColor = -1;
-
             if (prefs.GetProfileBool("Preferences", "SpecifyGridColor", true))
-                gridColor = prefs.GetProfileInt("Preferences\\Colors", "GridLines", -1);
-
-            m_DayView.GridlineColor = ((gridColor == -1) ? DefGridColor : DrawingColor.ToColor((UInt32)gridColor));
+                m_DayView.GridlineColor = prefs.GetProfileColor("Preferences\\Colors", "GridLines", DefGridColor);
+			else
+				m_DayView.GridlineColor = DefGridColor;
             
             if (appOnly)
 			{
