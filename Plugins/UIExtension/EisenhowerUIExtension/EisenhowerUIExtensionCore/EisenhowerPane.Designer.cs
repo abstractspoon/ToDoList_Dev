@@ -28,14 +28,32 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
+			this.m_TitleBar = new System.Windows.Forms.Label();
+			this.m_Icon = new System.Windows.Forms.PictureBox();
 			this.m_List = new EisenhowerUIExtension.EisenhowerPaneListView();
 			this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-			this.m_TitleBar = new System.Windows.Forms.Label();
-			this.m_Icon = new System.Windows.Forms.PictureBox();
 			((System.ComponentModel.ISupportInitialize)(this.m_Icon)).BeginInit();
 			this.SuspendLayout();
+			// 
+			// m_TitleBar
+			// 
+			this.m_TitleBar.AutoSize = true;
+			this.m_TitleBar.Location = new System.Drawing.Point(19, 2);
+			this.m_TitleBar.Name = "m_TitleBar";
+			this.m_TitleBar.Size = new System.Drawing.Size(69, 13);
+			this.m_TitleBar.TabIndex = 1;
+			this.m_TitleBar.Text = "Pane title bar";
+			// 
+			// m_Icon
+			// 
+			this.m_Icon.Location = new System.Drawing.Point(0, 0);
+			this.m_Icon.Margin = new System.Windows.Forms.Padding(0);
+			this.m_Icon.Name = "m_Icon";
+			this.m_Icon.Size = new System.Drawing.Size(17, 17);
+			this.m_Icon.TabIndex = 2;
+			this.m_Icon.TabStop = false;
 			// 
 			// m_List
 			// 
@@ -56,6 +74,7 @@
 			this.m_List.MultiSelect = false;
 			this.m_List.Name = "m_List";
 			this.m_List.OwnerDraw = true;
+			this.m_List.Selected = false;
 			this.m_List.ShowCompletionCheckboxes = false;
 			this.m_List.ShowGroups = false;
 			this.m_List.ShowLabelTips = false;
@@ -80,23 +99,6 @@
 			// 
 			this.columnHeader3.Text = "Attribute 2";
 			this.columnHeader3.Width = 80;
-			// 
-			// m_TitleBar
-			// 
-			this.m_TitleBar.AutoSize = true;
-			this.m_TitleBar.Location = new System.Drawing.Point(19, 2);
-			this.m_TitleBar.Name = "m_TitleBar";
-			this.m_TitleBar.Size = new System.Drawing.Size(69, 13);
-			this.m_TitleBar.TabIndex = 1;
-			this.m_TitleBar.Text = "Pane title bar";
-			// 
-			// m_Icon
-			// 
-			this.m_Icon.Location = new System.Drawing.Point(0, 0);
-			this.m_Icon.Name = "m_Icon";
-			this.m_Icon.Size = new System.Drawing.Size(16, 16);
-			this.m_Icon.TabIndex = 2;
-			this.m_Icon.TabStop = false;
 			// 
 			// EisenhowerPane
 			// 

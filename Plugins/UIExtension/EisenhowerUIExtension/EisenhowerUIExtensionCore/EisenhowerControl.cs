@@ -695,6 +695,7 @@ namespace EisenhowerUIExtension
 			Font font = new Font(fontName, fontSize);
 
 			m_Panes.ForEach(p => p.Font = font);
+			RecalcPaneRects();
 		}
 
 		// ILabelTipHandler implementation

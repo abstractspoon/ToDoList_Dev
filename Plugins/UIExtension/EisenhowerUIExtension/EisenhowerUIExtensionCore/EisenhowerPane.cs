@@ -164,6 +164,9 @@ namespace EisenhowerUIExtension
 		{
 			base.OnFontChanged(e);
 
+			if (Selected)
+				m_TitleBar.Font = new Font(Font, (Selected ? FontStyle.Bold : FontStyle.Regular));
+
 			m_List.Font = Font;
 		}
 
