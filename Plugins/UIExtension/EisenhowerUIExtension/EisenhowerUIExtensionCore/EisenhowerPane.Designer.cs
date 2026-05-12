@@ -110,6 +110,7 @@
 			this.Controls.Add(this.m_Icon);
 			this.Controls.Add(this.m_TitleBar);
 			this.Controls.Add(this.m_List);
+			this.Cursor = System.Windows.Forms.Cursors.Arrow;
 			this.Margin = new System.Windows.Forms.Padding(0);
 			this.Name = "EisenhowerPane";
 			this.Size = new System.Drawing.Size(433, 374);
