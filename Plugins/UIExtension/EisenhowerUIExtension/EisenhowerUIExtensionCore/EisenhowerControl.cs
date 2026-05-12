@@ -153,7 +153,7 @@ namespace EisenhowerUIExtension
 			// TODO
 		}
 
-		public bool SelectTask(UInt32 taskID)
+		public bool SelectTask(uint taskID)
 		{
 			foreach (var p in m_Panes)
 			{
@@ -262,7 +262,7 @@ namespace EisenhowerUIExtension
 			return false;
 		}
 
-		public UInt32 HitTestTask(Point screenPos)
+		public uint HitTestTask(Point screenPos)
 		{
 			// var clientPos = PointToClient(screenPos);
 			// var node = HitTestPositions(clientPos);
@@ -375,7 +375,7 @@ namespace EisenhowerUIExtension
 			return false;
 		}
 
-		public bool GetTask(UIExtension.GetTask getTask, ref UInt32 taskID)
+		public bool GetTask(UIExtension.GetTask getTask, ref uint taskID)
 		{
 			// TreeNode node = FindNode(taskID);
 			// 
@@ -464,22 +464,22 @@ namespace EisenhowerUIExtension
 		
 		// Message handlers --------------------------------
 
-		private bool OnPaneEditTaskDone(object sender, UInt32 taskId, bool completed)
+		private bool OnPaneEditTaskDone(object sender, uint taskId, bool completed)
 		{
 			return (bool)EditTaskDone?.Invoke(sender, taskId, completed);
 		}
 
-		private bool OnPaneEditTaskIcon(object sender, UInt32 taskId)
+		private bool OnPaneEditTaskIcon(object sender, uint taskId)
 		{
 			return (bool)EditTaskIcon?.Invoke(sender, taskId);
 		}
 
-		private bool OnPaneEditTaskLabel(object sender, UInt32 taskId)
+		private bool OnPaneEditTaskLabel(object sender, uint taskId)
 		{
 			return (bool)EditTaskLabel?.Invoke(sender, taskId);
 		}
 
-		private void OnPaneSelectionChange(object sender, UInt32 taskId)
+		private void OnPaneSelectionChange(object sender, uint taskId)
 		{
 			SelectionChange?.Invoke(sender, taskId);
 		}
@@ -689,7 +689,7 @@ namespace EisenhowerUIExtension
 
 		private void UpdateTaskAttributes(TaskList tasks)
 		{
-			var changedTaskIds = new HashSet<UInt32>();
+			var changedTaskIds = new HashSet<uint>();
 			Task task = tasks.GetFirstTask();
 
 			while (task.IsValid() && ProcessTaskUpdate(task, changedTaskIds))
@@ -703,12 +703,12 @@ namespace EisenhowerUIExtension
 			}
 		}
 
-		private bool ProcessTaskUpdate(Task task, HashSet<UInt32> taskIds)
+		private bool ProcessTaskUpdate(Task task, HashSet<uint> taskIds)
 		{
 			if (!task.IsValid())
 				return false;
 
-            UInt32 taskId = task.GetID();
+            uint taskId = task.GetID();
 			TaskItem item = m_Tasks.GetItem(taskId, true);
 
 			if (!item.ProcessTaskUpdate(task))
