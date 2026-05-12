@@ -53,7 +53,6 @@ namespace Abstractspoon
 				bool SelectTask(UInt32 taskId);
 				bool SelectTaskEx(String^ words, UIExtension::SelectTask selectTask, bool caseSensitive, bool wholeWord, bool findReplace);
 				void EnsureSelectionVisible();
-				Drawing::Rectangle GetSelectedTaskLabelRect(bool screenCoords);
 
 				property UInt32 SelectedTaskId { UInt32 get(); }
 				property String^ SelectedTaskTitle { String^ get(); }
@@ -101,7 +100,6 @@ namespace Abstractspoon
 				void OnMouseMove(Windows::Forms::MouseEventArgs^ e) override;
 				void OnBeforeLabelEdit(Windows::Forms::LabelEditEventArgs^ e) override;
 				void OnColumnWidthChanging(Windows::Forms::ColumnWidthChangingEventArgs^ e) override;
-				void OnMeasureItem(Windows::Forms::MeasureItemEventArgs^ e) override;
 				void OnDrawItem(Windows::Forms::DrawListViewItemEventArgs^ e) override;
 				void OnDrawColumnHeader(Windows::Forms::DrawListViewColumnHeaderEventArgs^ e) override;
 				void OnGotFocus(EventArgs^ e) override;

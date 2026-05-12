@@ -457,11 +457,6 @@ void TaskListView::AlternateLineColor::set(Color value)
 	}
 }
 
-void TaskListView::OnMeasureItem(Windows::Forms::MeasureItemEventArgs^ e)
-{
-	e->ItemHeight = Math::Max(17, Font->Height); // minimum height;
-}
-
 void TaskListView::OnDrawItem(DrawListViewItemEventArgs^ e)
 {
 	e->DrawDefault = false;
