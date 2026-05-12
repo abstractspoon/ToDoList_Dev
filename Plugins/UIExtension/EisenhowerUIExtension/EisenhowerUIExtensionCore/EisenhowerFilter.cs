@@ -1,73 +1,37 @@
 using System;
 using System.Diagnostics;
+using System.Text;
 
 
 using Abstractspoon.Tdl.PluginHelpers;
 
 namespace EisenhowerUIExtension
 {
+	////////////////////////////////////////////////////////////////////
 
-	public enum EisenhowerPaneFilterOperator
+	public enum EisenhowerPaneFilterAttributeRange
 	{
-		GT,
-		GTEQ,
-		LT,
-		LTEQ
+		High,
+		Low,
 	}
 
-	////////////////////////////////////////////////////////////////////
+	// ------------------------------
 
 	public class EisenhowerPaneFilterAttribute
 	{
-		public Task.Attribute AttributeId = Task.Attribute.Unknown;
-
-		public double MaxValue = 0.0;
-		public EisenhowerPaneFilterOperator MaxValueOperator = EisenhowerPaneFilterOperator.LTEQ;
-
-		public double MinValue = 0.0;
-		public EisenhowerPaneFilterOperator MinValueOperator = EisenhowerPaneFilterOperator.GT;
-
-		// ------------------------------
-
-		public EisenhowerPaneFilterAttribute(Task.Attribute attribId)
-		{
-			AttributeId = attribId;
-		}
+		public string Id;
+		public EisenhowerPaneFilterAttributeRange Range = EisenhowerPaneFilterAttributeRange.Low;
+		public double Cutoff = 0.0;
 
 		public bool TaskMatches(TaskItem task)
 		{
-			switch (AttributeId)
-			{
-			case Task.Attribute.Priority:
-				return ValueMatches(task.Priority);
+			var value = task.GetAttributeValue(Id);
 
-			case Task.Attribute.Risk:
-				return ValueMatches(task.Risk);
-			}
+			if (Range == EisenhowerPaneFilterAttributeRange.High)
+				return (value > Cutoff);
 
-			// All else
-			Debug.Assert(false);
-			return false;
-		}
-
-		private bool ValueMatches(double value)
-		{
-			return (ValueMatches(value, MaxValue, MaxValueOperator) &&
-					ValueMatches(value, MinValue, MinValueOperator));
-		}
-
-		static private bool ValueMatches(double value, double minMaxVal, EisenhowerPaneFilterOperator op)
-		{
-			switch (op)
-			{
-			case EisenhowerPaneFilterOperator.GT:	return (value > minMaxVal);
-			case EisenhowerPaneFilterOperator.GTEQ:	return (value >= minMaxVal);
-			case EisenhowerPaneFilterOperator.LT:	return (value < minMaxVal);
-			case EisenhowerPaneFilterOperator.LTEQ:	return (value <= minMaxVal);
-			}
-
-			Debug.Assert(false);
-			return false;
+			// else
+			return (value <= Cutoff);
 		}
 	}
 
@@ -75,14 +39,32 @@ namespace EisenhowerUIExtension
 
 	public class EisenhowerPaneFilter
 	{
-		public EisenhowerPaneFilterAttribute Attribute1;
-		public EisenhowerPaneFilterAttribute Attribute2;
+		public EisenhowerPaneFilter(EisenhowerPaneFilterAttribute xAttrib,
+									EisenhowerPaneFilterAttribute yAttrib)
+		{
+			Debug.Assert(xAttrib.Id != yAttrib.Id);
 
-		// ------------------------------
+			XAttribute = new EisenhowerPaneFilterAttribute()
+			{
+				Id = xAttrib.Id,
+				Range = xAttrib.Range,
+				Cutoff = xAttrib.Cutoff
+			};
+
+			YAttribute = new EisenhowerPaneFilterAttribute()
+			{
+				Id = yAttrib.Id,
+				Range = yAttrib.Range,
+				Cutoff = yAttrib.Cutoff
+			};
+		}
+
+		public EisenhowerPaneFilterAttribute XAttribute { get; private set; }
+		public EisenhowerPaneFilterAttribute YAttribute { get; private set; }
 
 		public bool TaskMatches(TaskItem task)
 		{
-			return (Attribute1.TaskMatches(task) && Attribute2.TaskMatches(task));
+			return (XAttribute.TaskMatches(task) && YAttribute.TaskMatches(task));
 		}
 	}
 }

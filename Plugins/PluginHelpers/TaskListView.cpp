@@ -49,6 +49,7 @@ const int IMAGE_SIZE = DPIScaling::Scale(16);
 TaskListView::TaskListView()
 	:
 	ListView(),
+	m_Trans(nullptr),
 	m_TaskIcons(nullptr),
 	m_LabelTip(nullptr),
 	m_BoldFont(nullptr),

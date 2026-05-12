@@ -14,13 +14,17 @@ using Abstractspoon.Tdl.PluginHelpers;
 namespace EisenhowerUIExtension
 {
 	public delegate void TaskSelectionEventHandler(Object sender, UInt32 taskId);
+
+	// ---------------------------------------------
 	
 	public partial class EisenhowerPane : UserControl
 	{
 		private TaskItems m_Tasks;
 		private EisenhowerPaneFilter m_Filter;
+		private Translator m_Trans;
 
 		private bool m_ShowMixedCompletionState;
+		private string m_XAttribTitle, m_YAttribTitle;
 
 		// ---------------------------------------------
 
@@ -38,15 +42,18 @@ namespace EisenhowerUIExtension
 			InitializeComponent();
 		}
 
-		public void Initialize(Translator trans, 
-							   TaskItems taskItems, 
-							   UIExtension.TaskIcon taskIcons,
+		public void Initialize(string paneTitle,
 							   Bitmap paneIcon,
-							   EisenhowerPaneFilter filter = null)
+							   Translator trans, 
+							   TaskItems taskItems, 
+							   UIExtension.TaskIcon taskIcons)
 		{
-			m_Tasks = taskItems;
-			m_Filter = filter;
+			m_TitleBar.Text = paneTitle;
 			m_Icon.Image = paneIcon;
+
+			m_Tasks = taskItems;
+			m_Filter = null;
+			m_Trans = trans;
 
 			m_List.Initialize(trans, taskIcons);
 
@@ -63,21 +70,28 @@ namespace EisenhowerUIExtension
 			};
 
 			m_List.GotFocus += (s, e) => { GotFocus?.Invoke(this, new EventArgs()); };
-
-			if (m_Filter != null)
-				RefreshList();
 		}
 
-		public EisenhowerPaneFilter Filter
+		public bool SetFilter(string xAttribTitle,
+							  EisenhowerPaneFilterAttribute xAttrib,
+							  string yAttribTitle,
+							  EisenhowerPaneFilterAttribute yAttrib)
 		{
-			set
+			var newFilter = new EisenhowerPaneFilter(xAttrib, yAttrib);
+
+			if ((m_Filter == null) || !m_Filter.Equals(newFilter))
 			{
-				if (!m_Filter.Equals(value))
-				{
-					m_Filter = value;
-					RefreshList();
-				}
+				m_XAttribTitle = xAttribTitle;
+				m_YAttribTitle = yAttribTitle;
+				m_Filter = newFilter;
+
+				UpdateTitle();
+				RefreshListItems();
+
+				return true;
 			}
+
+			return false; // no change
 		}
 
 		public bool Selected
@@ -130,7 +144,7 @@ namespace EisenhowerUIExtension
 			}
 		}
 
-		public bool RefreshList()
+		public bool RefreshListItems()
 		{
 			m_List.Items.Clear();
 
@@ -148,8 +162,8 @@ namespace EisenhowerUIExtension
 
 					if (lvItem != null)
 					{
-						lvItem.SubItems.Add(m_Filter.Attribute1.MaxValue.ToString());
-						lvItem.SubItems.Add(m_Filter.Attribute2.MaxValue.ToString());
+						lvItem.SubItems.Add(task.GetAttributeValue(m_Filter.XAttribute.Id).ToString());
+						lvItem.SubItems.Add(task.GetAttributeValue(m_Filter.YAttribute.Id).ToString());
 					}
 				}
 			}
@@ -184,5 +198,21 @@ namespace EisenhowerUIExtension
 		{
 			return (bool)EditTaskLabel?.Invoke(sender, taskId);
 		}
+		
+		private void UpdateTitle()
+		{
+			if (m_Filter != null)
+				m_TitleBar.Text = (FormatAttribute(m_XAttribTitle, m_Filter.XAttribute) + " - " + FormatAttribute(m_YAttribTitle, m_Filter.YAttribute));
+		}
+
+		private string FormatAttribute(string title, EisenhowerPaneFilterAttribute attrib)
+		{
+			if (attrib.Range == EisenhowerPaneFilterAttributeRange.High)
+				return string.Format("High {0} (>= {1})", title, attrib.Cutoff);
+
+			// else
+			return string.Format("Low {0} (< {1})", title, attrib.Cutoff);
+		}
+
 	}
 }

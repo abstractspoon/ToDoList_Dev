@@ -43,7 +43,7 @@ namespace EisenhowerUIExtension
 		{
 			InitializeComponent();
 
-			m_Panes = new List<EisenhowerPane>() { m_TopLeftPane, m_TopRightPane, m_BotLeftPane, m_BotRightPane };
+			m_Panes = new List<EisenhowerPane>() { m_TopLeftPane, m_TopRightPane, m_BottomLeftPane, m_BottomRightPane };
 		}
 
 		public void Initialize(Translator trans, UIExtension.TaskIcon icons)
@@ -54,105 +54,11 @@ namespace EisenhowerUIExtension
 			m_DragImage = new DragImage();
 			m_LabelTip = new LabelTip(this);
 
-			// Top-left => High Attrib1 - High Attrib2
-			{
-				// Dummy filter to get us started
-				var filter = new EisenhowerPaneFilter()
-				{
-					Attribute1 = new EisenhowerPaneFilterAttribute(Task.Attribute.Priority)
-					{
-						MaxValue = 10,
-						MaxValueOperator = EisenhowerPaneFilterOperator.LTEQ,
-						MinValue = 5,
-						MinValueOperator = EisenhowerPaneFilterOperator.GTEQ
-					},
-
-					Attribute2 = new EisenhowerPaneFilterAttribute(Task.Attribute.Risk)
-					{
-						MaxValue = 10,
-						MaxValueOperator = EisenhowerPaneFilterOperator.LTEQ,
-						MinValue = 5,
-						MinValueOperator = EisenhowerPaneFilterOperator.GTEQ
-					}
-				};
-
-				m_TopLeftPane.Initialize(m_Trans, m_Tasks, icons, Properties.Resources.TopLeftPane, filter);
-			}
-
-			// Top-right => Low Attrib1 - High Attrib2
-			{
-				// Dummy filter to get us started
-				var filter = new EisenhowerPaneFilter()
-				{
-					Attribute1 = new EisenhowerPaneFilterAttribute(Task.Attribute.Priority)
-					{
-						MaxValue = 5,
-						MaxValueOperator = EisenhowerPaneFilterOperator.LT,
-						MinValue = -2,
-						MinValueOperator = EisenhowerPaneFilterOperator.GTEQ
-					},
-
-					Attribute2 = new EisenhowerPaneFilterAttribute(Task.Attribute.Risk)
-					{
-						MaxValue = 10,
-						MaxValueOperator = EisenhowerPaneFilterOperator.LTEQ,
-						MinValue = 5,
-						MinValueOperator = EisenhowerPaneFilterOperator.GTEQ
-					}
-				};
-
-				m_TopRightPane.Initialize(m_Trans, m_Tasks, icons, Properties.Resources.TopRightPane, filter);
-			}
-
-			// Bottom-left => High Attrib1 - Low Attrib2
-			{
-				// Dummy filter to get us started
-				var filter = new EisenhowerPaneFilter()
-				{
-					Attribute1 = new EisenhowerPaneFilterAttribute(Task.Attribute.Priority)
-					{
-						MaxValue = 10,
-						MaxValueOperator = EisenhowerPaneFilterOperator.LTEQ,
-						MinValue = 5,
-						MinValueOperator = EisenhowerPaneFilterOperator.GTEQ
-					},
-
-					Attribute2 = new EisenhowerPaneFilterAttribute(Task.Attribute.Risk)
-					{
-						MaxValue = 5,
-						MaxValueOperator = EisenhowerPaneFilterOperator.LT,
-						MinValue = -2,
-						MinValueOperator = EisenhowerPaneFilterOperator.GTEQ
-					}
-				};
-
-				m_BotLeftPane.Initialize(m_Trans, m_Tasks, icons, Properties.Resources.BotLeftPane, filter);
-			}
-
-			// Bottom-right => Low Attrib1 - Low Attrib2
-			{
-				// Dummy filter to get us started
-				var filter = new EisenhowerPaneFilter()
-				{
-					Attribute1 = new EisenhowerPaneFilterAttribute(Task.Attribute.Priority)
-					{
-						MaxValue = 5,
-						MaxValueOperator = EisenhowerPaneFilterOperator.LT,
-						MinValue = -2,
-						MinValueOperator = EisenhowerPaneFilterOperator.GTEQ
-					},
-
-					Attribute2 = new EisenhowerPaneFilterAttribute(Task.Attribute.Risk)
-					{
-						MaxValue = 5,
-						MaxValueOperator = EisenhowerPaneFilterOperator.LT,
-						MinValue = -2,
-						MinValueOperator = EisenhowerPaneFilterOperator.GTEQ
-					}
-				};
-
-				m_BotRightPane.Initialize(m_Trans, m_Tasks, icons, Properties.Resources.BotRightPane, filter);
-			}
+			// Panes
+			m_TopLeftPane.Initialize("Top-Left Pane", Properties.Resources.TopLeftPane, m_Trans, m_Tasks, icons);
+			m_TopRightPane.Initialize("Top-Right Pane", Properties.Resources.TopRightPane, m_Trans, m_Tasks, icons);
+			m_BottomLeftPane.Initialize("Bottom-Left Pane", Properties.Resources.BotLeftPane, m_Trans, m_Tasks, icons);
+			m_BottomRightPane.Initialize("Bottom-Right Pane", Properties.Resources.BotRightPane, m_Trans, m_Tasks, icons);
 
 			// Callbacks
 			m_Panes.ForEach(p => 
@@ -162,11 +68,46 @@ namespace EisenhowerUIExtension
 				p.EditTaskLabel += new EditTaskLabelEventHandler(OnPaneEditTaskLabel);
 				p.SelectionChange += new TaskSelectionEventHandler(OnPaneSelectionChange);
 
-				p.GotFocus += (s, e) =>
-				{
-					SelectedPane = (s as EisenhowerPane);
-				};
+				p.GotFocus += (s, e) => { SelectedPane = (s as EisenhowerPane);	};
 			});
+		}
+
+		public void SetFilter(string xAttribTitle, string xAttribId,
+							  string yAttribTitle, string yAttribId)
+		{
+			// Top-left => High Attrib1 - High Attrib2
+			var xAttrib = new EisenhowerPaneFilterAttribute()
+			{
+				Id = xAttribId,
+				Range = EisenhowerPaneFilterAttributeRange.High,
+				Cutoff = 5
+			};
+
+			var yAttrib = new EisenhowerPaneFilterAttribute()
+			{
+				Id = yAttribId,
+				Range = EisenhowerPaneFilterAttributeRange.High,
+				Cutoff = 5
+			};
+
+			m_TopLeftPane.SetFilter(xAttribTitle, xAttrib, yAttribTitle, yAttrib);
+
+			// Top-right => Low Attrib1 - High Attrib2
+			xAttrib.Range = EisenhowerPaneFilterAttributeRange.Low;
+
+			m_TopRightPane.SetFilter(xAttribTitle, xAttrib, yAttribTitle, yAttrib);
+
+			// Bottom-left => High Attrib1 - Low Attrib2
+			xAttrib.Range = EisenhowerPaneFilterAttributeRange.High;
+			yAttrib.Range = EisenhowerPaneFilterAttributeRange.Low;
+
+			// Dummy filter to get us started
+			m_BottomLeftPane.SetFilter(xAttribTitle, xAttrib, yAttribTitle, yAttrib);
+
+			// Bottom-right => Low Attrib1 - Low Attrib2
+			xAttrib.Range = EisenhowerPaneFilterAttributeRange.Low;
+
+			m_BottomRightPane.SetFilter(xAttribTitle, xAttrib, yAttribTitle, yAttrib);
 		}
 
 		public void SetUITheme(UITheme theme)
@@ -580,7 +521,7 @@ namespace EisenhowerUIExtension
 			botLeftRect.Width = topLeftRect.Width;
 			botLeftRect.Height = (Height - botLeftRect.Y);
 
-			m_BotLeftPane.Bounds = botLeftRect;
+			m_BottomLeftPane.Bounds = botLeftRect;
 
 			// Bottom-right
 			Rectangle botRightRect = ClientRectangle;
@@ -590,7 +531,7 @@ namespace EisenhowerUIExtension
 			botRightRect.Width = topRightRect.Width;
 			botRightRect.Height = botLeftRect.Height;
 
-			m_BotRightPane.Bounds = botRightRect;
+			m_BottomRightPane.Bounds = botRightRect;
 
 			Update();
 		}
@@ -755,13 +696,10 @@ namespace EisenhowerUIExtension
 				task = task.GetNextTask();
 
 			// Only Update the panes if the attributes we are tracking were changed
-			// TODO
 			if (changedTaskIds.Count > 0)
 			{
-				m_TopLeftPane.RefreshList();
-				m_TopRightPane.RefreshList();
-				m_BotLeftPane.RefreshList();
-				m_BotRightPane.RefreshList();
+				// TODO
+				m_Panes.ForEach(p => p.RefreshListItems());
 			}
 		}
 
@@ -990,6 +928,5 @@ namespace EisenhowerUIExtension
 
 			base.OnDragLeave(e);
 		}
-
 	}
 }

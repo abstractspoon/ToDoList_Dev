@@ -38,9 +38,12 @@ namespace EisenhowerUIExtension
 			m_EisenhowerCtrl.EditTaskIcon += new EditTaskIconEventHandler(OnEisenhowerCtrlEditTaskIcon);
 			m_EisenhowerCtrl.EditTaskLabel += new EditTaskLabelEventHandler(OnEisenhowerCtrlEditTaskLabel);
 			m_EisenhowerCtrl.SelectionChange += new TaskSelectionEventHandler(OnEisenhowerCtrlSelectionChange);
+
+			// Dummy filter to get us started
+			m_EisenhowerCtrl.SetFilter("Priority", "Priority", "Risk", "Risk");
 		}
 
-		public bool SelectTask(uint taskID)
+	public bool SelectTask(uint taskID)
 		{
 			return m_EisenhowerCtrl.SelectTask(taskID);
 		}

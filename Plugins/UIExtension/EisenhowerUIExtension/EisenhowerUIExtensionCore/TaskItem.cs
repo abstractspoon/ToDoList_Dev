@@ -31,7 +31,6 @@ namespace EisenhowerUIExtension
 		public String Title { get; private set; }
 		public String Position { get; private set; }
 		public uint Id { get; private set; }
-//         public uint ParentID { get; private set; }
 		public Color TextColor { get; private set; }
 		public bool HasIcon { get; private set; }
 		public bool IsFlagged { get; private set; }
@@ -39,10 +38,8 @@ namespace EisenhowerUIExtension
         public bool SomeSubtasksDone { get; private set; }
 		public bool IsLocked { get; private set; }
 		public bool IsDone { get; private set; }
-		public int Priority { get; private set; }
-		public int Risk { get; private set; }
 
-		private Dictionary<String, int> m_CustAttribValues;
+		private Dictionary<String, double> m_AttribValues = new Dictionary<String, double>();
 
 		// -----------------------------------------------------------------
 
@@ -57,8 +54,6 @@ namespace EisenhowerUIExtension
 			IsParent = false;
             SomeSubtasksDone = false;
 			IsLocked = false;
-			Priority = -2;
-			Risk = -2;
 		}
 
 		public TaskItem(Task task)
@@ -72,8 +67,14 @@ namespace EisenhowerUIExtension
 			IsParent = task.IsParent();
             SomeSubtasksDone = task.HasSomeSubtasksDone();
 			IsLocked = task.IsLocked(true);
-			Priority = task.GetPriority(false); // TODO
-			Risk = task.GetRisk(false); // TODO
+
+			SetAttributeValue("Priority", task.GetPriority(false)); // TODO
+			SetAttributeValue("Risk", task.GetRisk(false)); // TODO
+
+			if (task.IsAttributeAvailable(Task.Attribute.CustomAttribute))
+			{
+				// TODO
+			}
 		}
 
 		public override string ToString() 
@@ -83,6 +84,21 @@ namespace EisenhowerUIExtension
 #else
 			return Title;
 #endif
+		}
+
+		public double GetAttributeValue(string attribId)
+		{
+			double value;
+
+			if (m_AttribValues.TryGetValue(attribId.ToUpper(), out value))
+				return value;
+
+			return 0.0;
+		}
+
+		private void SetAttributeValue(string attribId, double value)
+		{
+			m_AttribValues[attribId.ToUpper()] = value;
 		}
 
 		public void Update(Task task, HashSet<Task.Attribute> attribs)
@@ -108,19 +124,21 @@ namespace EisenhowerUIExtension
 				TextColor = task.GetTextDrawingColor();
 
 			if (task.IsAttributeAvailable(Task.Attribute.Priority))
-				Priority = task.GetPriority(false); // TODO
+				SetAttributeValue("Priority", task.GetPriority(false)); // TODO
 
 			if (task.IsAttributeAvailable(Task.Attribute.Risk))
-				Risk = task.GetRisk(false); // TODO
-
-			//if (task.IsAttributeAvailable(Task.Attribute.CustomAttribute))
-			//	CustAttribValues...; // TODO
+				SetAttributeValue("Risk", task.GetRisk(false)); // TODO
 
 			if (task.IsAttributeAvailable(Task.Attribute.DoneDate))
                 IsDone = task.IsDone();
 
 			if (task.IsAttributeAvailable(Task.Attribute.SubtaskDone))
                 SomeSubtasksDone = task.HasSomeSubtasksDone();
+
+			if (task.IsAttributeAvailable(Task.Attribute.CustomAttribute))
+			{
+				// TODO
+			}
 
 			IsParent = task.IsParent();
 			IsLocked = task.IsLocked(true);

@@ -30,8 +30,8 @@
 		{
 			this.m_TopRightPane = new EisenhowerUIExtension.EisenhowerPane();
 			this.m_TopLeftPane = new EisenhowerUIExtension.EisenhowerPane();
-			this.m_BotRightPane = new EisenhowerUIExtension.EisenhowerPane();
-			this.m_BotLeftPane = new EisenhowerUIExtension.EisenhowerPane();
+			this.m_BottomRightPane = new EisenhowerUIExtension.EisenhowerPane();
+			this.m_BottomLeftPane = new EisenhowerUIExtension.EisenhowerPane();
 			this.SuspendLayout();
 			// 
 			// m_TopRightPane
@@ -52,30 +52,30 @@
 			this.m_TopLeftPane.Size = new System.Drawing.Size(202, 155);
 			this.m_TopLeftPane.TabIndex = 2;
 			// 
-			// m_BotRightPane
+			// m_BottomRightPane
 			// 
-			this.m_BotRightPane.Anchor = System.Windows.Forms.AnchorStyles.None;
-			this.m_BotRightPane.Location = new System.Drawing.Point(206, 159);
-			this.m_BotRightPane.Margin = new System.Windows.Forms.Padding(0);
-			this.m_BotRightPane.Name = "m_BotRightPane";
-			this.m_BotRightPane.Size = new System.Drawing.Size(201, 155);
-			this.m_BotRightPane.TabIndex = 3;
+			this.m_BottomRightPane.Anchor = System.Windows.Forms.AnchorStyles.None;
+			this.m_BottomRightPane.Location = new System.Drawing.Point(206, 159);
+			this.m_BottomRightPane.Margin = new System.Windows.Forms.Padding(0);
+			this.m_BottomRightPane.Name = "m_BottomRightPane";
+			this.m_BottomRightPane.Size = new System.Drawing.Size(201, 155);
+			this.m_BottomRightPane.TabIndex = 3;
 			// 
-			// m_BotLeftPane
+			// m_BottomLeftPane
 			// 
-			this.m_BotLeftPane.Anchor = System.Windows.Forms.AnchorStyles.None;
-			this.m_BotLeftPane.Location = new System.Drawing.Point(0, 159);
-			this.m_BotLeftPane.Margin = new System.Windows.Forms.Padding(0);
-			this.m_BotLeftPane.Name = "m_BotLeftPane";
-			this.m_BotLeftPane.Size = new System.Drawing.Size(202, 155);
-			this.m_BotLeftPane.TabIndex = 4;
+			this.m_BottomLeftPane.Anchor = System.Windows.Forms.AnchorStyles.None;
+			this.m_BottomLeftPane.Location = new System.Drawing.Point(0, 159);
+			this.m_BottomLeftPane.Margin = new System.Windows.Forms.Padding(0);
+			this.m_BottomLeftPane.Name = "m_BottomLeftPane";
+			this.m_BottomLeftPane.Size = new System.Drawing.Size(202, 155);
+			this.m_BottomLeftPane.TabIndex = 4;
 			// 
 			// EisenhowerControl
 			// 
 			this.Controls.Add(this.m_TopRightPane);
 			this.Controls.Add(this.m_TopLeftPane);
-			this.Controls.Add(this.m_BotRightPane);
-			this.Controls.Add(this.m_BotLeftPane);
+			this.Controls.Add(this.m_BottomRightPane);
+			this.Controls.Add(this.m_BottomLeftPane);
 			this.Margin = new System.Windows.Forms.Padding(0);
 			this.Name = "EisenhowerControl";
 			this.Size = new System.Drawing.Size(407, 313);
@@ -87,7 +87,7 @@
 
 		private EisenhowerPane m_TopRightPane;
 		private EisenhowerPane m_TopLeftPane;
-		private EisenhowerPane m_BotRightPane;
-		private EisenhowerPane m_BotLeftPane;
+		private EisenhowerPane m_BottomRightPane;
+		private EisenhowerPane m_BottomLeftPane;
 	}
 }
