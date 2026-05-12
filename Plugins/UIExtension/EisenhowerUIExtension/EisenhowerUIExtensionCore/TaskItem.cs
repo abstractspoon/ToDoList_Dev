@@ -68,8 +68,10 @@ namespace EisenhowerUIExtension
             SomeSubtasksDone = task.HasSomeSubtasksDone();
 			IsLocked = task.IsLocked(true);
 
+			// Filterable attributes
 			SetAttributeValue("Priority", task.GetPriority(false)); // TODO
 			SetAttributeValue("Risk", task.GetRisk(false)); // TODO
+			SetAttributeValue("Cost", task.GetCost(false)); // TODO
 
 			if (task.IsAttributeAvailable(Task.Attribute.CustomAttribute))
 			{
@@ -123,17 +125,21 @@ namespace EisenhowerUIExtension
 			if (task.IsAttributeAvailable(Task.Attribute.Color))
 				TextColor = task.GetTextDrawingColor();
 
+			if (task.IsAttributeAvailable(Task.Attribute.DoneDate))
+                IsDone = task.IsDone();
+
+			if (task.IsAttributeAvailable(Task.Attribute.SubtaskDone))
+                SomeSubtasksDone = task.HasSomeSubtasksDone();
+
+			// Filterable attributes
 			if (task.IsAttributeAvailable(Task.Attribute.Priority))
 				SetAttributeValue("Priority", task.GetPriority(false)); // TODO
 
 			if (task.IsAttributeAvailable(Task.Attribute.Risk))
 				SetAttributeValue("Risk", task.GetRisk(false)); // TODO
 
-			if (task.IsAttributeAvailable(Task.Attribute.DoneDate))
-                IsDone = task.IsDone();
-
-			if (task.IsAttributeAvailable(Task.Attribute.SubtaskDone))
-                SomeSubtasksDone = task.HasSomeSubtasksDone();
+			if (task.IsAttributeAvailable(Task.Attribute.Cost))
+				SetAttributeValue("Risk", task.GetCost(false)); // TODO
 
 			if (task.IsAttributeAvailable(Task.Attribute.CustomAttribute))
 			{

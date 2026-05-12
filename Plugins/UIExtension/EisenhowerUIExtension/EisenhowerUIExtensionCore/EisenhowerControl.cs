@@ -247,7 +247,6 @@ namespace EisenhowerUIExtension
 			// Note: lock state is always provided
 			case Task.Attribute.Title:
 			case Task.Attribute.Icon:
-			case Task.Attribute.Flag:
 			case Task.Attribute.Color:
 			case Task.Attribute.DoneDate:
 			case Task.Attribute.Position:
@@ -255,6 +254,7 @@ namespace EisenhowerUIExtension
 			case Task.Attribute.CustomAttribute:
 			case Task.Attribute.Priority:
 			case Task.Attribute.Risk:
+			case Task.Attribute.Cost:
 				return true;
 			}
 
