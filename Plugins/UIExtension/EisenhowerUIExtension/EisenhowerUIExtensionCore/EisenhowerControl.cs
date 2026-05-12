@@ -278,15 +278,23 @@ namespace EisenhowerUIExtension
 			return taskId;
 		}
 
-		public Rectangle GetSelectedItemLabelRect()
+		public Rectangle SelectedItemLabelRect
 		{
-			var pane = SelectedPane;
+			get
+			{
+				var pane = SelectedPane;
 
-			if (pane == null)
+				if (pane != null)
+				{
+					var labelRect = pane.SelectedItemLabelRect;
+
+					if (!labelRect.IsEmpty)
+						return RectangleToClient(pane.RectangleToScreen(labelRect));
+				}
+
+				// else
 				return Rectangle.Empty;
-
-			// else
-			return pane.GetSelectedItemLabelRect();
+			}
 		}
 
 		public bool SelectTask(String text, UIExtension.SelectTask selectTask, bool caseSensitive, bool wholeWord, bool findReplace)

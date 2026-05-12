@@ -405,7 +405,7 @@ namespace WordCloudUIExtension
 
 		public bool GetLabelEditRect(ref Int32 left, ref Int32 top, ref Int32 right, ref Int32 bottom)
 		{
-			Rectangle editRect = m_TaskMatchesList.GetSelectedTaskLabelRect(true); // screen coords
+			Rectangle editRect = m_TaskMatchesList.SelectedTaskLabelRect;
 
 			if (!editRect.IsEmpty)
 			{

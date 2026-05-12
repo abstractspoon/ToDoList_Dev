@@ -136,9 +136,17 @@ namespace EisenhowerUIExtension
 			return m_List.SelectTaskEx(text, selectTask, caseSensitive, wholeWord, wholeWord);
 		}
 
-		public Rectangle GetSelectedItemLabelRect()
+		public Rectangle SelectedItemLabelRect
 		{
-			return m_List.GetSelectedTaskLabelRect(true); // screen coords
+			get
+			{
+				var labelRect = m_List.SelectedTaskLabelRect;
+
+				if (!labelRect.IsEmpty)
+					return RectangleToClient(m_List.RectangleToScreen(labelRect));
+
+				return Rectangle.Empty;
+			}
 		}
 
 		public bool SelectTasks(uint[] taskIDs)
