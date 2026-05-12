@@ -68,7 +68,7 @@ namespace EisenhowerUIExtension
 				p.EditTaskLabel += new EditTaskLabelEventHandler(OnPaneEditTaskLabel);
 				p.SelectionChange += new TaskSelectionEventHandler(OnPaneSelectionChange);
 
-				p.GotFocus += (s, e) => { SelectedPane = (s as EisenhowerPane);	};
+				p.GotFocus += new EventHandler(OnPaneGotFocus);
 			});
 		}
 
@@ -308,6 +308,31 @@ namespace EisenhowerUIExtension
 			return false;
 		}
 
+		public new bool Focus()
+		{
+			if (Focused)
+				return false;
+
+			// else
+			var pane = SelectedPane;
+
+			if (pane == null)
+				pane = m_Panes[0];
+
+			return pane.Focus();
+		}
+
+		public new bool Focused
+		{
+			get
+			{
+				bool focused = false;
+				m_Panes.ForEach(p => focused |= p.Focused);
+
+				return focused;
+			}
+		}
+
 		public bool CanSaveToImage()
 		{
 			return (m_Tasks.Count != 0);
@@ -345,6 +370,28 @@ namespace EisenhowerUIExtension
 		private void OnPaneSelectionChange(object sender, uint taskId)
 		{
 			SelectionChange?.Invoke(sender, taskId);
+		}
+
+		private void OnPaneGotFocus(object sender, EventArgs e)
+		{
+			// Prevent selection from moving to a pane without a selected task
+			var pane = (sender as EisenhowerPane);
+
+			if (pane != null)
+			{
+				if (pane.HasSelection)
+				{
+					SelectedPane = pane;
+					SelectionChange?.Invoke(this, pane.SelectedTaskId);
+				}
+				else
+				{
+					var selPane = SelectedPane;
+
+					if (selPane != null)
+						selPane.Focus();
+				}
+			}
 		}
 
 		protected override void OnSizeChanged(EventArgs e)

@@ -64,6 +64,7 @@ namespace Abstractspoon
 				property bool ShowCompletionCheckboxes { bool get(); void set(bool value); }
 				property bool ShowLabelTips { bool get(); void set(bool value); }
 
+				property Drawing::Rectangle SelectedTaskLabelRect { Drawing::Rectangle get(); }
 				property Drawing::Color GridlineColor { Drawing::Color get(); void set(Drawing::Color value); }
 				property Drawing::Color AlternateLineColor { Drawing::Color get(); void set(Drawing::Color value); }
 

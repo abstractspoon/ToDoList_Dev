@@ -167,14 +167,14 @@ namespace EisenhowerUIExtension
 			m_EisenhowerCtrl.LoadPreferences(prefs, key, appOnly);
 		}
 
-		public new bool Focus()
-		{
-			if (Focused)
-				return false;
-
-			// else
-			return m_EisenhowerCtrl.Focus();
-		}
+// 		public new bool Focus()
+// 		{
+// 			if (Focused)
+// 				return false;
+// 
+// 			// else
+// 			return m_EisenhowerCtrl.Focus();
+// 		}
 
 		public new bool Focused
 		{
@@ -211,6 +211,13 @@ namespace EisenhowerUIExtension
 		}
 
 		// Message handlers ---------------------------------------------------
+
+		protected override void OnGotFocus(EventArgs e)
+		{
+			base.OnGotFocus(e);
+
+			m_EisenhowerCtrl.Focus();
+		}
 
 		protected override void OnSizeChanged(EventArgs e)
 		{

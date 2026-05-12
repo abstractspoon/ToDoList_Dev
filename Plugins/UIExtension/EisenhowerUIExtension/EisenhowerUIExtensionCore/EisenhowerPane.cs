@@ -112,7 +112,9 @@ namespace EisenhowerUIExtension
 		public bool TaskColorIsBackground		{ set { m_List.TaskColorIsBackground = value; } }
 		public bool ShowParentsAsFolders		{ set { m_List.ShowParentsAsFolders = value; } }
 		public bool ShowCompletionCheckboxes	{ set { m_List.ShowCompletionCheckboxes = value; } }
+
 		public bool HasSelection				{ get { return (m_List.SelectedItems.Count > 0); } }
+		public uint SelectedTaskId				{ get {	return m_List.SelectedTaskId; } }
 
 		public bool ShowMixedCompletionState
 		{
@@ -163,6 +165,20 @@ namespace EisenhowerUIExtension
 		public uint GetTaskId(UIExtension.GetTask getTask)
 		{
 			return m_List.GetTaskIdEx(getTask);
+		}
+
+		public new bool Focus()
+		{
+			if (Focused)
+				return false;
+
+			// else
+			return m_List.Focus();
+		}
+
+		public new bool Focused
+		{
+			get { return m_List.Focused; }
 		}
 
 		public bool RefreshListItems()

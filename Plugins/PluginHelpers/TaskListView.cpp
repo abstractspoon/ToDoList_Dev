@@ -170,6 +170,8 @@ bool TaskListView::SelectTask(UInt32 taskId)
 		return false;
 
 	lvItem->Selected = true;
+	lvItem->Focused = true;
+
 	EnsureSelectionVisible();
 
 	return true;
@@ -208,17 +210,13 @@ ITaskBase^ TaskListView::SelectedTask::get()
 	return ASTYPE(SelectedItems[0]->Tag, ITaskBase);
 }
 
-Drawing::Rectangle TaskListView::GetSelectedTaskLabelRect(bool screenCoords)
+Drawing::Rectangle TaskListView::SelectedTaskLabelRect::get()
 {
-	if (SelectedItems->Count == 0)
-		return Drawing::Rectangle::Empty;
+	if (SelectedItems->Count > 0)
+		return CalcLabelTextRect(SelectedItems[0]->GetBounds(ItemBoundsPortion::Label), false);
 
-	auto labelRect = CalcLabelTextRect(SelectedItems[0]->GetBounds(ItemBoundsPortion::Label), false);
-	
-	if (screenCoords)
-		labelRect = RectangleToScreen(labelRect);
-
-	return labelRect;
+	//else 
+	return Drawing::Rectangle::Empty;
 }
 
 ListViewItem^ TaskListView::FindLVItem(UInt32 taskId)
@@ -318,7 +316,7 @@ Drawing::Rectangle TaskListView::CalcLabelTextRect(Drawing::Rectangle labelRect,
 {
 	Drawing::Rectangle textRect = labelRect;
 
-	textRect.X = 2;
+	textRect.X += 2;
 	textRect.X += CheckboxOffset;
 	textRect.X += TextIconOffset;
 
