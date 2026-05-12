@@ -61,9 +61,6 @@
 			// m_List
 			// 
 			this.m_List.AlternateLineColor = System.Drawing.Color.Empty;
-			this.m_List.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
 			this.m_List.CausesValidation = false;
 			this.m_List.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader1,

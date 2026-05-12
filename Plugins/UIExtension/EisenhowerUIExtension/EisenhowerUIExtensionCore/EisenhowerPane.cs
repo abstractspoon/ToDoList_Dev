@@ -195,6 +195,27 @@ namespace EisenhowerUIExtension
 				m_TitleBar.Font = new Font(Font, (Selected ? FontStyle.Bold : FontStyle.Regular));
 
 			m_List.Font = Font;
+			ResizeList();
+		}
+
+		private void ResizeList()
+		{
+			// Winforms scales the list size whenever the font changes 
+			// but without resizing it to fit within the pane's extents.
+			// So we do it ourselves
+			var listRect = m_List.Bounds;
+
+			listRect.Width = Width;
+			listRect.Height = (Height - listRect.Top);
+
+			m_List.Bounds = listRect;
+		}
+
+		protected override void OnSizeChanged(EventArgs e)
+		{
+			base.OnSizeChanged(e);
+
+			ResizeList();
 		}
 
 		private bool OnTaskMatchesEditTaskDone(object sender, UInt32 taskId, bool completed)

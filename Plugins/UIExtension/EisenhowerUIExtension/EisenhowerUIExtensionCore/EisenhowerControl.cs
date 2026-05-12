@@ -24,9 +24,8 @@ namespace EisenhowerUIExtension
 		private LabelTip m_LabelTip;
 
 		private bool m_DraggingHorzSplitBar, m_DraggingVertSplitBar;
-
 		private DragImage m_DragImage;
-		private Point m_SplitPos = new Point(50, 50); // 0-100
+		private Point m_SplitPos;
 
 		private List<EisenhowerPane> m_Panes;
 
@@ -44,6 +43,7 @@ namespace EisenhowerUIExtension
 			InitializeComponent();
 
 			m_Panes = new List<EisenhowerPane>() { m_TopLeftPane, m_TopRightPane, m_BottomLeftPane, m_BottomRightPane };
+			m_SplitPos = new Point(50, 50); // 0-100
 		}
 
 		public void Initialize(Translator trans, UIExtension.TaskIcon icons)
