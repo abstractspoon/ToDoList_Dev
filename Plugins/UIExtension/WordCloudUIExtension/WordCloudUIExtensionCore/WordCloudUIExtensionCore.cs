@@ -310,20 +310,7 @@ namespace WordCloudUIExtension
 
 		public bool GetTask(UIExtension.GetTask getTask, ref UInt32 taskId)
 		{
-			taskId = 0;
-
-			switch (getTask)
-			{
-				case UIExtension.GetTask.GetNextTask:
-				case UIExtension.GetTask.GetNextVisibleTask:
-					taskId = m_TaskMatchesList.GetNextTaskId(m_TaskMatchesList.SelectedTaskId, true);
-					break;
-
-				case UIExtension.GetTask.GetPrevTask:
-				case UIExtension.GetTask.GetPrevVisibleTask:
-					taskId = m_TaskMatchesList.GetNextTaskId(m_TaskMatchesList.SelectedTaskId, false);
-					break;
-			}
+			taskId = m_TaskMatchesList.GetTaskIdEx(getTask);
 
 			return (taskId != 0);
 		}
@@ -418,7 +405,7 @@ namespace WordCloudUIExtension
 
 		public bool GetLabelEditRect(ref Int32 left, ref Int32 top, ref Int32 right, ref Int32 bottom)
 		{
-			Rectangle editRect = m_TaskMatchesList.SelectedTaskLabelRect;
+			Rectangle editRect = m_TaskMatchesList.GetSelectedTaskLabelRect(true); // screen coords
 
 			if (!editRect.IsEmpty)
 			{

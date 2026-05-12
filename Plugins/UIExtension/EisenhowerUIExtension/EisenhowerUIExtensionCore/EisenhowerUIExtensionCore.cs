@@ -43,9 +43,9 @@ namespace EisenhowerUIExtension
 			m_EisenhowerCtrl.SetFilter("Priority", "Priority", "Risk", "Risk");
 		}
 
-	public bool SelectTask(uint taskID)
+		public bool SelectTask(uint taskId)
 		{
-			return m_EisenhowerCtrl.SelectTask(taskID);
+			return m_EisenhowerCtrl.SelectTask(taskId);
 		}
 
 		public bool SelectTasks(uint[] taskIDs)
@@ -117,8 +117,8 @@ namespace EisenhowerUIExtension
 			top = labelRect.Top;
 			right = labelRect.Right;
 			bottom = labelRect.Bottom;
-			
-			  return true;
+
+			return true;
 		}
 
 		public UIExtension.HitTestResult HitTest(Int32 xPos, Int32 yPos, UIExtension.HitTestReason reason)
@@ -183,17 +183,21 @@ namespace EisenhowerUIExtension
 
 		public bool CanMoveTask(UInt32 taskId, UInt32 destParentId, UInt32 destPrevSiblingId)
 		{
+			// Not supported
 			return false;
 		}
 
 		public bool MoveTask(UInt32 taskId, UInt32 destParentId, UInt32 destPrevSiblingId)
 		{
+			// Not supported
 			return false;
 		}
 
-		public bool GetTask(UIExtension.GetTask getTask, ref UInt32 taskID)
+		public bool GetTask(UIExtension.GetTask getTask, ref UInt32 taskId)
 		{
-			return m_EisenhowerCtrl.GetTask(getTask, ref taskID);
+			taskId = m_EisenhowerCtrl.GetTaskId(getTask);
+
+			return (taskId != 0);
 		}
 
 		public Bitmap SaveToImage()

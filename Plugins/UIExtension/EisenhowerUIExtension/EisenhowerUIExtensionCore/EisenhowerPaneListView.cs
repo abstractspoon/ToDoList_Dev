@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Windows.Forms;
+using System.Drawing;
 
 using Abstractspoon.Tdl.PluginHelpers;
 
@@ -28,13 +29,21 @@ namespace EisenhowerUIExtension
 				if (m_Selected != value)
 				{
 					m_Selected = value;
-
-					// Change title font to Bold
-					// TODO
-
 					Invalidate();
 				}
 			}
+		}
+
+		public uint HitTestTask(Point screenPos)
+		{
+			Point ptClient = PointToClient(screenPos);
+			var lvHit = HitTest(ptClient);
+
+			if (lvHit.Item != null)
+				return GetTaskId(lvHit.Item.Index);
+
+			// else
+			return 0;
 		}
 
 		// --------------------------------------------------------

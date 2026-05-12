@@ -264,170 +264,39 @@ namespace EisenhowerUIExtension
 
 		public uint HitTestTask(Point screenPos)
 		{
-			// var clientPos = PointToClient(screenPos);
-			// var node = HitTestPositions(clientPos);
-			// 
-			// if (node != null)
-			// 	return UniqueID(node);
+			uint taskId = 0;
+			m_Panes.ForEach(p => { taskId |= p.HitTestTask(screenPos); } );
 
-			// else
-			return 0;
+			return taskId;
+		}
+
+		public uint GetTaskId(UIExtension.GetTask getTask)
+		{
+			uint taskId = 0;
+			m_Panes.ForEach(p => { taskId |= p.GetTaskId(getTask); });
+
+			return taskId;
 		}
 
 		public Rectangle GetSelectedItemLabelRect()
 		{
-			// EnsureItemVisible(SelectedItem);
-			// return GetItemLabelRect(SelectedNode);
-			return Rectangle.Empty;
+			var pane = SelectedPane;
+
+			if (pane == null)
+				return Rectangle.Empty;
+
+			// else
+			return pane.GetSelectedItemLabelRect();
 		}
 
 		public bool SelectTask(String text, UIExtension.SelectTask selectTask, bool caseSensitive, bool wholeWord, bool findReplace)
 		{
-			// if ((text == String.Empty) || IsEmpty())
-			//     return false;
-			// 
-			// TreeNode node = null; // start node
-			// bool forward = true;
-			// 
-			// switch (selectTask)
-			//    {
-			//    case UIExtension.SelectTask.SelectFirstTask:
-			// 	node = RootNode.Nodes[0];
-			//        break;
-			// 
-			//    case UIExtension.SelectTask.SelectNextTask:
-			// 	node = TreeCtrl.GetNextItem(SelectedNode, false); // no wrap
-			//        break;
-			// 
-			//    case UIExtension.SelectTask.SelectNextTaskInclCurrent:
-			// 	node = SelectedNode;
-			// 	break;
-			// 
-			//    case UIExtension.SelectTask.SelectPrevTask:
-			// 	node = TreeCtrl.GetPrevItem(SelectedNode, false); // no wrap
-			// 
-			// 	if ((node == null) || ((node == RootNode) && !NodeIsTask(RootNode)))
-			// 		node = LastNode;
-			// 
-			// 	forward = false;
-			// 	break;
-			// 
-			//    case UIExtension.SelectTask.SelectLastTask:
-			// 	node = LastNode;
-			// 	forward = false;
-			// 	break;
-			//    }
-			// 
-			// // Avoid recursion
-			// while (node != null)
-			// { 
-			// 	if (StringUtil.Find(node.Text, text, caseSensitive, wholeWord))
-			// 	{
-			// 		SelectedNode = node;
-			// 		return true;
-			// 	}
-			// 
-			// 	if (forward)
-			// 		node = TreeCtrl.GetNextItem(node, false); // no wrap
-			// 	else
-			// 		node = TreeCtrl.GetPrevItem(node, false); // no wrap
-			// }
+			foreach (var p in m_Panes)
+			{
+				if (p.SelectTask(text, selectTask, caseSensitive, wholeWord, findReplace))
+					return true;
+			}
 
-			return false;
-		}
-
-		protected bool SelectNextTask(string startingWith)
-		{
-			// if (IsEmpty())
-			// 	return false;
-			// 
-			// TreeNode next = TreeCtrl.GetNextVisibleItem(SelectedNode, true); // wrap
-			// 
-			// while ((next != null) && (next != SelectedNode))
-			// {
-			// 	if (TaskItem(next).ID == 0)
-			// 	{
-			// 		// Skip root node
-			// 	}
-			// 	else if (next.Text.StartsWith(startingWith, StringComparison.InvariantCultureIgnoreCase))
-			// 	{
-			// 		SelectedNode = next;
-			// 		return true;
-			// 	}
-			// 
-			// 	next = TreeCtrl.GetNextVisibleItem(next, true); // wrap
-			// }
-
-			return false;
-		}
-
-		public bool GetTask(UIExtension.GetTask getTask, ref uint taskID)
-		{
-			// TreeNode node = FindNode(taskID);
-			// 
-			// if (node == null)
-			// 	return false;
-			// 
-			// switch (getTask)
-			// {
-			// 	case UIExtension.GetTask.GetNextTask:
-			// 		if (node.NextNode != null)
-			// 		{
-			// 			taskID = UniqueID(node.NextNode);
-			// 			return true;
-			// 		}
-			// 		break;
-			// 
-			// 	case UIExtension.GetTask.GetPrevTask:
-			// 		if (node.PrevNode != null)
-			// 		{
-			// 			taskID = UniqueID(node.PrevNode);
-			// 			return true;
-			// 		}
-			// 		break;
-			// 
-			// 	case UIExtension.GetTask.GetNextVisibleTask:
-			// 		if (node.NextVisibleNode != null)
-			// 		{
-			// 			taskID = UniqueID(node.NextVisibleNode);
-			// 			return true;
-			// 		}
-			// 		break;
-			// 
-			// 	case UIExtension.GetTask.GetPrevVisibleTask:
-			// 		if (node.PrevVisibleNode != null)
-			// 		{
-			// 			taskID = UniqueID(node.PrevVisibleNode);
-			// 			return true;
-			// 		}
-			// 		break;
-			// 
-			// 	case UIExtension.GetTask.GetNextTopLevelTask:
-			// 		{
-			// 			var topLevelParent = TopLevelParent(node);
-			// 
-			// 			if ((topLevelParent != null) && (topLevelParent.NextNode != null))
-			// 			{
-			// 				taskID = UniqueID(topLevelParent.NextNode);
-			// 				return true;
-			// 			}
-			// 		}
-			// 		break;
-			// 
-			// 	case UIExtension.GetTask.GetPrevTopLevelTask:
-			// 		{
-			// 			var topLevelParent = TopLevelParent(node);
-			// 
-			// 			if ((topLevelParent != null) && (topLevelParent.PrevNode != null))
-			// 			{
-			// 				taskID = UniqueID(topLevelParent.PrevNode);
-			// 				return true;
-			// 			}
-			// 		}
-			// 		break;
-			// }
-
-			// all else
 			return false;
 		}
 

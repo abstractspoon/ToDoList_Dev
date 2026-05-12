@@ -112,6 +112,7 @@ namespace EisenhowerUIExtension
 		public bool TaskColorIsBackground		{ set { m_List.TaskColorIsBackground = value; } }
 		public bool ShowParentsAsFolders		{ set { m_List.ShowParentsAsFolders = value; } }
 		public bool ShowCompletionCheckboxes	{ set { m_List.ShowCompletionCheckboxes = value; } }
+		public bool HasSelection				{ get { return (m_List.SelectedItems.Count > 0); } }
 
 		public bool ShowMixedCompletionState
 		{
@@ -130,18 +131,30 @@ namespace EisenhowerUIExtension
 			return m_List.SelectTask(taskID);
 		}
 
+		public bool SelectTask(String text, UIExtension.SelectTask selectTask, bool caseSensitive, bool wholeWord, bool findReplace)
+		{
+			return m_List.SelectTaskEx(text, selectTask, caseSensitive, wholeWord, wholeWord);
+		}
+
+		public Rectangle GetSelectedItemLabelRect()
+		{
+			return m_List.GetSelectedTaskLabelRect(true); // screen coords
+		}
+
 		public bool SelectTasks(uint[] taskIDs)
 		{
 			// TODO 
 			return true;
 		}
 
-		public bool HasSelection
+		public uint HitTestTask(Point screenPos)
 		{
-			get
-			{
-				return (m_List.SelectedItems.Count > 0);
-			}
+			return m_List.HitTestTask(screenPos);
+		}
+
+		public uint GetTaskId(UIExtension.GetTask getTask)
+		{
+			return m_List.GetTaskIdEx(getTask);
 		}
 
 		public bool RefreshListItems()

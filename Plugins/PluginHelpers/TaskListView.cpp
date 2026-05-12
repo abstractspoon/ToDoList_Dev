@@ -99,6 +99,22 @@ ListViewItem^ TaskListView::AddTask(ITaskBase^ task)
 	return Items->Add(lvItem);
 }
 
+UInt32 TaskListView::GetTaskIdEx(UIExtension::GetTask getTask)
+{
+	switch (getTask)
+	{
+	case UIExtension::GetTask::GetNextTask:
+	case UIExtension::GetTask::GetNextVisibleTask:
+		return GetNextTaskId(SelectedTaskId, true);
+
+	case UIExtension::GetTask::GetPrevTask:
+	case UIExtension::GetTask::GetPrevVisibleTask:
+		return GetNextTaskId(SelectedTaskId, false);
+	}
+
+	return 0;
+}
+
 IntPtr TaskListView::GetHeaderHandle()
 {
 	return IntPtr(Win32::SendMessage(Handle, LVM_GETHEADER, UIntPtr::Zero, IntPtr::Zero));
@@ -111,6 +127,9 @@ bool TaskListView::HasTaskId(UInt32 taskId)
 
 UInt32 TaskListView::GetNextTaskId(UInt32 taskId, bool next)
 {
+	if (taskId == 0)
+		return 0;
+
 	auto lvItem = FindLVItem(taskId);
 
 	if (lvItem == nullptr)
@@ -189,12 +208,15 @@ ITaskBase^ TaskListView::SelectedTask::get()
 	return ASTYPE(SelectedItems[0]->Tag, ITaskBase);
 }
 
-Drawing::Rectangle TaskListView::SelectedTaskLabelRect::get()
+Drawing::Rectangle TaskListView::GetSelectedTaskLabelRect(bool screenCoords)
 {
-	auto labelRect = Drawing::Rectangle::Empty;
+	if (SelectedItems->Count == 0)
+		return Drawing::Rectangle::Empty;
 
-	if (SelectedItems->Count > 0)
-		labelRect = CalcLabelTextRect(SelectedItems[0]->GetBounds(ItemBoundsPortion::Label), false);
+	auto labelRect = CalcLabelTextRect(SelectedItems[0]->GetBounds(ItemBoundsPortion::Label), false);
+	
+	if (screenCoords)
+		labelRect = RectangleToScreen(labelRect);
 
 	return labelRect;
 }
