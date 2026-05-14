@@ -310,7 +310,7 @@ namespace WordCloudUIExtension
 
 		public bool GetTask(UIExtension.GetTask getTask, ref UInt32 taskId)
 		{
-			taskId = m_TaskMatchesList.GetTaskIdEx(getTask);
+			taskId = m_TaskMatchesList.GetTaskId(getTask);
 
 			return (taskId != 0);
 		}

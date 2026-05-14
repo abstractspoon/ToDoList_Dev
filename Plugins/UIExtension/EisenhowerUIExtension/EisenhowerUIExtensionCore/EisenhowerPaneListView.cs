@@ -29,6 +29,10 @@ namespace EisenhowerUIExtension
 				if (m_Selected != value)
 				{
 					m_Selected = value;
+
+					if (!m_Selected)
+						SelectedIndices.Clear();
+
 					Invalidate();
 				}
 			}
@@ -46,12 +50,24 @@ namespace EisenhowerUIExtension
 			return 0;
 		}
 
+		public uint GetTaskId(UIExtension.GetTask getTask)
+		{
+			return GetTaskIdEx(getTask, m_Selected);
+		}
+
+		public bool SelectTask(String text, UIExtension.SelectTask selectTask, bool caseSensitive, bool wholeWord, bool findReplace)
+		{
+			return SelectTaskEx(text, selectTask, caseSensitive, wholeWord, findReplace);
+		}
+
+		public uint FirstTaskId { get { return base.GetTaskId(0); } }
+		public uint LastTaskId  { get { return base.GetTaskId(Items.Count - 1); } }
+
 		// --------------------------------------------------------
 
 		protected override bool IsItemSelected(ListViewItem lvItem)
 		{
 			return (m_Selected && base.IsItemSelected(lvItem));
 		}
-
 	}
 }

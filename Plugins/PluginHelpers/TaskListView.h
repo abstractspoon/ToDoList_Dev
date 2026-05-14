@@ -47,7 +47,8 @@ namespace Abstractspoon
 
 				ITaskBase^ GetTask(int index);
 				UInt32 GetTaskId(int index);
-				UInt32 GetTaskIdEx(UIExtension::GetTask getTask);
+				UInt32 GetTaskIdEx(UIExtension::GetTask getTask, bool fromSelTask);
+				UInt32 GetNextTaskId(int index, bool next, bool topLevel);
 				bool HasTaskId(UInt32 taskId);
 
 				bool SelectTask(UInt32 taskId);
@@ -114,11 +115,10 @@ namespace Abstractspoon
 
 				String^ Translate(String^ text, Translator::Type type);
 				void HandleMouseClick(Windows::Forms::MouseEventArgs^ e, bool doubleClick);
-				Windows::Forms::ListViewItem^ FindLVItem(UInt32 taskId);
+				Windows::Forms::ListViewItem^ FindItem(UInt32 taskId);
 				int FindTask(String^ phrase, int startIndex, bool forward, bool caseSensitive, bool wholeWord, bool findReplace);
 				Drawing::Color GetTextColor(ITaskBase^ task, bool selected);
 				Drawing::Color GetBackColor(ITaskBase^ task, int row);
-				UInt32 GetNextTaskId(UInt32 taskId, bool next);
 				
 				// Derived classes optionally override
 				virtual bool TaskMatches(ITaskBase^ task, String^ phrase, bool caseSensitive, bool wholeWord, bool findReplace);
@@ -130,6 +130,9 @@ namespace Abstractspoon
 				property int TextIconOffset { int get(); }
 				property int CheckboxOffset	{ int get(); }
 				property int ImageSize { int get(); }
+
+				property int FirstSelectedIndex { int get(); }
+				property int LastSelectedIndex { int get(); }
 			};
 		}
 	}

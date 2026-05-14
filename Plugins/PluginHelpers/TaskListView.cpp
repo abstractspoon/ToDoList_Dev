@@ -99,18 +99,59 @@ ListViewItem^ TaskListView::AddTask(ITaskBase^ task)
 	return Items->Add(lvItem);
 }
 
-UInt32 TaskListView::GetTaskIdEx(UIExtension::GetTask getTask)
+UInt32 TaskListView::GetTaskIdEx(UIExtension::GetTask getTask, bool fromSelTask)
 {
+	bool next = true, topLevel = true;
+
 	switch (getTask)
 	{
 	case UIExtension::GetTask::GetNextTask:
 	case UIExtension::GetTask::GetNextVisibleTask:
-		return GetNextTaskId(SelectedTaskId, true);
+		topLevel = false;
+		break;
+
+	case UIExtension::GetTask::GetNextTopLevelTask:
+		break;
 
 	case UIExtension::GetTask::GetPrevTask:
 	case UIExtension::GetTask::GetPrevVisibleTask:
-		return GetNextTaskId(SelectedTaskId, false);
-	}
+		next = false;
+		topLevel = false;
+		break;
+
+	case UIExtension::GetTask::GetPrevTopLevelTask:
+		next = false;
+		break;
+	};
+
+	int startIndex = -1;
+
+	if (fromSelTask && (SelectedTaskId != 0))
+		startIndex = SelectedIndices[next ? (SelectedIndices->Count - 1) : 0];
+	else
+		startIndex = (next ? -1 : Items->Count);
+
+	return GetNextTaskId(startIndex, next, topLevel);
+}
+
+UInt32 TaskListView::GetNextTaskId(int index, bool next, bool topLevel)
+{
+	// Don't pre-validate 'index'; ut's allowed to be just
+	// beyond or before the item range
+	ITaskBase^ task = nullptr;
+
+	do 
+	{
+		index += (next ? 1 : -1);
+		task = GetTask(index);
+
+		if (task != nullptr)
+		{
+			if (!topLevel || ITaskBaseExt::IsTopLevel(task))
+				return task->Id;
+		}
+	} 
+	while (task != nullptr);
 
 	return 0;
 }
@@ -122,21 +163,7 @@ IntPtr TaskListView::GetHeaderHandle()
 
 bool TaskListView::HasTaskId(UInt32 taskId)
 {
-	return (FindLVItem(taskId) != nullptr);
-}
-
-UInt32 TaskListView::GetNextTaskId(UInt32 taskId, bool next)
-{
-	if (taskId == 0)
-		return 0;
-
-	auto lvItem = FindLVItem(taskId);
-
-	if (lvItem == nullptr)
-		return 0;
-
-	int nextIndex = (next ? (lvItem->Index + 1) : (lvItem->Index - 1));
-	return GetTaskId(nextIndex);
+	return (FindItem(taskId) != nullptr);
 }
 
 ITaskBase^ TaskListView::GetTask(int index)
@@ -164,7 +191,7 @@ bool TaskListView::SelectTask(UInt32 taskId)
 	SelectedItems->Clear();
 	SelectedIndices->Clear();
 
-	ListViewItem^ lvItem = FindLVItem(taskId);
+	ListViewItem^ lvItem = FindItem(taskId);
 
 	if (lvItem == nullptr)
 		return false;
@@ -219,7 +246,7 @@ Drawing::Rectangle TaskListView::SelectedTaskLabelRect::get()
 	return Drawing::Rectangle::Empty;
 }
 
-ListViewItem^ TaskListView::FindLVItem(UInt32 taskId)
+ListViewItem^ TaskListView::FindItem(UInt32 taskId)
 {
 	for each(ListViewItem^ lvItem in Items)
 	{
@@ -754,32 +781,48 @@ bool TaskListView::SelectTaskEx(String^ words, UIExtension::SelectTask selectTas
 	if (Items->Count == 0)
 		return false;
 
-	if (SelectedIndices->Count == 0)
-		SelectedIndices->Add(0);
-
-	int selIndex = SelectedIndices[0];
 	int matchIndex = -1;
 
 	switch (selectTask)
 	{
 	case UIExtension::SelectTask::SelectFirstTask:
-		matchIndex = FindTask(words, 0, true, caseSensitive, wholeWord, findReplace);
+		{
+			matchIndex = FindTask(words, 0, true, caseSensitive, wholeWord, findReplace);
+		}
 		break;
 
 	case UIExtension::SelectTask::SelectNextTask:
-		matchIndex = FindTask(words, (selIndex + 1), true, caseSensitive, wholeWord, findReplace);
+		{
+			matchIndex = FindTask(words, (LastSelectedIndex + 1), true, caseSensitive, wholeWord, findReplace);
+		}
 		break;
 
 	case UIExtension::SelectTask::SelectNextTaskInclCurrent:
-		matchIndex = FindTask(words, selIndex, true, caseSensitive, wholeWord, findReplace);
+		{
+			int selIndex = LastSelectedIndex;
+
+			if (selIndex == -1)
+				selIndex = 0;
+
+			matchIndex = FindTask(words, selIndex, true, caseSensitive, wholeWord, findReplace);
+		}
 		break;
 
 	case UIExtension::SelectTask::SelectPrevTask:
-		matchIndex = FindTask(words, (selIndex - 1), false, caseSensitive, wholeWord, findReplace);
+		{
+			int selIndex = FirstSelectedIndex;
+
+			if (selIndex == -1)
+				selIndex = Items->Count;
+
+			matchIndex = FindTask(words, (selIndex - 1), false, caseSensitive, wholeWord, findReplace);
+		}
 		break;
 
 	case UIExtension::SelectTask::SelectLastTask:
-		matchIndex = FindTask(words, (Items->Count - 1), false, caseSensitive, wholeWord, findReplace);
+		{
+			matchIndex = FindTask(words, (Items->Count - 1), false, caseSensitive, wholeWord, findReplace);
+		}
 		break;
 	}
 
@@ -793,6 +836,16 @@ bool TaskListView::SelectTaskEx(String^ words, UIExtension::SelectTask selectTas
 	}
 
 	return false;
+}
+
+int TaskListView::FirstSelectedIndex::get()
+{
+	return ((SelectedIndices->Count > 0) ? SelectedIndices[0] : -1);
+}
+
+int TaskListView::LastSelectedIndex::get()
+{
+	return ((SelectedIndices->Count > 0) ? SelectedIndices[SelectedIndices->Count - 1] : -1);
 }
 
 int TaskListView::FindTask(String^ phrase, int startIndex, bool forward, bool caseSensitive, bool wholeWord, bool findReplace)

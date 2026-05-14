@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
-using System.Data;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
@@ -23,6 +23,7 @@ namespace EisenhowerUIExtension
 		private TaskItems m_Tasks;
 		private LabelTip m_LabelTip;
 
+		// local
 		private bool m_DraggingHorzSplitBar, m_DraggingVertSplitBar;
 		private DragImage m_DragImage;
 		private Point m_SplitPos;
@@ -272,10 +273,29 @@ namespace EisenhowerUIExtension
 
 		public uint GetTaskId(UIExtension.GetTask getTask)
 		{
-			uint taskId = 0;
-			m_Panes.ForEach(p => { taskId |= p.GetTaskId(getTask); });
+			var pane = SelectedPane;
+			bool next = true;
 
-			return taskId;
+			switch (getTask)
+			{
+			case UIExtension.GetTask.GetPrevTask:
+			case UIExtension.GetTask.GetPrevVisibleTask:
+			case UIExtension.GetTask.GetPrevTopLevelTask:
+				next = false;
+				break;
+			};
+
+			while (pane != null)
+			{
+				uint taskId = pane.GetTaskId(getTask);
+
+				if (taskId > 0)
+					return taskId;
+
+				pane = GetNextPane(pane, next/*, false*/);
+			}
+
+			return 0;
 		}
 
 		public Rectangle SelectedItemLabelRect
@@ -299,10 +319,60 @@ namespace EisenhowerUIExtension
 
 		public bool SelectTask(String text, UIExtension.SelectTask selectTask, bool caseSensitive, bool wholeWord, bool findReplace)
 		{
-			foreach (var p in m_Panes)
+			EisenhowerPane pane = null;
+			bool forward = true;
+
+			switch (selectTask)
 			{
-				if (p.SelectTask(text, selectTask, caseSensitive, wholeWord, findReplace))
+			case UIExtension.SelectTask.SelectFirstTask:
+				{
+					pane = m_Panes[0];
+				}
+				break;
+
+			case UIExtension.SelectTask.SelectNextTask:
+				{
+					pane = SelectedPane;
+
+					if (pane.SelectedTaskId == pane.LastTaskId)
+						pane = GetNextPane(pane, true);
+				}
+				break;
+
+			case UIExtension.SelectTask.SelectNextTaskInclCurrent:
+				{
+					pane = SelectedPane;
+				}
+				break;
+
+			case UIExtension.SelectTask.SelectPrevTask:
+				{
+					forward = false;
+					pane = SelectedPane;
+
+					if (pane.SelectedTaskId == pane.FirstTaskId)
+						pane = GetNextPane(pane, false);
+				}
+				break;
+
+			case UIExtension.SelectTask.SelectLastTask:
+				{
+					forward = false;
+					pane = m_Panes[m_Panes.Count - 1];
+				}
+				break;
+			}
+			Debug.Assert(pane != null);
+
+			while (pane != null)
+			{
+				if (pane.SelectTask(text, selectTask, caseSensitive, wholeWord, findReplace))
+				{
+					SelectedPane = pane;
 					return true;
+				}
+
+				pane = GetNextPane(pane, forward/*, false*/);
 			}
 
 			return false;
@@ -348,6 +418,49 @@ namespace EisenhowerUIExtension
 		{
 			// TODO
 			return false;
+		}
+
+		public void SetFont(String fontName, int fontSize)
+		{
+			Font font = new Font(fontName, fontSize);
+
+			m_Panes.ForEach(p => p.Font = font);
+			RecalcPaneRects();
+		}
+
+		// ILabelTipHandler implementation
+		public Control GetOwner()
+		{
+			return this;
+		}
+
+		public LabelTipInfo ToolHitTest(Point ptScreen)
+		{
+// 			var pt = PointToClient(ptScreen);
+// 			var hit = HitTestPositions(pt);
+// 
+// 			if ((hit == null) || IsRoot(hit))
+// 				return null;
+// 
+// 			var labelRect = GetItemLabelRect(hit);
+// 
+// 			if (!labelRect.Contains(pt))
+// 				return null;
+// 
+// 			if (ClientRectangle.Contains(labelRect))
+// 				return null;
+// 
+// 			labelRect.Offset(-1, -1);
+// 
+// 			return new LabelTipInfo()
+// 			{
+// 				Id = UniqueID(hit),
+// 				Text = hit.Text,
+// 				MultiLine = false,
+// 				Rect = labelRect,
+// 				Font = GetNodeTooltipFont(hit),
+// 			};
+			return null;
 		}
 		
 		// Message handlers --------------------------------
@@ -541,49 +654,6 @@ namespace EisenhowerUIExtension
 			return rect;
 		}
 
-		public void SetFont(String fontName, int fontSize)
-		{
-			Font font = new Font(fontName, fontSize);
-
-			m_Panes.ForEach(p => p.Font = font);
-			RecalcPaneRects();
-		}
-
-		// ILabelTipHandler implementation
-		public Control GetOwner()
-		{
-			return this;
-		}
-
-		public LabelTipInfo ToolHitTest(Point ptScreen)
-		{
-// 			var pt = PointToClient(ptScreen);
-// 			var hit = HitTestPositions(pt);
-// 
-// 			if ((hit == null) || IsRoot(hit))
-// 				return null;
-// 
-// 			var labelRect = GetItemLabelRect(hit);
-// 
-// 			if (!labelRect.Contains(pt))
-// 				return null;
-// 
-// 			if (ClientRectangle.Contains(labelRect))
-// 				return null;
-// 
-// 			labelRect.Offset(-1, -1);
-// 
-// 			return new LabelTipInfo()
-// 			{
-// 				Id = UniqueID(hit),
-// 				Text = hit.Text,
-// 				MultiLine = false,
-// 				Rect = labelRect,
-// 				Font = GetNodeTooltipFont(hit),
-// 			};
-			return null;
-		}
-
 		protected override void WndProc(ref Message m)
 		{
 			if (m_LabelTip != null)
@@ -633,6 +703,21 @@ namespace EisenhowerUIExtension
 			taskIds.Add(task.GetID());
 
 			return true;
+		}
+
+		EisenhowerPane GetNextPane(EisenhowerPane pane, bool next/*, bool wrap*/)
+		{
+			int iPane = m_Panes.IndexOf(pane);
+
+			if (next)
+				iPane++;
+			else
+				iPane--;
+
+			if ((iPane < 0) || (iPane >= m_Panes.Count))
+				return null;
+
+			return m_Panes[iPane];
 		}
 
 /*

@@ -115,6 +115,8 @@ namespace EisenhowerUIExtension
 
 		public bool HasSelection				{ get { return (m_List.SelectedItems.Count > 0); } }
 		public uint SelectedTaskId				{ get {	return m_List.SelectedTaskId; } }
+		public uint FirstTaskId					{ get { return m_List.FirstTaskId; } }
+		public uint LastTaskId					{ get { return m_List.LastTaskId; } }
 
 		public bool ShowMixedCompletionState
 		{
@@ -135,7 +137,7 @@ namespace EisenhowerUIExtension
 
 		public bool SelectTask(String text, UIExtension.SelectTask selectTask, bool caseSensitive, bool wholeWord, bool findReplace)
 		{
-			return m_List.SelectTaskEx(text, selectTask, caseSensitive, wholeWord, wholeWord);
+			return m_List.SelectTask(text, selectTask, caseSensitive, wholeWord, wholeWord);
 		}
 
 		public Rectangle SelectedItemLabelRect
@@ -164,7 +166,7 @@ namespace EisenhowerUIExtension
 
 		public uint GetTaskId(UIExtension.GetTask getTask)
 		{
-			return m_List.GetTaskIdEx(getTask);
+			return m_List.GetTaskId(getTask);
 		}
 
 		public new bool Focus()

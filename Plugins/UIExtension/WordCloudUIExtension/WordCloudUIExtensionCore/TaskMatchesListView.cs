@@ -80,6 +80,11 @@ namespace WordCloudUIExtension
 			}
 		}
 
+		public uint GetTaskId(UIExtension.GetTask getTask)
+		{
+			return GetTaskIdEx(getTask, true);
+		}
+
 		protected override void OnFontChanged(EventArgs e)
 		{
 			base.OnFontChanged(e);
