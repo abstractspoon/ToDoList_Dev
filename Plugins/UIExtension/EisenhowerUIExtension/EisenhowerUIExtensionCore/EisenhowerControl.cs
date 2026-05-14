@@ -222,6 +222,10 @@ namespace EisenhowerUIExtension
 			switch (type)
 			{
 			case UIExtension.UpdateType.All:
+				m_Tasks.Clear();
+				UpdateTaskAttributes(tasks);
+				break;
+
 			case UIExtension.UpdateType.Edit:
 			case UIExtension.UpdateType.New:
 				UpdateTaskAttributes(tasks);
@@ -362,7 +366,6 @@ namespace EisenhowerUIExtension
 				}
 				break;
 			}
-			Debug.Assert(pane != null);
 
 			while (pane != null)
 			{

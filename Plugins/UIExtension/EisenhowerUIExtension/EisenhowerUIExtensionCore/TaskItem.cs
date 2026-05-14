@@ -56,29 +56,6 @@ namespace EisenhowerUIExtension
 			IsLocked = false;
 		}
 
-		public TaskItem(Task task)
-		{
-			Title = task.GetTitle();
-			Position = task.GetPositionString();
-			Id = task.GetID();
-			TextColor = task.GetTextDrawingColor();
-			HasIcon = (task.GetIcon().Length > 0);
-			IsFlagged = task.IsFlagged(false);
-			IsParent = task.IsParent();
-            SomeSubtasksDone = task.HasSomeSubtasksDone();
-			IsLocked = task.IsLocked(true);
-
-			// Filterable attributes
-			SetAttributeValue("Priority", task.GetPriority(false)); // TODO
-			SetAttributeValue("Risk", task.GetRisk(false)); // TODO
-			SetAttributeValue("Cost", task.GetCost(false)); // TODO
-
-			if (task.IsAttributeAvailable(Task.Attribute.CustomAttribute))
-			{
-				// TODO
-			}
-		}
-
 		public override string ToString() 
 		{
 #if DEBUG
@@ -116,6 +93,9 @@ namespace EisenhowerUIExtension
 			if (task.IsAttributeAvailable(Task.Attribute.Title))
 				Title = task.GetTitle();
 
+			if (task.IsAttributeAvailable(Task.Attribute.Position))
+				Position = task.GetPositionString();
+
 			if (task.IsAttributeAvailable(Task.Attribute.Icon))
 				HasIcon = (task.GetIcon().Length > 0);
 
@@ -139,7 +119,7 @@ namespace EisenhowerUIExtension
 				SetAttributeValue("Risk", task.GetRisk(false)); // TODO
 
 			if (task.IsAttributeAvailable(Task.Attribute.Cost))
-				SetAttributeValue("Risk", task.GetCost(false)); // TODO
+				SetAttributeValue("Cost", task.GetCost(false)); // TODO
 
 			if (task.IsAttributeAvailable(Task.Attribute.CustomAttribute))
 			{
