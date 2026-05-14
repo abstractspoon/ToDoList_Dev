@@ -24,7 +24,6 @@ namespace EisenhowerUIExtension
 		private Translator m_Trans;
 
 		private bool m_ShowMixedCompletionState;
-		private string m_XAttribTitle, m_YAttribTitle;
 
 		// ---------------------------------------------
 
@@ -81,8 +80,8 @@ namespace EisenhowerUIExtension
 
 			if ((m_Filter == null) || !m_Filter.Equals(newFilter))
 			{
-				m_XAttribTitle = xAttribTitle;
-				m_YAttribTitle = yAttribTitle;
+				m_List.XAttribTitle = xAttribTitle;
+				m_List.YAttribTitle = yAttribTitle;
 				m_Filter = newFilter;
 
 				UpdateTitle();
@@ -274,7 +273,11 @@ namespace EisenhowerUIExtension
 		private void UpdateTitle()
 		{
 			if (m_Filter != null)
-				m_TitleBar.Text = (FormatAttribute(m_XAttribTitle, m_Filter.XAttribute) + " - " + FormatAttribute(m_YAttribTitle, m_Filter.YAttribute));
+			{
+				m_TitleBar.Text = (FormatAttribute(m_List.XAttribTitle, m_Filter.XAttribute) +
+									" - " +
+									FormatAttribute(m_List.YAttribTitle, m_Filter.YAttribute));
+			}
 		}
 
 		private string FormatAttribute(string title, EisenhowerPaneFilterAttribute attrib)

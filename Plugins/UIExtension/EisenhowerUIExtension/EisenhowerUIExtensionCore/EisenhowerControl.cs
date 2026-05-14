@@ -424,7 +424,7 @@ namespace EisenhowerUIExtension
 			Font font = new Font(fontName, fontSize);
 
 			m_Panes.ForEach(p => p.Font = font);
-			RecalcPaneRects();
+			RecalcPaneRects(false);
 		}
 
 		// Message handlers --------------------------------
@@ -475,10 +475,10 @@ namespace EisenhowerUIExtension
 		{
 			base.OnSizeChanged(e);
 
-			RecalcPaneRects();
+			RecalcPaneRects(false);
 		}
 
-		protected void RecalcPaneRects()
+		protected void RecalcPaneRects(bool update)
 		{
 			Rectangle hSplitRect = GetHorzSplitBarRect();
 			Rectangle vSplitRect = GetVertSplitBarRect();
@@ -520,7 +520,13 @@ namespace EisenhowerUIExtension
 
 			m_BottomRightPane.Bounds = botRightRect;
 
-			Update();
+			if (update)
+				Update();
+		}
+
+		protected bool IsSplitting
+		{
+			get { return (m_DraggingHorzSplitBar || m_DraggingVertSplitBar); }
 		}
 
 		protected override void OnMouseDown(MouseEventArgs e)
@@ -532,7 +538,7 @@ namespace EisenhowerUIExtension
 				m_DraggingHorzSplitBar = GetHorzSplitBarRect().Contains(e.Location);
 				m_DraggingVertSplitBar = GetVertSplitBarRect().Contains(e.Location);
 
-				Capture = (m_DraggingHorzSplitBar || m_DraggingVertSplitBar);
+				Capture = IsSplitting;
 			}
 		}
 
@@ -548,7 +554,7 @@ namespace EisenhowerUIExtension
 				if (GetVertSplitBarRect().Contains(e.Location))
 					m_SplitPos.X = 50;
 
-				RecalcPaneRects();
+				RecalcPaneRects(false);
 			}
 		}
 
@@ -564,7 +570,7 @@ namespace EisenhowerUIExtension
 		{
 			base.OnMouseMove(e);
 
-			if (m_DraggingHorzSplitBar || m_DraggingVertSplitBar)
+			if (IsSplitting)
 			{
 				if (m_DraggingHorzSplitBar)
 					m_SplitPos.Y = Math.Max(0, Math.Min(100, ((e.Y * 100) / Height)));
@@ -572,7 +578,7 @@ namespace EisenhowerUIExtension
 				if (m_DraggingVertSplitBar)
 					m_SplitPos.X = Math.Max(0, Math.Min(100, ((e.X * 100) / Width)));
 
-				RecalcPaneRects();
+				RecalcPaneRects(true);
 			}
 			else // Set split cursor
 			{

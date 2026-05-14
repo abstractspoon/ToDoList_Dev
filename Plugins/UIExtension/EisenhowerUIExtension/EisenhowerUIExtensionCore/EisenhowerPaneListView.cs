@@ -12,6 +12,11 @@ namespace EisenhowerUIExtension
 {
 	public partial class EisenhowerPaneListView : TaskListView
 	{
+		const int XColIndex = 1;
+		const int YColIndex = 2;
+
+		// --------------------------------------------------------
+
 		private bool m_Selected;
 
 		// --------------------------------------------------------
@@ -58,6 +63,18 @@ namespace EisenhowerUIExtension
 		public bool SelectTask(String text, UIExtension.SelectTask selectTask, bool caseSensitive, bool wholeWord, bool findReplace)
 		{
 			return SelectTaskEx(text, selectTask, caseSensitive, wholeWord, findReplace);
+		}
+
+		public string XAttribTitle
+		{
+			get { return Columns[XColIndex].Text; }
+			set { Columns[XColIndex].Text = value; }
+		}
+
+		public string YAttribTitle
+		{
+			get { return Columns[YColIndex].Text; }
+			set { Columns[YColIndex].Text = value; }
 		}
 
 		public uint FirstTaskId { get { return base.GetTaskId(0); } }
