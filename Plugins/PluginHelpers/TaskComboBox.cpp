@@ -34,11 +34,7 @@ public:
 ref class ComboTask : ITaskBase
 {
 public:
-	ComboTask(ITaskBase^ task)
-	{
-		m_ITask = task;
-		m_Depth = -1; // not calculated
-	}
+	ComboTask(ITaskBase^ task) { m_ITask = task; }
 
 	// ITaskBase
 	virtual property UInt32 Id { UInt32 get()			{ return m_ITask->Id ; } }
@@ -53,32 +49,10 @@ public:
 
 	// Local attributes
 	String^ ToString() override { return Title; }
-
-	property bool IsTopLevel { bool get()				{ return (Depth == 0); } }
-	property bool IsNone { bool get()					{ return (Id == 0); } }
-
-	property int Depth
-	{
-		int get()
-		{
-			if (m_Depth == -1)
-			{
-				m_Depth = 0;
-
-				for each (auto c in Position)
-				{
-					if (c == '.')
-						m_Depth++;
-				}
-			}
-
-			return m_Depth;
-		}
-	}
+	property bool IsNone { bool get(){ return (Id == 0); } }
 
 private: 
 	ITaskBase^ m_ITask;
-	int m_Depth;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -165,13 +139,13 @@ void TaskComboBox::OnDrawItem(DrawItemEventArgs^ e)
 	if (e->Index < 0)
 		return;
 
-	auto taskItem = ASTYPE(Items[e->Index], ComboTask);
+	auto task = ASTYPE(Items[e->Index], ComboTask);
 
-	if (taskItem != nullptr)
+	if (task != nullptr)
 	{
 		auto rect = e->Bounds;
 
-		bool hasIcon = (taskItem->HasIcon && m_TaskIcons->Get(taskItem->Id));
+		bool hasIcon = (task->HasIcon && m_TaskIcons->Get(task->Id));
 		bool listItem = !(e->State.HasFlag(DrawItemState::ComboBoxEdit));
 
 		if (listItem)
@@ -190,21 +164,21 @@ void TaskComboBox::OnDrawItem(DrawItemEventArgs^ e)
 		}
 
 		auto brush = TextBrush(e);
-		auto font = ((!taskItem->IsNone && taskItem->IsTopLevel) ? m_BoldFont : Font);
+		auto font = ((!task->IsNone && ITaskBaseExt::IsTopLevel(task)) ? m_BoldFont : Font);
 
-		e->Graphics->DrawString(taskItem->Title, font, brush, rect);
+		e->Graphics->DrawString(task->Title, font, brush, rect);
 		e->DrawFocusRectangle();
 	}
 }
 
 int TaskComboBox::GetListItemTextOffset(Object^ obj)
 {
-	auto taskItem = ASTYPE(obj, ComboTask);
+	auto task = ASTYPE(obj, ComboTask);
 
-	if ((taskItem == nullptr) || (taskItem == m_NoneTask))
+	if ((task == nullptr) || (task == m_NoneTask))
 		return 0;
 
-	int offset = ((UIExtension::TaskIcon::IconSize * taskItem->Depth) +
+	int offset = ((UIExtension::TaskIcon::IconSize * ITaskBaseExt::GetDepth(task)) +
 				  UIExtension::TaskIcon::IconSize);
 
 	return offset;
@@ -212,14 +186,14 @@ int TaskComboBox::GetListItemTextOffset(Object^ obj)
 
 int TaskComboBox::GetListItemTextLength(Object^ obj, Graphics^ graphics)
 {
-	auto taskItem = ASTYPE(obj, ComboTask);
+	auto task = ASTYPE(obj, ComboTask);
 
-	if ((taskItem == nullptr) || (taskItem == m_NoneTask))
+	if ((task == nullptr) || (task == m_NoneTask))
 		return 0;
 
-	auto font = (taskItem->IsTopLevel ? m_BoldFont : Font);
+	auto font = (ITaskBaseExt::IsTopLevel(task) ? m_BoldFont : Font);
 
-	return (int)graphics->MeasureString(taskItem->Title, font).Width;
+	return (int)graphics->MeasureString(task->Title, font).Width;
 }
 
 void TaskComboBox::OnTextChanged(EventArgs^ e)

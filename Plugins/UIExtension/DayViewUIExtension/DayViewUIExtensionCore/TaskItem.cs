@@ -293,7 +293,6 @@ namespace DayViewUIExtension
 
 		public string Position { get; private set; }
 		public bool IsParent { get; private set; }
-		public bool IsTopLevel { get; private set; }
 		public bool HasIcon { get; private set; }
         public bool IsDone { get; private set; }
 		public bool IsDoneOrGoodAsDone { get; private set; }
@@ -429,7 +428,6 @@ namespace DayViewUIExtension
 			TaskTextColor = task.GetTextDrawingColor();
 			IsLocked = task.IsLocked(true);
 			IsParent = task.IsParent();
-			IsTopLevel = (task.GetParentID() == 0);
 
 			if (newTask)
 			{

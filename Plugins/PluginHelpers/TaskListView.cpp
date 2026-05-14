@@ -542,7 +542,7 @@ void TaskListView::OnDrawItem(DrawListViewItemEventArgs^ e)
 				textRect.Width -= TextIconOffset;
 			}
 
-			if (task->Position->IndexOf('.') == -1)
+			if (ITaskBaseExt::IsTopLevel(task))
 				textFont = m_BoldFont;
 		}
 		else // numbers

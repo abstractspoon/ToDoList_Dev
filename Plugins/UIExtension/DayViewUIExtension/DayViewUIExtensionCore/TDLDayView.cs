@@ -529,7 +529,7 @@ namespace DayViewUIExtension
 
 				if (IsItemDisplayable(task))
 				{
-					if (!topLevel || task.IsTopLevel)
+					if (!topLevel || task.IsTopLevel())
 					{
 						taskID = task.Id;
 						return true;
