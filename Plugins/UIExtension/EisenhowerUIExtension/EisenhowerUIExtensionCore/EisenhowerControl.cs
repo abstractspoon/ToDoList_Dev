@@ -375,7 +375,7 @@ namespace EisenhowerUIExtension
 					return true;
 				}
 
-				pane = GetNextPane(pane, forward/*, false*/);
+				pane = GetNextPane(pane, forward);
 			}
 
 			return false;
@@ -708,7 +708,7 @@ namespace EisenhowerUIExtension
 			return true;
 		}
 
-		EisenhowerPane GetNextPane(EisenhowerPane pane, bool next/*, bool wrap*/)
+		EisenhowerPane GetNextPane(EisenhowerPane pane, bool next)
 		{
 			int iPane = m_Panes.IndexOf(pane);
 
