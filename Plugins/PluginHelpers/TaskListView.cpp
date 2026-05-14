@@ -246,6 +246,17 @@ Drawing::Rectangle TaskListView::SelectedTaskLabelRect::get()
 	return Drawing::Rectangle::Empty;
 }
 
+Drawing::Rectangle TaskListView::GetTaskLabelRect(UInt32 taskId)
+{
+	auto item = FindItem(taskId);
+
+	if (item)
+		return CalcLabelTextRect(item->GetBounds(ItemBoundsPortion::Label), false);
+
+	//else 
+	return Drawing::Rectangle::Empty;
+}
+
 ListViewItem^ TaskListView::FindItem(UInt32 taskId)
 {
 	for each(ListViewItem^ lvItem in Items)
@@ -288,24 +299,26 @@ LabelTipInfo^ TaskListView::ToolHitTest(Drawing::Point ptScreen)
 	if (!labelRect.Contains(pt))
 		return nullptr;
 
-	auto item = ASTYPE(hit->Item->Tag, ITaskBase);
+	auto task = ASTYPE(hit->Item->Tag, ITaskBase);
 
-	if (item == nullptr)
+	if (task == nullptr)
 		return nullptr;
 
 	// Check if there's enough room already
-	if (m_LabelTip->CalcTipHeight(item->Title, Font, labelRect.Width) <= labelRect.Height)
+	if (m_LabelTip->CalcTipHeight(task->Title, Font, labelRect.Width) <= labelRect.Height)
 		return nullptr;
 
-	labelRect.Offset(-1, -1);
+	// HACK /////////////////////////////////
+	labelRect.Offset(2, 2);
+	/////////////////////////////////////////
 
 	auto tip = gcnew LabelTipInfo();
 
-	tip->Id = item->Id;
-	tip->Text = item->Title;
+	tip->Id = task->Id;
+	tip->Text = task->Title;
 	tip->MultiLine = false;
 	tip->Rect = labelRect;
-	tip->Font = Font;
+	tip->Font = (ITaskBaseExt::IsTopLevel(task) ? m_BoldFont : Font);
 
 	return tip;
 }

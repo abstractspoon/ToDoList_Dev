@@ -12,7 +12,7 @@ using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
 namespace EisenhowerUIExtension
 {
-	public partial class EisenhowerControl : UserControl, IDragRenderer, ILabelTipHandler
+	public partial class EisenhowerControl : UserControl, IDragRenderer
 	{
 		const int SplitWidth = 6;
 
@@ -20,14 +20,12 @@ namespace EisenhowerUIExtension
 
 		// From Parent
 		private Translator m_Trans;
-		private TaskItems m_Tasks;
-		private LabelTip m_LabelTip;
 
 		// local
+		private TaskItems m_Tasks;
 		private bool m_DraggingHorzSplitBar, m_DraggingVertSplitBar;
 		private DragImage m_DragImage;
 		private Point m_SplitPos;
-
 		private List<EisenhowerPane> m_Panes;
 
 		// ---------------------------------------------
@@ -50,10 +48,8 @@ namespace EisenhowerUIExtension
 		public void Initialize(Translator trans, UIExtension.TaskIcon icons)
 		{
 			m_Trans = trans;
-
 			m_Tasks = new TaskItems();
 			m_DragImage = new DragImage();
-			m_LabelTip = new LabelTip(this);
 
 			// Panes
 			m_TopLeftPane.Initialize("Top-Left Pane", Properties.Resources.TopLeftPane, m_Trans, m_Tasks, icons);
@@ -131,6 +127,7 @@ namespace EisenhowerUIExtension
 			ShowParentsAsFolders = prefs.GetProfileBool("Preferences", "ShowParentsAsFolders", false);
 			ShowCompletionCheckboxes = prefs.GetProfileBool("Preferences", "AllowCheckboxAgainstTreeItem", false);
 			ShowMixedCompletionState = prefs.GetProfileBool("Preferences", "ShowMixedCompletionState", true);
+			ShowLabelTips = !prefs.GetProfileBool("Preferences", "ShowInfoTips", false);
 
 			if (prefs.GetProfileBool("Preferences", "AlternateLineColor", true))
 				AlternateLineColor = prefs.GetProfileColor("Preferences\\Colors", "AlternateLines", Color.Empty);
@@ -241,6 +238,7 @@ namespace EisenhowerUIExtension
 		public bool ShowMixedCompletionState	{ set { m_Panes.ForEach(p => p.ShowMixedCompletionState = value); } }
 		public bool ShowParentsAsFolders		{ set {	m_Panes.ForEach(p => p.ShowParentsAsFolders = value); } }
 		public bool ShowCompletionCheckboxes	{ set {	m_Panes.ForEach(p => p.ShowCompletionCheckboxes = value); } }
+		public bool ShowLabelTips				{ set {	m_Panes.ForEach(p => p.ShowLabelTips = value); } }
 
 		public Color AlternateLineColor			{ set { m_Panes.ForEach(p => p.AlternateLineColor = value); } }
 		public Color GridlineColor				{ set { m_Panes.ForEach(p => p.GridlineColor = value); } }
@@ -269,10 +267,8 @@ namespace EisenhowerUIExtension
 
 		public uint HitTestTask(Point screenPos)
 		{
-			uint taskId = 0;
-			m_Panes.ForEach(p => { taskId |= p.HitTestTask(screenPos); } );
-
-			return taskId;
+			EisenhowerPane unused;
+			return HitTestTask(screenPos, out unused);
 		}
 
 		public uint GetTaskId(UIExtension.GetTask getTask)
@@ -296,13 +292,13 @@ namespace EisenhowerUIExtension
 				if (taskId > 0)
 					return taskId;
 
-				pane = GetNextPane(pane, next/*, false*/);
+				pane = GetNextPane(pane, next);
 			}
 
 			return 0;
 		}
 
-		public Rectangle SelectedItemLabelRect
+		public Rectangle SelectedTaskLabelRect
 		{
 			get
 			{
@@ -310,7 +306,7 @@ namespace EisenhowerUIExtension
 
 				if (pane != null)
 				{
-					var labelRect = pane.SelectedItemLabelRect;
+					var labelRect = pane.SelectedTaskLabelRect;
 
 					if (!labelRect.IsEmpty)
 						return RectangleToClient(pane.RectangleToScreen(labelRect));
@@ -431,41 +427,6 @@ namespace EisenhowerUIExtension
 			RecalcPaneRects();
 		}
 
-		// ILabelTipHandler implementation
-		public Control GetOwner()
-		{
-			return this;
-		}
-
-		public LabelTipInfo ToolHitTest(Point ptScreen)
-		{
-// 			var pt = PointToClient(ptScreen);
-// 			var hit = HitTestPositions(pt);
-// 
-// 			if ((hit == null) || IsRoot(hit))
-// 				return null;
-// 
-// 			var labelRect = GetItemLabelRect(hit);
-// 
-// 			if (!labelRect.Contains(pt))
-// 				return null;
-// 
-// 			if (ClientRectangle.Contains(labelRect))
-// 				return null;
-// 
-// 			labelRect.Offset(-1, -1);
-// 
-// 			return new LabelTipInfo()
-// 			{
-// 				Id = UniqueID(hit),
-// 				Text = hit.Text,
-// 				MultiLine = false,
-// 				Rect = labelRect,
-// 				Font = GetNodeTooltipFont(hit),
-// 			};
-			return null;
-		}
-		
 		// Message handlers --------------------------------
 
 		private bool OnPaneEditTaskDone(object sender, uint taskId, bool completed)
@@ -657,19 +618,6 @@ namespace EisenhowerUIExtension
 			return rect;
 		}
 
-		protected override void WndProc(ref Message m)
-		{
-			if (m_LabelTip != null)
-				m_LabelTip.ProcessMessage(m);
-
-			// When 'show window contents while dragging' is DISABLED
-			// WinForms also disables 'live' scrollbar thumb dragging
-			// and only performs the scroll when the thumb is released.
-			FormsUtil.FixThumbScrolling(ref m);
-
-			base.WndProc(ref m);
-		}
-
 		private void UpdateTaskAttributes(TaskList tasks)
 		{
 			var changedTaskIds = new HashSet<uint>();
@@ -813,5 +761,24 @@ namespace EisenhowerUIExtension
 
 			base.OnDragLeave(e);
 		}
+
+		private uint HitTestTask(Point screenPos, out EisenhowerPane pane)
+		{
+			foreach (var p in m_Panes)
+			{
+				uint taskId = p.HitTestTask(screenPos);
+
+				if (taskId != 0)
+				{
+					pane = p;
+					return taskId;
+				}
+			}
+
+			// else
+			pane = null;
+			return 0;
+		}
+
 	}
 }

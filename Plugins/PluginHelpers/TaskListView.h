@@ -50,6 +50,7 @@ namespace Abstractspoon
 				UInt32 GetTaskIdEx(UIExtension::GetTask getTask, bool fromSelTask);
 				UInt32 GetNextTaskId(int index, bool next, bool topLevel);
 				bool HasTaskId(UInt32 taskId);
+				Drawing::Rectangle GetTaskLabelRect(UInt32 taskId);
 
 				bool SelectTask(UInt32 taskId);
 				bool SelectTaskEx(String^ words, UIExtension::SelectTask selectTask, bool caseSensitive, bool wholeWord, bool findReplace);

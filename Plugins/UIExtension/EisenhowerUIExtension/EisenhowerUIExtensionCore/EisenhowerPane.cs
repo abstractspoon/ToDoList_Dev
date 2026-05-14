@@ -109,9 +109,11 @@ namespace EisenhowerUIExtension
 
 		public Color GridlineColor				{ set { m_List.GridlineColor = value; } }
 		public Color AlternateLineColor			{ set { m_List.AlternateLineColor = value; } }
+
 		public bool TaskColorIsBackground		{ set { m_List.TaskColorIsBackground = value; } }
 		public bool ShowParentsAsFolders		{ set { m_List.ShowParentsAsFolders = value; } }
 		public bool ShowCompletionCheckboxes	{ set { m_List.ShowCompletionCheckboxes = value; } }
+		public bool ShowLabelTips				{ set { m_List.ShowLabelTips = value; } }
 
 		public bool HasSelection				{ get { return (m_List.SelectedItems.Count > 0); } }
 		public uint SelectedTaskId				{ get {	return m_List.SelectedTaskId; } }
@@ -140,7 +142,7 @@ namespace EisenhowerUIExtension
 			return m_List.SelectTask(text, selectTask, caseSensitive, wholeWord, wholeWord);
 		}
 
-		public Rectangle SelectedItemLabelRect
+		public Rectangle SelectedTaskLabelRect
 		{
 			get
 			{
@@ -151,6 +153,16 @@ namespace EisenhowerUIExtension
 
 				return Rectangle.Empty;
 			}
+		}
+
+		public Rectangle GetTaskLabelRect(uint taskId)
+		{
+			var labelRect = m_List.GetTaskLabelRect(taskId);
+
+			if (!labelRect.IsEmpty)
+				return RectangleToClient(m_List.RectangleToScreen(labelRect));
+
+			return Rectangle.Empty;
 		}
 
 		public bool SelectTasks(uint[] taskIDs)

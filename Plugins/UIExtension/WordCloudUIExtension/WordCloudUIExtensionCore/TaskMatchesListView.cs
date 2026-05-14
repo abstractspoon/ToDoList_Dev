@@ -40,11 +40,6 @@ namespace WordCloudUIExtension
 			get { return DPIScaling.Scale(100); }
 		}
 
-		private int LabelTipBorder
-		{
-			get { return DPIScaling.Scale(4); }
-		}
-		
 		public new bool Initialize(Translator trans, UIExtension.TaskIcon taskIcons)
         {
 			if (this.Columns.Count == 0) // once only

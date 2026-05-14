@@ -106,7 +106,7 @@ namespace EisenhowerUIExtension
 
 		public bool GetLabelEditRect(ref Int32 left, ref Int32 top, ref Int32 right, ref Int32 bottom)
 		{
-			Rectangle labelRect = m_EisenhowerCtrl.SelectedItemLabelRect;
+			Rectangle labelRect = m_EisenhowerCtrl.SelectedTaskLabelRect;
 			
 			if (labelRect.IsEmpty)
 				return false;
