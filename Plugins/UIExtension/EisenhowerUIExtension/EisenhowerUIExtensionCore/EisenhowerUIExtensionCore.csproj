@@ -47,9 +47,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="EisenhowerControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
+    <Compile Include="EisenhowerControl.cs" />
     <Compile Include="EisenhowerControl.Designer.cs">
       <DependentUpon>EisenhowerControl.cs</DependentUpon>
     </Compile>
@@ -70,7 +68,6 @@
     <Compile Include="EisenhowerUIExtensionCore.Designer.cs">
       <DependentUpon>EisenhowerUIExtensionCore.cs</DependentUpon>
     </Compile>
-    <Compile Include="EisenhowerUtils.cs" />
     <Compile Include="EisenhowerItem.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
