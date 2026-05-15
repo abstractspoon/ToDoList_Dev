@@ -80,7 +80,25 @@ namespace EisenhowerUIExtension
 		public uint FirstTaskId { get { return base.GetTaskId(0); } }
 		public uint LastTaskId  { get { return base.GetTaskId(Items.Count - 1); } }
 
+		public void DrawDragImage(Graphics graphics, Rectangle rect)
+		{
+			graphics.FillRectangle(Brushes.Red, rect);
+
+			foreach (int index in SelectedIndices)
+			{
+				var task = GetTask(index);
+
+				TextRenderer.DrawText(graphics,
+									   task.Title,
+									   Font,
+									   rect,
+									   task.TextColor,
+									   (TextFormatFlags.SingleLine | TextFormatFlags.Bottom | TextFormatFlags.Left));
+			}
+		}
+
 		// --------------------------------------------------------
+		// Message handlers
 
 		protected override bool IsItemSelected(ListViewItem lvItem)
 		{

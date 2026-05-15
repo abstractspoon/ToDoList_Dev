@@ -24,6 +24,7 @@ namespace EisenhowerUIExtension
 		private Translator m_Trans;
 
 		private bool m_ShowMixedCompletionState;
+		private bool m_DropHighlighted;
 
 		// ---------------------------------------------
 
@@ -31,6 +32,11 @@ namespace EisenhowerUIExtension
 		public event EditTaskIconEventHandler EditTaskIcon;
 		public event EditTaskCompletionEventHandler EditTaskDone;
 		public event TaskSelectionEventHandler SelectionChange;
+
+ 		public new event EventHandler DragLeave;
+ 		public new event DragEventHandler DragOver;
+		public new event DragEventHandler DragDrop;
+		public new event QueryContinueDragEventHandler QueryContinueDrag;
 
 		new public event EventHandler GotFocus;
 
@@ -55,10 +61,22 @@ namespace EisenhowerUIExtension
 			m_Trans = trans;
 
 			m_List.Initialize(trans, taskIcons);
+			m_List.AllowDrop = true;
 
 			m_List.EditTaskDone += new EditTaskCompletionEventHandler(OnTaskMatchesEditTaskDone);
 			m_List.EditTaskIcon += new EditTaskIconEventHandler(OnTaskMatchesEditTaskIcon);
 			m_List.EditTaskLabel += new EditTaskLabelEventHandler(OnTaskMatchesEditTaskLabel);
+
+			m_List.ItemDrag  += (s, e) =>
+			{
+				if (m_List.AllowDrop)
+					DoDragDrop(this, DragDropEffects.Move);
+			};
+
+			m_List.DragOver  += (s, e) => DragOver?.Invoke(this, e);
+			m_List.DragLeave += (s, e) => DragLeave?.Invoke(this, e);
+			m_List.DragDrop  += (s, e) => DragDrop?.Invoke(this, e);
+			m_List.QueryContinueDrag  += (s, e) => QueryContinueDrag?.Invoke(this, e);
 
 			m_List.SelectedIndexChanged += (s, e) =>
 			{
@@ -93,6 +111,7 @@ namespace EisenhowerUIExtension
 			return false; // no change
 		}
 
+
 		public bool Selected
 		{
 			get { return m_List.Selected; }
@@ -108,16 +127,39 @@ namespace EisenhowerUIExtension
 
 		public Color GridlineColor				{ set { m_List.GridlineColor = value; } }
 		public Color AlternateLineColor			{ set { m_List.AlternateLineColor = value; } }
+		public Color ListBackColor				{ set { m_List.BackColor = value; } }
 
 		public bool TaskColorIsBackground		{ set { m_List.TaskColorIsBackground = value; } }
 		public bool ShowParentsAsFolders		{ set { m_List.ShowParentsAsFolders = value; } }
 		public bool ShowCompletionCheckboxes	{ set { m_List.ShowCompletionCheckboxes = value; } }
 		public bool ShowLabelTips				{ set { m_List.ShowLabelTips = value; } }
+		public bool ReadOnly					{ set { m_List.AllowDrop = (value == false); } }
 
 		public bool HasSelection				{ get { return (m_List.SelectedItems.Count > 0); } }
 		public uint SelectedTaskId				{ get {	return m_List.SelectedTaskId; } }
 		public uint FirstTaskId					{ get { return m_List.FirstTaskId; } }
 		public uint LastTaskId					{ get { return m_List.LastTaskId; } }
+
+		public bool DropHighlighted
+		{
+			set
+			{
+				if (value != m_DropHighlighted)
+				{
+					m_DropHighlighted = value;
+
+					if (m_DropHighlighted)
+					{
+						m_TitleBar.BackColor = UIExtension.SelectionRect.GetColor(UIExtension.SelectionRect.Style.Selected);
+						m_List.BackColor = UIExtension.SelectionRect.GetColor(UIExtension.SelectionRect.Style.DropHighlighted);
+					}
+					else
+					{
+						m_TitleBar.BackColor = m_List.BackColor = Color.Empty;
+					}
+				}
+			}
+		}
 
 		public bool ShowMixedCompletionState
 		{
@@ -221,8 +263,33 @@ namespace EisenhowerUIExtension
 			return true;
 		}
 
+		public void DrawDragImage(Graphics graphics, Rectangle rect)
+		{
+			m_List.DrawDragImage(graphics, rect);
+		}
+
 		// --------------------------------------------------------
 		// Message Handlers
+
+// 		private void OnDragEnter(object sender, DragEventArgs e)
+// 		{
+// 			if (!(sender is EisenhowerPaneListView) || (sender == m_List))
+// 				e.Effect = DragDropEffects.None;
+// 			else
+// 				e.Effect = e.AllowedEffect;
+// 		}
+// 
+// 		private void OnDragOver(object sender, DragEventArgs e)
+// 		{
+// 			int breakpoint = 0;
+// 
+// 		}
+// 
+// 		private void OnDragDrop(object sender, DragEventArgs e)
+// 		{
+// 			int breakpoint = 0;
+// 
+// 		}
 
 		protected override void OnFontChanged(EventArgs e)
 		{

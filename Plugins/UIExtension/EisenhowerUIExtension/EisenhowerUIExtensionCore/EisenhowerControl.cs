@@ -65,6 +65,10 @@ namespace EisenhowerUIExtension
 				p.EditTaskLabel += new EditTaskLabelEventHandler(OnPaneEditTaskLabel);
 				p.SelectionChange += new TaskSelectionEventHandler(OnPaneSelectionChange);
 
+ 				p.DragLeave += new EventHandler(OnDragLeave);
+				p.DragOver += new DragEventHandler(OnDragOver);
+				p.DragDrop += new DragEventHandler(OnDragDrop);
+
 				p.GotFocus += new EventHandler(OnPaneGotFocus);
 			});
 		}
@@ -212,8 +216,6 @@ namespace EisenhowerUIExtension
 			}
 		}
 
-		public bool ReadOnly { get; set; }
-
 		public void UpdateTasks(TaskList tasks, UIExtension.UpdateType type)
 		{
 			switch (type)
@@ -239,6 +241,7 @@ namespace EisenhowerUIExtension
 		public bool ShowParentsAsFolders		{ set {	m_Panes.ForEach(p => p.ShowParentsAsFolders = value); } }
 		public bool ShowCompletionCheckboxes	{ set {	m_Panes.ForEach(p => p.ShowCompletionCheckboxes = value); } }
 		public bool ShowLabelTips				{ set {	m_Panes.ForEach(p => p.ShowLabelTips = value); } }
+		public bool ReadOnly					{ set {	m_Panes.ForEach(p => p.ReadOnly = value); } }
 
 		public Color AlternateLineColor			{ set { m_Panes.ForEach(p => p.AlternateLineColor = value); } }
 		public Color GridlineColor				{ set { m_Panes.ForEach(p => p.GridlineColor = value); } }
@@ -314,6 +317,17 @@ namespace EisenhowerUIExtension
 
 				// else
 				return Rectangle.Empty;
+			}
+		}
+
+		public uint SelectedTaskId
+		{
+			get
+			{
+				uint taskId = 0;
+				m_Panes.ForEach(p => taskId |= p.SelectedTaskId);
+
+				return taskId;
 			}
 		}
 
@@ -677,96 +691,124 @@ namespace EisenhowerUIExtension
 			return m_Panes[iPane];
 		}
 
-/*
-		protected override bool IsAcceptableDropTarget(Object draggedItemData, Object dropTargetItemData, DropPos dropPos, bool copy)
+		private void OnDragLeave(object sender, EventArgs e)
 		{
-// 			if (dropPos == EisenhowerControl.DropPos.On)
-// 				return !TaskItem(dropTargetItemData).IsLocked;
-
-			// else
-			return true;
+			m_Panes.ForEach(p => p.DropHighlighted = false);
 		}
 
-		protected override bool IsAcceptableDragSource(Object itemData)
+		private void OnDragOver(object sender, DragEventArgs e)
 		{
-			return !TaskItem(itemData).IsLocked;
+			var srcPane = (e.Data.GetData(typeof(EisenhowerPane)) as EisenhowerPane);
+			var destPane = HitTestPane(new Point(e.X, e.Y));
+
+			m_Panes.ForEach(p => p.DropHighlighted = ((p != srcPane) && (p == destPane)));
+			
+			if ((srcPane == null) || (destPane == null) ||(destPane == srcPane))
+				e.Effect = DragDropEffects.None;
+			else
+				e.Effect = e.AllowedEffect;
 		}
 
-		protected override bool DoDrop(EisenhowerDragEventArgs e)
+		private void OnDragDrop(object sender, DragEventArgs e)
 		{
-			TreeNode prevParentNode = e.dragged.node.Parent;
+			int breakpoint = 0;
 
-			if (!base.DoDrop(e) || e.copyItem)
-				return false;
+		}
 
-			if (e.targetParent.node != prevParentNode)
+		private void OnQueryContinueDrag(object sender, QueryContinueDragEventArgs e)
+		{
+			if (e.EscapePressed)
 			{
-                // Fixup parent states
-                // Note: our tree nodes haven't been moved yet but 
-                // the application will have updated it's data structures
-                // so we have to account for this in the node count passed
-                FixupParentalStatus(e.targetParent.node, 1);
-                FixupParentalStatus(prevParentNode, -1);
-
-                FixupParentID(e.dragged.node, e.targetParent.node);
+				e.Action = DragAction.Cancel;
+				m_Panes.ForEach(p => p.DropHighlighted = false);
 			}
-
-			return true;
-		}
-*/
-		protected override void OnDragOver(DragEventArgs e)
-		{
-			m_DragImage.ShowNoLock(false);
-
-			base.OnDragOver(e);
-
-			m_DragImage.ShowNoLock(true);
-			m_DragImage.Move(e.X, e.Y);
 		}
 
-		protected override void OnDragEnter(DragEventArgs e)
-		{
-			base.OnDragEnter(e);
+		/*
+				protected override bool IsAcceptableDropTarget(Object draggedItemData, Object dropTargetItemData, DropPos dropPos, bool copy)
+				{
+		// 			if (dropPos == EisenhowerControl.DropPos.On)
+		// 				return !TaskItem(dropTargetItemData).IsLocked;
 
-// 			var rect = GetItemLabelRect(SelectedNode);
-// 			rect.Offset(-rect.Left, -rect.Top);
-// 
-// 			m_DragImage.Begin(Handle, 
-// 								this,
-// 								SelectedNode, 
-// 								rect.Width, 
-// 								rect.Height, 
-// 								rect.Width, 
-// 								rect.Height);
-		}
+					// else
+					return true;
+				}
+
+				protected override bool IsAcceptableDragSource(Object itemData)
+				{
+					return !TaskItem(itemData).IsLocked;
+				}
+
+				protected override bool DoDrop(EisenhowerDragEventArgs e)
+				{
+					TreeNode prevParentNode = e.dragged.node.Parent;
+
+					if (!base.DoDrop(e) || e.copyItem)
+						return false;
+
+					if (e.targetParent.node != prevParentNode)
+					{
+						// Fixup parent states
+						// Note: our tree nodes haven't been moved yet but 
+						// the application will have updated it's data structures
+						// so we have to account for this in the node count passed
+						FixupParentalStatus(e.targetParent.node, 1);
+						FixupParentalStatus(prevParentNode, -1);
+
+						FixupParentID(e.dragged.node, e.targetParent.node);
+					}
+
+					return true;
+				}
+		*/
+		// 		protected override void OnDragOver(DragEventArgs e)
+		// 		{
+		// 			m_DragImage.ShowNoLock(false);
+		// 
+		// 			base.OnDragOver(e);
+		// 
+		// 			m_DragImage.ShowNoLock(true);
+		// 			m_DragImage.Move(e.X, e.Y);
+		// 		}
+		// 
+		// 		protected override void OnDragEnter(DragEventArgs e)
+		// 		{
+		// 			base.OnDragEnter(e);
+		// 
+		// 			var rect = SelectedTaskLabelRect;
+		// 			rect.Offset(-rect.Left, -rect.Top);
+		// 
+		// 			m_DragImage.Begin(Handle, 
+		// 								this,
+		// 								SelectedPane, 
+		// 								rect.Width, 
+		// 								rect.Height, 
+		// 								rect.Width, 
+		// 								rect.Height);
+		// 		}
 
 
 		public void DrawDragImage(Graphics graphics, Object obj, int width, int height)
 		{
-			var node = (obj as TreeNode);
+			var pane = (obj as EisenhowerPane);
+			Debug.Assert(pane == SelectedPane);
 
-// 			DrawItemLabel(graphics,
-// 							TaskItem(node), 
-// 							new Rectangle(0, 0, width, height),
-// 							NodeDrawState.Selected,
-// 							NodeDrawPos.Root,
-// 							GetNodeTitleFont(node),
-// 							true); // drag image
+			pane.DrawDragImage(graphics, new Rectangle(0, 0, width, height));
 		}
+// 
+// 		protected override void OnDragDrop(DragEventArgs e)
+// 		{
+// 			m_DragImage.End();
+// 
+// 			base.OnDragDrop(e);
+// 		}
 
-		protected override void OnDragDrop(DragEventArgs e)
-		{
-			m_DragImage.End();
-
-			base.OnDragDrop(e);
-		}
-
-		protected override void OnDragLeave(EventArgs e)
-		{
-			m_DragImage.End();
-
-			base.OnDragLeave(e);
-		}
+// 		protected override void OnDragLeave(EventArgs e)
+// 		{
+// 			m_DragImage.End();
+// 
+// 			base.OnDragLeave(e);
+// 		}
 
 		private uint HitTestTask(Point screenPos, out EisenhowerPane pane)
 		{
@@ -786,5 +828,16 @@ namespace EisenhowerUIExtension
 			return 0;
 		}
 
+		private EisenhowerPane HitTestPane(Point screenPos)
+		{
+			foreach (var p in m_Panes)
+			{
+				if (p.Bounds.Contains(PointToClient(screenPos)))
+					return p;
+			}
+
+			// else
+			return null;
+		}
 	}
 }
