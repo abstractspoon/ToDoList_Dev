@@ -12,6 +12,18 @@ using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
 namespace EisenhowerUIExtension
 {
+	public class AttributeChangeEventArgs : EventArgs
+	{
+		public string XAttribId;
+		public double XValue;
+		public string YAttribId;
+		public double YValue;
+	};
+
+	public delegate bool AttributeChangeEventHandler(Object sender, AttributeChangeEventArgs args);
+
+	// ---------------------------------------------
+
 	public partial class EisenhowerControl : UserControl, IDragRenderer
 	{
 		const int SplitWidth = 6;
@@ -30,10 +42,16 @@ namespace EisenhowerUIExtension
 
 		// ---------------------------------------------
 
+		// From TaskListView
 		public event EditTaskLabelEventHandler EditTaskLabel;
 		public event EditTaskIconEventHandler EditTaskIcon;
 		public event EditTaskCompletionEventHandler EditTaskDone;
-		public event TaskSelectionEventHandler SelectionChange;
+
+		// From EisenhowerPane
+		public event SelectionChangeEventHandler SelectionChange;
+
+		// local
+		public event AttributeChangeEventHandler AttributeChange;
 
 		// ---------------------------------------------
 
@@ -63,7 +81,7 @@ namespace EisenhowerUIExtension
 				p.EditTaskDone += new EditTaskCompletionEventHandler(OnPaneEditTaskDone);
 				p.EditTaskIcon += new EditTaskIconEventHandler(OnPaneEditTaskIcon);
 				p.EditTaskLabel += new EditTaskLabelEventHandler(OnPaneEditTaskLabel);
-				p.SelectionChange += new TaskSelectionEventHandler(OnPaneSelectionChange);
+				p.SelectionChange += new SelectionChangeEventHandler(OnPaneSelectionChange);
 
  				p.DragLeave += new EventHandler(OnDragLeave);
 				p.DragOver += new DragEventHandler(OnDragOver);
@@ -77,38 +95,28 @@ namespace EisenhowerUIExtension
 							  string yAttribTitle, string yAttribId)
 		{
 			// Top-left => High Attrib1 - High Attrib2
-			var xAttrib = new EisenhowerPaneFilterAttribute()
-			{
-				Id = xAttribId,
-				Range = EisenhowerPaneFilterAttributeRange.High,
-				Cutoff = 5
-			};
-
-			var yAttrib = new EisenhowerPaneFilterAttribute()
-			{
-				Id = yAttribId,
-				Range = EisenhowerPaneFilterAttributeRange.High,
-				Cutoff = 5
-			};
-
-			m_TopLeftPane.SetFilter(xAttribTitle, xAttrib, yAttribTitle, yAttrib);
+			m_TopLeftPane.SetFilter(xAttribTitle, 
+									new EisenhowerPaneFilterAttribute(xAttribId, EisenhowerPaneFilterAttributeRange.High, 5), 
+									yAttribTitle, 
+									new EisenhowerPaneFilterAttribute(yAttribId, EisenhowerPaneFilterAttributeRange.High, 5));
 
 			// Top-right => Low Attrib1 - High Attrib2
-			xAttrib.Range = EisenhowerPaneFilterAttributeRange.Low;
-
-			m_TopRightPane.SetFilter(xAttribTitle, xAttrib, yAttribTitle, yAttrib);
+			m_TopRightPane.SetFilter(xAttribTitle,
+									new EisenhowerPaneFilterAttribute(xAttribId, EisenhowerPaneFilterAttributeRange.Low, 5),
+									yAttribTitle,
+									new EisenhowerPaneFilterAttribute(yAttribId, EisenhowerPaneFilterAttributeRange.High, 5));
 
 			// Bottom-left => High Attrib1 - Low Attrib2
-			xAttrib.Range = EisenhowerPaneFilterAttributeRange.High;
-			yAttrib.Range = EisenhowerPaneFilterAttributeRange.Low;
-
-			// Dummy filter to get us started
-			m_BottomLeftPane.SetFilter(xAttribTitle, xAttrib, yAttribTitle, yAttrib);
+			m_BottomLeftPane.SetFilter(xAttribTitle,
+									new EisenhowerPaneFilterAttribute(xAttribId, EisenhowerPaneFilterAttributeRange.High, 5),
+									yAttribTitle,
+									new EisenhowerPaneFilterAttribute(yAttribId, EisenhowerPaneFilterAttributeRange.Low, 5));
 
 			// Bottom-right => Low Attrib1 - Low Attrib2
-			xAttrib.Range = EisenhowerPaneFilterAttributeRange.Low;
-
-			m_BottomRightPane.SetFilter(xAttribTitle, xAttrib, yAttribTitle, yAttrib);
+			m_BottomRightPane.SetFilter(xAttribTitle,
+									new EisenhowerPaneFilterAttribute(xAttribId, EisenhowerPaneFilterAttributeRange.Low, 5),
+									yAttribTitle,
+									new EisenhowerPaneFilterAttribute(yAttribId, EisenhowerPaneFilterAttributeRange.Low, 5));
 		}
 
 		public void SetUITheme(UITheme theme)
@@ -694,73 +702,93 @@ namespace EisenhowerUIExtension
 		private void OnDragLeave(object sender, EventArgs e)
 		{
 			m_Panes.ForEach(p => p.DropHighlighted = false);
+			m_DragImage.End();
+		}
+
+		private bool GetDragPanes(DragEventArgs e, out EisenhowerPane src, out EisenhowerPane dest)
+		{
+			src = (e.Data.GetData(typeof(EisenhowerPane)) as EisenhowerPane);
+			dest = HitTestPane(new Point(e.X, e.Y));
+
+			return IsValidDrop(src, dest);
+		}
+
+		private bool IsValidDrop(EisenhowerPane src, EisenhowerPane dest)
+		{
+			return ((src != null) && (dest != null) && (dest != src));
 		}
 
 		private void OnDragOver(object sender, DragEventArgs e)
 		{
-			var srcPane = (e.Data.GetData(typeof(EisenhowerPane)) as EisenhowerPane);
-			var destPane = HitTestPane(new Point(e.X, e.Y));
+			EisenhowerPane srcPane, destPane;
+
+			if (GetDragPanes(e, out srcPane, out destPane))
+				e.Effect = e.AllowedEffect;
+			else
+				e.Effect = DragDropEffects.None;
 
 			m_Panes.ForEach(p => p.DropHighlighted = ((p != srcPane) && (p == destPane)));
-			
-			if ((srcPane == null) || (destPane == null) ||(destPane == srcPane))
-				e.Effect = DragDropEffects.None;
-			else
-				e.Effect = e.AllowedEffect;
 		}
 
 		private void OnDragDrop(object sender, DragEventArgs e)
 		{
-			int breakpoint = 0;
+			OnDragLeave(sender, e);
 
-		}
+			// Notify parent of changes
+			Debug.Assert(AttributeChange != null);
 
-		private void OnQueryContinueDrag(object sender, QueryContinueDragEventArgs e)
-		{
-			if (e.EscapePressed)
+			EisenhowerPane srcPane, destPane;
+
+			if (GetDragPanes(e, out srcPane, out destPane))
 			{
-				e.Action = DragAction.Cancel;
-				m_Panes.ForEach(p => p.DropHighlighted = false);
+				var attribChangeArgs = new AttributeChangeEventArgs();
+
+				var srcXRange = srcPane.Filter.XAttribute.Range;
+				var srcYRange = srcPane.Filter.YAttribute.Range;
+				var destXRange = destPane.Filter.XAttribute.Range;
+				var destYRange = destPane.Filter.YAttribute.Range;
+
+				if (destXRange != srcXRange)
+				{
+					attribChangeArgs.XAttribId = destPane.Filter.XAttribute.Id;
+					attribChangeArgs.XValue = destPane.Filter.XAttribute.Cutoff;
+
+					if (destXRange == EisenhowerPaneFilterAttributeRange.High)
+						attribChangeArgs.XValue++;
+				}
+
+				if (destYRange != srcYRange)
+				{
+					attribChangeArgs.YAttribId = destPane.Filter.YAttribute.Id;
+					attribChangeArgs.YValue = destPane.Filter.YAttribute.Cutoff;
+
+					if (destYRange == EisenhowerPaneFilterAttributeRange.High)
+						attribChangeArgs.YValue++;
+				}
+
+				if (AttributeChange.Invoke(this, attribChangeArgs))
+				{
+					var selTaskId = SelectedTaskId;
+					var task = m_Tasks.GetItem(selTaskId);
+
+					if (task != null)
+					{
+						if (destXRange != srcXRange)
+							task.SetAttributeValue(attribChangeArgs.XAttribId, attribChangeArgs.XValue);
+
+						if (destYRange != srcYRange)
+							task.SetAttributeValue(attribChangeArgs.YAttribId, attribChangeArgs.YValue);
+
+						srcPane.RefreshListItems();
+						destPane.RefreshListItems();
+
+						SelectTask(selTaskId);
+						destPane.Focus();
+					}
+				}
 			}
 		}
 
-		/*
-				protected override bool IsAcceptableDropTarget(Object draggedItemData, Object dropTargetItemData, DropPos dropPos, bool copy)
-				{
-		// 			if (dropPos == EisenhowerControl.DropPos.On)
-		// 				return !TaskItem(dropTargetItemData).IsLocked;
-
-					// else
-					return true;
-				}
-
-				protected override bool IsAcceptableDragSource(Object itemData)
-				{
-					return !TaskItem(itemData).IsLocked;
-				}
-
-				protected override bool DoDrop(EisenhowerDragEventArgs e)
-				{
-					TreeNode prevParentNode = e.dragged.node.Parent;
-
-					if (!base.DoDrop(e) || e.copyItem)
-						return false;
-
-					if (e.targetParent.node != prevParentNode)
-					{
-						// Fixup parent states
-						// Note: our tree nodes haven't been moved yet but 
-						// the application will have updated it's data structures
-						// so we have to account for this in the node count passed
-						FixupParentalStatus(e.targetParent.node, 1);
-						FixupParentalStatus(prevParentNode, -1);
-
-						FixupParentID(e.dragged.node, e.targetParent.node);
-					}
-
-					return true;
-				}
-		*/
 		// 		protected override void OnDragOver(DragEventArgs e)
 		// 		{
 		// 			m_DragImage.ShowNoLock(false);
@@ -795,20 +823,6 @@ namespace EisenhowerUIExtension
 
 			pane.DrawDragImage(graphics, new Rectangle(0, 0, width, height));
 		}
-// 
-// 		protected override void OnDragDrop(DragEventArgs e)
-// 		{
-// 			m_DragImage.End();
-// 
-// 			base.OnDragDrop(e);
-// 		}
-
-// 		protected override void OnDragLeave(EventArgs e)
-// 		{
-// 			m_DragImage.End();
-// 
-// 			base.OnDragLeave(e);
-// 		}
 
 		private uint HitTestTask(Point screenPos, out EisenhowerPane pane)
 		{

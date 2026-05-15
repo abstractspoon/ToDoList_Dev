@@ -75,7 +75,7 @@ namespace EisenhowerUIExtension
 			return 0.0;
 		}
 
-		private void SetAttributeValue(string attribId, double value)
+		public void SetAttributeValue(string attribId, double value)
 		{
 			m_AttribValues[attribId.ToUpper()] = value;
 		}

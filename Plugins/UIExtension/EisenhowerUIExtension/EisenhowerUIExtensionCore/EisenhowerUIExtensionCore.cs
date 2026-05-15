@@ -34,10 +34,11 @@ namespace EisenhowerUIExtension
 
 			m_EisenhowerCtrl.Initialize(trans, m_TaskIcons);
 
-			m_EisenhowerCtrl.EditTaskDone += new EditTaskCompletionEventHandler(OnEisenhowerCtrlEditTaskDone);
-			m_EisenhowerCtrl.EditTaskIcon += new EditTaskIconEventHandler(OnEisenhowerCtrlEditTaskIcon);
-			m_EisenhowerCtrl.EditTaskLabel += new EditTaskLabelEventHandler(OnEisenhowerCtrlEditTaskLabel);
-			m_EisenhowerCtrl.SelectionChange += new TaskSelectionEventHandler(OnEisenhowerCtrlSelectionChange);
+			m_EisenhowerCtrl.EditTaskDone    += new EditTaskCompletionEventHandler(OnEisenhowerCtrlEditTaskDone);
+			m_EisenhowerCtrl.EditTaskIcon    += new EditTaskIconEventHandler(OnEisenhowerCtrlEditTaskIcon);
+			m_EisenhowerCtrl.EditTaskLabel   += new EditTaskLabelEventHandler(OnEisenhowerCtrlEditTaskLabel);
+			m_EisenhowerCtrl.SelectionChange += new SelectionChangeEventHandler(OnEisenhowerCtrlSelectionChange);
+			m_EisenhowerCtrl.AttributeChange += new AttributeChangeEventHandler(OnEisenhowerCtrlAttributeChange);
 
 			// Dummy filter to get us started
 			m_EisenhowerCtrl.SetFilter("Priority", "Priority", "Risk", "Risk");
@@ -258,8 +259,19 @@ namespace EisenhowerUIExtension
 			notify.NotifySelChange(taskId);
 		}
 
+		private bool OnEisenhowerCtrlAttributeChange(Object sender, AttributeChangeEventArgs args)
+		{
+			var notify = new UIExtension.ParentNotify(m_HwndParent);
 
+			// Fake Priority vs Risk for now
+			if (!string.IsNullOrEmpty(args.XAttribId))
+				notify.AddMod(Task.Attribute.Priority, (int)args.XValue);
+
+			if (!string.IsNullOrEmpty(args.YAttribId))
+				notify.AddMod(Task.Attribute.Risk, (int)args.YValue);
+
+			return notify.NotifyMod();
+		}
 	}
-
 
 }

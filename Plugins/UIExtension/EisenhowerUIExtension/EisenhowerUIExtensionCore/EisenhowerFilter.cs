@@ -19,9 +19,20 @@ namespace EisenhowerUIExtension
 
 	public class EisenhowerPaneFilterAttribute
 	{
-		public string Id;
-		public EisenhowerPaneFilterAttributeRange Range = EisenhowerPaneFilterAttributeRange.Low;
-		public double Cutoff = 0.0;
+		public string Id { get; private set; }
+		public EisenhowerPaneFilterAttributeRange Range { get; private set; }
+		public double Cutoff { get; private set; }
+
+		// ----------------------------------------
+
+		public EisenhowerPaneFilterAttribute(string id,
+											 EisenhowerPaneFilterAttributeRange range,
+											 double cutoff)
+		{
+			Id = id;
+			Range = range;
+			Cutoff = cutoff;
+		}
 
 		public bool TaskMatches(TaskItem task)
 		{
@@ -44,19 +55,8 @@ namespace EisenhowerUIExtension
 		{
 			Debug.Assert(xAttrib.Id != yAttrib.Id);
 
-			XAttribute = new EisenhowerPaneFilterAttribute()
-			{
-				Id = xAttrib.Id,
-				Range = xAttrib.Range,
-				Cutoff = xAttrib.Cutoff
-			};
-
-			YAttribute = new EisenhowerPaneFilterAttribute()
-			{
-				Id = yAttrib.Id,
-				Range = yAttrib.Range,
-				Cutoff = yAttrib.Cutoff
-			};
+			XAttribute = xAttrib;
+			YAttribute = yAttrib;
 		}
 
 		public EisenhowerPaneFilterAttribute XAttribute { get; private set; }

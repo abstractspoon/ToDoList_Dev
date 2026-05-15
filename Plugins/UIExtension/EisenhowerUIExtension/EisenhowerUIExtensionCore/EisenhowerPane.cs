@@ -13,10 +13,10 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 namespace EisenhowerUIExtension
 {
-	public delegate void TaskSelectionEventHandler(Object sender, UInt32 taskId);
+	public delegate void SelectionChangeEventHandler(Object sender, UInt32 taskId);
 
 	// ---------------------------------------------
-	
+
 	public partial class EisenhowerPane : UserControl
 	{
 		private TaskItems m_Tasks;
@@ -25,18 +25,21 @@ namespace EisenhowerUIExtension
 
 		private bool m_ShowMixedCompletionState;
 		private bool m_DropHighlighted;
+		private Color m_BackColor;
 
 		// ---------------------------------------------
 
+		// From TaskListView
 		public event EditTaskLabelEventHandler EditTaskLabel;
 		public event EditTaskIconEventHandler EditTaskIcon;
 		public event EditTaskCompletionEventHandler EditTaskDone;
-		public event TaskSelectionEventHandler SelectionChange;
 
- 		public new event EventHandler DragLeave;
+		// Local 
+		public event SelectionChangeEventHandler SelectionChange;
+
+		public new event EventHandler DragLeave;
  		public new event DragEventHandler DragOver;
 		public new event DragEventHandler DragDrop;
-		public new event QueryContinueDragEventHandler QueryContinueDrag;
 
 		new public event EventHandler GotFocus;
 
@@ -73,11 +76,6 @@ namespace EisenhowerUIExtension
 					DoDragDrop(this, DragDropEffects.Move);
 			};
 
-			m_List.DragOver  += (s, e) => DragOver?.Invoke(this, e);
-			m_List.DragLeave += (s, e) => DragLeave?.Invoke(this, e);
-			m_List.DragDrop  += (s, e) => DragDrop?.Invoke(this, e);
-			m_List.QueryContinueDrag  += (s, e) => QueryContinueDrag?.Invoke(this, e);
-
 			m_List.SelectedIndexChanged += (s, e) =>
 			{
 				UInt32 selTaskId = m_List.SelectedTaskId;
@@ -87,7 +85,29 @@ namespace EisenhowerUIExtension
 			};
 
 			m_List.GotFocus += (s, e) => { GotFocus?.Invoke(this, new EventArgs()); };
+
+			base.DragOver += (s, e) => DragOver?.Invoke(this, e);
+			base.DragLeave += (s, e) => DragLeave?.Invoke(this, e);
+			base.DragDrop += (s, e) => DragDrop?.Invoke(this, e);
+
+			base.QueryContinueDrag += (s, e) =>
+			{
+				if (e.EscapePressed)
+				{
+					e.Action = DragAction.Cancel;
+					DragLeave?.Invoke(this, e);
+				}
+			};
+
+			foreach (Control c in Controls)
+			{
+				c.DragOver += (s, e) => DragOver?.Invoke(this, e);
+				c.DragLeave += (s, e) => DragLeave?.Invoke(this, e);
+				c.DragDrop += (s, e) => DragDrop?.Invoke(this, e);
+			}
 		}
+
+		public EisenhowerPaneFilter Filter { get { return m_Filter; } }
 
 		public bool SetFilter(string xAttribTitle,
 							  EisenhowerPaneFilterAttribute xAttrib,
@@ -111,7 +131,6 @@ namespace EisenhowerUIExtension
 			return false; // no change
 		}
 
-
 		public bool Selected
 		{
 			get { return m_List.Selected; }
@@ -127,18 +146,28 @@ namespace EisenhowerUIExtension
 
 		public Color GridlineColor				{ set { m_List.GridlineColor = value; } }
 		public Color AlternateLineColor			{ set { m_List.AlternateLineColor = value; } }
-		public Color ListBackColor				{ set { m_List.BackColor = value; } }
+// 		public Color ListBackColor				{ set { m_List.BackColor = value; } }
 
 		public bool TaskColorIsBackground		{ set { m_List.TaskColorIsBackground = value; } }
 		public bool ShowParentsAsFolders		{ set { m_List.ShowParentsAsFolders = value; } }
 		public bool ShowCompletionCheckboxes	{ set { m_List.ShowCompletionCheckboxes = value; } }
 		public bool ShowLabelTips				{ set { m_List.ShowLabelTips = value; } }
-		public bool ReadOnly					{ set { m_List.AllowDrop = (value == false); } }
 
 		public bool HasSelection				{ get { return (m_List.SelectedItems.Count > 0); } }
 		public uint SelectedTaskId				{ get {	return m_List.SelectedTaskId; } }
 		public uint FirstTaskId					{ get { return m_List.FirstTaskId; } }
 		public uint LastTaskId					{ get { return m_List.LastTaskId; } }
+
+		public bool ReadOnly
+		{
+			set
+			{
+				AllowDrop = (value == false);
+
+				foreach (Control c in Controls)
+					c.AllowDrop = (value == false);
+			}
+		}
 
 		public bool DropHighlighted
 		{
@@ -150,12 +179,15 @@ namespace EisenhowerUIExtension
 
 					if (m_DropHighlighted)
 					{
-						m_TitleBar.BackColor = UIExtension.SelectionRect.GetColor(UIExtension.SelectionRect.Style.Selected);
+						m_BackColor = BackColor;
+
+						BackColor = UIExtension.SelectionRect.GetColor(UIExtension.SelectionRect.Style.Selected);
 						m_List.BackColor = UIExtension.SelectionRect.GetColor(UIExtension.SelectionRect.Style.DropHighlighted);
 					}
 					else
 					{
-						m_TitleBar.BackColor = m_List.BackColor = Color.Empty;
+						BackColor = m_BackColor;
+						m_List.BackColor = Color.Empty;
 					}
 				}
 			}
