@@ -41,7 +41,19 @@ namespace EisenhowerUIExtension
 			m_EisenhowerCtrl.AttributeChange += new AttributeChangeEventHandler(OnEisenhowerCtrlAttributeChange);
 
 			// Dummy filter to get us started
-			m_EisenhowerCtrl.SetFilter("Priority", "Priority", "Risk", "Risk");
+			var xAttrib = new TaskAttributeItem()
+			{
+				Label = "Priority",
+				AttributeId = Task.Attribute.Priority
+			};
+			var yAttrib = new TaskAttributeItem()
+			{
+				Label = "Risk",
+				AttributeId = Task.Attribute.Risk
+			};
+
+			m_EisenhowerCtrl.SetFilter(new EisenhowerVariable(xAttrib, false), 
+									   new EisenhowerVariable(yAttrib, false));
 		}
 
 		public bool SelectTask(uint taskId)
@@ -263,14 +275,29 @@ namespace EisenhowerUIExtension
 		{
 			var notify = new UIExtension.ParentNotify(m_HwndParent);
 
-			// Fake Priority vs Risk for now
-			if (!string.IsNullOrEmpty(args.XAttribId))
-				notify.AddMod(Task.Attribute.Priority, (int)args.XValue);
-
-			if (!string.IsNullOrEmpty(args.YAttribId))
-				notify.AddMod(Task.Attribute.Risk, (int)args.YValue);
+			AddModNotification(args.XAttrib, args.XValue, notify);
+			AddModNotification(args.YAttrib, args.YValue, notify);
 
 			return notify.NotifyMod();
+		}
+
+		static private void AddModNotification(EisenhowerVariable attrib, double value, UIExtension.ParentNotify notify)
+		{
+			if (attrib != null)
+			{
+				if (attrib.IsCustom())
+				{
+					notify.AddMod(attrib.CustomAttributeId, value.ToString());
+				}
+				else if (attrib.TypeIsDouble)
+				{
+					notify.AddMod(attrib.AttributeId, value);
+				}
+				else
+				{
+					notify.AddMod(attrib.AttributeId, (int)value);
+				}
+			}
 		}
 	}
 

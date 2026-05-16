@@ -2,11 +2,28 @@ using System;
 using System.Diagnostics;
 using System.Text;
 
-
 using Abstractspoon.Tdl.PluginHelpers;
 
 namespace EisenhowerUIExtension
 {
+	public class EisenhowerVariable : TaskAttributeItem
+	{
+		public bool TypeIsDouble { get; private set; }
+		public string Key { get; private set; }
+
+		// ------------------------------
+
+		public EisenhowerVariable(TaskAttributeItem attrib, bool isDouble) : base(attrib)
+		{
+			TypeIsDouble = isDouble;
+
+			if (string.IsNullOrEmpty(attrib.CustomAttributeId))
+				Key = attrib.AttributeId.ToString();
+			else
+				Key = attrib.CustomAttributeId;
+		}
+	}
+
 	////////////////////////////////////////////////////////////////////
 
 	public enum EisenhowerPaneFilterAttributeRange
@@ -17,26 +34,26 @@ namespace EisenhowerUIExtension
 
 	// ------------------------------
 
-	public class EisenhowerPaneFilterAttribute
+	public class EisenhowerFilterVariable : EisenhowerVariable
 	{
-		public string Id { get; private set; }
 		public EisenhowerPaneFilterAttributeRange Range { get; private set; }
 		public double Cutoff { get; private set; }
 
 		// ----------------------------------------
 
-		public EisenhowerPaneFilterAttribute(string id,
-											 EisenhowerPaneFilterAttributeRange range,
-											 double cutoff)
+		public EisenhowerFilterVariable(EisenhowerVariable attrib,
+										EisenhowerPaneFilterAttributeRange range,
+										double cutoff) 
+			: 
+			base(attrib, attrib.TypeIsDouble)
 		{
-			Id = id;
 			Range = range;
 			Cutoff = cutoff;
 		}
 
 		public bool TaskMatches(TaskItem task)
 		{
-			var value = task.GetAttributeValue(Id);
+			var value = task.GetAttributeValue(this);
 
 			if (Range == EisenhowerPaneFilterAttributeRange.High)
 				return (value > Cutoff);
@@ -50,21 +67,26 @@ namespace EisenhowerUIExtension
 
 	public class EisenhowerPaneFilter
 	{
-		public EisenhowerPaneFilter(EisenhowerPaneFilterAttribute xAttrib,
-									EisenhowerPaneFilterAttribute yAttrib)
+		public EisenhowerPaneFilter(EisenhowerFilterVariable xVar,
+									EisenhowerFilterVariable yVar)
 		{
-			Debug.Assert(xAttrib.Id != yAttrib.Id);
+#if DEBUG
+			if (xVar.IsCustom() && yVar.IsCustom())
+				Debug.Assert(xVar.CustomAttributeId != yVar.CustomAttributeId );
+			else
+				Debug.Assert(xVar.AttributeId != yVar.AttributeId);
+#endif
 
-			XAttribute = xAttrib;
-			YAttribute = yAttrib;
+			XVariable = xVar;
+			YVariable = yVar;
 		}
 
-		public EisenhowerPaneFilterAttribute XAttribute { get; private set; }
-		public EisenhowerPaneFilterAttribute YAttribute { get; private set; }
+		public EisenhowerFilterVariable XVariable { get; private set; }
+		public EisenhowerFilterVariable YVariable { get; private set; }
 
 		public bool TaskMatches(TaskItem task)
 		{
-			return (XAttribute.TaskMatches(task) && YAttribute.TaskMatches(task));
+			return (XVariable.TaskMatches(task) && YVariable.TaskMatches(task));
 		}
 	}
 }

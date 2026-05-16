@@ -14,9 +14,9 @@ namespace EisenhowerUIExtension
 {
 	public class AttributeChangeEventArgs : EventArgs
 	{
-		public string XAttribId;
+		public EisenhowerVariable XAttrib;
 		public double XValue;
-		public string YAttribId;
+		public EisenhowerVariable YAttrib;
 		public double YValue;
 	};
 
@@ -91,32 +91,26 @@ namespace EisenhowerUIExtension
 			});
 		}
 
-		public void SetFilter(string xAttribTitle, string xAttribId,
-							  string yAttribTitle, string yAttribId)
+		public void SetFilter(EisenhowerVariable xAttrib, EisenhowerVariable yAttrib)
 		{
-			// Top-left => High Attrib1 - High Attrib2
-			m_TopLeftPane.SetFilter(xAttribTitle, 
-									new EisenhowerPaneFilterAttribute(xAttribId, EisenhowerPaneFilterAttributeRange.High, 5), 
-									yAttribTitle, 
-									new EisenhowerPaneFilterAttribute(yAttribId, EisenhowerPaneFilterAttributeRange.High, 5));
+			double xCutoff = m_Tasks.CalculateAttributeValueMidpoint(xAttrib);
+			double yCutoff = m_Tasks.CalculateAttributeValueMidpoint(yAttrib);
 
-			// Top-right => Low Attrib1 - High Attrib2
-			m_TopRightPane.SetFilter(xAttribTitle,
-									new EisenhowerPaneFilterAttribute(xAttribId, EisenhowerPaneFilterAttributeRange.Low, 5),
-									yAttribTitle,
-									new EisenhowerPaneFilterAttribute(yAttribId, EisenhowerPaneFilterAttributeRange.High, 5));
+			// Top-left => High xAttrib - High yAttrib
+			m_TopLeftPane.SetFilter(new EisenhowerFilterVariable(xAttrib, EisenhowerPaneFilterAttributeRange.High, xCutoff), 
+									new EisenhowerFilterVariable(yAttrib, EisenhowerPaneFilterAttributeRange.High, xCutoff));
 
-			// Bottom-left => High Attrib1 - Low Attrib2
-			m_BottomLeftPane.SetFilter(xAttribTitle,
-									new EisenhowerPaneFilterAttribute(xAttribId, EisenhowerPaneFilterAttributeRange.High, 5),
-									yAttribTitle,
-									new EisenhowerPaneFilterAttribute(yAttribId, EisenhowerPaneFilterAttributeRange.Low, 5));
+			// Top-right => Low xAttrib - High yAttrib
+			m_TopRightPane.SetFilter(new EisenhowerFilterVariable(xAttrib, EisenhowerPaneFilterAttributeRange.Low, xCutoff),
+									 new EisenhowerFilterVariable(yAttrib, EisenhowerPaneFilterAttributeRange.High, xCutoff));
 
-			// Bottom-right => Low Attrib1 - Low Attrib2
-			m_BottomRightPane.SetFilter(xAttribTitle,
-									new EisenhowerPaneFilterAttribute(xAttribId, EisenhowerPaneFilterAttributeRange.Low, 5),
-									yAttribTitle,
-									new EisenhowerPaneFilterAttribute(yAttribId, EisenhowerPaneFilterAttributeRange.Low, 5));
+			// Bottom-left => High xAttrib - Low yAttrib
+			m_BottomLeftPane.SetFilter(new EisenhowerFilterVariable(xAttrib, EisenhowerPaneFilterAttributeRange.High, xCutoff),
+									   new EisenhowerFilterVariable(yAttrib, EisenhowerPaneFilterAttributeRange.Low, xCutoff));
+
+			// Bottom-right => Low xAttrib - Low yAttrib
+			m_BottomRightPane.SetFilter(new EisenhowerFilterVariable(xAttrib, EisenhowerPaneFilterAttributeRange.Low, xCutoff),
+										new EisenhowerFilterVariable(yAttrib, EisenhowerPaneFilterAttributeRange.Low, xCutoff));
 		}
 
 		public void SetUITheme(UITheme theme)
@@ -743,15 +737,15 @@ namespace EisenhowerUIExtension
 			{
 				var attribChangeArgs = new AttributeChangeEventArgs();
 
-				var srcXRange = srcPane.Filter.XAttribute.Range;
-				var srcYRange = srcPane.Filter.YAttribute.Range;
-				var destXRange = destPane.Filter.XAttribute.Range;
-				var destYRange = destPane.Filter.YAttribute.Range;
+				var srcXRange = srcPane.Filter.XVariable.Range;
+				var srcYRange = srcPane.Filter.YVariable.Range;
+				var destXRange = destPane.Filter.XVariable.Range;
+				var destYRange = destPane.Filter.YVariable.Range;
 
 				if (destXRange != srcXRange)
 				{
-					attribChangeArgs.XAttribId = destPane.Filter.XAttribute.Id;
-					attribChangeArgs.XValue = destPane.Filter.XAttribute.Cutoff;
+					attribChangeArgs.XAttrib = destPane.Filter.XVariable;
+					attribChangeArgs.XValue = destPane.Filter.XVariable.Cutoff;
 
 					if (destXRange == EisenhowerPaneFilterAttributeRange.High)
 						attribChangeArgs.XValue++;
@@ -759,8 +753,8 @@ namespace EisenhowerUIExtension
 
 				if (destYRange != srcYRange)
 				{
-					attribChangeArgs.YAttribId = destPane.Filter.YAttribute.Id;
-					attribChangeArgs.YValue = destPane.Filter.YAttribute.Cutoff;
+					attribChangeArgs.YAttrib = destPane.Filter.YVariable;
+					attribChangeArgs.YValue = destPane.Filter.YVariable.Cutoff;
 
 					if (destYRange == EisenhowerPaneFilterAttributeRange.High)
 						attribChangeArgs.YValue++;
@@ -774,10 +768,10 @@ namespace EisenhowerUIExtension
 					if (task != null)
 					{
 						if (destXRange != srcXRange)
-							task.SetAttributeValue(attribChangeArgs.XAttribId, attribChangeArgs.XValue);
+							task.SetAttributeValue(attribChangeArgs.XAttrib, attribChangeArgs.XValue);
 
 						if (destYRange != srcYRange)
-							task.SetAttributeValue(attribChangeArgs.YAttribId, attribChangeArgs.YValue);
+							task.SetAttributeValue(attribChangeArgs.YAttrib, attribChangeArgs.YValue);
 
 						srcPane.RefreshListItems();
 						destPane.RefreshListItems();

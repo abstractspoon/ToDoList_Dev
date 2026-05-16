@@ -1,6 +1,7 @@
 using System;
 using System.Drawing;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 using Abstractspoon.Tdl.PluginHelpers;
 
@@ -19,6 +20,34 @@ namespace EisenhowerUIExtension
 			}
 
 			return taskItem;
+		}
+
+		public double CalculateAttributeValueMidpoint(EisenhowerVariable var)
+		{
+			switch (var.AttributeId)
+			{
+			case Task.Attribute.Priority:
+			case Task.Attribute.Risk:
+				return 5;
+			}
+
+			// All the rest
+			double minVal = double.MaxValue, maxVal = double.MinValue;
+
+			foreach (var task in Values)
+			{
+				double attribVal = task.GetAttributeValue(var);
+
+				minVal = Math.Min(minVal, attribVal);
+				maxVal = Math.Max(maxVal, attribVal);
+			}
+
+			if (minVal > 0.0)
+				return (maxVal / 2); // minVal => 0
+
+			// else
+			// TODO - Make this a 'nice' number
+			return ((maxVal - minVal) / 2);
 		}
 	}
 
@@ -65,24 +94,19 @@ namespace EisenhowerUIExtension
 #endif
 		}
 
-		public double GetAttributeValue(string attribId)
+		public double GetAttributeValue(EisenhowerVariable var)
 		{
 			double value;
 
-			if (m_AttribValues.TryGetValue(attribId.ToUpper(), out value))
+			if (m_AttribValues.TryGetValue(var.Key, out value))
 				return value;
 
 			return 0.0;
 		}
 
-		public void SetAttributeValue(string attribId, double value)
+		public void SetAttributeValue(EisenhowerVariable var, double value)
 		{
-			m_AttribValues[attribId.ToUpper()] = value;
-		}
-
-		public void Update(Task task, HashSet<Task.Attribute> attribs)
-		{
-			// TODO
+			m_AttribValues[var.Key] = value;
 		}
 
 		public bool ProcessTaskUpdate(Task task)
@@ -113,13 +137,13 @@ namespace EisenhowerUIExtension
 
 			// Filterable attributes
 			if (task.IsAttributeAvailable(Task.Attribute.Priority))
-				SetAttributeValue("Priority", task.GetPriority(false)); // TODO
+				SetAttributeValue("Priority", task.GetPriority(true));
 
 			if (task.IsAttributeAvailable(Task.Attribute.Risk))
-				SetAttributeValue("Risk", task.GetRisk(false)); // TODO
+				SetAttributeValue("Risk", task.GetRisk(true));
 
 			if (task.IsAttributeAvailable(Task.Attribute.Cost))
-				SetAttributeValue("Cost", task.GetCost(false)); // TODO
+				SetAttributeValue("Cost", task.GetCost(true));
 
 			if (task.IsAttributeAvailable(Task.Attribute.CustomAttribute))
 			{
@@ -130,6 +154,13 @@ namespace EisenhowerUIExtension
 			IsLocked = task.IsLocked(true);
 
 			return true;
+		}
+
+		// ---------------------------------------------------------------
+
+		private void SetAttributeValue(string attribId, double value)
+		{
+			m_AttribValues[attribId] = value;
 		}
 	}
 

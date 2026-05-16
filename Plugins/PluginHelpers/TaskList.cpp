@@ -20,6 +20,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 using namespace System::Globalization;
+using namespace System::Diagnostics;
 
 using namespace Abstractspoon::Tdl::PluginHelpers;
 
@@ -1437,3 +1438,35 @@ TDC_ATTRIBUTE Task::MapAttribute(Task::Attribute attrib)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
+
+TaskAttributeItem::TaskAttributeItem()
+	:
+	Label(String::Empty),
+	AttributeId(Task::Attribute::Unknown),
+	CustomAttributeId(String::Empty),
+	CustomAttributeType(CustomAttributeDefinition::Attribute::Unknown)
+{
+}
+
+TaskAttributeItem::TaskAttributeItem(TaskAttributeItem^ attrib)
+	:
+	Label(attrib->Label),
+	AttributeId(attrib->AttributeId),
+	CustomAttributeId(attrib->CustomAttributeId),
+	CustomAttributeType(attrib->CustomAttributeType)
+{
+}
+
+bool TaskAttributeItem::IsCustom()
+{
+	if (String::IsNullOrEmpty(CustomAttributeId))
+		return false;
+
+	if (CustomAttributeType == CustomAttributeDefinition::Attribute::Unknown)
+	{
+		Debug::Assert(false);
+		return false;
+	}
+
+	return true;
+}

@@ -303,14 +303,10 @@ namespace Abstractspoon
 			public ref class TaskAttributeItem
 			{
 			public:
-				TaskAttributeItem()
-					:
-					Label(String::Empty),
-					AttributeId(Task::Attribute::Unknown),
-					CustomAttributeId(String::Empty),
-					CustomAttributeType(CustomAttributeDefinition::Attribute::Unknown)
-				{
-				}
+				TaskAttributeItem();
+;				TaskAttributeItem(TaskAttributeItem^ attrib);
+
+				bool IsCustom();
 
 			public:
 				String^ Label;

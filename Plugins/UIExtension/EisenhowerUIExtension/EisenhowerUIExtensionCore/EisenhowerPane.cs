@@ -109,17 +109,15 @@ namespace EisenhowerUIExtension
 
 		public EisenhowerPaneFilter Filter { get { return m_Filter; } }
 
-		public bool SetFilter(string xAttribTitle,
-							  EisenhowerPaneFilterAttribute xAttrib,
-							  string yAttribTitle,
-							  EisenhowerPaneFilterAttribute yAttrib)
+		public bool SetFilter(EisenhowerFilterVariable xAttrib,
+							  EisenhowerFilterVariable yAttrib)
 		{
 			var newFilter = new EisenhowerPaneFilter(xAttrib, yAttrib);
 
 			if ((m_Filter == null) || !m_Filter.Equals(newFilter))
 			{
-				m_List.XAttribTitle = xAttribTitle;
-				m_List.YAttribTitle = yAttribTitle;
+				m_List.XAttribTitle = xAttrib.Label;
+				m_List.YAttribTitle = yAttrib.Label;
 				m_Filter = newFilter;
 
 				UpdateTitle();
@@ -286,8 +284,8 @@ namespace EisenhowerUIExtension
 
 					if (lvItem != null)
 					{
-						lvItem.SubItems.Add(task.GetAttributeValue(m_Filter.XAttribute.Id).ToString());
-						lvItem.SubItems.Add(task.GetAttributeValue(m_Filter.YAttribute.Id).ToString());
+						lvItem.SubItems.Add(task.GetAttributeValue(m_Filter.XVariable).ToString());
+						lvItem.SubItems.Add(task.GetAttributeValue(m_Filter.YVariable).ToString());
 					}
 				}
 			}
@@ -373,13 +371,13 @@ namespace EisenhowerUIExtension
 		{
 			if (m_Filter != null)
 			{
-				m_TitleBar.Text = (FormatAttribute(m_List.XAttribTitle, m_Filter.XAttribute) +
+				m_TitleBar.Text = (FormatAttribute(m_List.XAttribTitle, m_Filter.XVariable) +
 									" - " +
-									FormatAttribute(m_List.YAttribTitle, m_Filter.YAttribute));
+									FormatAttribute(m_List.YAttribTitle, m_Filter.YVariable));
 			}
 		}
 
-		private string FormatAttribute(string title, EisenhowerPaneFilterAttribute attrib)
+		private string FormatAttribute(string title, EisenhowerFilterVariable attrib)
 		{
 			if (attrib.Range == EisenhowerPaneFilterAttributeRange.High)
 				return string.Format("High {0} (>= {1})", title, attrib.Cutoff);
