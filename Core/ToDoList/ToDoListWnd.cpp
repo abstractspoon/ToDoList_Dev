@@ -5005,7 +5005,7 @@ TDCEXPORTTASKLIST* CToDoListWnd::PrepareNewDueTaskNotification(int nTDC, int nDu
 	}
 	
 	// set an appropriate title
-	pExport->tasks.SetReportDetails(CEnString(nIDDueBy));
+	pExport->tasks.SetReportDetails(CEnString(nIDDueBy), CDateHelper::NullDate());
 
 	if (bTransform)
 		pExport->sStylesheet = sStylesheet;
