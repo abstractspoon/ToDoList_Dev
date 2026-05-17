@@ -125,9 +125,9 @@ UInt32 TaskListView::GetTaskIdEx(UIExtension::GetTask getTask, bool fromSelTask)
 	int startIndex = -1;
 
 	if (fromSelTask && (SelectedTaskId != 0))
-		startIndex = SelectedIndices[next ? (SelectedIndices->Count - 1) : 0];
+		startIndex = (next ? LastSelectedIndex : FirstSelectedIndex);
 	else
-		startIndex = (next ? -1 : Items->Count);
+		startIndex = (next ? -1 : Items->Count); // intentianally just beyond/before the item range
 
 	return GetNextTaskId(startIndex, next, topLevel);
 }
@@ -166,7 +166,7 @@ bool TaskListView::HasTaskId(UInt32 taskId)
 
 ITaskBase^ TaskListView::GetTask(int index)
 {
-	if ((index < 0) || (index >= Items->Count))
+	if ((index < 0) || (index > LastIndex))
 		return nullptr;
 
 	return ASTYPE(Items[index]->Tag, ITaskBase);
@@ -214,7 +214,7 @@ bool TaskListView::SelectTasks(IList<UInt32>^ taskIds)
 
 void TaskListView::EnsureSelectionVisible()
 {
-	if ((SelectedIndices->Count == 0) || (Items->Count == 0))
+	if ((SelectionCount == 0) || (Items->Count == 0))
 		return;
 
 	int itemIndex = SelectionCount;
@@ -228,7 +228,7 @@ void TaskListView::EnsureSelectionVisible()
 	}
 
 	// else
-	EnsureVisible(SelectedIndices[0]);
+	EnsureVisible(FirstSelectedIndex);
 }
 
 int TaskListView::SelectionCount::get() 
@@ -298,7 +298,7 @@ Drawing::Rectangle TaskListView::GetTaskLabelRect(UInt32 taskId)
 
 Drawing::Rectangle TaskListView::GetTaskLabelRect(int index)
 {
-	if ((index < 0) || (index >= Items->Count))
+	if ((index < 0) || (index > LastIndex))
 		return Drawing::Rectangle::Empty;
 
 	// else 
@@ -883,7 +883,7 @@ bool TaskListView::SelectTaskEx(String^ words, UIExtension::SelectTask selectTas
 
 	case UIExtension::SelectTask::SelectLastTask:
 		{
-			matchIndex = FindTask(words, (Items->Count - 1), false, caseSensitive, wholeWord, findReplace);
+			matchIndex = FindTask(words, LastIndex, false, caseSensitive, wholeWord, findReplace);
 		}
 		break;
 	}
@@ -902,12 +902,12 @@ bool TaskListView::SelectTaskEx(String^ words, UIExtension::SelectTask selectTas
 
 int TaskListView::FirstSelectedIndex::get()
 {
-	return ((SelectedIndices->Count > 0) ? SelectedIndices[0] : -1);
+	return (HasSelection ? SelectedIndices[0] : -1);
 }
 
 int TaskListView::LastSelectedIndex::get()
 {
-	return ((SelectedIndices->Count > 0) ? SelectedIndices[SelectedIndices->Count - 1] : -1);
+	return (HasSelection ? SelectedIndices[SelectionCount - 1] : -1);
 }
 
 int TaskListView::LastIndex::get()
@@ -918,7 +918,7 @@ int TaskListView::LastIndex::get()
 int TaskListView::FindTask(String^ phrase, int startIndex, bool forward, bool caseSensitive, bool wholeWord, bool findReplace)
 {
 	int fromIndex = startIndex;
-	int toIndex = (forward ? Items->Count : -1);
+	int toIndex = (forward ? Items->Count : -1); // intentianally just beyond/before the item range
 	int increment = (forward ? 1 : -1);
 
 	for (int i = fromIndex; i != toIndex; i += increment)

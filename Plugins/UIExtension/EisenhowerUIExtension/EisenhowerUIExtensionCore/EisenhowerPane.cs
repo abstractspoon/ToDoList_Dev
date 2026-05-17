@@ -347,6 +347,11 @@ namespace EisenhowerUIExtension
 			if ((task == null) || task.IsLocked)
 				return;
 
+			if (!item.Selected)
+				SelectTask(task.Id);
+
+			Focus();
+
 			DoDragDrop(this, DragDropEffects.Move);
 		}
 
