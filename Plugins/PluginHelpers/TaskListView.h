@@ -10,6 +10,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 using namespace System;
+using namespace System::Collections::Generic;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -51,19 +52,26 @@ namespace Abstractspoon
 				UInt32 GetNextTaskId(int index, bool next, bool topLevel);
 				bool HasTaskId(UInt32 taskId);
 				Drawing::Rectangle GetTaskLabelRect(UInt32 taskId);
+				Drawing::Rectangle GetTaskLabelRect(int index);
 
 				bool SelectTask(UInt32 taskId);
 				bool SelectTaskEx(String^ words, UIExtension::SelectTask selectTask, bool caseSensitive, bool wholeWord, bool findReplace);
+				bool SelectTasks(IList<UInt32>^ taskIDs);
 				void EnsureSelectionVisible();
 
 				property UInt32 SelectedTaskId { UInt32 get(); }
 				property String^ SelectedTaskTitle { String^ get(); }
 				property ITaskBase^ SelectedTask { ITaskBase^ get(); }
 
+				property int SelectionCount { int get(); }
+				property bool HasSelection { bool get(); }
+				property IList<UInt32>^ SelectedTaskIds { IList<UInt32>^ get(); }
+
 				property bool TaskColorIsBackground { bool get(); void set(bool value); }
 				property bool ShowParentsAsFolders { bool get(); void set(bool value); }
 				property bool ShowCompletionCheckboxes { bool get(); void set(bool value); }
 				property bool ShowLabelTips { bool get(); void set(bool value); }
+				property bool BoundSelecting { bool get() { return m_BoundSelecting; } }
 
 				property Drawing::Rectangle SelectedTaskLabelRect { Drawing::Rectangle get(); }
 				property Drawing::Color GridlineColor { Drawing::Color get(); void set(Drawing::Color value); }
@@ -91,14 +99,12 @@ namespace Abstractspoon
 				bool m_ShowParentAsFolder;
 				bool m_TaskColorIsBkgnd;
 				bool m_ShowCompletionCheckboxes;
+				bool m_BoundSelecting;
 				int m_CheckBoxSize;
 
 			protected:
 				void WndProc(Windows::Forms::Message% m) override;
 
-				void OnMouseDown(Windows::Forms::MouseEventArgs^ e) override;
-				void OnMouseClick(Windows::Forms::MouseEventArgs^ e) override;
-				void OnMouseDoubleClick(Windows::Forms::MouseEventArgs^ e) override;
 				void OnMouseMove(Windows::Forms::MouseEventArgs^ e) override;
 				void OnBeforeLabelEdit(Windows::Forms::LabelEditEventArgs^ e) override;
 				void OnColumnWidthChanging(Windows::Forms::ColumnWidthChangingEventArgs^ e) override;
@@ -109,18 +115,20 @@ namespace Abstractspoon
 				void OnSizeChanged(EventArgs^ e) override;
 				void OnFontChanged(EventArgs^ e) override;
 
+				// Pseudo-handler
+				bool OnLButtonDown(Drawing::Point ptClient, bool doubleClick);
+
 			protected:
 				Drawing::Rectangle CalcLabelTextRect(Drawing::Rectangle labelRect, bool includeSubItems);
 				Drawing::Rectangle CalcCheckboxRect(Drawing::Rectangle labelRect);
 				Drawing::Rectangle CalcIconRect(Drawing::Rectangle labelRect);
 
 				String^ Translate(String^ text, Translator::Type type);
-				void HandleMouseClick(Windows::Forms::MouseEventArgs^ e, bool doubleClick);
 				Windows::Forms::ListViewItem^ FindItem(UInt32 taskId);
 				int FindTask(String^ phrase, int startIndex, bool forward, bool caseSensitive, bool wholeWord, bool findReplace);
 				Drawing::Color GetTextColor(ITaskBase^ task, bool selected);
 				Drawing::Color GetBackColor(ITaskBase^ task, int row);
-				
+
 				// Derived classes optionally override
 				virtual bool TaskMatches(ITaskBase^ task, String^ phrase, bool caseSensitive, bool wholeWord, bool findReplace);
 				virtual Windows::Forms::VisualStyles::CheckBoxState GetTaskCheckboxState(ITaskBase^ task);
@@ -134,6 +142,7 @@ namespace Abstractspoon
 
 				property int FirstSelectedIndex { int get(); }
 				property int LastSelectedIndex { int get(); }
+				property int LastIndex { int get(); }
 			};
 		}
 	}

@@ -13,7 +13,7 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 namespace EisenhowerUIExtension
 {
-	public delegate void SelectionChangeEventHandler(Object sender, UInt32 taskId);
+	public delegate void SelectionChangeEventHandler(Object sender, IList<uint> taskIds);
 
 	// ---------------------------------------------
 
@@ -66,22 +66,14 @@ namespace EisenhowerUIExtension
 			m_List.Initialize(trans, taskIcons);
 			m_List.AllowDrop = true;
 
-			m_List.EditTaskDone += new EditTaskCompletionEventHandler(OnTaskMatchesEditTaskDone);
-			m_List.EditTaskIcon += new EditTaskIconEventHandler(OnTaskMatchesEditTaskIcon);
-			m_List.EditTaskLabel += new EditTaskLabelEventHandler(OnTaskMatchesEditTaskLabel);
-
-			m_List.ItemDrag  += (s, e) =>
-			{
-				if (m_List.AllowDrop)
-					DoDragDrop(this, DragDropEffects.Move);
-			};
+			m_List.EditTaskDone += new EditTaskCompletionEventHandler(OnListEditTaskDone);
+			m_List.EditTaskIcon += new EditTaskIconEventHandler(OnListEditTaskIcon);
+			m_List.EditTaskLabel += new EditTaskLabelEventHandler(OnListEditTaskLabel);
+			m_List.ItemDrag += new ItemDragEventHandler(OnListBeginItemDrag);
 
 			m_List.SelectedIndexChanged += (s, e) =>
 			{
-				UInt32 selTaskId = m_List.SelectedTaskId;
-
-				if (selTaskId != 0)
-					SelectionChange?.Invoke(this, selTaskId);
+				SelectionChange?.Invoke(this, m_List.SelectedTaskIds);
 			};
 
 			m_List.GotFocus += (s, e) => { GotFocus?.Invoke(this, new EventArgs()); };
@@ -144,17 +136,19 @@ namespace EisenhowerUIExtension
 
 		public Color GridlineColor				{ set { m_List.GridlineColor = value; } }
 		public Color AlternateLineColor			{ set { m_List.AlternateLineColor = value; } }
-// 		public Color ListBackColor				{ set { m_List.BackColor = value; } }
 
 		public bool TaskColorIsBackground		{ set { m_List.TaskColorIsBackground = value; } }
 		public bool ShowParentsAsFolders		{ set { m_List.ShowParentsAsFolders = value; } }
 		public bool ShowCompletionCheckboxes	{ set { m_List.ShowCompletionCheckboxes = value; } }
 		public bool ShowLabelTips				{ set { m_List.ShowLabelTips = value; } }
 
-		public bool HasSelection				{ get { return (m_List.SelectedItems.Count > 0); } }
-		public uint SelectedTaskId				{ get {	return m_List.SelectedTaskId; } }
+		public bool HasSelection				{ get { return m_List.HasSelection; } }
+		public IList<uint> SelectedTaskIds		{ get {	return m_List.SelectedTaskIds; } }
 		public uint FirstTaskId					{ get { return m_List.FirstTaskId; } }
 		public uint LastTaskId					{ get { return m_List.LastTaskId; } }
+		public uint FirstSelectedTaskId			{ get { return m_List.FirstSelectedTaskId; } }
+		public uint LastSelectedTaskId			{ get { return m_List.LastSelectedTaskId; } }
+		public bool BoundSelecting				{ get { return m_List.BoundSelecting; } }
 
 		public bool ReadOnly
 		{
@@ -236,10 +230,9 @@ namespace EisenhowerUIExtension
 			return Rectangle.Empty;
 		}
 
-		public bool SelectTasks(uint[] taskIDs)
+		public bool SelectTasks(IList<uint> taskIDs)
 		{
-			// TODO 
-			return true;
+			return m_List.SelectTasks(taskIDs);
 		}
 
 		public uint HitTestTask(Point screenPos)
@@ -352,22 +345,36 @@ namespace EisenhowerUIExtension
 			ResizeList();
 		}
 
-		private bool OnTaskMatchesEditTaskDone(object sender, UInt32 taskId, bool completed)
+		private bool OnListEditTaskDone(object sender, UInt32 taskId, bool completed)
 		{
 			return (bool)EditTaskDone?.Invoke(sender, taskId, completed);
 		}
 
-		private bool OnTaskMatchesEditTaskIcon(object sender, UInt32 taskId)
+		private bool OnListEditTaskIcon(object sender, UInt32 taskId)
 		{
 			return (bool)EditTaskIcon?.Invoke(sender, taskId);
 		}
 
-		private bool OnTaskMatchesEditTaskLabel(object sender, UInt32 taskId)
+		private bool OnListEditTaskLabel(object sender, UInt32 taskId)
 		{
 			return (bool)EditTaskLabel?.Invoke(sender, taskId);
 		}
-		
-		private void UpdateTitle()
+
+		private void OnListBeginItemDrag(object sender, ItemDragEventArgs e)
+		{
+			if (!m_List.AllowDrop)
+				return;
+
+			var item = (e.Item as ListViewItem);
+			var task = m_List.GetTask(item.Index);
+
+			if ((task == null) || task.IsLocked)
+				return;
+
+			DoDragDrop(this, DragDropEffects.Move);
+		}
+
+	private void UpdateTitle()
 		{
 			if (m_Filter != null)
 			{

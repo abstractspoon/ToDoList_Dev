@@ -190,7 +190,7 @@ namespace EisenhowerUIExtension
 			}
 		}
 
-		public bool SelectTasks(uint[] taskIDs)
+		public bool SelectTasks(IList<uint> taskIDs)
 		{
 			foreach (var p in m_Panes)
 			{
@@ -322,14 +322,11 @@ namespace EisenhowerUIExtension
 			}
 		}
 
-		public uint SelectedTaskId
+		public IList<uint> SelectedTaskIds
 		{
 			get
 			{
-				uint taskId = 0;
-				m_Panes.ForEach(p => taskId |= p.SelectedTaskId);
-
-				return taskId;
+				return SelectedPane.SelectedTaskIds;
 			}
 		}
 
@@ -350,7 +347,7 @@ namespace EisenhowerUIExtension
 				{
 					pane = SelectedPane;
 
-					if (pane.SelectedTaskId == pane.LastTaskId)
+					if (pane.FirstSelectedTaskId == pane.LastTaskId)
 						pane = GetNextPane(pane, true);
 				}
 				break;
@@ -366,7 +363,7 @@ namespace EisenhowerUIExtension
 					forward = false;
 					pane = SelectedPane;
 
-					if (pane.SelectedTaskId == pane.FirstTaskId)
+					if (pane.LastSelectedTaskId == pane.FirstTaskId)
 						pane = GetNextPane(pane, false);
 				}
 				break;
@@ -460,9 +457,9 @@ namespace EisenhowerUIExtension
 			return (bool)EditTaskLabel?.Invoke(sender, taskId);
 		}
 
-		private void OnPaneSelectionChange(object sender, uint taskId)
+		private void OnPaneSelectionChange(object sender, IList<uint> taskIds)
 		{
-			SelectionChange?.Invoke(sender, taskId);
+			SelectionChange?.Invoke(sender, taskIds);
 		}
 
 		private void OnPaneGotFocus(object sender, EventArgs e)
@@ -472,10 +469,10 @@ namespace EisenhowerUIExtension
 
 			if (pane != null)
 			{
-				if (pane.HasSelection)
+				if (pane.HasSelection || pane.BoundSelecting)
 				{
 					SelectedPane = pane;
-					SelectionChange?.Invoke(this, pane.SelectedTaskId);
+					SelectionChange?.Invoke(this, pane.SelectedTaskIds);
 				}
 				else
 				{
@@ -762,23 +759,32 @@ namespace EisenhowerUIExtension
 
 				if (AttributeChange.Invoke(this, attribChangeArgs))
 				{
-					var selTaskId = SelectedTaskId;
-					var task = m_Tasks.GetItem(selTaskId);
+					var modTaskIds = SelectedTaskIds;
+					int i = modTaskIds.Count;
 
-					if (task != null)
+					while (i-- > 0)
 					{
-						if (destXRange != srcXRange)
-							task.SetAttributeValue(attribChangeArgs.XAttrib, attribChangeArgs.XValue);
+						var task = m_Tasks.GetItem(modTaskIds[i]);
 
-						if (destYRange != srcYRange)
-							task.SetAttributeValue(attribChangeArgs.YAttrib, attribChangeArgs.YValue);
+						if ((task != null) && !task.IsLocked)
+						{
+							if (destXRange != srcXRange)
+								task.SetAttributeValue(attribChangeArgs.XAttrib, attribChangeArgs.XValue);
 
-						srcPane.RefreshListItems();
-						destPane.RefreshListItems();
-
-						SelectTask(selTaskId);
-						destPane.Focus();
+							if (destYRange != srcYRange)
+								task.SetAttributeValue(attribChangeArgs.YAttrib, attribChangeArgs.YValue);
+						}
+						else
+						{
+							modTaskIds.RemoveAt(i);
+						}
 					}
+
+					srcPane.RefreshListItems();
+					destPane.RefreshListItems();
+
+					SelectTasks(modTaskIds);
+					destPane.Focus();
 				}
 			}
 		}

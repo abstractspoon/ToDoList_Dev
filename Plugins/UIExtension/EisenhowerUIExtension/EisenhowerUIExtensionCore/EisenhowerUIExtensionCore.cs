@@ -180,15 +180,6 @@ namespace EisenhowerUIExtension
 			m_EisenhowerCtrl.LoadPreferences(prefs, key, appOnly);
 		}
 
-// 		public new bool Focus()
-// 		{
-// 			if (Focused)
-// 				return false;
-// 
-// 			// else
-// 			return m_EisenhowerCtrl.Focus();
-// 		}
-
 		public new bool Focused
 		{
 			get { return m_EisenhowerCtrl.Focused; }
@@ -265,10 +256,10 @@ namespace EisenhowerUIExtension
 			return notify.NotifyEditLabel();
 		}
 
-		private void OnEisenhowerCtrlSelectionChange(object sender, UInt32 taskId)
+		private void OnEisenhowerCtrlSelectionChange(object sender, IList<UInt32> taskIds)
 		{
 			var notify = new UIExtension.ParentNotify(m_HwndParent);
-			notify.NotifySelChange(taskId);
+			notify.NotifySelChange(taskIds);
 		}
 
 		private bool OnEisenhowerCtrlAttributeChange(Object sender, AttributeChangeEventArgs args)

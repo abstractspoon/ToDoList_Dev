@@ -817,13 +817,23 @@ bool UIExtension::ParentNotify::NotifySelChange(UInt32 taskID)
 	return (bRet != FALSE);
 }
 
-bool UIExtension::ParentNotify::NotifySelChange(cli::array<UInt32>^ pdwTaskIDs)
+bool UIExtension::ParentNotify::NotifySelChange(IList<UInt32>^ taskIDs)
 {
-	if (!IsWindow(m_hwndParent) || !pdwTaskIDs->Length)
+	switch (taskIDs->Count)
+	{
+	case 0:	return NotifySelChange(0);
+	case 1:	return NotifySelChange(taskIDs[0]);
+	}
+
+	// Multi-selection
+	if (!IsWindow(m_hwndParent))
 		return false;
 
-	pin_ptr<UInt32> p = &pdwTaskIDs[0];
-	BOOL bRet = ::SendMessage(m_hwndParent, WM_IUI_SELECTTASK, (WPARAM)p, pdwTaskIDs->Length);
+	auto aTaskIDs = gcnew cli::array<UInt32>(taskIDs->Count);
+	taskIDs->CopyTo(aTaskIDs, 0);
+
+	pin_ptr<UInt32> p = &aTaskIDs[0];
+	BOOL bRet = ::SendMessage(m_hwndParent, WM_IUI_SELECTTASK, (WPARAM)p, taskIDs->Count);
 
 	return (bRet != FALSE);
 }

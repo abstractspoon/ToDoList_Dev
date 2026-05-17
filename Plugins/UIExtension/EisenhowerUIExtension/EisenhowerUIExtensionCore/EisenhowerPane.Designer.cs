@@ -68,10 +68,10 @@
             this.columnHeader3});
 			this.m_List.GridlineColor = System.Drawing.Color.Empty;
 			this.m_List.HideSelection = false;
+			this.m_List.LabelEdit = true;
 			this.m_List.LabelWrap = false;
 			this.m_List.Location = new System.Drawing.Point(0, 18);
 			this.m_List.Margin = new System.Windows.Forms.Padding(0);
-			this.m_List.MultiSelect = false;
 			this.m_List.Name = "m_List";
 			this.m_List.OwnerDraw = true;
 			this.m_List.Selected = false;
@@ -84,6 +84,8 @@
 			this.m_List.TaskColorIsBackground = false;
 			this.m_List.UseCompatibleStateImageBehavior = false;
 			this.m_List.View = System.Windows.Forms.View.Details;
+			this.m_List.XAttribTitle = "X Attribute";
+			this.m_List.YAttribTitle = "Y Attribute";
 			// 
 			// columnHeader1
 			// 
@@ -92,12 +94,12 @@
 			// 
 			// columnHeader2
 			// 
-			this.columnHeader2.Text = "Attribute 1";
+			this.columnHeader2.Text = "X Attribute";
 			this.columnHeader2.Width = 80;
 			// 
 			// columnHeader3
 			// 
-			this.columnHeader3.Text = "Attribute 2";
+			this.columnHeader3.Text = "Y Attribute";
 			this.columnHeader3.Width = 80;
 			// 
 			// EisenhowerPane

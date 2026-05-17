@@ -77,8 +77,11 @@ namespace EisenhowerUIExtension
 			set { Columns[YColIndex].Text = value; }
 		}
 
-		public uint FirstTaskId { get { return base.GetTaskId(0); } }
-		public uint LastTaskId  { get { return base.GetTaskId(Items.Count - 1); } }
+		public uint FirstTaskId  { get { return base.GetTaskId(0); } }
+		public uint LastTaskId   { get { return base.GetTaskId(LastIndex); } }
+
+		public uint FirstSelectedTaskId	{ get { return (HasSelection ? GetTaskId(SelectedIndices[0]) : 0); } }
+		public uint LastSelectedTaskId	{ get { return (HasSelection ? GetTaskId(SelectedIndices[LastIndex]) : 0); } }
 
 		public void DrawDragImage(Graphics graphics, Rectangle rect)
 		{

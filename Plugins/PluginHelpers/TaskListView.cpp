@@ -57,6 +57,7 @@ TaskListView::TaskListView()
 	m_ShowParentAsFolder(false),
 	m_TaskColorIsBkgnd(false),
 	m_ShowCompletionCheckboxes(false),
+	m_BoundSelecting(false),
 	m_GridlineColor(Color::Empty),
 	m_AlternateLineColor(Color::Empty),
 	m_CheckBoxSize(-1)
@@ -70,7 +71,6 @@ void TaskListView::Initialize(Translator^ trans, UIExtension::TaskIcon^ taskIcon
 	m_TaskIcons = taskIcons;
 
 	View = System::Windows::Forms::View::Details;
-	MultiSelect = false;
 	FullRowSelect = true;
 	HideSelection = false;
 	OwnerDraw = true;
@@ -79,8 +79,6 @@ void TaskListView::Initialize(Translator^ trans, UIExtension::TaskIcon^ taskIcon
 	DoubleBuffered = true;
 	HotTracking = false;
 	HoverSelection = false;
-	LabelEdit = true;
-	GridLines = false;
 }
 
 ListViewItem^ TaskListView::AddTask(ITaskBase^ task)
@@ -136,7 +134,7 @@ UInt32 TaskListView::GetTaskIdEx(UIExtension::GetTask getTask, bool fromSelTask)
 
 UInt32 TaskListView::GetNextTaskId(int index, bool next, bool topLevel)
 {
-	// Don't pre-validate 'index'; ut's allowed to be just
+	// Don't pre-validate 'index'; it's allowed to be just
 	// beyond or before the item range
 	ITaskBase^ task = nullptr;
 
@@ -180,27 +178,37 @@ UInt32 TaskListView::GetTaskId(int index)
 	return ((task == nullptr) ? 0 : task->Id);
 }
 
-UInt32 TaskListView::SelectedTaskId::get()
-{
-	auto selTask = SelectedTask;
-	return (selTask == nullptr ? 0 : selTask->Id);
-}
-
 bool TaskListView::SelectTask(UInt32 taskId)
 {
+	auto taskIds = gcnew List<UInt32>();
+	taskIds->Add(taskId);
+
+	return SelectTasks(taskIds);
+}
+
+bool TaskListView::SelectTasks(IList<UInt32>^ taskIds)
+{
+	Debug::Assert((MultiSelect == true) || (taskIds->Count <= 1));
+
 	SelectedItems->Clear();
 	SelectedIndices->Clear();
 
-	ListViewItem^ lvItem = FindItem(taskId);
+	bool first = true;
 
-	if (lvItem == nullptr)
-		return false;
+	for each(auto taskId in taskIds)
+	{
+		ListViewItem^ lvItem = FindItem(taskId);
 
-	lvItem->Selected = true;
-	lvItem->Focused = true;
+		if (lvItem == nullptr)
+			return false;
+
+		lvItem->Selected = true;
+		lvItem->Focused = first;
+
+		first = false;
+	}
 
 	EnsureSelectionVisible();
-
 	return true;
 }
 
@@ -209,7 +217,7 @@ void TaskListView::EnsureSelectionVisible()
 	if ((SelectedIndices->Count == 0) || (Items->Count == 0))
 		return;
 
-	int itemIndex = SelectedItems->Count;
+	int itemIndex = SelectionCount;
 
 	while (itemIndex-- > 0)
 	{
@@ -223,6 +231,32 @@ void TaskListView::EnsureSelectionVisible()
 	EnsureVisible(SelectedIndices[0]);
 }
 
+int TaskListView::SelectionCount::get() 
+{ 
+	return SelectedItems->Count;
+}
+
+bool TaskListView::HasSelection::get()
+{
+	return (SelectionCount > 0);
+}
+
+IList<UInt32>^ TaskListView::SelectedTaskIds::get()
+{
+	auto taskIds = gcnew List<UInt32>();
+
+	for each (int index in SelectedIndices)
+		taskIds->Add(GetTaskId(index));
+
+	return taskIds;
+}
+
+UInt32 TaskListView::SelectedTaskId::get()
+{
+	auto selTask = SelectedTask;
+	return (selTask == nullptr ? 0 : selTask->Id);
+}
+
 String^ TaskListView::SelectedTaskTitle::get()
 {
 	auto selTask = SelectedTask;
@@ -231,30 +265,44 @@ String^ TaskListView::SelectedTaskTitle::get()
 
 ITaskBase^ TaskListView::SelectedTask::get()
 {
-	if (SelectedItems->Count == 0)
+	Debug::Assert((MultiSelect == false) || (SelectionCount <= 1));
+
+	if (SelectionCount == 0)
 		return nullptr;
 
+	// else 
 	return ASTYPE(SelectedItems[0]->Tag, ITaskBase);
 }
 
 Drawing::Rectangle TaskListView::SelectedTaskLabelRect::get()
 {
-	if (SelectedItems->Count > 0)
-		return CalcLabelTextRect(SelectedItems[0]->GetBounds(ItemBoundsPortion::Label), false);
+	Debug::Assert((MultiSelect == false) || (SelectionCount <= 1));
 
-	//else 
-	return Drawing::Rectangle::Empty;
+	if (SelectionCount == 0)
+		return Drawing::Rectangle::Empty;
+
+	// else 
+	return CalcLabelTextRect(SelectedItems[0]->GetBounds(ItemBoundsPortion::Label), false);
 }
 
 Drawing::Rectangle TaskListView::GetTaskLabelRect(UInt32 taskId)
 {
 	auto item = FindItem(taskId);
 
-	if (item)
-		return CalcLabelTextRect(item->GetBounds(ItemBoundsPortion::Label), false);
+	if (item == nullptr)
+		return Drawing::Rectangle::Empty;
 
-	//else 
-	return Drawing::Rectangle::Empty;
+	// else
+	return CalcLabelTextRect(item->GetBounds(ItemBoundsPortion::Label), false);
+}
+
+Drawing::Rectangle TaskListView::GetTaskLabelRect(int index)
+{
+	if ((index < 0) || (index >= Items->Count))
+		return Drawing::Rectangle::Empty;
+
+	// else 
+	return CalcLabelTextRect(Items[index]->GetBounds(ItemBoundsPortion::Label), false);
 }
 
 ListViewItem^ TaskListView::FindItem(UInt32 taskId)
@@ -328,6 +376,7 @@ void TaskListView::OnGotFocus(EventArgs^ e)
 	ListView::OnGotFocus(e);
 
 	Invalidate();
+	//GotFocus(this, e);
 }
 
 void TaskListView::OnLostFocus(EventArgs^ e)
@@ -648,21 +697,41 @@ void TaskListView::WndProc(Message% m)
 	switch (m.Msg)
 	{
 	case WM_LBUTTONDOWN:
-	case WM_LBUTTONUP:
+		{
+			Point pos = Win32::GetPoint(m.LParam);
+
+			if (HitTest(pos)->Item == nullptr)
+			{
+				// Check for bounds selection
+				m_BoundSelecting = (MultiSelect && Win32::DragDetect(Handle, PointToScreen(pos)));
+
+				if (m_BoundSelecting)
+					break;
+
+				Focus();
+				return;
+			}
+
+			if (OnLButtonDown(pos, false))
+				return;
+		}
+		break;
+
 	case WM_LBUTTONDBLCLK:
 		{
-			Point pos = Point(Win32::LoWord(m.LParam), Win32::HiWord(m.LParam));
+			Point pos = Win32::GetPoint(m.LParam);
 
-			switch (HitTest(pos)->Location)
-			{
-			case ListViewHitTestLocations::AboveClientArea:
-			case ListViewHitTestLocations::BelowClientArea:
-			case ListViewHitTestLocations::LeftOfClientArea:
-			case ListViewHitTestLocations::RightOfClientArea:
-			case ListViewHitTestLocations::None:
-				Focus();
-				return; // eat
-			}
+			if (OnLButtonDown(pos, true))
+				return;
+		}
+		break;
+
+	case WM_LBUTTONUP:
+		{
+			Point pos = Win32::GetPoint(m.LParam);
+
+			if (HitTest(pos)->Item == nullptr)
+				return;
 		}
 		break;
 	}
@@ -671,66 +740,46 @@ void TaskListView::WndProc(Message% m)
 	ListView::WndProc(m);
 }
 
-void TaskListView::OnMouseDown(MouseEventArgs^ e)
+bool TaskListView::OnLButtonDown(Point ptClient, bool doubleClick)
 {
-	// disable label editing if not on the item text
-	int leftMargin = (CheckboxOffset + TextIconOffset);
-	int rightMargin = Columns[0]->Width;
+	if (!doubleClick && !ItemsHaveIcons && !ShowCompletionCheckboxes)
+		return false;
 
-	LabelEdit = ((e->Location.X > leftMargin) && (e->Location.X < rightMargin));
-
-	ListView::OnMouseDown(e);
-}
-
-void TaskListView::HandleMouseClick(MouseEventArgs^ e, bool doubleClick)
-{
-	if (e->Button != Windows::Forms::MouseButtons::Left)
-		return;
-
-	if (!ItemsHaveIcons && !ShowCompletionCheckboxes && !doubleClick)
-		return;
-
-	auto hit = HitTest(e->Location);
+	auto hit = HitTest(ptClient);
 
 	if (hit->Item == nullptr)
-		return;
+		return false;
 
 	auto task = ASTYPE(hit->Item->Tag, ITaskBase);
 
 	if ((task == nullptr) || task->IsLocked)
-		return;
+		return false;
 
-	if (CalcCheckboxRect(hit->Item->Bounds).Contains(e->Location))
+	if (CalcCheckboxRect(hit->Item->Bounds).Contains(ptClient))
 	{
 		EditTaskDone(this, task->Id, !task->IsDone);
+		return true;
 	}
-	else if (CalcIconRect(hit->Item->Bounds).Contains(e->Location))
+	else if (CalcIconRect(hit->Item->Bounds).Contains(ptClient))
 	{
 		EditTaskIcon(this, task->Id);
+		return true;
 	}
 	else if (doubleClick)
 	{
 		EditTaskLabel(this, task->Id);
+		return true;
 	}
-}
 
-void TaskListView::OnMouseClick(MouseEventArgs^ e)
-{
-	ListView::OnMouseClick(e);
-
-	HandleMouseClick(e, false);
-}
-
-void TaskListView::OnMouseDoubleClick(MouseEventArgs^ e)
-{
-	ListView::OnMouseDoubleClick(e);
-
-	HandleMouseClick(e, true);
+	return false;
 }
 
 void TaskListView::OnMouseMove(MouseEventArgs^ e)
 {
 	ListView::OnMouseMove(e);
+
+	// Update bounds selecting
+	m_BoundSelecting &= (MouseButtons == Windows::Forms::MouseButtons::None);
 
 	auto hit = HitTest(e->Location);
 
@@ -859,6 +908,11 @@ int TaskListView::FirstSelectedIndex::get()
 int TaskListView::LastSelectedIndex::get()
 {
 	return ((SelectedIndices->Count > 0) ? SelectedIndices[SelectedIndices->Count - 1] : -1);
+}
+
+int TaskListView::LastIndex::get()
+{
+	return ((Items->Count > 0) ? (Items->Count - 1) : -1);
 }
 
 int TaskListView::FindTask(String^ phrase, int startIndex, bool forward, bool caseSensitive, bool wholeWord, bool findReplace)

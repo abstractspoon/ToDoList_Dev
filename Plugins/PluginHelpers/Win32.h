@@ -64,6 +64,7 @@ namespace Abstractspoon
 				static void EnableExplorerTheming(IntPtr hWnd);
 				static String^ GetWindowText(IntPtr hWnd);
 				static void SetWindowText(IntPtr hWnd, String^ text);
+				static bool DragDetect(IntPtr hWnd, Drawing::Point ptScreen);
 
 				// Message cracking
 				static int LoWord(int n) { return LOWORD(n); }
@@ -72,6 +73,9 @@ namespace Abstractspoon
 				static int HiWord(IntPtr n)	{ return HiWord(n.ToInt32()); }
 				static int MakeLParam(int low, int high) { return MAKELPARAM(low, high); }
 				static int MakeWParam(int low, int high) { return MAKEWPARAM(low, high); }
+
+				static Drawing::Point GetPoint(int lParam);
+				static Drawing::Point GetPoint(IntPtr lParam) { return GetPoint(lParam.ToInt32()); }
 
 			protected:
 				static void DoFrameChange(IntPtr hWnd) { DoFrameChangeEx(hWnd, false); }
