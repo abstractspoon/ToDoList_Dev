@@ -3505,7 +3505,8 @@ LRESULT CToDoListWnd::OnToDoCtrlNotifyListChange(WPARAM /*wp*/, LPARAM lp)
 
 LRESULT CToDoListWnd::OnToDoCtrlNotifySelChange(WPARAM /*wp*/, LPARAM /*lp*/)
 {
-	m_idleTasks.UpdateStatusBar();
+	// Selection changes are visualised immediately
+	UpdateStatusBar(TDCA_ALL);
 
 	return 0L;
 }
