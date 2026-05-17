@@ -25,6 +25,8 @@ namespace WordCloudUIExtension
 
 		public TaskMatchesListView() : base()
 		{
+			MultiSelect = false;
+			LabelEdit = true;
 		}
 
 		protected override void OnHandleCreated(EventArgs e)
@@ -46,8 +48,8 @@ namespace WordCloudUIExtension
 			{
 				base.Initialize(trans, taskIcons);
 
-				this.Columns.Add(Translate("Task Matches", Translator.Type.Header));
-				this.Columns.Add(Translate("ID", Translator.Type.Header));
+				Columns.Add(Translate("Task Matches", Translator.Type.Header));
+				Columns.Add(Translate("ID", Translator.Type.Header));
 
 				Columns[1].Width = -2; // Header width
 			}
