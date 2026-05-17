@@ -71,16 +71,12 @@ namespace EisenhowerUIExtension
 			m_List.EditTaskLabel += new EditTaskLabelEventHandler(OnListEditTaskLabel);
 			m_List.ItemDrag += new ItemDragEventHandler(OnListBeginItemDrag);
 
-			m_List.SelectedIndexChanged += (s, e) =>
-			{
-				SelectionChange?.Invoke(this, m_List.SelectedTaskIds);
-			};
-
+			m_List.SelectedIndexChanged += (s, e) => { SelectionChange?.Invoke(this, m_List.SelectedTaskIds); };
 			m_List.GotFocus += (s, e) => { GotFocus?.Invoke(this, new EventArgs()); };
 
-			base.DragOver += (s, e) => DragOver?.Invoke(this, e);
-			base.DragLeave += (s, e) => DragLeave?.Invoke(this, e);
-			base.DragDrop += (s, e) => DragDrop?.Invoke(this, e);
+			base.DragOver += new DragEventHandler(OnDragOver);
+			base.DragLeave += new EventHandler(OnDragLeave);
+			base.DragDrop += new DragEventHandler(OnDragDrop);
 
 			base.QueryContinueDrag += (s, e) =>
 			{
@@ -93,13 +89,11 @@ namespace EisenhowerUIExtension
 
 			foreach (Control c in Controls)
 			{
-				c.DragOver += (s, e) => DragOver?.Invoke(this, e);
-				c.DragLeave += (s, e) => DragLeave?.Invoke(this, e);
-				c.DragDrop += (s, e) => DragDrop?.Invoke(this, e);
+				c.DragOver += new DragEventHandler(OnDragOver);
+				c.DragLeave += new EventHandler(OnDragLeave);
+				c.DragDrop += new DragEventHandler(OnDragDrop);
 			}
 		}
-
-		public EisenhowerPaneFilter Filter { get { return m_Filter; } }
 
 		public bool SetFilter(EisenhowerFilterVariable xAttrib,
 							  EisenhowerFilterVariable yAttrib)
@@ -120,6 +114,8 @@ namespace EisenhowerUIExtension
 
 			return false; // no change
 		}
+
+		public EisenhowerPaneFilter Filter { get { return m_Filter; } }
 
 		public bool Selected
 		{
@@ -294,26 +290,6 @@ namespace EisenhowerUIExtension
 		// --------------------------------------------------------
 		// Message Handlers
 
-// 		private void OnDragEnter(object sender, DragEventArgs e)
-// 		{
-// 			if (!(sender is EisenhowerPaneListView) || (sender == m_List))
-// 				e.Effect = DragDropEffects.None;
-// 			else
-// 				e.Effect = e.AllowedEffect;
-// 		}
-// 
-// 		private void OnDragOver(object sender, DragEventArgs e)
-// 		{
-// 			int breakpoint = 0;
-// 
-// 		}
-// 
-// 		private void OnDragDrop(object sender, DragEventArgs e)
-// 		{
-// 			int breakpoint = 0;
-// 
-// 		}
-
 		protected override void OnFontChanged(EventArgs e)
 		{
 			base.OnFontChanged(e);
@@ -374,7 +350,29 @@ namespace EisenhowerUIExtension
 			DoDragDrop(this, DragDropEffects.Move);
 		}
 
-	private void UpdateTitle()
+		private bool IsValidDragData(IDataObject obj)
+		{
+			return (obj.GetData(typeof(EisenhowerPane)) != null);
+		}
+
+		private void OnDragLeave(object sender, EventArgs e)
+		{
+			DragLeave?.Invoke(this, e);
+		}
+
+		private void OnDragOver(object sender, DragEventArgs e)
+		{
+			if (IsValidDragData(e.Data))
+				DragOver?.Invoke(this, e);
+		}
+
+		private void OnDragDrop(object sender, DragEventArgs e)
+		{
+			if (IsValidDragData(e.Data))
+				DragDrop?.Invoke(this, e);
+		}
+
+		private void UpdateTitle()
 		{
 			if (m_Filter != null)
 			{
