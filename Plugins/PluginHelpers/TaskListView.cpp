@@ -644,7 +644,7 @@ void TaskListView::OnDrawItem(DrawListViewItemEventArgs^ e)
 
 		// Vertical gridline
 		if (gridPen != nullptr)
-			e->Graphics->DrawLine(gridPen, subItemRect.Right, itemRect.Top, subItemRect.Right, itemRect.Bottom);
+			e->Graphics->DrawLine(gridPen, subItemRect.Right - 1, itemRect.Top, subItemRect.Right - 1, itemRect.Bottom);
 
 		// next subitem
 		subItemRect.X = subItemRect.Right;
