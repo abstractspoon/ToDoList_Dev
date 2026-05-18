@@ -1708,26 +1708,21 @@ namespace MindMapUIExtension
 		{
 			base.OnDragEnter(e);
 
-			var rect = GetItemLabelRect(SelectedNode);
-			rect.Offset(-rect.Left, -rect.Top);
-
-			m_DragImage.Begin(Handle, 
-								this,
-								SelectedNode, 
-								rect.Width, 
-								rect.Height, 
-								rect.Width, 
-								rect.Height);
+			m_DragImage.Begin(Handle, this,	SelectedNode);
 		}
 
+		public Size GetDragImageSize()
+		{
+			return GetItemLabelRect(SelectedNode).Size;
+		}
 
-		public void DrawDragImage(Graphics graphics, Object obj, int width, int height)
+		public void DrawDragImage(Graphics graphics, Object obj, Size size)
 		{
 			var node = (obj as TreeNode);
 
 			DrawItemLabel(graphics,
 							TaskItem(node), 
-							new Rectangle(0, 0, width, height),
+							new Rectangle(Point.Empty, size),
 							NodeDrawState.Selected,
 							NodeDrawPos.Root,
 							GetNodeTitleFont(node),

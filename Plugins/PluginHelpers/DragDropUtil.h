@@ -38,7 +38,8 @@ namespace Abstractspoon
 			public interface class IDragRenderer
 			{
 			public:
-				virtual void DrawDragImage(Drawing::Graphics^ graphics, Object^ object, int width, int height) = 0;
+				virtual Drawing::Size GetDragImageSize() = 0;
+				virtual void DrawDragImage(Drawing::Graphics^ graphics, Object^ object, Drawing::Size size) = 0;
 			};
 
 			// ----------------------------------------------------------------------------
@@ -50,7 +51,7 @@ namespace Abstractspoon
 				~DragImage();
 
 				bool Begin(IntPtr wnd, Drawing::Font^ font, String^ text, int width, int height, int hotX, int hotY);
-				bool Begin(IntPtr wnd, IDragRenderer^ renderer, Object^ object, int width, int height, int hotX, int hotY);
+				bool Begin(IntPtr wnd, IDragRenderer^ renderer, Object^ object);
 				bool Move(int x, int y);
 				bool End();
 				bool ShowNoLock(bool show);

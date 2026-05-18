@@ -17,7 +17,7 @@ namespace EisenhowerUIExtension
 
 	// ---------------------------------------------
 
-	public partial class EisenhowerPane : UserControl
+	public partial class EisenhowerPane : UserControl, IDragRenderer
 	{
 		private TaskItems m_Tasks;
 		private EisenhowerPaneFilter m_Filter;
@@ -37,6 +37,8 @@ namespace EisenhowerUIExtension
 		// Local 
 		public event SelectionChangeEventHandler SelectionChange;
 
+		public	   event EventHandler DragBegin;
+		public	   event EventHandler DragCancel;
 		public new event EventHandler DragLeave;
  		public new event DragEventHandler DragOver;
 		public new event DragEventHandler DragDrop;
@@ -83,7 +85,7 @@ namespace EisenhowerUIExtension
 				if (e.EscapePressed)
 				{
 					e.Action = DragAction.Cancel;
-					DragLeave?.Invoke(this, e);
+					DragCancel?.Invoke(this, e);
 				}
 			};
 
@@ -177,6 +179,13 @@ namespace EisenhowerUIExtension
 						BackColor = m_BackColor;
 						m_List.BackColor = Color.Empty;
 					}
+/*
+					Invalidate();
+					Update();
+
+					m_List.Invalidate();
+					m_List.Update();
+*/
 				}
 			}
 		}
@@ -282,9 +291,14 @@ namespace EisenhowerUIExtension
 			return true;
 		}
 
-		public void DrawDragImage(Graphics graphics, Rectangle rect)
+		public void DrawDragImage(Graphics graphics, object unused, Size size)
 		{
-			m_List.DrawDragImage(graphics, rect);
+			m_List.DrawDragImage(graphics, size);
+		}
+
+		public Size GetDragImageSize()
+		{
+			return m_List.GetDragImageSize();
 		}
 
 		// --------------------------------------------------------
@@ -351,6 +365,7 @@ namespace EisenhowerUIExtension
 				SelectTask(task.Id);
 
 			Focus();
+			DragBegin?.Invoke(this, new EventArgs());
 
 			DoDragDrop(this, DragDropEffects.Move);
 		}

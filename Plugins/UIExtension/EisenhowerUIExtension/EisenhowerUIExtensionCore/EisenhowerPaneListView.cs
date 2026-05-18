@@ -81,21 +81,84 @@ namespace EisenhowerUIExtension
 		public uint FirstSelectedTaskId	{ get { return (HasSelection ? GetTaskId(SelectedIndices[0]) : 0); } }
 		public uint LastSelectedTaskId	{ get { return (HasSelection ? GetTaskId(SelectedIndices[LastIndex]) : 0); } }
 
-		public void DrawDragImage(Graphics graphics, Rectangle rect)
+		protected override void OnDrawItem(DrawListViewItemEventArgs e)
 		{
-			graphics.FillRectangle(Brushes.Red, rect);
+			base.OnDrawItem(e);
+		}
+
+		public void DrawDragImage(Graphics graphics, Size size)
+		{
+			var format = new StringFormat(StringFormatFlags.NoClip | StringFormatFlags.FitBlackBox | StringFormatFlags.NoWrap);
+
+			format.LineAlignment = StringAlignment.Center;
+			format.Trimming = StringTrimming.None;
+			format.Alignment = StringAlignment.Near;
+
+			var labelRect = Rectangle.Empty;
+			labelRect.Height = Items[0].Bounds.Height;
 
 			foreach (int index in SelectedIndices)
 			{
 				var task = GetTask(index);
 
-				TextRenderer.DrawText(graphics,
-									   task.Title,
-									   Font,
-									   rect,
-									   task.TextColor,
-									   (TextFormatFlags.SingleLine | TextFormatFlags.Bottom | TextFormatFlags.Left));
+				if ((task != null) && !task.IsLocked)
+				{
+					labelRect.X = LabelPadding;
+					labelRect.Width = CalcLabelDragImageWidth(task, graphics);
+
+					// Icon
+					if (ItemsHaveIcons)
+					{
+						if (task.HasIcon && m_TaskIcons.Get(task.Id))
+							m_TaskIcons.Draw(graphics, labelRect.Left, labelRect.Top);
+
+						labelRect.X += TextIconOffset;
+						labelRect.Width -= TextIconOffset;
+					}
+
+					// Selection
+					UIExtension.SelectionRect.Draw(Handle,
+													 graphics,
+													 labelRect.X,
+													 labelRect.Y,
+													 labelRect.Width,
+													 labelRect.Height,
+													 false); // opaque
+					// text
+					graphics.DrawString(task.Title, 
+										GetFont(task, true), 
+										SystemBrushes.WindowText, 
+										labelRect, 
+										format);
+
+					// Next item
+					labelRect.Y = labelRect.Bottom;
+				}
 			}
+		}
+
+		public Size GetDragImageSize()
+		{
+			Size imageSize = Size.Empty;
+
+			if (HasSelection)
+			{
+				var graphics = Graphics.FromHwnd(Handle);
+				var itemHeight = Items[0].Bounds.Height;
+				
+				foreach (int index in SelectedIndices)
+				{
+					var task = GetTask(index);
+
+					int width = CalcLabelDragImageWidth(task, graphics);
+					imageSize.Width = Math.Max(imageSize.Width, width);
+
+					if (width > 0)
+						imageSize.Height += itemHeight;
+				}
+			}
+
+			return imageSize;
 		}
 
 		// --------------------------------------------------------
@@ -105,5 +168,19 @@ namespace EisenhowerUIExtension
 		{
 			return (m_Selected && base.IsItemSelected(lvItem));
 		}
+
+		public int CalcLabelDragImageWidth(ITaskBase task, Graphics graphics)
+		{
+			if ((task == null) || task.IsLocked)
+				return 0;
+
+			int labelWidth = (int)graphics.MeasureString(task.Title, GetFont(task, true)).Width;
+
+			if (ItemsHaveIcons)
+				labelWidth += TextIconOffset;
+
+			return labelWidth + (2 * LabelPadding);
+		}
+
 	}
 }

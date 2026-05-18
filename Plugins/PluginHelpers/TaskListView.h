@@ -86,7 +86,7 @@ namespace Abstractspoon
 				event EditTaskIconEventHandler^ EditTaskIcon;
 				event EditTaskCompletionEventHandler^ EditTaskDone;
 
-			private:
+			protected:
 				Translator^ m_Trans;
 				UIExtension::TaskIcon^ m_TaskIcons;
 				LabelTip^ m_LabelTip;
@@ -128,6 +128,7 @@ namespace Abstractspoon
 				int FindTask(String^ phrase, int startIndex, bool forward, bool caseSensitive, bool wholeWord, bool findReplace);
 				Drawing::Color GetTextColor(ITaskBase^ task, bool selected);
 				Drawing::Color GetBackColor(ITaskBase^ task, int row);
+				Drawing::Font^ GetFont(ITaskBase^ task, bool title);
 
 				// Derived classes optionally override
 				virtual bool TaskMatches(ITaskBase^ task, String^ phrase, bool caseSensitive, bool wholeWord, bool findReplace);
@@ -139,6 +140,7 @@ namespace Abstractspoon
 				property int TextIconOffset { int get(); }
 				property int CheckboxOffset	{ int get(); }
 				property int ImageSize { int get(); }
+				property int LabelPadding { int get() { return 2; } }
 
 				property int FirstSelectedIndex { int get(); }
 				property int LastSelectedIndex { int get(); }

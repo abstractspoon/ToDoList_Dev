@@ -599,7 +599,6 @@ void TaskListView::OnDrawItem(DrawListViewItemEventArgs^ e)
 
 		subItemRect.Width = Columns[colIndex]->Width;
 
-		auto textFont = Font;
 		auto textRect = Rectangle::Inflate(subItemRect, -2, -1);
 		auto flags = (TextFormatFlags::SingleLine | TextFormatFlags::Bottom | TextFormatFlags::Left);
 
@@ -621,7 +620,7 @@ void TaskListView::OnDrawItem(DrawListViewItemEventArgs^ e)
 
 			if (ItemsHaveIcons)
 			{
-				if ((e->Item->ImageIndex != -1) && m_TaskIcons->Get(task->Id))
+				if (task->HasIcon && m_TaskIcons->Get(task->Id))
 				{
 					auto iconRect = CalcIconRect(itemRect);
 					m_TaskIcons->Draw(e->Graphics, iconRect.Left, iconRect.Top);
@@ -630,9 +629,6 @@ void TaskListView::OnDrawItem(DrawListViewItemEventArgs^ e)
 				textRect.X += TextIconOffset;
 				textRect.Width -= TextIconOffset;
 			}
-
-			if (ITaskBaseExt::IsTopLevel(task))
-				textFont = m_BoldFont;
 		}
 		else // numbers
 		{
@@ -641,7 +637,7 @@ void TaskListView::OnDrawItem(DrawListViewItemEventArgs^ e)
 
 		TextRenderer::DrawText(e->Graphics, 
 							   subItem->Text, 
-							   textFont, 
+							   GetFont(task, (colIndex == 0)),
 							   textRect, 
 							   textColor, 
 							   flags);
@@ -653,6 +649,14 @@ void TaskListView::OnDrawItem(DrawListViewItemEventArgs^ e)
 		// next subitem
 		subItemRect.X = subItemRect.Right;
 	}
+}
+
+Drawing::Font^ TaskListView::GetFont(ITaskBase^ task, bool title)
+{
+	if (title && ITaskBaseExt::IsTopLevel(task))
+		return m_BoldFont;
+
+	return Font;
 }
 
 Drawing::Color TaskListView::GetTextColor(ITaskBase^ task, bool selected)

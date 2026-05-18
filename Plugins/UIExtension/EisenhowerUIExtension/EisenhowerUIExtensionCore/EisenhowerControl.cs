@@ -24,7 +24,7 @@ namespace EisenhowerUIExtension
 
 	// ---------------------------------------------
 
-	public partial class EisenhowerControl : UserControl, IDragRenderer
+	public partial class EisenhowerControl : UserControl
 	{
 		const int SplitWidth = 6;
 
@@ -67,7 +67,6 @@ namespace EisenhowerUIExtension
 		{
 			m_Trans = trans;
 			m_Tasks = new TaskItems();
-			m_DragImage = new DragImage();
 
 			// Panes
 			m_TopLeftPane.Initialize("Top-Left Pane", Properties.Resources.TopLeftPane, m_Trans, m_Tasks, icons);
@@ -83,10 +82,12 @@ namespace EisenhowerUIExtension
 				p.EditTaskLabel += new EditTaskLabelEventHandler(OnPaneEditTaskLabel);
 				p.SelectionChange += new SelectionChangeEventHandler(OnPaneSelectionChange);
 
+ 				p.DragBegin += new EventHandler(OnDragBegin);
  				p.DragLeave += new EventHandler(OnDragLeave);
+				p.DragCancel += new EventHandler(OnDragCancel);
+
 				p.DragOver += new DragEventHandler(OnDragOver);
 				p.DragDrop += new DragEventHandler(OnDragDrop);
-
 				p.GotFocus += new EventHandler(OnPaneGotFocus);
 			});
 		}
@@ -690,10 +691,26 @@ namespace EisenhowerUIExtension
 			return m_Panes[iPane];
 		}
 
+		private void OnDragBegin(object sender, EventArgs e)
+		{
+			// Create the drag image
+			Debug.Assert(m_DragImage == null);
+
+			m_DragImage = new DragImage();
+			m_DragImage.Begin(Handle, SelectedPane, null);
+		}
+
 		private void OnDragLeave(object sender, EventArgs e)
 		{
 			m_Panes.ForEach(p => p.DropHighlighted = false);
+		}
+
+		private void OnDragCancel(object sender, EventArgs e)
+		{
+			OnDragLeave(sender, e);
+
 			m_DragImage.End();
+			m_DragImage = null;
 		}
 
 		private bool GetDragPanes(DragEventArgs e, out EisenhowerPane src, out EisenhowerPane dest)
@@ -718,12 +735,23 @@ namespace EisenhowerUIExtension
 			else
 				e.Effect = DragDropEffects.None;
 
-			m_Panes.ForEach(p => p.DropHighlighted = ((p != srcPane) && (p == destPane)));
+			{
+				m_DragImage?.ShowNoLock(false);
+
+				m_Panes.ForEach(p =>
+				{
+					p.DropHighlighted = ((p != srcPane) && (p == destPane));
+					p.Update();
+				});
+
+				m_DragImage?.ShowNoLock(true);
+				m_DragImage?.Move(e.X, e.Y);
+			}
 		}
 
 		private void OnDragDrop(object sender, DragEventArgs e)
 		{
-			OnDragLeave(sender, e);
+			OnDragCancel(sender, e);
 
 			// Notify parent of changes
 			Debug.Assert(AttributeChange != null);
@@ -814,15 +842,6 @@ namespace EisenhowerUIExtension
 		// 								rect.Width, 
 		// 								rect.Height);
 		// 		}
-
-
-		public void DrawDragImage(Graphics graphics, Object obj, int width, int height)
-		{
-			var pane = (obj as EisenhowerPane);
-			Debug.Assert(pane == SelectedPane);
-
-			pane.DrawDragImage(graphics, new Rectangle(0, 0, width, height));
-		}
 
 		private uint HitTestTask(Point screenPos, out EisenhowerPane pane)
 		{
