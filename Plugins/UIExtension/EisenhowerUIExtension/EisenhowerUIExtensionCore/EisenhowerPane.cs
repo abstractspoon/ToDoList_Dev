@@ -379,22 +379,7 @@ namespace EisenhowerUIExtension
 
 		private void UpdateTitle()
 		{
-			if (m_Filter != null)
-			{
-				m_TitleBar.Text = (FormatAttribute(m_List.XAttribTitle, m_Filter.XVariable) +
-									" - " +
-									FormatAttribute(m_List.YAttribTitle, m_Filter.YVariable));
-			}
+			m_TitleBar.Text = m_Filter?.ToString();
 		}
-
-		private string FormatAttribute(string title, EisenhowerFilterVariable attrib)
-		{
-			if (attrib.Range == EisenhowerPaneFilterAttributeRange.High)
-				return string.Format("High {0} (>= {1})", title, attrib.Cutoff);
-
-			// else
-			return string.Format("Low {0} (< {1})", title, attrib.Cutoff);
-		}
-
 	}
 }

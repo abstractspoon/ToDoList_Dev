@@ -61,6 +61,15 @@ namespace EisenhowerUIExtension
 			// else
 			return (value <= Cutoff);
 		}
+
+		public override string ToString()
+		{
+			if (Range == EisenhowerPaneFilterAttributeRange.High)
+				return string.Format("High {0} (>= {1})", Label, Cutoff);
+
+			// else
+			return string.Format("Low {0} (< {1})", Label, Cutoff);
+		}
 	}
 
 	////////////////////////////////////////////////////////////////////
@@ -88,6 +97,12 @@ namespace EisenhowerUIExtension
 		{
 			return (XVariable.TaskMatches(task) && YVariable.TaskMatches(task));
 		}
+
+		public override string ToString()
+		{
+			return (XVariable.ToString() + " - " + YVariable.ToString());
+		}
+
 	}
 }
 

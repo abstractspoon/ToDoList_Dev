@@ -67,13 +67,11 @@ namespace EisenhowerUIExtension
 
 		public string XAttribTitle
 		{
-			get { return Columns[XColIndex].Text; }
 			set { Columns[XColIndex].Text = value; }
 		}
 
 		public string YAttribTitle
 		{
-			get { return Columns[YColIndex].Text; }
 			set { Columns[YColIndex].Text = value; }
 		}
 
