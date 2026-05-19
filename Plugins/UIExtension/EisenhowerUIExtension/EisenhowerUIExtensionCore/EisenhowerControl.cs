@@ -156,7 +156,20 @@ namespace EisenhowerUIExtension
 		public void EnsureSelectionVisible()
 		{
 			SelectedPane?.EnsureSelectionVisible();
+		}
+
+		public bool PrepareNewTask(ref Task task)
+		{
+			var pane = SelectedPane;
+
+			if (pane == null)
+				pane = m_Panes[0];
+
 			// TODO
+			task.SetPriority((byte)pane.Filter.XVariable.Cutoff);
+			task.SetRisk((byte)pane.Filter.XVariable.Cutoff);
+
+			return true;
 		}
 
 		public bool SelectTask(uint taskID)
