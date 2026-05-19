@@ -144,6 +144,17 @@ ListViewItem^ TaskListView::AddTask(ITaskBase^ task)
 	return Items->Add(lvItem);
 }
 
+bool TaskListView::RemoveTask(UInt32 taskId)
+{
+	auto lvItem = FindItem(taskId);
+
+	if (lvItem == nullptr)
+		return false;
+
+	Items->Remove(lvItem);
+	return true;
+}
+
 UInt32 TaskListView::GetTaskIdEx(UIExtension::GetTask getTask, bool fromSelTask)
 {
 	bool next = true, topLevel = true;

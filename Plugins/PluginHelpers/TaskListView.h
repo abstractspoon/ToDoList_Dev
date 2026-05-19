@@ -48,6 +48,7 @@ namespace Abstractspoon
 				void Initialize(Translator^ trans, UIExtension::TaskIcon^ taskIcons);
 
 				Windows::Forms::ListViewItem^ AddTask(ITaskBase^ base);
+				bool RemoveTask(UInt32 taskId);
 
 				ITaskBase^ GetTask(int index);
 				UInt32 GetTaskId(int index);

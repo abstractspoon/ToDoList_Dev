@@ -224,17 +224,54 @@ namespace EisenhowerUIExtension
 			switch (type)
 			{
 			case UIExtension.UpdateType.All:
-				m_Tasks.Clear();
-				UpdateTaskAttributes(tasks);
+				{
+					m_Tasks.Rebuild(tasks);
+					m_Panes.ForEach(p => p.RebuildTaskList());
+				}
 				break;
 
 			case UIExtension.UpdateType.Edit:
+				{
+// 					var removedIds = m_Tasks.RemoveCompletedTasks(tasks);
+// 
+// 					if (removedIds?.Count > 0)
+// 						m_Panes.ForEach(p => p.RemoveTasks(removedIds));
+
+					List<uint> processedTaskIds = m_Tasks.Update(tasks);
+
+					if (processedTaskIds.Count > 0)
+					{
+						// Only Update the panes if the attributes we are tracking were changed
+						// TODO
+						m_Panes.ForEach(p => p.RebuildTaskList());
+					}
+				}
+				break;
+
 			case UIExtension.UpdateType.New:
-				UpdateTaskAttributes(tasks);
+				{
+					var newTaskIds = m_Tasks.Update(tasks);
+
+					if (newTaskIds.Count > 0)
+					{
+						// Only Update the panes if the attributes we are tracking were changed
+						// TODO
+
+						m_Panes.ForEach(p =>
+						{
+							newTaskIds.ForEach(id => p.AddTask(m_Tasks.GetItem(id)));
+						});
+					}
+				}
 				break;
 
 			case UIExtension.UpdateType.Delete:
-				// TODO
+				{
+					var removedIds = m_Tasks.RemoveDeletedTasks(tasks);
+
+					if (removedIds?.Count > 0)
+						m_Panes.ForEach(p => p.RemoveTasks(removedIds));
+				}
 				break;
 			}
 		}
@@ -638,44 +675,6 @@ namespace EisenhowerUIExtension
 			return rect;
 		}
 
-		private void UpdateTaskAttributes(TaskList tasks)
-		{
-			var changedTaskIds = new HashSet<uint>();
-			Task task = tasks.GetFirstTask();
-
-			while (task.IsValid() && ProcessTaskUpdate(task, changedTaskIds))
-				task = task.GetNextTask();
-
-			// Only Update the panes if the attributes we are tracking were changed
-			if (changedTaskIds.Count > 0)
-			{
-				// TODO
-				m_Panes.ForEach(p => p.RefreshListItems());
-			}
-		}
-
-		private bool ProcessTaskUpdate(Task task, HashSet<uint> taskIds)
-		{
-			if (!task.IsValid())
-				return false;
-
-            uint taskId = task.GetID();
-			TaskItem item = m_Tasks.GetItem(taskId, true);
-
-			if (!item.ProcessTaskUpdate(task))
-				return false;
-
-			// Process children
-			Task subtask = task.GetFirstSubtask();
-
-			while (subtask.IsValid() && ProcessTaskUpdate(subtask, taskIds)) // RECURSIVE CALL
-				subtask = subtask.GetNextTask();
-
-			taskIds.Add(task.GetID());
-
-			return true;
-		}
-
 		EisenhowerPane GetNextPane(EisenhowerPane pane, bool next)
 		{
 			int iPane = m_Panes.IndexOf(pane);
@@ -808,8 +807,8 @@ namespace EisenhowerUIExtension
 						}
 					}
 
-					srcPane.RefreshListItems();
-					destPane.RefreshListItems();
+					srcPane.RebuildTaskList();
+					destPane.RebuildTaskList();
 
 					SelectTasks(modTaskIds);
 					destPane.Focus();

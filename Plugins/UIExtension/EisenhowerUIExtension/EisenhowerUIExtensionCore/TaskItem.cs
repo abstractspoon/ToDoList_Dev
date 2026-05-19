@@ -7,8 +7,75 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 namespace EisenhowerUIExtension
 {
+	public class EisenhowerData
+	{
+
+	}
+	
+	///////////////////////////////////////////////////////////////////////////
+
+	public class TaskAttributes
+	{
+
+	}
+	
+	///////////////////////////////////////////////////////////////////////////
+
 	public class TaskItems : Dictionary<uint, TaskItem>
 	{
+		public void Rebuild(TaskList tasks)
+		{
+			Clear();
+			Update(tasks);
+		}
+
+		public List<uint> Update(TaskList tasks)
+		{
+			var processedTaskIds = new List<uint>();
+			Task task = tasks.GetFirstTask();
+
+			while (task.IsValid() && ProcessTaskUpdate(task, processedTaskIds))
+				task = task.GetNextTask();
+
+			return processedTaskIds;
+		}
+
+		public List<uint> RemoveDeletedTasks(TaskList tasks)
+		{
+			var removedIds = new List<uint>();
+
+			// Find the deleted tasks
+			foreach (var taskId in Keys)
+			{
+				if (!tasks.HasTask(taskId))
+					removedIds.Add(taskId);
+			}
+
+			// Remove them
+			removedIds.ForEach(id => Remove(id));
+
+			return removedIds;
+		}
+
+		public List<uint> RemoveCompletedTasks(TaskList tasks)
+		{
+			var removedIds = new List<uint>();
+
+			// Find the completed tasks
+			foreach (var taskId in Keys)
+			{
+				var task = tasks.FindTask(taskId);
+
+				if (task.IsDone() || task.IsGoodAsDone())
+					removedIds.Add(taskId);
+			}
+
+			// Remove them
+			removedIds.ForEach(id => Remove(id));
+
+			return removedIds;
+		}
+
 		public TaskItem GetItem(uint taskId, bool autoCreate = false)
 		{
 			TaskItem taskItem;
@@ -49,26 +116,53 @@ namespace EisenhowerUIExtension
 			// TODO - Make this a 'nice' number
 			return ((maxVal - minVal) / 2);
 		}
+
+		// -------------------------------------------------
+
+		private bool ProcessTaskUpdate(Task task, List<uint> processedTaskIds)
+		{
+			if (!task.IsValid())
+				return false;
+
+			uint taskId = task.GetID();
+			TaskItem item = GetItem(taskId, true); // auto-create
+
+			if (!item.ProcessTaskUpdate(task))
+				return false;
+
+			// Process children
+			Task subtask = task.GetFirstSubtask();
+
+			while (subtask.IsValid() && ProcessTaskUpdate(subtask, processedTaskIds)) // RECURSIVE CALL
+				subtask = subtask.GetNextTask();
+
+			processedTaskIds.Add(task.GetID());
+
+			return true;
+		}
 	}
 
-	// ---------------------------------------------------------------
+	///////////////////////////////////////////////////////////////////////////
 
 	public class TaskItem : ITaskBase
 	{
-		// Data
+		private Dictionary<String, double> m_AttribValues = new Dictionary<String, double>();
 
+		// -----------------------------------------------------------------
+
+		// ITaskBase
 		public String Title { get; private set; }
 		public String Position { get; private set; }
 		public uint Id { get; private set; }
 		public Color TextColor { get; private set; }
 		public bool HasIcon { get; private set; }
-		public bool IsFlagged { get; private set; }
 		public bool IsParent { get; private set; }
-        public bool SomeSubtasksDone { get; private set; }
 		public bool IsLocked { get; private set; }
 		public bool IsDone { get; private set; }
 
-		private Dictionary<String, double> m_AttribValues = new Dictionary<String, double>();
+		// Local
+		public bool IsFlagged { get; private set; }
+		public bool SomeSubtasksDone { get; private set; }
 
 		// -----------------------------------------------------------------
 
@@ -96,12 +190,7 @@ namespace EisenhowerUIExtension
 
 		public double GetAttributeValue(EisenhowerVariable var)
 		{
-			double value;
-
-			if (m_AttribValues.TryGetValue(var.Key, out value))
-				return value;
-
-			return 0.0;
+			return GetAttributeValue(var.Key);
 		}
 
 		public void SetAttributeValue(EisenhowerVariable var, double value)
@@ -130,7 +219,7 @@ namespace EisenhowerUIExtension
 				TextColor = task.GetTextDrawingColor();
 
 			if (task.IsAttributeAvailable(Task.Attribute.DoneDate))
-                IsDone = task.IsDone();
+                IsDone = (task.IsDone() || task.IsGoodAsDone());
 
 			if (task.IsAttributeAvailable(Task.Attribute.SubtaskDone))
                 SomeSubtasksDone = task.HasSomeSubtasksDone();
@@ -158,10 +247,25 @@ namespace EisenhowerUIExtension
 
 		// ---------------------------------------------------------------
 
-		private void SetAttributeValue(string attribId, double value)
+		private bool SetAttributeValue(string attribId, double value)
 		{
+			if (value == GetAttributeValue(attribId))
+				return false;
+
 			m_AttribValues[attribId] = value;
+			return true;
 		}
+
+		public double GetAttributeValue(string attribId)
+		{
+			double value;
+
+			if (m_AttribValues.TryGetValue(attribId, out value))
+				return value;
+
+			return 0.0;
+		}
+
 	}
 
 }

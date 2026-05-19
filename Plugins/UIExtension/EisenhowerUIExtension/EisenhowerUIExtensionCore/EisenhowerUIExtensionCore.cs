@@ -104,7 +104,7 @@ namespace EisenhowerUIExtension
 
 		public bool PrepareNewTask(ref Task task)
 		{
-			return true;
+			return m_EisenhowerCtrl.PrepareNewTask(ref task);
 		}
 
 		public bool ProcessMessage(IntPtr hwnd, UInt32 message, UInt32 wParam, UInt32 lParam, UInt32 time, Int32 xPos, Int32 yPos)

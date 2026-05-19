@@ -109,7 +109,7 @@ namespace EisenhowerUIExtension
 				m_Filter = newFilter;
 
 				UpdateTitle();
-				RefreshListItems();
+				RebuildTaskList();
 
 				return true;
 			}
@@ -264,7 +264,7 @@ namespace EisenhowerUIExtension
 			get { return m_List.Focused; }
 		}
 
-		public bool RefreshListItems()
+		public bool RebuildTaskList()
 		{
 			m_List.Items.Clear();
 
@@ -275,20 +275,32 @@ namespace EisenhowerUIExtension
 			}
 
 			foreach (var task in m_Tasks.Values)
-			{
-				if (m_Filter.TaskMatches(task))
-				{
-					var lvItem = m_List.AddTask(task);
+				AddTask(task);
 
-					if (lvItem != null)
-					{
-						lvItem.SubItems.Add(task.GetAttributeValue(m_Filter.XVariable).ToString());
-						lvItem.SubItems.Add(task.GetAttributeValue(m_Filter.YVariable).ToString());
-					}
+			return true;
+		}
+
+		public bool AddTask(TaskItem task)
+		{
+			if (m_Filter.TaskMatches(task))
+			{
+				var lvItem = m_List.AddTask(task);
+
+				if (lvItem != null)
+				{
+					lvItem.SubItems.Add(task.GetAttributeValue(m_Filter.XVariable).ToString());
+					lvItem.SubItems.Add(task.GetAttributeValue(m_Filter.YVariable).ToString());
+
+					return true;
 				}
 			}
 
-			return true;
+			return false;
+		}
+
+		public void RemoveTasks(List<uint> taskIds)
+		{
+			taskIds.ForEach(id => m_List.RemoveTask(id));
 		}
 
 		public void DrawDragImage(Graphics graphics, object unused, Size size)

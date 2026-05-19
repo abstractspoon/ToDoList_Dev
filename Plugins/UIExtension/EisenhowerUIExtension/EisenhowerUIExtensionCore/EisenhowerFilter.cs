@@ -95,6 +95,9 @@ namespace EisenhowerUIExtension
 
 		public bool TaskMatches(TaskItem task)
 		{
+			if (task.IsDone)
+				return false;
+
 			return (XVariable.TaskMatches(task) && YVariable.TaskMatches(task));
 		}
 

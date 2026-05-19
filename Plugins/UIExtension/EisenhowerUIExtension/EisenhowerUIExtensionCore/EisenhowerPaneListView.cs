@@ -84,11 +84,6 @@ namespace EisenhowerUIExtension
 		public uint FirstSelectedTaskId	{ get { return (HasSelection ? GetTaskId(SelectedIndices[0]) : 0); } }
 		public uint LastSelectedTaskId	{ get { return (HasSelection ? GetTaskId(SelectedIndices[LastIndex]) : 0); } }
 
-		protected override void OnDrawItem(DrawListViewItemEventArgs e)
-		{
-			base.OnDrawItem(e);
-		}
-
 		public void DrawDragImage(Graphics graphics, Size size)
 		{
 			var format = new StringFormat(StringFormatFlags.NoClip | StringFormatFlags.FitBlackBox | StringFormatFlags.NoWrap);
