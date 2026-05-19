@@ -84,8 +84,6 @@
 			this.m_List.TaskColorIsBackground = false;
 			this.m_List.UseCompatibleStateImageBehavior = false;
 			this.m_List.View = System.Windows.Forms.View.Details;
-			this.m_List.XAttribTitle = "X Attribute";
-			this.m_List.YAttribTitle = "Y Attribute";
 			// 
 			// columnHeader1
 			// 

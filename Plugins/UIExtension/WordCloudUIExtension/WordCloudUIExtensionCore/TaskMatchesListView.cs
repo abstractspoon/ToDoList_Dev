@@ -28,12 +28,10 @@ namespace WordCloudUIExtension
 			MultiSelect = false;
 			LabelEdit = true;
 			EnableHeaderTracking = false;
+			MinTaskColumnWidth = DPIScaling.Scale(100);
+			SizeTaskColumnToFit = true;
 		}
 
-		private int MinTaskMatchesWidth
-		{
-			get { return DPIScaling.Scale(100); }
-		}
 
 		public new bool Initialize(Translator trans, UIExtension.TaskIcon taskIcons)
         {
@@ -214,19 +212,6 @@ namespace WordCloudUIExtension
 			// Flip sort direction
 			this.Sorting = (this.Sorting == SortOrder.Ascending ? SortOrder.Descending : SortOrder.Ascending);
 			Sort();
-		}
-
-		protected override void OnSizeChanged(EventArgs e)
-		{
-			base.OnSizeChanged(e);
-
-			if (ClientRectangle.Width <= MinTaskMatchesWidth)
-				return;
-
-			// Resize first column to fill remaining width
-			base.BeginUpdate();
-			Columns[0].Width = (ClientRectangle.Width - Columns[1].Width - 2);
-			base.EndUpdate();
 		}
 	}
 }

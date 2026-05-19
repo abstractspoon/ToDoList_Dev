@@ -65,9 +65,12 @@ TaskListView::TaskListView()
 	m_GridlineColor(Color::Empty),
 	m_AlternateLineColor(Color::Empty),
 	m_EnableHeaderTracking(true),
+	m_SizeTaskColumnToFit(false),
 	m_CheckBoxSize(-1)
 {
 	m_LabelTip = gcnew LabelTip(this);
+
+	MinTaskColumnWidth = -1;
 }
 
 void TaskListView::Initialize(Translator^ trans, UIExtension::TaskIcon^ taskIcons)
@@ -107,6 +110,22 @@ void TaskListView::EnableHeaderTracking::set(bool value)
 
 	if (m_HeaderCtrl != nullptr)
 		m_HeaderCtrl->EnableTracking = value;
+}
+
+bool TaskListView::SizeTaskColumnToFit::get()
+{
+	return m_SizeTaskColumnToFit;
+}
+
+void TaskListView::SizeTaskColumnToFit::set(bool value)
+{
+	if (value != m_SizeTaskColumnToFit)
+	{
+		m_SizeTaskColumnToFit = value;
+
+		if (Columns->Count > 0)
+			ResizeTaskColumnToFit();
+	}
 }
 
 ListViewItem^ TaskListView::AddTask(ITaskBase^ task)
@@ -412,6 +431,9 @@ void TaskListView::OnLostFocus(EventArgs^ e)
 void TaskListView::OnSizeChanged(EventArgs^ e)
 {
 	ListView::OnSizeChanged(e);
+
+	if (m_SizeTaskColumnToFit)
+		ResizeTaskColumnToFit();
 
 	Invalidate();
 }
@@ -855,7 +877,9 @@ void TaskListView::OnBeforeLabelEdit(LabelEditEventArgs^ e)
 // The other part of making HeaderControl::EnableTracking work
 void TaskListView::OnColumnWidthChanging(ColumnWidthChangingEventArgs^ e)
 {
-	if ((m_HeaderCtrl != nullptr) && !m_HeaderCtrl->EnableTracking)
+	if ((m_HeaderCtrl != nullptr) && 
+		!m_HeaderCtrl->EnableTracking &&
+		(MouseButtons == Windows::Forms::MouseButtons::Left))
 	{
 		e->Cancel = true;
 		e->NewWidth = Columns[e->ColumnIndex]->Width;
@@ -963,4 +987,19 @@ bool TaskListView::TaskMatches(ITaskBase^ task, String^ phrase, bool caseSensiti
 CheckBoxState TaskListView::GetTaskCheckboxState(ITaskBase^ task)
 {
 	return (task->IsDone ? CheckBoxState::CheckedNormal : CheckBoxState::UncheckedNormal);
+}
+
+void TaskListView::ResizeTaskColumnToFit()
+{
+	// Resize first column to fill remaining width
+	int otherColsWidth = 0;
+
+	for (int i = 1; i < Columns->Count; i++)
+		otherColsWidth += Columns[i]->Width;
+
+	int taskColWidth = (ClientRectangle.Width - otherColsWidth - 2);
+	taskColWidth = Math::Max(MinTaskColumnWidth, taskColWidth);
+	taskColWidth = Math::Max(0, taskColWidth);
+
+	Columns[0]->Width = taskColWidth;
 }

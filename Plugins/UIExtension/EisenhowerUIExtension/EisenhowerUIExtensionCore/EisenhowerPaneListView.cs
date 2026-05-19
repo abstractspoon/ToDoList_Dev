@@ -23,6 +23,9 @@ namespace EisenhowerUIExtension
 
 		public EisenhowerPaneListView()
 		{
+			EnableHeaderTracking = false;
+			MinTaskColumnWidth = DPIScaling.Scale(100);
+			SizeTaskColumnToFit = true;
 		}
 
 		public bool Selected

@@ -56,6 +56,7 @@ namespace Abstractspoon
 				bool HasTaskId(UInt32 taskId);
 				Drawing::Rectangle GetTaskLabelRect(UInt32 taskId);
 				Drawing::Rectangle GetTaskLabelRect(int index);
+				void ResizeTaskColumnToFit();
 
 				bool SelectTask(UInt32 taskId);
 				bool SelectTaskEx(String^ words, UIExtension::SelectTask selectTask, bool caseSensitive, bool wholeWord, bool findReplace);
@@ -76,6 +77,9 @@ namespace Abstractspoon
 				property bool ShowLabelTips { bool get(); void set(bool value); }
 				property bool BoundSelecting { bool get() { return m_BoundSelecting; } }
 				property bool EnableHeaderTracking { bool get(); void set(bool value); }
+				property bool SizeTaskColumnToFit { bool get(); void set(bool value); }
+
+				property int MinTaskColumnWidth;
 
 				property Drawing::Rectangle SelectedTaskLabelRect { Drawing::Rectangle get(); }
 				property Drawing::Color GridlineColor { Drawing::Color get(); void set(Drawing::Color value); }
@@ -108,6 +112,7 @@ namespace Abstractspoon
 				bool m_ShowCompletionCheckboxes;
 				bool m_BoundSelecting;
 				bool m_EnableHeaderTracking;
+				bool m_SizeTaskColumnToFit;
 
 				int m_CheckBoxSize;
 
