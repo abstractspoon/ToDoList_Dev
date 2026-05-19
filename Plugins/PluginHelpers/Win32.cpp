@@ -308,7 +308,7 @@ Drawing::Point Win32::GetPoint(int lParam)
 
 bool Win32::DragDetect(IntPtr hWnd, Drawing::Point ptScreen)
 {
-	return (::DragDetect(GetHwnd(hWnd), CPoint(ptScreen.X, ptScreen.Y)));
+	return (::DragDetect(GetHwnd(hWnd), CPoint(ptScreen.X, ptScreen.Y)) != FALSE);
 }
 
 int Win32::SendMessage(IntPtr hWnd, UInt32 wMsg, UIntPtr wParam, IntPtr lParam)

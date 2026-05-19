@@ -29,10 +29,12 @@ namespace Abstractspoon
 			public ref class TaskListView : Windows::Forms::ListView, ILabelTipHandler
 			{
 			public:
-				ref class NoTrackHeaderControl : Windows::Forms::NativeWindow
+				ref class HeaderControl : Windows::Forms::NativeWindow
 				{
 				public:
-					NoTrackHeaderControl(TaskListView^ lv);
+					HeaderControl(TaskListView^ lv);
+
+					property bool EnableTracking;
 
 				protected:
 					void WndProc(Windows::Forms::Message% m) override;

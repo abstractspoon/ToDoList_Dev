@@ -23,18 +23,22 @@ using namespace Abstractspoon::Tdl::PluginHelpers::ColorUtil;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-TaskListView::NoTrackHeaderControl::NoTrackHeaderControl(TaskListView^ lv)
+TaskListView::HeaderControl::HeaderControl(TaskListView^ lv)
 {
 	AssignHandle(lv->GetHeaderHandle());
 }
 
-void TaskListView::NoTrackHeaderControl::WndProc(Message% m)
+void TaskListView::HeaderControl::WndProc(Message% m)
 {
 	switch (m.Msg)
 	{
 	case WM_SETCURSOR:
-		Win32::SetArrowCursor();
-		return;
+		if (!EnableTracking)
+		{
+			Win32::SetArrowCursor();
+			return;
+		}
+		break;
 	}
 
 	NativeWindow::WndProc(m);
@@ -829,12 +833,12 @@ void TaskListView::OnBeforeLabelEdit(LabelEditEventArgs^ e)
 	ListView::OnBeforeLabelEdit(e);
 }
 
-// The other part of making NoTrackHeaderControl work
+// The other part of making HeaderControl::EnableTracking work
 void TaskListView::OnColumnWidthChanging(ColumnWidthChangingEventArgs^ e)
 {
 	NativeWindow^ header = NativeWindow::FromHandle(GetHeaderHandle());
 
-	if (ISTYPE(header, NoTrackHeaderControl))
+	if (ISTYPE(header, HeaderControl) && (ASTYPE(header, HeaderControl)->EnableTracking == false))
 	{
 		e->Cancel = true;
 		e->NewWidth = Columns[e->ColumnIndex]->Width;

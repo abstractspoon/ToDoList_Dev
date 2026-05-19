@@ -21,7 +21,7 @@ namespace WordCloudUIExtension
 		private uint m_MaxTaskId = DefaultMaxTaskId;
 		private bool m_ShowMixedCompletionState;
 
-		private TaskListView.NoTrackHeaderControl m_Header;
+		private TaskListView.HeaderControl m_Header;
 
 		public TaskMatchesListView() : base()
 		{
@@ -34,7 +34,8 @@ namespace WordCloudUIExtension
 			base.OnHandleCreated(e);
 
 			// Prevent column resizing to save us having to save/restore the widths
-			m_Header = new TaskListView.NoTrackHeaderControl(this);
+			m_Header = new TaskListView.HeaderControl(this);
+			m_Header.EnableTracking = false;
 		}
 
 		private int MinTaskMatchesWidth
