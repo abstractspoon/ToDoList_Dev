@@ -6,26 +6,6 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 namespace EisenhowerUIExtension
 {
-	public class EisenhowerVariable : TaskAttributeItem
-	{
-		public bool TypeIsDouble { get; private set; }
-		public string Key { get; private set; }
-
-		// ------------------------------
-
-		public EisenhowerVariable(TaskAttributeItem attrib, bool isDouble) : base(attrib)
-		{
-			TypeIsDouble = isDouble;
-
-			if (string.IsNullOrEmpty(attrib.CustomAttributeId))
-				Key = attrib.AttributeId.ToString();
-			else
-				Key = attrib.CustomAttributeId;
-		}
-	}
-
-	////////////////////////////////////////////////////////////////////
-
 	public enum EisenhowerPaneFilterAttributeRange
 	{
 		High,
@@ -51,7 +31,7 @@ namespace EisenhowerUIExtension
 			Cutoff = cutoff;
 		}
 
-		public bool TaskMatches(TaskItem task)
+		public bool TaskMatches(EisenhowerTask task)
 		{
 			var value = task.GetAttributeValue(this);
 
@@ -93,7 +73,7 @@ namespace EisenhowerUIExtension
 		public EisenhowerFilterVariable XVariable { get; private set; }
 		public EisenhowerFilterVariable YVariable { get; private set; }
 
-		public bool TaskMatches(TaskItem task)
+		public bool TaskMatches(EisenhowerTask task)
 		{
 			if (task.IsDone)
 				return false;

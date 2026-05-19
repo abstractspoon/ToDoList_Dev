@@ -34,7 +34,7 @@ namespace EisenhowerUIExtension
 		private Translator m_Trans;
 
 		// local
-		private TaskItems m_Tasks;
+		private EisenhowerData m_Data;
 		private bool m_DraggingHorzSplitBar, m_DraggingVertSplitBar;
 		private DragImage m_DragImage;
 		private Point m_SplitPos;
@@ -66,13 +66,13 @@ namespace EisenhowerUIExtension
 		public void Initialize(Translator trans, UIExtension.TaskIcon icons)
 		{
 			m_Trans = trans;
-			m_Tasks = new TaskItems();
+			m_Data = new EisenhowerData();
 
 			// Panes
-			m_TopLeftPane.Initialize("Top-Left Pane", Properties.Resources.TopLeftPane, m_Trans, m_Tasks, icons);
-			m_TopRightPane.Initialize("Top-Right Pane", Properties.Resources.TopRightPane, m_Trans, m_Tasks, icons);
-			m_BottomLeftPane.Initialize("Bottom-Left Pane", Properties.Resources.BotLeftPane, m_Trans, m_Tasks, icons);
-			m_BottomRightPane.Initialize("Bottom-Right Pane", Properties.Resources.BotRightPane, m_Trans, m_Tasks, icons);
+			m_TopLeftPane.Initialize("Top-Left Pane", Properties.Resources.TopLeftPane, m_Trans, m_Data.Tasks, icons);
+			m_TopRightPane.Initialize("Top-Right Pane", Properties.Resources.TopRightPane, m_Trans, m_Data.Tasks, icons);
+			m_BottomLeftPane.Initialize("Bottom-Left Pane", Properties.Resources.BotLeftPane, m_Trans, m_Data.Tasks, icons);
+			m_BottomRightPane.Initialize("Bottom-Right Pane", Properties.Resources.BotRightPane, m_Trans, m_Data.Tasks, icons);
 
 			// Callbacks
 			m_Panes.ForEach(p => 
@@ -94,8 +94,8 @@ namespace EisenhowerUIExtension
 
 		public void SetFilter(EisenhowerVariable xAttrib, EisenhowerVariable yAttrib)
 		{
-			double xCutoff = m_Tasks.CalculateAttributeValueMidpoint(xAttrib);
-			double yCutoff = m_Tasks.CalculateAttributeValueMidpoint(yAttrib);
+			double xCutoff = m_Data.Tasks.CalculateAttributeValueMidpoint(xAttrib);
+			double yCutoff = m_Data.Tasks.CalculateAttributeValueMidpoint(yAttrib);
 
 			// Top-left => High xAttrib - High yAttrib
 			m_TopLeftPane.SetFilter(new EisenhowerFilterVariable(xAttrib, EisenhowerPaneFilterAttributeRange.High, xCutoff), 
@@ -239,19 +239,19 @@ namespace EisenhowerUIExtension
 			{
 			case UIExtension.UpdateType.All:
 				{
-					m_Tasks.Rebuild(tasks);
+					m_Data.Tasks.Rebuild(tasks);
 					m_Panes.ForEach(p => p.RebuildTaskList());
 				}
 				break;
 
 			case UIExtension.UpdateType.Edit:
 				{
-// 					var removedIds = m_Tasks.RemoveCompletedTasks(tasks);
+// 					var removedIds = m_Data.Tasks.RemoveCompletedTasks(tasks);
 // 
 // 					if (removedIds?.Count > 0)
 // 						m_Panes.ForEach(p => p.RemoveTasks(removedIds));
 
-					List<uint> processedTaskIds = m_Tasks.Update(tasks);
+					List<uint> processedTaskIds = m_Data.Tasks.Update(tasks);
 
 					if (processedTaskIds.Count > 0)
 					{
@@ -264,7 +264,7 @@ namespace EisenhowerUIExtension
 
 			case UIExtension.UpdateType.New:
 				{
-					var newTaskIds = m_Tasks.Update(tasks);
+					var newTaskIds = m_Data.Tasks.Update(tasks);
 
 					if (newTaskIds.Count > 0)
 					{
@@ -273,7 +273,7 @@ namespace EisenhowerUIExtension
 
 						m_Panes.ForEach(p =>
 						{
-							newTaskIds.ForEach(id => p.AddTask(m_Tasks.GetItem(id)));
+							newTaskIds.ForEach(id => p.AddTask(m_Data.Tasks.GetItem(id)));
 						});
 					}
 				}
@@ -281,7 +281,7 @@ namespace EisenhowerUIExtension
 
 			case UIExtension.UpdateType.Delete:
 				{
-					var removedIds = m_Tasks.RemoveDeletedTasks(tasks);
+					var removedIds = m_Data.Tasks.RemoveDeletedTasks(tasks);
 
 					if (removedIds?.Count > 0)
 						m_Panes.ForEach(p => p.RemoveTasks(removedIds));
@@ -469,7 +469,7 @@ namespace EisenhowerUIExtension
 
 		public bool CanSaveToImage()
 		{
-			return (m_Tasks.Count != 0);
+			return (m_Data.Tasks.Count != 0);
 		}
 
 		public Bitmap SaveToImage()
@@ -805,7 +805,7 @@ namespace EisenhowerUIExtension
 
 					while (i-- > 0)
 					{
-						var task = m_Tasks.GetItem(modTaskIds[i]);
+						var task = m_Data.Tasks.GetItem(modTaskIds[i]);
 
 						if ((task != null) && !task.IsLocked)
 						{

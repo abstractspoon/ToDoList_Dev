@@ -19,7 +19,7 @@ namespace EisenhowerUIExtension
 
 	public partial class EisenhowerPane : UserControl, IDragRenderer
 	{
-		private TaskItems m_Tasks;
+		private EisenhowerTasks m_Tasks;
 		private EisenhowerPaneFilter m_Filter;
 		private Translator m_Trans;
 
@@ -55,7 +55,7 @@ namespace EisenhowerUIExtension
 		public void Initialize(string paneTitle,
 							   Bitmap paneIcon,
 							   Translator trans, 
-							   TaskItems taskItems, 
+							   EisenhowerTasks taskItems, 
 							   UIExtension.TaskIcon taskIcons)
 		{
 			m_TitleBar.Text = paneTitle;
@@ -280,7 +280,7 @@ namespace EisenhowerUIExtension
 			return true;
 		}
 
-		public bool AddTask(TaskItem task)
+		public bool AddTask(EisenhowerTask task)
 		{
 			if (m_Filter.TaskMatches(task))
 			{

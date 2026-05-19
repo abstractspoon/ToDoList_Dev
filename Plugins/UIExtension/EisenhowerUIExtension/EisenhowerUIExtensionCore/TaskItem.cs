@@ -7,143 +7,6 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 namespace EisenhowerUIExtension
 {
-	public class EisenhowerData
-	{
-
-	}
-	
-	///////////////////////////////////////////////////////////////////////////
-
-	public class TaskAttributes
-	{
-
-	}
-	
-	///////////////////////////////////////////////////////////////////////////
-
-	public class TaskItems : Dictionary<uint, TaskItem>
-	{
-		public void Rebuild(TaskList tasks)
-		{
-			Clear();
-			Update(tasks);
-		}
-
-		public List<uint> Update(TaskList tasks)
-		{
-			var processedTaskIds = new List<uint>();
-			Task task = tasks.GetFirstTask();
-
-			while (task.IsValid() && ProcessTaskUpdate(task, processedTaskIds))
-				task = task.GetNextTask();
-
-			return processedTaskIds;
-		}
-
-		public List<uint> RemoveDeletedTasks(TaskList tasks)
-		{
-			var removedIds = new List<uint>();
-
-			// Find the deleted tasks
-			foreach (var taskId in Keys)
-			{
-				if (!tasks.HasTask(taskId))
-					removedIds.Add(taskId);
-			}
-
-			// Remove them
-			removedIds.ForEach(id => Remove(id));
-
-			return removedIds;
-		}
-
-		public List<uint> RemoveCompletedTasks(TaskList tasks)
-		{
-			var removedIds = new List<uint>();
-
-			// Find the completed tasks
-			foreach (var taskId in Keys)
-			{
-				var task = tasks.FindTask(taskId);
-
-				if (task.IsDone() || task.IsGoodAsDone())
-					removedIds.Add(taskId);
-			}
-
-			// Remove them
-			removedIds.ForEach(id => Remove(id));
-
-			return removedIds;
-		}
-
-		public TaskItem GetItem(uint taskId, bool autoCreate = false)
-		{
-			TaskItem taskItem;
-
-			if (!TryGetValue(taskId, out taskItem) && autoCreate)
-			{
-				taskItem = new TaskItem("", taskId);
-				Add(taskId, taskItem);
-			}
-
-			return taskItem;
-		}
-
-		public double CalculateAttributeValueMidpoint(EisenhowerVariable var)
-		{
-			switch (var.AttributeId)
-			{
-			case Task.Attribute.Priority:
-			case Task.Attribute.Risk:
-				return 5;
-			}
-
-			// All the rest
-			double minVal = double.MaxValue, maxVal = double.MinValue;
-
-			foreach (var task in Values)
-			{
-				double attribVal = task.GetAttributeValue(var);
-
-				minVal = Math.Min(minVal, attribVal);
-				maxVal = Math.Max(maxVal, attribVal);
-			}
-
-			if (minVal > 0.0)
-				return (maxVal / 2); // minVal => 0
-
-			// else
-			// TODO - Make this a 'nice' number
-			return ((maxVal - minVal) / 2);
-		}
-
-		// -------------------------------------------------
-
-		private bool ProcessTaskUpdate(Task task, List<uint> processedTaskIds)
-		{
-			if (!task.IsValid())
-				return false;
-
-			uint taskId = task.GetID();
-			TaskItem item = GetItem(taskId, true); // auto-create
-
-			if (!item.ProcessTaskUpdate(task))
-				return false;
-
-			// Process children
-			Task subtask = task.GetFirstSubtask();
-
-			while (subtask.IsValid() && ProcessTaskUpdate(subtask, processedTaskIds)) // RECURSIVE CALL
-				subtask = subtask.GetNextTask();
-
-			processedTaskIds.Add(task.GetID());
-
-			return true;
-		}
-	}
-
-	///////////////////////////////////////////////////////////////////////////
-
 	public class TaskItem : ITaskBase
 	{
 		private Dictionary<String, double> m_AttribValues = new Dictionary<String, double>();
@@ -186,16 +49,6 @@ namespace EisenhowerUIExtension
 #else
 			return Title;
 #endif
-		}
-
-		public double GetAttributeValue(EisenhowerVariable var)
-		{
-			return GetAttributeValue(var.Key);
-		}
-
-		public void SetAttributeValue(EisenhowerVariable var, double value)
-		{
-			m_AttribValues[var.Key] = value;
 		}
 
 		public bool ProcessTaskUpdate(Task task)
@@ -247,7 +100,7 @@ namespace EisenhowerUIExtension
 
 		// ---------------------------------------------------------------
 
-		private bool SetAttributeValue(string attribId, double value)
+		protected bool SetAttributeValue(string attribId, double value)
 		{
 			if (value == GetAttributeValue(attribId))
 				return false;
@@ -256,7 +109,7 @@ namespace EisenhowerUIExtension
 			return true;
 		}
 
-		public double GetAttributeValue(string attribId)
+		protected double GetAttributeValue(string attribId)
 		{
 			double value;
 
