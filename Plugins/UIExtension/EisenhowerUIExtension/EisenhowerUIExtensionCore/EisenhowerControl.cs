@@ -155,6 +155,7 @@ namespace EisenhowerUIExtension
 
 		public void EnsureSelectionVisible()
 		{
+			SelectedPane?.EnsureSelectionVisible();
 			// TODO
 		}
 

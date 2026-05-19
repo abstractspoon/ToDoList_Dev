@@ -313,6 +313,11 @@ namespace EisenhowerUIExtension
 			return m_List.GetDragImageSize();
 		}
 
+		public void EnsureSelectionVisible()
+		{
+			m_List.EnsureSelectionVisible();
+		}
+
 		// --------------------------------------------------------
 		// Message Handlers
 
