@@ -45,10 +45,10 @@ namespace EisenhowerUIExtension
 		public override string ToString()
 		{
 			if (Range == EisenhowerPaneFilterAttributeRange.High)
-				return string.Format("High {0} (>= {1})", Label, Cutoff);
+				return string.Format("High {0} (> {1})", Label, Cutoff);
 
 			// else
-			return string.Format("Low {0} (< {1})", Label, Cutoff);
+			return string.Format("Low {0} (<= {1})", Label, Cutoff);
 		}
 	}
 
