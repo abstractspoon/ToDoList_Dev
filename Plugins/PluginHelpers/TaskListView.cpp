@@ -23,12 +23,12 @@ using namespace Abstractspoon::Tdl::PluginHelpers::ColorUtil;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-TaskListView::HeaderControl::HeaderControl(TaskListView^ lv)
+HeaderControl::HeaderControl(IntPtr handle)
 {
-	AssignHandle(lv->GetHeaderHandle());
+	AssignHandle(handle);
 }
 
-void TaskListView::HeaderControl::WndProc(Message% m)
+void HeaderControl::WndProc(Message% m)
 {
 	switch (m.Msg)
 	{
@@ -64,6 +64,7 @@ TaskListView::TaskListView()
 	m_BoundSelecting(false),
 	m_GridlineColor(Color::Empty),
 	m_AlternateLineColor(Color::Empty),
+	m_EnableHeaderTracking(true),
 	m_CheckBoxSize(-1)
 {
 	m_LabelTip = gcnew LabelTip(this);
@@ -83,6 +84,29 @@ void TaskListView::Initialize(Translator^ trans, UIExtension::TaskIcon^ taskIcon
 	DoubleBuffered = true;
 	HotTracking = false;
 	HoverSelection = false;
+}
+
+void TaskListView::OnHandleCreated(EventArgs^ e)
+{
+	ListView::OnHandleCreated(e);
+
+	auto header = IntPtr(Win32::SendMessage(Handle, LVM_GETHEADER, UIntPtr::Zero, IntPtr::Zero));
+
+	m_HeaderCtrl = gcnew HeaderControl(header);
+	m_HeaderCtrl->EnableTracking = m_EnableHeaderTracking;
+}
+
+bool TaskListView::EnableHeaderTracking::get()
+{
+	return m_EnableHeaderTracking;
+}
+
+void TaskListView::EnableHeaderTracking::set(bool value)
+{
+	m_EnableHeaderTracking = value;
+
+	if (m_HeaderCtrl != nullptr)
+		m_HeaderCtrl->EnableTracking = value;
 }
 
 ListViewItem^ TaskListView::AddTask(ITaskBase^ task)
@@ -156,11 +180,6 @@ UInt32 TaskListView::GetNextTaskId(int index, bool next, bool topLevel)
 	while (task != nullptr);
 
 	return 0;
-}
-
-IntPtr TaskListView::GetHeaderHandle()
-{
-	return IntPtr(Win32::SendMessage(Handle, LVM_GETHEADER, UIntPtr::Zero, IntPtr::Zero));
 }
 
 bool TaskListView::HasTaskId(UInt32 taskId)
@@ -836,9 +855,7 @@ void TaskListView::OnBeforeLabelEdit(LabelEditEventArgs^ e)
 // The other part of making HeaderControl::EnableTracking work
 void TaskListView::OnColumnWidthChanging(ColumnWidthChangingEventArgs^ e)
 {
-	NativeWindow^ header = NativeWindow::FromHandle(GetHeaderHandle());
-
-	if (ISTYPE(header, HeaderControl) && (ASTYPE(header, HeaderControl)->EnableTracking == false))
+	if ((m_HeaderCtrl != nullptr) && !m_HeaderCtrl->EnableTracking)
 	{
 		e->Cancel = true;
 		e->NewWidth = Columns[e->ColumnIndex]->Width;

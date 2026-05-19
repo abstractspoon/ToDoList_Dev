@@ -26,25 +26,26 @@ namespace Abstractspoon
 
 			// ---------------------------------------------
 
-			public ref class TaskListView : Windows::Forms::ListView, ILabelTipHandler
+			// Internal class (for now)
+			ref class HeaderControl : Windows::Forms::NativeWindow
 			{
 			public:
-				ref class HeaderControl : Windows::Forms::NativeWindow
-				{
-				public:
-					HeaderControl(TaskListView^ lv);
+				HeaderControl(IntPtr handle);
 
-					property bool EnableTracking;
+				property bool EnableTracking;
 
-				protected:
-					void WndProc(Windows::Forms::Message% m) override;
-				};
+			protected:
+				void WndProc(Windows::Forms::Message% m) override;
+			};
 
+			// ---------------------------------------------
+
+			public ref class TaskListView : Windows::Forms::ListView, ILabelTipHandler
+			{
 			public:
 				TaskListView();
 
 				void Initialize(Translator^ trans, UIExtension::TaskIcon^ taskIcons);
-				IntPtr GetHeaderHandle();
 
 				Windows::Forms::ListViewItem^ AddTask(ITaskBase^ base);
 
@@ -74,6 +75,7 @@ namespace Abstractspoon
 				property bool ShowCompletionCheckboxes { bool get(); void set(bool value); }
 				property bool ShowLabelTips { bool get(); void set(bool value); }
 				property bool BoundSelecting { bool get() { return m_BoundSelecting; } }
+				property bool EnableHeaderTracking { bool get(); void set(bool value); }
 
 				property Drawing::Rectangle SelectedTaskLabelRect { Drawing::Rectangle get(); }
 				property Drawing::Color GridlineColor { Drawing::Color get(); void set(Drawing::Color value); }
@@ -87,6 +89,9 @@ namespace Abstractspoon
 				event EditTaskLabelEventHandler^ EditTaskLabel;
 				event EditTaskIconEventHandler^ EditTaskIcon;
 				event EditTaskCompletionEventHandler^ EditTaskDone;
+
+			private:
+				HeaderControl^ m_HeaderCtrl;
 
 			protected:
 				Translator^ m_Trans;
@@ -102,6 +107,8 @@ namespace Abstractspoon
 				bool m_TaskColorIsBkgnd;
 				bool m_ShowCompletionCheckboxes;
 				bool m_BoundSelecting;
+				bool m_EnableHeaderTracking;
+
 				int m_CheckBoxSize;
 
 			protected:
@@ -116,6 +123,7 @@ namespace Abstractspoon
 				void OnLostFocus(EventArgs^ e) override;
 				void OnSizeChanged(EventArgs^ e) override;
 				void OnFontChanged(EventArgs^ e) override;
+				void OnHandleCreated(EventArgs^ e) override;
 
 				// Pseudo-handler
 				bool OnLButtonDown(Drawing::Point ptClient, bool doubleClick);
