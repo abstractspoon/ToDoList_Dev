@@ -450,7 +450,7 @@ Drawing::Rectangle TaskListView::CalcCheckboxRect(Drawing::Rectangle labelRect)
 
 	int top = ((labelRect.Top + labelRect.Bottom - m_CheckBoxSize) / 2) + (labelRect.Height % 2);
 
-	return Drawing::Rectangle(labelRect.X, top, m_CheckBoxSize, m_CheckBoxSize);
+	return Drawing::Rectangle(labelRect.X + LabelPadding, top, m_CheckBoxSize, m_CheckBoxSize);
 }
 
 Drawing::Rectangle TaskListView::CalcIconRect(Drawing::Rectangle labelRect)
@@ -533,12 +533,12 @@ int TaskListView::ImageSize::get()
 
 int TaskListView::TextIconOffset::get() 
 { 
-	return (ItemsHaveIcons ? (ImageSize + 2) : 0);
+	return (ItemsHaveIcons ? (ImageSize/* + LabelPadding*/) : 0);
 }
 
 int TaskListView::CheckboxOffset::get() 
 { 
-	return (ShowCompletionCheckboxes ? ImageSize : 0);
+	return (ShowCompletionCheckboxes ? (ImageSize + LabelPadding) : 0);
 }
 
 Color TaskListView::GridlineColor::get()
@@ -622,7 +622,7 @@ void TaskListView::OnDrawItem(DrawListViewItemEventArgs^ e)
 
 		subItemRect.Width = Columns[colIndex]->Width;
 
-		auto textRect = Rectangle::Inflate(subItemRect, -2, -1);
+		auto textRect = Rectangle::Inflate(subItemRect, -LabelPadding, -1);
 		auto flags = (TextFormatFlags::SingleLine | TextFormatFlags::Bottom | TextFormatFlags::Left);
 
 		if (colIndex == 0)
