@@ -179,13 +179,6 @@ namespace EisenhowerUIExtension
 						BackColor = m_BackColor;
 						m_List.BackColor = Color.Empty;
 					}
-/*
-					Invalidate();
-					Update();
-
-					m_List.Invalidate();
-					m_List.Update();
-*/
 				}
 			}
 		}
