@@ -104,13 +104,13 @@ namespace EisenhowerUIExtension
 
 			if ((m_Filter == null) || !m_Filter.Equals(newFilter))
 			{
-				m_List.XAttribTitle = xAttrib.Label;
-				m_List.YAttribTitle = yAttrib.Label;
 				m_Filter = newFilter;
-
 				UpdateTitle();
-				RebuildTaskList();
 
+				// Note: column widths will be recalculated in RebuildTaskList
+				m_List.SetAttributeNames(xAttrib.Label, yAttrib.Label, false); 
+
+				RebuildTaskList();
 				return true;
 			}
 
@@ -259,7 +259,7 @@ namespace EisenhowerUIExtension
 
 		public bool RebuildTaskList()
 		{
-			m_List.Items.Clear();
+			m_List.RemoveAll();
 
 			if ((m_Tasks == null) || (m_Filter == null))
 			{
@@ -270,30 +270,27 @@ namespace EisenhowerUIExtension
 			foreach (var task in m_Tasks.Values)
 				AddTask(task);
 
+			m_List.RefreshColumnWidths();
+
 			return true;
 		}
 
 		public bool AddTask(EisenhowerTask task)
 		{
-			if (m_Filter.TaskMatches(task))
-			{
-				var lvItem = m_List.AddTask(task);
+			if (!m_Filter.TaskMatches(task))
+				return false;
 
-				if (lvItem != null)
-				{
-					lvItem.SubItems.Add(task.GetAttributeValue(m_Filter.XVariable).ToString());
-					lvItem.SubItems.Add(task.GetAttributeValue(m_Filter.YVariable).ToString());
-
-					return true;
-				}
-			}
-
-			return false;
+			return m_List.AddTask(task,
+								  task.GetAttributeValue(m_Filter.XVariable).ToString(),
+								  task.GetAttributeValue(m_Filter.YVariable).ToString());
 		}
 
 		public void RemoveTasks(List<uint> taskIds)
 		{
 			taskIds.ForEach(id => m_List.RemoveTask(id));
+
+			if (m_List.Items.Count == 0)
+				m_List.RefreshColumnWidths();
 		}
 
 		public void DrawDragImage(Graphics graphics, object unused, Size size)

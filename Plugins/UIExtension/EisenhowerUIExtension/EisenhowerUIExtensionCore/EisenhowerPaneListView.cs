@@ -12,12 +12,15 @@ namespace EisenhowerUIExtension
 {
 	public partial class EisenhowerPaneListView : TaskListView
 	{
-		const int XColIndex = 1;
-		const int YColIndex = 2;
+		const int TaskCol	= 0;
+		const int XCol		= 1;
+		const int YCol		= 2;
 
 		// --------------------------------------------------------
 
 		private bool m_Selected;
+		private int[] m_ColHeaderWidth		= new int[3] { -1, -1, -1 };
+		private int[] m_ColValueMaxCharWidth	= new int[3] { -1, -1, -1 };
 
 		// --------------------------------------------------------
 
@@ -46,6 +49,29 @@ namespace EisenhowerUIExtension
 			}
 		}
 
+		public bool AddTask(ITaskBase task, string xValue, string yValue)
+		{
+			var lvItem = AddTask(task);
+
+			if (lvItem != null)
+			{
+				lvItem.SubItems.Add(xValue);
+				m_ColValueMaxCharWidth[XCol] = Math.Max(xValue.Length, m_ColValueMaxCharWidth[XCol]);
+
+				lvItem.SubItems.Add(yValue);
+				m_ColValueMaxCharWidth[YCol] = Math.Max(yValue.Length, m_ColValueMaxCharWidth[YCol]);
+			}
+
+			return (lvItem != null);
+		}
+
+		public void RemoveAll()
+		{
+			Items.Clear();
+
+			m_ColValueMaxCharWidth[XCol] = m_ColValueMaxCharWidth[YCol] = -1;
+		}
+
 		public uint HitTestTask(Point screenPos)
 		{
 			Point ptClient = PointToClient(screenPos);
@@ -68,14 +94,13 @@ namespace EisenhowerUIExtension
 			return SelectTaskEx(text, selectTask, caseSensitive, wholeWord, findReplace);
 		}
 
-		public string XAttribTitle
+		public void SetAttributeNames(string xAttribName, string yAttribName, bool updateColWidths)
 		{
-			set { Columns[XColIndex].Text = value; }
-		}
+			Columns[XCol].Text = xAttribName;
+			Columns[YCol].Text = yAttribName;
 
-		public string YAttribTitle
-		{
-			set { Columns[YColIndex].Text = value; }
+			if (updateColWidths)
+				RefreshColumnWidths();
 		}
 
 		public uint FirstTaskId  { get { return base.GetTaskId(0); } }
@@ -159,8 +184,38 @@ namespace EisenhowerUIExtension
 			return imageSize;
 		}
 
+		public void RefreshColumnWidths()
+		{
+			using (var graphics = Graphics.FromHwnd(Handle))
+			{
+				RefreshVariableColumnWidth(XCol, graphics);
+				RefreshVariableColumnWidth(YCol, graphics);
+			}
+
+			// Task column takes up tyhe slack
+			ResizeTaskColumnToFit();
+		}
+
 		// --------------------------------------------------------
 		// Message handlers
+
+		public void RefreshVariableColumnWidth(int col, Graphics g)
+		{
+			if (m_ColHeaderWidth[col] < 0)
+				m_ColHeaderWidth[col] = (int)(g.MeasureString(Columns[col].Text, Font).Width + (4 * LabelPadding));
+
+			int colWidth = m_ColHeaderWidth[col];
+
+			if (m_ColValueMaxCharWidth[col] > 0)
+			{
+				string val = new String('0', m_ColValueMaxCharWidth[col]);
+				int valWidth = (int)(g.MeasureString(val, Font).Width + (4 * LabelPadding));
+
+				colWidth = Math.Max(colWidth, valWidth);
+			}
+
+			Columns[col].Width = colWidth;
+		}
 
 		protected override bool IsItemSelected(ListViewItem lvItem)
 		{
