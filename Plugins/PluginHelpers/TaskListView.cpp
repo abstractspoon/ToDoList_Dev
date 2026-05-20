@@ -362,9 +362,9 @@ ListViewItem^ TaskListView::FindItem(UInt32 taskId)
 {
 	for each(ListViewItem^ lvItem in Items)
 	{
-		auto item = ASTYPE(lvItem->Tag, ITaskBase);
+		auto task = ASTYPE(lvItem->Tag, ITaskBase);
 
-		if ((item != nullptr) && (item->Id == taskId))
+		if ((task != nullptr) && (task->Id == taskId))
 			return lvItem;
 	}
 
@@ -759,30 +759,65 @@ void TaskListView::WndProc(Message% m)
 	case WM_LBUTTONDOWN:
 		{
 			Point pos = Win32::GetPoint(m.LParam);
+			auto lvHit = HitTest(pos)->Item;
 
-			if (HitTest(pos)->Item == nullptr)
+			if (lvHit == nullptr)
 			{
 				// Check for bounds selection
 				m_BoundSelecting = (MultiSelect && Win32::DragDetect(Handle, PointToScreen(pos)));
 
-				if (m_BoundSelecting)
-					break;
-
-				Focus();
-				return;
+				if (!m_BoundSelecting)
+				{
+					Focus();
+					return;
+				}
 			}
 
-			if (OnLButtonDown(pos, false))
-				return;
+			auto task = ASTYPE(lvHit->Tag, ITaskBase);
+
+			if (IsTaskEditable(task))
+			{
+				if (CalcCheckboxRect(lvHit->Bounds).Contains(pos))
+				{
+					if (!lvHit->Selected)
+						ListView::WndProc(m); // Default handling to select task
+
+					EditTaskDone(this, task->Id, !task->IsDone);
+					return;
+				}
+				else if (CalcIconRect(lvHit->Bounds).Contains(pos))
+				{
+					if (!lvHit->Selected)
+						ListView::WndProc(m); // Default handling to select task
+
+					EditTaskIcon(this, task->Id);
+					return;
+				}
+			}
 		}
 		break;
 
 	case WM_LBUTTONDBLCLK:
 		{
 			Point pos = Win32::GetPoint(m.LParam);
+			auto lvHit = HitTest(pos)->Item;
 
-			if (OnLButtonDown(pos, true))
-				return;
+			if (lvHit == nullptr)
+				break;
+
+			Debug::Assert(lvHit->Selected);
+
+			auto task = ASTYPE(lvHit->Tag, ITaskBase);
+
+			if (IsTaskEditable(task))
+			{
+				if (!CalcCheckboxRect(lvHit->Bounds).Contains(pos) &&
+					!CalcIconRect(lvHit->Bounds).Contains(pos))
+				{
+					EditTaskLabel(this, task->Id);
+					return;
+				}
+			}
 		}
 		break;
 
@@ -800,40 +835,6 @@ void TaskListView::WndProc(Message% m)
 	ListView::WndProc(m);
 }
 
-bool TaskListView::OnLButtonDown(Point ptClient, bool doubleClick)
-{
-	if (!doubleClick && !ItemsHaveIcons && !ShowCompletionCheckboxes)
-		return false;
-
-	auto hit = HitTest(ptClient);
-
-	if (hit->Item == nullptr)
-		return false;
-
-	auto task = ASTYPE(hit->Item->Tag, ITaskBase);
-
-	if ((task == nullptr) || task->IsLocked)
-		return false;
-
-	if (CalcCheckboxRect(hit->Item->Bounds).Contains(ptClient))
-	{
-		EditTaskDone(this, task->Id, !task->IsDone);
-		return true;
-	}
-	else if (CalcIconRect(hit->Item->Bounds).Contains(ptClient))
-	{
-		EditTaskIcon(this, task->Id);
-		return true;
-	}
-	else if (doubleClick)
-	{
-		EditTaskLabel(this, task->Id);
-		return true;
-	}
-
-	return false;
-}
-
 void TaskListView::OnMouseMove(MouseEventArgs^ e)
 {
 	ListView::OnMouseMove(e);
@@ -841,21 +842,21 @@ void TaskListView::OnMouseMove(MouseEventArgs^ e)
 	// Update bounds selecting
 	m_BoundSelecting &= (MouseButtons == Windows::Forms::MouseButtons::None);
 
-	auto hit = HitTest(e->Location);
+	auto lvHit = HitTest(e->Location)->Item;
 
-	if (hit->Item != nullptr)
+	if (lvHit != nullptr)
 	{
-		auto item = ASTYPE(hit->Item->Tag, ITaskBase);
+		auto task = ASTYPE(lvHit->Tag, ITaskBase);
 
-		if (item != nullptr)
+		if (task != nullptr)
 		{
-			if (item->IsLocked)
+			if (task->IsLocked)
 			{
 				Cursor = UIExtension::AppCursor(UIExtension::AppCursorType::LockedTask);
 				return;
 			}
 			
-			if (CalcIconRect(hit->Item->Bounds).Contains(e->Location))
+			if (CalcIconRect(lvHit->Bounds).Contains(e->Location))
 			{
 				Cursor = UIExtension::HandCursor();
 				return;
@@ -871,11 +872,11 @@ void TaskListView::OnBeforeLabelEdit(LabelEditEventArgs^ e)
 {
 	if (e->Item != -1)
 	{
-		auto item = ASTYPE(Items[e->Item]->Tag, ITaskBase);
+		auto task = ASTYPE(Items[e->Item]->Tag, ITaskBase);
 
-		if (item != nullptr)
+		if (task != nullptr)
 		{
-			EditTaskLabel(this, item->Id);
+			EditTaskLabel(this, task->Id);
 			e->CancelEdit = true;
 
 			return;

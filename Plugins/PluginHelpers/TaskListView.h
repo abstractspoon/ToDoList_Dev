@@ -131,17 +131,15 @@ namespace Abstractspoon
 				void OnFontChanged(EventArgs^ e) override;
 				void OnHandleCreated(EventArgs^ e) override;
 
-				// Pseudo-handler
-				bool OnLButtonDown(Drawing::Point ptClient, bool doubleClick);
-
 			protected:
 				Drawing::Rectangle CalcLabelTextRect(Drawing::Rectangle labelRect, bool includeSubItems);
 				Drawing::Rectangle CalcCheckboxRect(Drawing::Rectangle labelRect);
 				Drawing::Rectangle CalcIconRect(Drawing::Rectangle labelRect);
 
 				String^ Translate(String^ text, Translator::Type type);
-				Windows::Forms::ListViewItem^ FindItem(UInt32 taskId);
+				bool IsTaskEditable(ITaskBase^ task) { return ((task != nullptr) && !task->IsLocked); }
 				int FindTask(String^ phrase, int startIndex, bool forward, bool caseSensitive, bool wholeWord, bool findReplace);
+				Windows::Forms::ListViewItem^ FindItem(UInt32 taskId);
 				Drawing::Color GetTextColor(ITaskBase^ task, bool selected);
 				Drawing::Color GetBackColor(ITaskBase^ task, int row);
 				Drawing::Font^ GetFont(ITaskBase^ task, bool title);
