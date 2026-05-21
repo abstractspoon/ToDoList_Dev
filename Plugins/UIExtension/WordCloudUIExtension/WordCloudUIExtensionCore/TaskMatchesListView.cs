@@ -200,19 +200,6 @@ namespace WordCloudUIExtension
 
 			return item.Matches(phrase, caseSensitive, wholeWord, findReplace);
 		}
-
-		protected override void OnDrawColumnHeader(DrawListViewColumnHeaderEventArgs e)
-		{
-			e.DrawBackground();
-			e.DrawText(TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.SingleLine);
-		}
-
-		protected override void OnColumnClick(ColumnClickEventArgs e)
-		{
-			// Flip sort direction
-			this.Sorting = (this.Sorting == SortOrder.Ascending ? SortOrder.Descending : SortOrder.Ascending);
-			Sort();
-		}
 	}
 }
 

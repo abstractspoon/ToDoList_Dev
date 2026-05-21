@@ -66,12 +66,14 @@
             this.columnHeader1,
             this.columnHeader2,
             this.columnHeader3});
+			this.m_List.EnableHeaderTracking = false;
 			this.m_List.GridlineColor = System.Drawing.Color.Empty;
 			this.m_List.HideSelection = false;
 			this.m_List.LabelEdit = true;
 			this.m_List.LabelWrap = false;
 			this.m_List.Location = new System.Drawing.Point(0, 18);
 			this.m_List.Margin = new System.Windows.Forms.Padding(0);
+			this.m_List.MinTaskColumnWidth = 100;
 			this.m_List.Name = "m_List";
 			this.m_List.OwnerDraw = true;
 			this.m_List.Selected = false;
@@ -80,6 +82,7 @@
 			this.m_List.ShowLabelTips = false;
 			this.m_List.ShowParentsAsFolders = false;
 			this.m_List.Size = new System.Drawing.Size(433, 356);
+			this.m_List.SizeTaskColumnToFit = true;
 			this.m_List.TabIndex = 0;
 			this.m_List.TaskColorIsBackground = false;
 			this.m_List.UseCompatibleStateImageBehavior = false;
@@ -88,16 +91,18 @@
 			// columnHeader1
 			// 
 			this.columnHeader1.Text = "Task";
-			this.columnHeader1.Width = 200;
+			this.columnHeader1.Width = 267;
 			// 
 			// columnHeader2
 			// 
 			this.columnHeader2.Text = "X Attribute";
+			this.columnHeader2.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
 			this.columnHeader2.Width = 80;
 			// 
 			// columnHeader3
 			// 
 			this.columnHeader3.Text = "Y Attribute";
+			this.columnHeader3.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
 			this.columnHeader3.Width = 80;
 			// 
 			// EisenhowerPane

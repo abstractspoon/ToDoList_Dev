@@ -4,6 +4,7 @@
 #include "Win32.h"
 #include "DPIScaling.h"
 #include "ColorUtil.h"
+#include "PluginHelpers.h"
 
 #include <shared\Clipboard.h>
 #include <shared\Misc.h>
@@ -22,26 +23,165 @@ using namespace Abstractspoon::Tdl::PluginHelpers;
 using namespace Abstractspoon::Tdl::PluginHelpers::ColorUtil;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
+// Private classes
 
-HeaderControl::HeaderControl(IntPtr handle)
+namespace Abstractspoon
 {
-	AssignHandle(handle);
-}
-
-void HeaderControl::WndProc(Message% m)
-{
-	switch (m.Msg)
+	namespace Tdl
 	{
-	case WM_SETCURSOR:
-		if (!EnableTracking)
+		namespace PluginHelpers
 		{
-			Win32::SetArrowCursor();
-			return;
-		}
-		break;
-	}
+			ref class DefaultItemComparer : System::Collections::IComparer
+			{
+			public:
+				DefaultItemComparer() : m_Column(0), m_Ascending(true) {}
+				DefaultItemComparer(int column, bool ascending) : m_Column(column), m_Ascending(ascending) {}
 
-	NativeWindow::WndProc(m);
+				virtual int Compare(Object^ x, Object^ y)
+				{
+					int res = StringUtil::NaturalCompare(ASTYPE(x, ListViewItem)->SubItems[m_Column]->Text, 
+														 ASTYPE(y, ListViewItem)->SubItems[m_Column]->Text);
+
+					return (m_Ascending ? res : -res);
+				}
+
+				property int Column { int get() { return m_Column; } }
+				property bool Ascending { bool get() { return m_Ascending; } }
+
+			private:
+				int m_Column;
+				bool m_Ascending;
+			};
+
+			////////////////////////////////////////////////////////////////////////////////////////////////
+
+			// Private class (for now)
+			ref class HeaderControl : Windows::Forms::NativeWindow
+			{
+			public:
+				HeaderControl(ListView^ list) : m_List(list)
+				{
+					Debug::Assert(list->IsHandleCreated);
+
+					auto header = IntPtr(::SendMessage(Win32::GetHwnd(m_List->Handle), LVM_GETHEADER, 0, 0));
+					AssignHandle(header);
+
+					list->ColumnClick += gcnew ColumnClickEventHandler(this, &HeaderControl::OnColumnClick);
+					list->DrawColumnHeader += gcnew DrawListViewColumnHeaderEventHandler(this, &HeaderControl::OnDrawColumnHeader);
+					list->ColumnWidthChanging += gcnew ColumnWidthChangingEventHandler(this, &HeaderControl::OnColumnWidthChanging);
+				}
+
+			public:
+				property bool EnableTracking;
+
+			private:
+				ListView^ m_List;
+
+			protected:
+				void OnDrawColumnHeader(Object^ sender, DrawListViewColumnHeaderEventArgs^ e)
+				{
+					Debug::Assert(sender == m_List);
+
+					auto sorter = ASTYPE(m_List->ListViewItemSorter, DefaultItemComparer);
+
+					if ((sorter == nullptr) || (sorter->Column != e->ColumnIndex))
+					{
+						e->DrawDefault = true;
+						return;
+					}
+
+					e->DrawBackground();
+
+					if (e->Header == nullptr)
+						return;
+
+					// Reimplement DrawListViewColumnHeaderEventArgs::DrawText()
+					// to avoid it adding unnecessary extra padding
+					HorizontalAlignment hAlign = HorizontalAlignment::Left;
+					TextFormatFlags flags = (TextFormatFlags::Left | TextFormatFlags::VerticalCenter | TextFormatFlags::WordEllipsis);
+
+					switch (e->Header->TextAlign)
+					{
+					case HorizontalAlignment::Center: flags = (flags | TextFormatFlags::HorizontalCenter); break;
+					case HorizontalAlignment::Right: flags = (flags | TextFormatFlags::Right); break;
+					}
+
+					TextRenderer::DrawText(e->Graphics,
+										   e->Header->Text,
+										   e->Font,
+										   Rectangle::Inflate(e->Bounds, -2/*LabelPadding*/, -1),
+										   e->ForeColor,
+										   flags);
+
+					// Sort arrow
+					HDC hDC = Win32::GetHdc(e->Graphics->GetHdc());
+					CDC* pDC = CDC::FromHandle(hDC);
+
+					GraphicsMisc::DrawSortArrow(pDC, 
+												CRect(e->Bounds.Left, e->Bounds.Top, e->Bounds.Right, e->Bounds.Bottom),
+												(sorter->Ascending ? true : false));
+
+					e->Graphics->ReleaseHdc();
+				}
+
+				void OnColumnClick(Object^ sender, ColumnClickEventArgs^ e)
+				{
+					Debug::Assert(sender == m_List);
+
+					auto sorter = ASTYPE(m_List->ListViewItemSorter, DefaultItemComparer);
+
+					if (sorter == nullptr)
+					{
+						if (m_List->ListViewItemSorter != nullptr)
+							return; // not 'our' sorter
+
+						// else 
+						sorter = gcnew DefaultItemComparer(e->Column, true);
+					}
+					else if (e->Column != sorter->Column)
+					{
+						sorter = gcnew DefaultItemComparer(e->Column, true);
+
+						// Clear the previous sort arrow
+						::InvalidateRect(Win32::GetHwnd(Handle), NULL, FALSE);
+					}
+					else
+					{
+						sorter = gcnew DefaultItemComparer(e->Column, !sorter->Ascending);
+					}
+
+					m_List->ListViewItemSorter = sorter;
+				}
+
+				void OnColumnWidthChanging(Object^ sender, ColumnWidthChangingEventArgs^ e)
+				{
+					Debug::Assert(sender == m_List);
+
+					if (!EnableTracking && (Control::MouseButtons == Windows::Forms::MouseButtons::Left))
+					{
+						e->Cancel = true;
+						e->NewWidth = m_List->Columns[e->ColumnIndex]->Width;
+					}
+				}
+
+				void WndProc(Windows::Forms::Message% m) override
+				{
+					switch (m.Msg)
+					{
+					case WM_SETCURSOR:
+						if (!EnableTracking)
+						{
+							Win32::SetArrowCursor();
+							return;
+						}
+						break;
+					}
+
+					NativeWindow::WndProc(m);
+				}
+			};
+		}
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -93,9 +233,7 @@ void TaskListView::OnHandleCreated(EventArgs^ e)
 {
 	ListView::OnHandleCreated(e);
 
-	auto header = IntPtr(Win32::SendMessage(Handle, LVM_GETHEADER, UIntPtr::Zero, IntPtr::Zero));
-
-	m_HeaderCtrl = gcnew HeaderControl(header);
+	m_HeaderCtrl = gcnew HeaderControl(this);
 	m_HeaderCtrl->EnableTracking = m_EnableHeaderTracking;
 }
 
@@ -744,11 +882,6 @@ Drawing::Color TaskListView::GetBackColor(ITaskBase^ task, int row)
 	return SystemColors::Window;
 }
 
-void TaskListView::OnDrawColumnHeader(DrawListViewColumnHeaderEventArgs^ e)
-{
-	e->DrawDefault = true;
-}
-
 void TaskListView::WndProc(Message% m)
 {
 	if (m_LabelTip != nullptr)
@@ -884,18 +1017,6 @@ void TaskListView::OnBeforeLabelEdit(LabelEditEventArgs^ e)
 	}
 
 	ListView::OnBeforeLabelEdit(e);
-}
-
-// The other part of making HeaderControl::EnableTracking work
-void TaskListView::OnColumnWidthChanging(ColumnWidthChangingEventArgs^ e)
-{
-	if ((m_HeaderCtrl != nullptr) && 
-		!m_HeaderCtrl->EnableTracking &&
-		(MouseButtons == Windows::Forms::MouseButtons::Left))
-	{
-		e->Cancel = true;
-		e->NewWidth = Columns[e->ColumnIndex]->Width;
-	}
 }
 
 bool TaskListView::SelectTaskEx(String^ words, UIExtension::SelectTask selectTask, 

@@ -259,6 +259,7 @@ namespace EisenhowerUIExtension
 
 		public bool RebuildTaskList()
 		{
+			m_List.BeginUpdate();
 			m_List.RemoveAll();
 
 			if ((m_Tasks == null) || (m_Filter == null))
@@ -271,6 +272,7 @@ namespace EisenhowerUIExtension
 				AddTask(task);
 
 			m_List.RefreshColumnWidths();
+			m_List.EndUpdate();
 
 			return true;
 		}

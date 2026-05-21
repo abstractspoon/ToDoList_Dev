@@ -26,17 +26,8 @@ namespace Abstractspoon
 
 			// ---------------------------------------------
 
-			// Internal class (for now)
-			ref class HeaderControl : Windows::Forms::NativeWindow
-			{
-			public:
-				HeaderControl(IntPtr handle);
-
-				property bool EnableTracking;
-
-			protected:
-				void WndProc(Windows::Forms::Message% m) override;
-			};
+			// Forward declaration
+			ref class HeaderControl;
 
 			// ---------------------------------------------
 
@@ -122,9 +113,11 @@ namespace Abstractspoon
 
 				void OnMouseMove(Windows::Forms::MouseEventArgs^ e) override;
 				void OnBeforeLabelEdit(Windows::Forms::LabelEditEventArgs^ e) override;
-				void OnColumnWidthChanging(Windows::Forms::ColumnWidthChangingEventArgs^ e) override;
 				void OnDrawItem(Windows::Forms::DrawListViewItemEventArgs^ e) override;
-				void OnDrawColumnHeader(Windows::Forms::DrawListViewColumnHeaderEventArgs^ e) override;
+// 				void OnColumnWidthChanging(Windows::Forms::ColumnWidthChangingEventArgs^ e) override;
+		//		void OnDrawColumnHeader(Windows::Forms::DrawListViewColumnHeaderEventArgs^ e) override;
+		//		void OnColumnClick(Windows::Forms::ColumnClickEventArgs^ e) override;
+
 				void OnGotFocus(EventArgs^ e) override;
 				void OnLostFocus(EventArgs^ e) override;
 				void OnSizeChanged(EventArgs^ e) override;

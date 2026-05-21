@@ -93,7 +93,7 @@ namespace EisenhowerUIExtension
 			}
 
 			IsParent = task.IsParent();
-			IsLocked = task.IsLocked(true);
+			IsLocked = task.IsLocked(true); // Explicitly AND implicitly
 
 			return true;
 		}
