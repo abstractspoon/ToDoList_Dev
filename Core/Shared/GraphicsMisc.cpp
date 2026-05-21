@@ -2577,3 +2577,45 @@ BOOL GraphicsMisc::DrawShortcutOverlay(CDC* pDC, LPCRECT pRect)
 
 	return s_ilShortcutOverlay.Draw(pDC, 0, ptPos, ILD_TRANSPARENT);
 }
+
+static CThemed s_thSortArrow; // Must be in FILE SCOPE else dotNet will crash
+
+BOOL GraphicsMisc::DrawSortArrow(CDC* pDC, LPCRECT pHeaderRect, BOOL bUp)
+{
+	if (::IsRectEmpty(pHeaderRect))
+		return FALSE;
+
+	if ((COSVersion() >= OSV_VISTA) && CThemed::AreControlsThemed())
+	{
+		if (!s_thSortArrow.IsValid())
+			s_thSortArrow.Open(::GetDesktopWindow(), _T("Header"));
+
+		CSize size;
+		s_thSortArrow.GetSize(HP_HEADERSORTARROW, 1, size);
+
+		CRect rArrow(CPoint(0, 0), size);
+		CentreRect(rArrow, pHeaderRect, TRUE, FALSE);
+
+		rArrow.bottom = rArrow.top + 8;
+
+		return s_thSortArrow.DrawBackground(pDC, HP_HEADERSORTARROW, (bUp ? HSAS_SORTEDUP : HSAS_SORTEDDOWN), rArrow);
+	}
+
+	// else
+	int nOffY = (bUp ? 5 : 3), nOffX = (CentrePoint(pHeaderRect).x - 4);
+	int nDir = (bUp ? -1 : 1);
+
+	POINT ptArrow[3] = { { 0, 0 },{ 3, (int)nDir * 3 },{ 7, -(int)nDir } };
+
+	// translate the arrow to the appropriate location
+	int nPoint = 3;
+
+	while (nPoint--)
+	{
+		ptArrow[nPoint].x += nOffX;
+		ptArrow[nPoint].y += nOffY;
+	}
+	
+	pDC->Polyline(ptArrow, 3);
+	return TRUE;
+}
