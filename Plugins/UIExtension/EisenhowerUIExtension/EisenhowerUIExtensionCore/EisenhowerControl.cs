@@ -34,7 +34,7 @@ namespace EisenhowerUIExtension
 		private Translator m_Trans;
 
 		// local
-		private EisenhowerData m_Data;
+		private EisenhowerTasks m_Tasks;
 		private bool m_DraggingHorzSplitBar, m_DraggingVertSplitBar;
 		private DragImage m_DragImage;
 		private Point m_SplitPos;
@@ -63,16 +63,16 @@ namespace EisenhowerUIExtension
 			m_SplitPos = new Point(50, 50); // 0-100
 		}
 
-		public void Initialize(Translator trans, UIExtension.TaskIcon icons)
+		public void Initialize(EisenhowerTasks tasks, Translator trans, UIExtension.TaskIcon icons)
 		{
 			m_Trans = trans;
-			m_Data = new EisenhowerData();
+			m_Tasks = tasks;
 
 			// Panes
-			m_TopLeftPane.Initialize("Top-Left Pane", Properties.Resources.TopLeftPane, m_Trans, m_Data.Tasks, icons);
-			m_TopRightPane.Initialize("Top-Right Pane", Properties.Resources.TopRightPane, m_Trans, m_Data.Tasks, icons);
-			m_BottomLeftPane.Initialize("Bottom-Left Pane", Properties.Resources.BotLeftPane, m_Trans, m_Data.Tasks, icons);
-			m_BottomRightPane.Initialize("Bottom-Right Pane", Properties.Resources.BotRightPane, m_Trans, m_Data.Tasks, icons);
+			m_TopLeftPane.Initialize("Top-Left Pane", Properties.Resources.TopLeftPane, m_Trans, m_Tasks, icons);
+			m_TopRightPane.Initialize("Top-Right Pane", Properties.Resources.TopRightPane, m_Trans, m_Tasks, icons);
+			m_BottomLeftPane.Initialize("Bottom-Left Pane", Properties.Resources.BotLeftPane, m_Trans, m_Tasks, icons);
+			m_BottomRightPane.Initialize("Bottom-Right Pane", Properties.Resources.BotRightPane, m_Trans, m_Tasks, icons);
 
 			// Callbacks
 			m_Panes.ForEach(p => 
@@ -94,8 +94,8 @@ namespace EisenhowerUIExtension
 
 		public void SetFilter(EisenhowerVariable xAttrib, EisenhowerVariable yAttrib)
 		{
-			double xCutoff = m_Data.Tasks.CalculateAttributeValueMidpoint(xAttrib);
-			double yCutoff = m_Data.Tasks.CalculateAttributeValueMidpoint(yAttrib);
+			double xCutoff = xAttrib.ValueMidPoint;
+			double yCutoff = yAttrib.ValueMidPoint;
 
 			// Top-left => High xAttrib - High yAttrib
 			m_TopLeftPane.SetFilter(new EisenhowerFilterVariable(xAttrib, EisenhowerPaneFilterAttributeRange.High, xCutoff), 
@@ -233,59 +233,18 @@ namespace EisenhowerUIExtension
 			}
 		}
 
-		public void UpdateTasks(TaskList tasks, UIExtension.UpdateType type)
+		public void OnUpdateTasks(UIExtension.UpdateType type, List<uint> taskIds)
 		{
 			switch (type)
 			{
 			case UIExtension.UpdateType.All:
-				{
-					m_Data.Tasks.Rebuild(tasks);
-					m_Panes.ForEach(p => p.RebuildTaskList());
-				}
+				m_Panes.ForEach(p => p.RebuildTaskList());
 				break;
 
 			case UIExtension.UpdateType.Edit:
-				{
-// 					var removedIds = m_Data.Tasks.RemoveCompletedTasks(tasks);
-// 
-// 					if (removedIds?.Count > 0)
-// 						m_Panes.ForEach(p => p.RemoveTasks(removedIds));
-
-					List<uint> processedTaskIds = m_Data.Tasks.Update(tasks);
-
-					if (processedTaskIds.Count > 0)
-					{
-						// Only Update the panes if the attributes we are tracking were changed
-						// TODO
-						m_Panes.ForEach(p => p.RebuildTaskList());
-					}
-				}
-				break;
-
 			case UIExtension.UpdateType.New:
-				{
-					var newTaskIds = m_Data.Tasks.Update(tasks);
-
-					if (newTaskIds.Count > 0)
-					{
-						// Only Update the panes if the attributes we are tracking were changed
-						// TODO
-
-						m_Panes.ForEach(p =>
-						{
-							newTaskIds.ForEach(id => p.AddTask(m_Data.Tasks.GetItem(id)));
-						});
-					}
-				}
-				break;
-
 			case UIExtension.UpdateType.Delete:
-				{
-					var removedIds = m_Data.Tasks.RemoveDeletedTasks(tasks);
-
-					if (removedIds?.Count > 0)
-						m_Panes.ForEach(p => p.RemoveTasks(removedIds));
-				}
+				m_Panes.ForEach(p => p.RefilterTasks(taskIds));
 				break;
 			}
 		}
@@ -469,7 +428,7 @@ namespace EisenhowerUIExtension
 
 		public bool CanSaveToImage()
 		{
-			return (m_Data.Tasks.Count != 0);
+			return (m_Tasks.Count != 0);
 		}
 
 		public Bitmap SaveToImage()
@@ -805,7 +764,7 @@ namespace EisenhowerUIExtension
 
 					while (i-- > 0)
 					{
-						var task = m_Data.Tasks.GetItem(modTaskIds[i]);
+						var task = m_Tasks.GetItem(modTaskIds[i]);
 
 						if ((task != null) && !task.IsLocked)
 						{

@@ -7,44 +7,271 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 namespace EisenhowerUIExtension
 {
+	public class UpdateResult
+	{
+		public UIExtension.UpdateType Type = UIExtension.UpdateType.Unknown;
+
+		public List<uint> ModifiedTaskIds;
+		public List<EisenhowerVariable> ModifiedVariables;
+	}
+
+	// -----------------------------------------
+
 	public class EisenhowerData
 	{
 		public EisenhowerTasks Tasks { get; private set; }
 		public EisenhowerVariables Variables { get; private set; }
 
-		// ---------------------------------
+		// -----------------------------------------
 
-		public EisenhowerData()
+		public EisenhowerData(Translator trans)
 		{
 			Tasks = new EisenhowerTasks();
-			Variables = new EisenhowerVariables();
+			Variables = new EisenhowerVariables(trans);
+		}
+
+		public UpdateResult Update(TaskList tasks, UIExtension.UpdateType type)
+		{
+			var result = new UpdateResult()
+			{
+				ModifiedTaskIds = Tasks.Update(tasks, type),
+				ModifiedVariables = Variables.Update(tasks)
+			};
+
+			// Update variable value ranges
+			result.ModifiedVariables.ForEach(v => UpdateAttributeValueRange(v));
+
+			return result;
+		}
+
+		// -------------------------------------------
+
+		private bool UpdateAttributeValueRange(EisenhowerVariable var)
+		{
+			double minVal = 0, maxVal = 0;
+
+			switch (var.Attribute.AttributeId)
+			{
+			case Task.Attribute.Priority:
+			case Task.Attribute.Risk:
+				{
+					minVal = -2;
+
+					// Adjust max val to match user-defined number of levels
+					// TODO
+					maxVal = 10;
+				}
+				break;
+
+			default: // All the rest
+				if (Tasks.Count > 0)
+				{
+					minVal = double.MaxValue;
+					maxVal = double.MinValue;
+
+					foreach (var task in Tasks.Values)
+					{
+						double attribVal = task.GetAttributeValue(var);
+
+						minVal = Math.Min(minVal, attribVal);
+						maxVal = Math.Max(maxVal, attribVal);
+					}
+				}
+				break;
+			}
+			Debug.Assert(minVal <= maxVal);
+
+			return var.SetValueRange(minVal, maxVal);
 		}
 	}
-	
-	///////////////////////////////////////////////////////////////////////////
 
-	public class EisenhowerVariables
+	////////////////////////////////////////////////////////////
+
+	public class EisenhowerVariables : List<EisenhowerVariable>
 	{
-		// TODO
+		public EisenhowerVariables(Translator trans)
+		{
+			// Default attributes always exist
+			var attribPriority = new TaskAttributeItem()
+			{
+				Label = trans.Translate("Priority", Translator.Type.Header),
+				AttributeId = Task.Attribute.Priority
+			};
+			Add(new EisenhowerVariable(attribPriority, false, -2, 10));
+
+			var attribRisk = new TaskAttributeItem()
+			{
+				Label = trans.Translate("Risk", Translator.Type.Header),
+				AttributeId = Task.Attribute.Risk
+			};
+			Add(new EisenhowerVariable(attribRisk, false, -2, 10));
+
+			var attribCost = new TaskAttributeItem()
+			{
+				Label = trans.Translate("Cost", Translator.Type.Header),
+				AttributeId = Task.Attribute.Cost
+			};
+			Add(new EisenhowerVariable(attribCost, true));
+		}
+
+		public List<EisenhowerVariable> Update(TaskList tasks)
+		{
+			var modifiedVars = new List<EisenhowerVariable>();
+
+			if (tasks.IsAttributeAvailable(Task.Attribute.CustomAttribute))
+			{
+				var custAttribDefs = tasks.GetCustomAttributes();
+
+				// Remove deleted or no longer supported custom attributes
+				ForEach(v =>
+				{
+					if (v.Attribute.IsCustom())
+					{
+						var attrib = custAttribDefs.Find(a => a.Id == v.Attribute.CustomAttributeId);
+						
+						if ((attrib == null) || !EisenhowerVariable.SupportsCustomAttribute(attrib))
+							Remove(v);
+					}
+				});
+
+				// Add new custom attributes or update the existing
+				custAttribDefs.ForEach(a =>
+				{
+					var var = Find(a.Id);
+
+					if ((var == null) && EisenhowerVariable.SupportsCustomAttribute(a))
+					{
+						var = new EisenhowerVariable(a);
+
+						Add(var);
+						modifiedVars.Add(var);
+					}
+					else if (var.Attribute.CustomAttributeType != a.AttributeType)
+					{
+						var.Attribute.CustomAttributeType = a.AttributeType;
+						modifiedVars.Add(var);
+					}
+				});
+			}
+
+			return modifiedVars;
+		}
+
+		// ---------------------------------------------
+
+		public /*protected*/ EisenhowerVariable Find(Task.Attribute attribId)
+		{
+			return Find(v => (v.Attribute.AttributeId == attribId));
+		}
+
+		protected EisenhowerVariable Find(string custAttribId)
+		{
+			return Find(v => ((v.Attribute.AttributeId == Task.Attribute.CustomAttribute) && 
+								(v.Attribute.CustomAttributeId == custAttribId)));
+		}
 	}
 
 	///////////////////////////////////////////////////////////////////////////
 
-	public class EisenhowerVariable : TaskAttributeItem
+	public class EisenhowerVariable
 	{
+		public TaskAttributeItem Attribute { get; private set; }
 		public bool TypeIsDouble { get; private set; }
 		public string Key { get; private set; }
 
+		public double MinValue { get; private set; }
+		public double MaxValue { get; private set; }
+
 		// ------------------------------
 
-		public EisenhowerVariable(TaskAttributeItem attrib, bool isDouble) : base(attrib)
+		public EisenhowerVariable(TaskAttributeItem attrib, bool isDouble)
 		{
+			MinValue = MaxValue = 0;
+			Attribute = attrib;
 			TypeIsDouble = isDouble;
 
-			if (string.IsNullOrEmpty(attrib.CustomAttributeId))
-				Key = attrib.AttributeId.ToString();
-			else
+			if (attrib.IsCustom())
 				Key = attrib.CustomAttributeId;
+			else
+				Key = attrib.AttributeId.ToString();
+		}
+
+		public EisenhowerVariable(CustomAttributeDefinition attrib)
+		{
+			bool isDouble = false;
+
+			if (!SupportsCustomAttribute(attrib, ref isDouble))
+			{
+				Debug.Assert(false);
+				return;
+			}
+
+			Attribute = new TaskAttributeItem()
+			{
+				Label = attrib.Label,
+				AttributeId = Task.Attribute.CustomAttribute,
+				CustomAttributeId = attrib.Id,
+				CustomAttributeType = attrib.AttributeType
+			};
+
+			MinValue = MaxValue = 0;
+			TypeIsDouble = isDouble;
+			Key = attrib.Id;
+		}
+
+		public EisenhowerVariable(TaskAttributeItem attrib, bool isDouble, double minVal, double maxVal)
+			:
+			this(attrib, isDouble)
+		{
+			SetValueRange(minVal, maxVal);
+		}
+
+		public bool SetValueRange(double minVal, double maxVal)
+		{
+			if (minVal > maxVal)
+				return false;
+
+			MinValue = minVal;
+			MaxValue = maxVal;
+
+			return true;
+		}
+
+		public double ValueMidPoint
+		{
+			get
+			{
+				Debug.Assert(MinValue <= MaxValue);
+				return ((MaxValue + MinValue) / 2);
+			}
+		}
+
+		public static bool SupportsCustomAttribute(CustomAttributeDefinition attrib)
+		{
+			bool unused = false;
+			return SupportsCustomAttribute(attrib, ref unused);
+		}
+
+		// ------------------------------------------------------------
+
+		private static bool SupportsCustomAttribute(CustomAttributeDefinition attrib, ref bool isDouble)
+		{
+			// Determine if it's a type we support
+			switch (attrib.AttributeType)
+			{
+			case CustomAttributeDefinition.Attribute.Integer:
+				isDouble = false;
+				return true;
+
+			case CustomAttributeDefinition.Attribute.Decimal:
+			case CustomAttributeDefinition.Attribute.TimePeriod:
+			case CustomAttributeDefinition.Attribute.Calculation:
+				isDouble = true;
+				return true;
+			}
+
+			return false;
+
 		}
 	}
 
@@ -52,57 +279,37 @@ namespace EisenhowerUIExtension
 
 	public class EisenhowerTasks : Dictionary<uint, EisenhowerTask>
 	{
-		public void Rebuild(TaskList tasks)
+		public List<uint> Update(TaskList tasks, UIExtension.UpdateType type)
 		{
-			Clear();
-			Update(tasks);
-		}
+			List<uint> taskIds = null;
 
-		public List<uint> Update(TaskList tasks)
-		{
-			var processedTaskIds = new List<uint>();
-			Task task = tasks.GetFirstTask();
-
-			while (task.IsValid() && ProcessTaskUpdate(task, processedTaskIds))
-				task = task.GetNextTask();
-
-			return processedTaskIds;
-		}
-
-		public List<uint> RemoveDeletedTasks(TaskList tasks)
-		{
-			var removedIds = new List<uint>();
-
-			// Find the deleted tasks
-			foreach (var taskId in Keys)
+			switch (type)
 			{
-				if (!tasks.HasTask(taskId))
-					removedIds.Add(taskId);
+			case UIExtension.UpdateType.All:
+				Clear();
+				taskIds = Update(tasks);
+				break;
+
+			case UIExtension.UpdateType.Edit:
+				taskIds = RemoveCompletedTasks(tasks);
+				taskIds.AddRange(Update(tasks));
+				break;
+
+			case UIExtension.UpdateType.New:
+				taskIds = Update(tasks);
+				break;
+
+			case UIExtension.UpdateType.Delete:
+				taskIds = RemoveDeletedTasks(tasks);
+				break;
 			}
 
-			// Remove them
-			removedIds.ForEach(id => Remove(id));
-
-			return removedIds;
+			return taskIds;
 		}
 
-		public List<uint> RemoveCompletedTasks(TaskList tasks)
+		public bool HasItem(uint taskId)
 		{
-			var removedIds = new List<uint>();
-
-			// Find the completed tasks
-			foreach (var taskId in Keys)
-			{
-				var task = tasks.FindTask(taskId);
-
-				if (task.IsDone() || task.IsGoodAsDone())
-					removedIds.Add(taskId);
-			}
-
-			// Remove them
-			removedIds.ForEach(id => Remove(id));
-
-			return removedIds;
+			return ContainsKey(taskId);
 		}
 
 		public EisenhowerTask GetItem(uint taskId, bool autoCreate = false)
@@ -118,54 +325,82 @@ namespace EisenhowerUIExtension
 			return taskItem;
 		}
 
-		public double CalculateAttributeValueMidpoint(EisenhowerVariable var)
+		// ---------------------------------
+
+		private List<uint> Update(TaskList tasks)
 		{
-			switch (var.AttributeId)
+			var modifiedTaskIds = new List<uint>();
+
+			Task task = tasks.GetFirstTask();
+
+			while (task.IsValid() && ProcessTaskUpdate(task, modifiedTaskIds))
+				task = task.GetNextTask();
+
+			return modifiedTaskIds;
+		}
+
+		private List<uint> RemoveDeletedTasks(TaskList tasks)
+		{
+			var deletedTaskIds = new List<uint>();
+
+			// 1. Locate the tasks
+			foreach (var taskId in Keys)
 			{
-			case Task.Attribute.Priority:
-			case Task.Attribute.Risk:
-				return 5;
+				if (!tasks.HasTask(taskId))
+					deletedTaskIds.Add(taskId);
 			}
 
-			// All the rest
-			double minVal = double.MaxValue, maxVal = double.MinValue;
+			// 2. Remove them
+			deletedTaskIds?.ForEach(id => Remove(id));
 
-			foreach (var task in Values)
+			return deletedTaskIds;			
+		}
+
+		private List<uint> RemoveCompletedTasks(TaskList tasks)
+		{
+			var completedTaskIds = new List<uint>();
+
+			// 1. Locate the tasks
+			foreach (var taskId in Keys)
 			{
-				double attribVal = task.GetAttributeValue(var);
+				var task = tasks.FindTask(taskId);
 
-				minVal = Math.Min(minVal, attribVal);
-				maxVal = Math.Max(maxVal, attribVal);
+				if (task.IsDone() || task.IsGoodAsDone())
+					completedTaskIds.Add(taskId);
 			}
 
-			if (minVal > 0.0)
-				return (maxVal / 2); // minVal => 0
+			// 2. Remove them
+			completedTaskIds?.ForEach(id => Remove(id));
 
-			// else
-			// TODO - Make this a 'nice' number
-			return ((maxVal - minVal) / 2);
+			return completedTaskIds;
 		}
 
 		// -------------------------------------------------
 
-		private bool ProcessTaskUpdate(Task task, List<uint> processedTaskIds)
+		private bool ProcessTaskUpdate(Task task, List<uint> modifiedTaskIds)
 		{
 			if (!task.IsValid())
 				return false;
 
-			uint taskId = task.GetID();
-			EisenhowerTask item = GetItem(taskId, true); // auto-create
+			// Be careful not to re-add tasks which may have been completed
+			if (!task.IsDone() && !task.IsGoodAsDone())
+			{
+				uint taskId = task.GetID();
+				bool newTask = !HasItem(taskId);
 
-			if (!item.ProcessTaskUpdate(task))
-				return false;
+				TaskItem item = GetItem(taskId, true);
 
-			// Process children
-			Task subtask = task.GetFirstSubtask();
+				if (!item.ProcessTaskUpdate(task))
+					return false;
 
-			while (subtask.IsValid() && ProcessTaskUpdate(subtask, processedTaskIds)) // RECURSIVE CALL
-				subtask = subtask.GetNextTask();
+				modifiedTaskIds?.Add(taskId);
 
-			processedTaskIds.Add(task.GetID());
+				// Process children
+				Task subtask = task.GetFirstSubtask();
+
+				while (subtask.IsValid() && ProcessTaskUpdate(subtask, modifiedTaskIds)) // RECURSIVE CALL
+					subtask = subtask.GetNextTask();
+			}
 
 			return true;
 		}

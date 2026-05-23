@@ -304,7 +304,7 @@ namespace Abstractspoon
 			{
 			public:
 				TaskAttributeItem();
-;				TaskAttributeItem(TaskAttributeItem^ attrib);
+				TaskAttributeItem(TaskAttributeItem^ attrib);
 
 				bool IsCustom();
 

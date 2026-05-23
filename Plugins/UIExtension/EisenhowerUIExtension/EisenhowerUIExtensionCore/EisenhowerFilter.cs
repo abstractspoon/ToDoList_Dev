@@ -21,11 +21,11 @@ namespace EisenhowerUIExtension
 
 		// ----------------------------------------
 
-		public EisenhowerFilterVariable(EisenhowerVariable attrib,
+		public EisenhowerFilterVariable(EisenhowerVariable var,
 										EisenhowerPaneFilterAttributeRange range,
-										double cutoff) 
-			: 
-			base(attrib, attrib.TypeIsDouble)
+										double cutoff)
+			:
+			base(var.Attribute, var.TypeIsDouble)
 		{
 			Range = range;
 			Cutoff = cutoff;
@@ -45,10 +45,10 @@ namespace EisenhowerUIExtension
 		public override string ToString()
 		{
 			if (Range == EisenhowerPaneFilterAttributeRange.High)
-				return string.Format("High {0} (> {1})", Label, Cutoff);
+				return string.Format("High {0} (> {1})", Attribute.Label, Cutoff);
 
 			// else
-			return string.Format("Low {0} (<= {1})", Label, Cutoff);
+			return string.Format("Low {0} (<= {1})", Attribute.Label, Cutoff);
 		}
 	}
 
@@ -60,10 +60,10 @@ namespace EisenhowerUIExtension
 									EisenhowerFilterVariable yVar)
 		{
 #if DEBUG
-			if (xVar.IsCustom() && yVar.IsCustom())
-				Debug.Assert(xVar.CustomAttributeId != yVar.CustomAttributeId );
+			if (xVar.Attribute.IsCustom() && yVar.Attribute.IsCustom())
+				Debug.Assert(xVar.Attribute.CustomAttributeId != yVar.Attribute.CustomAttributeId );
 			else
-				Debug.Assert(xVar.AttributeId != yVar.AttributeId);
+				Debug.Assert(xVar.Attribute.AttributeId != yVar.Attribute.AttributeId);
 #endif
 
 			XVariable = xVar;

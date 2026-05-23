@@ -17,7 +17,9 @@ namespace EisenhowerUIExtension
 		string m_TypeID;
 		string m_UiName;
 		IntPtr m_HwndParent;
-//		Translator m_Trans;
+		Translator m_Trans;
+
+		private EisenhowerData m_Data;
 		private UIExtension.TaskIcon m_TaskIcons;
 
 		// ------------------------------------------------
@@ -28,11 +30,13 @@ namespace EisenhowerUIExtension
 
 			m_TypeID = typeID;
 			m_UiName = uiName;
-//			m_Trans = trans;
+			m_Trans = trans;
 			m_HwndParent = parentHandle;
-			m_TaskIcons = new UIExtension.TaskIcon(parentHandle);
 
-			m_EisenhowerCtrl.Initialize(trans, m_TaskIcons);
+			m_TaskIcons = new UIExtension.TaskIcon(parentHandle);
+			m_Data = new EisenhowerData(trans);
+
+			m_EisenhowerCtrl.Initialize(m_Data.Tasks, trans, m_TaskIcons);
 
 			m_EisenhowerCtrl.EditTaskDone    += new EditTaskCompletionEventHandler(OnEisenhowerCtrlEditTaskDone);
 			m_EisenhowerCtrl.EditTaskIcon    += new EditTaskIconEventHandler(OnEisenhowerCtrlEditTaskIcon);
@@ -40,20 +44,24 @@ namespace EisenhowerUIExtension
 			m_EisenhowerCtrl.SelectionChange += new SelectionChangeEventHandler(OnEisenhowerCtrlSelectionChange);
 			m_EisenhowerCtrl.AttributeChange += new AttributeChangeEventHandler(OnEisenhowerCtrlAttributeChange);
 
-			// Dummy filter to get us started
-			var xAttrib = new TaskAttributeItem()
-			{
-				Label = "Priority",
-				AttributeId = Task.Attribute.Priority
-			};
-			var yAttrib = new TaskAttributeItem()
-			{
-				Label = "Risk",
-				AttributeId = Task.Attribute.Risk
-			};
+			// Default filter
+			m_EisenhowerCtrl.SetFilter(m_Data.Variables.Find(Task.Attribute.Priority), 
+									   m_Data.Variables.Find(Task.Attribute.Risk));
+		}
 
-			m_EisenhowerCtrl.SetFilter(new EisenhowerVariable(xAttrib, false), 
-									   new EisenhowerVariable(yAttrib, false));
+		public void UpdateTasks(TaskList tasks, UIExtension.UpdateType type)
+		{
+			var result = m_Data.Update(tasks, type);
+
+			// Handle variable changes
+			// TODO
+
+			m_EisenhowerCtrl.OnUpdateTasks(type, result.ModifiedTaskIds);
+		}
+
+		public bool WantTaskUpdate(Task.Attribute attrib)
+		{
+			return m_EisenhowerCtrl.WantTaskUpdate(attrib);
 		}
 
 		public bool SelectTask(uint taskId)
@@ -85,16 +93,6 @@ namespace EisenhowerUIExtension
 		public bool CanScrollToSelectedTask()
 		{
 			return m_EisenhowerCtrl.HasSelection;
-		}
-
-		public void UpdateTasks(TaskList tasks, UIExtension.UpdateType type)
-		{
-			m_EisenhowerCtrl.UpdateTasks(tasks, type);
-		}
-
-		public bool WantTaskUpdate(Task.Attribute attrib)
-		{
-			return m_EisenhowerCtrl.WantTaskUpdate(attrib);
 		}
 
 		public bool WantSortUpdate(Task.Attribute attrib)
@@ -266,27 +264,27 @@ namespace EisenhowerUIExtension
 		{
 			var notify = new UIExtension.ParentNotify(m_HwndParent);
 
-			AddModNotification(args.XAttrib, args.XValue, notify);
-			AddModNotification(args.YAttrib, args.YValue, notify);
+			CheckAddNotification(args.XAttrib, args.XValue, notify);
+			CheckAddNotification(args.YAttrib, args.YValue, notify);
 
 			return notify.NotifyMod();
 		}
 
-		static private void AddModNotification(EisenhowerVariable attrib, double value, UIExtension.ParentNotify notify)
+		static private void CheckAddNotification(EisenhowerVariable var, double value, UIExtension.ParentNotify notify)
 		{
-			if (attrib != null)
+			if (var != null)
 			{
-				if (attrib.IsCustom())
+				if (var.Attribute.IsCustom())
 				{
-					notify.AddMod(attrib.CustomAttributeId, value.ToString());
+					notify.AddMod(var.Attribute.CustomAttributeId, value.ToString());
 				}
-				else if (attrib.TypeIsDouble)
+				else if (var.TypeIsDouble)
 				{
-					notify.AddMod(attrib.AttributeId, value);
+					notify.AddMod(var.Attribute.AttributeId, value);
 				}
 				else
 				{
-					notify.AddMod(attrib.AttributeId, (int)value);
+					notify.AddMod(var.Attribute.AttributeId, (int)value);
 				}
 			}
 		}
