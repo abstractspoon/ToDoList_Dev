@@ -114,6 +114,9 @@ namespace EisenhowerUIExtension
 										new EisenhowerFilterVariable(yAttrib, EisenhowerPaneFilterAttributeRange.Low, xCutoff));
 		}
 
+		public EisenhowerVariable XFilterVariable { get { return m_Panes[0].Filter.XVariable; } }
+		public EisenhowerVariable YFilterVariable { get { return m_Panes[0].Filter.YVariable; } }
+
 		public void SetUITheme(UITheme theme)
 		{
 			BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackDark);

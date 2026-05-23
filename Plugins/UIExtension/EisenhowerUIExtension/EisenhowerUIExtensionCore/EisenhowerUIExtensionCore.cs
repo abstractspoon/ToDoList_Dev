@@ -47,6 +47,16 @@ namespace EisenhowerUIExtension
 			// Default filter
 			m_EisenhowerCtrl.SetFilter(m_Data.Variables.Find(Task.Attribute.Priority), 
 									   m_Data.Variables.Find(Task.Attribute.Risk));
+
+			// Initialise filter combos -------------------------------------------
+			m_Data.Variables.ForEach(v =>
+			{
+				m_XAttribCombo.Items.Add(v);
+				m_YAttribCombo.Items.Add(v);
+			});
+
+			m_XAttribCombo.SelectedItem = m_Data.Variables.Find(Task.Attribute.Priority);//m_EisenhowerCtrl.XFilterVariable;
+			m_YAttribCombo.SelectedItem = m_Data.Variables.Find(Task.Attribute.Risk);//m_EisenhowerCtrl.YFilterVariable;
 		}
 
 		public void UpdateTasks(TaskList tasks, UIExtension.UpdateType type)
@@ -287,6 +297,12 @@ namespace EisenhowerUIExtension
 					notify.AddMod(var.Attribute.AttributeId, (int)value);
 				}
 			}
+		}
+
+		private void OnUpdateFilter(object sender, EventArgs e)
+		{
+			m_EisenhowerCtrl.SetFilter(m_XAttribCombo.SelectedItem as EisenhowerVariable,
+									   m_YAttribCombo.SelectedItem as EisenhowerVariable);
 		}
 	}
 

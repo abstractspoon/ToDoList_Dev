@@ -226,6 +226,11 @@ namespace EisenhowerUIExtension
 			SetValueRange(minVal, maxVal);
 		}
 
+		public override string ToString() // for UI elements
+		{
+			return Attribute.Label;
+		}
+
 		public bool SetValueRange(double minVal, double maxVal)
 		{
 			if (minVal > maxVal)
