@@ -114,9 +114,6 @@ namespace Abstractspoon
 				void OnMouseMove(Windows::Forms::MouseEventArgs^ e) override;
 				void OnBeforeLabelEdit(Windows::Forms::LabelEditEventArgs^ e) override;
 				void OnDrawItem(Windows::Forms::DrawListViewItemEventArgs^ e) override;
-// 				void OnColumnWidthChanging(Windows::Forms::ColumnWidthChangingEventArgs^ e) override;
-		//		void OnDrawColumnHeader(Windows::Forms::DrawListViewColumnHeaderEventArgs^ e) override;
-		//		void OnColumnClick(Windows::Forms::ColumnClickEventArgs^ e) override;
 
 				void OnGotFocus(EventArgs^ e) override;
 				void OnLostFocus(EventArgs^ e) override;
@@ -125,7 +122,14 @@ namespace Abstractspoon
 				void OnHandleCreated(EventArgs^ e) override;
 
 			protected:
-				Drawing::Rectangle CalcLabelTextRect(Drawing::Rectangle labelRect, bool includeSubItems);
+				enum class LabelExtents
+				{
+					TitleTextOnly,
+					TitleColumn,
+					AllColumns,
+				};
+
+				Drawing::Rectangle CalcLabelRect(Windows::Forms::ListViewItem^ item, LabelExtents extents);
 				Drawing::Rectangle CalcCheckboxRect(Drawing::Rectangle labelRect);
 				Drawing::Rectangle CalcIconRect(Drawing::Rectangle labelRect);
 

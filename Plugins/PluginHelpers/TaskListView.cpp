@@ -473,7 +473,7 @@ Drawing::Rectangle TaskListView::SelectedTaskLabelRect::get()
 		return Drawing::Rectangle::Empty;
 
 	// else 
-	return CalcLabelTextRect(SelectedItems[0]->GetBounds(ItemBoundsPortion::Label), false);
+	return CalcLabelRect(SelectedItems[0], TaskListView::LabelExtents::TitleColumn);
 }
 
 Drawing::Rectangle TaskListView::GetTaskLabelRect(UInt32 taskId)
@@ -484,7 +484,7 @@ Drawing::Rectangle TaskListView::GetTaskLabelRect(UInt32 taskId)
 		return Drawing::Rectangle::Empty;
 
 	// else
-	return CalcLabelTextRect(item->GetBounds(ItemBoundsPortion::Label), false);
+	return CalcLabelRect(item, TaskListView::LabelExtents::TitleColumn);
 }
 
 Drawing::Rectangle TaskListView::GetTaskLabelRect(int index)
@@ -493,7 +493,7 @@ Drawing::Rectangle TaskListView::GetTaskLabelRect(int index)
 		return Drawing::Rectangle::Empty;
 
 	// else 
-	return CalcLabelTextRect(Items[index]->GetBounds(ItemBoundsPortion::Label), false);
+	return CalcLabelRect(Items[index], TaskListView::LabelExtents::TitleColumn);
 }
 
 ListViewItem^ TaskListView::FindItem(UInt32 taskId)
@@ -527,18 +527,18 @@ Windows::Forms::Control^ TaskListView::GetOwner()
 LabelTipInfo^ TaskListView::ToolHitTest(Drawing::Point ptScreen)
 {
 	auto pt = PointToClient(ptScreen);
-	auto hit = HitTest(pt);
+	auto lvHit = HitTest(pt);
 
-	if ((hit == nullptr) || (hit->Item == nullptr))
+	if ((lvHit == nullptr) || (lvHit->Item == nullptr))
 		return nullptr;
 
 	// Only interested in first (label) column
-	auto labelRect = CalcLabelTextRect(hit->Item->GetBounds(ItemBoundsPortion::Entire), false);
+	auto labelRect = CalcLabelRect(lvHit->Item, TaskListView::LabelExtents::TitleColumn);
 
 	if (!labelRect.Contains(pt))
 		return nullptr;
 
-	auto task = ASTYPE(hit->Item->Tag, ITaskBase);
+	auto task = ASTYPE(lvHit->Item->Tag, ITaskBase);
 
 	if (task == nullptr)
 		return nullptr;
@@ -595,20 +595,35 @@ void TaskListView::OnFontChanged(EventArgs^ e)
 	Invalidate();
 }
 
-Drawing::Rectangle TaskListView::CalcLabelTextRect(Drawing::Rectangle labelRect, bool includeIdSubItems)
+Drawing::Rectangle TaskListView::CalcLabelRect(ListViewItem^ item, TaskListView::LabelExtents extents)
 {
-	Drawing::Rectangle textRect = labelRect;
+	Drawing::Rectangle textRect = item->Bounds;
 
 	textRect.X += 2;
 	textRect.X += CheckboxOffset;
 	textRect.X += TextIconOffset;
 
-	textRect.Width = (Columns[0]->Width - textRect.X);
-
-	if (includeIdSubItems)
+	switch (extents)
 	{
-		for (int i = 1; i < Columns->Count; i++)
-			textRect.Width += Columns[i]->Width;
+	case TaskListView::LabelExtents::TitleTextOnly:
+		{
+			auto graphics = Graphics::FromHwnd(Handle);
+			textRect.Width = (int)graphics->MeasureString(item->Text, GetFont(ASTYPE(item->Tag, ITaskBase), true)).Width;
+		}
+		break;
+
+	case TaskListView::LabelExtents::TitleColumn:
+		textRect.Width = (Columns[0]->Width - textRect.X);
+		break;
+
+	case TaskListView::LabelExtents::AllColumns:
+		{
+			textRect.Width = (Columns[0]->Width - textRect.X);
+
+			for (int i = 1; i < Columns->Count; i++)
+				textRect.Width += Columns[i]->Width;
+		}
+		break;
 	}
 
 	return textRect;
@@ -769,7 +784,7 @@ void TaskListView::OnDrawItem(DrawListViewItemEventArgs^ e)
 
 	if (selected)
 	{
-		Drawing::Rectangle labelRect = CalcLabelTextRect(itemRect, true);
+		Drawing::Rectangle labelRect = CalcLabelRect(e->Item, TaskListView::LabelExtents::AllColumns);
 
 		UIExtension::SelectionRect::Draw(Handle,
 										 e->Graphics,
@@ -926,6 +941,20 @@ void TaskListView::WndProc(Message% m)
 					EditTaskIcon(this, task->Id);
 					return;
 				}
+				// If the item is selected but we're not focused, 
+				// or the click was not on the label itself, prevent
+				// the base class from starting a label edit
+				else if (lvHit->Selected)
+				{
+					if (!Focused)
+					{
+						Focus();
+						return;
+					}
+
+					if (!CalcLabelRect(lvHit, TaskListView::LabelExtents::TitleTextOnly).Contains(pos))
+						return;
+				}
 			}
 		}
 		break;
@@ -942,17 +971,11 @@ void TaskListView::WndProc(Message% m)
 
 			auto task = ASTYPE(lvHit->Tag, ITaskBase);
 
-			if (IsTaskEditable(task))
-			{
-				if (!CalcCheckboxRect(lvHit->Bounds).Contains(pos) &&
-					!CalcIconRect(lvHit->Bounds).Contains(pos))
-				{
-					EditTaskLabel(this, task->Id);
-					return;
-				}
-			}
+			if (IsTaskEditable(task) && GetTaskLabelRect(task->Id).Contains(pos))
+				EditTaskLabel(this, task->Id);
+
 		}
-		break;
+		return; // always
 
 	case WM_LBUTTONUP:
 		{
