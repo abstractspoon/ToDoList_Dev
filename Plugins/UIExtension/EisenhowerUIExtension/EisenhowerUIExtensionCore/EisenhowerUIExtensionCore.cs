@@ -44,29 +44,58 @@ namespace EisenhowerUIExtension
 			m_EisenhowerCtrl.SelectionChange += new SelectionChangeEventHandler(OnEisenhowerCtrlSelectionChange);
 			m_EisenhowerCtrl.AttributeChange += new AttributeChangeEventHandler(OnEisenhowerCtrlAttributeChange);
 
-			// Default filter
-			m_EisenhowerCtrl.SetFilter(m_Data.Variables.Find(Task.Attribute.Priority), 
-									   m_Data.Variables.Find(Task.Attribute.Risk));
+			// Initialise filter
+			SetDefaultFilter();
 
-			// Initialise filter combos -------------------------------------------
-			m_Data.Variables.ForEach(v =>
-			{
-				m_XAttribCombo.Items.Add(v);
-				m_YAttribCombo.Items.Add(v);
-			});
+			m_XAttribCombo.Items.AddRange(m_Data.Variables.ToArray());
+			m_YAttribCombo.Items.AddRange(m_Data.Variables.ToArray());
 
-			m_XAttribCombo.SelectedItem = m_Data.Variables.Find(Task.Attribute.Priority);//m_EisenhowerCtrl.XFilterVariable;
-			m_YAttribCombo.SelectedItem = m_Data.Variables.Find(Task.Attribute.Risk);//m_EisenhowerCtrl.YFilterVariable;
+			m_XAttribCombo.SelectedItem = m_EisenhowerCtrl.XFilterVariable;
+			m_YAttribCombo.SelectedItem = m_EisenhowerCtrl.YFilterVariable;
 		}
 
 		public void UpdateTasks(TaskList tasks, UIExtension.UpdateType type)
 		{
+			var selTaskIds = m_EisenhowerCtrl.SelectedTaskIds;
+
+			// EisenhowerData.Update() returns:
+			//
+			// 1. A list of IDs of tasks which have been:
+			//
+			//	 1.1. Added
+			//	 1.2. Removed
+			//	 1.3. Modified
+			//
+			// 2. A list of variables which have been:
+			//	 2.1. Added
+			//   2.2. Removed
+			//   2.3. Had their numeric type changed (int <=> double)
+			//   2.4. Had their max/min range updated
+			// 
 			var result = m_Data.Update(tasks, type);
 
-			// Handle variable changes
-			// TODO
+			// If the existing filter variables have been removed
+			// then we need to revert to known types
+			var xUpdatedVar = m_Data.Variables.Find(m_EisenhowerCtrl.XFilterVariable);
+			var yUpdatedVar = m_Data.Variables.Find(m_EisenhowerCtrl.YFilterVariable);
 
-			m_EisenhowerCtrl.OnUpdateTasks(type, result.ModifiedTaskIds);
+			if ((xUpdatedVar == null) || (yUpdatedVar == null))
+			{
+				SetDefaultFilter();
+			}
+			// if the ranges have changed then rebuild the lists
+			else if (result.ModifiedVariables.Contains(xUpdatedVar) ||
+					 result.ModifiedVariables.Contains(yUpdatedVar))
+			{
+				m_EisenhowerCtrl.SetFilter(xUpdatedVar, yUpdatedVar);
+			}
+			else // simple update
+			{
+				m_EisenhowerCtrl.OnUpdateTasks(type, result.ModifiedTaskIds);
+			}
+
+			if (selTaskIds != null)
+				m_EisenhowerCtrl.SelectTasks(selTaskIds);
 		}
 
 		public bool WantTaskUpdate(Task.Attribute attrib)
@@ -224,6 +253,12 @@ namespace EisenhowerUIExtension
 
 		// Message handlers ---------------------------------------------------
 
+		void SetDefaultFilter()
+		{
+			m_EisenhowerCtrl.SetFilter(m_Data.Variables.Find(Task.Attribute.Priority),
+									   m_Data.Variables.Find(Task.Attribute.Risk));
+		}
+
 		protected override void OnGotFocus(EventArgs e)
 		{
 			base.OnGotFocus(e);
@@ -301,8 +336,13 @@ namespace EisenhowerUIExtension
 
 		private void OnUpdateFilter(object sender, EventArgs e)
 		{
+			var selTaskIds = m_EisenhowerCtrl.SelectedTaskIds;
+
 			m_EisenhowerCtrl.SetFilter(m_XAttribCombo.SelectedItem as EisenhowerVariable,
 									   m_YAttribCombo.SelectedItem as EisenhowerVariable);
+
+			m_EisenhowerCtrl.SelectTasks(selTaskIds);
+			m_EisenhowerCtrl.Focus();
 		}
 	}
 

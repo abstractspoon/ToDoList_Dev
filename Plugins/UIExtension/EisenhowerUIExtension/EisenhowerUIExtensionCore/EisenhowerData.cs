@@ -39,7 +39,11 @@ namespace EisenhowerUIExtension
 			};
 
 			// Update variable value ranges
-			result.ModifiedVariables.ForEach(v => UpdateAttributeValueRange(v));
+			Variables.ForEach(v =>
+			{
+				if (UpdateAttributeValueRange(v) && !result.ModifiedVariables.Contains(v))
+					result.ModifiedVariables.Add(v);
+			});
 
 			return result;
 		}
@@ -48,6 +52,7 @@ namespace EisenhowerUIExtension
 
 		private bool UpdateAttributeValueRange(EisenhowerVariable var)
 		{
+			double prevMinVal = var.MinValue, prevMaxVal = var.MaxValue;
 			double minVal = 0, maxVal = 0;
 
 			switch (var.Attribute.AttributeId)
@@ -81,7 +86,8 @@ namespace EisenhowerUIExtension
 			}
 			Debug.Assert(minVal <= maxVal);
 
-			return var.SetValueRange(minVal, maxVal);
+			return (var.SetValueRange(minVal, maxVal) && 
+					((minVal != prevMinVal) || (maxVal != prevMaxVal)));
 		}
 	}
 
@@ -157,9 +163,16 @@ namespace EisenhowerUIExtension
 			return modifiedVars;
 		}
 
-		// ---------------------------------------------
+		public EisenhowerVariable Find(EisenhowerVariable var)
+		{
+			if (var.Attribute.IsCustom())
+				return Find(var.Attribute.CustomAttributeId);
 
-		public /*protected*/ EisenhowerVariable Find(Task.Attribute attribId)
+			// else
+			return Find(var.Attribute.AttributeId);
+		}
+
+		public EisenhowerVariable Find(Task.Attribute attribId)
 		{
 			return Find(v => (v.Attribute.AttributeId == attribId));
 		}
@@ -175,6 +188,8 @@ namespace EisenhowerUIExtension
 
 	public class EisenhowerVariable
 	{
+		// ------------------------------
+
 		public TaskAttributeItem Attribute { get; private set; }
 		public bool TypeIsDouble { get; private set; }
 		public string Key { get; private set; }
@@ -186,9 +201,9 @@ namespace EisenhowerUIExtension
 
 		public EisenhowerVariable(TaskAttributeItem attrib, bool isDouble)
 		{
-			MinValue = MaxValue = 0;
 			Attribute = attrib;
 			TypeIsDouble = isDouble;
+			MinValue = MaxValue = 0;
 
 			if (attrib.IsCustom())
 				Key = attrib.CustomAttributeId;
@@ -229,6 +244,21 @@ namespace EisenhowerUIExtension
 		public override string ToString() // for UI elements
 		{
 			return Attribute.Label;
+		}
+
+		public override bool Equals(object other)
+		{
+			var var = (other as EisenhowerVariable);
+
+			return (Attribute.Equals(var?.Attribute) && 
+					(TypeIsDouble == var?.TypeIsDouble));
+		}
+
+		public override int GetHashCode()
+		{
+			// Don't use as a dictionary key
+			Debug.Assert(false);
+			return base.GetHashCode();
 		}
 
 		public bool SetValueRange(double minVal, double maxVal)

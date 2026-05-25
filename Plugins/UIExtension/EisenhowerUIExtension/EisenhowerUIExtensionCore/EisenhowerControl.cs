@@ -99,19 +99,19 @@ namespace EisenhowerUIExtension
 
 			// Top-left => High xAttrib - High yAttrib
 			m_TopLeftPane.SetFilter(new EisenhowerFilterVariable(xAttrib, EisenhowerPaneFilterAttributeRange.High, xCutoff), 
-									new EisenhowerFilterVariable(yAttrib, EisenhowerPaneFilterAttributeRange.High, xCutoff));
+									new EisenhowerFilterVariable(yAttrib, EisenhowerPaneFilterAttributeRange.High, yCutoff));
 
 			// Top-right => Low xAttrib - High yAttrib
 			m_TopRightPane.SetFilter(new EisenhowerFilterVariable(xAttrib, EisenhowerPaneFilterAttributeRange.Low, xCutoff),
-									 new EisenhowerFilterVariable(yAttrib, EisenhowerPaneFilterAttributeRange.High, xCutoff));
+									 new EisenhowerFilterVariable(yAttrib, EisenhowerPaneFilterAttributeRange.High, yCutoff));
 
 			// Bottom-left => High xAttrib - Low yAttrib
 			m_BottomLeftPane.SetFilter(new EisenhowerFilterVariable(xAttrib, EisenhowerPaneFilterAttributeRange.High, xCutoff),
-									   new EisenhowerFilterVariable(yAttrib, EisenhowerPaneFilterAttributeRange.Low, xCutoff));
+									   new EisenhowerFilterVariable(yAttrib, EisenhowerPaneFilterAttributeRange.Low, yCutoff));
 
 			// Bottom-right => Low xAttrib - Low yAttrib
 			m_BottomRightPane.SetFilter(new EisenhowerFilterVariable(xAttrib, EisenhowerPaneFilterAttributeRange.Low, xCutoff),
-										new EisenhowerFilterVariable(yAttrib, EisenhowerPaneFilterAttributeRange.Low, xCutoff));
+										new EisenhowerFilterVariable(yAttrib, EisenhowerPaneFilterAttributeRange.Low, yCutoff));
 		}
 
 		public EisenhowerVariable XFilterVariable { get { return m_Panes[0].Filter.XVariable; } }
@@ -340,7 +340,7 @@ namespace EisenhowerUIExtension
 		{
 			get
 			{
-				return SelectedPane.SelectedTaskIds;
+				return SelectedPane?.SelectedTaskIds;
 			}
 		}
 

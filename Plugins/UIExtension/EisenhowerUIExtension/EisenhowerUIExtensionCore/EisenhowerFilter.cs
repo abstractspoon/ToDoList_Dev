@@ -50,6 +50,22 @@ namespace EisenhowerUIExtension
 			// else
 			return string.Format("Low {0} (<= {1})", Attribute.Label, Cutoff);
 		}
+
+		public override bool Equals(object other)
+		{
+			var var = (other as EisenhowerFilterVariable);
+
+			return (Attribute.Equals(var?.Attribute) &&
+					(Range == var?.Range) && 
+					(Cutoff == var?.Cutoff));
+		}
+
+		public override int GetHashCode()
+		{
+			// Don't use as a dictionary key
+			Debug.Assert(false);
+			return base.GetHashCode();
+		}
 	}
 
 	////////////////////////////////////////////////////////////////////
@@ -86,6 +102,19 @@ namespace EisenhowerUIExtension
 			return (XVariable.ToString() + " - " + YVariable.ToString());
 		}
 
+		public override bool Equals(object obj)
+		{
+			var filter = (obj as EisenhowerPaneFilter);
+
+			return (XVariable.Equals(filter?.XVariable) && XVariable.Equals(filter?.YVariable));
+		}
+
+		public override int GetHashCode()
+		{
+			// Don't use as a dictionary key
+			Debug.Assert(false);
+			return base.GetHashCode();
+		}
 	}
 }
 
