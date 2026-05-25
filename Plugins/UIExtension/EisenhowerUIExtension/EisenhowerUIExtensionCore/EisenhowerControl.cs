@@ -189,6 +189,20 @@ namespace EisenhowerUIExtension
 			return false;
 		}
 
+		public bool SelectTasks(IList<uint> taskIDs)
+		{
+			foreach (var p in m_Panes)
+			{
+				if (p.SelectTasks(taskIDs))
+				{
+					SelectedPane = p;
+					return true;
+				}
+			}
+
+			return false;
+		}
+
 		protected EisenhowerPane SelectedPane
 		{
 			get
@@ -206,20 +220,6 @@ namespace EisenhowerUIExtension
 			{
 				m_Panes.ForEach(p => p.Selected = (p == value));
 			}
-		}
-
-		public bool SelectTasks(IList<uint> taskIDs)
-		{
-			foreach (var p in m_Panes)
-			{
-				if (p.SelectTasks(taskIDs))
-				{
-					SelectedPane = p;
-					return true;
-				}
-			}
-
-			return false;
 		}
 
 		public bool HasSelection
