@@ -311,6 +311,17 @@ bool Win32::DragDetect(IntPtr hWnd, Drawing::Point ptScreen)
 	return (::DragDetect(GetHwnd(hWnd), CPoint(ptScreen.X, ptScreen.Y)) != FALSE);
 }
 
+bool Win32::SetFocus(IntPtr hWnd)
+{
+	::SetFocus(GetHwnd(hWnd));
+	return HasFocus(hWnd);
+}
+
+bool Win32::HasFocus(IntPtr hWnd)
+{
+	return (::GetFocus() == GetHwnd(hWnd));
+}
+
 int Win32::SendMessage(IntPtr hWnd, UInt32 wMsg, UIntPtr wParam, IntPtr lParam)
 {
 	return ::SendMessage(GetHwnd(hWnd), wMsg, (WPARAM)wParam, (LPARAM)lParam.ToInt32());

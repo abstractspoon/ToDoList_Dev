@@ -219,6 +219,9 @@ namespace EisenhowerUIExtension
 			set
 			{
 				m_Panes.ForEach(p => p.Selected = (p == value));
+
+				if (Focused)
+					value?.Focus();
 			}
 		}
 

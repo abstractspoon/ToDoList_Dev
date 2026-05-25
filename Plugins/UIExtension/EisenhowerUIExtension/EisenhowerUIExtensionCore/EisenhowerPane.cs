@@ -248,7 +248,7 @@ namespace EisenhowerUIExtension
 				return false;
 
 			// else
-			return m_List.Focus();
+			return Win32.SetFocus(m_List.Handle);
 		}
 
 		public new bool Focused
