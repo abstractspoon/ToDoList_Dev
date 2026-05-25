@@ -314,11 +314,7 @@ bool Win32::DragDetect(IntPtr hWnd, Drawing::Point ptScreen)
 bool Win32::SetFocus(IntPtr hWnd)
 {
 	::SetFocus(GetHwnd(hWnd));
-	return HasFocus(hWnd);
-}
 
-bool Win32::HasFocus(IntPtr hWnd)
-{
 	return (::GetFocus() == GetHwnd(hWnd));
 }
 
