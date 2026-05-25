@@ -285,7 +285,7 @@ namespace EisenhowerUIExtension
 			}
 
 			bool someModified = false;
-			m_List.BeginUpdate();
+			//m_List.BeginUpdate();
 
 			foreach (var taskId in taskIds)
 			{
@@ -303,13 +303,10 @@ namespace EisenhowerUIExtension
 					someModified |= AddTask(task);
 				}
 			}
+			//m_List.EndUpdate();
 
 			if (someModified)
-			{
 				m_List.RefreshColumnWidths();
-				m_List.EndUpdate();
-				m_List.Invalidate();
-			}
 
 			return someModified;
 		}

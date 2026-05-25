@@ -569,6 +569,7 @@ namespace EisenhowerUIExtension
 				m_DraggingVertSplitBar = GetVertSplitBarRect().Contains(e.Location);
 
 				Capture = IsSplitting;
+				SelectedPane?.Focus();
 			}
 		}
 
@@ -585,6 +586,7 @@ namespace EisenhowerUIExtension
 					m_SplitPos.X = 50;
 
 				RecalcPaneRects(false);
+				SelectedPane?.Focus();
 			}
 		}
 
