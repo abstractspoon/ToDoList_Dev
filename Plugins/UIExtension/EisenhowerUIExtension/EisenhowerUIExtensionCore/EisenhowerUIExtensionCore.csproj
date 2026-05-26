@@ -62,6 +62,9 @@
     <Compile Include="EisenhowerPaneListView.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="EisenhowerVariableComboBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="TaskItem.cs" />
     <Compile Include="EisenhowerUIExtensionCore.cs">
       <SubType>UserControl</SubType>

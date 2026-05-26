@@ -31,8 +31,8 @@
 			this.m_XAttribLabel = new System.Windows.Forms.Label();
 			this.m_YAttribLabel = new System.Windows.Forms.Label();
 			this.m_EisenhowerCtrl = new EisenhowerUIExtension.EisenhowerControl();
-			this.m_XAttribCombo = new System.Windows.Forms.ComboBox();
-			this.m_YAttribCombo = new System.Windows.Forms.ComboBox();
+			this.m_XAttribCombo = new EisenhowerUIExtension.EisenhowerVariableComboBox();
+			this.m_YAttribCombo = new EisenhowerUIExtension.EisenhowerVariableComboBox();
 			this.m_UpdateBtn = new System.Windows.Forms.Button();
 			this.SuspendLayout();
 			// 
@@ -73,6 +73,7 @@
 			this.m_XAttribCombo.Location = new System.Drawing.Point(0, 20);
 			this.m_XAttribCombo.Name = "m_XAttribCombo";
 			this.m_XAttribCombo.Size = new System.Drawing.Size(121, 21);
+			this.m_XAttribCombo.Sorted = true;
 			this.m_XAttribCombo.TabIndex = 3;
 			// 
 			// m_YAttribCombo
@@ -82,6 +83,7 @@
 			this.m_YAttribCombo.Location = new System.Drawing.Point(129, 20);
 			this.m_YAttribCombo.Name = "m_YAttribCombo";
 			this.m_YAttribCombo.Size = new System.Drawing.Size(121, 21);
+			this.m_YAttribCombo.Sorted = true;
 			this.m_YAttribCombo.TabIndex = 3;
 			// 
 			// m_UpdateBtn
@@ -114,8 +116,8 @@
 		private EisenhowerControl m_EisenhowerCtrl;
 		private System.Windows.Forms.Label m_XAttribLabel;
 		private System.Windows.Forms.Label m_YAttribLabel;
-		private System.Windows.Forms.ComboBox m_XAttribCombo;
-		private System.Windows.Forms.ComboBox m_YAttribCombo;
+		private EisenhowerVariableComboBox m_XAttribCombo;
+		private EisenhowerVariableComboBox m_YAttribCombo;
 		private System.Windows.Forms.Button m_UpdateBtn;
 	}
 }

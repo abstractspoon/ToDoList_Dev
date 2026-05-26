@@ -53,12 +53,6 @@ namespace EisenhowerUIExtension
 			// Initialise filter
 			SetDefaultFilter();
 
-			m_XAttribCombo.Items.AddRange(m_Data.Variables.ToArray());
-			m_YAttribCombo.Items.AddRange(m_Data.Variables.ToArray());
-
-			m_XAttribCombo.SelectedItem = m_EisenhowerCtrl.XFilterVariable;
-			m_YAttribCombo.SelectedItem = m_EisenhowerCtrl.YFilterVariable;
-
 			FormsUtil.SetFont(this, m_ControlsFont);
 		}
 
@@ -81,6 +75,12 @@ namespace EisenhowerUIExtension
 			//   2.4. Had their max/min range updated
 			// 
 			var result = m_Data.Update(tasks, type);
+
+			if (result.ModifiedVariables.Count > 0)
+			{
+				m_XAttribCombo.Populate(m_Data.Variables);
+				m_YAttribCombo.Populate(m_Data.Variables);
+			}
 
 			// If the existing filter variables have been removed
 			// then we need to revert to known types
@@ -265,8 +265,14 @@ namespace EisenhowerUIExtension
 
 		void SetDefaultFilter()
 		{
+			m_XAttribCombo.Populate(m_Data.Variables);
+			m_YAttribCombo.Populate(m_Data.Variables);
+
 			m_EisenhowerCtrl.SetFilter(m_Data.Variables.Find(Task.Attribute.Priority),
 									   m_Data.Variables.Find(Task.Attribute.Risk));
+
+			m_XAttribCombo.SelectedItem = m_EisenhowerCtrl.XFilterVariable;
+			m_YAttribCombo.SelectedItem = m_EisenhowerCtrl.YFilterVariable;
 		}
 
 		protected override void OnGotFocus(EventArgs e)
