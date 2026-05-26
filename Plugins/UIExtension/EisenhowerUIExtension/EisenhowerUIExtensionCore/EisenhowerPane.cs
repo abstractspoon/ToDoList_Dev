@@ -158,6 +158,13 @@ namespace EisenhowerUIExtension
 			}
 		}
 
+		public void SetUITheme(UITheme theme)
+		{
+			BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight);
+
+			m_TitleBar.ForeColor = theme.GetAppDrawingColor(UITheme.AppColor.AppText);
+		}
+
 		public bool DropHighlighted
 		{
 			set

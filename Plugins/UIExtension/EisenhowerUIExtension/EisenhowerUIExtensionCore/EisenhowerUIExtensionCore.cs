@@ -14,13 +14,18 @@ namespace EisenhowerUIExtension
 {
 	public partial class EisenhowerUIExtensionCore : UserControl, IUIExtension
 	{
-		string m_TypeID;
-		string m_UiName;
-		IntPtr m_HwndParent;
-		Translator m_Trans;
+		private const string FontName = "Tahoma";
+
+		// ------------------------------------------------
+
+		private string m_TypeID;
+		private string m_UiName;
+		private IntPtr m_HwndParent;
+		private Translator m_Trans;
 
 		private EisenhowerData m_Data;
 		private UIExtension.TaskIcon m_TaskIcons;
+		private Font m_ControlsFont;
 
 		// ------------------------------------------------
 
@@ -33,6 +38,7 @@ namespace EisenhowerUIExtension
 			m_Trans = trans;
 			m_HwndParent = parentHandle;
 
+			m_ControlsFont = new Font(FontName, 8, FontStyle.Regular);
 			m_TaskIcons = new UIExtension.TaskIcon(parentHandle);
 			m_Data = new EisenhowerData(trans);
 
@@ -52,6 +58,8 @@ namespace EisenhowerUIExtension
 
 			m_XAttribCombo.SelectedItem = m_EisenhowerCtrl.XFilterVariable;
 			m_YAttribCombo.SelectedItem = m_EisenhowerCtrl.YFilterVariable;
+
+			FormsUtil.SetFont(this, m_ControlsFont);
 		}
 
 		public void UpdateTasks(TaskList tasks, UIExtension.UpdateType type)
@@ -195,6 +203,8 @@ namespace EisenhowerUIExtension
 			BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight);
 
 			m_EisenhowerCtrl.SetUITheme(theme);
+
+			m_XAttribLabel.ForeColor = m_YAttribLabel.ForeColor = theme.GetAppDrawingColor(UITheme.AppColor.AppText);
 		}
 
 		public void SetTaskFont(String faceName, int pointSize)

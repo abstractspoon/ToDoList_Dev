@@ -42,6 +42,7 @@
 			this.m_TitleBar.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.m_TitleBar.AutoSize = true;
+			this.m_TitleBar.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.m_TitleBar.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
 			this.m_TitleBar.Location = new System.Drawing.Point(19, 2);
 			this.m_TitleBar.Name = "m_TitleBar";

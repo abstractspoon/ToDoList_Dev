@@ -121,7 +121,7 @@ namespace EisenhowerUIExtension
 		{
 			BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackDark);
 
-			m_Panes.ForEach(p => p.BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight));
+			m_Panes.ForEach(p => p.SetUITheme(theme));
 		}
 
 		public void SavePreferences(Preferences prefs, String key)
