@@ -44,7 +44,7 @@
 			this.m_TitleBar.AutoSize = true;
 			this.m_TitleBar.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.m_TitleBar.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-			this.m_TitleBar.Location = new System.Drawing.Point(19, 2);
+			this.m_TitleBar.Location = new System.Drawing.Point(20, 2);
 			this.m_TitleBar.Name = "m_TitleBar";
 			this.m_TitleBar.Size = new System.Drawing.Size(69, 13);
 			this.m_TitleBar.TabIndex = 1;
@@ -52,7 +52,7 @@
 			// 
 			// m_Icon
 			// 
-			this.m_Icon.Location = new System.Drawing.Point(0, 0);
+			this.m_Icon.Location = new System.Drawing.Point(2, 1);
 			this.m_Icon.Margin = new System.Windows.Forms.Padding(0);
 			this.m_Icon.Name = "m_Icon";
 			this.m_Icon.Size = new System.Drawing.Size(17, 17);

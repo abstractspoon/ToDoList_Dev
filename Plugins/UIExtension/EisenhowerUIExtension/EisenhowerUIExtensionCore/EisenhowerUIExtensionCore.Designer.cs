@@ -60,7 +60,7 @@
 			// 
 			// m_EisenhowerCtrl
 			// 
-			this.m_EisenhowerCtrl.Location = new System.Drawing.Point(0, 48);
+			this.m_EisenhowerCtrl.Location = new System.Drawing.Point(0, 47);
 			this.m_EisenhowerCtrl.Margin = new System.Windows.Forms.Padding(0);
 			this.m_EisenhowerCtrl.Name = "m_EisenhowerCtrl";
 			this.m_EisenhowerCtrl.Size = new System.Drawing.Size(613, 399);
@@ -70,7 +70,7 @@
 			// 
 			this.m_XAttribCombo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.m_XAttribCombo.FormattingEnabled = true;
-			this.m_XAttribCombo.Location = new System.Drawing.Point(0, 20);
+			this.m_XAttribCombo.Location = new System.Drawing.Point(0, 21);
 			this.m_XAttribCombo.Name = "m_XAttribCombo";
 			this.m_XAttribCombo.Size = new System.Drawing.Size(121, 21);
 			this.m_XAttribCombo.Sorted = true;
@@ -80,7 +80,7 @@
 			// 
 			this.m_YAttribCombo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.m_YAttribCombo.FormattingEnabled = true;
-			this.m_YAttribCombo.Location = new System.Drawing.Point(129, 20);
+			this.m_YAttribCombo.Location = new System.Drawing.Point(129, 21);
 			this.m_YAttribCombo.Name = "m_YAttribCombo";
 			this.m_YAttribCombo.Size = new System.Drawing.Size(121, 21);
 			this.m_YAttribCombo.Sorted = true;
@@ -89,7 +89,7 @@
 			// m_UpdateBtn
 			// 
 			this.m_UpdateBtn.Image = global::EisenhowerUIExtension.Properties.Resources.BotLeftPane;
-			this.m_UpdateBtn.Location = new System.Drawing.Point(257, 19);
+			this.m_UpdateBtn.Location = new System.Drawing.Point(257, 20);
 			this.m_UpdateBtn.Name = "m_UpdateBtn";
 			this.m_UpdateBtn.Size = new System.Drawing.Size(22, 23);
 			this.m_UpdateBtn.TabIndex = 4;

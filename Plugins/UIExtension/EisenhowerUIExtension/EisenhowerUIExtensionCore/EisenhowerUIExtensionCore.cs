@@ -290,7 +290,7 @@ namespace EisenhowerUIExtension
 
 			rCtrl.X = 0;
 			rCtrl.Width = Width;
-			rCtrl.Height = (Height - rCtrl.Top);
+			rCtrl.Height = (Height - rCtrl.Top - 1);
 
 			m_EisenhowerCtrl.Bounds = rCtrl;
 		}

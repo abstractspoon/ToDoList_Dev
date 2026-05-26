@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.Windows.Forms;
 
 using Abstractspoon.Tdl.PluginHelpers;
+using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
 namespace EisenhowerUIExtension
 {
@@ -21,10 +22,10 @@ namespace EisenhowerUIExtension
 		private EisenhowerTasks m_Tasks;
 		private EisenhowerPaneFilter m_Filter;
 		private Translator m_Trans;
+		private UITheme m_Theme = new UITheme();
 
 		private bool m_ShowMixedCompletionState;
 		private bool m_DropHighlighted;
-		private Color m_BackColor;
 
 		// ---------------------------------------------
 
@@ -63,6 +64,7 @@ namespace EisenhowerUIExtension
 			m_Tasks = taskItems;
 			m_Filter = null;
 			m_Trans = trans;
+			m_Theme = new UITheme();
 
 			m_List.Initialize(trans, taskIcons);
 			m_List.AllowDrop = true;
@@ -126,9 +128,14 @@ namespace EisenhowerUIExtension
 			set
 			{
 				if (value != m_List.Selected)
-					m_TitleBar.Font = new Font(Font, (value ? FontStyle.Bold : FontStyle.Regular));
+				{
+					m_List.Selected = value; // Must come first
 
-				m_List.Selected = value;
+					m_TitleBar.Font = new Font(Font, (value ? FontStyle.Bold : FontStyle.Regular));
+					m_TitleBar.ForeColor = TitleTextColor;
+
+					BackColor = TitleBackColor;
+				}
 			}
 		}
 
@@ -161,9 +168,10 @@ namespace EisenhowerUIExtension
 
 		public void SetUITheme(UITheme theme)
 		{
-			BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight);
+			m_Theme = theme; // Must come first
 
-			m_TitleBar.ForeColor = theme.GetAppDrawingColor(UITheme.AppColor.AppText);
+			BackColor = TitleBackColor;
+			m_TitleBar.ForeColor = TitleTextColor;
 		}
 
 		public bool DropHighlighted
@@ -172,20 +180,12 @@ namespace EisenhowerUIExtension
 			{
 				if (value != m_DropHighlighted)
 				{
-					m_DropHighlighted = value;
+					m_DropHighlighted = value; // Must come first
 
-					if (m_DropHighlighted)
-					{
-						m_BackColor = BackColor;
+					BackColor = TitleBackColor;
+					m_TitleBar.ForeColor = TitleTextColor;
 
-						BackColor = UIExtension.SelectionRect.GetColor(UIExtension.SelectionRect.Style.Selected);
-						m_List.BackColor = UIExtension.SelectionRect.GetColor(UIExtension.SelectionRect.Style.DropHighlighted);
-					}
-					else
-					{
-						BackColor = m_BackColor;
-						m_List.BackColor = Color.Empty;
-					}
+					m_List.BackColor = (m_DropHighlighted ? BackColor : Color.Empty);
 				}
 			}
 		}
@@ -337,11 +337,85 @@ namespace EisenhowerUIExtension
 		// --------------------------------------------------------
 		// Message Handlers
 
+		private Rectangle TitleRect
+		{
+			get
+			{
+				var titleRect = ClientRectangle;
+
+				titleRect.Height = m_List.Top;
+				titleRect.Width--;
+
+				return titleRect;
+			}
+		}
+
+		private Color TitleBorderColor
+		{
+			get
+			{
+				if (Selected)
+					return UIExtension.SelectionRect.GetBorderColor(UIExtension.SelectionRect.Style.Selected);
+
+				if (m_DropHighlighted)
+					return UIExtension.SelectionRect.GetBorderColor(UIExtension.SelectionRect.Style.DropHighlighted);
+
+				if (UITheme.IsDarkMode())
+					return SystemColors.ButtonHighlight;
+					
+				if (DrawingColor.GetLuminance(BackColor) < 0.5)
+					return m_Theme.GetAppDrawingColor(UITheme.AppColor.AppLinesLight);
+
+				//else
+				return m_Theme.GetAppDrawingColor(UITheme.AppColor.AppLinesDark);
+			}
+		}
+
+		private Color TitleBackColor
+		{
+			get
+			{
+				if (Selected)
+					return UIExtension.SelectionRect.GetColor(UIExtension.SelectionRect.Style.Selected);
+
+				if (m_DropHighlighted)
+					return UIExtension.SelectionRect.GetColor(UIExtension.SelectionRect.Style.DropHighlighted);
+
+				// else
+				return m_Theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight);
+			}
+		}
+
+		private Color TitleTextColor
+		{
+			get
+			{
+				if (Selected || m_DropHighlighted)
+					return SystemColors.ControlText;
+
+				// else
+				return m_Theme.GetAppDrawingColor(UITheme.AppColor.AppText);
+			}
+		}
+
+		protected override void OnPaintBackground(PaintEventArgs e)
+		{
+			base.OnPaintBackground(e);
+
+			var titleRect = TitleRect;
+
+			if (titleRect.IntersectsWith(e.ClipRectangle))
+			{
+				using (var pen = new Pen(TitleBorderColor))
+					e.Graphics.DrawRectangle(pen, titleRect);
+			}
+		}
+
 		private void OnListSelectionChange(object sender, EventArgs e)
 		{
 			// Don't forward selection changes:
 
-			// 1. If bounds selection
+			// 1. If bounds selecting
 			if (m_List.IsBoundSelecting)
 				return;
 
@@ -355,10 +429,6 @@ namespace EisenhowerUIExtension
 				System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.PageUp) ||
 				System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.PageDown))
 				return;
-
-			// Don't forward selection changes while the left button is down
-// 			if (MouseButtons == MouseButtons.Left)
-// 				return;
 
 			SelectionChange?.Invoke(this, m_List.SelectedTaskIds);
 		}
@@ -404,6 +474,7 @@ namespace EisenhowerUIExtension
 		{
 			base.OnSizeChanged(e);
 
+			Invalidate(TitleRect);
 			ResizeList();
 		}
 
