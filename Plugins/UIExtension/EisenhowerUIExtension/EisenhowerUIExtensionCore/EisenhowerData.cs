@@ -145,12 +145,15 @@ namespace EisenhowerUIExtension
 				{
 					var var = Find(a.Id);
 
-					if ((var == null) && EisenhowerVariable.SupportsCustomAttribute(a))
+					if (var == null)
 					{
-						var = new EisenhowerVariable(a);
+						if (EisenhowerVariable.SupportsCustomAttribute(a))
+						{
+							var = new EisenhowerVariable(a);
 
-						Add(var);
-						modifiedVars.Add(var);
+							Add(var);
+							modifiedVars.Add(var);
+						}
 					}
 					else if (var.Attribute.CustomAttributeType != a.AttributeType)
 					{

@@ -89,7 +89,15 @@ namespace EisenhowerUIExtension
 
 			if (task.IsAttributeAvailable(Task.Attribute.CustomAttribute))
 			{
-				// TODO
+				var custValues = task.GetCustomAttributeValues(false);
+
+				foreach (var val in custValues)
+				{
+					double value = 0.0;
+
+					if (double.TryParse(val.Value, out value))
+						SetAttributeValue(val.Key, value);
+				}
 			}
 
 			IsParent = task.IsParent();
