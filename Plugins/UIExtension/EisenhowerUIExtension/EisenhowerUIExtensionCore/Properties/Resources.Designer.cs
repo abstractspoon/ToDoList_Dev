@@ -61,6 +61,26 @@ namespace EisenhowerUIExtension.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap BotLeftPane {
+            get {
+                object obj = ResourceManager.GetObject("BotLeftPane", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap BotRightPane {
+            get {
+                object obj = ResourceManager.GetObject("BotRightPane", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
         /// </summary>
         internal static System.Drawing.Icon Eisenhower {
@@ -68,44 +88,36 @@ namespace EisenhowerUIExtension.Properties {
                 object obj = ResourceManager.GetObject("Eisenhower", resourceCulture);
                 return ((System.Drawing.Icon)(obj));
             }
-		}
-
-		/// <summary>
-		///   Looks up a localized resource of type System.Drawing.Bitmap.
-		/// </summary>
-		internal static System.Drawing.Bitmap TopLeftPane {
-			get {
-				object obj = ResourceManager.GetObject("TopLeftPane", resourceCulture);
-				return ((System.Drawing.Bitmap)(obj));
-			}
-		}
-
-		/// <summary>
-		///   Looks up a localized resource of type System.Drawing.Bitmap.
-		/// </summary>
-		internal static System.Drawing.Bitmap TopRightPane {
-			get {
-				object obj = ResourceManager.GetObject("TopRightPane", resourceCulture);
-				return ((System.Drawing.Bitmap)(obj));
-			}
-		}
-		/// <summary>
-		///   Looks up a localized resource of type System.Drawing.Bitmap.
-		/// </summary>
-		internal static System.Drawing.Bitmap BotLeftPane {
-			get {
-				object obj = ResourceManager.GetObject("BotLeftPane", resourceCulture);
-				return ((System.Drawing.Bitmap)(obj));
-			}
-		}
-		/// <summary>
-		///   Looks up a localized resource of type System.Drawing.Bitmap.
-		/// </summary>
-		internal static System.Drawing.Bitmap BotRightPane {
-			get {
-				object obj = ResourceManager.GetObject("BotRightPane", resourceCulture);
-				return ((System.Drawing.Bitmap)(obj));
-			}
-		}
-	}
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap TopLeftPane {
+            get {
+                object obj = ResourceManager.GetObject("TopLeftPane", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap TopRightPane {
+            get {
+                object obj = ResourceManager.GetObject("TopRightPane", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap UpdateFilter {
+            get {
+                object obj = ResourceManager.GetObject("UpdateFilter", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+    }
 }

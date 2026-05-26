@@ -106,6 +106,7 @@
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
@@ -116,6 +117,7 @@
     <EmbeddedResource Include="Resources\BotRightPane.png" />
     <EmbeddedResource Include="Resources\TopLeftPane.png" />
     <EmbeddedResource Include="Resources\TopRightPane.png" />
+    <EmbeddedResource Include="Resources\UpdateFilter.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
