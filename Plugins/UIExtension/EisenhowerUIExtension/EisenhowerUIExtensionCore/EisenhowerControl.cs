@@ -486,7 +486,7 @@ namespace EisenhowerUIExtension
 
 			if (pane != null)
 			{
-				if (pane.HasSelection || pane.BoundSelecting)
+				if (pane.HasSelection || pane.IsBoundSelecting)
 				{
 					SelectedPane = pane;
 					SelectionChange?.Invoke(this, pane.SelectedTaskIds);

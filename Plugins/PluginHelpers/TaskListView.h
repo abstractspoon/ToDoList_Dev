@@ -67,7 +67,7 @@ namespace Abstractspoon
 				property bool ShowParentsAsFolders { bool get(); void set(bool value); }
 				property bool ShowCompletionCheckboxes { bool get(); void set(bool value); }
 				property bool ShowLabelTips { bool get(); void set(bool value); }
-				property bool BoundSelecting { bool get() { return m_BoundSelecting; } }
+				property bool IsBoundSelecting { bool get() { return (m_BoundSelectionTimer != nullptr); } }
 				property bool EnableHeaderTracking { bool get(); void set(bool value); }
 				property bool SizeTaskColumnToFit { bool get(); void set(bool value); }
 
@@ -86,6 +86,8 @@ namespace Abstractspoon
 				event EditTaskIconEventHandler^ EditTaskIcon;
 				event EditTaskCompletionEventHandler^ EditTaskDone;
 
+				event EventHandler^ BoundSelectionEnded;
+
 			private:
 				HeaderControl^ m_HeaderCtrl;
 
@@ -93,6 +95,7 @@ namespace Abstractspoon
 				Translator^ m_Trans;
 				UIExtension::TaskIcon^ m_TaskIcons;
 				LabelTip^ m_LabelTip;
+				Windows::Forms::Timer^ m_BoundSelectionTimer;
 
 				Drawing::Font^ m_BoldFont;
 				Drawing::Color m_GridlineColor;
@@ -102,7 +105,6 @@ namespace Abstractspoon
 				bool m_ShowParentAsFolder;
 				bool m_TaskColorIsBkgnd;
 				bool m_ShowCompletionCheckboxes;
-				bool m_BoundSelecting;
 				bool m_EnableHeaderTracking;
 				bool m_SizeTaskColumnToFit;
 
@@ -120,6 +122,8 @@ namespace Abstractspoon
 				void OnSizeChanged(EventArgs^ e) override;
 				void OnFontChanged(EventArgs^ e) override;
 				void OnHandleCreated(EventArgs^ e) override;
+
+				void OnBoundSelectionTimer(Object^ sender, EventArgs^ e);
 
 			protected:
 				enum class LabelExtents

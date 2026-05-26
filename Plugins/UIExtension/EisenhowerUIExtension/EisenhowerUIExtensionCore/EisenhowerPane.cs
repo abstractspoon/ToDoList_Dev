@@ -7,7 +7,6 @@ using System.Linq;
 using System.Text;
 using System.Diagnostics;
 using System.Windows.Forms;
-using System.Windows.Forms.VisualStyles;
 
 using Abstractspoon.Tdl.PluginHelpers;
 
@@ -72,8 +71,10 @@ namespace EisenhowerUIExtension
 			m_List.EditTaskIcon += new EditTaskIconEventHandler(OnListEditTaskIcon);
 			m_List.EditTaskLabel += new EditTaskLabelEventHandler(OnListEditTaskLabel);
 			m_List.ItemDrag += new ItemDragEventHandler(OnListBeginItemDrag);
+			m_List.SelectedIndexChanged += new EventHandler(OnListSelectionChange);
+			m_List.KeyUp += new KeyEventHandler(OnListKeyUp);
 
-			m_List.SelectedIndexChanged += (s, e) => { SelectionChange?.Invoke(this, m_List.SelectedTaskIds); };
+			m_List.BoundSelectionEnded += (s, e) => { SelectionChange?.Invoke(this, SelectedTaskIds); };
 			m_List.GotFocus += (s, e) => { GotFocus?.Invoke(this, new EventArgs()); };
 
 			base.DragOver += new DragEventHandler(OnDragOver);
@@ -145,7 +146,7 @@ namespace EisenhowerUIExtension
 		public uint LastTaskId					{ get { return m_List.LastTaskId; } }
 		public uint FirstSelectedTaskId			{ get { return m_List.FirstSelectedTaskId; } }
 		public uint LastSelectedTaskId			{ get { return m_List.LastSelectedTaskId; } }
-		public bool BoundSelecting				{ get { return m_List.BoundSelecting; } }
+		public bool IsBoundSelecting			{ get { return m_List.IsBoundSelecting; } }
 
 		public bool ReadOnly
 		{
@@ -335,6 +336,45 @@ namespace EisenhowerUIExtension
 
 		// --------------------------------------------------------
 		// Message Handlers
+
+		private void OnListSelectionChange(object sender, EventArgs e)
+		{
+			// Don't forward selection changes:
+
+			// 1. If bounds selection
+			if (m_List.IsBoundSelecting)
+				return;
+
+			// 2. If NOT bounds selecting and nothing is selected
+			if (m_List.SelectionCount == 0)
+				return;
+
+			// 3. During keyboard navigation
+			if (System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.Up) ||
+				System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.Down) ||
+				System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.PageUp) ||
+				System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.PageDown))
+				return;
+
+			// Don't forward selection changes while the left button is down
+// 			if (MouseButtons == MouseButtons.Left)
+// 				return;
+
+			SelectionChange?.Invoke(this, m_List.SelectedTaskIds);
+		}
+
+		private void OnListKeyUp(object sender, KeyEventArgs e)
+		{
+			switch (e.KeyCode)
+			{
+			case Keys.Up:
+			case Keys.Down:
+			case Keys.PageUp:
+			case Keys.PageDown:
+				SelectionChange?.Invoke(this, m_List.SelectedTaskIds);
+				return;
+			}
+		}
 
 		protected override void OnFontChanged(EventArgs e)
 		{

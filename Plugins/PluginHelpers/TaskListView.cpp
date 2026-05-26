@@ -201,7 +201,7 @@ TaskListView::TaskListView()
 	m_ShowParentAsFolder(false),
 	m_TaskColorIsBkgnd(false),
 	m_ShowCompletionCheckboxes(false),
-	m_BoundSelecting(false),
+	m_BoundSelectionTimer(nullptr),
 	m_GridlineColor(Color::Empty),
 	m_AlternateLineColor(Color::Empty),
 	m_EnableHeaderTracking(true),
@@ -912,13 +912,23 @@ void TaskListView::WndProc(Message% m)
 			if (lvHit == nullptr)
 			{
 				// Check for bounds selection
-				m_BoundSelecting = (MultiSelect && Win32::DragDetect(Handle, PointToScreen(pos)));
-
-				if (!m_BoundSelecting)
+				if (MultiSelect && Win32::DragDetect(Handle, PointToScreen(pos)))
 				{
-					Focus();
-					return;
+					// Start a timer to detect the end of bound selecting
+					m_BoundSelectionTimer = gcnew Timer();
+
+					m_BoundSelectionTimer->Interval = 100;
+					m_BoundSelectionTimer->Tick += gcnew EventHandler(this, &TaskListView::OnBoundSelectionTimer);
+					m_BoundSelectionTimer->Enabled = true;
+					m_BoundSelectionTimer->Start();
+
+					// then default handling
+					break;
 				}
+
+				// else
+				Focus();
+				return;
 			}
 
 			auto task = ASTYPE(lvHit->Tag, ITaskBase);
@@ -991,12 +1001,21 @@ void TaskListView::WndProc(Message% m)
 	ListView::WndProc(m);
 }
 
+void TaskListView::OnBoundSelectionTimer(Object^ sender, EventArgs^ e)
+{
+	if (MouseButtons == Windows::Forms::MouseButtons::None)
+	{
+		m_BoundSelectionTimer->Stop();
+		m_BoundSelectionTimer->Enabled = false;
+		m_BoundSelectionTimer = nullptr;
+
+		BoundSelectionEnded(this, gcnew EventArgs());
+	}
+}
+
 void TaskListView::OnMouseMove(MouseEventArgs^ e)
 {
 	ListView::OnMouseMove(e);
-
-	// Update bounds selecting
-	m_BoundSelecting &= (MouseButtons == Windows::Forms::MouseButtons::None);
 
 	auto lvHit = HitTest(e->Location)->Item;
 
