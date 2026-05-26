@@ -32,7 +32,7 @@ using namespace Abstractspoon::Tdl::PluginHelpers;
 
 // REPLACE THIS WITH NEW GUID!
 const LPCWSTR EISENHOWER_GUID = L"C766D687-D8DD-4FB6-8822-FD16435EB5B6";
-const LPCWSTR EISENHOWER_NAME = L"Eisenhower";
+const LPCWSTR EISENHOWER_NAME = L"Decision Matrix";
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
