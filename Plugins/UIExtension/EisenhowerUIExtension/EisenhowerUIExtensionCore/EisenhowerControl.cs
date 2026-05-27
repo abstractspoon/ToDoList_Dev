@@ -84,7 +84,8 @@ namespace EisenhowerUIExtension
 
  				p.DragBegin += new EventHandler(OnDragBegin);
  				p.DragLeave += new EventHandler(OnDragLeave);
-				p.DragCancel += new EventHandler(OnDragCancel);
+//				p.DragCancel += new EventHandler(OnDragCancel);
+				p.QueryContinueDrag += new QueryContinueDragEventHandler(OnQueryContinueDrag);
 
 				p.DragOver += new DragEventHandler(OnDragOver);
 				p.DragDrop += new DragEventHandler(OnDragDrop);
@@ -685,12 +686,29 @@ namespace EisenhowerUIExtension
 			m_Panes.ForEach(p => p.DropHighlighted = false);
 		}
 
-		private void OnDragCancel(object sender, EventArgs e)
+		private void CleanupDrag()
 		{
-			OnDragLeave(sender, e);
+			OnDragLeave(null, null);
 
 			m_DragImage.End();
 			m_DragImage = null;
+		}
+
+		private void OnQueryContinueDrag(object sender, QueryContinueDragEventArgs e)
+		{
+			bool cancel = e.EscapePressed;
+
+			if (!cancel)
+			{
+				var dest = HitTestPane(MousePosition);
+				cancel = ((MouseButtons == MouseButtons.None) && !IsValidDrop(sender as EisenhowerPane, dest));
+			}
+
+			if (cancel)
+			{
+				e.Action = DragAction.Cancel;
+				CleanupDrag();
+			}
 		}
 
 		private bool GetDragPanes(DragEventArgs e, out EisenhowerPane src, out EisenhowerPane dest)
@@ -731,7 +749,7 @@ namespace EisenhowerUIExtension
 
 		private void OnDragDrop(object sender, DragEventArgs e)
 		{
-			OnDragCancel(sender, e);
+			CleanupDrag();
 
 			// Notify parent of changes
 			Debug.Assert(AttributeChange != null);

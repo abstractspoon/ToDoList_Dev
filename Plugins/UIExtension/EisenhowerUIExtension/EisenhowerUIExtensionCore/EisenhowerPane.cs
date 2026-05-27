@@ -38,12 +38,11 @@ namespace EisenhowerUIExtension
 		public event SelectionChangeEventHandler SelectionChange;
 
 		public	   event EventHandler DragBegin;
-		public	   event EventHandler DragCancel;
 		public new event EventHandler DragLeave;
  		public new event DragEventHandler DragOver;
 		public new event DragEventHandler DragDrop;
 
-		new public event EventHandler GotFocus;
+		public new event EventHandler GotFocus;
 
 		// ---------------------------------------------
 
@@ -82,15 +81,6 @@ namespace EisenhowerUIExtension
 			base.DragOver += new DragEventHandler(OnDragOver);
 			base.DragLeave += new EventHandler(OnDragLeave);
 			base.DragDrop += new DragEventHandler(OnDragDrop);
-
-			base.QueryContinueDrag += (s, e) =>
-			{
-				if (e.EscapePressed)
-				{
-					e.Action = DragAction.Cancel;
-					DragCancel?.Invoke(this, e);
-				}
-			};
 
 			foreach (Control c in Controls)
 			{
