@@ -420,9 +420,9 @@ CustomAttributeDefinition::CustomAttributeDefinition()
 	AttributeType = Attribute::Unknown;
 	ListType = List::None;
 
-	Id = nullptr;
-	Label = nullptr;
-	ListData = nullptr;
+	Id = String::Empty;
+	Label = String::Empty;
+	ListData = String::Empty;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////
