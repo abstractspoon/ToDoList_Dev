@@ -92,26 +92,17 @@ namespace EisenhowerUIExtension
 			});
 		}
 
-		public void SetFilter(EisenhowerVariable xAttrib, EisenhowerVariable yAttrib)
+		public void SetFilter(EisenhowerVariable xVar, EisenhowerVariable yVar)
 		{
-			double xCutoff = xAttrib.ValueMidPoint;
-			double yCutoff = yAttrib.ValueMidPoint;
+			var xHighVar = new EisenhowerFilterVariable(xVar, EisenhowerPaneFilterAttributeRange.High, xVar.ValueMidPoint);
+			var xLowVar  = new EisenhowerFilterVariable(xVar, EisenhowerPaneFilterAttributeRange.Low, xVar.ValueMidPoint);
+			var yHighVar = new EisenhowerFilterVariable(yVar, EisenhowerPaneFilterAttributeRange.High, yVar.ValueMidPoint);
+			var yLowVar  = new EisenhowerFilterVariable(yVar, EisenhowerPaneFilterAttributeRange.Low, yVar.ValueMidPoint);
 
-			// Top-left => High xAttrib - High yAttrib
-			m_TopLeftPane.SetFilter(new EisenhowerFilterVariable(xAttrib, EisenhowerPaneFilterAttributeRange.High, xCutoff), 
-									new EisenhowerFilterVariable(yAttrib, EisenhowerPaneFilterAttributeRange.High, yCutoff));
-
-			// Top-right => Low xAttrib - High yAttrib
-			m_TopRightPane.SetFilter(new EisenhowerFilterVariable(xAttrib, EisenhowerPaneFilterAttributeRange.Low, xCutoff),
-									 new EisenhowerFilterVariable(yAttrib, EisenhowerPaneFilterAttributeRange.High, yCutoff));
-
-			// Bottom-left => High xAttrib - Low yAttrib
-			m_BottomLeftPane.SetFilter(new EisenhowerFilterVariable(xAttrib, EisenhowerPaneFilterAttributeRange.High, xCutoff),
-									   new EisenhowerFilterVariable(yAttrib, EisenhowerPaneFilterAttributeRange.Low, yCutoff));
-
-			// Bottom-right => Low xAttrib - Low yAttrib
-			m_BottomRightPane.SetFilter(new EisenhowerFilterVariable(xAttrib, EisenhowerPaneFilterAttributeRange.Low, xCutoff),
-										new EisenhowerFilterVariable(yAttrib, EisenhowerPaneFilterAttributeRange.Low, yCutoff));
+			m_TopLeftPane.SetFilter(xHighVar, yHighVar);
+			m_TopRightPane.SetFilter(xLowVar, yHighVar);
+			m_BottomLeftPane.SetFilter(xHighVar, yLowVar);
+			m_BottomRightPane.SetFilter(xLowVar, yLowVar);
 		}
 
 		public EisenhowerVariable XFilterVariable { get { return m_Panes[0].Filter.XVariable; } }

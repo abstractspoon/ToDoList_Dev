@@ -129,16 +129,23 @@ namespace EisenhowerUIExtension
 				var custAttribDefs = tasks.GetCustomAttributes();
 
 				// Remove deleted or no longer supported custom attributes
-				ForEach(v =>
+				int i = Count;
+
+				while (i-- > 0)
 				{
-					if (v.Attribute.IsCustom())
+					var var = this[i];
+
+					if (var.Attribute.IsCustom())
 					{
-						var attrib = custAttribDefs.Find(a => a.Id == v.Attribute.CustomAttributeId);
+						var attrib = custAttribDefs.Find(a => a.Id == var.Attribute.CustomAttributeId);
 						
 						if ((attrib == null) || !EisenhowerVariable.SupportsCustomAttribute(attrib))
-							Remove(v);
+						{
+							modifiedVars.Add(var);
+							RemoveAt(i);
+						}
 					}
-				});
+				};
 
 				// Add new custom attributes or update the existing
 				custAttribDefs.ForEach(a =>
@@ -191,8 +198,6 @@ namespace EisenhowerUIExtension
 
 	public class EisenhowerVariable
 	{
-		// ------------------------------
-
 		public TaskAttributeItem Attribute { get; private set; }
 		public bool TypeIsDouble { get; private set; }
 		public string Key { get; private set; }
@@ -201,6 +206,27 @@ namespace EisenhowerUIExtension
 		public double MaxValue { get; private set; }
 
 		// ------------------------------
+
+		public bool IsNull { get; private set; }
+		public static EisenhowerVariable Null { get { return new EisenhowerVariable(); } }
+
+		private EisenhowerVariable()
+		{
+			IsNull = true;
+			Attribute = new TaskAttributeItem();
+		}
+
+		// ------------------------------
+
+		public EisenhowerVariable(EisenhowerVariable var)
+		{
+			IsNull = var.IsNull;
+			Attribute = var.Attribute;
+			TypeIsDouble = var.TypeIsDouble;
+			MinValue = var.MinValue;
+			MaxValue = var.MaxValue;
+			Key = var.Key;
+		}
 
 		public EisenhowerVariable(TaskAttributeItem attrib, bool isDouble)
 		{
@@ -260,7 +286,7 @@ namespace EisenhowerUIExtension
 		public override int GetHashCode()
 		{
 			// Don't use as a dictionary key
-			Debug.Assert(false);
+			// Debug.Assert(false);
 			return base.GetHashCode();
 		}
 

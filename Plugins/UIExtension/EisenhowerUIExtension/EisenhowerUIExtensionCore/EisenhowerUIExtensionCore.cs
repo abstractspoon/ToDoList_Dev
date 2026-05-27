@@ -87,18 +87,27 @@ namespace EisenhowerUIExtension
 			var xUpdatedVar = m_Data.Variables.Find(m_EisenhowerCtrl.XFilterVariable);
 			var yUpdatedVar = m_Data.Variables.Find(m_EisenhowerCtrl.YFilterVariable);
 
-			if ((xUpdatedVar == null) || (yUpdatedVar == null))
+			if ((xUpdatedVar == null) && (yUpdatedVar == null))
 			{
 				SetDefaultFilter();
 			}
-			// if the ranges have changed then rebuild the lists
+			else if (xUpdatedVar == null)
+			{
+				m_EisenhowerCtrl.SetFilter(EisenhowerVariable.Null, yUpdatedVar);
+			}
+			else if (yUpdatedVar == null)
+			{
+				m_EisenhowerCtrl.SetFilter(xUpdatedVar, EisenhowerVariable.Null);
+			}
 			else if (result.ModifiedVariables.Contains(xUpdatedVar) ||
 					 result.ModifiedVariables.Contains(yUpdatedVar))
 			{
+				// Ranges have changed => rebuild the lists
 				m_EisenhowerCtrl.SetFilter(xUpdatedVar, yUpdatedVar);
 			}
-			else // simple update
-			{
+			else
+			{ 
+				// simple update
 				m_EisenhowerCtrl.OnUpdateTasks(type, result.ModifiedTaskIds);
 			}
 
@@ -352,11 +361,9 @@ namespace EisenhowerUIExtension
 
 		private void OnUpdateFilter(object sender, EventArgs e)
 		{
-			var selTaskIds = m_EisenhowerCtrl.SelectedTaskIds;
+			var selTaskIds = m_EisenhowerCtrl.SelectedTaskIds; // cache
 
-			m_EisenhowerCtrl.SetFilter(m_XAttribCombo.SelectedItem as EisenhowerVariable,
-									   m_YAttribCombo.SelectedItem as EisenhowerVariable);
-
+			m_EisenhowerCtrl.SetFilter(m_XAttribCombo.SelectedVariable,	m_YAttribCombo.SelectedVariable);
 			m_EisenhowerCtrl.SelectTasks(selTaskIds);
 			m_EisenhowerCtrl.Focus();
 		}
