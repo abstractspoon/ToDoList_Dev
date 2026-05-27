@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Windows.Forms;
+﻿using System.Windows.Forms;
+
+using Abstractspoon.Tdl.PluginHelpers;
 
 namespace EisenhowerUIExtension
 {
@@ -14,15 +10,50 @@ namespace EisenhowerUIExtension
 		{
 		}
 
-		public void Populate(EisenhowerVariables vars)
+		public void Populate(EisenhowerVariables vars, Translator trans)
 		{
-			var selVar = SelectedItem;
+			var selVar = SelectedVariable;
 
 			Items.Clear();
-			Items.AddRange(vars.ToArray());
+			vars.ForEach(v => Items.Add(new EisenhowerVariableComboBoxItem(v, trans)));
 
-			SelectedItem = selVar;
+			SelectedVariable = selVar;
 		}
 
+		public EisenhowerVariable SelectedVariable
+		{
+			get
+			{
+				var selVar = (SelectedItem as EisenhowerVariableComboBoxItem);
+
+				return (selVar ?? EisenhowerVariable.Null);
+			}
+
+			set
+			{
+				SelectedItem = (value.IsNull ? null : value);
+			}
+		}
+
+		// --------------------------------------------
+
+		class EisenhowerVariableComboBoxItem : EisenhowerVariable
+		{
+			private string Label;
+
+			// -------------------------------------
+
+			public EisenhowerVariableComboBoxItem(EisenhowerVariable var, Translator trans)
+				:
+				base(var)
+			{
+				if (Attribute.IsCustom())
+					Label = string.Format(trans.Translate("{0} (Custom)", Translator.Type.ComboBox), Attribute.Label);
+				else
+					Label = Attribute.Label;
+			}
+
+			public override string ToString() { return Label; }
+		}
 	}
 }

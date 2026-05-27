@@ -78,8 +78,10 @@ namespace EisenhowerUIExtension
 
 			if (result.ModifiedVariables.Count > 0)
 			{
-				m_XAttribCombo.Populate(m_Data.Variables);
-				m_YAttribCombo.Populate(m_Data.Variables);
+				var selItem = m_XAttribCombo.SelectedItem;
+
+				m_XAttribCombo.Populate(m_Data.Variables, m_Trans);
+				m_YAttribCombo.Populate(m_Data.Variables, m_Trans);
 			}
 
 			// If the existing filter variables have been removed
@@ -274,14 +276,14 @@ namespace EisenhowerUIExtension
 
 		void SetDefaultFilter()
 		{
-			m_XAttribCombo.Populate(m_Data.Variables);
-			m_YAttribCombo.Populate(m_Data.Variables);
+			m_XAttribCombo.Populate(m_Data.Variables, m_Trans);
+			m_YAttribCombo.Populate(m_Data.Variables, m_Trans);
 
 			m_EisenhowerCtrl.SetFilter(m_Data.Variables.Find(Task.Attribute.Priority),
 									   m_Data.Variables.Find(Task.Attribute.Risk));
 
-			m_XAttribCombo.SelectedItem = m_EisenhowerCtrl.XFilterVariable;
-			m_YAttribCombo.SelectedItem = m_EisenhowerCtrl.YFilterVariable;
+			m_XAttribCombo.SelectedVariable = m_EisenhowerCtrl.XFilterVariable;
+			m_YAttribCombo.SelectedVariable = m_EisenhowerCtrl.YFilterVariable;
 		}
 
 		protected override void OnGotFocus(EventArgs e)
