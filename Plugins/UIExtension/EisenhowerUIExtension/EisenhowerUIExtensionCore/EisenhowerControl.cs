@@ -84,7 +84,6 @@ namespace EisenhowerUIExtension
 
  				p.DragBegin += new EventHandler(OnDragBegin);
  				p.DragLeave += new EventHandler(OnDragLeave);
-//				p.DragCancel += new EventHandler(OnDragCancel);
 				p.QueryContinueDrag += new QueryContinueDragEventHandler(OnQueryContinueDrag);
 
 				p.DragOver += new DragEventHandler(OnDragOver);
