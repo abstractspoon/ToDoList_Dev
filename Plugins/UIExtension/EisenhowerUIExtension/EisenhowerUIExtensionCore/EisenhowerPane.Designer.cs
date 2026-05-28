@@ -96,13 +96,13 @@
 			// 
 			// columnHeader2
 			// 
-			this.columnHeader2.Text = "X Attribute";
+			this.columnHeader2.Text = "Urgency";
 			this.columnHeader2.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
 			this.columnHeader2.Width = 80;
 			// 
 			// columnHeader3
 			// 
-			this.columnHeader3.Text = "Y Attribute";
+			this.columnHeader3.Text = "Importance";
 			this.columnHeader3.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
 			this.columnHeader3.Width = 80;
 			// 

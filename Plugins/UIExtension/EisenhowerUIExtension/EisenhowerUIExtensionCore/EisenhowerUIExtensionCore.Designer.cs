@@ -45,9 +45,9 @@
 			this.m_XAttribLabel.Location = new System.Drawing.Point(-2, 3);
 			this.m_XAttribLabel.Margin = new System.Windows.Forms.Padding(0);
 			this.m_XAttribLabel.Name = "m_XAttribLabel";
-			this.m_XAttribLabel.Size = new System.Drawing.Size(56, 13);
+			this.m_XAttribLabel.Size = new System.Drawing.Size(88, 13);
 			this.m_XAttribLabel.TabIndex = 2;
-			this.m_XAttribLabel.Text = "X Attribute";
+			this.m_XAttribLabel.Text = "Urgency Variable";
 			// 
 			// m_YAttribLabel
 			// 
@@ -56,9 +56,9 @@
 			this.m_YAttribLabel.Location = new System.Drawing.Point(126, 3);
 			this.m_YAttribLabel.Margin = new System.Windows.Forms.Padding(0);
 			this.m_YAttribLabel.Name = "m_YAttribLabel";
-			this.m_YAttribLabel.Size = new System.Drawing.Size(56, 13);
+			this.m_YAttribLabel.Size = new System.Drawing.Size(101, 13);
 			this.m_YAttribLabel.TabIndex = 2;
-			this.m_YAttribLabel.Text = "Y Attribute";
+			this.m_YAttribLabel.Text = "Importance Variable";
 			// 
 			// m_UpdateBtn
 			// 
