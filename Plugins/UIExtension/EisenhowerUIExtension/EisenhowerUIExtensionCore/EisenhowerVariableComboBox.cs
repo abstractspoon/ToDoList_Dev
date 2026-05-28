@@ -10,12 +10,17 @@ namespace EisenhowerUIExtension
 		{
 		}
 
-		public void Populate(EisenhowerVariables vars, Translator trans)
+		public void Populate(Translator trans, EisenhowerVariables vars, EisenhowerVariable excludeVar)
 		{
 			var selVar = SelectedVariable;
 
 			Items.Clear();
-			vars.ForEach(v => Items.Add(new EisenhowerVariableComboBoxItem(v, trans)));
+
+			foreach (var v in vars)
+			{
+				if (!v.Equals(excludeVar))
+					Items.Add(new EisenhowerVariableComboBoxItem(v, trans));
+			}
 
 			SelectedVariable = selVar;
 		}

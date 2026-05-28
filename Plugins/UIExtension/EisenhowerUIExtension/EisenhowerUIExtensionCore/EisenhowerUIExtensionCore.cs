@@ -51,6 +51,7 @@ namespace EisenhowerUIExtension
 			m_EisenhowerCtrl.AttributeChange += new AttributeChangeEventHandler(OnEisenhowerCtrlAttributeChange);
 
 			// Initialise filter
+			EnableComboEvents(true);
 			SetDefaultFilter();
 
 			FormsUtil.SetFont(this, m_ControlsFont);
@@ -76,14 +77,6 @@ namespace EisenhowerUIExtension
 			// 
 			var result = m_Data.Update(tasks, type);
 
-			if (result.ModifiedVariables.Count > 0)
-			{
-				var selItem = m_XAttribCombo.SelectedItem;
-
-				m_XAttribCombo.Populate(m_Data.Variables, m_Trans);
-				m_YAttribCombo.Populate(m_Data.Variables, m_Trans);
-			}
-
 			// If the existing filter variables have been removed
 			// then we need to revert to known types
 			var xUpdatedVar = m_Data.Variables.Find(m_EisenhowerCtrl.XFilterVariable);
@@ -91,26 +84,35 @@ namespace EisenhowerUIExtension
 
 			if ((xUpdatedVar == null) && (yUpdatedVar == null))
 			{
-				SetDefaultFilter();
-			}
-			else if (xUpdatedVar == null)
-			{
-				m_EisenhowerCtrl.SetFilter(EisenhowerVariable.Null, yUpdatedVar);
-			}
-			else if (yUpdatedVar == null)
-			{
-				m_EisenhowerCtrl.SetFilter(xUpdatedVar, EisenhowerVariable.Null);
-			}
-			else if (result.ModifiedVariables.Contains(xUpdatedVar) ||
-					 result.ModifiedVariables.Contains(yUpdatedVar))
-			{
-				// Ranges have changed => rebuild the lists
-				m_EisenhowerCtrl.SetFilter(xUpdatedVar, yUpdatedVar);
+				SetDefaultFilter(); // Repopulates the combos
 			}
 			else
-			{ 
-				// simple update
-				m_EisenhowerCtrl.OnUpdateTasks(type, result.ModifiedTaskIds);
+			{
+				if (result.ModifiedVariables.Count > 0)
+				{
+					m_XAttribCombo.Populate(m_Trans, m_Data.Variables, yUpdatedVar);
+					m_YAttribCombo.Populate(m_Trans, m_Data.Variables, xUpdatedVar);
+				}
+
+				if (xUpdatedVar == null)
+				{
+					m_EisenhowerCtrl.SetFilter(EisenhowerVariable.Null, yUpdatedVar);
+				}
+				else if (yUpdatedVar == null)
+				{
+					m_EisenhowerCtrl.SetFilter(xUpdatedVar, EisenhowerVariable.Null);
+				}
+				else if (result.ModifiedVariables.Contains(xUpdatedVar) ||
+						 result.ModifiedVariables.Contains(yUpdatedVar))
+				{
+					// Ranges or types have changed => rebuild the lists
+					m_EisenhowerCtrl.SetFilter(xUpdatedVar, yUpdatedVar);
+				}
+				else
+				{ 
+					// simple update
+					m_EisenhowerCtrl.OnUpdateTasks(type, result.ModifiedTaskIds);
+				}
 			}
 
 			if (selTaskIds != null)
@@ -274,18 +276,6 @@ namespace EisenhowerUIExtension
 
 		// Message handlers ---------------------------------------------------
 
-		void SetDefaultFilter()
-		{
-			m_XAttribCombo.Populate(m_Data.Variables, m_Trans);
-			m_YAttribCombo.Populate(m_Data.Variables, m_Trans);
-
-			m_EisenhowerCtrl.SetFilter(m_Data.Variables.Find(Task.Attribute.Priority),
-									   m_Data.Variables.Find(Task.Attribute.Risk));
-
-			m_XAttribCombo.SelectedVariable = m_EisenhowerCtrl.XFilterVariable;
-			m_YAttribCombo.SelectedVariable = m_EisenhowerCtrl.YFilterVariable;
-		}
-
 		protected override void OnGotFocus(EventArgs e)
 		{
 			base.OnGotFocus(e);
@@ -361,9 +351,63 @@ namespace EisenhowerUIExtension
 			}
 		}
 
+		private void SetDefaultFilter()
+		{
+			EnableComboEvents(false);
+
+			EisenhowerVariable xVar = m_Data.Variables.Find(Task.Attribute.Priority);
+			EisenhowerVariable yVar = m_Data.Variables.Find(Task.Attribute.Risk);
+
+			m_EisenhowerCtrl.SetFilter(xVar, yVar);
+
+			m_XAttribCombo.Populate(m_Trans, m_Data.Variables, yVar);
+			m_YAttribCombo.Populate(m_Trans, m_Data.Variables, xVar);
+
+			m_XAttribCombo.SelectedVariable = xVar;
+			m_YAttribCombo.SelectedVariable = yVar;
+
+			EnableComboEvents(true);
+		}
+
+		private void EnableComboEvents(bool enable)
+		{
+			if (enable)
+			{
+				m_XAttribCombo.SelectedIndexChanged += new EventHandler(OnXAttribComboSelectionChange);
+				m_YAttribCombo.SelectedIndexChanged += new EventHandler(OnYAttribComboSelectionChange);
+			}
+			else
+			{
+				m_XAttribCombo.SelectedIndexChanged -= new EventHandler(OnXAttribComboSelectionChange);
+				m_YAttribCombo.SelectedIndexChanged -= new EventHandler(OnYAttribComboSelectionChange);
+			}
+		}
+
+		private void OnXAttribComboSelectionChange(object sender, EventArgs e)
+		{
+			if (m_XAttribCombo.SelectedVariable.Equals(m_EisenhowerCtrl.XFilterVariable))
+				return;
+
+			// Rebuild Y combo without the new X variable
+			EnableComboEvents(false);
+			m_YAttribCombo.Populate(m_Trans, m_Data.Variables, m_XAttribCombo.SelectedVariable);
+			EnableComboEvents(true);
+		}
+
+		private void OnYAttribComboSelectionChange(object sender, EventArgs e)
+		{
+			if (m_YAttribCombo.SelectedVariable.Equals(m_EisenhowerCtrl.YFilterVariable))
+				return;
+
+			// Rebuild X combo without the new Y variable
+			EnableComboEvents(false);
+			m_XAttribCombo.Populate(m_Trans, m_Data.Variables, m_YAttribCombo.SelectedVariable);
+			EnableComboEvents(true);
+		}
+
 		private void OnUpdateFilter(object sender, EventArgs e)
 		{
-			var selTaskIds = m_EisenhowerCtrl.SelectedTaskIds; // cache
+			var selTaskIds = m_EisenhowerCtrl.SelectedTaskIds;
 
 			m_EisenhowerCtrl.SetFilter(m_XAttribCombo.SelectedVariable,	m_YAttribCombo.SelectedVariable);
 			m_EisenhowerCtrl.SelectTasks(selTaskIds);
