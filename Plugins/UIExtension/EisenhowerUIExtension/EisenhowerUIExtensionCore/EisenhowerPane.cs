@@ -283,7 +283,6 @@ namespace EisenhowerUIExtension
 			}
 
 			bool someModified = false;
-			//m_List.BeginUpdate();
 
 			foreach (var taskId in taskIds)
 			{
@@ -300,8 +299,13 @@ namespace EisenhowerUIExtension
 				{
 					someModified |= AddTask(task);
 				}
+				else // update values
+				{
+					m_List.SetTaskValues(taskId, 
+										 task.GetAttributeDisplayValue(m_Filter.XVariable),
+										 task.GetAttributeDisplayValue(m_Filter.YVariable));
+				}
 			}
-			//m_List.EndUpdate();
 
 			if (someModified)
 				m_List.RefreshColumnWidths();
@@ -527,7 +531,7 @@ namespace EisenhowerUIExtension
 
 		private void UpdateTitle()
 		{
-			m_TitleBar.Text = m_Filter?.ToString();
+			m_TitleBar.Text = m_Filter?.ToString(m_Trans);
 		}
 
 		private bool AddTask(EisenhowerTask task)
@@ -536,8 +540,8 @@ namespace EisenhowerUIExtension
 				return false;
 
 			return m_List.AddTask(task,
-								  task.GetAttributeValue(m_Filter.XVariable).ToString(),
-								  task.GetAttributeValue(m_Filter.YVariable).ToString());
+								  task.GetAttributeDisplayValue(m_Filter.XVariable),
+								  task.GetAttributeDisplayValue(m_Filter.YVariable));
 		}
 	}
 }

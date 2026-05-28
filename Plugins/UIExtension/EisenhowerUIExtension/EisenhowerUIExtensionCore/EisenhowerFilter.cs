@@ -45,16 +45,27 @@ namespace EisenhowerUIExtension
 			return (value <= Cutoff);
 		}
 
-		public override string ToString()
+		public string ToString(Translator trans)
 		{
 			if (IsNull)
 				return string.Empty;
 
-			if (Range == EisenhowerPaneFilterAttributeRange.High)
-				return string.Format("High {0} (> {1})", Attribute.Label, Cutoff);
+			bool high = (Range == EisenhowerPaneFilterAttributeRange.High);
+			var format = (high ? "High {0} (> {1})" : "Low {0} (<= {1})");
 
-			// else
-			return string.Format("Low {0} (<= {1})", Attribute.Label, Cutoff);
+			switch (Type)
+			{
+			case ValueType.Date:
+				format = (high ? "Later {0} (> {1})" : "Earlier {0} (<= {1})");
+				break;
+
+			//case ValueType.TimePeriod:
+			//case ValueType.Boolean:
+			//case ValueType.Integer:
+			//case ValueType.Decimal:
+			}
+
+			return string.Format(trans.Translate(format, Translator.Type.Header), Attribute.Label, FormatValue(Cutoff));
 		}
 
 		public override bool Equals(object other)
@@ -109,12 +120,12 @@ namespace EisenhowerUIExtension
 			return( (bool)XVariable?.TaskMatches(task) &&  (bool)YVariable?.TaskMatches(task));
 		}
 
-		public override string ToString()
+		public string ToString(Translator trans)
 		{
 			if (HasNull)
 				return string.Empty;
 
-			return (XVariable.ToString() + " - " + YVariable.ToString());
+			return (XVariable.ToString(trans) + " - " + YVariable.ToString(trans));
 		}
 
 		public override bool Equals(object obj)

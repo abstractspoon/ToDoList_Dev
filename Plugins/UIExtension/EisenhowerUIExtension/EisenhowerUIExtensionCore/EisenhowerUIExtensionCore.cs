@@ -338,15 +338,33 @@ namespace EisenhowerUIExtension
 			{
 				if (var.Attribute.IsCustom())
 				{
+					// Always as string
 					notify.AddMod(var.Attribute.CustomAttributeId, value.ToString());
-				}
-				else if (var.TypeIsDouble)
-				{
-					notify.AddMod(var.Attribute.AttributeId, value);
 				}
 				else
 				{
-					notify.AddMod(var.Attribute.AttributeId, (int)value);
+					switch (var.Type)
+					{
+					case EisenhowerVariable.ValueType.Integer:
+						notify.AddMod(var.Attribute.AttributeId, (int)value);
+						break;
+
+					case EisenhowerVariable.ValueType.Decimal:
+						notify.AddMod(var.Attribute.AttributeId, value);
+						break;
+
+					case EisenhowerVariable.ValueType.Boolean:
+						notify.AddMod(var.Attribute.AttributeId, (value != 0));
+						break;
+
+					case EisenhowerVariable.ValueType.TimePeriod:
+						notify.AddMod(var.Attribute.AttributeId, value);
+						break;
+
+					case EisenhowerVariable.ValueType.Date:
+						notify.AddMod(var.Attribute.AttributeId, value);
+						break;
+					}
 				}
 			}
 		}

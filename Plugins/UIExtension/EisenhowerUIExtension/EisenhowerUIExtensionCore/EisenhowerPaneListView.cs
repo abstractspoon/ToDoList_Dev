@@ -52,17 +52,30 @@ namespace EisenhowerUIExtension
 		public bool AddTask(ITaskBase task, string xValue, string yValue)
 		{
 			var lvItem = AddTask(task);
+			return SetTaskValues(lvItem, xValue, yValue);
+		}
 
-			if (lvItem != null)
-			{
-				lvItem.SubItems.Add(xValue);
-				m_ColValueMaxCharWidth[XCol] = Math.Max(xValue.Length, m_ColValueMaxCharWidth[XCol]);
+		public bool SetTaskValues(uint taskId, string xValue, string yValue)
+		{
+			var lvItem = FindItem(taskId);
+			return SetTaskValues(lvItem, xValue, yValue);
+		}
 
-				lvItem.SubItems.Add(yValue);
-				m_ColValueMaxCharWidth[YCol] = Math.Max(yValue.Length, m_ColValueMaxCharWidth[YCol]);
-			}
+		public bool SetTaskValues(ListViewItem lvItem, string xValue, string yValue)
+		{
+			if (lvItem == null)
+				return false;
 
-			return (lvItem != null);
+			while (lvItem.SubItems.Count < 3)
+				lvItem.SubItems.Add("");
+
+			lvItem.SubItems[XCol].Text = xValue;
+			lvItem.SubItems[YCol].Text = yValue;
+
+			m_ColValueMaxCharWidth[XCol] = Math.Max(xValue.Length, m_ColValueMaxCharWidth[XCol]);
+			m_ColValueMaxCharWidth[YCol] = Math.Max(yValue.Length, m_ColValueMaxCharWidth[YCol]);
+
+			return true;
 		}
 
 		public void RemoveAll()

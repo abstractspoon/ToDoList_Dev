@@ -256,9 +256,9 @@ namespace EisenhowerUIExtension
 		public Color AlternateLineColor			{ set { m_Panes.ForEach(p => p.AlternateLineColor = value); } }
 		public Color GridlineColor				{ set { m_Panes.ForEach(p => p.GridlineColor = value); } }
 
-		public bool WantTaskUpdate(Task.Attribute attrib)
+		public bool WantTaskUpdate(Task.Attribute attribId)
 		{
-			switch (attrib)
+			switch (attribId)
 			{
 			// Note: lock state is always provided
 			case Task.Attribute.Title:
@@ -268,15 +268,12 @@ namespace EisenhowerUIExtension
 			case Task.Attribute.Position:
 			case Task.Attribute.SubtaskDone:
 			case Task.Attribute.CustomAttribute:
-			case Task.Attribute.Priority:
-			case Task.Attribute.Risk:
-			case Task.Attribute.Cost:
 				return true;
 			}
 
 			// all else
-			return false;
-		}
+			return EisenhowerVariable.Supports(attribId);
+	}
 
 		public uint HitTestTask(Point screenPos)
 		{
@@ -334,7 +331,7 @@ namespace EisenhowerUIExtension
 		{
 			get
 			{
-				return SelectedPane?.SelectedTaskIds;
+				return SelectedPane?.SelectedTaskIds ?? new List<uint>();
 			}
 		}
 

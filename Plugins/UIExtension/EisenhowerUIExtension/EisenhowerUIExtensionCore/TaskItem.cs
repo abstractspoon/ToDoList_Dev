@@ -9,10 +9,6 @@ namespace EisenhowerUIExtension
 {
 	public class TaskItem : ITaskBase
 	{
-		private Dictionary<String, double> m_AttribValues = new Dictionary<String, double>();
-
-		// -----------------------------------------------------------------
-
 		// ITaskBase
 		public String Title { get; private set; }
 		public String Position { get; private set; }
@@ -56,6 +52,9 @@ namespace EisenhowerUIExtension
 			if (task.GetID() != Id)
 				return false;
 
+			IsParent = task.IsParent();
+			IsLocked = task.IsLocked(true); // Explicitly AND implicitly
+
 			if (task.IsAttributeAvailable(Task.Attribute.Title))
 				Title = task.GetTitle();
 
@@ -77,56 +76,8 @@ namespace EisenhowerUIExtension
 			if (task.IsAttributeAvailable(Task.Attribute.SubtaskDone))
                 SomeSubtasksDone = task.HasSomeSubtasksDone();
 
-			// Filterable attributes
-			if (task.IsAttributeAvailable(Task.Attribute.Priority))
-				SetAttributeValue("Priority", task.GetPriority(true));
-
-			if (task.IsAttributeAvailable(Task.Attribute.Risk))
-				SetAttributeValue("Risk", task.GetRisk(true));
-
-			if (task.IsAttributeAvailable(Task.Attribute.Cost))
-				SetAttributeValue("Cost", task.GetCost(true));
-
-			if (task.IsAttributeAvailable(Task.Attribute.CustomAttribute))
-			{
-				var custValues = task.GetCustomAttributeValues(false);
-
-				foreach (var val in custValues)
-				{
-					double value = 0.0;
-
-					if (double.TryParse(val.Value, out value))
-						SetAttributeValue(val.Key, value);
-				}
-			}
-
-			IsParent = task.IsParent();
-			IsLocked = task.IsLocked(true); // Explicitly AND implicitly
-
 			return true;
 		}
-
-		// ---------------------------------------------------------------
-
-		protected bool SetAttributeValue(string attribId, double value)
-		{
-			if (value == GetAttributeValue(attribId))
-				return false;
-
-			m_AttribValues[attribId] = value;
-			return true;
-		}
-
-		protected double GetAttributeValue(string attribId)
-		{
-			double value;
-
-			if (m_AttribValues.TryGetValue(attribId, out value))
-				return value;
-
-			return 0.0;
-		}
-
 	}
 
 }

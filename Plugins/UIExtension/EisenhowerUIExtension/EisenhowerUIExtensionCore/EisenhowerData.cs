@@ -9,8 +9,6 @@ namespace EisenhowerUIExtension
 {
 	public class UpdateResult
 	{
-		public UIExtension.UpdateType Type = UIExtension.UpdateType.Unknown;
-
 		public List<uint> ModifiedTaskIds;
 		public List<EisenhowerVariable> ModifiedVariables;
 	}
@@ -97,33 +95,45 @@ namespace EisenhowerUIExtension
 	{
 		public EisenhowerVariables(Translator trans)
 		{
-			// Default attributes always exist
+			// Fallback attributes
 			var attribPriority = new TaskAttributeItem()
 			{
 				Label = trans.Translate("Priority", Translator.Type.Header),
 				AttributeId = Task.Attribute.Priority
 			};
-			Add(new EisenhowerVariable(attribPriority, false, -2, 10));
+			Add(new EisenhowerVariable(attribPriority, -2, 10));
 
 			var attribRisk = new TaskAttributeItem()
 			{
 				Label = trans.Translate("Risk", Translator.Type.Header),
 				AttributeId = Task.Attribute.Risk
 			};
-			Add(new EisenhowerVariable(attribRisk, false, -2, 10));
-
-			var attribCost = new TaskAttributeItem()
-			{
-				Label = trans.Translate("Cost", Translator.Type.Header),
-				AttributeId = Task.Attribute.Cost
-			};
-			Add(new EisenhowerVariable(attribCost, true));
+			Add(new EisenhowerVariable(attribRisk, -2, 10));
 		}
 
 		public List<EisenhowerVariable> Update(TaskList tasks)
 		{
+			var attribs = tasks.GetAvailableAttributes();
 			var modifiedVars = new List<EisenhowerVariable>();
 
+			// Built-in attributes only get added
+			attribs.ForEach(a => 
+			{
+				if (a.AttributeId != Task.Attribute.CustomAttribute)
+				{
+					var var = Find(a.AttributeId);
+
+					if ((var == null) && EisenhowerVariable.Supports(a))
+					{
+						var = new EisenhowerVariable(a);
+
+						Add(var);
+						modifiedVars.Add(var);
+					}
+				}
+			});
+
+			// Custom attributes
 			if (tasks.IsAttributeAvailable(Task.Attribute.CustomAttribute))
 			{
 				var custAttribDefs = tasks.GetCustomAttributes();
@@ -139,7 +149,7 @@ namespace EisenhowerUIExtension
 					{
 						var attrib = custAttribDefs.Find(a => a.Id == var.Attribute.CustomAttributeId);
 						
-						if ((attrib == null) || !EisenhowerVariable.SupportsCustomAttribute(attrib))
+						if ((attrib == null) || !EisenhowerVariable.Supports(attrib))
 						{
 							modifiedVars.Add(var);
 							RemoveAt(i);
@@ -154,7 +164,7 @@ namespace EisenhowerUIExtension
 
 					if (var == null)
 					{
-						if (EisenhowerVariable.SupportsCustomAttribute(a))
+						if (EisenhowerVariable.Supports(a))
 						{
 							var = new EisenhowerVariable(a);
 
@@ -199,11 +209,24 @@ namespace EisenhowerUIExtension
 	public class EisenhowerVariable
 	{
 		public TaskAttributeItem Attribute { get; private set; }
-		public bool TypeIsDouble { get; private set; }
-		public string Key { get; private set; }
+		public ValueType Type { get; private set; }
 
 		public double MinValue { get; private set; }
 		public double MaxValue { get; private set; }
+
+		public static List<Task.Attribute> SupportedAttributeIds { get; private set; }
+
+		// ------------------------------
+
+		public enum ValueType
+		{
+			Unknown = -1,
+			Integer,
+			Decimal,
+			Boolean,
+			TimePeriod,
+			Date,
+		}
 
 		// ------------------------------
 
@@ -218,38 +241,43 @@ namespace EisenhowerUIExtension
 
 		// ------------------------------
 
+		static EisenhowerVariable()
+		{
+			SupportedAttributeIds = new List<Task.Attribute>()
+			{
+				Task.Attribute.DueDate,
+				Task.Attribute.StartDate,
+				Task.Attribute.Priority,
+				Task.Attribute.Percent,
+				Task.Attribute.Risk,
+				Task.Attribute.Flag,
+				Task.Attribute.TimeEstimate,
+				Task.Attribute.TimeSpent,
+				Task.Attribute.Cost,
+				Task.Attribute.CustomAttribute,
+			};
+		}
+
+		// ------------------------------
+
 		public EisenhowerVariable(EisenhowerVariable var)
 		{
 			IsNull = var.IsNull;
 			Attribute = var.Attribute;
-			TypeIsDouble = var.TypeIsDouble;
+			Type = var.Type;
 			MinValue = var.MinValue;
 			MaxValue = var.MaxValue;
-			Key = var.Key;
 		}
 
-		public EisenhowerVariable(TaskAttributeItem attrib, bool isDouble)
+		public EisenhowerVariable(TaskAttributeItem attrib)
 		{
 			Attribute = attrib;
-			TypeIsDouble = isDouble;
+			Type = GetValueType(attrib);
 			MinValue = MaxValue = 0;
-
-			if (attrib.IsCustom())
-				Key = attrib.CustomAttributeId;
-			else
-				Key = attrib.AttributeId.ToString();
 		}
 
 		public EisenhowerVariable(CustomAttributeDefinition attrib)
 		{
-			bool isDouble = false;
-
-			if (!SupportsCustomAttribute(attrib, ref isDouble))
-			{
-				Debug.Assert(false);
-				return;
-			}
-
 			Attribute = new TaskAttributeItem()
 			{
 				Label = attrib.Label,
@@ -259,13 +287,14 @@ namespace EisenhowerUIExtension
 			};
 
 			MinValue = MaxValue = 0;
-			TypeIsDouble = isDouble;
-			Key = attrib.Id;
+			Type = GetValueType(attrib.AttributeType);
+
+			Debug.Assert(Type != ValueType.Unknown);
 		}
 
-		public EisenhowerVariable(TaskAttributeItem attrib, bool isDouble, double minVal, double maxVal)
+		public EisenhowerVariable(TaskAttributeItem attrib, double minVal, double maxVal)
 			:
-			this(attrib, isDouble)
+			this(attrib)
 		{
 			SetValueRange(minVal, maxVal);
 		}
@@ -275,12 +304,29 @@ namespace EisenhowerUIExtension
 			return Attribute.Label;
 		}
 
+		public string FormatValue(double value)
+		{
+			switch (Type)
+			{
+			case ValueType.Date:
+				return DateTime.FromOADate(value).ToShortDateString();
+
+			case ValueType.Integer:
+				return ((int)value).ToString();
+
+//			case ValueType.TimePeriod:
+//			case ValueType.Boolean:
+//			case ValueType.Decimal:
+			}
+
+			return value.ToString();
+		}
+
 		public override bool Equals(object other)
 		{
 			var var = (other as EisenhowerVariable);
 
-			return (Attribute.Equals(var?.Attribute) && 
-					(TypeIsDouble == var?.TypeIsDouble));
+			return (Attribute.Equals(var?.Attribute) && (Type == var?.Type));
 		}
 
 		public override int GetHashCode()
@@ -310,32 +356,77 @@ namespace EisenhowerUIExtension
 			}
 		}
 
-		public static bool SupportsCustomAttribute(CustomAttributeDefinition attrib)
+		public static bool Supports(TaskAttributeItem attrib)
 		{
-			bool unused = false;
-			return SupportsCustomAttribute(attrib, ref unused);
+ 			ValueType type = GetValueType(attrib);
+ 			return (type != ValueType.Unknown);
 		}
 
-		// ------------------------------------------------------------
-
-		private static bool SupportsCustomAttribute(CustomAttributeDefinition attrib, ref bool isDouble)
+		public static bool Supports(Task.Attribute attribId)
 		{
-			// Determine if it's a type we support
-			switch (attrib.AttributeType)
-			{
-			case CustomAttributeDefinition.Attribute.Integer:
-				isDouble = false;
-				return true;
+			return SupportedAttributeIds.Contains(attribId);
+		}
 
-			case CustomAttributeDefinition.Attribute.Decimal:
-			case CustomAttributeDefinition.Attribute.TimePeriod:
-			case CustomAttributeDefinition.Attribute.Calculation:
-				isDouble = true;
-				return true;
+		public static bool Supports(CustomAttributeDefinition attrib)
+		{
+			ValueType type = GetValueType(attrib.AttributeType);
+			return (type != ValueType.Unknown);
+		}
+
+		// -------------------------------------------------------------
+
+		private static ValueType GetValueType(TaskAttributeItem attrib)
+		{
+			if (attrib.AttributeId == Task.Attribute.CustomAttribute)
+				return GetValueType(attrib.CustomAttributeType);
+
+			// else
+			return GetValueType(attrib.AttributeId);
+		}
+
+		private static ValueType GetValueType(Task.Attribute attribId)
+		{
+			switch (attribId)
+			{
+			case Task.Attribute.DueDate:
+			case Task.Attribute.StartDate:
+				return ValueType.Date;
+
+			case Task.Attribute.Priority:
+			case Task.Attribute.Percent:
+			case Task.Attribute.Risk:
+				return ValueType.Integer;
+
+			case Task.Attribute.Flag:
+				return ValueType.Boolean;
+
+			case Task.Attribute.TimeEstimate:
+			case Task.Attribute.TimeSpent:
+				return ValueType.TimePeriod;
+
+			case Task.Attribute.Cost:
+				return ValueType.Decimal;
 			}
 
-			return false;
+			return ValueType.Unknown;
+		}
 
+		private static ValueType GetValueType(CustomAttributeDefinition.Attribute type)
+		{
+			switch (type)
+			{
+			case CustomAttributeDefinition.Attribute.Integer:		return ValueType.Integer;
+			case CustomAttributeDefinition.Attribute.Decimal:		return ValueType.Decimal;
+			case CustomAttributeDefinition.Attribute.TimePeriod:	return ValueType.TimePeriod;
+			case CustomAttributeDefinition.Attribute.Boolean:		return ValueType.Boolean;
+			case CustomAttributeDefinition.Attribute.Date:			return ValueType.Date;
+
+			case CustomAttributeDefinition.Attribute.Calculation:
+				// TODO
+				break;
+			}
+
+			return ValueType.Unknown;
 		}
 	}
 
@@ -450,9 +541,7 @@ namespace EisenhowerUIExtension
 			if (!task.IsDone() && !task.IsGoodAsDone())
 			{
 				uint taskId = task.GetID();
-				bool newTask = !HasItem(taskId);
-
-				TaskItem item = GetItem(taskId, true);
+				var item = GetItem(taskId, true);
 
 				if (!item.ProcessTaskUpdate(task))
 					return false;
@@ -474,18 +563,93 @@ namespace EisenhowerUIExtension
 
 	public class EisenhowerTask : TaskItem
 	{
+		private Dictionary<String, double> m_AttribValues = new Dictionary<String, double>();
+
+		// -----------------------------------------------------------------
+
 		public EisenhowerTask(String label, uint id) : base(label, id)
 		{
 		}
 
+		public new bool ProcessTaskUpdate(Task task)
+		{
+			if (!base.ProcessTaskUpdate(task))
+				return false;
+
+			// Filterable attributes -----------------------------------
+
+			// Built-in
+			foreach (var id in EisenhowerVariable.SupportedAttributeIds)
+			{
+				if (task.IsAttributeAvailable(id) && (id != Task.Attribute.CustomAttribute))
+					SetAttributeValue(id.ToString(), task.GetAttributeValue(id, true, false));
+			}
+
+			// Custom
+			if (task.IsAttributeAvailable(Task.Attribute.CustomAttribute))
+			{
+				var custValues = task.GetCustomAttributeValues(false);
+
+				foreach (var val in custValues)
+					SetAttributeValue(val.Key, val.Value);
+			}
+
+			return true;
+		}
+
 		public double GetAttributeValue(EisenhowerVariable var)
 		{
-			return GetAttributeValue(var.Key);
+			return GetAttributeValue(GetKey(var));
+		}
+
+		public string GetAttributeDisplayValue(EisenhowerVariable var)
+		{
+			return var.FormatValue(GetAttributeValue(var));
 		}
 
 		public void SetAttributeValue(EisenhowerVariable var, double value)
 		{
-			SetAttributeValue(var.Key, value);
+			SetAttributeValue(GetKey(var), value);
+		}
+
+		// ---------------------------------------------------------------
+
+		private string GetKey(EisenhowerVariable var)
+		{
+			if (var.Attribute.IsCustom())
+				return var.Attribute.CustomAttributeId;
+
+			// else
+			return var.Attribute.AttributeId.ToString();
+		}
+
+		private bool SetAttributeValue(string attribId, double value)
+		{
+			if (value == GetAttributeValue(attribId))
+				return false;
+
+			m_AttribValues[attribId] = value;
+			return true;
+		}
+
+		private double GetAttributeValue(string attribId)
+		{
+			double value;
+
+			if (m_AttribValues.TryGetValue(attribId, out value))
+				return value;
+
+			return 0.0;
+		}
+
+		private bool SetAttributeValue(string attribId, string value)
+		{
+			double dblValue = 0.0;
+
+			if (double.TryParse(value, out dblValue))
+				return SetAttributeValue(attribId, dblValue);
+
+			return false;
 		}
 	}
 }
