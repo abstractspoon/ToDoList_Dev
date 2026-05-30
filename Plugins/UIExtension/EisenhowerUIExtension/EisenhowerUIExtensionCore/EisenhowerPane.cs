@@ -26,6 +26,7 @@ namespace EisenhowerUIExtension
 
 		private bool m_ShowMixedCompletionState;
 		private bool m_DropHighlight;
+		private bool m_ReadOnly;
 
 		// ---------------------------------------------
 
@@ -147,9 +148,11 @@ namespace EisenhowerUIExtension
 
 		public bool ReadOnly
 		{
+			get { return m_ReadOnly; }
 			set
 			{
-				AllowDrop = (value == false);
+				m_ReadOnly = value;
+				AllowDrop = !m_ReadOnly;
 
 				foreach (Control c in Controls)
 					c.AllowDrop = (value == false);
@@ -168,6 +171,8 @@ namespace EisenhowerUIExtension
 		{
 			set
 			{
+				Debug.Assert(!value || !m_ReadOnly);
+
 				if (value != m_DropHighlight)
 				{
 					m_DropHighlight = value; // Must come first
@@ -474,16 +479,25 @@ namespace EisenhowerUIExtension
 
 		private bool OnListEditTaskDone(object sender, UInt32 taskId, bool completed)
 		{
+			if (m_ReadOnly)
+				return false;
+
 			return (bool)EditTaskDone?.Invoke(sender, taskId, completed);
 		}
 
 		private bool OnListEditTaskIcon(object sender, UInt32 taskId)
 		{
+			if (m_ReadOnly)
+				return false;
+
 			return (bool)EditTaskIcon?.Invoke(sender, taskId);
 		}
 
 		private bool OnListEditTaskLabel(object sender, UInt32 taskId)
 		{
+			if (m_ReadOnly)
+				return false;
+
 			return (bool)EditTaskLabel?.Invoke(sender, taskId);
 		}
 
