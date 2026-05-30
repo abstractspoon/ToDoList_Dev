@@ -952,18 +952,11 @@ void TaskListView::WndProc(Message% m)
 					return;
 				}
 				// If the item is selected but we're not focused, 
-				// or the click was not on the label itself, prevent
-				// the base class from starting a label edit
-				else if (lvHit->Selected)
+				// prevent the base class from starting a label edit
+				else if (lvHit->Selected && !Focused)
 				{
-					if (!Focused)
-					{
-						Focus();
-						return;
-					}
-
-					if (!CalcLabelRect(lvHit, TaskListView::LabelExtents::TitleTextOnly).Contains(pos))
-						return;
+					Focus();
+					return;
 				}
 			}
 		}
@@ -1045,20 +1038,23 @@ void TaskListView::OnMouseMove(MouseEventArgs^ e)
 
 void TaskListView::OnBeforeLabelEdit(LabelEditEventArgs^ e)
 {
-	if (e->Item != -1)
+	if (m_ReadOnly)
+		return;
+
+	// Mouse cursor must still be over the text label
+	auto mousePos = PointToClient(MousePosition);
+
+	if (CalcLabelRect(Items[e->Item], TaskListView::LabelExtents::TitleTextOnly).Contains(mousePos))
 	{
 		auto task = ASTYPE(Items[e->Item]->Tag, ITaskBase);
 
 		if (task != nullptr)
-		{
 			EditTaskLabel(this, task->Id);
-			e->CancelEdit = true;
-
-			return;
-		}
 	}
 
-	ListView::OnBeforeLabelEdit(e);
+	// always
+	e->CancelEdit = true;
+	return;
 }
 
 bool TaskListView::SelectTaskEx(String^ words, UIExtension::SelectTask selectTask, 
