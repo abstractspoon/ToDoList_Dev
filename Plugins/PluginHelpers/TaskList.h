@@ -291,6 +291,7 @@ namespace Abstractspoon
 
 			public:
 				Attribute AttributeType;
+				Attribute CalculationResultType;
 				List ListType;
 
 				String^ Id;
@@ -369,7 +370,10 @@ namespace Abstractspoon
 				String^ GetCustomAttributeValue(int nIndex, String^ sItem);
 
 				CustomAttributeDefinition::Attribute GetCustomAttributeType(int nIndex);
+				CustomAttributeDefinition::Attribute GetCustomAttributeCalculationResultType(int nIndex);
 				CustomAttributeDefinition::List GetCustomAttributeListType(int nIndex);
+
+				CustomAttributeDefinition::Attribute MapAttributeType(UInt32 nType);
 			};
 
 			////////////////////////////////////////////////////////////////////////////////////////////////

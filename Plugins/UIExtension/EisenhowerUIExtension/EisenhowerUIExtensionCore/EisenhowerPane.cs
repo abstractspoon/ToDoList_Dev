@@ -516,8 +516,11 @@ namespace EisenhowerUIExtension
 				SelectTask(task.Id);
 
 			Focus();
-			DragBegin?.Invoke(this, new EventArgs());
 
+			if (Filter.XVariable.ReadOnly && Filter.YVariable.ReadOnly)
+				return;
+
+			DragBegin?.Invoke(this, new EventArgs());
 			DoDragDrop(this, DragDropEffects.Move);
 		}
 

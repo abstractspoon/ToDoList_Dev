@@ -261,6 +261,7 @@ public:
 	double GetTaskTimeRemaining(HTASKITEM hTask, TDC_UNITS& cUnits) const;
 
 	unsigned long GetCustomAttributeFeatures(int nIndex) const;
+	unsigned long GetCustomAttributeCalculationResultType(int nIndex) const;
 
 	//////////////////////////////////////////////////////////////
 	// ITaskList17 implementation 

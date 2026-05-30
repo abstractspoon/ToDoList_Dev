@@ -247,6 +247,7 @@ List<CustomAttributeDefinition^>^ TaskList::GetCustomAttributes(CustomAttributeD
 			auto attrib = gcnew CustomAttributeDefinition();
 
 			attrib->AttributeType = attribType;
+			attrib->CalculationResultType = GetCustomAttributeCalculationResultType(i);
 			attrib->Id = GetCustomAttributeID(i);
 			attrib->Label = GetCustomAttributeLabel(i);
 			attrib->ListData = GetCustomAttributeListData(i);
@@ -261,9 +262,19 @@ List<CustomAttributeDefinition^>^ TaskList::GetCustomAttributes(CustomAttributeD
 
 CustomAttributeDefinition::Attribute TaskList::GetCustomAttributeType(int nIndex)
 {
-	UInt32 types = GETVAL_ARG(GetCustomAttributeType, nIndex, 0);
+	UInt32 nType = GETVAL_ARG(GetCustomAttributeType, nIndex, 0);
+	return MapAttributeType(nType);
+}
 
-	switch (types & TDCCA_DATAMASK)
+CustomAttributeDefinition::Attribute TaskList::GetCustomAttributeCalculationResultType(int nIndex)
+{
+	UInt32 nType = GETVAL_ARG(GetCustomAttributeCalculationResultType, nIndex, 0);
+	return MapAttributeType(nType);
+}
+
+CustomAttributeDefinition::Attribute TaskList::MapAttributeType(UInt32 nType)
+{
+	switch (nType & TDCCA_DATAMASK)
 	{
 	case TDCCA_STRING:		return CustomAttributeDefinition::Attribute::String;
 	case TDCCA_DATE:		return CustomAttributeDefinition::Attribute::Date;
@@ -274,6 +285,7 @@ CustomAttributeDefinition::Attribute TaskList::GetCustomAttributeType(int nIndex
 	case TDCCA_FILELINK:	return CustomAttributeDefinition::Attribute::FileLink;
 	case TDCCA_TIMEPERIOD:	return CustomAttributeDefinition::Attribute::TimePeriod;
 	case TDCCA_FRACTION:	return CustomAttributeDefinition::Attribute::Fraction;
+	case TDCCA_CALCULATION:	return CustomAttributeDefinition::Attribute::Calculation;
 	}
 
 	return CustomAttributeDefinition::Attribute::Unknown;
@@ -417,7 +429,7 @@ String^ TaskList::GetAttributeName(Task::Attribute attrib)
 
 CustomAttributeDefinition::CustomAttributeDefinition()
 {
-	AttributeType = Attribute::Unknown;
+	AttributeType = CalculationResultType = Attribute::Unknown;
 	ListType = List::None;
 
 	Id = String::Empty;

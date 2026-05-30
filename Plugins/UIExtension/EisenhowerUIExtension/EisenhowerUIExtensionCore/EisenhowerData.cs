@@ -230,8 +230,10 @@ namespace EisenhowerUIExtension
 
 		// ------------------------------
 
+		public bool ReadOnly { get; private set; }
 		public bool IsNull { get; private set; }
-		public static EisenhowerVariable Null { get { return new EisenhowerVariable(); } }
+
+		public static EisenhowerVariable Null;
 
 		private EisenhowerVariable()
 		{
@@ -243,6 +245,8 @@ namespace EisenhowerUIExtension
 
 		static EisenhowerVariable()
 		{
+			Null = new EisenhowerVariable();
+
 			SupportedAttributeIds = new List<Task.Attribute>()
 			{
 				Task.Attribute.DueDate,
@@ -267,6 +271,7 @@ namespace EisenhowerUIExtension
 			Type = var.Type;
 			MinValue = var.MinValue;
 			MaxValue = var.MaxValue;
+			ReadOnly = var.ReadOnly;
 		}
 
 		public EisenhowerVariable(TaskAttributeItem attrib)
@@ -274,6 +279,7 @@ namespace EisenhowerUIExtension
 			Attribute = attrib;
 			Type = GetValueType(attrib);
 			MinValue = MaxValue = 0;
+			ReadOnly = false; // For now
 		}
 
 		public EisenhowerVariable(CustomAttributeDefinition attrib)
@@ -287,7 +293,8 @@ namespace EisenhowerUIExtension
 			};
 
 			MinValue = MaxValue = 0;
-			Type = GetValueType(attrib.AttributeType);
+			Type = GetValueType(attrib);
+			ReadOnly = (attrib.AttributeType == CustomAttributeDefinition.Attribute.Calculation);
 
 			Debug.Assert(Type != ValueType.Unknown);
 		}
@@ -369,7 +376,7 @@ namespace EisenhowerUIExtension
 
 		public static bool Supports(CustomAttributeDefinition attrib)
 		{
-			ValueType type = GetValueType(attrib.AttributeType);
+			ValueType type = GetValueType(attrib);
 			return (type != ValueType.Unknown);
 		}
 
@@ -411,6 +418,15 @@ namespace EisenhowerUIExtension
 			return ValueType.Unknown;
 		}
 
+		private static ValueType GetValueType(CustomAttributeDefinition attrib)
+		{
+			if (attrib.AttributeType == CustomAttributeDefinition.Attribute.Calculation)
+				return GetValueType(attrib.CalculationResultType);
+
+			// else
+			return GetValueType(attrib.AttributeType);
+		}
+
 		private static ValueType GetValueType(CustomAttributeDefinition.Attribute type)
 		{
 			switch (type)
@@ -422,7 +438,7 @@ namespace EisenhowerUIExtension
 			case CustomAttributeDefinition.Attribute.Date:			return ValueType.Date;
 
 			case CustomAttributeDefinition.Attribute.Calculation:
-				// TODO
+				Debug.Assert(false);
 				break;
 			}
 

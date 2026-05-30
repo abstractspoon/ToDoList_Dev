@@ -712,7 +712,23 @@ namespace EisenhowerUIExtension
 
 		private bool IsValidDrop(EisenhowerPane src, EisenhowerPane dest)
 		{
-			return ((src != null) && (dest != null) && (dest != src));
+			// Sanity checks
+			if ((src == null) || (dest == null) || (dest == src))
+				return false;
+
+			// Disallow changing panes on a readonly variable
+			if (src.Filter.XVariable.ReadOnly && 
+				(src.Filter.XVariable.Range != dest.Filter.XVariable.Range))
+			{
+				return false;
+			}
+			else if (src.Filter.YVariable.ReadOnly &&
+					(src.Filter.YVariable.Range != dest.Filter.YVariable.Range))
+			{
+				return false;
+			}
+
+			return true;
 		}
 
 		private void OnPaneDragOver(object sender, DragEventArgs e)
