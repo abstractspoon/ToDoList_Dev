@@ -82,11 +82,11 @@ namespace EisenhowerUIExtension
 				p.EditTaskLabel += new EditTaskLabelEventHandler(OnPaneEditTaskLabel);
 				p.SelectionChange += new SelectionChangeEventHandler(OnPaneSelectionChange);
 
- 				p.DragBegin += new EventHandler(OnDragBegin);
- 				p.DragLeave += new EventHandler(OnDragLeave);
-				p.QueryContinueDrag += new QueryContinueDragEventHandler(OnQueryContinueDrag);
+ 				p.DragBegin += new EventHandler(OnPaneDragBegin);
+ 				p.DragLeave += new EventHandler(OnPaneDragLeave);
+				p.QueryContinueDrag += new QueryContinueDragEventHandler(OnPaneQueryContinueDrag);
 
-				p.DragOver += new DragEventHandler(OnDragOver);
+				p.DragOver += new DragEventHandler(OnPaneDragOver);
 				p.DragDrop += new DragEventHandler(OnDragDrop);
 				p.GotFocus += new EventHandler(OnPaneGotFocus);
 			});
@@ -659,7 +659,7 @@ namespace EisenhowerUIExtension
 			return m_Panes[iPane];
 		}
 
-		private void OnDragBegin(object sender, EventArgs e)
+		private void OnPaneDragBegin(object sender, EventArgs e)
 		{
 			// Create the drag image
 			Debug.Assert(m_DragImage == null);
@@ -668,20 +668,20 @@ namespace EisenhowerUIExtension
 			m_DragImage.Begin(Handle, SelectedPane, null);
 		}
 
-		private void OnDragLeave(object sender, EventArgs e)
+		private void OnPaneDragLeave(object sender, EventArgs e)
 		{
 			m_Panes.ForEach(p => p.DropHighlighted = false);
 		}
 
 		private void CleanupDrag()
 		{
-			OnDragLeave(null, null);
+			OnPaneDragLeave(null, null);
 
 			m_DragImage.End();
 			m_DragImage = null;
 		}
 
-		private void OnQueryContinueDrag(object sender, QueryContinueDragEventArgs e)
+		private void OnPaneQueryContinueDrag(object sender, QueryContinueDragEventArgs e)
 		{
 			bool cancel = e.EscapePressed;
 
@@ -711,7 +711,7 @@ namespace EisenhowerUIExtension
 			return ((src != null) && (dest != null) && (dest != src));
 		}
 
-		private void OnDragOver(object sender, DragEventArgs e)
+		private void OnPaneDragOver(object sender, DragEventArgs e)
 		{
 			EisenhowerPane srcPane, destPane;
 
@@ -801,32 +801,6 @@ namespace EisenhowerUIExtension
 				}
 			}
 		}
-
-		// 		protected override void OnDragOver(DragEventArgs e)
-		// 		{
-		// 			m_DragImage.ShowNoLock(false);
-		// 
-		// 			base.OnDragOver(e);
-		// 
-		// 			m_DragImage.ShowNoLock(true);
-		// 			m_DragImage.Move(e.X, e.Y);
-		// 		}
-		// 
-		// 		protected override void OnDragEnter(DragEventArgs e)
-		// 		{
-		// 			base.OnDragEnter(e);
-		// 
-		// 			var rect = SelectedTaskLabelRect;
-		// 			rect.Offset(-rect.Left, -rect.Top);
-		// 
-		// 			m_DragImage.Begin(Handle, 
-		// 								this,
-		// 								SelectedPane, 
-		// 								rect.Width, 
-		// 								rect.Height, 
-		// 								rect.Width, 
-		// 								rect.Height);
-		// 		}
 
 		private uint HitTestTask(Point screenPos, out EisenhowerPane pane)
 		{
