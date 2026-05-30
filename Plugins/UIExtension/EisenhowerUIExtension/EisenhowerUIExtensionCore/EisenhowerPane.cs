@@ -34,6 +34,7 @@ namespace EisenhowerUIExtension
 		public event EditTaskLabelEventHandler EditTaskLabel;
 		public event EditTaskIconEventHandler EditTaskIcon;
 		public event EditTaskCompletionEventHandler EditTaskDone;
+		public event IsTaskDraggableEventHandler IsTaskDraggable;
 
 		// Local 
 		public event SelectionChangeEventHandler SelectionChange;
@@ -67,11 +68,13 @@ namespace EisenhowerUIExtension
 			m_Theme = new UITheme();
 
 			m_List.Initialize(trans, taskIcons);
-			m_List.AllowDrop = true;
+			m_List.ReadOnly = false;
 
 			m_List.EditTaskDone += new EditTaskCompletionEventHandler(OnListEditTaskDone);
 			m_List.EditTaskIcon += new EditTaskIconEventHandler(OnListEditTaskIcon);
 			m_List.EditTaskLabel += new EditTaskLabelEventHandler(OnListEditTaskLabel);
+			m_List.IsTaskDraggable += new IsTaskDraggableEventHandler(OnListIsTaskDraggable);
+
 			m_List.ItemDrag += new ItemDragEventHandler(OnListBeginItemDrag);
 			m_List.SelectedIndexChanged += new EventHandler(OnListSelectionChange);
 			m_List.KeyUp += new KeyEventHandler(OnListKeyUp);
@@ -151,7 +154,7 @@ namespace EisenhowerUIExtension
 			get { return m_ReadOnly; }
 			set
 			{
-				m_ReadOnly = value;
+				m_ReadOnly = m_List.ReadOnly = value;
 				AllowDrop = !m_ReadOnly;
 
 				foreach (Control c in Controls)
@@ -490,7 +493,7 @@ namespace EisenhowerUIExtension
 			if (m_ReadOnly)
 				return false;
 
-			return (bool)EditTaskIcon?.Invoke(sender, taskId);
+			return (bool)EditTaskIcon?.Invoke(this, taskId);
 		}
 
 		private bool OnListEditTaskLabel(object sender, UInt32 taskId)
@@ -498,27 +501,25 @@ namespace EisenhowerUIExtension
 			if (m_ReadOnly)
 				return false;
 
-			return (bool)EditTaskLabel?.Invoke(sender, taskId);
+			return (bool)EditTaskLabel?.Invoke(this, taskId);
+		}
+
+		private bool OnListIsTaskDraggable(object sender, UInt32 taskId)
+		{
+			if (m_Filter.XVariable.ReadOnly && m_Filter.YVariable.ReadOnly)
+				return false;
+
+			return (bool)IsTaskDraggable?.Invoke(this, taskId);
 		}
 
 		private void OnListBeginItemDrag(object sender, ItemDragEventArgs e)
 		{
-			if (!m_List.AllowDrop)
-				return;
-
+#if DEBUG
 			var item = (e.Item as ListViewItem);
 			var task = m_List.GetTask(item.Index);
 
-			if ((task == null) || task.IsLocked)
-				return;
-
-			if (!item.Selected)
-				SelectTask(task.Id);
-
-			Focus();
-
-			if (Filter.XVariable.ReadOnly && Filter.YVariable.ReadOnly)
-				return;
+			Debug.Assert(OnListIsTaskDraggable(m_List, (uint)task?.Id));
+#endif
 
 			DragBegin?.Invoke(this, new EventArgs());
 			DoDragDrop(this, DragDropEffects.Move);

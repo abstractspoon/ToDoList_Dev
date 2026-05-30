@@ -39,6 +39,7 @@ namespace EisenhowerUIExtension
 		private DragImage m_DragImage;
 		private Point m_SplitPos;
 		private List<EisenhowerPane> m_Panes;
+		private HashSet<Task.Attribute> m_ParentCalculatedValues;
 
 		// ---------------------------------------------
 
@@ -61,6 +62,7 @@ namespace EisenhowerUIExtension
 
 			m_Panes = new List<EisenhowerPane>() { m_TopLeftPane, m_TopRightPane, m_BottomLeftPane, m_BottomRightPane };
 			m_SplitPos = new Point(50, 50); // 0-100
+			m_ParentCalculatedValues = new HashSet<Task.Attribute>();
 		}
 
 		public void Initialize(EisenhowerTasks tasks, Translator trans, UIExtension.TaskIcon icons)
@@ -80,6 +82,7 @@ namespace EisenhowerUIExtension
 				p.EditTaskDone += new EditTaskCompletionEventHandler(OnPaneEditTaskDone);
 				p.EditTaskIcon += new EditTaskIconEventHandler(OnPaneEditTaskIcon);
 				p.EditTaskLabel += new EditTaskLabelEventHandler(OnPaneEditTaskLabel);
+				p.IsTaskDraggable += new IsTaskDraggableEventHandler(OnPaneIsTaskDraggable);
 				p.SelectionChange += new SelectionChangeEventHandler(OnPaneSelectionChange);
 
  				p.DragBegin += new EventHandler(OnPaneDragBegin);
@@ -130,6 +133,16 @@ namespace EisenhowerUIExtension
 			ShowMixedCompletionState = prefs.GetProfileBool("Preferences", "ShowMixedCompletionState", true);
 			ShowLabelTips = !prefs.GetProfileBool("Preferences", "ShowInfoTips", false);
 
+			SetParentCalculatedValues(Task.Attribute.Priority, prefs.GetProfileBool("Preferences", "UseHighestPriority", false));
+			SetParentCalculatedValues(Task.Attribute.Risk, prefs.GetProfileBool("Preferences", "UseHighestPriority", false)); // Shares same preference
+			SetParentCalculatedValues(Task.Attribute.StartDate, prefs.GetProfileInt("Preferences", "CalcStartDate", 2) != 2);
+			SetParentCalculatedValues(Task.Attribute.DueDate, prefs.GetProfileInt("Preferences", "CalcDueDate", 2) != 2);
+			SetParentCalculatedValues(Task.Attribute.Percent, prefs.GetProfileBool("Preferences", "AutoCalcPercentDone", false));
+			SetParentCalculatedValues(Task.Attribute.TimeEstimate, true);
+			SetParentCalculatedValues(Task.Attribute.TimeSpent, true);
+			SetParentCalculatedValues(Task.Attribute.Flag, prefs.GetProfileBool("Preferences", "TaskInheritsSubtaskFlags", false));
+			SetParentCalculatedValues(Task.Attribute.Cost, true);
+
 			if (prefs.GetProfileBool("Preferences", "AlternateLineColor", true))
 				AlternateLineColor = prefs.GetProfileColor("Preferences\\Colors", "AlternateLines", Color.Empty);
 			else
@@ -145,6 +158,22 @@ namespace EisenhowerUIExtension
 				m_SplitPos.X = prefs.GetProfileInt(key, "XSplit", 50);
 				m_SplitPos.Y = prefs.GetProfileInt(key, "YSplit", 50);
 			}
+		}
+
+		private void SetParentCalculatedValues(Task.Attribute attribId, bool set)
+		{
+			if (set != HasParentCalculatedValues(attribId))
+			{
+				if (set)
+					m_ParentCalculatedValues.Add(attribId);
+				else
+					m_ParentCalculatedValues.Remove(attribId);
+			}
+		}
+
+		private bool HasParentCalculatedValues(Task.Attribute attribId)
+		{
+			return m_ParentCalculatedValues.Contains(attribId);
 		}
 
 		public void EnsureSelectionVisible()
@@ -460,6 +489,23 @@ namespace EisenhowerUIExtension
 		private bool OnPaneEditTaskLabel(object sender, uint taskId)
 		{
 			return (bool)EditTaskLabel?.Invoke(sender, taskId);
+		}
+
+		private bool OnPaneIsTaskDraggable(object sender, uint taskId)
+		{
+			var task = m_Tasks.GetItem(taskId);
+
+			if ((bool)task?.IsParent)
+			{
+				// Disallow dragging of parent tasks both of whose values are calculated
+				if (HasParentCalculatedValues(XFilterVariable.Attribute.AttributeId) &&
+					HasParentCalculatedValues(YFilterVariable.Attribute.AttributeId))
+				{
+					return false;
+				}
+			}
+
+			return true;
 		}
 
 		private void OnPaneSelectionChange(object sender, IList<uint> taskIds)

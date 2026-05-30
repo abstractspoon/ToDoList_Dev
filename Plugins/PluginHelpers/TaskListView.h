@@ -24,6 +24,8 @@ namespace Abstractspoon
 			public delegate bool EditTaskIconEventHandler(Object^ sender, UInt32 taskId);
 			public delegate bool EditTaskCompletionEventHandler(Object^ sender, UInt32 taskId, bool completed);
 
+			public delegate bool IsTaskDraggableEventHandler(Object^ sender, UInt32 taskId);
+
 			// ---------------------------------------------
 
 			// Forward declaration
@@ -70,6 +72,7 @@ namespace Abstractspoon
 				property bool IsBoundSelecting { bool get() { return (m_BoundSelectionTimer != nullptr); } }
 				property bool EnableHeaderTracking { bool get(); void set(bool value); }
 				property bool SizeTaskColumnToFit { bool get(); void set(bool value); }
+				property bool ReadOnly { bool get(); void set(bool value); }
 
 				property int MinTaskColumnWidth;
 
@@ -85,6 +88,7 @@ namespace Abstractspoon
 				event EditTaskLabelEventHandler^ EditTaskLabel;
 				event EditTaskIconEventHandler^ EditTaskIcon;
 				event EditTaskCompletionEventHandler^ EditTaskDone;
+				event IsTaskDraggableEventHandler^ IsTaskDraggable;
 
 				event EventHandler^ BoundSelectionEnded;
 
@@ -107,6 +111,7 @@ namespace Abstractspoon
 				bool m_ShowCompletionCheckboxes;
 				bool m_EnableHeaderTracking;
 				bool m_SizeTaskColumnToFit;
+				bool m_ReadOnly;
 
 				int m_CheckBoxSize;
 
@@ -116,6 +121,7 @@ namespace Abstractspoon
 				void OnMouseMove(Windows::Forms::MouseEventArgs^ e) override;
 				void OnBeforeLabelEdit(Windows::Forms::LabelEditEventArgs^ e) override;
 				void OnDrawItem(Windows::Forms::DrawListViewItemEventArgs^ e) override;
+				void OnItemDrag(Windows::Forms::ItemDragEventArgs^ e) override;
 
 				void OnGotFocus(EventArgs^ e) override;
 				void OnLostFocus(EventArgs^ e) override;
@@ -138,7 +144,7 @@ namespace Abstractspoon
 				Drawing::Rectangle CalcIconRect(Drawing::Rectangle labelRect);
 
 				String^ Translate(String^ text, Translator::Type type);
-				bool IsTaskEditable(ITaskBase^ task) { return ((task != nullptr) && !task->IsLocked); }
+				bool IsTaskEditable(ITaskBase^ task) { return (!m_ReadOnly && (task != nullptr) && !task->IsLocked); }
 				int FindTask(String^ phrase, int startIndex, bool forward, bool caseSensitive, bool wholeWord, bool findReplace);
 				Windows::Forms::ListViewItem^ FindItem(UInt32 taskId);
 				Drawing::Color GetTextColor(ITaskBase^ task, bool selected);

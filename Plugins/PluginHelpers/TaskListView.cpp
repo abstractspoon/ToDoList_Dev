@@ -206,6 +206,7 @@ TaskListView::TaskListView()
 	m_AlternateLineColor(Color::Empty),
 	m_EnableHeaderTracking(true),
 	m_SizeTaskColumnToFit(false),
+	m_ReadOnly(false),
 	m_CheckBoxSize(-1)
 {
 	m_LabelTip = gcnew LabelTip(this);
@@ -691,6 +692,20 @@ void TaskListView::ShowCompletionCheckboxes::set(bool value)
 	}
 }
 
+bool TaskListView::ReadOnly::get()
+{
+	return m_ReadOnly;
+}
+
+void TaskListView::ReadOnly::set(bool value)
+{
+	if (m_ReadOnly != value)
+	{
+		m_ReadOnly = value;
+		AllowDrop = !m_ReadOnly;
+	}
+}
+
 bool TaskListView::ShowLabelTips::get()
 {
 	return ((m_LabelTip != nullptr) ? m_LabelTip->Active : false);
@@ -1011,6 +1026,7 @@ void TaskListView::OnMouseMove(MouseEventArgs^ e)
 	ListView::OnMouseMove(e);
 
 	auto lvHit = HitTest(e->Location)->Item;
+	Windows::Forms::Cursor^ cursor = nullptr;
 
 	if (lvHit != nullptr)
 	{
@@ -1020,20 +1036,50 @@ void TaskListView::OnMouseMove(MouseEventArgs^ e)
 		{
 			if (task->IsLocked)
 			{
-				Cursor = UIExtension::AppCursor(UIExtension::AppCursorType::LockedTask);
-				return;
+				cursor = UIExtension::AppCursor(UIExtension::AppCursorType::LockedTask);
 			}
-			
-			if (CalcIconRect(lvHit->Bounds).Contains(e->Location))
+			else if (!m_ReadOnly)
 			{
-				Cursor = UIExtension::HandCursor();
-				return;
+				if (CalcIconRect(lvHit->Bounds).Contains(e->Location))
+				{
+					cursor = UIExtension::HandCursor();
+				}
+				else if (CalcLabelRect(lvHit, LabelExtents::AllColumns).Contains(e->Location) &&
+						 !IsTaskDraggable(this, task->Id))
+				{
+					cursor = UIExtension::AppCursor(UIExtension::AppCursorType::NoDrag);
+				}
 			}
 		}
 	}
 
 	// all else
-	Cursor = Cursors::Arrow;
+	if (cursor == nullptr)
+		cursor = Cursors::Arrow;
+
+	Cursor = cursor;
+}
+
+void TaskListView::OnItemDrag(ItemDragEventArgs^ e)
+{
+	auto item = ASTYPE(e->Item, ListViewItem);
+	auto task = ASTYPE(item->Tag, ITaskBase);
+
+	if (task == nullptr)
+		return;
+
+	if (!item->Selected)
+		SelectTask(task->Id);
+
+	Focus();
+
+	if (task->IsLocked)
+		return;
+
+	if (!IsTaskDraggable(this, task->Id))
+		 return;
+	
+	ListView::OnItemDrag(e);
 }
 
 void TaskListView::OnBeforeLabelEdit(LabelEditEventArgs^ e)
