@@ -25,7 +25,7 @@ namespace EisenhowerUIExtension
 		private UITheme m_Theme = new UITheme();
 
 		private bool m_ShowMixedCompletionState;
-		private bool m_DropHighlighted;
+		private bool m_DropHighlight;
 
 		// ---------------------------------------------
 
@@ -164,18 +164,18 @@ namespace EisenhowerUIExtension
 			m_TitleBar.ForeColor = TitleTextColor;
 		}
 
-		public bool DropHighlighted
+		public bool DropHighlight
 		{
 			set
 			{
-				if (value != m_DropHighlighted)
+				if (value != m_DropHighlight)
 				{
-					m_DropHighlighted = value; // Must come first
+					m_DropHighlight = value; // Must come first
 
 					BackColor = TitleBackColor;
 					m_TitleBar.ForeColor = TitleTextColor;
 
-					m_List.BackColor = (m_DropHighlighted ? BackColor : Color.Empty);
+					m_List.BackColor = (m_DropHighlight ? BackColor : Color.Empty);
 				}
 			}
 		}
@@ -351,7 +351,7 @@ namespace EisenhowerUIExtension
 				if (Selected)
 					return UIExtension.SelectionRect.GetBorderColor(UIExtension.SelectionRect.Style.Selected);
 
-				if (m_DropHighlighted)
+				if (m_DropHighlight)
 					return UIExtension.SelectionRect.GetBorderColor(UIExtension.SelectionRect.Style.DropHighlighted);
 
 				if (UITheme.IsDarkMode())
@@ -372,7 +372,7 @@ namespace EisenhowerUIExtension
 				if (Selected)
 					return UIExtension.SelectionRect.GetColor(UIExtension.SelectionRect.Style.Selected);
 
-				if (m_DropHighlighted)
+				if (m_DropHighlight)
 					return UIExtension.SelectionRect.GetColor(UIExtension.SelectionRect.Style.DropHighlighted);
 
 				// else
@@ -384,7 +384,7 @@ namespace EisenhowerUIExtension
 		{
 			get
 			{
-				if (Selected || m_DropHighlighted)
+				if (Selected || m_DropHighlight)
 					return SystemColors.ControlText;
 
 				// else

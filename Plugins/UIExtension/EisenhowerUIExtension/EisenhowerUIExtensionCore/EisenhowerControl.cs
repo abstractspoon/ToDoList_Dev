@@ -670,7 +670,7 @@ namespace EisenhowerUIExtension
 
 		private void OnPaneDragLeave(object sender, EventArgs e)
 		{
-			m_Panes.ForEach(p => p.DropHighlighted = false);
+			m_Panes.ForEach(p => p.DropHighlight = false);
 		}
 
 		private void CleanupDrag()
@@ -703,7 +703,11 @@ namespace EisenhowerUIExtension
 			src = (e.Data.GetData(typeof(EisenhowerPane)) as EisenhowerPane);
 			dest = HitTestPane(new Point(e.X, e.Y));
 
-			return IsValidDrop(src, dest);
+			if (IsValidDrop(src, dest))
+				return true;
+
+			dest = null;
+			return false;
 		}
 
 		private bool IsValidDrop(EisenhowerPane src, EisenhowerPane dest)
@@ -725,7 +729,7 @@ namespace EisenhowerUIExtension
 
 				m_Panes.ForEach(p =>
 				{
-					p.DropHighlighted = ((p != srcPane) && (p == destPane));
+					p.DropHighlight = ((p != srcPane) && (p == destPane));
 					p.Update();
 				});
 
