@@ -105,7 +105,7 @@ namespace Abstractspoon
 				Drawing::Color m_AlternateLineColor;
 
 				bool m_ItemsHaveIcons;
-				bool m_ShowParentAsFolder;
+				bool m_ShowParentsAsFolders;
 				bool m_TaskColorIsBkgnd;
 				bool m_ShowCompletionCheckboxes;
 				bool m_EnableHeaderTracking;
