@@ -326,6 +326,11 @@ String^ DateUtil::GetMonthName(int nMonth, bool shortName)
 	return gcnew String(sMonth);
 }
 
+bool DateUtil::IsEndOfMonth(DateTime date)
+{
+	return (CDateHelper::IsEndOfMonth(GetOleDate(date)) != FALSE);
+}
+
 int DateUtil::DateInMonths(DateTime date)
 {
 	return CDateHelper::GetDateInMonths(GetOleDate(date));

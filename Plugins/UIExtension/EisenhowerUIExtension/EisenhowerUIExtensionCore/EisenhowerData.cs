@@ -358,8 +358,43 @@ namespace EisenhowerUIExtension
 		{
 			get
 			{
-				Debug.Assert(MinValue <= MaxValue);
-				return ((MaxValue + MinValue) / 2);
+				var mid = ((MaxValue + MinValue) / 2);
+
+				switch (Type)
+				{
+				case ValueType.Integer:
+					return (int)mid;
+
+				case ValueType.Boolean:
+					return 0.0; // Because the upper range (true) is '> mid'
+
+				case ValueType.Date:
+					{
+						mid = (int)mid;
+
+						// If the range is great enough use the end of the month
+						var minDate = DateTime.FromOADate(MinValue);
+						var maxDate = DateTime.FromOADate(MaxValue);
+
+						if (2 < (DateUtil.DateInMonths(maxDate) - DateUtil.DateInMonths(minDate)))
+						{
+							var midDate = DateTime.FromOADate(mid);
+
+							// Beginning of month
+							midDate = DateUtil.DateFromMonths(DateUtil.DateInMonths(midDate));
+
+							// End of previous month
+							mid = midDate.AddDays(-1).ToOADate();
+						}
+					}
+					break;
+
+				case ValueType.TimePeriod:
+				case ValueType.Decimal:
+					break;
+				}
+
+				return mid;
 			}
 		}
 

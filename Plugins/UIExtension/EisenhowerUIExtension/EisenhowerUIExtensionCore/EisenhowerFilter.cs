@@ -51,9 +51,36 @@ namespace EisenhowerUIExtension
 				return string.Empty;
 
 			bool high = (Range == EisenhowerPaneFilterAttributeRange.High);
+
+			var cutoff = Cutoff;
 			var format = (high ? "{0} > {1}" : "{0} <= {1}");
 
-			return string.Format(trans.Translate(format, Translator.Type.Header), Attribute.Label, FormatValue(Cutoff));
+			switch (Type)
+			{
+			case ValueType.Boolean:
+				format = (high ? "{0} = Set" : "{0} = Not set");
+				break;
+
+			case ValueType.Date:
+				if (high)
+				{
+					// If the cutoff is at the end of a month then change
+					// the format to be '>= beginning of next month'
+					if (DateUtil.IsEndOfMonth(DateTime.FromOADate(Cutoff)))
+					{
+						cutoff++;
+						format = "{0} >= {1}";
+					}
+				}
+				break;
+
+			case ValueType.Integer:
+			case ValueType.TimePeriod:
+			case ValueType.Decimal:
+				break;
+			}
+
+			return string.Format(trans.Translate(format, Translator.Type.Header), Attribute.Label, FormatValue(cutoff));
 		}
 
 		public override bool Equals(object other)

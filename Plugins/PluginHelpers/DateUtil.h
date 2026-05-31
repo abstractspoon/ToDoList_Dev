@@ -91,6 +91,7 @@ namespace Abstractspoon
 
 				static int DateInMonths(DateTime date);
 				static DateTime DateFromMonths(int nMonths);
+				static bool IsEndOfMonth(DateTime date);
 
 				static int GetDay(DateTime date);
 				static int GetMonth(DateTime date);
