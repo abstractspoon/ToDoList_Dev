@@ -15,6 +15,8 @@
 #include <Shared\GraphicsMisc.h>
 #include <Shared\Misc.h>
 
+#include <3rdParty\T64Utils.h>
+
 #include <ShellAPI.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -139,7 +141,7 @@ UIExtension::ParentNotify::IUITaskMod::IUITaskMod(Task::Attribute attrib, DateTi
 	:
 	nAttrib(attrib),
 	dataType(DataType::Date),
-	tValue(value)
+	dtValue(value)
 {
 
 }
@@ -248,7 +250,7 @@ UIExtension::ParentNotify::IUITaskMod::IUITaskMod(UInt32 taskID, Task::Attribute
 	dwSelectedTaskID(taskID),
 	nAttrib(attrib),
 	dataType(DataType::Date),
-	tValue(value)
+	dtValue(value)
 {
 
 }
@@ -375,10 +377,10 @@ bool UIExtension::ParentNotify::IUITaskMod::CopyTo(IUITASKMOD& mod)
 		break;
 
 	case DataType::Date:
-		if (tValue == DateTime::MinValue)
-			mod.tValue = 0xffffffffffffffff;
+		if (dtValue == DateTime::MinValue)
+			mod.tValue = T64Utils::T64_NULL;
 		else
-			mod.tValue = static_cast<__int64>(Task::MapDate(tValue));
+			mod.tValue = static_cast<__int64>(Task::MapDate(dtValue));
 		break;
 
 	case DataType::Integer:

@@ -365,7 +365,7 @@ namespace EisenhowerUIExtension
 						break;
 
 					case EisenhowerVariable.ValueType.Date:
-						notify.AddMod(taskId, var.Attribute.AttributeId, value);
+						notify.AddMod(taskId, var.Attribute.AttributeId, DateTime.FromOADate(value));
 						break;
 					}
 				}

@@ -238,7 +238,7 @@ namespace Abstractspoon
 							int nValue;
 							double dValue;
 							String^ szValue;
-							DateTime tValue;
+							DateTime dtValue;
 							bool bValue;
 							UInt32 crValue;
 						//};
