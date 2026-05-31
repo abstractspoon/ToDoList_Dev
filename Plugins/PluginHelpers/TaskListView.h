@@ -62,7 +62,7 @@ namespace Abstractspoon
 
 				property int SelectionCount { int get(); }
 				property bool HasSelection { bool get(); }
-				property IList<UInt32>^ SelectedTaskIds { IList<UInt32>^ get(); }
+				property List<UInt32>^ SelectedTaskIds { List<UInt32>^ get(); }
 
 				property bool TaskColorIsBackground { bool get(); void set(bool value); }
 				property bool ShowParentsAsFolders { bool get(); void set(bool value); }

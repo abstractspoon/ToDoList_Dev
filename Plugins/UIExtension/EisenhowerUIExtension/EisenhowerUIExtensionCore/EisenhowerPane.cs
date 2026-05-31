@@ -142,7 +142,7 @@ namespace EisenhowerUIExtension
 		public bool ShowLabelTips				{ set { m_List.ShowLabelTips = value; } }
 
 		public bool HasSelection				{ get { return m_List.HasSelection; } }
-		public IList<uint> SelectedTaskIds		{ get {	return m_List.SelectedTaskIds; } }
+		public List<uint> SelectedTaskIds		{ get {	return m_List.SelectedTaskIds; } }
 		public uint FirstTaskId					{ get { return m_List.FirstTaskId; } }
 		public uint LastTaskId					{ get { return m_List.LastTaskId; } }
 		public uint FirstSelectedTaskId			{ get { return m_List.FirstSelectedTaskId; } }
