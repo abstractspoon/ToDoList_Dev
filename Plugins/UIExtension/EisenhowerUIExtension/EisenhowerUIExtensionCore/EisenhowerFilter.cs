@@ -51,19 +51,7 @@ namespace EisenhowerUIExtension
 				return string.Empty;
 
 			bool high = (Range == EisenhowerPaneFilterAttributeRange.High);
-			var format = (high ? "High {0} (> {1})" : "Low {0} (<= {1})");
-
-			switch (Type)
-			{
-			case ValueType.Date:
-				format = (high ? "Later {0} (> {1})" : "Earlier {0} (<= {1})");
-				break;
-
-			//case ValueType.TimePeriod:
-			//case ValueType.Boolean:
-			//case ValueType.Integer:
-			//case ValueType.Decimal:
-			}
+			var format = (high ? "{0} > {1}" : "{0} <= {1}");
 
 			return string.Format(trans.Translate(format, Translator.Type.Header), Attribute.Label, FormatValue(Cutoff));
 		}
@@ -117,7 +105,7 @@ namespace EisenhowerUIExtension
 			if (task.IsDone)
 				return false;
 
-			return( (bool)XVariable?.TaskMatches(task) &&  (bool)YVariable?.TaskMatches(task));
+			return ((bool)XVariable?.TaskMatches(task) && (bool)YVariable?.TaskMatches(task));
 		}
 
 		public string ToString(Translator trans)
@@ -125,7 +113,7 @@ namespace EisenhowerUIExtension
 			if (HasNull)
 				return string.Empty;
 
-			return (XVariable.ToString(trans) + " - " + YVariable.ToString(trans));
+			return (XVariable.ToString(trans) + " / " + YVariable.ToString(trans));
 		}
 
 		public override bool Equals(object obj)
