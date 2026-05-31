@@ -90,7 +90,7 @@ namespace EisenhowerUIExtension
 				p.QueryContinueDrag += new QueryContinueDragEventHandler(OnPaneQueryContinueDrag);
 
 				p.DragOver += new DragEventHandler(OnPaneDragOver);
-				p.DragDrop += new DragEventHandler(OnDragDrop);
+				p.DragDrop += new DragEventHandler(OnPaneDragDrop);
 				p.GotFocus += new EventHandler(OnPaneGotFocus);
 			});
 		}
@@ -800,7 +800,7 @@ namespace EisenhowerUIExtension
 			}
 		}
 
-		private void OnDragDrop(object sender, DragEventArgs e)
+		private void OnPaneDragDrop(object sender, DragEventArgs e)
 		{
 			CleanupDrag();
 
