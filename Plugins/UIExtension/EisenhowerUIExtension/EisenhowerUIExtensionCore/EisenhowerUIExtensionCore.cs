@@ -113,6 +113,8 @@ namespace EisenhowerUIExtension
 					// simple update
 					m_EisenhowerCtrl.OnUpdateTasks(type, result.ModifiedTaskIds);
 				}
+
+				UpdateToolbarButtonStates();
 			}
 
 			if (selTaskIds != null)
@@ -388,6 +390,7 @@ namespace EisenhowerUIExtension
 			m_YAttribCombo.SelectedVariable = yVar;
 
 			EnableComboEvents(true);
+			UpdateToolbarButtonStates();
 		}
 
 		private void EnableComboEvents(bool enable)
@@ -406,24 +409,28 @@ namespace EisenhowerUIExtension
 
 		private void OnXAttribComboSelectionChange(object sender, EventArgs e)
 		{
-			if (m_XAttribCombo.SelectedVariable.Equals(m_EisenhowerCtrl.XFilterVariable))
-				return;
+			if (!m_XAttribCombo.SelectedVariable.Equals(m_EisenhowerCtrl.XFilterVariable))
+			{
+				// Rebuild Y combo without the new X variable
+				EnableComboEvents(false);
+				m_YAttribCombo.Populate(m_Trans, m_Data.Variables, m_XAttribCombo.SelectedVariable);
+				EnableComboEvents(true);
+			}
 
-			// Rebuild Y combo without the new X variable
-			EnableComboEvents(false);
-			m_YAttribCombo.Populate(m_Trans, m_Data.Variables, m_XAttribCombo.SelectedVariable);
-			EnableComboEvents(true);
+			UpdateToolbarButtonStates();
 		}
 
 		private void OnYAttribComboSelectionChange(object sender, EventArgs e)
 		{
-			if (m_YAttribCombo.SelectedVariable.Equals(m_EisenhowerCtrl.YFilterVariable))
-				return;
+			if (!m_YAttribCombo.SelectedVariable.Equals(m_EisenhowerCtrl.YFilterVariable))
+			{
+				// Rebuild X combo without the new Y variable
+				EnableComboEvents(false);
+				m_XAttribCombo.Populate(m_Trans, m_Data.Variables, m_YAttribCombo.SelectedVariable);
+				EnableComboEvents(true);
+			}
 
-			// Rebuild X combo without the new Y variable
-			EnableComboEvents(false);
-			m_XAttribCombo.Populate(m_Trans, m_Data.Variables, m_YAttribCombo.SelectedVariable);
-			EnableComboEvents(true);
+			UpdateToolbarButtonStates();
 		}
 
 		private void OnUpdateFilter(object sender, EventArgs e)
@@ -433,6 +440,14 @@ namespace EisenhowerUIExtension
 			m_EisenhowerCtrl.SetFilter(m_XAttribCombo.SelectedVariable,	m_YAttribCombo.SelectedVariable);
 			m_EisenhowerCtrl.SelectTasks(selTaskIds);
 			m_EisenhowerCtrl.Focus();
+
+			UpdateToolbarButtonStates();
+		}
+
+		private void UpdateToolbarButtonStates()
+		{
+			m_UpdateBtn.Enabled = (!m_XAttribCombo.SelectedVariable.Equals(m_EisenhowerCtrl.XFilterVariable) ||
+								   !m_YAttribCombo.SelectedVariable.Equals(m_EisenhowerCtrl.YFilterVariable));
 		}
 	}
 
