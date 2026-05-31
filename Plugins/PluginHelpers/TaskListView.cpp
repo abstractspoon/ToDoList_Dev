@@ -198,7 +198,7 @@ TaskListView::TaskListView()
 	m_LabelTip(nullptr),
 	m_BoldFont(nullptr),
 	m_ItemsHaveIcons(false),
-	m_ShowParentAsFolder(false),
+	m_ShowParentsAsFolders(false),
 	m_TaskColorIsBkgnd(false),
 	m_ShowCompletionCheckboxes(false),
 	m_BoundSelectionTimer(nullptr),
@@ -269,6 +269,9 @@ void TaskListView::SizeTaskColumnToFit::set(bool value)
 
 ListViewItem^ TaskListView::AddTask(ITaskBase^ task)
 {
+	if (Items->Count == 0)
+		ItemsHaveIcons = false;
+
 	auto lvItem = gcnew ListViewItem(task->Title);
 
 	lvItem->Tag = task;
@@ -666,14 +669,14 @@ void TaskListView::TaskColorIsBackground::set(bool value)
 
 bool TaskListView::ShowParentsAsFolders::get()
 {
-	return m_ShowParentAsFolder;
+	return m_ShowParentsAsFolders;
 }
 
 void TaskListView::ShowParentsAsFolders::set(bool value)
 {
-	if (m_ShowParentAsFolder != value)
+	if (m_ShowParentsAsFolders != value)
 	{
-		m_ShowParentAsFolder = value;
+		m_ShowParentsAsFolders = value;
 		Invalidate();
 	}
 }
@@ -844,7 +847,7 @@ void TaskListView::OnDrawItem(DrawListViewItemEventArgs^ e)
 
 			if (ItemsHaveIcons)
 			{
-				if (task->HasIcon && m_TaskIcons->Get(task->Id))
+				if ((task->HasIcon || (task->IsParent && ShowParentsAsFolders)) && m_TaskIcons->Get(task->Id))
 				{
 					auto iconRect = CalcIconRect(itemRect);
 					m_TaskIcons->Draw(e->Graphics, iconRect.Left, iconRect.Top);
