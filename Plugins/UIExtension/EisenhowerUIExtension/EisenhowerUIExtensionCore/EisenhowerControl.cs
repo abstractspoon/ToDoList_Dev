@@ -14,10 +14,10 @@ namespace EisenhowerUIExtension
 {
 	public class AttributeChangeEventArgs : EventArgs
 	{
-		public EisenhowerVariable XAttrib;
-		public double XValue;
-		public EisenhowerVariable YAttrib;
-		public double YValue;
+		public List<uint> TaskIds;
+
+		public EisenhowerVariable XAttrib, YAttrib;
+		public double XValue, YValue;
 	};
 
 	public delegate bool AttributeChangeEventHandler(Object sender, AttributeChangeEventArgs args);
@@ -809,7 +809,13 @@ namespace EisenhowerUIExtension
 
 			if (GetDragPanes(e, out srcPane, out destPane))
 			{
-				var attribChangeArgs = new AttributeChangeEventArgs();
+				var attribChangeArgs = new AttributeChangeEventArgs()
+				{
+					TaskIds = srcPane.SelectedTaskIds
+				};
+
+				// Weed out any non-droppable tasks
+				attribChangeArgs.TaskIds.RemoveAll(id => !IsTaskDroppable(m_Tasks.GetItem(id), srcPane, destPane));
 
 				var srcXRange = srcPane.Filter.XVariable.Range;
 				var srcYRange = srcPane.Filter.YVariable.Range;
@@ -836,12 +842,13 @@ namespace EisenhowerUIExtension
 
 				if (AttributeChange.Invoke(this, attribChangeArgs))
 				{
-					var modTaskIds = SelectedTaskIds;
-					int i = modTaskIds.Count;
+					// Modify our copy of the task values and update
+					// the source and destination panes
+					int i = attribChangeArgs.TaskIds.Count;
 
 					while (i-- > 0)
 					{
-						var task = m_Tasks.GetItem(modTaskIds[i]);
+						var task = m_Tasks.GetItem(attribChangeArgs.TaskIds[i]);
 
 						if ((task != null) && !task.IsLocked)
 						{
@@ -851,19 +858,41 @@ namespace EisenhowerUIExtension
 							if (destYRange != srcYRange)
 								task.SetAttributeValue(attribChangeArgs.YAttrib, attribChangeArgs.YValue);
 						}
-						else
-						{
-							modTaskIds.RemoveAt(i);
-						}
 					}
 
-					srcPane.RebuildTaskList();
-					destPane.RebuildTaskList();
+					srcPane.RefilterTasks(attribChangeArgs.TaskIds);
+					destPane.RefilterTasks(attribChangeArgs.TaskIds);
 
-					SelectTasks(modTaskIds);
+					SelectTasks(attribChangeArgs.TaskIds);
 					destPane.Focus();
 				}
 			}
+		}
+
+		private bool IsTaskDroppable(ITaskBase task, EisenhowerPane srcPane, EisenhowerPane destPane)
+		{
+			Debug.Assert(IsValidDrop(srcPane, destPane));
+
+			if ((task == null) || task.IsLocked)
+				return false;
+
+			if (task.IsParent)
+			{
+				// Disallow changing parent tasks whose value is calculated
+				if (HasParentCalculatedValues(XFilterVariable.Attribute.AttributeId) &&
+					(destPane.Filter.XVariable.Range != srcPane.Filter.XVariable.Range))
+				{
+					return false;
+				}
+
+				if (HasParentCalculatedValues(YFilterVariable.Attribute.AttributeId) &&
+					(destPane.Filter.YVariable.Range != srcPane.Filter.YVariable.Range))
+				{
+					return false;
+				}
+			}
+
+			return true;
 		}
 
 		private uint HitTestTask(Point screenPos, out EisenhowerPane pane)

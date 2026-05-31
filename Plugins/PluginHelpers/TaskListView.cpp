@@ -433,7 +433,7 @@ bool TaskListView::HasSelection::get()
 	return (SelectionCount > 0);
 }
 
-IList<UInt32>^ TaskListView::SelectedTaskIds::get()
+List<UInt32>^ TaskListView::SelectedTaskIds::get()
 {
 	auto taskIds = gcnew List<UInt32>();
 

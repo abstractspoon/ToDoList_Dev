@@ -326,43 +326,46 @@ namespace EisenhowerUIExtension
 		{
 			var notify = new UIExtension.ParentNotify(m_HwndParent);
 
-			CheckAddNotification(args.XAttrib, args.XValue, notify);
-			CheckAddNotification(args.YAttrib, args.YValue, notify);
+			args.TaskIds.ForEach(id =>
+			{
+				CheckAddNotification(id, args.XAttrib, args.XValue, notify);
+				CheckAddNotification(id, args.YAttrib, args.YValue, notify);
+			});
 
 			return notify.NotifyMod();
 		}
 
-		static private void CheckAddNotification(EisenhowerVariable var, double value, UIExtension.ParentNotify notify)
+		static private void CheckAddNotification(uint taskId, EisenhowerVariable var, double value, UIExtension.ParentNotify notify)
 		{
 			if (var != null)
 			{
 				if (var.Attribute.IsCustom())
 				{
 					// Always as string
-					notify.AddMod(var.Attribute.CustomAttributeId, value.ToString());
+					notify.AddMod(taskId, var.Attribute.CustomAttributeId, value.ToString());
 				}
 				else
 				{
 					switch (var.Type)
 					{
 					case EisenhowerVariable.ValueType.Integer:
-						notify.AddMod(var.Attribute.AttributeId, (int)value);
+						notify.AddMod(taskId, var.Attribute.AttributeId, (int)value);
 						break;
 
 					case EisenhowerVariable.ValueType.Decimal:
-						notify.AddMod(var.Attribute.AttributeId, value);
+						notify.AddMod(taskId, var.Attribute.AttributeId, value);
 						break;
 
 					case EisenhowerVariable.ValueType.Boolean:
-						notify.AddMod(var.Attribute.AttributeId, (value != 0));
+						notify.AddMod(taskId, var.Attribute.AttributeId, (value != 0));
 						break;
 
 					case EisenhowerVariable.ValueType.TimePeriod:
-						notify.AddMod(var.Attribute.AttributeId, value);
+						notify.AddMod(taskId, var.Attribute.AttributeId, value);
 						break;
 
 					case EisenhowerVariable.ValueType.Date:
-						notify.AddMod(var.Attribute.AttributeId, value);
+						notify.AddMod(taskId, var.Attribute.AttributeId, value);
 						break;
 					}
 				}
