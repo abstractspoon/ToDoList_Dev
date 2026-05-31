@@ -955,7 +955,7 @@ void TaskListView::WndProc(Message% m)
 					if (!lvHit->Selected)
 						ListView::WndProc(m); // Default handling to select task
 
-					EditTaskDone(this, task->Id, !task->IsDone);
+					EditTaskDone(this, task);
 					return;
 				}
 				else if (CalcIconRect(lvHit->Bounds).Contains(pos))
@@ -963,7 +963,7 @@ void TaskListView::WndProc(Message% m)
 					if (!lvHit->Selected)
 						ListView::WndProc(m); // Default handling to select task
 
-					EditTaskIcon(this, task->Id);
+					EditTaskIcon(this, task);
 					return;
 				}
 				// If the item is selected but we're not focused, 
@@ -990,7 +990,7 @@ void TaskListView::WndProc(Message% m)
 			auto task = ASTYPE(lvHit->Tag, ITaskBase);
 
 			if (IsTaskEditable(task) && GetTaskLabelRect(task->Id).Contains(pos))
-				EditTaskLabel(this, task->Id);
+				EditTaskLabel(this, task);
 
 		}
 		return; // always
@@ -1045,7 +1045,7 @@ void TaskListView::OnMouseMove(MouseEventArgs^ e)
 					cursor = UIExtension::HandCursor();
 				}
 				else if (CalcLabelRect(lvHit, LabelExtents::AllColumns).Contains(e->Location) &&
-						 !IsTaskDraggable(this, task->Id))
+						 !IsTaskDraggable(this, task))
 				{
 					cursor = UIExtension::AppCursor(UIExtension::AppCursorType::NoDrag);
 				}
@@ -1076,7 +1076,7 @@ void TaskListView::OnItemDrag(ItemDragEventArgs^ e)
 	if (task->IsLocked)
 		return;
 
-	if (!IsTaskDraggable(this, task->Id))
+	if (!IsTaskDraggable(this, task))
 		 return;
 	
 	ListView::OnItemDrag(e);
@@ -1095,7 +1095,7 @@ void TaskListView::OnBeforeLabelEdit(LabelEditEventArgs^ e)
 		auto task = ASTYPE(Items[e->Item]->Tag, ITaskBase);
 
 		if (task != nullptr)
-			EditTaskLabel(this, task->Id);
+			EditTaskLabel(this, task);
 	}
 
 	// always

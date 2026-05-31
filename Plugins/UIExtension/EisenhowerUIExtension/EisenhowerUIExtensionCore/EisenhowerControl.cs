@@ -476,26 +476,24 @@ namespace EisenhowerUIExtension
 
 		// Message handlers --------------------------------
 
-		private bool OnPaneEditTaskDone(object sender, uint taskId, bool completed)
+		private bool OnPaneEditTaskDone(object sender, ITaskBase task)
 		{
-			return (bool)EditTaskDone?.Invoke(sender, taskId, completed);
+			return (bool)EditTaskDone?.Invoke(sender, task);
 		}
 
-		private bool OnPaneEditTaskIcon(object sender, uint taskId)
+		private bool OnPaneEditTaskIcon(object sender, ITaskBase task)
 		{
-			return (bool)EditTaskIcon?.Invoke(sender, taskId);
+			return (bool)EditTaskIcon?.Invoke(sender, task);
 		}
 
-		private bool OnPaneEditTaskLabel(object sender, uint taskId)
+		private bool OnPaneEditTaskLabel(object sender, ITaskBase task)
 		{
-			return (bool)EditTaskLabel?.Invoke(sender, taskId);
+			return (bool)EditTaskLabel?.Invoke(sender, task);
 		}
 
-		private bool OnPaneIsTaskDraggable(object sender, uint taskId)
+		private bool OnPaneIsTaskDraggable(object sender, ITaskBase task)
 		{
-			var task = m_Tasks.GetItem(taskId);
-
-			if ((bool)task?.IsParent)
+			if (task.IsParent)
 			{
 				// Disallow dragging of parent tasks both of whose values are calculated
 				if (HasParentCalculatedValues(XFilterVariable.Attribute.AttributeId) &&

@@ -296,21 +296,21 @@ namespace EisenhowerUIExtension
 			m_EisenhowerCtrl.Bounds = rCtrl;
 		}
 
-		private bool OnEisenhowerCtrlEditTaskDone(object sender, UInt32 taskId, bool completed)
+		private bool OnEisenhowerCtrlEditTaskDone(object sender, ITaskBase task)
 		{
 			var notify = new UIExtension.ParentNotify(m_HwndParent);
 
 			return notify.NotifyMod(Task.Attribute.DoneDate,
-									(completed ? DateTime.Now : DateTime.MinValue));
+									(task.IsDone ? DateTime.Now : DateTime.MinValue));
 		}
 
-		private bool OnEisenhowerCtrlEditTaskIcon(object sender, UInt32 taskId)
+		private bool OnEisenhowerCtrlEditTaskIcon(object sender, ITaskBase task)
 		{
 			var notify = new UIExtension.ParentNotify(m_HwndParent);
 			return notify.NotifyEditIcon();
 		}
 
-		private bool OnEisenhowerCtrlEditTaskLabel(object sender, UInt32 taskId)
+		private bool OnEisenhowerCtrlEditTaskLabel(object sender, ITaskBase task)
 		{
 			var notify = new UIExtension.ParentNotify(m_HwndParent);
 			return notify.NotifyEditLabel();

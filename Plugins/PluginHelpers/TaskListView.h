@@ -20,11 +20,10 @@ namespace Abstractspoon
 	{
 		namespace PluginHelpers
 		{
-			public delegate bool EditTaskLabelEventHandler(Object^ sender, UInt32 taskId);
-			public delegate bool EditTaskIconEventHandler(Object^ sender, UInt32 taskId);
-			public delegate bool EditTaskCompletionEventHandler(Object^ sender, UInt32 taskId, bool completed);
-
-			public delegate bool IsTaskDraggableEventHandler(Object^ sender, UInt32 taskId);
+			public delegate bool EditTaskLabelEventHandler(Object^ sender, ITaskBase^ task);
+			public delegate bool EditTaskIconEventHandler(Object^ sender, ITaskBase^ task);
+			public delegate bool EditTaskCompletionEventHandler(Object^ sender, ITaskBase^ task);
+			public delegate bool IsTaskDraggableEventHandler(Object^ sender, ITaskBase^ task);
 
 			// ---------------------------------------------
 

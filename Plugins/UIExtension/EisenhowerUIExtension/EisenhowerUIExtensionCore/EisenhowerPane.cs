@@ -480,36 +480,36 @@ namespace EisenhowerUIExtension
 			ResizeList();
 		}
 
-		private bool OnListEditTaskDone(object sender, UInt32 taskId, bool completed)
+		private bool OnListEditTaskDone(object sender, ITaskBase task)
 		{
 			if (m_ReadOnly)
 				return false;
 
-			return (bool)EditTaskDone?.Invoke(sender, taskId, completed);
+			return (bool)EditTaskDone?.Invoke(sender, task);
 		}
 
-		private bool OnListEditTaskIcon(object sender, UInt32 taskId)
+		private bool OnListEditTaskIcon(object sender, ITaskBase task)
 		{
 			if (m_ReadOnly)
 				return false;
 
-			return (bool)EditTaskIcon?.Invoke(this, taskId);
+			return (bool)EditTaskIcon?.Invoke(this, task);
 		}
 
-		private bool OnListEditTaskLabel(object sender, UInt32 taskId)
+		private bool OnListEditTaskLabel(object sender, ITaskBase task)
 		{
 			if (m_ReadOnly)
 				return false;
 
-			return (bool)EditTaskLabel?.Invoke(this, taskId);
+			return (bool)EditTaskLabel?.Invoke(this, task);
 		}
 
-		private bool OnListIsTaskDraggable(object sender, UInt32 taskId)
+		private bool OnListIsTaskDraggable(object sender, ITaskBase task)
 		{
 			if (m_Filter.XVariable.ReadOnly && m_Filter.YVariable.ReadOnly)
 				return false;
 
-			return (bool)IsTaskDraggable?.Invoke(this, taskId);
+			return (bool)IsTaskDraggable?.Invoke(this, task);
 		}
 
 		private void OnListBeginItemDrag(object sender, ItemDragEventArgs e)
@@ -518,7 +518,7 @@ namespace EisenhowerUIExtension
 			var item = (e.Item as ListViewItem);
 			var task = m_List.GetTask(item.Index);
 
-			Debug.Assert(OnListIsTaskDraggable(m_List, (uint)task?.Id));
+			Debug.Assert(OnListIsTaskDraggable(m_List, task));
 #endif
 
 			DragBegin?.Invoke(this, new EventArgs());

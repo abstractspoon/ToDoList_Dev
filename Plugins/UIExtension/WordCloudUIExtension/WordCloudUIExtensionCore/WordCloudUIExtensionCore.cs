@@ -1074,22 +1074,22 @@ namespace WordCloudUIExtension
 				NotifyParentSelChange(selTaskId);
 		}
 
-        private bool OnTaskMatchesEditTaskDone(object sender, UInt32 taskId, bool completed)
+        private bool OnTaskMatchesEditTaskDone(object sender, ITaskBase task)
         {
             var notify = new UIExtension.ParentNotify(m_HwndParent);
 
             return notify.NotifyMod(Task.Attribute.DoneDate,
-                                    (completed ? DateTime.Now : DateTime.MinValue));
+                                    (task.IsDone ? DateTime.Now : DateTime.MinValue));
         }
 
-        private bool OnTaskMatchesEditTaskIcon(object sender, UInt32 taskId)
+        private bool OnTaskMatchesEditTaskIcon(object sender, ITaskBase task)
         {
             var notify = new UIExtension.ParentNotify(m_HwndParent);
 
             return notify.NotifyEditIcon();
         }
 
-        private bool OnTaskMatchesEditTaskLabel(object sender, UInt32 taskId)
+        private bool OnTaskMatchesEditTaskLabel(object sender, ITaskBase task)
         {
             var notify = new UIExtension.ParentNotify(m_HwndParent);
 
