@@ -45,20 +45,23 @@ namespace EisenhowerUIExtension
 			return (value <= Cutoff);
 		}
 
+		public bool RangeIsHigh { get { return (Range == EisenhowerPaneFilterAttributeRange.High); } }
+		public bool RangeIsLow { get { return !RangeIsHigh; } }
+
 		public string ToString(Translator trans)
 		{
 			if (IsNull)
 				return string.Empty;
 
-			bool high = (Range == EisenhowerPaneFilterAttributeRange.High);
-
 			var cutoff = Cutoff;
-			var format = (high ? "{0} > {1}" : "{0} <= {1}");
+
+			bool high = RangeIsHigh;
+			var format = (RangeIsHigh ? "{0} > {1}" : "{0} <= {1}");
 
 			switch (Type)
 			{
 			case ValueType.Boolean:
-				format = (high ? "{0} = Set" : "{0} = Not set");
+				format = trans.Translate(high ? "{0} = Set" : "{0} = Not set", Translator.Type.Header);
 				break;
 
 			case ValueType.Date:
@@ -80,7 +83,7 @@ namespace EisenhowerUIExtension
 				break;
 			}
 
-			return string.Format(trans.Translate(format, Translator.Type.Header), Attribute.Label, FormatValue(cutoff));
+			return string.Format(format, Attribute.Label, FormatValue(cutoff));
 		}
 
 		public override bool Equals(object other)
@@ -140,7 +143,14 @@ namespace EisenhowerUIExtension
 			if (HasNull)
 				return string.Empty;
 
-			return (XVariable.ToString(trans) + " / " + YVariable.ToString(trans));
+			string xText = trans.Translate((XVariable.RangeIsHigh ? "Urgent" : "Not urgent"), Translator.Type.Label);
+			string yText = trans.Translate((YVariable.RangeIsHigh ? "Important" : "Not important"), Translator.Type.Label);
+
+			return string.Format("{0} ({1}) / {2} ({3})",
+								 xText,
+								 XVariable.ToString(trans),
+								 yText,
+								 YVariable.ToString(trans));
 		}
 
 		public override bool Equals(object obj)
