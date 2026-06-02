@@ -2,10 +2,11 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
+#include "TDCEnum.h"
+
 #include "..\Shared\ownerdrawcomboboxbase.h"
 
 /////////////////////////////////////////////////////////////////////////////
-// CTDLReminderleadinComboBox
 
 enum 
 {
@@ -14,10 +15,7 @@ enum
 };
 
 /////////////////////////////////////////////////////////////////////////////
-
-const UINT TDLRPC_NOREMINDER = (UINT)-1; // for SetSelectedLeadin
-
-/////////////////////////////////////////////////////////////////////////////
+// CTDLReminderleadinComboBox
 
 class CTDLReminderPeriodComboBox : public COwnerdrawComboBoxBase
 {
@@ -27,10 +25,10 @@ public:
 	CTDLReminderPeriodComboBox(DWORD dwShow = 0);
 	virtual ~CTDLReminderPeriodComboBox();
 
-	BOOL SetSelectedPeriod(UINT nMinutes);
-	int GetSelectedPeriod() const;
+	BOOL SetSelectedPeriod(TDC_REMINDERPERIOD nPeriod);
+	TDC_REMINDERPERIOD GetSelectedPeriod() const;
 
-	void DDX(CDataExchange* pDX, int& nMinutes);
+	void DDX(CDataExchange* pDX, TDC_REMINDERPERIOD& nPeriod);
 
 protected:
 	DWORD m_dwShow;
@@ -39,11 +37,11 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	void ValidateLeadin(UINT& nMinutes);
+	void ValidatePeriod(TDC_REMINDERPERIOD& nPeriod);
 
 	virtual void BuildCombo();
 	virtual void DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
-		DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText);
+								DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText);
 };
 
 

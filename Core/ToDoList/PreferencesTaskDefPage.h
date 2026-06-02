@@ -84,7 +84,7 @@ protected:
 	BOOL	m_bUseCreationTimeForDefStartDate;
 	BOOL	m_bUseCreationDateForDefDueDate;
 	CTDCImageList m_ilTaskIcons;
-	int m_nDefReminderLeadinMins;
+	TDC_REMINDERPERIOD m_nDefReminderLeadin;
 
 	const CTDCContentMgr* m_pMgrContent;
 

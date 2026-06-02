@@ -45,7 +45,7 @@ protected:
 	//{{AFX_DATA(CTDLShowReminderDlg)
 	//}}AFX_DATA
 	CString m_sSoundFile;
-	UINT m_nSnoozeMins;
+	TDC_REMINDERPERIOD m_nSnooze;
 	int m_bSnoozeUntil;
 	BOOL m_bModifyingList;
 	BOOL m_bModifyingReminder;
@@ -105,8 +105,6 @@ protected:
 	int GetListReminders(const CFilteredToDoCtrl& tdc, CTDCReminderArray& aRem) const;
 
 	BOOL GetWantSnoozeUntil() const { return m_bSnoozeUntil; }
-	UINT GetSnoozeMinutes() const { return m_nSnoozeMins; }
-	double GetSnoozeDays() const;
 	COleDateTime GetSnoozeUntil() const;
 
 	void EnableDisableControls();

@@ -9,60 +9,54 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
-// CTDLReminderleadinComboBox
-struct LEADINDATA
+struct PERIODDATA
 {
 	LPCTSTR szItemText;
-	UINT nItemData; // minutes
+	TDC_REMINDERPERIOD nPeriod;
 };
 
-const UINT ONE_HOUR		= 60;
-const UINT ONE_DAY		= ONE_HOUR * 24;
-const UINT ONE_WEEK		= ONE_DAY * 7;
-const UINT ONE_MONTH	= ONE_DAY * 30;
-const UINT ONE_YEAR		= ONE_DAY * 365;
+// --------------------------------------
 
-// We can get away with non-resourced strings here because
-// ToDoList uses a dynamic runtime translation system
-static LEADINDATA data[] = 
+static PERIODDATA data[] = 
 {
-	{ _T("<none>"),				TDLRPC_NOREMINDER },
-	{ _T("0 minutes"),			0 },
-	{ _T("5 minutes"),			5 },
-	{ _T("10 minutes"),			10 },
-	{ _T("15 minutes"),			15 },
-	{ _T("20 minutes"),			20 },
-	{ _T("30 minutes"),			30 },
-	{ _T("45 minutes"),			45 },
-	{ _T("60 minutes / 1 hour"),ONE_HOUR },
-	{ _T("2 hours"),			2 * ONE_HOUR },
-	{ _T("3 hours"),			3 * ONE_HOUR },
-	{ _T("4 hours"),			4 * ONE_HOUR },
-	{ _T("5 hours"),			5 * ONE_HOUR },
-	{ _T("6 hours"),			6 * ONE_HOUR },
-	{ _T("12 hours"),			12 * ONE_HOUR },
-	{ _T("24 hours / 1 day"),	ONE_DAY },
-	{ _T("2 days"),				2 * ONE_DAY },
-	{ _T("3 days"),				3 * ONE_DAY },
-	{ _T("4 days"),				4 * ONE_DAY },
-	{ _T("5 days"),				5 * ONE_DAY },
-	{ _T("6 days"),				6 * ONE_DAY },
-	{ _T("7 days / 1 week"),	ONE_WEEK },
-	{ _T("2 weeks"),			2 * ONE_WEEK },
-	{ _T("3 weeks"),			3 * ONE_WEEK },
-	{ _T("4 weeks"),			4 * ONE_WEEK },
-	{ _T("1 month"),			ONE_MONTH },
-	{ _T("2 months"),			2 * ONE_MONTH } ,
-	{ _T("3 months"),			3 * ONE_MONTH },
-	{ _T("4 months"),			4 * ONE_MONTH },
-	{ _T("5 months"),			5 * ONE_MONTH },
-	{ _T("6 months"),			6 * ONE_MONTH },
-	{ _T("9 months"),			9 * ONE_MONTH },
-	{ _T("12 months / 1 year"),	ONE_YEAR 	},
+	{ _T("<none>"),				TDCRP_NOREMINDER },
+	{ _T("0 minutes"),			TDCRP_0_MINS },
+	{ _T("5 minutes"),			TDCRP_5_MINS },
+	{ _T("10 minutes"),			TDCRP_10_MINS },
+	{ _T("15 minutes"),			TDCRP_15_MINS },
+	{ _T("20 minutes"),			TDCRP_20_MINS },
+	{ _T("30 minutes"),			TDCRP_30_MINS },
+	{ _T("45 minutes"),			TDCRP_45_MINS },
+	{ _T("60 minutes / 1 hour"),TDCRP_1_HOUR },
+	{ _T("2 hours"),			TDCRP_2_HOURS },
+	{ _T("3 hours"),			TDCRP_3_HOURS },
+	{ _T("4 hours"),			TDCRP_4_HOURS },
+	{ _T("5 hours"),			TDCRP_5_HOURS },
+	{ _T("6 hours"),			TDCRP_6_HOURS },
+	{ _T("12 hours"),			TDCRP_12_HOURS },
+	{ _T("24 hours / 1 day"),	TDCRP_1_DAY },
+	{ _T("2 days"),				TDCRP_2_DAYS },
+	{ _T("3 days"),				TDCRP_3_DAYS },
+	{ _T("4 days"),				TDCRP_4_DAYS },
+	{ _T("5 days"),				TDCRP_5_DAYS },
+	{ _T("6 days"),				TDCRP_6_DAYS },
+	{ _T("7 days / 1 week"),	TDCRP_1_WEEK },
+	{ _T("2 weeks"),			TDCRP_2_WEEKS },
+	{ _T("3 weeks"),			TDCRP_3_WEEKS },
+	{ _T("4 weeks"),			TDCRP_4_WEEKS },
+	{ _T("1 month"),			TDCRP_1_MONTH },
+	{ _T("2 months"),			TDCRP_2_MONTHS } ,
+	{ _T("3 months"),			TDCRP_3_MONTHS },
+	{ _T("4 months"),			TDCRP_4_MONTHS },
+	{ _T("5 months"),			TDCRP_5_MONTHS },
+	{ _T("6 months"),			TDCRP_6_MONTHS },
+	{ _T("9 months"),			TDCRP_9_MONTHS },
+	{ _T("12 months / 1 year"),	TDCRP_1_YEAR },
 };
-const UINT NUM_DATA = (sizeof(data) / sizeof(LEADINDATA));
+const UINT NUM_DATA = (sizeof(data) / sizeof(PERIODDATA));
 
 /////////////////////////////////////////////////////////////////////////////
+// CTDLReminderleadinComboBox
 
 IMPLEMENT_DYNAMIC(CTDLReminderPeriodComboBox, COwnerdrawComboBoxBase)
 
@@ -81,7 +75,6 @@ BEGIN_MESSAGE_MAP(CTDLReminderPeriodComboBox, COwnerdrawComboBoxBase)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
-// CTDLReminderleadinComboBox message handlers
 
 void CTDLReminderPeriodComboBox::BuildCombo()
 {
@@ -91,63 +84,63 @@ void CTDLReminderPeriodComboBox::BuildCombo()
 
 	for (int nData = 0; nData < NUM_DATA; nData++)
 	{
-		if (!(m_dwShow & TDLRPC_SHOWNONE) && (data[nData].nItemData == TDLRPC_NOREMINDER))
+		if (!(m_dwShow & TDLRPC_SHOWNONE) && (data[nData].nPeriod == TDCRP_NOREMINDER))
 			continue;
 
-		if (!(m_dwShow & TDLRPC_SHOWZERO) && (data[nData].nItemData == 0))
+		if (!(m_dwShow & TDLRPC_SHOWZERO) && (data[nData].nPeriod == TDCRP_0_MINS))
 			continue;
 
 		VERIFY(CDialogHelper::AddStringT(*this,
 										 data[nData].szItemText,
-										 data[nData].nItemData) != CB_ERR);
+										 data[nData].nPeriod) != CB_ERR);
 	}
 }
 
-BOOL CTDLReminderPeriodComboBox::SetSelectedPeriod(UINT nMinutes)
+BOOL CTDLReminderPeriodComboBox::SetSelectedPeriod(TDC_REMINDERPERIOD nPeriod)
 {
 	CheckBuildCombo();
-	ValidateLeadin(nMinutes);
+	ValidatePeriod(nPeriod);
 
-	return (CB_ERR != CDialogHelper::SelectItemByDataT(*this, nMinutes));
+	return (CB_ERR != CDialogHelper::SelectItemByDataT(*this, nPeriod));
 }
 
-int CTDLReminderPeriodComboBox::GetSelectedPeriod() const
+TDC_REMINDERPERIOD CTDLReminderPeriodComboBox::GetSelectedPeriod() const
 {
-	return CDialogHelper::GetSelectedItemDataT(*this, 15);
+	return CDialogHelper::GetSelectedItemDataT(*this, TDCRP_15_MINS);
 }
 
-void CTDLReminderPeriodComboBox::ValidateLeadin(UINT& nMinutes)
+void CTDLReminderPeriodComboBox::ValidatePeriod(TDC_REMINDERPERIOD& nPeriod)
 {
-	ASSERT ((m_dwShow & TDLRPC_SHOWNONE) || (nMinutes != TDLRPC_NOREMINDER));
-	ASSERT ((m_dwShow & TDLRPC_SHOWZERO) || (nMinutes != 0));
+	ASSERT ((m_dwShow & TDLRPC_SHOWNONE) || (nPeriod != TDCRP_NOREMINDER));
+	ASSERT ((m_dwShow & TDLRPC_SHOWZERO) || (nPeriod != TDCRP_0_MINS));
 
 	// ignore 'none'
-	if ((m_dwShow & TDLRPC_SHOWNONE) && (nMinutes == TDLRPC_NOREMINDER))
+	if ((m_dwShow & TDLRPC_SHOWNONE) && (nPeriod == TDCRP_NOREMINDER))
 		return;
 
 	for (int nData = 1; nData < NUM_DATA; nData++)
 	{
-		if (data[nData].nItemData >= nMinutes)
+		if (data[nData].nPeriod >= nPeriod)
 		{
-			nMinutes = data[nData].nItemData;
+			nPeriod = data[nData].nPeriod;
 			break;
 		}
 	}
 }
 
-void CTDLReminderPeriodComboBox::DDX(CDataExchange* pDX, int& nMinutes)
+void CTDLReminderPeriodComboBox::DDX(CDataExchange* pDX, TDC_REMINDERPERIOD& nPeriod)
 {
 	if (pDX->m_bSaveAndValidate)
-		nMinutes = GetSelectedPeriod();
+		nPeriod = GetSelectedPeriod();
 	else
-		SetSelectedPeriod(nMinutes);
+		SetSelectedPeriod(nPeriod);
 }
 
 void CTDLReminderPeriodComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
 	DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText)
 {
 	// Draw <none> in window prompt color
-	if ((dwItemData == TDLRPC_NOREMINDER) && !(nItemState & ODS_SELECTED) && !bList)
+	if ((dwItemData == TDCRP_NOREMINDER) && !(nItemState & ODS_SELECTED) && !bList)
 	{
 		crText = CWndPrompt::GetTextColor();
 	}

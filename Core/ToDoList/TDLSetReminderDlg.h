@@ -47,7 +47,7 @@ protected:
 	CDateTimeCtrlEx m_dtcAbsolute;
 
 	int		m_bRelativeFromDueDate;
-	double  m_dRelativeLeadInHours;
+	TDC_REMINDERPERIOD m_nRelativeLeadIn;
 	CString	m_sSoundFile;
 	int		m_bRelative;
 	COleDateTime m_dtAbsoluteDate;
