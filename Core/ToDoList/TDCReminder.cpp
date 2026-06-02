@@ -230,7 +230,8 @@ void TDCREMINDER::Save(IPreferences* pPrefs, LPCTSTR szKey) const
 	
 	if (bRelative)
 	{
-		pPrefs->WriteProfileInt(szKey, _T("LeadIn"), nRelativeLeadIn);
+		// Lead-in remains stored as 'double' for backwards compatibility
+		pPrefs->WriteProfileDouble(szKey, _T("LeadIn"), nRelativeLeadIn);
 		pPrefs->WriteProfileInt(szKey, _T("FromWhen"), nRelativeFromWhen);
 	}
 	else
@@ -251,7 +252,7 @@ void TDCREMINDER::Load(const IPreferences* pPrefs, LPCTSTR szKey)
 	
 	if (bRelative)
 	{
-		// Using 'GetProfileDouble' for backwards compatibility
+		// Lead-in remains stored as 'double' for backwards compatibility
 		nRelativeLeadIn = (TDC_REMINDERPERIOD)(int)pPrefs->GetProfileDouble(szKey, _T("LeadIn"), TDCRP_15_MINS);
 		nRelativeFromWhen = (TDC_REMINDER)pPrefs->GetProfileInt(szKey, _T("FromWhen"));
 	}

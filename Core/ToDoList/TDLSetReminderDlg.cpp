@@ -219,19 +219,9 @@ void CTDLSetReminderDlg::LoadPreferences(const CPreferences& prefs)
 	m_bPlaySound = prefs.GetProfileInt(m_sPrefsKey, _T("PlaySound"), -1);
 	m_sSoundFile = prefs.GetProfileString(m_sPrefsKey, _T("SoundFile"), m_sSoundFile);
 
-	// Backwards compatibility
-	CString sLeadIn = prefs.GetProfileString(m_sPrefsKey, _T("LeadIn"));
-
-	if (sLeadIn.Find('.') != -1)
-	{
-		// Previously leadin was stored in 'hours'
-		double dHours = _ttof(sLeadIn);
-		m_nRelativeLeadIn = (TDC_REMINDERPERIOD)Misc::Round(dHours * TDCRP_1_HOUR);
-	}
-	else
-	{
-		m_nRelativeLeadIn = prefs.GetProfileEnum(m_sPrefsKey, _T("LeadIn"), TDCRP_15_MINS);
-	}
+	// Lead-in remains stored in 'hours' for backwards compatibility
+	double dLeadInHours = prefs.GetProfileDouble(m_sPrefsKey, _T("LeadIn"), 0.25);
+	m_nRelativeLeadIn = (TDC_REMINDERPERIOD)Misc::Round(dLeadInHours * TDCRP_1_HOUR);
 
 	// Backwards compatibility
 	const LPCTSTR NO_SOUND = _T("None");
@@ -258,8 +248,10 @@ void CTDLSetReminderDlg::SavePreferences(CPreferences& prefs) const
 {
 	prefs.WriteProfileInt(m_sPrefsKey, _T("Relative"), m_bRelative);
 	prefs.WriteProfileInt(m_sPrefsKey, _T("RelativeFromDue"), m_bRelativeFromDueDate);
-	prefs.WriteProfileInt(m_sPrefsKey, _T("LeadIn"), m_nRelativeLeadIn);
 	prefs.WriteProfileString(m_sPrefsKey, _T("SoundFile"), m_sSoundFile);
 	prefs.WriteProfileInt(m_sPrefsKey, _T("PlaySound"), m_bPlaySound);
+
+	// Lead-in remains stored in 'hours' for backwards compatibility
+	prefs.WriteProfileDouble(m_sPrefsKey, _T("LeadIn"), ((double)m_nRelativeLeadIn / TDCRP_1_HOUR));
 }
 
