@@ -62,12 +62,12 @@ void CTimeComboBox::BuildCombo()
 	CLocalizer::EnableTranslation(*this, FALSE);
 }
 
-void CTimeComboBox::DDX(CDataExchange* pDX, double& dHours)
+void CTimeComboBox::DDX(CDataExchange* pDX, double& dHours, BOOL b24HourTime)
 {
 	if (pDX->m_bSaveAndValidate)
-		dHours = Get24HourTime();
+		dHours = (b24HourTime ? Get24HourTime() : GetOleTime());
 	else
-		Set24HourTime(dHours);
+		(b24HourTime ? Set24HourTime(dHours) : SetOleTime(dHours));
 }
 
 void CTimeComboBox::DDX(CDataExchange* pDX, COleDateTime& dtTime)

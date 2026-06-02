@@ -35,7 +35,7 @@ public:
 	
 	void SetISOFormat(BOOL bISO);
 
-	void DDX(CDataExchange* pDX, double& dHours);
+	void DDX(CDataExchange* pDX, double& dHours, BOOL b24HourTime = TRUE);
 	void DDX(CDataExchange* pDX, COleDateTime& dtTime);
 	
 protected:

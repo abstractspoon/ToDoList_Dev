@@ -61,7 +61,6 @@ void CTDLSetReminderDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_PLAYSOUND, m_bPlaySound);
 
 	m_cbLeadIn.DDX(pDX, m_nRelativeLeadIn);
-	m_cbAbsoluteTime.DDX(pDX, m_dAbsoluteTime);
 
 // 	if (pDX->m_bSaveAndValidate)
 // 	{
@@ -73,6 +72,7 @@ void CTDLSetReminderDlg::DoDataExchange(CDataExchange* pDX)
 // 		m_cbLeadIn.SetSelectedPeriod((UINT)(m_dRelativeLeadInHours * 60));
 // 		m_cbAbsoluteTime.SetOleTime(m_dAbsoluteTime);
 // 	}
+	m_cbAbsoluteTime.DDX(pDX, m_dAbsoluteTime, FALSE); // OLE time
 }
 
 BEGIN_MESSAGE_MAP(CTDLSetReminderDlg, CTDLDialog)
