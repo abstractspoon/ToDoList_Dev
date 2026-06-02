@@ -836,28 +836,16 @@ void CToDoCtrlReminders::DoSnoozeReminder(const TDCREMINDER& rem)
 		}
 		else
 		{
-			// in case the user didn't handle the notification immediately we need
-			// to soak up any additional elapsed time in the snooze
-			COleDateTime date;
-			VERIFY(remExist.GetReminderDate(date));
+			// in case the user didn't handle the notification immediately 
+			// we update the snooze to soak up any additional elapsed time
+			COleDateTime dtRem;
+			VERIFY(remExist.GetReminderDate(dtRem));
 
-			remExist.dDaysSnooze = (dNow - date.m_dt);
-
-// 			if (remExist.bRelative)
-// 			{
-// 				COleDateTime date;
-// 				VERIFY(remExist.GetRelativeToDate(date));
-// 
-// 				remExist.dDaysSnooze = (dNow - date + remExist.dRelativeDaysLeadIn);
-// 			}
-// 			else // absolute
-// 			{
-// 				remExist.dDaysSnooze = (dNow - remExist.dtAbsolute);
-// 			}
+			remExist.dDaysSnooze = (dNow - dtRem.m_dt);
 						
 			// then we add the user's snooze
 			remExist.nLastUserSnooze = m_nSnooze;
-			remExist.dDaysSnooze += (m_nSnooze / (24 * 60.0));
+			remExist.dDaysSnooze += ((double)m_nSnooze / TDCRP_1_DAY);
 		}
 	}
 

@@ -61,23 +61,12 @@ void CTDLSetReminderDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_PLAYSOUND, m_bPlaySound);
 
 	m_cbLeadIn.DDX(pDX, m_nRelativeLeadIn);
-
-// 	if (pDX->m_bSaveAndValidate)
-// 	{
-// 		m_dRelativeLeadInHours = (m_cbLeadIn.GetSelectedPeriod() / 60.0);
-// 		m_dAbsoluteTime = m_cbAbsoluteTime.GetOleTime();
-// 	}
-// 	else
-// 	{
-// 		m_cbLeadIn.SetSelectedPeriod((UINT)(m_dRelativeLeadInHours * 60));
-// 		m_cbAbsoluteTime.SetOleTime(m_dAbsoluteTime);
-// 	}
 	m_cbAbsoluteTime.DDX(pDX, m_dAbsoluteTime, FALSE); // OLE time
 }
 
 BEGIN_MESSAGE_MAP(CTDLSetReminderDlg, CTDLDialog)
 	//{{AFX_MSG_MAP(CTDLSetReminderDlg)
-	ON_CBN_SELCHANGE(IDC_RELATIVELEADIN, OnSelchangeLeadin)
+//	ON_CBN_SELCHANGE(IDC_RELATIVELEADIN, OnSelchangeLeadin)
 	ON_BN_CLICKED(IDC_RELATIVE, OnChangeRelative)
 	ON_BN_CLICKED(IDC_ABSOLUTE, OnChangeRelative)
 	//}}AFX_MSG_MAP
@@ -177,13 +166,6 @@ void CTDLSetReminderDlg::OnClickPlaySound()
 	UpdateData();
 
 	GetDlgItem(IDC_SOUNDFILE)->EnableWindow(m_bPlaySound);
-}
-
-void CTDLSetReminderDlg::OnSelchangeLeadin() 
-{
-	UpdateData();
-
-//	m_nRelativeLeadInHours = (m_cbLeadIn.GetSelectedPeriod() / 60.0); // in hours
 }
 
 void CTDLSetReminderDlg::OnChangeRelative() 

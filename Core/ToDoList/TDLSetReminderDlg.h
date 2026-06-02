@@ -67,7 +67,6 @@ protected:
 protected:
 	// Generated message map functions
 	//{{AFX_MSG(CTDLSetReminderDlg)
-	afx_msg void OnSelchangeLeadin();
 	afx_msg void OnChangeRelative();
 	//}}AFX_MSG
 	afx_msg void OnClickPlaySound();
