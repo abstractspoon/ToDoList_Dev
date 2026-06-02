@@ -55,15 +55,12 @@ CToDoCtrlReminders::~CToDoCtrlReminders()
 
 
 BEGIN_MESSAGE_MAP(CToDoCtrlReminders, CTDLShowReminderDlg)
-	//{{AFX_MSG_MAP(CToDoCtrlReminders)
 	ON_WM_TIMER()
-	//}}AFX_MSG_MAP
 	ON_WM_SYSCOMMAND()
 END_MESSAGE_MAP()
 
 
 /////////////////////////////////////////////////////////////////////////////
-// CToDoCtrlReminders message handlers
 
 BOOL CToDoCtrlReminders::Initialize(CWnd* pNotify)
 {
@@ -844,8 +841,8 @@ void CToDoCtrlReminders::DoSnoozeReminder(const TDCREMINDER& rem)
 			remExist.dDaysSnooze = (dNow - dtRem.m_dt);
 						
 			// then we add the user's snooze
-			remExist.nLastUserSnooze = m_nSnooze;
 			remExist.dDaysSnooze += ((double)m_nSnooze / TDCRP_1_DAY);
+			remExist.nLastUserSnooze = m_nSnooze;
 		}
 	}
 

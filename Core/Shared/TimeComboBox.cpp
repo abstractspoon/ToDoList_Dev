@@ -36,7 +36,6 @@ BEGIN_MESSAGE_MAP(CTimeComboBox, COwnerdrawComboBoxBase)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
-// CTimeComboBox message handlers
 
 void CTimeComboBox::BuildCombo()
 {

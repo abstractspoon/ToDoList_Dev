@@ -51,12 +51,9 @@ CPreferencesTaskDefPage::CPreferencesTaskDefPage(const CTDCContentMgr* pMgrConte
 	m_cbDefReminder(TDLRPC_SHOWNONE | TDLRPC_SHOWZERO),
 	m_cbDefPriority(FALSE),
 	m_cbDefRisk(FALSE),
+	m_bReminderBeforeDue(TRUE),
 	m_nDefReminderLeadin(TDCRP_NOREMINDER)
 {
-	//{{AFX_DATA_INIT(CPreferencesTaskDefPage)
-	m_sReminderSound = _T("");
-	//}}AFX_DATA_INIT
-	m_bReminderBeforeDue = TRUE;
 	m_eCost.SetMask(_T("@.0123456789"), ME_LOCALIZEDECIMAL);
 }
 
@@ -67,14 +64,13 @@ CPreferencesTaskDefPage::~CPreferencesTaskDefPage()
 void CPreferencesTaskDefPage::DoDataExchange(CDataExchange* pDX)
 {
 	CPreferencesPageBase::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CPreferencesTaskDefPage)
+
 	DDX_Control(pDX, IDC_PLAYSOUND, m_eReminderSound);
 	DDX_Text(pDX, IDC_PLAYSOUND, m_sReminderSound);
 	DDX_Control(pDX, IDC_DEFREMINDER, m_cbDefReminder);
 	DDX_Control(pDX, IDC_DEFAULTRISK, m_cbDefRisk);
 	DDX_Control(pDX, IDC_DEFAULTPRIORITY, m_cbDefPriority);
 	DDX_CBIndex(pDX, IDC_DEFREMINDERDATE, m_bReminderBeforeDue);
-	//}}AFX_DATA_MAP
 	DDX_Control(pDX, IDC_DEFAULTTIMESPENT, m_eTimeSpent);
 	DDX_Control(pDX, IDC_DEFAULTTIMEEST, m_eTimeEst);
 	DDX_Control(pDX, IDC_DEFAULTCOST, m_eCost);
@@ -101,10 +97,8 @@ void CPreferencesTaskDefPage::DoDataExchange(CDataExchange* pDX)
 }
 
 BEGIN_MESSAGE_MAP(CPreferencesTaskDefPage, CPreferencesPageBase)
-	//{{AFX_MSG_MAP(CPreferencesTaskDefPage)
 	ON_CBN_SELCHANGE(IDC_DEFREMINDER, OnSelchangeReminder)
 	ON_BN_CLICKED(IDC_USECREATIONFORDEFSTARTDATE, OnUseCreationDateForDefStartDate)
-	//}}AFX_MSG_MAP
 	ON_BN_CLICKED(IDC_SETDEFAULTICON, OnSetdefaulticon)
 	ON_BN_CLICKED(IDC_SETDEFAULTCOLOR, OnSetdefaultcolor)
 	ON_CBN_SELENDOK(IDC_COMMENTS, OnSelchangeCommentsformat)
@@ -114,15 +108,6 @@ BEGIN_MESSAGE_MAP(CPreferencesTaskDefPage, CPreferencesPageBase)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
-// CPreferencesTaskDefPage message handlers
-
-BOOL CPreferencesTaskDefPage::OnInitDialog()
-{
-	CPreferencesPageBase::OnInitDialog();
-
-	return TRUE;  // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX Property Pages should return FALSE
-}
 
 void CPreferencesTaskDefPage::OnFirstShow()
 {

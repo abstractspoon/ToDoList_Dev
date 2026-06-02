@@ -42,13 +42,13 @@ protected:
 	DWORD m_dwStyle;
 	
 protected:
-	afx_msg void OnCaptureChanged(CWnd* pWnd);
-	DECLARE_MESSAGE_MAP()
-
 	virtual void BuildCombo();
 	virtual LRESULT OnEditboxMessage(UINT msg, WPARAM wp, LPARAM lp);
 	virtual void GetItemColors(int nItem, UINT nItemState, DWORD dwItemData, 
 								COLORREF& crText, COLORREF& crBack) const;	
+protected:
+	afx_msg void OnCaptureChanged(CWnd* pWnd);
+	DECLARE_MESSAGE_MAP()
 
 protected:
 	void ScrollListBox();

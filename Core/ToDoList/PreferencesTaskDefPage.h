@@ -6,6 +6,7 @@
 #endif // _MSC_VER > 1000
 // PreferencesTaskDefPage.h : header file
 //
+/////////////////////////////////////////////////////////////////////////////
 
 #include "tdcenum.h"
 #include "tdlprioritycombobox.h"
@@ -39,7 +40,6 @@ class CTDCContentMgr;
 
 class CPreferencesTaskDefPage : public CPreferencesPageBase
 {
-// Construction
 public:
 	CPreferencesTaskDefPage(const CTDCContentMgr* pMgrContent = NULL);
 	~CPreferencesTaskDefPage();
@@ -52,24 +52,22 @@ public:
 	BOOL GetReminder(TDCREMINDER& rem) const;
 
 protected:
-// Dialog Data
-	//{{AFX_DATA(CPreferencesTaskDefPage)
-	//}}AFX_DATA
-
-	CTDLReminderPeriodComboBox	m_cbDefReminder;
-	CTDLRiskComboBox	m_cbDefRisk;
-	CTDLPriorityComboBox	m_cbDefPriority;
-	CTimeEdit	m_eTimeEst;
-	CTimeEdit	m_eTimeSpent;
+	CTDLReminderPeriodComboBox m_cbDefReminder;
+	CTDLRiskComboBox m_cbDefRisk;
+	CTDLPriorityComboBox m_cbDefPriority;
+	CTimeEdit m_eTimeEst;
+	CTimeEdit m_eTimeSpent;
 	CMaskEdit m_eCost;
-	CColourButton	m_btDefColor;
-	CIconButton		m_btDefIcon;
-	CSoundEdit	m_eReminderSound;
+	CColourButton m_btDefColor;
+	CIconButton m_btDefIcon;
+	CSoundEdit m_eReminderSound;
+	CTDLCommentsCtrl m_ctrlComments;
+	CTDCImageList m_ilTaskIcons;
 
 	CString	m_sDefCreatedBy;
-	BOOL	m_bReminderBeforeDue;
-	int		m_nDefPriority;
-	int		m_nDefRisk;
+	BOOL m_bReminderBeforeDue;
+	int m_nDefPriority;
+	int m_nDefRisk;
 	TDCCOST	m_defCost;
 	TDCTIMEPERIOD m_defTimeEst, m_defTimeSpent;
 	CString	m_sDefAllocTo;
@@ -80,45 +78,34 @@ protected:
 	CString m_sDefIcon;
 	CString	m_sReminderSound;
 	COLORREF m_crDef;
-	BOOL	m_bUseCreationDateForDefStartDate;
-	BOOL	m_bUseCreationTimeForDefStartDate;
-	BOOL	m_bUseCreationDateForDefDueDate;
-	CTDCImageList m_ilTaskIcons;
+	BOOL m_bUseCreationDateForDefStartDate;
+	BOOL m_bUseCreationTimeForDefStartDate;
+	BOOL m_bUseCreationDateForDefDueDate;
 	TDC_REMINDERPERIOD m_nDefReminderLeadin;
 
 	const CTDCContentMgr* m_pMgrContent;
 
-	CTDLCommentsCtrl m_ctrlComments;
 	CONTENTFORMAT m_cfDefault;
 	CBinaryData m_defCustomComments;
 	CString m_sDefTextComments;
 	CFont m_fontDefComments;
 
-// Overrides
-	// ClassWizard generate virtual function overrides
-	//{{AFX_VIRTUAL(CPreferencesTaskDefPage)
-	//}}AFX_VIRTUAL
-
 protected:
 	virtual void OnOK();
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-	virtual BOOL OnInitDialog();
 	virtual void OnFirstShow();
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 
-// Implementation
 protected:
-	// Generated message map functions
-	//{{AFX_MSG(CPreferencesTaskDefPage)
 	afx_msg void OnSetdefaulticon();
 	afx_msg void OnSelchangeReminder();
 	afx_msg void OnUseCreationDateForDefStartDate();
-	//}}AFX_MSG
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnSetdefaultcolor();
 	afx_msg void OnSelchangeCommentsformat();
 	afx_msg LRESULT OnCommentsChange(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnInitComments(WPARAM wParam, LPARAM lParam);
+
 	DECLARE_MESSAGE_MAP()
 		
 protected:
@@ -127,8 +114,5 @@ protected:
 	
 	void UpdateCommentsSize();
 };
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
 #endif // !defined(AFX_PREFERENCESTASKDEFPAGE_H__852964E3_4ABD_4B66_88BA_F553177616F2__INCLUDED_)

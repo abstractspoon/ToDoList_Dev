@@ -29,7 +29,7 @@ double ONE_DAY_IN_MINS = (24.0 * 60);
 /////////////////////////////////////////////////////////////////////////////
 // CTDLShowReminderDlg dialog
 
-CTDLShowReminderDlg::CTDLShowReminderDlg(CWnd* pParent /*=NULL*/)
+CTDLShowReminderDlg::CTDLShowReminderDlg(CWnd* pParent)
 	: 
 	CTDLDialog(IDD_SHOWREMINDER_DIALOG, _T("ShowReminders"), pParent),
 	m_lcReminders(m_sPrefsKey),
@@ -74,7 +74,6 @@ void CTDLShowReminderDlg::DoDataExchange(CDataExchange* pDX)
 IMPLEMENT_DYNAMIC(CTDLShowReminderDlg, CTDLDialog)
 
 BEGIN_MESSAGE_MAP(CTDLShowReminderDlg, CTDLDialog)
-	//{{AFX_MSG_MAP(CTDLShowReminderDlg)
 	ON_BN_CLICKED(IDC_SNOOZE, OnSnooze)
 	ON_BN_CLICKED(IDC_MODIFY, OnModify)
 	ON_BN_CLICKED(IDC_DISMISS, OnDismiss)
@@ -84,14 +83,12 @@ BEGIN_MESSAGE_MAP(CTDLShowReminderDlg, CTDLDialog)
 	ON_BN_CLICKED(IDC_SNOOZEOPTIONUNTIL, OnSnoozeUntil)
 	ON_NOTIFY(LVN_ITEMCHANGED, IDC_REMINDERS, OnItemchangedReminders)
 	ON_BN_CLICKED(IDC_SNOOZEALL, OnSnoozeAll)
-	//}}AFX_MSG_MAP
 	ON_NOTIFY(NM_DBLCLK, IDC_REMINDERS, OnDblClkReminders)
 	ON_WM_CLOSE()
 	ON_WM_ACTIVATE()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
-// CTDLShowReminderDlg message handlers
 
 BOOL CTDLShowReminderDlg::Create(CWnd* pParent, BOOL bVisible)
 {

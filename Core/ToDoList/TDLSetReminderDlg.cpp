@@ -29,9 +29,9 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CTDLSetReminderDlg dialog
 
-CTDLSetReminderDlg::CTDLSetReminderDlg(HICON hIcon, BOOL bISODateTimes, CWnd* pParent /*=NULL*/)
+CTDLSetReminderDlg::CTDLSetReminderDlg(HICON hIcon, BOOL bISODateTimes, CWnd* pParent)
 	: 
-	CTDLDialog(CTDLSetReminderDlg::IDD, _T("Reminders"), pParent), 
+	CTDLDialog(IDD_SETREMINDER_DIALOG, _T("Reminders"), pParent),
 	m_cbAbsoluteTime(TCB_HALFHOURS | TCB_HOURSINDAY),
 	m_cbLeadIn(TDLRPC_SHOWZERO),
 	m_bRelativeFromDueDate(0),
@@ -48,7 +48,7 @@ CTDLSetReminderDlg::CTDLSetReminderDlg(HICON hIcon, BOOL bISODateTimes, CWnd* pP
 void CTDLSetReminderDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CTDLDialog::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CTDLSetReminderDlg)
+
 	DDX_Control(pDX, IDC_ABSOLUTETIME, m_cbAbsoluteTime);
 	DDX_Control(pDX, IDC_SOUNDFILE, m_ePlaySound);
 	DDX_Control(pDX, IDC_ABSOLUTEDATE, m_dtcAbsolute);
@@ -57,7 +57,6 @@ void CTDLSetReminderDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_SOUNDFILE, m_sSoundFile);
 	DDX_Radio(pDX, IDC_ABSOLUTE, m_bRelative);
 	DDX_DateTimeCtrl(pDX, IDC_ABSOLUTEDATE, m_dtAbsoluteDate);
-	//}}AFX_DATA_MAP
 	DDX_Check(pDX, IDC_PLAYSOUND, m_bPlaySound);
 
 	m_cbLeadIn.DDX(pDX, m_nRelativeLeadIn);
@@ -65,17 +64,13 @@ void CTDLSetReminderDlg::DoDataExchange(CDataExchange* pDX)
 }
 
 BEGIN_MESSAGE_MAP(CTDLSetReminderDlg, CTDLDialog)
-	//{{AFX_MSG_MAP(CTDLSetReminderDlg)
-//	ON_CBN_SELCHANGE(IDC_RELATIVELEADIN, OnSelchangeLeadin)
 	ON_BN_CLICKED(IDC_RELATIVE, OnChangeRelative)
 	ON_BN_CLICKED(IDC_ABSOLUTE, OnChangeRelative)
-	//}}AFX_MSG_MAP
 	ON_BN_CLICKED(IDC_DISMISS, OnDismissReminder)
 	ON_BN_CLICKED(IDC_PLAYSOUND, OnClickPlaySound)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
-// CTDLSetReminderDlg message handlers
 
 int CTDLSetReminderDlg::DoModal(TDCREMINDER& rem, BOOL bNewReminder)
 {
