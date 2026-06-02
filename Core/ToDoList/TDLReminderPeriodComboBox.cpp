@@ -9,7 +9,7 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
-struct PERIODDATA
+struct PERIOD
 {
 	LPCTSTR szItemText;
 	TDC_REMINDERPERIOD nPeriod;
@@ -17,7 +17,7 @@ struct PERIODDATA
 
 // --------------------------------------
 
-static PERIODDATA data[] = 
+static PERIOD PERIODS[] = 
 {
 	{ _T("<none>"),				TDCRP_NOREMINDER },
 	{ _T("0 minutes"),			TDCRP_0_MINS },
@@ -53,7 +53,7 @@ static PERIODDATA data[] =
 	{ _T("9 months"),			TDCRP_9_MONTHS },
 	{ _T("12 months / 1 year"),	TDCRP_1_YEAR },
 };
-const UINT NUM_DATA = (sizeof(data) / sizeof(PERIODDATA));
+const UINT NUM_PERIODS = (sizeof(PERIODS) / sizeof(PERIOD));
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLReminderleadinComboBox
@@ -82,17 +82,17 @@ void CTDLReminderPeriodComboBox::BuildCombo()
 	ASSERT(GetCount() == 0);
 	ASSERT(!HasStyle(CBS_SORT));
 
-	for (int nData = 0; nData < NUM_DATA; nData++)
+	for (int nItem = 0; nItem < NUM_PERIODS; nItem++)
 	{
-		if (!(m_dwShow & TDLRPC_SHOWNONE) && (data[nData].nPeriod == TDCRP_NOREMINDER))
+		if (!(m_dwShow & TDLRPC_SHOWNONE) && (PERIODS[nItem].nPeriod == TDCRP_NOREMINDER))
 			continue;
 
-		if (!(m_dwShow & TDLRPC_SHOWZERO) && (data[nData].nPeriod == TDCRP_0_MINS))
+		if (!(m_dwShow & TDLRPC_SHOWZERO) && (PERIODS[nItem].nPeriod == TDCRP_0_MINS))
 			continue;
 
 		VERIFY(CDialogHelper::AddStringT(*this,
-										 data[nData].szItemText,
-										 data[nData].nPeriod) != CB_ERR);
+										 PERIODS[nItem].szItemText,
+										 PERIODS[nItem].nPeriod) != CB_ERR);
 	}
 }
 
@@ -118,11 +118,11 @@ void CTDLReminderPeriodComboBox::ValidatePeriod(TDC_REMINDERPERIOD& nPeriod)
 	if ((m_dwShow & TDLRPC_SHOWNONE) && (nPeriod == TDCRP_NOREMINDER))
 		return;
 
-	for (int nData = 1; nData < NUM_DATA; nData++)
+	for (int nData = 1; nData < NUM_PERIODS; nData++)
 	{
-		if (data[nData].nPeriod >= nPeriod)
+		if (PERIODS[nData].nPeriod >= nPeriod)
 		{
-			nPeriod = data[nData].nPeriod;
+			nPeriod = PERIODS[nData].nPeriod;
 			break;
 		}
 	}
