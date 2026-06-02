@@ -39,7 +39,7 @@ CTDLShowReminderDlg::CTDLShowReminderDlg(CWnd* pParent)
 	m_cbSnoozeTime(TCB_HOURSINDAY),
 	m_bSnoozeUntil(FALSE)
 {
-	m_nSnooze = CPreferences().GetProfileEnum(m_sPrefsKey, _T("Snooze"), TDCRP_15_MINS);
+	m_nSnooze = CPreferences().GetProfileEnum(m_sPrefsKey, _T("Snooze"), TDCRP_5_MINS);
 
 	SetIcon(IDR_MAINFRAME);
 }

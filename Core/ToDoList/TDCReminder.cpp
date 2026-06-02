@@ -296,7 +296,7 @@ BOOL TDCREMINDER::GetReminderDate(COleDateTime& date, BOOL bIncludeSnooze) const
 
 		if (nRelativeLeadIn < TDCRP_1_MONTH)
 		{
-			date.m_dt -= (nRelativeLeadIn / (double)TDCRP_1_DAY);
+			date.m_dt -= ((double)nRelativeLeadIn / TDCRP_1_DAY);
 		}
 		else
 		{

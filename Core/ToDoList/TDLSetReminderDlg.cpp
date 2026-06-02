@@ -34,15 +34,16 @@ CTDLSetReminderDlg::CTDLSetReminderDlg(HICON hIcon, BOOL bISODateTimes, CWnd* pP
 	CTDLDialog(IDD_SETREMINDER_DIALOG, _T("Reminders"), pParent),
 	m_cbAbsoluteTime(TCB_HALFHOURS | TCB_HOURSINDAY),
 	m_cbLeadIn(TDLRPC_SHOWZERO),
-	m_bRelativeFromDueDate(0),
+	m_bRelativeFromDueDate(FALSE),
 	m_nRelativeLeadIn(TDCRP_15_MINS),
-	m_bRelative(TRUE),
-	m_dtAbsoluteDate(COleDateTime::GetCurrentTime()),
-	m_dAbsoluteTime(CDateHelper::GetTimeOnly(m_dtAbsoluteDate))
+	m_bRelative(TRUE)
 {
 	m_iconDlg.SetIcon(hIcon, FALSE); // not owned
 	m_dtcAbsolute.SetISOFormat(bISODateTimes);
 	m_cbAbsoluteTime.SetISOFormat(bISODateTimes);
+
+	m_dtAbsoluteDate = COleDateTime::GetCurrentTime();
+	m_dAbsoluteTime = CDateHelper::GetTimeOnly(m_dtAbsoluteDate);
 }
 
 void CTDLSetReminderDlg::DoDataExchange(CDataExchange* pDX)
