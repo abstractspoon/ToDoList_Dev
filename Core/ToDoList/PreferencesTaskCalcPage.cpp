@@ -154,9 +154,9 @@ void CPreferencesTaskCalcPage::LoadPreferences(const IPreferences* pPrefs, LPCTS
 	m_bDoneTasksHaveLowestPriority = pPrefs->GetProfileInt(szKey, _T("DoneTasksHaveLowestPriority"), TRUE);
 	m_bNoDueDateDueTodayOrStart = pPrefs->GetProfileInt(szKey, _T("NoDueDateIsDueToday"), FALSE);
 	m_bWeightPercentCompletionByNumSubtasks = pPrefs->GetProfileInt(szKey, _T("WeightPercentCompletionByNumSubtasks"), TRUE);
-	m_nCalcRemainingTime = (PTCP_CALCTIMEREMAINING)pPrefs->GetProfileInt(szKey, _T("CalcRemainingTime"), PTCP_REMAININGTTIMEISDUEDATE);
-	m_nCalcDueDate = (PTCP_CALCDUEDATE)pPrefs->GetProfileInt(szKey, _T("CalcDueDate"), PTCP_NOCALCDUEDATE);
-	m_nCalcStartDate = (PTCP_CALCSTARTDATE)pPrefs->GetProfileInt(szKey, _T("CalcStartDate"), PTCP_NOCALCSTARTDATE);
+	m_nCalcRemainingTime = pPrefs->GetProfileEnum(szKey, _T("CalcRemainingTime"), PTCP_REMAININGTTIMEISDUEDATE);
+	m_nCalcDueDate = pPrefs->GetProfileEnum(szKey, _T("CalcDueDate"), PTCP_NOCALCDUEDATE);
+	m_nCalcStartDate = pPrefs->GetProfileEnum(szKey, _T("CalcStartDate"), PTCP_NOCALCSTARTDATE);
 	m_bSetCompletionStatus = pPrefs->GetProfileInt(szKey, _T("SetCompletionStatus"), FALSE);
 	m_bSyncCompletionToStatus = pPrefs->GetProfileInt(szKey, _T("SyncCompletionToStatus"), TRUE);
 	m_sCompletionStatus = pPrefs->GetProfileString(szKey, _T("CompletionStatus"), CEnString(IDS_TDC_COLUMN_DONEDATE));
@@ -177,7 +177,7 @@ void CPreferencesTaskCalcPage::LoadPreferences(const IPreferences* pPrefs, LPCTS
 		m_bAveragePercentSubCompletion = FALSE;
 
 	m_recentModTime.dAmount = pPrefs->GetProfileDouble(szKey, _T("RecentModTime"), 1.0);
-	m_recentModTime.SetTHUnits((TH_UNITS)pPrefs->GetProfileInt(szKey, _T("RecentModTimeUnits"), THU_HOURS), FALSE);
+	m_recentModTime.SetTHUnits(pPrefs->GetProfileEnum(szKey, _T("RecentModTimeUnits"), THU_HOURS), FALSE);
 }
 
 void CPreferencesTaskCalcPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const

@@ -250,7 +250,7 @@ void TDCREMINDER::Load(const IPreferences* pPrefs, LPCTSTR szKey)
 	if (bRelative)
 	{
 		dRelativeDaysLeadIn = (pPrefs->GetProfileDouble(szKey, _T("LeadIn")) / MINS_IN_DAY);
-		nRelativeFromWhen = (TDC_REMINDER)pPrefs->GetProfileInt(szKey, _T("FromWhen"));
+		nRelativeFromWhen = pPrefs->GetProfileEnum(szKey, _T("FromWhen"), TDCR_DUEDATE);
 	}
 	else
 		dtAbsolute = pPrefs->GetProfileDouble(szKey, _T("AbsoluteDate"));

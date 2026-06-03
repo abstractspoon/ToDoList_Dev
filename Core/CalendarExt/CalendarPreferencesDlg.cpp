@@ -241,7 +241,7 @@ void CCalendarPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTS
 			m_aSelPalette.Copy(aPalettes[0]);
 	}
 
-	m_nHeatMapAttrib = (TDC_ATTRIBUTE)pPrefs->GetProfileInt(szKey, _T("HeatMapAttribute"), TDCA_DONEDATE);
+	m_nHeatMapAttrib = pPrefs->GetProfileEnum(szKey, _T("HeatMapAttribute"), TDCA_DONEDATE);
 }
 
 BOOL CCalendarPreferencesPage::GetEnableHeatMap(CDWordArray& aPalette, TDC_ATTRIBUTE& nAttrib) const

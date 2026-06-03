@@ -269,7 +269,7 @@ void CKanbanPreferencesPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey
 
 void CKanbanPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey) 
 {
-	m_nFixedAttrib = (TDC_ATTRIBUTE)pPrefs->GetProfileInt(szKey, _T("FixedAttribute"), TDCA_NONE);
+	m_nFixedAttrib = pPrefs->GetProfileEnum(szKey, _T("FixedAttribute"), TDCA_NONE);
 	m_sFixedCustomAttribID = pPrefs->GetProfileString(szKey, _T("FixedCustomAttributeID"));
 
 	m_bAlwaysShowBacklog = pPrefs->GetProfileInt(szKey, _T("AlwaysShowBacklog"), TRUE);
@@ -293,7 +293,7 @@ void CKanbanPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR
 			
 		colDef.sTitle = pPrefs->GetProfileString(sColKey, _T("Title"));
  		colDef.nMaxTaskCount = pPrefs->GetProfileInt(sColKey, _T("MaxItems"));
-		colDef.crBackground = (COLORREF)pPrefs->GetProfileInt(sColKey, _T("BkgndColor"), CLR_NONE);
+		colDef.crBackground = pPrefs->GetProfileInt(sColKey, _T("BkgndColor"), CLR_NONE);
 
 		// Validate color
 		if (colDef.crBackground == GetSysColor(COLOR_WINDOW))
@@ -316,7 +316,7 @@ void CKanbanPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR
 	for (int nAtt = 0; nAtt < nNumAttrib; nAtt++)
 	{
 		CString sEntry = Misc::MakeKey(_T("DisplayAttrib%d"), nAtt);
-		TDC_ATTRIBUTE nAttribID = (TDC_ATTRIBUTE)pPrefs->GetProfileInt(szKey, sEntry, TDCA_NONE);
+		TDC_ATTRIBUTE nAttribID = pPrefs->GetProfileEnum(szKey, sEntry, TDCA_NONE);
 
 		if (nAttribID != TDCA_NONE)
 			m_aDisplayAttrib.Add(nAttribID);
