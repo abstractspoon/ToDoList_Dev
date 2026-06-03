@@ -59,7 +59,7 @@ CTDLTaskSelectionPage::CTDLTaskSelectionPage(const CTDCCustomAttribDefinitionArr
 		while (nAtt--)
 		{
 			CString sKey = Misc::MakeKey(_T("att%d"), nAtt);
-			TDC_ATTRIBUTE nAttribID = (TDC_ATTRIBUTE)prefs.GetProfileInt(sGroup, sKey, TDCA_NONE);
+			TDC_ATTRIBUTE nAttribID = prefs.GetProfileEnum(sGroup, sKey, TDCA_NONE);
 			ASSERT(nAttribID != TDCA_NONE);
 
 			mapAttrib.Add(nAttribID);

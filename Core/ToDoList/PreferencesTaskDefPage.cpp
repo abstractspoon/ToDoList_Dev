@@ -222,7 +222,7 @@ void CPreferencesTaskDefPage::LoadPreferences(const IPreferences* pPrefs, LPCTST
 	m_defTimeSpent.dAmount = pPrefs->GetProfileDouble(szKey, _T("DefaultTimeSpent"), 0);
 	m_defTimeSpent.SetTHUnits(pPrefs->GetProfileEnum(szKey, _T("DefaultTimeSpentUnits"), THU_DAYS), FALSE);
 	m_sDefIcon = pPrefs->GetProfileString(szKey, _T("DefaultIcon"));
-	m_nDefReminderLeadin = (TDC_REMINDERPERIOD)pPrefs->GetProfileInt(szKey, _T("DefaultReminderLeadin"), TDCRP_NOREMINDER);
+	m_nDefReminderLeadin = pPrefs->GetProfileEnum(szKey, _T("DefaultReminderLeadin"), TDCRP_NOREMINDER);
 	m_bReminderBeforeDue = pPrefs->GetProfileInt(szKey, _T("ReminderBeforeDue"), TRUE);
 
 	m_sReminderSound = pPrefs->GetProfileString(szKey, _T("ReminderSound"));

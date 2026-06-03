@@ -248,13 +248,13 @@ void TDCREMINDER::Load(const IPreferences* pPrefs, LPCTSTR szKey)
 	dwTaskID = pPrefs->GetProfileInt(szKey, _T("TaskID"));
 	bRelative = pPrefs->GetProfileInt(szKey, _T("Relative"));
 	dDaysSnooze = pPrefs->GetProfileDouble(szKey, _T("Snooze"));
-	nLastUserSnooze = (TDC_REMINDERPERIOD)pPrefs->GetProfileInt(szKey, _T("LastSnoozeMins"));
+	nLastUserSnooze = pPrefs->GetProfileEnum(szKey, _T("LastSnoozeMins"), TDCRP_5_MINS);
 	
 	if (bRelative)
 	{
 		// Lead-in remains stored as 'double' for backwards compatibility
 		nRelativeLeadIn = (TDC_REMINDERPERIOD)(int)pPrefs->GetProfileDouble(szKey, _T("LeadIn"), TDCRP_15_MINS);
-		nRelativeFromWhen = (TDC_REMINDER)pPrefs->GetProfileInt(szKey, _T("FromWhen"));
+		nRelativeFromWhen = pPrefs->GetProfileEnum(szKey, _T("FromWhen"), TDCR_DUEDATE);
 	}
 	else
 	{

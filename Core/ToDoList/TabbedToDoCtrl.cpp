@@ -619,7 +619,7 @@ void CTabbedToDoCtrl::LoadState()
 
 	// Last active view
 	FTC_VIEW nCurView = GetActiveTaskView();
-	FTC_VIEW nView = (FTC_VIEW)prefs.GetProfileInt(sKey, _T("View"), FTCV_UNSET);
+	FTC_VIEW nView = prefs.GetProfileEnum(sKey, _T("View"), FTCV_UNSET);
 
 	// 1. Under high DPI displays (For reasons I don't understand) the plugin views 
 	//    which derive from CDialog have the vertical positions of their controls 
