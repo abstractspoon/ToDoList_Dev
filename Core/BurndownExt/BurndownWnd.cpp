@@ -226,7 +226,7 @@ void CBurndownWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 			m_mapGraphs.SetAttributes(m_graphAttrib);
 
 		// Previously active graph
-		m_nActiveGraph = (BURNDOWN_GRAPH)pPrefs->GetProfileInt(szKey, _T("ActiveGraph"), DEF_GRAPH);
+		m_nActiveGraph = pPrefs->GetProfileEnum(szKey, _T("ActiveGraph"), DEF_GRAPH);
 		m_sPrevCustomGraph = pPrefs->GetProfileString(szKey, _T("ActiveCustomGraph"));
 
 		SetActiveGraph(m_nActiveGraph, FALSE); // No rebuild

@@ -646,8 +646,8 @@ void CShortcutManager::LoadSettings(const IPreferences* pPrefs, LPCTSTR szKey)
 			CString sKey;
 			sKey.Format(_T("%s\\Item%02d"), szKey, nItem);
 
-			UINT nCmdID = (UINT)pPrefs->GetProfileInt(sKey, _T("CmdID"), 0);
-			DWORD dwShortcut = (DWORD)pPrefs->GetProfileInt(sKey, _T("Shortcut"), 0);
+			UINT nCmdID = pPrefs->GetProfileInt(sKey, _T("CmdID"), 0);
+			DWORD dwShortcut = pPrefs->GetProfileInt(sKey, _T("Shortcut"), 0);
 
 			if (nCmdID && dwShortcut)
 				SetShortcut(nCmdID, dwShortcut);

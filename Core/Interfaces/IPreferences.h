@@ -28,6 +28,13 @@ public:
 
 	virtual bool HasProfileSection(LPCWSTR lpszSection) const = 0;
 
+	// -----------------------------------------------
+
+	template <class T> 
+	T GetProfileEnum(LPCWSTR lpszSection, LPCWSTR lpszEntry, T nDefault) const
+	{
+		return (T)GetProfileInt(lpszSection, lpszEntry, (int)nDefault);
+	}
 };
 
 /////////////////////////////////////////////////////////////////////////////////

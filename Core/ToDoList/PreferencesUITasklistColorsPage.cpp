@@ -940,9 +940,9 @@ void CPreferencesUITasklistColorsPage::LoadPreferences(const IPreferences* pPref
 	m_bSpecifyReferenceColor = pPrefs->GetProfileInt(szKey, _T("ReferenceColor"), FALSE);
 	m_bSpecifyGroupHeaderBkgndColor = pPrefs->GetProfileInt(szKey, _T("SpecifyGroupHeaderBkgndColor"), FALSE);
 
-	m_nPriorityColorOption = (PUITCP_PRIORITYCOLOROPTION)pPrefs->GetProfileInt(szKey, _T("PriorityColorOption"), m_nPriorityColorOption);
-	m_nTextColorOption = (PUITCP_TEXTCOLOROPTION)pPrefs->GetProfileInt(szKey, _T("TextColorOption"), m_nTextColorOption);
-	m_nColorAttribute = (TDC_ATTRIBUTE)pPrefs->GetProfileInt(szKey, _T("ColorAttribute"), TDCA_CATEGORY);
+	m_nPriorityColorOption = pPrefs->GetProfileEnum(szKey, _T("PriorityColorOption"), m_nPriorityColorOption);
+	m_nTextColorOption = pPrefs->GetProfileEnum(szKey, _T("TextColorOption"), m_nTextColorOption);
+	m_nColorAttribute = pPrefs->GetProfileEnum(szKey, _T("ColorAttribute"), TDCA_CATEGORY);
 
 	// colors
 	CString sColorKey(szKey);
@@ -1016,7 +1016,7 @@ void CPreferencesUITasklistColorsPage::LoadPreferences(const IPreferences* pPref
 		}
 
 		// Attribute colours
-		m_nColorAttribute = (TDC_ATTRIBUTE)pPrefs->GetProfileInt(_T("Preferences\\AttribColors"), _T("Attribute"), TDCA_CATEGORY);
+		m_nColorAttribute = pPrefs->GetProfileEnum(_T("Preferences\\AttribColors"), _T("Attribute"), TDCA_CATEGORY);
 
 		CString sKey = Misc::MakeKey(_T("AttribColors"), NULL, szKey), sAttrib(_T("Attrib"));
 		int nNumColor = pPrefs->GetProfileInt(sKey, _T("Count"), 0);

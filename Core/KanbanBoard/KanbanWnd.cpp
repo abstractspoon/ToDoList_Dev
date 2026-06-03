@@ -349,7 +349,7 @@ void CKanbanWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool
 		m_dlgPrefs.LoadPreferences(pPrefs, szKey);
 
 		// Last 'Tracked' attribute
-		m_nTrackedAttribID = (TDC_ATTRIBUTE)pPrefs->GetProfileInt(szKey, _T("LastTrackedAttribute"), TDCA_STATUS);
+		m_nTrackedAttribID = pPrefs->GetProfileEnum(szKey, _T("LastTrackedAttribute"), TDCA_STATUS);
 
 		// TDCA_FIXEDCOLUMNS is not a real enum value and the compiler 
 		// will issue a warning if it's used in a switch statement
@@ -392,7 +392,7 @@ void CKanbanWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool
 		}
 
 		// Last 'Group By' attribute
-		m_nGroupByAttribID = (TDC_ATTRIBUTE)pPrefs->GetProfileInt(szKey, _T("GroupByAttribute"), TDCA_NONE);
+		m_nGroupByAttribID = pPrefs->GetProfileEnum(szKey, _T("GroupByAttribute"), TDCA_NONE);
 
 		if (KBUtils::IsCustomAttribute(m_nGroupByAttribID))
 		{

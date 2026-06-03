@@ -334,7 +334,7 @@ void CGanttChartWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, 
 		LoadSnapModePreference(pPrefs, sSnapKey, GTLC_DISPLAY_HOURS, _T("Hour"), GTLCSM_NEARESTHOUR);
 
 		// last display
-		GTLC_MONTH_DISPLAY nDisplay = (GTLC_MONTH_DISPLAY)pPrefs->GetProfileInt(sKey, _T("MonthDisplay"), GTLC_DISPLAY_MONTHS_LONG);
+		GTLC_MONTH_DISPLAY nDisplay = pPrefs->GetProfileEnum(sKey, _T("MonthDisplay"), GTLC_DISPLAY_MONTHS_LONG);
 		SetMonthDisplay(nDisplay);
 
 		m_dlgPrefs.LoadPreferences(pPrefs, sKey);
@@ -386,7 +386,7 @@ void CGanttChartWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, 
 
 void CGanttChartWnd::LoadSnapModePreference(const IPreferences* pPrefs, LPCTSTR szSnapKey, GTLC_MONTH_DISPLAY nDisplay, LPCTSTR szDisplay, GTLC_SNAPMODE nDefaultSnap) 
 {
-	m_mapDisplaySnapModes[nDisplay]	= (GTLC_SNAPMODE)pPrefs->GetProfileInt(szSnapKey, szDisplay, nDefaultSnap);
+	m_mapDisplaySnapModes[nDisplay]	= pPrefs->GetProfileEnum(szSnapKey, szDisplay, nDefaultSnap);
 }
 
 void CGanttChartWnd::SaveSnapModePreference(IPreferences* pPrefs, LPCTSTR szSnapKey, GTLC_MONTH_DISPLAY nDisplay, LPCTSTR szDisplay) const

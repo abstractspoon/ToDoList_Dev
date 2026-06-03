@@ -2746,7 +2746,7 @@ void TDCCOLEDITVISIBILITY::Save(IPreferences* pPrefs, LPCTSTR szKey) const
 
 BOOL TDCCOLEDITVISIBILITY::Load(const IPreferences* pPrefs, LPCTSTR szKey)
 {
-	nShowFields = (TDL_SHOWATTRIB)pPrefs->GetProfileInt(szKey, _T("ShowAttributes"), TDLSA_ASCOLUMN);
+	nShowFields = pPrefs->GetProfileEnum(szKey, _T("ShowAttributes"), TDLSA_ASCOLUMN);
 
 	// columns
 	CString sKey = Misc::MakeKey(_T("%s\\ColumnVisibility"), szKey);

@@ -764,8 +764,8 @@ void CRTFContentControl::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szK
 
 		if (HasLockedColours())
 		{
-			crText = (COLORREF)pPrefs->GetProfileInt(sKey, _T("ForegroundColour"), CLR_DEFAULT);
-			crBack = (COLORREF)pPrefs->GetProfileInt(sKey, _T("BackgroundColour"), CLR_DEFAULT);
+			crText = pPrefs->GetProfileInt(sKey, _T("ForegroundColour"), crText);
+			crBack = pPrefs->GetProfileInt(sKey, _T("BackgroundColour"), crBack);
 		}
 		m_toolbar.SetFontColor(crText, TRUE);
 		m_toolbar.SetFontColor(crBack, FALSE);
@@ -782,7 +782,7 @@ void CRTFContentControl::OnStyleChanging(int nStyleType, LPSTYLESTRUCT lpStyleSt
 {
 	if (nStyleType == GWL_EXSTYLE)
 	{
-		// strip of our client edge
+		// strip off our client edge
 		if (lpStyleStruct->styleNew & WS_EX_CLIENTEDGE)
 			lpStyleStruct->styleNew &= ~WS_EX_CLIENTEDGE;
 	}

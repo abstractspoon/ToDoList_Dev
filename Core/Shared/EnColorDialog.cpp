@@ -69,7 +69,7 @@ void CEnColorDialog::LoadPreferences(const IPreferences* pPrefs)
 		CString sKey;
 		sKey.Format(_T("CustomColor%d"), nColor);
 
-		COLORREF color = (COLORREF)pPrefs->GetProfileInt(_T("ColorDialog"), sKey, (int)RGB(255, 255, 255));
+		COLORREF color = pPrefs->GetProfileInt(_T("ColorDialog"), sKey, RGB(255, 255, 255));
 		m_cc.lpCustColors[nColor] = color;
 	}
 }
