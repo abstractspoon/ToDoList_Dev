@@ -285,25 +285,37 @@ BOOL TDCREMINDER::GetReminderDate(COleDateTime& date, BOOL bIncludeSnooze) const
 	
 	if (bRelative)
 	{
-		if (nRelativeLeadIn == TDCRP_NOREMINDER)
-		{
-			ASSERT(0);
-			return FALSE;
-		}
-
 		if (!GetRelativeToDate(date))
 			return FALSE;
 
-		if (nRelativeLeadIn < TDCRP_1_MONTH)
+		switch (nRelativeLeadIn)
 		{
-			date.m_dt -= ((double)nRelativeLeadIn / TDCRP_1_DAY);
-		}
-		else
-		{
-			CTwentyFourSevenWeek week;
-			CDateHelper dh(week);
+		case TDCRP_NOREMINDER:
+			ASSERT(0);
+			return FALSE;
 
-			dh.OffsetDate(date, -(nRelativeLeadIn / TDCRP_1_MONTH), DHU_MONTHS);
+		case TDCRP_1_MONTH:
+		case TDCRP_2_MONTHS:
+		case TDCRP_3_MONTHS:
+		case TDCRP_4_MONTHS:
+		case TDCRP_5_MONTHS:
+		case TDCRP_6_MONTHS:
+		case TDCRP_9_MONTHS:
+		case TDCRP_12_MONTHS: // TDCRP_1_YEAR
+			{
+				CTwentyFourSevenWeek week;
+				CDateHelper dh(week);
+
+				dh.OffsetDate(date, -(nRelativeLeadIn / TDCRP_1_MONTH), DHU_MONTHS);
+			}
+			break;
+
+		default:
+			{
+				ASSERT(nRelativeLeadIn < TDCRP_1_MONTH);
+				date.m_dt -= ((double)nRelativeLeadIn / TDCRP_1_DAY);
+			}
+			break;
 		}
 	}
 	

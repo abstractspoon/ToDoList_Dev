@@ -27,31 +27,31 @@ static PERIOD PERIODS[] =
 	{ _T("20 minutes"),			TDCRP_20_MINS },
 	{ _T("30 minutes"),			TDCRP_30_MINS },
 	{ _T("45 minutes"),			TDCRP_45_MINS },
-	{ _T("60 minutes / 1 hour"),TDCRP_1_HOUR },
+	{ _T("60 minutes / 1 hour"),TDCRP_1_HOUR }, // TDCRP_60_MINS
 	{ _T("2 hours"),			TDCRP_2_HOURS },
 	{ _T("3 hours"),			TDCRP_3_HOURS },
 	{ _T("4 hours"),			TDCRP_4_HOURS },
 	{ _T("5 hours"),			TDCRP_5_HOURS },
 	{ _T("6 hours"),			TDCRP_6_HOURS },
 	{ _T("12 hours"),			TDCRP_12_HOURS },
-	{ _T("24 hours / 1 day"),	TDCRP_1_DAY },
+	{ _T("24 hours / 1 day"),	TDCRP_1_DAY },  // TDCRP_24_hours
 	{ _T("2 days"),				TDCRP_2_DAYS },
 	{ _T("3 days"),				TDCRP_3_DAYS },
 	{ _T("4 days"),				TDCRP_4_DAYS },
 	{ _T("5 days"),				TDCRP_5_DAYS },
 	{ _T("6 days"),				TDCRP_6_DAYS },
-	{ _T("7 days / 1 week"),	TDCRP_1_WEEK },
+	{ _T("7 days / 1 week"),	TDCRP_1_WEEK }, // TDCRP_7_DAYS
 	{ _T("2 weeks"),			TDCRP_2_WEEKS },
 	{ _T("3 weeks"),			TDCRP_3_WEEKS },
 	{ _T("4 weeks"),			TDCRP_4_WEEKS },
 	{ _T("1 month"),			TDCRP_1_MONTH },
-	{ _T("2 months"),			TDCRP_2_MONTHS } ,
+	{ _T("2 months"),			TDCRP_2_MONTHS },
 	{ _T("3 months"),			TDCRP_3_MONTHS },
 	{ _T("4 months"),			TDCRP_4_MONTHS },
 	{ _T("5 months"),			TDCRP_5_MONTHS },
 	{ _T("6 months"),			TDCRP_6_MONTHS },
 	{ _T("9 months"),			TDCRP_9_MONTHS },
-	{ _T("12 months / 1 year"),	TDCRP_1_YEAR },
+	{ _T("12 months / 1 year"),	TDCRP_1_YEAR }, // TDCRP_12_MONTHS
 };
 const UINT NUM_PERIODS = (sizeof(PERIODS) / sizeof(PERIOD));
 
