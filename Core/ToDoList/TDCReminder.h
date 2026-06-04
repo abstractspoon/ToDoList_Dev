@@ -52,13 +52,13 @@ struct TDCREMINDER
 
 	COleDateTime dtAbsolute;
 	BOOL bRelative;
-	double dRelativeDaysLeadIn;
+	TDC_REMINDERPERIOD nRelativeLeadIn;
 	double dDaysSnooze;
 	TDC_REMINDER nRelativeFromWhen;
 	BOOL bEnabled;
 	CString sSoundFile;
 	CString sStickiesID;
-	int nLastSnoozeMins;
+	TDC_REMINDERPERIOD nLastUserSnooze;
 };
 
 typedef CMap<DWORD, DWORD, TDCREMINDER, TDCREMINDER&> CTDCReminderMap;

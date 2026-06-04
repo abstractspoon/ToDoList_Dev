@@ -60,6 +60,12 @@ int CTDLInfoTipCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		return -1;
 
 	CLocalizer::EnableTranslation(GetSafeHwnd(), FALSE);
+
+	SetDelayTime(TTDT_RESHOW, 0);
+	SetDelayTime(TTDT_INITIAL, 0);
+	SetDelayTime(TTDT_AUTOPOP, SHRT_MAX);
+
+	EnableMultilineTips();
 	return 0;
 }
 

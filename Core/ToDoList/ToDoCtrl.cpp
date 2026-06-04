@@ -3830,9 +3830,6 @@ DWORD CToDoCtrl::SetStyle(TDC_STYLE nStyle, BOOL bEnable)
 			if (!m_infoTip.Create(this))
 				return FALSE;
 
-			// else
-			m_infoTip.EnableMultilineTips();
-			m_infoTip.EnableTracking(TRUE, INFOTIPOFFSET, INFOTIPOFFSET);
 			m_infoTip.SetFont(CFont::FromHandle(m_hFontTree));
 		}
 		else if (m_infoTip.GetSafeHwnd())

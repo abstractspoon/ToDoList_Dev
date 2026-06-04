@@ -162,10 +162,10 @@ void CWorkloadPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTS
 	m_bEnableUnderload = pPrefs->GetProfileInt(szKey, _T("EnableUnderload"), TRUE);
 	m_nOverloadFromPercent = pPrefs->GetProfileInt(szKey, _T("OverloadPercentFrom"), 80);
 	m_nUnderloadToPercent = pPrefs->GetProfileInt(szKey, _T("UnderloadPercentTo"), 50);
-	m_crOverload = (COLORREF)pPrefs->GetProfileInt(szKey, _T("OverloadColor"), DEF_OVERLOAD_COLOR);
-	m_crUnderload = (COLORREF)pPrefs->GetProfileInt(szKey, _T("UnderloadColor"), DEF_UNDERLOAD_COLOR);
+	m_crOverload = pPrefs->GetProfileInt(szKey, _T("OverloadColor"), DEF_OVERLOAD_COLOR);
+	m_crUnderload = pPrefs->GetProfileInt(szKey, _T("UnderloadColor"), DEF_UNDERLOAD_COLOR);
 	m_bEnableOverlapColor = pPrefs->GetProfileInt(szKey, _T("EnableOverlapColor"), TRUE);
-	m_crOverlap = (COLORREF)pPrefs->GetProfileInt(szKey, _T("OverlapColor"), DEF_OVERLAP_COLOR);
+	m_crOverlap = pPrefs->GetProfileInt(szKey, _T("OverlapColor"), DEF_OVERLAP_COLOR);
 }
 
 void CWorkloadPreferencesPage::OnOK()

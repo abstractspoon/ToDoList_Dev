@@ -461,7 +461,7 @@ BOOL TDSORT::LoadState(const IPreferences* pPrefs, const CString& sKey)
 {
 	CString sSortKey = (sKey + _T("\\SortColState"));
 
-	single.nColumnID = (TDC_COLUMN)pPrefs->GetProfileInt(sSortKey, _T("Column"), TDCC_NONE);
+	single.nColumnID = pPrefs->GetProfileEnum(sSortKey, _T("Column"), TDCC_NONE);
 	single.bAscending = pPrefs->GetProfileInt(sSortKey, _T("Ascending"), TRUE);
 
 	bMulti = pPrefs->GetProfileInt(sSortKey, _T("Multi"), FALSE);
@@ -475,7 +475,7 @@ BOOL TDSORT::LoadState(const IPreferences* pPrefs, const CString& sKey)
 		sAscendKey.Format(_T("Ascending%d"), (nCol + 1));
 
 		multi.SetSortBy(nCol,
-			(TDC_COLUMN)pPrefs->GetProfileInt(sSortKey, sColKey, TDCC_NONE),
+						pPrefs->GetProfileEnum(sSortKey, sColKey, TDCC_NONE),
 						pPrefs->GetProfileInt(sSortKey, sAscendKey, TRUE));
 	}
 

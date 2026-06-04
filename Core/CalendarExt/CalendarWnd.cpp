@@ -284,7 +284,7 @@ void CCalendarWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 		if (m_BigCalendar.SetVisibleWeeks(nWeeks))
 			m_cbNumWeeks.SetCurSel(nWeeks-1);
 
-		TCC_SNAPMODE nSnap = (TCC_SNAPMODE)pPrefs->GetProfileInt(szKey, _T("SnapMode"), TCCSM_NEARESTHOUR);
+		TCC_SNAPMODE nSnap = pPrefs->GetProfileEnum(szKey, _T("SnapMode"), TCCSM_NEARESTHOUR);
 		m_BigCalendar.SetDefaultSnapMode(nSnap);
 		CDialogHelper::SelectItemByDataT(m_cbSnapModes, nSnap);
 	

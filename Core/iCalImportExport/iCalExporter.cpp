@@ -116,7 +116,7 @@ bool CiCalExporter::InitConsts(DWORD dwFlags, IPreferences* pPrefs, LPCTSTR szKe
 	CString sKey(szKey);
 	sKey += _T("\\iCalExporter");
 
-	EXPORTFORMAT = (ICALEXPORTAS)pPrefs->GetProfileInt(szKey, _T("ExportFormat"), ICEA_APPT);
+	EXPORTFORMAT = pPrefs->GetProfileEnum(szKey, _T("ExportFormat"), ICEA_APPT);
 
 	BOOL bSilent = ((dwFlags & IIEF_SILENT) != 0);
 

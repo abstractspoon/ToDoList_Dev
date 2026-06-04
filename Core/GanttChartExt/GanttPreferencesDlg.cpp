@@ -191,8 +191,8 @@ void CGanttPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR 
 	m_bCalculateMissingStartDates = pPrefs->GetProfileInt(szKey, _T("CalculateMissingStartDates"), TRUE);
 	m_bCalculateMissingDueDates = pPrefs->GetProfileInt(szKey, _T("CalculateMissingDueDates"), TRUE);
 	m_bSpecifyDefaultColor = pPrefs->GetProfileInt(szKey, _T("SpecifyDefaultColor"), FALSE);
-	m_crDefault = (COLORREF)pPrefs->GetProfileInt(szKey, _T("DefaultColor"), DEF_DEFAULTCOLOR);
-	m_crParent = (COLORREF)pPrefs->GetProfileInt(szKey, _T("ParentColor"), DEF_PARENTCOLOR);
+	m_crDefault = pPrefs->GetProfileInt(szKey, _T("DefaultColor"), DEF_DEFAULTCOLOR);
+	m_crParent = pPrefs->GetProfileInt(szKey, _T("ParentColor"), DEF_PARENTCOLOR);
 	m_nParentColoring = pPrefs->GetProfileInt(szKey, _T("ParentColoring"), 0);
 	m_bDisplayProgressInBar = pPrefs->GetProfileInt(szKey, _T("DisplayProgressInBar"), FALSE);
 	m_bDecadesAreOneBased = pPrefs->GetProfileInt(szKey, _T("DecadesAreOneBased"), FALSE);

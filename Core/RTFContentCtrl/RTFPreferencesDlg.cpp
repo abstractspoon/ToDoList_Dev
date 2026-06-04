@@ -111,7 +111,7 @@ void CRTFPreferencesPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) c
 void CRTFPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey)
 {
 	// Note: Parent App handles global settings
-	RE_PASTE nLinkOption = (RE_PASTE)pPrefs->GetProfileInt(szKey, _T("FileLinkOption"), REP_ASIMAGE);
+	RE_PASTE nLinkOption = pPrefs->GetProfileEnum(szKey, _T("FileLinkOption"), REP_ASIMAGE);
 	BOOL bPromptForFileLink = !pPrefs->GetProfileInt(szKey, _T("FileLinkOptionIsDefault"), TRUE);
 	BOOL bReduceImageColors = pPrefs->GetProfileInt(szKey, _T("ReduceImageColors"), TRUE);
 

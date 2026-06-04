@@ -41,15 +41,12 @@ public:
 	void SetISODateTimeFormat(BOOL bIso);
 
 protected:
-// Dialog Data
-	//{{AFX_DATA(CTDLShowReminderDlg)
-	//}}AFX_DATA
-	CString m_sSoundFile;
-	UINT m_nSnoozeMins;
 	int m_bSnoozeUntil;
 	BOOL m_bModifyingList;
 	BOOL m_bModifyingReminder;
 	BOOL m_bISODateTimes;
+	CString m_sSoundFile;
+	TDC_REMINDERPERIOD m_nSnooze;
 
 	CTDLReminderPeriodComboBox m_cbSnoozeFor;
 	CDateTimeCtrlEx m_dtcSnoozeDate;
@@ -58,11 +55,7 @@ protected:
 	CTDLShowReminderListCtrl m_lcReminders;
 
 protected:
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CTDLShowReminderDlg)
-	//}}AFX_VIRTUAL
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	virtual void DoDataExchange(CDataExchange* pDX);
 	virtual int OnInitDialog();
 	virtual void OnOK();
 	virtual void OnCancel();
@@ -77,10 +70,7 @@ protected:
 	virtual void OnRepositionControls(int dx, int dy);
 	virtual BOOL CanModifyReminders() const;
 
-// Implementation
 protected:
-	// Generated message map functions
-	//{{AFX_MSG(CTDLShowReminderDlg)
 	afx_msg void OnSnooze();
 	afx_msg void OnModify();
 	afx_msg void OnDismiss();
@@ -90,7 +80,6 @@ protected:
 	afx_msg void OnSnoozeUntil();
 	afx_msg void OnItemchangedReminders(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnSnoozeAll();
-	//}}AFX_MSG
 	afx_msg void OnDblClkReminders(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnClose();
 	afx_msg void OnActivate(UINT nState, CWnd* pWndOther, BOOL bMinimized);
@@ -105,8 +94,6 @@ protected:
 	int GetListReminders(const CFilteredToDoCtrl& tdc, CTDCReminderArray& aRem) const;
 
 	BOOL GetWantSnoozeUntil() const { return m_bSnoozeUntil; }
-	UINT GetSnoozeMinutes() const { return m_nSnoozeMins; }
-	double GetSnoozeDays() const;
 	COleDateTime GetSnoozeUntil() const;
 
 	void EnableDisableControls();
@@ -116,8 +103,5 @@ protected:
 	void SnoozeReminders(BOOL bAll);
 	void RestoreFocusToList(int nPrevSel);
 };
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
 #endif // !defined(AFX_TDLSHOWREMINDERDLG_H__6B20922F_A2AA_4C95_B9E6_45F5EBEF18BF__INCLUDED_)

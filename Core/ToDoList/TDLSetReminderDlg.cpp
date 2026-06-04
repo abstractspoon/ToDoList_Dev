@@ -29,26 +29,27 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CTDLSetReminderDlg dialog
 
-CTDLSetReminderDlg::CTDLSetReminderDlg(HICON hIcon, BOOL bISODateTimes, CWnd* pParent /*=NULL*/)
+CTDLSetReminderDlg::CTDLSetReminderDlg(HICON hIcon, BOOL bISODateTimes, CWnd* pParent)
 	: 
-	CTDLDialog(CTDLSetReminderDlg::IDD, _T("Reminders"), pParent), 
+	CTDLDialog(IDD_SETREMINDER_DIALOG, _T("Reminders"), pParent),
 	m_cbAbsoluteTime(TCB_HALFHOURS | TCB_HOURSINDAY),
 	m_cbLeadIn(TDLRPC_SHOWZERO),
-	m_bRelativeFromDueDate(0),
-	m_dRelativeLeadInHours(0.25), // 15 mins
-	m_bRelative(TRUE),
-	m_dtAbsoluteDate(COleDateTime::GetCurrentTime()),
-	m_dAbsoluteTime(CDateHelper::GetTimeOnly(m_dtAbsoluteDate))
+	m_bRelativeFromDueDate(FALSE),
+	m_nRelativeLeadIn(TDCRP_15_MINS),
+	m_bRelative(TRUE)
 {
 	m_iconDlg.SetIcon(hIcon, FALSE); // not owned
 	m_dtcAbsolute.SetISOFormat(bISODateTimes);
 	m_cbAbsoluteTime.SetISOFormat(bISODateTimes);
+
+	m_dtAbsoluteDate = COleDateTime::GetCurrentTime();
+	m_dAbsoluteTime = CDateHelper::GetTimeOnly(m_dtAbsoluteDate);
 }
 
 void CTDLSetReminderDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CTDLDialog::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CTDLSetReminderDlg)
+
 	DDX_Control(pDX, IDC_ABSOLUTETIME, m_cbAbsoluteTime);
 	DDX_Control(pDX, IDC_SOUNDFILE, m_ePlaySound);
 	DDX_Control(pDX, IDC_ABSOLUTEDATE, m_dtcAbsolute);
@@ -57,33 +58,20 @@ void CTDLSetReminderDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_SOUNDFILE, m_sSoundFile);
 	DDX_Radio(pDX, IDC_ABSOLUTE, m_bRelative);
 	DDX_DateTimeCtrl(pDX, IDC_ABSOLUTEDATE, m_dtAbsoluteDate);
-	//}}AFX_DATA_MAP
 	DDX_Check(pDX, IDC_PLAYSOUND, m_bPlaySound);
 
-	if (pDX->m_bSaveAndValidate)
-	{
-		m_dRelativeLeadInHours = (m_cbLeadIn.GetSelectedPeriod() / 60.0);
-		m_dAbsoluteTime = m_cbAbsoluteTime.GetOleTime();
-	}
-	else
-	{
-		m_cbLeadIn.SetSelectedPeriod((UINT)(m_dRelativeLeadInHours * 60));
-		m_cbAbsoluteTime.SetOleTime(m_dAbsoluteTime);
-	}
+	m_cbLeadIn.DDX(pDX, m_nRelativeLeadIn);
+	m_cbAbsoluteTime.DDX(pDX, m_dAbsoluteTime, FALSE); // OLE time
 }
 
 BEGIN_MESSAGE_MAP(CTDLSetReminderDlg, CTDLDialog)
-	//{{AFX_MSG_MAP(CTDLSetReminderDlg)
-	ON_CBN_SELCHANGE(IDC_RELATIVELEADIN, OnSelchangeLeadin)
 	ON_BN_CLICKED(IDC_RELATIVE, OnChangeRelative)
 	ON_BN_CLICKED(IDC_ABSOLUTE, OnChangeRelative)
-	//}}AFX_MSG_MAP
 	ON_BN_CLICKED(IDC_DISMISS, OnDismissReminder)
 	ON_BN_CLICKED(IDC_PLAYSOUND, OnClickPlaySound)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
-// CTDLSetReminderDlg message handlers
 
 int CTDLSetReminderDlg::DoModal(TDCREMINDER& rem, BOOL bNewReminder)
 {
@@ -98,7 +86,7 @@ int CTDLSetReminderDlg::DoModal(TDCREMINDER& rem, BOOL bNewReminder)
 
 		if (m_bRelative)
 		{
-			m_dRelativeLeadInHours = (rem.dRelativeDaysLeadIn * 24);
+			m_nRelativeLeadIn = rem.nRelativeLeadIn;
 			m_bRelativeFromDueDate = (rem.nRelativeFromWhen == TDCR_DUEDATE);
 
 			// init absolute date and time to now
@@ -125,13 +113,13 @@ int CTDLSetReminderDlg::DoModal(TDCREMINDER& rem, BOOL bNewReminder)
 		rem.sSoundFile = (m_bPlaySound ? m_sSoundFile : _T(""));
 		rem.bRelative = m_bRelative;
 		rem.dDaysSnooze = 0; // always
-		rem.nLastSnoozeMins = 0; // always
+		rem.nLastUserSnooze = TDCRP_0_MINS; // always
 		rem.bEnabled = TRUE;
 		
 		if (m_bRelative)
 		{
 			rem.nRelativeFromWhen = (m_bRelativeFromDueDate ? TDCR_DUEDATE : TDCR_STARTDATE);
-			rem.dRelativeDaysLeadIn = (m_dRelativeLeadInHours / 24);
+			rem.nRelativeLeadIn = m_nRelativeLeadIn;
 		}
 		else
 		{
@@ -176,13 +164,6 @@ void CTDLSetReminderDlg::OnClickPlaySound()
 	GetDlgItem(IDC_SOUNDFILE)->EnableWindow(m_bPlaySound);
 }
 
-void CTDLSetReminderDlg::OnSelchangeLeadin() 
-{
-	UpdateData();
-
-	m_dRelativeLeadInHours = (m_cbLeadIn.GetSelectedPeriod() / 60.0); // in hours
-}
-
 void CTDLSetReminderDlg::OnChangeRelative() 
 {
 	UpdateData();
@@ -212,10 +193,13 @@ void CTDLSetReminderDlg::OnDismissReminder()
 void CTDLSetReminderDlg::LoadPreferences(const CPreferences& prefs)
 {
 	m_bRelative = prefs.GetProfileInt(m_sPrefsKey, _T("Relative"), TRUE);
-	m_dRelativeLeadInHours = prefs.GetProfileDouble(m_sPrefsKey, _T("LeadIn"), 0.25); // 15 mins
 	m_bRelativeFromDueDate = prefs.GetProfileInt(m_sPrefsKey, _T("RelativeFromDue"), TRUE);
 	m_bPlaySound = prefs.GetProfileInt(m_sPrefsKey, _T("PlaySound"), -1);
 	m_sSoundFile = prefs.GetProfileString(m_sPrefsKey, _T("SoundFile"), m_sSoundFile);
+
+	// Lead-in remains stored in 'hours' for backwards compatibility
+	double dLeadInHours = prefs.GetProfileDouble(m_sPrefsKey, _T("LeadIn"), 0.25);
+	m_nRelativeLeadIn = (TDC_REMINDERPERIOD)Misc::Round(dLeadInHours * TDCRP_1_HOUR);
 
 	// Backwards compatibility
 	const LPCTSTR NO_SOUND = _T("None");
@@ -242,8 +226,10 @@ void CTDLSetReminderDlg::SavePreferences(CPreferences& prefs) const
 {
 	prefs.WriteProfileInt(m_sPrefsKey, _T("Relative"), m_bRelative);
 	prefs.WriteProfileInt(m_sPrefsKey, _T("RelativeFromDue"), m_bRelativeFromDueDate);
-	prefs.WriteProfileDouble(m_sPrefsKey, _T("LeadIn"), m_dRelativeLeadInHours);
 	prefs.WriteProfileString(m_sPrefsKey, _T("SoundFile"), m_sSoundFile);
 	prefs.WriteProfileInt(m_sPrefsKey, _T("PlaySound"), m_bPlaySound);
+
+	// Store lead-in as 'hours' for backwards compatibility
+	prefs.WriteProfileDouble(m_sPrefsKey, _T("LeadIn"), ((double)m_nRelativeLeadIn / TDCRP_1_HOUR));
 }
 

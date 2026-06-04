@@ -433,8 +433,8 @@ BOOL CTDLFindTasksDlg::Create()
 	CPreferences prefs;
 	DM_POS nLastPos = prefs.GetProfileEnum(_T("FindTasks"), _T("DockPos"), DMP_UNDOCKED);
 
-	DWORD dwTopLeft = (DWORD)prefs.GetProfileInt(_T("FindTasks"), _T("TopLeft"), -1);
-	DWORD dwBottomRight = (DWORD)prefs.GetProfileInt(_T("FindTasks"), _T("BottomRight"), -1);
+	DWORD dwTopLeft = prefs.GetProfileInt(_T("FindTasks"), _T("TopLeft"), -1);
+	DWORD dwBottomRight = prefs.GetProfileInt(_T("FindTasks"), _T("BottomRight"), -1);
 
 	m_rUndocked.SetRectEmpty();
 

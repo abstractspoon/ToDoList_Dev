@@ -283,7 +283,7 @@ BOOL CGraphAttributes::Load(const IPreferences* pPrefs, LPCTSTR szKey)
 					m_mapColors.SetAt(sGraph, aColors);
 
 					CString sOptionKey = (_T("GraphOption") + sGraph);
-					BURNDOWN_GRAPHOPTION nOption = (BURNDOWN_GRAPHOPTION)pPrefs->GetProfileInt(szKey, sOptionKey, GetDefaultOption(nType));
+					BURNDOWN_GRAPHOPTION nOption = pPrefs->GetProfileEnum(szKey, sOptionKey, GetDefaultOption(nType));
 
 					m_mapOptions.SetAt(sGraph, nOption);
 				}

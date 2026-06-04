@@ -173,7 +173,7 @@ public:
 	CString GetCommentsType() const; 
 	void EnableISODates(BOOL bEnable = TRUE) { m_bISODates = bEnable; }
 
-	BOOL SetReportDetails(LPCTSTR szTitle, const COleDateTime& date = 0.0);
+	BOOL SetReportDetails(LPCTSTR szTitle, const COleDateTime& date);
 	void SetAvailableAttributes(const CTDCAttributeMap& mapAttrib);
 
 	// Task-related methods -----------
