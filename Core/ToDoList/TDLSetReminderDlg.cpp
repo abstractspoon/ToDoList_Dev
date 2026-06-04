@@ -229,7 +229,7 @@ void CTDLSetReminderDlg::SavePreferences(CPreferences& prefs) const
 	prefs.WriteProfileString(m_sPrefsKey, _T("SoundFile"), m_sSoundFile);
 	prefs.WriteProfileInt(m_sPrefsKey, _T("PlaySound"), m_bPlaySound);
 
-	// Lead-in remains stored in 'hours' for backwards compatibility
+	// Store lead-in as 'hours' for backwards compatibility
 	prefs.WriteProfileDouble(m_sPrefsKey, _T("LeadIn"), ((double)m_nRelativeLeadIn / TDCRP_1_HOUR));
 }
 

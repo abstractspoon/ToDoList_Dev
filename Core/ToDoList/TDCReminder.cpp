@@ -252,7 +252,7 @@ void TDCREMINDER::Load(const IPreferences* pPrefs, LPCTSTR szKey)
 	
 	if (bRelative)
 	{
-		// Lead-in remains stored as 'double' for backwards compatibility
+		// Store lead-in as 'double' for backwards compatibility
 		nRelativeLeadIn = (TDC_REMINDERPERIOD)(int)pPrefs->GetProfileDouble(szKey, _T("LeadIn"), TDCRP_15_MINS);
 		nRelativeFromWhen = pPrefs->GetProfileEnum(szKey, _T("FromWhen"), TDCR_DUEDATE);
 	}
