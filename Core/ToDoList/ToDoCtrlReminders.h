@@ -6,6 +6,7 @@
 #endif // _MSC_VER > 1000
 // ToDoCtrlReminders.h : header file
 //
+/////////////////////////////////////////////////////////////////////////////
 
 #include "tdcenum.h"
 #include "tdlshowreminderdlg.h"
@@ -27,9 +28,9 @@ struct TDCDATEOFFSET;
 
 class CToDoCtrlReminders : public CTDLShowReminderDlg
 {
-// Construction
 public:
 	CToDoCtrlReminders();
+	virtual ~CToDoCtrlReminders();
 
 	BOOL Initialize(CWnd* pNotify);
 	BOOL UseStickies(BOOL bEnable, LPCTSTR szStickiesPath, BOOL bShowFullTaskPath, BOOL bAutoStart);
@@ -52,7 +53,6 @@ public:
 	BOOL GetFirstTaskReminder(const CFilteredToDoCtrl* pTDC, const CDWordArray& aTaskIDs, TDCREMINDER& rem) const;
 	BOOL UpdateRecurringTaskReminders(DWORD dwOldTaskID, DWORD dwNewTaskID, const CFilteredToDoCtrl* pTDC);
 
-// Attributes
 protected:
 	CWnd* m_pWndNotify;
 	CArray<TDCREMINDER, TDCREMINDER&> m_aReminders;
@@ -62,10 +62,7 @@ protected:
 	CStickiesWnd m_stickies;
 	CRichEditBaseCtrl m_rtfFormatter; // For 'Stickies'
 
-// Implementation
-public:
-	virtual ~CToDoCtrlReminders();
-
+protected:
 	virtual void DoSnoozeReminder(const TDCREMINDER& rem);
 	virtual void DoModifyReminder(const TDCREMINDER& rem);
 	virtual void DoDismissReminder(const TDCREMINDER& rem);
@@ -74,10 +71,7 @@ public:
 	virtual void HideWindow();
 	virtual BOOL CanModifyReminders() const;
 
-	// Generated message map functions
 protected:
-	//{{AFX_MSG(CToDoCtrlReminders)
-	//}}AFX_MSG
 	afx_msg void OnTimer(UINT nIDEvent);
 	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
 	DECLARE_MESSAGE_MAP()

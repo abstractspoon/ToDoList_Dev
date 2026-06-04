@@ -34,12 +34,12 @@ TDCREMINDER::TDCREMINDER()
 	: 
 	dwTaskID(0), 
 	pTDC(NULL), 
-	dRelativeDaysLeadIn(0.0), 
+	nRelativeLeadIn(TDCRP_0_MINS),
 	dDaysSnooze(0.0), 
 	nRelativeFromWhen(TDCR_DUEDATE), 
 	bEnabled(TRUE), 
 	bRelative(FALSE),
-	nLastSnoozeMins(0)
+	nLastUserSnooze(TDCRP_0_MINS)
 {
 }
 
@@ -226,15 +226,18 @@ void TDCREMINDER::Save(IPreferences* pPrefs, LPCTSTR szKey) const
 	pPrefs->WriteProfileInt(szKey, _T("TaskID"), dwTaskID);
 	pPrefs->WriteProfileInt(szKey, _T("Relative"), bRelative);
 	pPrefs->WriteProfileDouble(szKey, _T("Snooze"), dDaysSnooze);
-	pPrefs->WriteProfileInt(szKey, _T("LastSnoozeMins"), nLastSnoozeMins);
+	pPrefs->WriteProfileInt(szKey, _T("LastSnoozeMins"), nLastUserSnooze);
 	
 	if (bRelative)
 	{
-		pPrefs->WriteProfileDouble(szKey, _T("LeadIn"), dRelativeDaysLeadIn * MINS_IN_DAY);
+		// Lead-in remains stored as 'double' for backwards compatibility
+		pPrefs->WriteProfileDouble(szKey, _T("LeadIn"), nRelativeLeadIn);
 		pPrefs->WriteProfileInt(szKey, _T("FromWhen"), nRelativeFromWhen);
 	}
 	else
+	{
 		pPrefs->WriteProfileDouble(szKey, _T("AbsoluteDate"), dtAbsolute);
+	}
 	
 	pPrefs->WriteProfileInt(szKey, _T("Enabled"), bEnabled);
 	pPrefs->WriteProfileString(szKey, _T("SoundFile"), sSoundFile);
@@ -245,15 +248,18 @@ void TDCREMINDER::Load(const IPreferences* pPrefs, LPCTSTR szKey)
 	dwTaskID = pPrefs->GetProfileInt(szKey, _T("TaskID"));
 	bRelative = pPrefs->GetProfileInt(szKey, _T("Relative"));
 	dDaysSnooze = pPrefs->GetProfileDouble(szKey, _T("Snooze"));
-	nLastSnoozeMins = pPrefs->GetProfileInt(szKey, _T("LastSnoozeMins"));
+	nLastUserSnooze = pPrefs->GetProfileEnum(szKey, _T("LastSnoozeMins"), TDCRP_5_MINS);
 	
 	if (bRelative)
 	{
-		dRelativeDaysLeadIn = (pPrefs->GetProfileDouble(szKey, _T("LeadIn")) / MINS_IN_DAY);
+		// Store lead-in as 'double' for backwards compatibility
+		nRelativeLeadIn = (TDC_REMINDERPERIOD)(int)pPrefs->GetProfileDouble(szKey, _T("LeadIn"), TDCRP_15_MINS);
 		nRelativeFromWhen = pPrefs->GetProfileEnum(szKey, _T("FromWhen"), TDCR_DUEDATE);
 	}
 	else
+	{
 		dtAbsolute = pPrefs->GetProfileDouble(szKey, _T("AbsoluteDate"));
+	}
 	
 	bEnabled = pPrefs->GetProfileInt(szKey, _T("Enabled"));
 	sSoundFile = pPrefs->GetProfileString(szKey, _T("SoundFile"));
@@ -277,8 +283,41 @@ BOOL TDCREMINDER::GetReminderDate(COleDateTime& date, BOOL bIncludeSnooze) const
 
 	date = dtAbsolute;
 	
-	if (bRelative && GetRelativeToDate(date))
-		date -= dRelativeDaysLeadIn;
+	if (bRelative)
+	{
+		if (!GetRelativeToDate(date))
+			return FALSE;
+
+		switch (nRelativeLeadIn)
+		{
+		case TDCRP_NOREMINDER:
+			ASSERT(0);
+			return FALSE;
+
+		case TDCRP_1_MONTH:
+		case TDCRP_2_MONTHS:
+		case TDCRP_3_MONTHS:
+		case TDCRP_4_MONTHS:
+		case TDCRP_5_MONTHS:
+		case TDCRP_6_MONTHS:
+		case TDCRP_9_MONTHS:
+		case TDCRP_12_MONTHS: // TDCRP_1_YEAR
+			{
+				CTwentyFourSevenWeek week;
+				CDateHelper dh(week);
+
+				dh.OffsetDate(date, -(nRelativeLeadIn / TDCRP_1_MONTH), DHU_MONTHS);
+			}
+			break;
+
+		default:
+			{
+				ASSERT(nRelativeLeadIn < TDCRP_1_MONTH);
+				date.m_dt -= ((double)nRelativeLeadIn / TDCRP_1_DAY);
+			}
+			break;
+		}
+	}
 	
 	NULLDATE_CHECKRET(date, FALSE);
 

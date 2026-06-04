@@ -35,20 +35,20 @@ public:
 	
 	void SetISOFormat(BOOL bISO);
 
-	void DDX(CDataExchange* pDX, double& dHours);
+	void DDX(CDataExchange* pDX, double& dHours, BOOL b24HourTime = TRUE);
 	void DDX(CDataExchange* pDX, COleDateTime& dtTime);
 	
 protected:
 	DWORD m_dwStyle;
 	
 protected:
-	afx_msg void OnCaptureChanged(CWnd* pWnd);
-	DECLARE_MESSAGE_MAP()
-
 	virtual void BuildCombo();
 	virtual LRESULT OnEditboxMessage(UINT msg, WPARAM wp, LPARAM lp);
 	virtual void GetItemColors(int nItem, UINT nItemState, DWORD dwItemData, 
 								COLORREF& crText, COLORREF& crBack) const;	
+protected:
+	afx_msg void OnCaptureChanged(CWnd* pWnd);
+	DECLARE_MESSAGE_MAP()
 
 protected:
 	void ScrollListBox();

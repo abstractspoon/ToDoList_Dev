@@ -29,7 +29,7 @@ double ONE_DAY_IN_MINS = (24.0 * 60);
 /////////////////////////////////////////////////////////////////////////////
 // CTDLShowReminderDlg dialog
 
-CTDLShowReminderDlg::CTDLShowReminderDlg(CWnd* pParent /*=NULL*/)
+CTDLShowReminderDlg::CTDLShowReminderDlg(CWnd* pParent)
 	: 
 	CTDLDialog(IDD_SHOWREMINDER_DIALOG, _T("ShowReminders"), pParent),
 	m_lcReminders(m_sPrefsKey),
@@ -39,7 +39,7 @@ CTDLShowReminderDlg::CTDLShowReminderDlg(CWnd* pParent /*=NULL*/)
 	m_cbSnoozeTime(TCB_HOURSINDAY),
 	m_bSnoozeUntil(FALSE)
 {
-	m_nSnoozeMins = CPreferences().GetProfileInt(m_sPrefsKey, _T("Snooze"), 5);
+	m_nSnooze = CPreferences().GetProfileEnum(m_sPrefsKey, _T("Snooze"), TDCRP_5_MINS);
 
 	SetIcon(IDR_MAINFRAME);
 }
@@ -55,12 +55,10 @@ void CTDLShowReminderDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_SNOOZEUNTILDATE, m_dtcSnoozeDate);
 	DDX_Control(pDX, IDC_SNOOZEUNTILTIME, m_cbSnoozeTime);
 
-//	ASSERT(m_cbSnoozeFor.GetCount());
+	m_cbSnoozeFor.DDX(pDX, m_nSnooze);
 
 	if (pDX->m_bSaveAndValidate)
 	{
-		m_nSnoozeMins = m_cbSnoozeFor.GetSelectedPeriod();
-
 		COleDateTime date;
 		m_dtcSnoozeDate.GetTime(date);
 
@@ -68,8 +66,6 @@ void CTDLShowReminderDlg::DoDataExchange(CDataExchange* pDX)
 	}
 	else
 	{
-		m_cbSnoozeFor.SetSelectedPeriod(m_nSnoozeMins);
-
 		m_dtcSnoozeDate.SetTime(CDateHelper::GetDateOnly(m_dtSnoozeUntil));
 		m_cbSnoozeTime.Set24HourTime(CDateHelper::GetTimeOnly(m_dtSnoozeUntil) * 24);
 	}
@@ -78,7 +74,6 @@ void CTDLShowReminderDlg::DoDataExchange(CDataExchange* pDX)
 IMPLEMENT_DYNAMIC(CTDLShowReminderDlg, CTDLDialog)
 
 BEGIN_MESSAGE_MAP(CTDLShowReminderDlg, CTDLDialog)
-	//{{AFX_MSG_MAP(CTDLShowReminderDlg)
 	ON_BN_CLICKED(IDC_SNOOZE, OnSnooze)
 	ON_BN_CLICKED(IDC_MODIFY, OnModify)
 	ON_BN_CLICKED(IDC_DISMISS, OnDismiss)
@@ -88,14 +83,12 @@ BEGIN_MESSAGE_MAP(CTDLShowReminderDlg, CTDLDialog)
 	ON_BN_CLICKED(IDC_SNOOZEOPTIONUNTIL, OnSnoozeUntil)
 	ON_NOTIFY(LVN_ITEMCHANGED, IDC_REMINDERS, OnItemchangedReminders)
 	ON_BN_CLICKED(IDC_SNOOZEALL, OnSnoozeAll)
-	//}}AFX_MSG_MAP
 	ON_NOTIFY(NM_DBLCLK, IDC_REMINDERS, OnDblClkReminders)
 	ON_WM_CLOSE()
 	ON_WM_ACTIVATE()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
-// CTDLShowReminderDlg message handlers
 
 BOOL CTDLShowReminderDlg::Create(CWnd* pParent, BOOL bVisible)
 {
@@ -217,7 +210,7 @@ void CTDLShowReminderDlg::SnoozeReminders(BOOL bAll)
 
 	// save snooze value for next time
 	if (!m_bSnoozeUntil)
-		CPreferences().WriteProfileInt(m_sPrefsKey, _T("Snooze"), GetSnoozeMinutes());
+		CPreferences().WriteProfileInt(m_sPrefsKey, _T("Snooze"), m_nSnooze);
 
 	CTDCReminderArray aRem;
 	int nPrevSel = m_lcReminders.GetLastSel();
@@ -248,11 +241,6 @@ void CTDLShowReminderDlg::OnSnoozeAll()
 	ASSERT(m_lcReminders.GetItemCount());
 	
 	SnoozeReminders(TRUE);
-}
-
-double CTDLShowReminderDlg::GetSnoozeDays() const
-{
-	return (GetSnoozeMinutes() / ONE_DAY_IN_MINS);
 }
 
 COleDateTime CTDLShowReminderDlg::GetSnoozeUntil() const
@@ -404,11 +392,11 @@ void CTDLShowReminderDlg::UpdateControls()
 
 	if (m_lcReminders.GetSelectedReminder(rem) != -1)
 	{
-		UINT nSnooze = ((rem.nLastSnoozeMins > 0) ? rem.nLastSnoozeMins : 5);
+		TDC_REMINDERPERIOD nSnooze = max(rem.nLastUserSnooze, TDCRP_5_MINS);
 		m_cbSnoozeFor.SetSelectedPeriod(nSnooze);
 		
 		m_dtSnoozeUntil = (COleDateTime::GetCurrentTime().m_dt + (nSnooze / ONE_DAY_IN_MINS));
-		m_bSnoozeUntil = (rem.nLastSnoozeMins == 0);
+		m_bSnoozeUntil = (rem.nLastUserSnooze == TDCRP_0_MINS);
 
 		UpdateData(FALSE);
 	}

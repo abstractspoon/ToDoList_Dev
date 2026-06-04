@@ -51,12 +51,9 @@ CPreferencesTaskDefPage::CPreferencesTaskDefPage(const CTDCContentMgr* pMgrConte
 	m_cbDefReminder(TDLRPC_SHOWNONE | TDLRPC_SHOWZERO),
 	m_cbDefPriority(FALSE),
 	m_cbDefRisk(FALSE),
-	m_nDefReminderLeadinMins(TDLRPC_NOREMINDER)
+	m_bReminderBeforeDue(TRUE),
+	m_nDefReminderLeadin(TDCRP_NOREMINDER)
 {
-	//{{AFX_DATA_INIT(CPreferencesTaskDefPage)
-	m_sReminderSound = _T("");
-	//}}AFX_DATA_INIT
-	m_bReminderBeforeDue = TRUE;
 	m_eCost.SetMask(_T("@.0123456789"), ME_LOCALIZEDECIMAL);
 }
 
@@ -67,14 +64,13 @@ CPreferencesTaskDefPage::~CPreferencesTaskDefPage()
 void CPreferencesTaskDefPage::DoDataExchange(CDataExchange* pDX)
 {
 	CPreferencesPageBase::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CPreferencesTaskDefPage)
+
 	DDX_Control(pDX, IDC_PLAYSOUND, m_eReminderSound);
 	DDX_Text(pDX, IDC_PLAYSOUND, m_sReminderSound);
 	DDX_Control(pDX, IDC_DEFREMINDER, m_cbDefReminder);
 	DDX_Control(pDX, IDC_DEFAULTRISK, m_cbDefRisk);
 	DDX_Control(pDX, IDC_DEFAULTPRIORITY, m_cbDefPriority);
 	DDX_CBIndex(pDX, IDC_DEFREMINDERDATE, m_bReminderBeforeDue);
-	//}}AFX_DATA_MAP
 	DDX_Control(pDX, IDC_DEFAULTTIMESPENT, m_eTimeSpent);
 	DDX_Control(pDX, IDC_DEFAULTTIMEEST, m_eTimeEst);
 	DDX_Control(pDX, IDC_DEFAULTCOST, m_eCost);
@@ -97,14 +93,12 @@ void CPreferencesTaskDefPage::DoDataExchange(CDataExchange* pDX)
 
 	m_cbDefPriority.DDX(pDX, m_nDefPriority);
 	m_cbDefRisk.DDX(pDX, m_nDefRisk);
-	m_cbDefReminder.DDX(pDX, m_nDefReminderLeadinMins);
+	m_cbDefReminder.DDX(pDX, m_nDefReminderLeadin);
 }
 
 BEGIN_MESSAGE_MAP(CPreferencesTaskDefPage, CPreferencesPageBase)
-	//{{AFX_MSG_MAP(CPreferencesTaskDefPage)
 	ON_CBN_SELCHANGE(IDC_DEFREMINDER, OnSelchangeReminder)
 	ON_BN_CLICKED(IDC_USECREATIONFORDEFSTARTDATE, OnUseCreationDateForDefStartDate)
-	//}}AFX_MSG_MAP
 	ON_BN_CLICKED(IDC_SETDEFAULTICON, OnSetdefaulticon)
 	ON_BN_CLICKED(IDC_SETDEFAULTCOLOR, OnSetdefaultcolor)
 	ON_CBN_SELENDOK(IDC_COMMENTS, OnSelchangeCommentsformat)
@@ -114,15 +108,6 @@ BEGIN_MESSAGE_MAP(CPreferencesTaskDefPage, CPreferencesPageBase)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
-// CPreferencesTaskDefPage message handlers
-
-BOOL CPreferencesTaskDefPage::OnInitDialog()
-{
-	CPreferencesPageBase::OnInitDialog();
-
-	return TRUE;  // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX Property Pages should return FALSE
-}
 
 void CPreferencesTaskDefPage::OnFirstShow()
 {
@@ -130,8 +115,8 @@ void CPreferencesTaskDefPage::OnFirstShow()
 	
 	AddGroupLine(IDC_DEFGROUP);
 
-	GetDlgItem(IDC_DEFREMINDERDATE)->EnableWindow(m_nDefReminderLeadinMins != TDLRPC_NOREMINDER);
-	GetDlgItem(IDC_PLAYSOUND)->EnableWindow(m_nDefReminderLeadinMins != TDLRPC_NOREMINDER);
+	GetDlgItem(IDC_DEFREMINDERDATE)->EnableWindow(m_nDefReminderLeadin != TDCRP_NOREMINDER);
+	GetDlgItem(IDC_PLAYSOUND)->EnableWindow(m_nDefReminderLeadin != TDCRP_NOREMINDER);
 	GetDlgItem(IDC_USECREATIONTIMEFORDEFSTARTDATE)->EnableWindow(m_bUseCreationDateForDefStartDate);	
 
 	m_btDefColor.SetColor(m_crDef);
@@ -157,12 +142,12 @@ void CPreferencesTaskDefPage::OnFirstShow()
 
 BOOL CPreferencesTaskDefPage::GetReminder(TDCREMINDER& rem) const
 {
-	if (m_nDefReminderLeadinMins == TDLRPC_NOREMINDER)
+	if (m_nDefReminderLeadin == TDCRP_NOREMINDER)
 		return FALSE;
 
 	// else
 	rem.bRelative = TRUE;
-	rem.dRelativeDaysLeadIn = (m_nDefReminderLeadinMins / (24 * 60.0));
+	rem.nRelativeLeadIn = m_nDefReminderLeadin;
 	rem.nRelativeFromWhen = (m_bReminderBeforeDue ? TDCR_DUEDATE : TDCR_STARTDATE);
 	rem.sSoundFile = m_sReminderSound;
 
@@ -237,7 +222,7 @@ void CPreferencesTaskDefPage::LoadPreferences(const IPreferences* pPrefs, LPCTST
 	m_defTimeSpent.dAmount = pPrefs->GetProfileDouble(szKey, _T("DefaultTimeSpent"), 0);
 	m_defTimeSpent.SetTHUnits(pPrefs->GetProfileEnum(szKey, _T("DefaultTimeSpentUnits"), THU_DAYS), FALSE);
 	m_sDefIcon = pPrefs->GetProfileString(szKey, _T("DefaultIcon"));
-	m_nDefReminderLeadinMins = pPrefs->GetProfileInt(szKey, _T("DefaultReminderLeadin"), TDLRPC_NOREMINDER);
+	m_nDefReminderLeadin = pPrefs->GetProfileEnum(szKey, _T("DefaultReminderLeadin"), TDCRP_NOREMINDER);
 	m_bReminderBeforeDue = pPrefs->GetProfileInt(szKey, _T("ReminderBeforeDue"), TRUE);
 
 	m_sReminderSound = pPrefs->GetProfileString(szKey, _T("ReminderSound"));
@@ -293,7 +278,7 @@ void CPreferencesTaskDefPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKe
 	pPrefs->WriteProfileInt(szKey, _T("DefaultTimeEstUnits"), m_defTimeEst.GetTHUnits());
 	pPrefs->WriteProfileDouble(szKey, _T("DefaultTimeSpent"), m_defTimeSpent.dAmount);
 	pPrefs->WriteProfileInt(szKey, _T("DefaultTimeSpentUnits"), m_defTimeSpent.GetTHUnits());
-	pPrefs->WriteProfileInt(szKey, _T("DefaultReminderLeadin"), m_nDefReminderLeadinMins);
+	pPrefs->WriteProfileInt(szKey, _T("DefaultReminderLeadin"), m_nDefReminderLeadin);
 	pPrefs->WriteProfileInt(szKey, _T("ReminderBeforeDue"), m_bReminderBeforeDue);
 	pPrefs->WriteProfileString(szKey, _T("ReminderSound"), m_sReminderSound);
 
@@ -379,8 +364,8 @@ void CPreferencesTaskDefPage::OnSelchangeReminder()
 {
 	UpdateData();
 
-	GetDlgItem(IDC_DEFREMINDERDATE)->EnableWindow(m_nDefReminderLeadinMins != TDLRPC_NOREMINDER);
-	GetDlgItem(IDC_PLAYSOUND)->EnableWindow(m_nDefReminderLeadinMins != TDLRPC_NOREMINDER);
+	GetDlgItem(IDC_DEFREMINDERDATE)->EnableWindow(m_nDefReminderLeadin != TDCRP_NOREMINDER);
+	GetDlgItem(IDC_PLAYSOUND)->EnableWindow(m_nDefReminderLeadin != TDCRP_NOREMINDER);
 }
 
 void CPreferencesTaskDefPage::OnSelchangeCommentsformat() 
@@ -420,7 +405,6 @@ LRESULT CPreferencesTaskDefPage::OnInitComments(WPARAM /*wParam*/, LPARAM /*lPar
 
 	return 0L;
 }
-
 
 void CPreferencesTaskDefPage::OnSize(UINT nType, int cx, int cy)
 {
