@@ -62,6 +62,12 @@
     <Compile Include="EisenhowerPaneListView.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="EisenhowerPreferencesDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="EisenhowerPreferencesDlg.Designer.cs">
+      <DependentUpon>EisenhowerPreferencesDlg.cs</DependentUpon>
+    </Compile>
     <Compile Include="EisenhowerVariableComboBox.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -99,6 +105,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="EisenhowerPane.resx">
       <DependentUpon>EisenhowerPane.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="EisenhowerPreferencesDlg.resx">
+      <DependentUpon>EisenhowerPreferencesDlg.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="EisenhowerUIExtensionCore.resx">
       <DependentUpon>EisenhowerUIExtensionCore.cs</DependentUpon>

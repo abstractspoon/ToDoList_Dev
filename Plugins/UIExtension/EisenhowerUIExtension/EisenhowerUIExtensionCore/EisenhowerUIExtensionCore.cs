@@ -449,6 +449,13 @@ namespace EisenhowerUIExtension
 			m_UpdateBtn.Enabled = (!m_XAttribCombo.SelectedVariable.Equals(m_EisenhowerCtrl.XFilterVariable) ||
 								   !m_YAttribCombo.SelectedVariable.Equals(m_EisenhowerCtrl.YFilterVariable));
 		}
+
+		private void OnPreferences(object sender, EventArgs e)
+		{
+			var prefs = new EisenhowerPreferencesDlg();
+
+			prefs.ShowDialog();
+		}
 	}
 
 }

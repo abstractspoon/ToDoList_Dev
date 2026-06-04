@@ -36,6 +36,7 @@
 			this.m_XAttribCombo = new EisenhowerUIExtension.EisenhowerVariableComboBox();
 			this.m_EisenhowerCtrl = new EisenhowerUIExtension.EisenhowerControl();
 			this.m_Tooltip = new System.Windows.Forms.ToolTip(this.components);
+			this.button1 = new System.Windows.Forms.Button();
 			this.SuspendLayout();
 			// 
 			// m_XAttribLabel
@@ -100,8 +101,21 @@
 			this.m_EisenhowerCtrl.Size = new System.Drawing.Size(613, 399);
 			this.m_EisenhowerCtrl.TabIndex = 0;
 			// 
+			// button1
+			// 
+			this.button1.AutoSize = true;
+			this.button1.ImageAlign = System.Drawing.ContentAlignment.BottomRight;
+			this.button1.Location = new System.Drawing.Point(317, 21);
+			this.button1.Name = "button1";
+			this.button1.Size = new System.Drawing.Size(50, 23);
+			this.button1.TabIndex = 4;
+			this.button1.Text = "Prefs...";
+			this.button1.UseVisualStyleBackColor = true;
+			this.button1.Click += new System.EventHandler(this.OnPreferences);
+			// 
 			// EisenhowerUIExtensionCore
 			// 
+			this.Controls.Add(this.button1);
 			this.Controls.Add(this.m_UpdateBtn);
 			this.Controls.Add(this.m_YAttribCombo);
 			this.Controls.Add(this.m_XAttribCombo);
@@ -124,5 +138,6 @@
 		private EisenhowerVariableComboBox m_YAttribCombo;
 		private System.Windows.Forms.Button m_UpdateBtn;
 		private System.Windows.Forms.ToolTip m_Tooltip;
+		private System.Windows.Forms.Button button1;
 	}
 }
