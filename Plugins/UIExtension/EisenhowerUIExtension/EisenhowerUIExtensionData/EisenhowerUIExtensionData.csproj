@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{2EA5F87A-CD7D-4ECA-AC91-B8180C3B0CE3}</ProjectGuid>
+    <ProjectGuid>{5C8B7743-2C31-4CF9-A70F-5AB5077D0E7A}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>EisenhowerUIExtension</RootNamespace>
-    <AssemblyName>EisenhowerUIExtensionCore</AssemblyName>
+    <AssemblyName>EisenhowerUIExtensionData</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
@@ -70,34 +70,9 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="EisenhowerControl.cs" />
-    <Compile Include="EisenhowerControl.Designer.cs">
-      <DependentUpon>EisenhowerControl.cs</DependentUpon>
-    </Compile>
-    <Compile Include="EisenhowerPane.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="EisenhowerPane.Designer.cs">
-      <DependentUpon>EisenhowerPane.cs</DependentUpon>
-    </Compile>
-    <Compile Include="EisenhowerPaneListView.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="EisenhowerPreferencesDlg.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="EisenhowerPreferencesDlg.Designer.cs">
-      <DependentUpon>EisenhowerPreferencesDlg.cs</DependentUpon>
-    </Compile>
-    <Compile Include="EisenhowerVariableComboBox.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="EisenhowerUIExtensionCore.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="EisenhowerUIExtensionCore.Designer.cs">
-      <DependentUpon>EisenhowerUIExtensionCore.cs</DependentUpon>
-    </Compile>
+    <Compile Include="EisenhowerData.cs" />
+    <Compile Include="EisenhowerFilter.cs" />
+    <Compile Include="TaskItem.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -118,39 +93,13 @@
       <Project>{85db2caf-cc78-4ca9-b948-ec2ac25f13e8}</Project>
       <Name>PluginHelpers</Name>
     </ProjectReference>
-    <ProjectReference Include="..\EisenhowerUIExtensionData\EisenhowerUIExtensionData.csproj">
-      <Project>{5c8b7743-2c31-4cf9-a70f-5ab5077d0e7a}</Project>
-      <Name>EisenhowerUIExtensionData</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="EisenhowerControl.resx">
-      <DependentUpon>EisenhowerControl.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="EisenhowerPane.resx">
-      <DependentUpon>EisenhowerPane.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="EisenhowerPreferencesDlg.resx">
-      <DependentUpon>EisenhowerPreferencesDlg.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="EisenhowerUIExtensionCore.resx">
-      <DependentUpon>EisenhowerUIExtensionCore.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\Eisenhower.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\BotLeftPane.png" />
-    <EmbeddedResource Include="Resources\BotRightPane.png" />
-    <EmbeddedResource Include="Resources\TopLeftPane.png" />
-    <EmbeddedResource Include="Resources\TopRightPane.png" />
-    <EmbeddedResource Include="Resources\UpdateFilter.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

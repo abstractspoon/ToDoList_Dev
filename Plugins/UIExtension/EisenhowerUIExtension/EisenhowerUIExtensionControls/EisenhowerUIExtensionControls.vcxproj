@@ -152,6 +152,9 @@ copy $(SolutionDir)$(ConfigurationName)\Microsoft.VisualStudio.OLE.Interop.dll "
     <ProjectReference Include="..\..\..\..\Core\Shared\Shared.vcxproj">
       <Project>{95605899-9c90-40d8-8774-d1da1fce7464}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\EisenhowerUIExtensionData\EisenhowerUIExtensionData.csproj">
+      <Project>{5c8b7743-2c31-4cf9-a70f-5ab5077d0e7a}</Project>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="EisenhowerUIExtensionControls.rc" />

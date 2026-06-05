@@ -21,7 +21,7 @@ using namespace System::Windows::Forms;
 using namespace System::Collections::Generic;
 
 // using namespace Abstractspoon::Tdl::EisenhowerUIExtensionControls;
-using namespace EisenhowerUIExtension::EisenhowerUIExtensionControls;
+using namespace EisenhowerUIExtension;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -148,7 +148,7 @@ HFONT GetHfont(IntPtr hFont)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-EisenhowerFilterSetupListCtrl::EisenhowerFilterSetupListCtrl()
+EisenhowerFilterSetupListCtrl::EisenhowerFilterSetupListCtrl() : m_Filters(nullptr)
 {
 } 
 
@@ -157,7 +157,7 @@ void EisenhowerFilterSetupListCtrl::OnHandleCreated(EventArgs^ e)
 	Control::OnHandleCreated(e);
 
 	m_pMFCInfo = IntPtr(HostedEisenhowerSetupListCtrl::Attach(GetHwnd(Handle), GetHfont(Font->ToHfont())));
-	//CheckSetSelectedDays();
+	CheckInitListCtrl();
 }
 
 void EisenhowerFilterSetupListCtrl::OnHandleDestroyed(EventArgs^ e)
@@ -166,8 +166,6 @@ void EisenhowerFilterSetupListCtrl::OnHandleDestroyed(EventArgs^ e)
 
 	if (m_pMFCInfo != IntPtr::Zero)
 	{
-		//m_SelectedDays = DateUtil::MapDaysOfWeek(GetSelectedDays());
-
 		ListCtrl(m_pMFCInfo)->Detach();
 		m_pMFCInfo = IntPtr::Zero;
 	}
@@ -181,27 +179,19 @@ void EisenhowerFilterSetupListCtrl::OnSizeChanged(EventArgs^ e)
 		ListCtrl(m_pMFCInfo)->UpdateSize();
 }
 
-// List<System::DayOfWeek>^ EisenhowerFilterSetupListCtrl::GetSelectedDays()
-// {
-// 	if (m_pMFCInfo != IntPtr::Zero)
-// 		m_SelectedDays = ListCtrl(m_pMFCInfo)->GetSelectedDays();
-// 
-// 	return DateUtil::MapDaysOfWeek(m_SelectedDays);
-// }
-// 
-// void EisenhowerFilterSetupListCtrl::SetSelectedDays(List<DayOfWeek>^ days)
-// {
-// 	m_SelectedDays = DateUtil::MapDaysOfWeek(days);
-// 
-// 	CheckSetSelectedDays();
-// }
-// 
-// void EisenhowerFilterSetupListCtrl::SetSelectedDay(DayOfWeek day)
-// {
-// 	m_SelectedDays = DateUtil::MapDayOfWeek(day);
-// 
-// 	CheckSetSelectedDays();
-// }
+List<EisenhowerFilterSetup^>^ EisenhowerFilterSetupListCtrl::GetFilters()
+{
+	return gcnew List<EisenhowerFilterSetup^>();
+}
+
+void EisenhowerFilterSetupListCtrl::Initialise(List<EisenhowerVariable^>^ supportedVars,
+												List<EisenhowerFilterSetup^>^ filters)
+{
+	m_Vars = supportedVars;
+	m_Filters = filters;
+
+	CheckInitListCtrl();
+}
 
 void EisenhowerFilterSetupListCtrl::WndProc(Message% m)
 {
@@ -216,23 +206,13 @@ void EisenhowerFilterSetupListCtrl::WndProc(Message% m)
 		// Forward to the MFC control
 		ListCtrl(m_pMFCInfo)->DrawItem(m.WParam.ToInt32(), m.LParam.ToInt32());
 		break;
-// 
-// 	case WM_COMMAND:
-// 		ChangeEvent(this, gcnew EventArgs());
-// 		break;
 	}
 }
 
-// void EisenhowerFilterSetupListCtrl::CheckSetSelectedDays()
-// {
-// 	if (m_pMFCInfo != IntPtr::Zero)
-// 		ListCtrl(m_pMFCInfo)->SetSelectedDays(m_SelectedDays);
-// }
-// 
-// void EisenhowerFilterSetupListCtrl::SetEnabled(bool enabled)
-// {
-// 	Windows::Forms::Control::Enabled = enabled;
-// 
-// 	if (m_pMFCInfo != IntPtr::Zero)
-// 		ListCtrl(m_pMFCInfo)->SetEnabled(enabled);
-// }
+void EisenhowerFilterSetupListCtrl::CheckInitListCtrl()
+{
+	if (m_pMFCInfo != IntPtr::Zero)
+	{
+		//ListCtrl(m_pMFCInfo)->SetFilters(m_Filters);
+	}
+}

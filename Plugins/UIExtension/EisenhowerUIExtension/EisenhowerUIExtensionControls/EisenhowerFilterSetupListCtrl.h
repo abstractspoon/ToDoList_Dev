@@ -10,8 +10,6 @@ using namespace System;
 
 namespace EisenhowerUIExtension
 {
-		namespace EisenhowerUIExtensionControls
-		{
 			class CEisenhowerSetupListCtrl : public CInputListCtrl
 			{
 			public:
@@ -35,6 +33,7 @@ namespace EisenhowerUIExtension
 
 				void DrawItem(WPARAM wp, LPARAM lp);
 				void UpdateSize();
+				void AddFilter(LPCWSTR xVar, double xCutoff, LPCWSTR yVar, double yCutoff, DWORD dwItemData);
 
 			protected:
 				HostedEisenhowerSetupListCtrl(HWND hwndParent);
@@ -46,12 +45,12 @@ namespace EisenhowerUIExtension
 
 			// -------------------------------------------------------------------
 
-// 			public ref class EisenhowerFilterSetup
-// 			{
-// 			public:
-// 				String XVar, YVar;
-// 				double XCutoff, YCutoff;
-// 			};
+			public ref class EisenhowerFilterSetup
+			{
+			public:
+				EisenhowerVariable ^XVar, ^YVar;
+				double XCutoff, YCutoff;
+			};
 
 			// -------------------------------------------------------------------
 
@@ -60,18 +59,23 @@ namespace EisenhowerUIExtension
 			public:
 				EisenhowerFilterSetupListCtrl();
 
-//  				Collections::Generic::List<EisenhowerFilterSetup^>^ GetFilters();
-// 				void SetFilters(Collections::Generic::List<EisenhowerFilterSetup^>^ filters);
+ 				Collections::Generic::List<EisenhowerFilterSetup^>^ GetFilters();
+				void Initialise(Collections::Generic::List<EisenhowerVariable^>^ supportedVars,
+								Collections::Generic::List<EisenhowerFilterSetup^>^ filters);
 
 			private:
 				IntPtr m_pMFCInfo = IntPtr::Zero;
+				Collections::Generic::List<EisenhowerVariable^>^ m_Vars;
+				Collections::Generic::List<EisenhowerFilterSetup^>^ m_Filters;
 
 			protected:
 				void WndProc(Windows::Forms::Message% m) override;
 				void OnHandleCreated(EventArgs^ e) override;
 				void OnHandleDestroyed(EventArgs^ e) override;
 				void OnSizeChanged(EventArgs^ e) override;
+
+			protected:
+				void CheckInitListCtrl();
 			};
 
-		}
 }
