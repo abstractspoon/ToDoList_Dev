@@ -1,0 +1,162 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{139F16A6-439A-4D0F-80BD-02C863A38BAC}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>EisenhowerUIExtensionControls</RootNamespace>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <CLRSupport>true</CLRSupport>
+    <PlatformToolset>v140</PlatformToolset>
+    <UseOfMfc>Dynamic</UseOfMfc>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v140</PlatformToolset>
+    <CLRSupport>true</CLRSupport>
+    <UseOfMfc>Dynamic</UseOfMfc>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;PLUGINHELPERS_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessToFile>false</PreprocessToFile>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\Core;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MinimalRebuild>false</MinimalRebuild>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <ForcedUsingFiles>System.Windows.Forms.dll</ForcedUsingFiles>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>Shared.lib;3rdParty.lib;Interfaces.lib;ToDoListLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)3rdParty\Unicode_Debug;$(SolutionDir)Shared\Unicode_Debug;$(SolutionDir)Interfaces\Unicode_Debug;$(SolutionDir)ToDoListLib\Unicode_Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>/IGNORE:4248 %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+    <PostBuildEvent>
+      <Command>mkdir "$(SolutionDir)$(ConfigurationName)"
+copy $(SolutionDir)3rdParty\HtmlAgilityPack\HtmlAgilityPack.dll "$(SolutionDir)$(ConfigurationName)\"
+copy $(SolutionDir)3rdParty\Microsoft\Microsoft.VisualStudio.OLE.Interop.dll "$(SolutionDir)$(ConfigurationName)\"
+
+mkdir "$(SolutionDir)..\Core\ToDoList"
+mkdir "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)"
+copy $(TargetPath) "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)\"
+copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)\"
+
+copy $(SolutionDir)$(ConfigurationName)\HtmlAgilityPack.dll "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)\"
+copy $(SolutionDir)$(ConfigurationName)\Microsoft.VisualStudio.OLE.Interop.dll "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)\"
+
+</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;PLUGINHELPERS_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\Core\3rdParty\Unicode_Release;$(SolutionDir)..\Core\Shared\Unicode_Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\Core;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MinimalRebuild>false</MinimalRebuild>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <ForcedUsingFiles>System.Windows.Forms.dll</ForcedUsingFiles>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;comctl32.lib;3rdParty.lib;Shared.lib;Interfaces.lib;ToDoListLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)Interfaces\Unicode_Release;$(SolutionDir)3rdParty\Unicode_Release;$(SolutionDir)Shared\Unicode_Release;$(SolutionDir)ToDoListLib\Unicode_Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <LinkTimeCodeGeneration>Default</LinkTimeCodeGeneration>
+    </Link>
+    <PostBuildEvent>
+      <Command>mkdir "$(SolutionDir)$(ConfigurationName)"
+copy $(SolutionDir)3rdParty\HtmlAgilityPack\HtmlAgilityPack.dll "$(SolutionDir)$(ConfigurationName)\"
+copy $(SolutionDir)3rdParty\Microsoft\Microsoft.VisualStudio.OLE.Interop.dll "$(SolutionDir)$(ConfigurationName)\"
+
+mkdir "$(SolutionDir)..\Core\ToDoList"
+mkdir "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)"
+copy $(TargetPath) "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)\"
+copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)\"
+
+copy $(SolutionDir)$(ConfigurationName)\HtmlAgilityPack.dll "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)\"
+copy $(SolutionDir)$(ConfigurationName)\Microsoft.VisualStudio.OLE.Interop.dll "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)\"
+</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="EisenhowerFilterSetupListCtrl.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="targetver.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="EisenhowerFilterSetupListCtrl.cpp" />
+    <ClCompile Include="stdafx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="PresentationCore" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Security" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\Core\3rdParty\3rdParty.vcxproj">
+      <Project>{e15c17b8-c080-492f-bbb8-bf9e84a0ea31}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\..\Core\Shared\Shared.vcxproj">
+      <Project>{95605899-9c90-40d8-8774-d1da1fce7464}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="EisenhowerUIExtensionControls.rc" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

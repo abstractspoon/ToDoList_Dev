@@ -29,23 +29,50 @@
 		private void InitializeComponent()
 		{
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(EisenhowerPreferencesDlg));
-			this.rangeSliderCtrl1 = new Abstractspoon.Tdl.PluginHelpers.RangeSliderCtrl();
+			this.button1 = new System.Windows.Forms.Button();
+			this.button2 = new System.Windows.Forms.Button();
+			this.eisenhowerSetupListCtrl1 = new EisenhowerUIExtension.EisenhowerUIExtensionControls.EisenhowerFilterSetupListCtrl();
 			this.SuspendLayout();
 			// 
-			// rangeSliderCtrl1
+			// button1
 			// 
-			this.rangeSliderCtrl1.Location = new System.Drawing.Point(26, 87);
-			this.rangeSliderCtrl1.Name = "rangeSliderCtrl1";
-			this.rangeSliderCtrl1.Size = new System.Drawing.Size(207, 23);
-			this.rangeSliderCtrl1.TabIndex = 0;
-			this.rangeSliderCtrl1.Text = "rangeSliderCtrl1";
+			this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+			this.button1.Location = new System.Drawing.Point(338, 235);
+			this.button1.Name = "button1";
+			this.button1.Size = new System.Drawing.Size(75, 23);
+			this.button1.TabIndex = 1;
+			this.button1.Text = "button1";
+			this.button1.UseVisualStyleBackColor = true;
+			// 
+			// button2
+			// 
+			this.button2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+			this.button2.Location = new System.Drawing.Point(419, 235);
+			this.button2.Name = "button2";
+			this.button2.Size = new System.Drawing.Size(75, 23);
+			this.button2.TabIndex = 1;
+			this.button2.Text = "button1";
+			this.button2.UseVisualStyleBackColor = true;
+			// 
+			// eisenhowerSetupListCtrl1
+			// 
+			this.eisenhowerSetupListCtrl1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.eisenhowerSetupListCtrl1.Location = new System.Drawing.Point(7, 12);
+			this.eisenhowerSetupListCtrl1.Name = "eisenhowerSetupListCtrl1";
+			this.eisenhowerSetupListCtrl1.Size = new System.Drawing.Size(487, 215);
+			this.eisenhowerSetupListCtrl1.TabIndex = 0;
+			this.eisenhowerSetupListCtrl1.Text = "eisenhowerSetupListCtrl1";
 			// 
 			// EisenhowerPreferencesDlg
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(284, 261);
-			this.Controls.Add(this.rangeSliderCtrl1);
+			this.ClientSize = new System.Drawing.Size(502, 261);
+			this.Controls.Add(this.button2);
+			this.Controls.Add(this.button1);
+			this.Controls.Add(this.eisenhowerSetupListCtrl1);
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.Name = "EisenhowerPreferencesDlg";
 			this.ShowInTaskbar = false;
@@ -57,6 +84,8 @@
 
 		#endregion
 
-		private Abstractspoon.Tdl.PluginHelpers.RangeSliderCtrl rangeSliderCtrl1;
+		private EisenhowerUIExtensionControls.EisenhowerFilterSetupListCtrl eisenhowerSetupListCtrl1;
+		private System.Windows.Forms.Button button1;
+		private System.Windows.Forms.Button button2;
 	}
 }
