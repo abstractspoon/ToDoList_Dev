@@ -1,29 +1,39 @@
 using System;
 using System.Diagnostics;
+using System.Collections.Generic;
 using System.Text;
 
 using Abstractspoon.Tdl.PluginHelpers;
 
 namespace EisenhowerUIExtension
 {
-	public enum EisenhowerPaneFilterAttributeRange
+
+	public class EisenhowerFilter
 	{
-		High,
-		Low,
-	}
+		public EisenhowerVariable XVar, YVar;
+		public String XCutoff, YCutoff;
+	};
 
 	// ------------------------------
 
-	public class EisenhowerFilterVariable : EisenhowerVariable
+	public class EisenhowerPaneFilterVariable : EisenhowerVariable
 	{
-		public EisenhowerPaneFilterAttributeRange Range { get; private set; }
+		public enum ValueRange
+		{
+			High,
+			Low,
+		}
+
+		// ------------------------------
+
+		public ValueRange Range { get; private set; }
 		public double Cutoff { get; private set; }
 
 		// ----------------------------------------
 
-		public EisenhowerFilterVariable(EisenhowerVariable var,
-										EisenhowerPaneFilterAttributeRange range,
-										double cutoff)
+		public EisenhowerPaneFilterVariable(EisenhowerVariable var,
+											ValueRange range,
+											double cutoff)
 			:
 			base(var)
 		{
@@ -38,14 +48,14 @@ namespace EisenhowerUIExtension
 
 			var value = task.GetAttributeValue(this);
 
-			if (Range == EisenhowerPaneFilterAttributeRange.High)
+			if (Range == ValueRange.High)
 				return (value > Cutoff);
 
 			// else
 			return (value <= Cutoff);
 		}
 
-		public bool RangeIsHigh { get { return (Range == EisenhowerPaneFilterAttributeRange.High); } }
+		public bool RangeIsHigh { get { return (Range == ValueRange.High); } }
 		public bool RangeIsLow { get { return !RangeIsHigh; } }
 
 		public string ToString(Translator trans)
@@ -88,7 +98,7 @@ namespace EisenhowerUIExtension
 
 		public override bool Equals(object other)
 		{
-			var var = (other as EisenhowerFilterVariable);
+			var var = (other as EisenhowerPaneFilterVariable);
 
 			return (Attribute.Equals(var?.Attribute) &&
 					(Range == var?.Range) && 
@@ -107,8 +117,8 @@ namespace EisenhowerUIExtension
 
 	public class EisenhowerPaneFilter
 	{
-		public EisenhowerPaneFilter(EisenhowerFilterVariable xVar,
-									EisenhowerFilterVariable yVar)
+		public EisenhowerPaneFilter(EisenhowerPaneFilterVariable xVar,
+									EisenhowerPaneFilterVariable yVar)
 		{
 			XVariable = xVar;
 			YVariable = yVar;
@@ -124,8 +134,8 @@ namespace EisenhowerUIExtension
 #endif
 		}
 
-		public EisenhowerFilterVariable XVariable { get; private set; }
-		public EisenhowerFilterVariable YVariable { get; private set; }
+		public EisenhowerPaneFilterVariable XVariable { get; private set; }
+		public EisenhowerPaneFilterVariable YVariable { get; private set; }
 
 		public bool TaskMatches(EisenhowerTask task)
 		{

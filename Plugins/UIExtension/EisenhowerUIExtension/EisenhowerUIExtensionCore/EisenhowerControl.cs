@@ -97,10 +97,10 @@ namespace EisenhowerUIExtension
 
 		public void SetFilter(EisenhowerVariable xVar, EisenhowerVariable yVar)
 		{
-			var xHighVar = new EisenhowerFilterVariable(xVar, EisenhowerPaneFilterAttributeRange.High, xVar.ValueMidPoint);
-			var xLowVar  = new EisenhowerFilterVariable(xVar, EisenhowerPaneFilterAttributeRange.Low, xVar.ValueMidPoint);
-			var yHighVar = new EisenhowerFilterVariable(yVar, EisenhowerPaneFilterAttributeRange.High, yVar.ValueMidPoint);
-			var yLowVar  = new EisenhowerFilterVariable(yVar, EisenhowerPaneFilterAttributeRange.Low, yVar.ValueMidPoint);
+			var xHighVar = new EisenhowerPaneFilterVariable(xVar, EisenhowerPaneFilterVariable.ValueRange.High, xVar.ValueMidPoint);
+			var xLowVar  = new EisenhowerPaneFilterVariable(xVar, EisenhowerPaneFilterVariable.ValueRange.Low, xVar.ValueMidPoint);
+			var yHighVar = new EisenhowerPaneFilterVariable(yVar, EisenhowerPaneFilterVariable.ValueRange.High, yVar.ValueMidPoint);
+			var yLowVar  = new EisenhowerPaneFilterVariable(yVar, EisenhowerPaneFilterVariable.ValueRange.Low, yVar.ValueMidPoint);
 
 			m_TopLeftPane.SetFilter(xHighVar, yHighVar);
 			m_TopRightPane.SetFilter(xLowVar, yHighVar);
@@ -834,7 +834,8 @@ namespace EisenhowerUIExtension
 					attribChangeArgs.XAttrib = destPane.Filter.XVariable;
 					attribChangeArgs.XValue = destPane.Filter.XVariable.Cutoff;
 
-					if (destXRange == EisenhowerPaneFilterAttributeRange.High)
+					// TODO
+					if (destXRange == EisenhowerPaneFilterVariable.ValueRange.High)
 						attribChangeArgs.XValue++;
 				}
 
@@ -843,7 +844,8 @@ namespace EisenhowerUIExtension
 					attribChangeArgs.YAttrib = destPane.Filter.YVariable;
 					attribChangeArgs.YValue = destPane.Filter.YVariable.Cutoff;
 
-					if (destYRange == EisenhowerPaneFilterAttributeRange.High)
+					// TODO
+					if (destYRange == EisenhowerPaneFilterVariable.ValueRange.High)
 						attribChangeArgs.YValue++;
 				}
 

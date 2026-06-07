@@ -197,7 +197,7 @@ namespace EisenhowerUIExtension
 			return Find(v => (v.Attribute.AttributeId == attribId));
 		}
 
-		protected EisenhowerVariable Find(string custAttribId)
+		public EisenhowerVariable Find(string custAttribId)
 		{
 			return Find(v => ((v.Attribute.AttributeId == Task.Attribute.CustomAttribute) && 
 								(v.Attribute.CustomAttributeId == custAttribId)));

@@ -94,7 +94,7 @@ namespace EisenhowerUIExtension
 			}
 		}
 
-		public bool SetFilter(EisenhowerFilterVariable xVar, EisenhowerFilterVariable yVar)
+		public bool SetFilter(EisenhowerPaneFilterVariable xVar, EisenhowerPaneFilterVariable yVar)
 		{
 			var newFilter = new EisenhowerPaneFilter(xVar, yVar);
 
