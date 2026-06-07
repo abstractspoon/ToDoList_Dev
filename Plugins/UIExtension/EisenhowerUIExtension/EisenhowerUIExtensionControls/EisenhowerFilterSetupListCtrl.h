@@ -2,80 +2,136 @@
 
 #include <Shared\InputListCtrl.h>
 
+#include <Interfaces\IEnums.h>
+
+#include <afxtempl.h>
+
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 using namespace System;
+using namespace Abstractspoon::Tdl::PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 namespace EisenhowerUIExtension
 {
-			class CEisenhowerSetupListCtrl : public CInputListCtrl
-			{
-			public:
+	///////////////////////////////////////////////////////////////////
 
-			protected:
-				afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
+	struct VARIABLE
+	{
+		CString sAttribID;
+		CString sLabel;
+	};
 
-				DECLARE_MESSAGE_MAP()
+	// ----------------------------------------
 
-			private:
-			};
+	struct FILTER
+	{
+		FILTER();
 
-			// -------------------------------------------------------------------
+		BOOL IsValid() const;
 
-			class HostedEisenhowerSetupListCtrl
-			{
-			public:
-				static HostedEisenhowerSetupListCtrl* Attach(HWND hwndParent, HFONT hFont);
-				
-				void Detach();
+		int nXVarIndex, nYVarIndex;
+		CString sXCutoff, sYCutoff;
+	};
 
-				void DrawItem(WPARAM wp, LPARAM lp);
-				void UpdateSize();
-				void AddFilter(LPCWSTR xVar, double xCutoff, LPCWSTR yVar, double yCutoff, DWORD dwItemData);
+	///////////////////////////////////////////////////////////////////
+	
+	class CEisenhowerSetupListCtrl : public CInputListCtrl
+	{
+	public:
+		CEisenhowerSetupListCtrl();
 
-			protected:
-				HostedEisenhowerSetupListCtrl(HWND hwndParent);
+		void Initialise(LPCWSTR szXVarColName, 
+						LPCWSTR szXCutoffColName, 
+						LPCWSTR szYVarColName, 
+						LPCWSTR szYCutoffColName,
+						LPCWSTR szNewRowPrompt,
+						LPCWSTR szCutoffPrompt,
+						const CArray<VARIABLE, VARIABLE&>& aVars,
+						const CArray<FILTER, FILTER&>& aFilters);
 
-			private:
-				CWnd m_WndOfManagedHandle;
-				CEisenhowerSetupListCtrl m_ListCtrl;
-			};
+		int GetFilters(CArray<FILTER, FILTER&>& filters) const;
 
-			// -------------------------------------------------------------------
+	private:
+		CComboBox m_cbVariables;
+		CString m_sCutoffPrompt;
 
-			public ref class EisenhowerFilterSetup
-			{
-			public:
-				EisenhowerVariable ^XVar, ^YVar;
-				double XCutoff, YCutoff;
-			};
+		CArray<VARIABLE, VARIABLE&> m_aVariables;
+		CArray<FILTER, FILTER&> m_aFilters;
 
-			// -------------------------------------------------------------------
+	protected:
+		afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
+		afx_msg void OnComboSelChange();
+		DECLARE_MESSAGE_MAP()
 
-			public ref class EisenhowerFilterSetupListCtrl : Windows::Forms::Control
-			{
-			public:
-				EisenhowerFilterSetupListCtrl();
+	protected:
+		virtual void PrepareControl(CWnd& ctrl, int nRow, int nCol);
+		virtual void EditCell(int nItem, int nCol, BOOL bBtnClick);
+		virtual void DrawCellText(CDC* pDC, int nItem, int nCol, const CRect& rText, const CString& sText, COLORREF crText, UINT nDrawTextFlags);
 
- 				Collections::Generic::List<EisenhowerFilterSetup^>^ GetFilters();
-				void Initialise(Collections::Generic::List<EisenhowerVariable^>^ supportedVars,
-								Collections::Generic::List<EisenhowerFilterSetup^>^ filters);
+		void PrepareCombo(int nRow, int nCol);
+	};
 
-			private:
-				IntPtr m_pMFCInfo = IntPtr::Zero;
-				Collections::Generic::List<EisenhowerVariable^>^ m_Vars;
-				Collections::Generic::List<EisenhowerFilterSetup^>^ m_Filters;
+	///////////////////////////////////////////////////////////////////
 
-			protected:
-				void WndProc(Windows::Forms::Message% m) override;
-				void OnHandleCreated(EventArgs^ e) override;
-				void OnHandleDestroyed(EventArgs^ e) override;
-				void OnSizeChanged(EventArgs^ e) override;
+	class HostedEisenhowerSetupListCtrl
+	{
+	public:
+		static HostedEisenhowerSetupListCtrl* Attach(HWND hwndParent, HFONT hFont);
 
-			protected:
-				void CheckInitListCtrl();
-			};
+		void Detach();
+
+		void DrawItem(WPARAM wp, LPARAM lp);
+		void UpdateSize();
+
+		void Initialise(LPCWSTR szXVarColName,
+						LPCWSTR szXCutoffColName,
+						LPCWSTR szYVarColName,
+						LPCWSTR szYCutoffColName,
+						LPCWSTR szNewRowPrompt,
+						LPCWSTR szCutoffPrompt,
+						const CArray<VARIABLE, VARIABLE&>& vars,
+						const CArray<FILTER, FILTER&>& filters);
+
+		int GetFilters(CArray<FILTER, FILTER&>& filters);
+
+	protected:
+		HostedEisenhowerSetupListCtrl(HWND hwndParent);
+
+	private:
+		CWnd m_WndOfManagedHandle;
+		CEisenhowerSetupListCtrl m_ListCtrl;
+	};
+
+	///////////////////////////////////////////////////////////////////
+
+	public ref class EisenhowerFilterSetupListCtrl : Windows::Forms::Control
+	{
+	public:
+		EisenhowerFilterSetupListCtrl();
+
+		void Initialise(Translator^ trans,
+						EisenhowerVariables^ vars,
+						EisenhowerFilters^ filters);
+
+		property EisenhowerFilters^ Filters { EisenhowerFilters^ get(); }
+
+	private:
+		IntPtr m_pMFCInfo = IntPtr::Zero;
+		Translator^ m_Trans;
+
+		EisenhowerVariables^ m_Vars;
+		EisenhowerFilters^ m_Filters;
+
+	protected:
+		void WndProc(Windows::Forms::Message% m) override;
+		void OnHandleCreated(EventArgs^ e) override;
+		void OnHandleDestroyed(EventArgs^ e) override;
+		void OnSizeChanged(EventArgs^ e) override;
+
+	protected:
+		void CheckInitListCtrl();
+	};
 
 }

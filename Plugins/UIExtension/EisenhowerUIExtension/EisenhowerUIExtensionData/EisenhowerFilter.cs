@@ -7,6 +7,39 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 namespace EisenhowerUIExtension
 {
+	public class EisenhowerFilters : List<EisenhowerFilter>
+	{
+		public EisenhowerFilters()
+		{
+		}
+
+		public bool AddOrUpdate(IEnumerable<EisenhowerFilter> filters)
+		{
+			bool modified = false;
+
+			foreach (var filter in filters)
+			{
+				var existFilter = Find(f => (f.XVar.Equals(filter.XVar) && f.YVar.Equals(filter.YVar)));
+
+				if (existFilter == null)
+				{
+					Add(filter);
+					modified = true;
+				}
+				else if ((existFilter.XCutoff != filter.XCutoff) || (existFilter.YCutoff != filter.YCutoff))
+				{
+					existFilter.XCutoff = filter.XCutoff;
+					existFilter.YCutoff = filter.YCutoff;
+					modified = true;
+				}
+			}
+
+			return modified;
+		}
+
+	};
+	
+	// -------------------------------------------------------------------
 
 	public class EisenhowerFilter
 	{

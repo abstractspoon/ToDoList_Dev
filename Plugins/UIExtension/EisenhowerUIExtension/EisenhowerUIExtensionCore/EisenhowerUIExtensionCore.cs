@@ -24,6 +24,7 @@ namespace EisenhowerUIExtension
 		private Translator m_Trans;
 
 		private EisenhowerData m_Data;
+		private EisenhowerFilters m_Filters;
 		private UIExtension.TaskIcon m_TaskIcons;
 		private Font m_ControlsFont;
 
@@ -41,6 +42,7 @@ namespace EisenhowerUIExtension
 			m_ControlsFont = new Font(FontName, 8, FontStyle.Regular);
 			m_TaskIcons = new UIExtension.TaskIcon(parentHandle);
 			m_Data = new EisenhowerData(trans);
+			m_Filters = new EisenhowerFilters();
 
 			m_EisenhowerCtrl.Initialize(m_Data.Tasks, trans, m_TaskIcons);
 
@@ -239,6 +241,31 @@ namespace EisenhowerUIExtension
 
 		public void LoadPreferences(Preferences prefs, String key, bool appOnly)
 		{
+			if (!appOnly)
+			{
+				// Load prior filters
+				// TODO
+
+				///////////////////////////////////////////////////
+				// Dummy filters for now
+				m_Filters.Add(new EisenhowerFilter()
+				{
+					XVar = m_Data.Variables.Find(Task.Attribute.Priority),
+					YVar = m_Data.Variables.Find(Task.Attribute.Risk),
+					XCutoff = "5",
+					YCutoff = "4"
+				});
+
+				m_Filters.Add(new EisenhowerFilter()
+				{
+					XVar = m_Data.Variables.Find(Task.Attribute.Risk),
+					YVar = m_Data.Variables.Find(Task.Attribute.Cost),
+					XCutoff = "3",
+					YCutoff = "47"
+				});
+				///////////////////////////////////////////////////
+			}
+
 			m_EisenhowerCtrl.LoadPreferences(prefs, key, appOnly);
 		}
 
@@ -452,9 +479,19 @@ namespace EisenhowerUIExtension
 
 		private void OnPreferences(object sender, EventArgs e)
 		{
-			var prefs = new EisenhowerPreferencesDlg();
+			var dlg = new EisenhowerPreferencesDlg(m_Trans, m_Data.Variables, m_Filters);
 
-			prefs.ShowDialog();
+			if (dlg.ShowDialog() == DialogResult.OK)
+			{
+				if (m_Filters.AddOrUpdate(dlg.Filters))
+				{
+					// Rebuild combobox
+					// TODO
+
+					// Update current filter
+					// TODO
+				}
+			}
 		}
 	}
 
