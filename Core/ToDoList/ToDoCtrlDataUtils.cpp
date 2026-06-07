@@ -4806,7 +4806,7 @@ CString CTDCTaskFormatter::GetTaskCustomAttributeData(const TODOITEM* pTDI, cons
 			if (!m_calculator.GetTaskCustomAttributeData(pTDI, pTDS, attribDef, dDate))
 				return EMPTY_STR;
 
-			return TDCCADATA(dDate).FormatAsDate(HasStyle(TDCS_SHOWDATESINISO), attribDef.HasFeature(TDCCAF_SHOWTIME));
+			return GetDateTime(dDate, attribDef.HasFeature(TDCCAF_SHOWTIME));
 		}
 		break;
 
