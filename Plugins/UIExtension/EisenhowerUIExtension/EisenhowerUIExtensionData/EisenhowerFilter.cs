@@ -13,6 +13,14 @@ namespace EisenhowerUIExtension
 		{
 		}
 
+		public override bool Equals(object obj)
+		{
+			if (obj is EisenhowerFilters)
+				return (ToString() == obj.ToString());
+
+			return false;
+		}
+
 		public bool AddOrUpdate(IEnumerable<EisenhowerFilter> filters)
 		{
 			bool modified = false;
@@ -37,6 +45,30 @@ namespace EisenhowerUIExtension
 			return modified;
 		}
 
+		EisenhowerFilter Find(string filterId)
+		{
+			return Find(f => (filterId == f.Id));
+		}
+
+		public override string ToString()
+		{
+			return string.Join(";", this);
+		}
+
+		public int FromString(string filters, EisenhowerVariables variables)
+		{
+			Clear();
+
+			foreach (var f in filters.Split(';'))
+			{
+				var filter = EisenhowerFilter.FromString(f, variables);
+
+				if (filter != null)
+					Add(filter);
+			}
+
+			return Count;
+		}
 	};
 	
 	// -------------------------------------------------------------------
@@ -45,6 +77,43 @@ namespace EisenhowerUIExtension
 	{
 		public EisenhowerVariable XVar, YVar;
 		public String XCutoff, YCutoff;
+
+		public String Id
+		{
+			get
+			{
+				return string.Format("{0}.{1}", XVar?.Id, YVar?.Id);
+			}
+		}
+
+		public override string ToString()
+		{
+			return string.Format("{0}:{1}:{2}", Id, XCutoff, YCutoff);
+		}
+
+		public static EisenhowerFilter FromString(string filter, EisenhowerVariables variables)
+		{
+			var parts = filter.Split(':');
+
+			if (parts.Length == 3)
+			{
+				var vars = parts[0].Split('.');
+
+				if (vars.Length == 2)
+				{
+					return new EisenhowerFilter()
+					{
+						XVar = variables.Find(v => (v.Id == vars[0])),
+						YVar = variables.Find(v => (v.Id == vars[1])),
+
+						XCutoff = parts[1],
+						YCutoff = parts[2]
+					};
+				}
+			}
+
+			return null;
+		}
 	};
 
 	// ------------------------------
@@ -156,15 +225,7 @@ namespace EisenhowerUIExtension
 			XVariable = xVar;
 			YVariable = yVar;
 
-#if DEBUG
-			if (!HasNull)
-			{
-				if (xVar.Attribute.IsCustom() && yVar.Attribute.IsCustom())
-					Debug.Assert(xVar.Attribute.CustomAttributeId != yVar.Attribute.CustomAttributeId);
-				else
-					Debug.Assert(xVar.Attribute.AttributeId != yVar.Attribute.AttributeId);
-			}
-#endif
+			Debug.Assert(HasNull || (XVariable.Id != YVariable.Id));
 		}
 
 		public EisenhowerPaneFilterVariable XVariable { get; private set; }

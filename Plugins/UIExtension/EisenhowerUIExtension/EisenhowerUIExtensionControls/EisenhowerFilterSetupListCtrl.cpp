@@ -358,40 +358,14 @@ void EisenhowerFilterSetupListCtrl::Initialise(Translator^ trans,
 	m_Trans = trans;
 	m_Vars = supportedVars;
 	m_Filters = filters;
+	m_ModifiedFilters = nullptr;
 
 	CheckInitListCtrl();
 }
 
 EisenhowerFilters^ EisenhowerFilterSetupListCtrl::Filters::get()
 {
-	if (m_pMFCInfo == IntPtr::Zero)
-		return m_Filters;
-
-	// else
-	auto filters = gcnew EisenhowerFilters();
-
-	CArray<FILTER, FILTER&> aFilters;
-	int numFilters = ListCtrl(m_pMFCInfo)->GetFilters(aFilters);
-
-	for (int f = 0; f < numFilters; f++)
-	{
-		const FILTER& filter = aFilters[f];
-
-		if (filter.IsValid())
-		{
-			auto ef = gcnew EisenhowerFilter();
-
-			ef->XVar = m_Vars[filter.nXVarIndex];
-			ef->YVar = m_Vars[filter.nYVarIndex];
-
-			ef->XCutoff = gcnew String(filter.sXCutoff);
-			ef->YCutoff = gcnew String(filter.sYCutoff);
-
-			filters->Add(ef);
-		}
-	}
-
-	return filters;
+	return ((m_ModifiedFilters != nullptr) ? m_ModifiedFilters : m_Filters);
 }
 
 // ------------------------------------------------
@@ -406,13 +380,38 @@ void EisenhowerFilterSetupListCtrl::OnHandleCreated(EventArgs^ e)
 
 void EisenhowerFilterSetupListCtrl::OnHandleDestroyed(EventArgs^ e)
 {
-	Control::OnHandleDestroyed(e);
-
 	if (m_pMFCInfo != IntPtr::Zero)
 	{
+		// Get modified filters
+		m_ModifiedFilters = gcnew EisenhowerFilters();
+
+		CArray<FILTER, FILTER&> aFilters;
+		int numFilters = ListCtrl(m_pMFCInfo)->GetFilters(aFilters);
+
+		for (int f = 0; f < numFilters; f++)
+		{
+			const FILTER& filter = aFilters[f];
+
+			if (filter.IsValid())
+			{
+				auto ef = gcnew EisenhowerFilter();
+
+				ef->XVar = m_Vars[filter.nXVarIndex];
+				ef->YVar = m_Vars[filter.nYVarIndex];
+
+				ef->XCutoff = gcnew String(filter.sXCutoff);
+				ef->YCutoff = gcnew String(filter.sYCutoff);
+
+				m_ModifiedFilters->Add(ef);
+			}
+		}
+		
+		// Clean up
 		ListCtrl(m_pMFCInfo)->Detach();
 		m_pMFCInfo = IntPtr::Zero;
 	}
+
+	Control::OnHandleDestroyed(e);
 }
 
 void EisenhowerFilterSetupListCtrl::OnSizeChanged(EventArgs^ e)

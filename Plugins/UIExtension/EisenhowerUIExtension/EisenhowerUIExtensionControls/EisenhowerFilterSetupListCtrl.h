@@ -122,7 +122,7 @@ namespace EisenhowerUIExtension
 		Translator^ m_Trans;
 
 		EisenhowerVariables^ m_Vars;
-		EisenhowerFilters^ m_Filters;
+		EisenhowerFilters ^m_Filters, ^m_ModifiedFilters;
 
 	protected:
 		void WndProc(Windows::Forms::Message% m) override;

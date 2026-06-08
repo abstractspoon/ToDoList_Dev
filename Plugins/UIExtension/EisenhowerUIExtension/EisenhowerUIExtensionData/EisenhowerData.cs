@@ -214,6 +214,11 @@ namespace EisenhowerUIExtension
 		public double MinValue { get; private set; }
 		public double MaxValue { get; private set; }
 
+		public String Id
+		{
+			get { return (Attribute.IsCustom() ? Attribute.CustomAttributeId : Attribute.AttributeId.ToString()); }
+		}
+
 		public static List<Task.Attribute> SupportedAttributeIds { get; private set; }
 
 		// ------------------------------
@@ -650,7 +655,7 @@ namespace EisenhowerUIExtension
 
 		public double GetAttributeValue(EisenhowerVariable var)
 		{
-			return GetAttributeValue(GetKey(var));
+			return GetAttributeValue(var.Id);
 		}
 
 		public string GetAttributeDisplayValue(EisenhowerVariable var)
@@ -660,19 +665,10 @@ namespace EisenhowerUIExtension
 
 		public void SetAttributeValue(EisenhowerVariable var, double value)
 		{
-			SetAttributeValue(GetKey(var), value);
+			SetAttributeValue(var.Id, value);
 		}
 
 		// ---------------------------------------------------------------
-
-		private string GetKey(EisenhowerVariable var)
-		{
-			if (var.Attribute.IsCustom())
-				return var.Attribute.CustomAttributeId;
-
-			// else
-			return var.Attribute.AttributeId.ToString();
-		}
 
 		private bool SetAttributeValue(string attribId, double value)
 		{

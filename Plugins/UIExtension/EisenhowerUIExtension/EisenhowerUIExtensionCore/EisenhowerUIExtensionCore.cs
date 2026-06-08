@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Drawing;
 using System.Drawing.Imaging;
-using System.Drawing.Drawing2D;
+using System.Diagnostics;
 using System.Windows.Forms;
 using System.Collections.Generic;
 using System.Windows.Forms.VisualStyles;
@@ -27,6 +27,9 @@ namespace EisenhowerUIExtension
 		private EisenhowerFilters m_Filters;
 		private UIExtension.TaskIcon m_TaskIcons;
 		private Font m_ControlsFont;
+
+		private string m_PrevFilters;
+		private string m_PrevSelFilter;
 
 		// ------------------------------------------------
 
@@ -78,6 +81,11 @@ namespace EisenhowerUIExtension
 			//   2.4. Had their max/min range updated
 			// 
 			var result = m_Data.Update(tasks, type);
+
+			if (m_PrevFilters != null)
+				InitialiseFilters();
+			else
+				UpdateFilters();
 
 			// If the existing filter variables have been removed
 			// then we need to revert to known types
@@ -236,6 +244,9 @@ namespace EisenhowerUIExtension
 
 		public void SavePreferences(Preferences prefs, String key)
 		{
+			prefs.WriteProfileString(key, "Filters", m_Filters.ToString());
+			prefs.WriteProfileString(key, "SelFilter", ""/*m_Filters.ToString()*/);
+
 			m_EisenhowerCtrl.SavePreferences(prefs, key);
 		}
 
@@ -244,29 +255,46 @@ namespace EisenhowerUIExtension
 			if (!appOnly)
 			{
 				// Load prior filters
-				// TODO
+				m_PrevSelFilter = prefs.GetProfileString(key, "SelFilter", "");
+				m_PrevFilters = prefs.GetProfileString(key, "Filters", "");
+			}
 
-				///////////////////////////////////////////////////
-				// Dummy filters for now
+			m_EisenhowerCtrl.LoadPreferences(prefs, key, appOnly);
+		}
+
+		private void InitialiseFilters()
+		{
+			Debug.Assert(m_Filters.Count == 0);
+			Debug.Assert(m_PrevFilters != null);
+
+			if (m_Filters.FromString(m_PrevFilters, m_Data.Variables) == 0)
+			{
+				// Default filters
 				m_Filters.Add(new EisenhowerFilter()
 				{
 					XVar = m_Data.Variables.Find(Task.Attribute.Priority),
 					YVar = m_Data.Variables.Find(Task.Attribute.Risk),
 					XCutoff = "5",
-					YCutoff = "4"
+					YCutoff = "5"
 				});
 
 				m_Filters.Add(new EisenhowerFilter()
 				{
 					XVar = m_Data.Variables.Find(Task.Attribute.Risk),
-					YVar = m_Data.Variables.Find(Task.Attribute.Cost),
-					XCutoff = "3",
-					YCutoff = "47"
+					YVar = m_Data.Variables.Find(Task.Attribute.Priority),
+					XCutoff = "5",
+					YCutoff = "5"
 				});
-				///////////////////////////////////////////////////
 			}
 
-			m_EisenhowerCtrl.LoadPreferences(prefs, key, appOnly);
+			m_PrevFilters = null;
+
+			// TODO
+		}
+
+		private void UpdateFilters()
+		{
+			// TODO
 		}
 
 		public new bool Focused
@@ -483,14 +511,13 @@ namespace EisenhowerUIExtension
 
 			if (dlg.ShowDialog() == DialogResult.OK)
 			{
-				if (m_Filters.AddOrUpdate(dlg.Filters))
-				{
-					// Rebuild combobox
-					// TODO
+				m_Filters = dlg.Filters;
 
-					// Update current filter
-					// TODO
-				}
+				// Rebuild combobox
+				// TODO
+
+				// Update current filter
+				// TODO
 			}
 		}
 	}

@@ -14,31 +14,42 @@ namespace EisenhowerUIExtension
 	public partial class EisenhowerPreferencesDlg : Form
 	{
 		private Translator m_Trans;
-		private EisenhowerVariables m_Variables;
-		private EisenhowerFilters m_Filters;
 
 		// ---------------------------------------------
 
-
-		public EisenhowerFilters Filters
-		{
-			get
-			{
-				return (IsHandleCreated ? m_SetupListCtrl.Filters : m_Filters);
-			}
-		}
+		public EisenhowerVariables Variables { get; private set; }
+		public EisenhowerFilters Filters { get; private set; }
 
 		// ---------------------------------------------
 
-		public EisenhowerPreferencesDlg(Translator trans, 
+		public EisenhowerPreferencesDlg(Translator trans,
 										EisenhowerVariables variables,
 										EisenhowerFilters filters)
 		{
 			m_Trans = trans;
-			m_Variables = variables;
-			m_Filters = filters;
+
+			Variables = variables;
+			Filters = filters;
 
 			InitializeComponent();
+		}
+
+		public new DialogResult ShowDialog()
+		{
+			if (base.ShowDialog() == DialogResult.OK)
+			{
+				// Only return OK if there have been modifications
+				var filters = m_SetupListCtrl.Filters;
+
+				if (!filters.Equals(Filters))
+				{
+					Filters = filters;
+					return DialogResult.OK;
+				}
+			}
+
+			// all else
+			return DialogResult.Cancel;
 		}
 
 		// ------------------------------------------------------
@@ -47,7 +58,7 @@ namespace EisenhowerUIExtension
 		{
 			base.OnHandleCreated(e);
 
-			m_SetupListCtrl.Initialise(m_Trans, m_Variables, m_Filters);
+			m_SetupListCtrl.Initialise(m_Trans, Variables, Filters);
 		}
 	}
 }
