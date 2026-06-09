@@ -19,7 +19,7 @@ namespace EisenhowerUIExtension
 		// --------------------------------------------------------
 
 		private bool m_Selected;
-		private int[] m_ColHeaderWidth		= new int[3] { -1, -1, -1 };
+		private int[] m_ColHeaderWidth			= new int[3] { -1, -1, -1 };
 		private int[] m_ColValueMaxCharWidth	= new int[3] { -1, -1, -1 };
 
 		// --------------------------------------------------------
@@ -212,17 +212,19 @@ namespace EisenhowerUIExtension
 		// --------------------------------------------------------
 		// Message handlers
 
-		public void RefreshVariableColumnWidth(int col, Graphics g)
+		private int HeaderPadding { get { return (6 * LabelPadding); } }
+
+		private void RefreshVariableColumnWidth(int col, Graphics g)
 		{
 			if (m_ColHeaderWidth[col] < 0)
-				m_ColHeaderWidth[col] = (int)(g.MeasureString(Columns[col].Text, Font).Width + (4 * LabelPadding));
+				m_ColHeaderWidth[col] = (int)(g.MeasureString(Columns[col].Text, Font).Width + HeaderPadding);
 
 			int colWidth = m_ColHeaderWidth[col];
 
 			if (m_ColValueMaxCharWidth[col] > 0)
 			{
 				string val = new String('0', m_ColValueMaxCharWidth[col]);
-				int valWidth = (int)(g.MeasureString(val, Font).Width + (4 * LabelPadding));
+				int valWidth = (int)(g.MeasureString(val, Font).Width + HeaderPadding);
 
 				colWidth = Math.Max(colWidth, valWidth);
 			}
