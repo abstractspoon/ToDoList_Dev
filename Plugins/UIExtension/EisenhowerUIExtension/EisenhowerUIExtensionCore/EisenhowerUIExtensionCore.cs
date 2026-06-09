@@ -251,9 +251,9 @@ namespace EisenhowerUIExtension
 			m_PrevFilters = null;
 
 			m_FilterCombo.Populate(m_Filters, m_Trans);
-			m_FilterCombo.SelectedFilter = m_Filters[0];
+			m_FilterCombo.SelectedFilter = m_Filters.FirstOrNull;
 
-			m_EisenhowerCtrl.SetFilter(m_Filters[0]);
+			m_EisenhowerCtrl.SetFilter(m_Filters.FirstOrNull);
 
 			return true;
 		}
@@ -283,7 +283,7 @@ namespace EisenhowerUIExtension
 				// then we need to revert to known types
 				if ((xUpdatedVar == null) || (yUpdatedVar == null))
 				{
-					selFilter = DefaultFilter;
+					selFilter = m_Filters.FirstOrNull;
 				}
 				else if (xUpdatedVar == null)
 				{
@@ -441,11 +441,6 @@ namespace EisenhowerUIExtension
 			}
 		}
 
-		private EisenhowerFilter DefaultFilter
-		{
-			get	{ return m_Filters.Find(f => (f.Id == "Priority.Risk")) ?? m_Filters[0]; }
-		}
-
 		private void EnableFilterComboEvents(bool enable)
 		{
 			if (enable)
@@ -457,14 +452,11 @@ namespace EisenhowerUIExtension
 		private void OnFilterComboSelectionChange(object sender, EventArgs e)
 		{
 			// Update filter
-			// TODO
 			var selTaskIds = m_EisenhowerCtrl.SelectedTaskIds;
 
 			m_EisenhowerCtrl.SetFilter(m_FilterCombo.SelectedFilter);
 			m_EisenhowerCtrl.SelectTasks(selTaskIds);
 			m_EisenhowerCtrl.Focus();
-
-			UpdateToolbarButtonStates();
 
 			UpdateToolbarButtonStates();
 		}
@@ -492,7 +484,7 @@ namespace EisenhowerUIExtension
 				m_Filters = dlg.Filters;
 				m_FilterCombo.Populate(m_Filters, m_Trans);
 
-				var newSelFilter = (SelectedFilter ?? DefaultFilter ?? EisenhowerFilter.Null);
+				var newSelFilter = (SelectedFilter ?? m_Filters.FirstOrNull ?? EisenhowerFilter.Null);
 
 				if (!newSelFilter.Equals(prevSelFilter))
 					m_EisenhowerCtrl.SetFilter(newSelFilter);

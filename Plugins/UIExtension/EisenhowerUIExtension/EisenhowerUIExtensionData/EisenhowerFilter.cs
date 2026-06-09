@@ -9,6 +9,13 @@ namespace EisenhowerUIExtension
 {
 	public class EisenhowerFilters : List<EisenhowerFilter>
 	{
+		public EisenhowerFilter FirstOrNull
+		{
+			get { return ((Count > 0) ? this[0] : EisenhowerFilter.Null); }
+		}
+
+		// ----------------------------------------
+
 		public EisenhowerFilters()
 		{
 		}
@@ -77,24 +84,24 @@ namespace EisenhowerUIExtension
 
 	public class EisenhowerFilter
 	{
+		public static EisenhowerFilter Null { get; private set; }
+
+		static EisenhowerFilter()
+		{
+			Null = new EisenhowerFilter()
+			{
+				XVar = EisenhowerVariable.Null,
+				YVar = EisenhowerVariable.Null
+			};
+		}	
+
+		// -------------------------------------------------
 		public EisenhowerVariable XVar, YVar;
 		public String XCutoff, YCutoff;
 
 		public String Id
 		{
 			get { return string.Format("{0}.{1}", XVar?.Id, YVar?.Id); }
-		}
-
-		public static EisenhowerFilter Null
-		{
-			get
-			{
-				return new EisenhowerFilter()
-				{
-					XVar = EisenhowerVariable.Null,
-					YVar = EisenhowerVariable.Null
-				};
-			}
 		}
 
 		public double XCutoffValue { get { return GetCutoffValue(XCutoff, XVar); } }
