@@ -95,12 +95,12 @@ namespace EisenhowerUIExtension
 			});
 		}
 
-		public void SetFilter(EisenhowerVariable xVar, EisenhowerVariable yVar)
+		public void SetFilter(EisenhowerFilter filter)
 		{
-			var xHighVar = new EisenhowerPaneFilterVariable(xVar, EisenhowerPaneFilterVariable.ValueRange.High, xVar.ValueMidPoint);
-			var xLowVar  = new EisenhowerPaneFilterVariable(xVar, EisenhowerPaneFilterVariable.ValueRange.Low, xVar.ValueMidPoint);
-			var yHighVar = new EisenhowerPaneFilterVariable(yVar, EisenhowerPaneFilterVariable.ValueRange.High, yVar.ValueMidPoint);
-			var yLowVar  = new EisenhowerPaneFilterVariable(yVar, EisenhowerPaneFilterVariable.ValueRange.Low, yVar.ValueMidPoint);
+			var xHighVar = new EisenhowerPaneFilterVariable(filter.XVar, EisenhowerPaneFilterVariable.ValueRange.High, filter.XCutoffValue);
+			var xLowVar  = new EisenhowerPaneFilterVariable(filter.XVar, EisenhowerPaneFilterVariable.ValueRange.Low, filter.XCutoffValue);
+			var yHighVar = new EisenhowerPaneFilterVariable(filter.YVar, EisenhowerPaneFilterVariable.ValueRange.High, filter.YCutoffValue);
+			var yLowVar  = new EisenhowerPaneFilterVariable(filter.YVar, EisenhowerPaneFilterVariable.ValueRange.Low, filter.YCutoffValue);
 
 			m_TopLeftPane.SetFilter(xHighVar, yHighVar);
 			m_TopRightPane.SetFilter(xLowVar, yHighVar);
@@ -188,9 +188,12 @@ namespace EisenhowerUIExtension
 			if (pane == null)
 				pane = m_Panes[0];
 
-			// TODO
-			task.SetPriority((byte)pane.Filter.XVariable.Cutoff);
-			task.SetRisk((byte)pane.Filter.XVariable.Cutoff);
+			if (pane.Filter != null)
+			{
+				// TODO
+				task.SetPriority((byte)pane.Filter.XVariable.Cutoff);
+				task.SetRisk((byte)pane.Filter.XVariable.Cutoff);
+			}
 
 			return true;
 		}

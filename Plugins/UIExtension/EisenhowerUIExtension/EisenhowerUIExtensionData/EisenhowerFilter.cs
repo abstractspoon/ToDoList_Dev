@@ -21,6 +21,13 @@ namespace EisenhowerUIExtension
 			return false;
 		}
 
+		public override int GetHashCode()
+		{
+			// Don't use as a dictionary key
+			// Debug.Assert(false);
+			return base.GetHashCode();
+		}
+
 		public bool AddOrUpdate(IEnumerable<EisenhowerFilter> filters)
 		{
 			bool modified = false;
@@ -43,11 +50,6 @@ namespace EisenhowerUIExtension
 			}
 
 			return modified;
-		}
-
-		EisenhowerFilter Find(string filterId)
-		{
-			return Find(f => (filterId == f.Id));
 		}
 
 		public override string ToString()
@@ -80,15 +82,61 @@ namespace EisenhowerUIExtension
 
 		public String Id
 		{
+			get { return string.Format("{0}.{1}", XVar?.Id, YVar?.Id); }
+		}
+
+		public static EisenhowerFilter Null
+		{
 			get
 			{
-				return string.Format("{0}.{1}", XVar?.Id, YVar?.Id);
+				return new EisenhowerFilter()
+				{
+					XVar = EisenhowerVariable.Null,
+					YVar = EisenhowerVariable.Null
+				};
 			}
+		}
+
+		public double XCutoffValue { get { return GetCutoffValue(XCutoff, XVar); } }
+		public double YCutoffValue { get { return GetCutoffValue(YCutoff, YVar); } }
+
+		// -------------------------------------------------
+
+		public EisenhowerFilter()
+		{
+		}
+
+		public EisenhowerFilter(EisenhowerFilter other)
+		{
+			XVar = other.XVar;
+			YVar = other.YVar;
+			XCutoff = other.XCutoff;
+			YCutoff = other.YCutoff;
 		}
 
 		public override string ToString()
 		{
 			return string.Format("{0}:{1}:{2}", Id, XCutoff, YCutoff);
+		}
+
+		public override bool Equals(object obj)
+		{
+			var filter = (obj as EisenhowerFilter);
+
+			if (filter == null)
+				return false;
+
+			return (XVar.Equals(filter.XVar) &&
+					YVar.Equals(filter.YVar) &&
+					(XCutoff == filter.XCutoff) && 
+					(YCutoff == filter.YCutoff));
+		}
+
+		public override int GetHashCode()
+		{
+			// Don't use as a dictionary key
+			// Debug.Assert(false);
+			return base.GetHashCode();
 		}
 
 		public static EisenhowerFilter FromString(string filter, EisenhowerVariables variables)
@@ -113,6 +161,16 @@ namespace EisenhowerUIExtension
 			}
 
 			return null;
+		}
+
+		private static double GetCutoffValue(string strCutoff, EisenhowerVariable var)
+		{
+			double cutoff;
+
+			if (double.TryParse(strCutoff, out cutoff))
+				return cutoff;
+
+			return var.ValueMidPoint;
 		}
 	};
 

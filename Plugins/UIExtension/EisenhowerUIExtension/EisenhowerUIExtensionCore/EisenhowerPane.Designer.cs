@@ -44,7 +44,7 @@
 			this.m_TitleBar.AutoSize = true;
 			this.m_TitleBar.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.m_TitleBar.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-			this.m_TitleBar.Location = new System.Drawing.Point(20, 2);
+			this.m_TitleBar.Location = new System.Drawing.Point(20, 3);
 			this.m_TitleBar.Name = "m_TitleBar";
 			this.m_TitleBar.Size = new System.Drawing.Size(69, 13);
 			this.m_TitleBar.TabIndex = 1;
@@ -77,6 +77,7 @@
 			this.m_List.MinTaskColumnWidth = 100;
 			this.m_List.Name = "m_List";
 			this.m_List.OwnerDraw = true;
+			this.m_List.ReadOnly = false;
 			this.m_List.Selected = false;
 			this.m_List.ShowCompletionCheckboxes = false;
 			this.m_List.ShowGroups = false;
