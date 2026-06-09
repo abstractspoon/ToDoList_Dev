@@ -150,7 +150,6 @@
     <EmbeddedResource Include="Resources\BotRightPane.png" />
     <EmbeddedResource Include="Resources\TopLeftPane.png" />
     <EmbeddedResource Include="Resources\TopRightPane.png" />
-    <EmbeddedResource Include="Resources\UpdateFilter.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
