@@ -90,10 +90,13 @@ namespace Abstractspoon
 						return;
 					}
 
-					e->DrawBackground();
-
 					if (e->Header == nullptr)
+					{
+						e->DrawBackground();
 						return;
+					}
+
+					DrawColumnHeaderBackground(e);
 
 					// Reimplement DrawListViewColumnHeaderEventArgs::DrawText()
 					// to avoid it adding unnecessary extra padding
@@ -122,6 +125,36 @@ namespace Abstractspoon
 												(sorter->Ascending ? true : false));
 
 					e->Graphics->ReleaseHdc();
+				}
+
+				void DrawColumnHeaderBackground(DrawListViewColumnHeaderEventArgs^ e)
+				{
+					// DrawListViewColumnHeaderEventArgs:: DrawBackground
+					// always draws 'normal' regardless of actual state
+
+					POINT ptMouse = { Control::MousePosition.X, Control::MousePosition.Y };
+					::ScreenToClient(Win32::GetHwnd(Handle), &ptMouse);
+
+					if (!e->Bounds.Contains(ptMouse.x, ptMouse.y))
+					{
+						e->DrawBackground();
+						return;
+					}
+
+					bool pressed = Control::MouseButtons.HasFlag(MouseButtons::Left);
+
+					if (Application::RenderWithVisualStyles)
+					{
+						auto state = (pressed ? VisualStyleElement::Header::Item::Pressed : VisualStyleElement::Header::Item::Hot);
+						auto renderer = gcnew VisualStyleRenderer(state);
+
+						renderer->DrawBackground(e->Graphics, e->Bounds);
+					}
+					else
+					{
+						e->DrawBackground();
+						// TODO
+					}
 				}
 
 				void OnColumnClick(Object^ sender, ColumnClickEventArgs^ e)
