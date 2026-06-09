@@ -16,6 +16,18 @@ using namespace Abstractspoon::Tdl::PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
+enum // Variable ValueType
+{
+	VAR_UNKNOWN = -1,
+	VAR_INTEGER,
+	VAR_DECIMAL,
+	VAR_BOOLEAN,
+	VAR_TIMEPERIOD,
+	VAR_DATE,
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
 FILTER::FILTER() : nXVarIndex(-1), nYVarIndex(-1)
 {
 }
@@ -84,6 +96,7 @@ void CEisenhowerSetupListCtrl::Initialise(LPCWSTR szXVarColName,
 	AddCol(szYVarColName, (rClient.Width() * 3) / 10, ILCT_COMBO);
 	AddCol(szYCutoffColName, (rClient.Width() * 2) / 10, ILCT_TEXT);
 
+	ShowGrid(TRUE, TRUE);
 	SetAutoRowPrompt(szNewRowPrompt);
 	AutoAdd(TRUE, FALSE);
 
@@ -98,12 +111,15 @@ void CEisenhowerSetupListCtrl::Initialise(LPCWSTR szXVarColName,
 		const FILTER& filter = aFilters[nFilter];
 
 		int nRow = AddRow(m_aVariables[filter.nXVarIndex].sLabel);
+		ASSERT(nRow == nFilter);
 
-		SetItemText(nRow, 1, filter.sXCutoff);
+		if (CanEditCutOff(filter.nXVarIndex))
+			SetItemText(nRow, 1, filter.sXCutoff);
+
 		SetItemText(nRow, 2, m_aVariables[filter.nYVarIndex].sLabel);
-		SetItemText(nRow, 3, filter.sYCutoff);
 
-		SetItemData(nRow, nFilter);
+		if (CanEditCutOff(filter.nYVarIndex))
+			SetItemText(nRow, 3, filter.sYCutoff);
 	}
 }
 
@@ -122,7 +138,7 @@ void CEisenhowerSetupListCtrl::DrawCellText(CDC* pDC, int nItem, int nCol, const
 		case XCUTOFF_COL:
 		case YCUTOFF_COL:
 			if (sText.IsEmpty())
-				CInputListCtrl::DrawCellText(pDC, nItem, nCol, rText, m_sCutoffPrompt, CWndPrompt::GetTextColor(), nDrawTextFlags | DT_RIGHT);
+				CInputListCtrl::DrawCellText(pDC, nItem, nCol, rText, m_sCutoffPrompt, CWndPrompt::GetTextColor(), nDrawTextFlags | DT_CENTER);
 			else
 				CInputListCtrl::DrawCellText(pDC, nItem, nCol, rText, sText, crText, nDrawTextFlags | DT_RIGHT);
 			return;
@@ -133,9 +149,80 @@ void CEisenhowerSetupListCtrl::DrawCellText(CDC* pDC, int nItem, int nCol, const
 	CInputListCtrl::DrawCellText(pDC, nItem, nCol, rText, sText, crText, nDrawTextFlags | DT_LEFT);
 }
 
+int CEisenhowerSetupListCtrl::GetVarType(int nVar) const
+{
+	if (nVar < 0 || nVar >= m_aVariables.GetSize())
+		return VAR_UNKNOWN;
+
+	return m_aVariables[nVar].nType;
+}
+
+BOOL CEisenhowerSetupListCtrl::CanEditCutOff(int nVar) const
+{
+	switch (GetVarType(nVar))
+	{
+	case VAR_UNKNOWN:
+	case VAR_BOOLEAN:
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
 void CEisenhowerSetupListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 {
-	PrepareCombo(nRow, nCol);
+	switch (nCol)
+	{
+	case XVAR_COL:
+	case YVAR_COL:
+		PrepareCombo(nRow, nCol);
+		break;
+
+	case XCUTOFF_COL:
+		{
+			ASSERT(CanEditCutOff(m_aFilters[nRow].nXVarIndex));
+
+			if (GetVarType(m_aFilters[nRow].nXVarIndex) == VAR_INTEGER)
+				GetEditControl()->SetMask(L"0123456789");
+			else
+				GetEditControl()->SetMask(L"0123456789.", ME_LOCALIZEDECIMAL);
+		}
+		break;
+
+	case YCUTOFF_COL:
+		{
+			ASSERT(CanEditCutOff(m_aFilters[nRow].nXVarIndex));
+
+			if (GetVarType(m_aFilters[nRow].nYVarIndex) == VAR_INTEGER)
+				GetEditControl()->SetMask(L"0123456789");
+			else
+				GetEditControl()->SetMask(L"0123456789.", ME_LOCALIZEDECIMAL);
+		}
+		break;
+	}
+}
+
+BOOL CEisenhowerSetupListCtrl::CanEditCell(int nRow, int nCol) const
+{
+	if (!IsPrompt(nRow))
+	{
+		const FILTER& filter = m_aFilters[nRow];
+
+		switch (nCol)
+		{
+		case XVAR_COL:
+		case YVAR_COL:
+			return TRUE;
+
+		case XCUTOFF_COL:
+			return CanEditCutOff(filter.nXVarIndex);
+
+		case YCUTOFF_COL:
+			return CanEditCutOff(filter.nYVarIndex);
+		}
+	}
+
+	return CInputListCtrl::CanEditCell(nRow, nCol);
 }
 
 void CEisenhowerSetupListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClick)
@@ -152,9 +239,18 @@ void CEisenhowerSetupListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClick)
 	return CInputListCtrl::EditCell(nItem, nCol, bBtnClick);
 }
 
+COLORREF CEisenhowerSetupListCtrl::GetItemBackColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const
+{
+	if (!bSelected && !bDropHighlighted && !IsPrompt(nItem) && !CanEditCell(nItem, nCol))
+		return GetSysColor(COLOR_3DFACE);
+
+	// else
+	return CInputListCtrl::GetItemBackColor(nItem, nCol, bSelected, bDropHighlighted, bWndFocus);
+}
+
 void CEisenhowerSetupListCtrl::PrepareCombo(int nRow, int nCol)
 {
-	int nFilter = (IsPrompt(nRow) ? -1 : (int)GetItemData(nRow));
+	int nFilter = (IsPrompt(nRow) ? -1 : nRow);
 	int nVarExclude = -1, nSelVar = -1;
 
 	if ((nFilter != -1) && (nFilter < m_aFilters.GetSize()))
@@ -207,8 +303,7 @@ void CEisenhowerSetupListCtrl::OnComboSelChange()
 		filter.nXVarIndex = (int)m_cbVariables.GetItemData(nSelVar);
 
 		m_aFilters.Add(filter);
-
-		SetItemText(nSelItem, m_nCurCol, m_aVariables[filter.nXVarIndex].sLabel);
+		AddRow(m_aVariables[filter.nXVarIndex].sLabel);
 	}
 	else // existing filter
 	{
@@ -233,6 +328,36 @@ void CEisenhowerSetupListCtrl::OnComboSelChange()
 	}
 
 	HideControl(m_cbVariables);
+}
+
+void CEisenhowerSetupListCtrl::OnEndEdit(UINT uIDCtrl, int* pResult)
+{
+	switch (m_nEditCol)
+	{
+	case XCUTOFF_COL:
+		{
+			CString sText;
+			GetEditControl()->GetWindowText(sText);
+
+			SetItemText(m_nEditItem, m_nEditCol, sText);
+			m_aFilters[m_nEditItem].sXCutoff = sText;
+		}
+		break;
+
+	case YCUTOFF_COL:
+		{
+			CString sText;
+			GetEditControl()->GetWindowText(sText);
+
+			SetItemText(m_nEditItem, m_nEditCol, sText);
+			m_aFilters[m_nEditItem].sYCutoff = sText;
+			break;
+		}
+		break;
+
+	default:
+		ASSERT(0);
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -449,7 +574,9 @@ void EisenhowerFilterSetupListCtrl::CheckInitListCtrl()
 		for each (EisenhowerVariable^ ev in m_Vars)
 		{
 			VARIABLE var;
+
 			var.sLabel = MarshalledString(ev->Attribute->Label);
+			var.nType = (int)ev->Type;
 
 			if (ev->Attribute->IsCustom())
 				var.sAttribID = MarshalledString(ev->Attribute->CustomAttributeId);

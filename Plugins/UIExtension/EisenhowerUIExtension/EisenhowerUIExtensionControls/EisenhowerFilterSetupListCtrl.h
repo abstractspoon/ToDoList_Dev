@@ -21,6 +21,7 @@ namespace EisenhowerUIExtension
 	{
 		CString sAttribID;
 		CString sLabel;
+		int nType;
 	};
 
 	// ----------------------------------------
@@ -69,8 +70,14 @@ namespace EisenhowerUIExtension
 		virtual void PrepareControl(CWnd& ctrl, int nRow, int nCol);
 		virtual void EditCell(int nItem, int nCol, BOOL bBtnClick);
 		virtual void DrawCellText(CDC* pDC, int nItem, int nCol, const CRect& rText, const CString& sText, COLORREF crText, UINT nDrawTextFlags);
+		virtual void OnEndEdit(UINT uIDCtrl, int* pResult);
+		virtual BOOL CanEditCell(int nRow, int nCol) const;
+		COLORREF GetItemBackColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
 
+	protected:
 		void PrepareCombo(int nRow, int nCol);
+		int GetVarType(int nVar) const;
+		BOOL CanEditCutOff(int nVar) const;
 	};
 
 	///////////////////////////////////////////////////////////////////
