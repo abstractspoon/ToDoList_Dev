@@ -222,6 +222,7 @@ BOOL CEisenhowerSetupListCtrl::CanEditCell(int nRow, int nCol) const
 		}
 	}
 
+	// All else
 	return CInputListCtrl::CanEditCell(nRow, nCol);
 }
 
@@ -237,6 +238,40 @@ void CEisenhowerSetupListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClick)
 
 	// default
 	return CInputListCtrl::EditCell(nItem, nCol, bBtnClick);
+}
+
+BOOL CEisenhowerSetupListCtrl::DeleteSelectedCell()
+{
+	int nRow = GetCurSel(), nCol = m_nCurCol;
+
+	if (!CInputListCtrl::DeleteSelectedCell())
+		return FALSE;
+
+	ASSERT(!IsPrompt(nRow));
+
+	// Synchronise underlying filter array
+	FILTER& filter = m_aFilters[nRow];
+
+	switch (nCol)
+	{
+		case XVAR_COL:
+			m_aFilters.RemoveAt(nRow);
+			break;
+
+		case YVAR_COL:
+			filter.nYVarIndex = -1;
+			break;
+
+		case XCUTOFF_COL:
+			filter.sXCutoff.Empty();
+			break;
+
+		case YCUTOFF_COL:
+			filter.sYCutoff.Empty();
+			break;
+	}
+
+	return TRUE;
 }
 
 COLORREF CEisenhowerSetupListCtrl::GetItemBackColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const

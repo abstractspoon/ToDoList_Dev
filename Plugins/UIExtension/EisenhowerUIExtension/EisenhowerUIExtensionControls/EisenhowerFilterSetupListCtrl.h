@@ -72,7 +72,8 @@ namespace EisenhowerUIExtension
 		virtual void DrawCellText(CDC* pDC, int nItem, int nCol, const CRect& rText, const CString& sText, COLORREF crText, UINT nDrawTextFlags);
 		virtual void OnEndEdit(UINT uIDCtrl, int* pResult);
 		virtual BOOL CanEditCell(int nRow, int nCol) const;
-		COLORREF GetItemBackColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
+		virtual BOOL DeleteSelectedCell();
+		virtual COLORREF GetItemBackColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
 
 	protected:
 		void PrepareCombo(int nRow, int nCol);
