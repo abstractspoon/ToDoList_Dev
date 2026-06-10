@@ -29,32 +29,44 @@
 		private void InitializeComponent()
 		{
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(EisenhowerPreferencesDlg));
-			this.button1 = new System.Windows.Forms.Button();
-			this.button2 = new System.Windows.Forms.Button();
+			this.m_OK = new System.Windows.Forms.Button();
+			this.m_Cancel = new System.Windows.Forms.Button();
+			this.m_Error = new System.Windows.Forms.Label();
 			this.m_SetupListCtrl = new EisenhowerUIExtension.EisenhowerFilterSetupListCtrl();
 			this.SuspendLayout();
 			// 
-			// button1
+			// m_OK
 			// 
-			this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-			this.button1.DialogResult = System.Windows.Forms.DialogResult.OK;
-			this.button1.Location = new System.Drawing.Point(338, 230);
-			this.button1.Name = "button1";
-			this.button1.Size = new System.Drawing.Size(75, 23);
-			this.button1.TabIndex = 1;
-			this.button1.Text = "OK";
-			this.button1.UseVisualStyleBackColor = true;
+			this.m_OK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+			this.m_OK.DialogResult = System.Windows.Forms.DialogResult.OK;
+			this.m_OK.Location = new System.Drawing.Point(338, 230);
+			this.m_OK.Name = "m_OK";
+			this.m_OK.Size = new System.Drawing.Size(75, 23);
+			this.m_OK.TabIndex = 1;
+			this.m_OK.Text = "OK";
+			this.m_OK.UseVisualStyleBackColor = true;
 			// 
-			// button2
+			// m_Cancel
 			// 
-			this.button2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-			this.button2.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-			this.button2.Location = new System.Drawing.Point(419, 230);
-			this.button2.Name = "button2";
-			this.button2.Size = new System.Drawing.Size(75, 23);
-			this.button2.TabIndex = 1;
-			this.button2.Text = "Cancel";
-			this.button2.UseVisualStyleBackColor = true;
+			this.m_Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+			this.m_Cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+			this.m_Cancel.Location = new System.Drawing.Point(419, 230);
+			this.m_Cancel.Name = "m_Cancel";
+			this.m_Cancel.Size = new System.Drawing.Size(75, 23);
+			this.m_Cancel.TabIndex = 1;
+			this.m_Cancel.Text = "Cancel";
+			this.m_Cancel.UseVisualStyleBackColor = true;
+			// 
+			// m_Error
+			// 
+			this.m_Error.ForeColor = System.Drawing.Color.Red;
+			this.m_Error.Location = new System.Drawing.Point(7, 224);
+			this.m_Error.Name = "m_Error";
+			this.m_Error.Size = new System.Drawing.Size(325, 38);
+			this.m_Error.TabIndex = 23;
+			this.m_Error.Text = "One or more rows is invalid";
+			this.m_Error.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+			this.m_Error.Visible = false;
 			// 
 			// m_SetupListCtrl
 			// 
@@ -72,8 +84,9 @@
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(502, 261);
-			this.Controls.Add(this.button2);
-			this.Controls.Add(this.button1);
+			this.Controls.Add(this.m_Error);
+			this.Controls.Add(this.m_Cancel);
+			this.Controls.Add(this.m_OK);
 			this.Controls.Add(this.m_SetupListCtrl);
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
@@ -88,7 +101,8 @@
 		#endregion
 
 		private EisenhowerUIExtension.EisenhowerFilterSetupListCtrl m_SetupListCtrl;
-		private System.Windows.Forms.Button button1;
-		private System.Windows.Forms.Button button2;
+		private System.Windows.Forms.Button m_OK;
+		private System.Windows.Forms.Button m_Cancel;
+		private System.Windows.Forms.Label m_Error;
 	}
 }

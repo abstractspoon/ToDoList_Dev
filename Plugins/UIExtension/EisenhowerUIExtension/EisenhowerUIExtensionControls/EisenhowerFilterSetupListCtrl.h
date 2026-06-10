@@ -78,7 +78,9 @@ namespace EisenhowerUIExtension
 	protected:
 		void PrepareCombo(int nRow, int nCol);
 		int GetVarType(int nVar) const;
+		CString GetVarLabel(int nVar) const;
 		BOOL CanEditCutOff(int nVar) const;
+		void NotifyEditChange();
 	};
 
 	///////////////////////////////////////////////////////////////////
@@ -124,6 +126,8 @@ namespace EisenhowerUIExtension
 						EisenhowerFilters^ filters);
 
 		property EisenhowerFilters^ Filters { EisenhowerFilters^ get(); }
+
+		event System::EventHandler^ ChangeEvent;
 
 	private:
 		IntPtr m_pMFCInfo = IntPtr::Zero;

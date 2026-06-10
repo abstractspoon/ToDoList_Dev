@@ -35,30 +35,6 @@ namespace EisenhowerUIExtension
 			return base.GetHashCode();
 		}
 
-		public bool AddOrUpdate(IEnumerable<EisenhowerFilter> filters)
-		{
-			bool modified = false;
-
-			foreach (var filter in filters)
-			{
-				var existFilter = Find(f => (f.XVar.Equals(filter.XVar) && f.YVar.Equals(filter.YVar)));
-
-				if (existFilter == null)
-				{
-					Add(filter);
-					modified = true;
-				}
-				else if ((existFilter.XCutoff != filter.XCutoff) || (existFilter.YCutoff != filter.YCutoff))
-				{
-					existFilter.XCutoff = filter.XCutoff;
-					existFilter.YCutoff = filter.YCutoff;
-					modified = true;
-				}
-			}
-
-			return modified;
-		}
-
 		public override string ToString()
 		{
 			return string.Join(";", this);
@@ -88,16 +64,30 @@ namespace EisenhowerUIExtension
 
 		static EisenhowerFilter()
 		{
-			Null = new EisenhowerFilter()
-			{
-				XVar = EisenhowerVariable.Null,
-				YVar = EisenhowerVariable.Null
-			};
-		}	
+			Null = new EisenhowerFilter();
+		}
 
 		// -------------------------------------------------
-		public EisenhowerVariable XVar, YVar;
-		public String XCutoff, YCutoff;
+
+		private EisenhowerVariable m_XVar = EisenhowerVariable.Null;
+		private EisenhowerVariable m_YVar = EisenhowerVariable.Null;
+
+		// -------------------------------------------------
+
+		public EisenhowerVariable XVar
+		{
+			get { return m_XVar; }
+			set { m_XVar = (value ?? EisenhowerVariable.Null); }
+		}
+
+		public EisenhowerVariable YVar
+		{
+			get { return m_YVar; }
+			set { m_YVar = (value ?? EisenhowerVariable.Null); }
+		}
+
+		public String XCutoff;
+		public String YCutoff;
 
 		public String Id
 		{
@@ -106,6 +96,8 @@ namespace EisenhowerUIExtension
 
 		public double XCutoffValue { get { return GetCutoffValue(XCutoff, XVar); } }
 		public double YCutoffValue { get { return GetCutoffValue(YCutoff, YVar); } }
+
+		public bool HasNullVar { get { return (XVar.IsNull || YVar.IsNull); } }
 
 		// -------------------------------------------------
 
@@ -158,8 +150,8 @@ namespace EisenhowerUIExtension
 				{
 					return new EisenhowerFilter()
 					{
-						XVar = variables.Find(v => (v.Id == vars[0])),
-						YVar = variables.Find(v => (v.Id == vars[1])),
+						XVar = variables.Find(v => (v.Id == vars[0])) ?? EisenhowerVariable.Null,
+						YVar = variables.Find(v => (v.Id == vars[1])) ?? EisenhowerVariable.Null,
 
 						XCutoff = parts[1],
 						YCutoff = parts[2]
@@ -170,14 +162,14 @@ namespace EisenhowerUIExtension
 			return null;
 		}
 
-		private static double GetCutoffValue(string strCutoff, EisenhowerVariable var)
+		private static double GetCutoffValue(string cutoff, EisenhowerVariable var)
 		{
-			double cutoff;
+			double cutoffVal;
 
-			if (double.TryParse(strCutoff, out cutoff))
-				return cutoff;
+			if (!double.TryParse(cutoff, out cutoffVal))
+				cutoffVal = (double)var?.ValueMidPoint;
 
-			return var.ValueMidPoint;
+			return cutoffVal;
 		}
 	};
 

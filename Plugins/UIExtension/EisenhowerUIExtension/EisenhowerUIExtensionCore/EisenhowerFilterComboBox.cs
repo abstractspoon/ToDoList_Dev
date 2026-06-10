@@ -12,23 +12,20 @@ namespace EisenhowerUIExtension
 
 			Items.Clear();
 
+			// Only add valid filters
 			foreach (var f in filters)
-				Items.Add(new EisenhowerFilterComboBoxItem(f, trans));
+			{
+				if (!f.HasNullVar)
+					Items.Add(new EisenhowerFilterComboBoxItem(f, trans));
+			}
 
 			SelectedFilter = selVar;
 		}
 
 		public EisenhowerFilter SelectedFilter
 		{
-			get
-			{
-				return (SelectedItem as EisenhowerFilter);
-			}
-
-			set
-			{
-				SelectedItem = value;
-			}
+			get	{ return (SelectedItem as EisenhowerFilter); }
+			set { SelectedItem = value; }
 		}
 
 		// --------------------------------------------

@@ -58,6 +58,8 @@ enum
 
 const int IDC_COMBO = 1001;
 
+const UINT WM_ESLCN_EDITCHANGE = RegisterWindowMessage(L"WM_ESLC_NOTIFYEDIT");
+
 // --------------------------------
 
 CEisenhowerSetupListCtrl::CEisenhowerSetupListCtrl()
@@ -110,13 +112,13 @@ void CEisenhowerSetupListCtrl::Initialise(LPCWSTR szXVarColName,
 	{
 		const FILTER& filter = aFilters[nFilter];
 
-		int nRow = AddRow(m_aVariables[filter.nXVarIndex].sLabel);
+		int nRow = AddRow(GetVarLabel(filter.nXVarIndex));
 		ASSERT(nRow == nFilter);
 
 		if (CanEditCutOff(filter.nXVarIndex))
 			SetItemText(nRow, 1, filter.sXCutoff);
 
-		SetItemText(nRow, 2, m_aVariables[filter.nYVarIndex].sLabel);
+		SetItemText(nRow, 2, GetVarLabel(filter.nYVarIndex));
 
 		if (CanEditCutOff(filter.nYVarIndex))
 			SetItemText(nRow, 3, filter.sYCutoff);
@@ -155,6 +157,14 @@ int CEisenhowerSetupListCtrl::GetVarType(int nVar) const
 		return VAR_UNKNOWN;
 
 	return m_aVariables[nVar].nType;
+}
+
+CString CEisenhowerSetupListCtrl::GetVarLabel(int nVar) const
+{
+	if (nVar < 0 || nVar >= m_aVariables.GetSize())
+		return L"";
+
+	return m_aVariables[nVar].sLabel;
 }
 
 BOOL CEisenhowerSetupListCtrl::CanEditCutOff(int nVar) const
@@ -247,8 +257,6 @@ BOOL CEisenhowerSetupListCtrl::DeleteSelectedCell()
 	if (!CInputListCtrl::DeleteSelectedCell())
 		return FALSE;
 
-	ASSERT(!IsPrompt(nRow));
-
 	// Synchronise underlying filter array
 	FILTER& filter = m_aFilters[nRow];
 
@@ -256,18 +264,31 @@ BOOL CEisenhowerSetupListCtrl::DeleteSelectedCell()
 	{
 		case XVAR_COL:
 			m_aFilters.RemoveAt(nRow);
+			NotifyEditChange();
 			break;
 
 		case YVAR_COL:
-			filter.nYVarIndex = -1;
+			if (filter.nYVarIndex != -1)
+			{
+				filter.nYVarIndex = -1;
+				NotifyEditChange();
+			}
 			break;
 
 		case XCUTOFF_COL:
-			filter.sXCutoff.Empty();
+			if (!filter.sXCutoff.IsEmpty())
+			{
+				filter.sXCutoff.Empty();
+				NotifyEditChange();
+			}
 			break;
 
 		case YCUTOFF_COL:
-			filter.sYCutoff.Empty();
+			if (!filter.sYCutoff.IsEmpty())
+			{
+				filter.sYCutoff.Empty();
+				NotifyEditChange();
+			}
 			break;
 	}
 
@@ -323,38 +344,45 @@ void CEisenhowerSetupListCtrl::PrepareCombo(int nRow, int nCol)
 		}
 	}
 
-	if (nSelVar != -1)
-		m_cbVariables.SelectString(-1, m_aVariables[nSelVar].sLabel);
+	m_cbVariables.SelectString(-1, GetVarLabel(nSelVar));
 }
 
 void CEisenhowerSetupListCtrl::OnComboSelChange()
 {
 	int nSelItem = GetCurSel();
+
 	int nSelVar = m_cbVariables.GetCurSel();
+	int nVar = (int)m_cbVariables.GetItemData(nSelVar);
 
 	if (nSelItem >= m_aFilters.GetSize())
 	{
 		FILTER filter;
-		filter.nXVarIndex = (int)m_cbVariables.GetItemData(nSelVar);
+		filter.nXVarIndex = nVar;
 
 		m_aFilters.Add(filter);
-		AddRow(m_aVariables[filter.nXVarIndex].sLabel);
+		AddRow(GetVarLabel(filter.nXVarIndex));
 	}
 	else // existing filter
 	{
-		int nFilter = (int)GetItemData(nSelItem);
+		int nFilter = nSelItem;
 		FILTER& filter = m_aFilters[nFilter];
 
 		switch (m_nCurCol)
 		{
 		case XVAR_COL:
-			filter.nXVarIndex = (int)m_cbVariables.GetItemData(nSelVar);
-			SetItemText(nSelItem, m_nCurCol, m_aVariables[filter.nXVarIndex].sLabel);
+			if (nVar != filter.nXVarIndex)
+			{
+				filter.nXVarIndex = nVar;
+				SetItemText(nSelItem, m_nCurCol, GetVarLabel(nVar));
+			}
 			break;
 
 		case YVAR_COL:
-			filter.nYVarIndex = (int)m_cbVariables.GetItemData(nSelVar);
-			SetItemText(nSelItem, m_nCurCol, m_aVariables[filter.nYVarIndex].sLabel);
+			if (nVar != filter.nYVarIndex)
+			{
+				filter.nYVarIndex = nVar;
+				SetItemText(nSelItem, m_nCurCol, GetVarLabel(nVar));
+			}
 			break;
 
 		default:
@@ -362,7 +390,13 @@ void CEisenhowerSetupListCtrl::OnComboSelChange()
 		}
 	}
 
+	NotifyEditChange();
 	HideControl(m_cbVariables);
+}
+
+void CEisenhowerSetupListCtrl::NotifyEditChange()
+{
+	GetParent()->SendMessage(WM_ESLCN_EDITCHANGE);
 }
 
 void CEisenhowerSetupListCtrl::OnEndEdit(UINT uIDCtrl, int* pResult)
@@ -374,8 +408,12 @@ void CEisenhowerSetupListCtrl::OnEndEdit(UINT uIDCtrl, int* pResult)
 			CString sText;
 			GetEditControl()->GetWindowText(sText);
 
-			SetItemText(m_nEditItem, m_nEditCol, sText);
-			m_aFilters[m_nEditItem].sXCutoff = sText;
+			if (sText != GetItemText(m_nEditItem, m_nEditCol))
+			{
+				m_aFilters[m_nEditItem].sXCutoff = sText;
+				SetItemText(m_nEditItem, m_nEditCol, sText);
+				NotifyEditChange();
+			}
 		}
 		break;
 
@@ -384,8 +422,12 @@ void CEisenhowerSetupListCtrl::OnEndEdit(UINT uIDCtrl, int* pResult)
 			CString sText;
 			GetEditControl()->GetWindowText(sText);
 
-			SetItemText(m_nEditItem, m_nEditCol, sText);
-			m_aFilters[m_nEditItem].sYCutoff = sText;
+			if (sText != GetItemText(m_nEditItem, m_nEditCol))
+			{
+				m_aFilters[m_nEditItem].sYCutoff = sText;
+				SetItemText(m_nEditItem, m_nEditCol, sText);
+				NotifyEditChange();
+			}
 			break;
 		}
 		break;
@@ -507,6 +549,7 @@ EisenhowerFilterSetupListCtrl::EisenhowerFilterSetupListCtrl()
 	: 
 	m_Trans(nullptr),
 	m_Filters(nullptr),
+	m_ModifiedFilters(nullptr),
 	m_Vars(nullptr)
 {
 } 
@@ -518,14 +561,41 @@ void EisenhowerFilterSetupListCtrl::Initialise(Translator^ trans,
 	m_Trans = trans;
 	m_Vars = supportedVars;
 	m_Filters = filters;
-	m_ModifiedFilters = nullptr;
 
 	CheckInitListCtrl();
 }
 
 EisenhowerFilters^ EisenhowerFilterSetupListCtrl::Filters::get()
 {
-	return ((m_ModifiedFilters != nullptr) ? m_ModifiedFilters : m_Filters);
+	// Build on demand only
+	if (m_ModifiedFilters == nullptr)
+	{
+		// Get modified filters
+		m_ModifiedFilters = gcnew EisenhowerFilters();
+
+		CArray<FILTER, FILTER&> aFilters;
+		int numFilters = ListCtrl(m_pMFCInfo)->GetFilters(aFilters);
+
+		for (int f = 0; f < numFilters; f++)
+		{
+			const FILTER& filter = aFilters[f];
+
+			auto ef = gcnew EisenhowerFilter();
+
+			if (filter.nXVarIndex != -1)
+				ef->XVar = m_Vars[filter.nXVarIndex];
+
+			if (filter.nYVarIndex != -1)
+				ef->YVar = m_Vars[filter.nYVarIndex];
+
+			ef->XCutoff = gcnew String(filter.sXCutoff);
+			ef->YCutoff = gcnew String(filter.sYCutoff);
+
+			m_ModifiedFilters->Add(ef);
+		}
+	}
+
+	return m_ModifiedFilters;
 }
 
 // ------------------------------------------------
@@ -542,30 +612,6 @@ void EisenhowerFilterSetupListCtrl::OnHandleDestroyed(EventArgs^ e)
 {
 	if (m_pMFCInfo != IntPtr::Zero)
 	{
-		// Get modified filters
-		m_ModifiedFilters = gcnew EisenhowerFilters();
-
-		CArray<FILTER, FILTER&> aFilters;
-		int numFilters = ListCtrl(m_pMFCInfo)->GetFilters(aFilters);
-
-		for (int f = 0; f < numFilters; f++)
-		{
-			const FILTER& filter = aFilters[f];
-
-			if (filter.IsValid())
-			{
-				auto ef = gcnew EisenhowerFilter();
-
-				ef->XVar = m_Vars[filter.nXVarIndex];
-				ef->YVar = m_Vars[filter.nYVarIndex];
-
-				ef->XCutoff = gcnew String(filter.sXCutoff);
-				ef->YCutoff = gcnew String(filter.sYCutoff);
-
-				m_ModifiedFilters->Add(ef);
-			}
-		}
-		
 		// Clean up
 		ListCtrl(m_pMFCInfo)->Detach();
 		m_pMFCInfo = IntPtr::Zero;
@@ -588,6 +634,15 @@ void EisenhowerFilterSetupListCtrl::WndProc(Message% m)
 
 	if (m_pMFCInfo == IntPtr::Zero)
 		return;
+
+	// C# case statements must be const
+	if (m.Msg == WM_ESLCN_EDITCHANGE)
+	{
+		m_ModifiedFilters = nullptr;
+		ChangeEvent(this, gcnew EventArgs());
+
+		return;
+	}
 
 	switch (m.Msg)
 	{
@@ -627,17 +682,20 @@ void EisenhowerFilterSetupListCtrl::CheckInitListCtrl()
 		{
 			FILTER filter;
 
-			if (ef->XVar != nullptr)
+			if (ef->XVar == nullptr)
+				filter.nXVarIndex = -1;
+			else
 				filter.nXVarIndex = m_Vars->IndexOf(ef->XVar);
 
-			if (ef->YVar != nullptr)
+			if (ef->YVar == nullptr)
+				filter.nYVarIndex = -1;
+			else
 				filter.nYVarIndex = m_Vars->IndexOf(ef->YVar);
 
 			filter.sXCutoff = MarshalledString(ef->XCutoff);
 			filter.sYCutoff = MarshalledString(ef->YCutoff);
 
-			if (filter.IsValid())
-				aFilters.Add(filter);
+			aFilters.Add(filter);
 		}
 
 		ListCtrl(m_pMFCInfo)->Initialise(MarshalledString(m_Trans->Translate(L"'Urgent' Variable", Translator::Type::Header)),
