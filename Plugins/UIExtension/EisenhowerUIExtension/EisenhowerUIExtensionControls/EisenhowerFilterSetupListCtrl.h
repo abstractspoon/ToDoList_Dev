@@ -3,6 +3,7 @@
 #include <Shared\InputListCtrl.h>
 
 #include <Interfaces\IEnums.h>
+#include <Interfaces\ITransText.h>
 
 #include <afxtempl.h>
 
@@ -43,20 +44,13 @@ namespace EisenhowerUIExtension
 	public:
 		CEisenhowerSetupListCtrl();
 
-		void Initialise(LPCWSTR szXVarColName, 
-						LPCWSTR szXCutoffColName, 
-						LPCWSTR szYVarColName, 
-						LPCWSTR szYCutoffColName,
-						LPCWSTR szNewRowPrompt,
-						LPCWSTR szCutoffPrompt,
-						const CArray<VARIABLE, VARIABLE&>& aVars,
+		void Initialise(const CArray<VARIABLE, VARIABLE&>& aVars,
 						const CArray<FILTER, FILTER&>& aFilters);
 
 		int GetFilters(CArray<FILTER, FILTER&>& filters) const;
 
 	private:
 		CComboBox m_cbVariables;
-		CString m_sCutoffPrompt;
 
 		CArray<VARIABLE, VARIABLE&> m_aVariables;
 		CArray<FILTER, FILTER&> m_aFilters;
@@ -81,6 +75,8 @@ namespace EisenhowerUIExtension
 		CString GetVarLabel(int nVar) const;
 		BOOL CanEditCutOff(int nVar) const;
 		void NotifyEditChange();
+		CString GetCellPrompt(int nItem, int nCol, const CString& sText) const;
+		CString GetCellPrompt(int nItem, int nCol, const CString& sText, int nVar) const;
 	};
 
 	///////////////////////////////////////////////////////////////////
@@ -90,21 +86,15 @@ namespace EisenhowerUIExtension
 	public:
 		static HostedEisenhowerSetupListCtrl* Attach(HWND hwndParent, HFONT hFont);
 
-		void Detach();
-
-		void DrawItem(WPARAM wp, LPARAM lp);
-		void UpdateSize();
-
-		void Initialise(LPCWSTR szXVarColName,
-						LPCWSTR szXCutoffColName,
-						LPCWSTR szYVarColName,
-						LPCWSTR szYCutoffColName,
-						LPCWSTR szNewRowPrompt,
-						LPCWSTR szCutoffPrompt,
+		void Initialise(ITransText* pTrans,
 						const CArray<VARIABLE, VARIABLE&>& vars,
 						const CArray<FILTER, FILTER&>& filters);
 
 		int GetFilters(CArray<FILTER, FILTER&>& filters);
+
+		void Detach();
+		void DrawItem(WPARAM wp, LPARAM lp);
+		void UpdateSize();
 
 	protected:
 		HostedEisenhowerSetupListCtrl(HWND hwndParent);

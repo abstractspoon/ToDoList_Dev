@@ -5,6 +5,7 @@
 #include "EisenhowerFilterSetupListCtrl.h"
 
 #include <Shared\WndPrompt.h>
+#include <Shared\Localizer.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -79,28 +80,20 @@ int CEisenhowerSetupListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	return 0;
 }
 
-void CEisenhowerSetupListCtrl::Initialise(LPCWSTR szXVarColName,
-										  LPCWSTR szXCutoffColName,
-										  LPCWSTR szYVarColName,
-										  LPCWSTR szYCutoffColName,
-										  LPCWSTR szNewRowPrompt,
-										  LPCWSTR szCutoffPrompt,
-										  const CArray<VARIABLE, VARIABLE&>& aVars,
+void CEisenhowerSetupListCtrl::Initialise(const CArray<VARIABLE, VARIABLE&>& aVars,
 										  const CArray<FILTER, FILTER&>& aFilters)
 {
-	m_sCutoffPrompt = szCutoffPrompt;
-
 	CRect rClient;
 	GetClientRect(rClient);
 
-	AddCol(szXVarColName, (rClient.Width() * 3) / 10, ILCT_COMBO);
-	AddCol(szXCutoffColName, (rClient.Width() * 2) / 10, ILCT_TEXT);
-	AddCol(szYVarColName, (rClient.Width() * 3) / 10, ILCT_COMBO);
-	AddCol(szYCutoffColName, (rClient.Width() * 2) / 10, ILCT_TEXT);
+	AddCol(CLocalizer::TranslateText(L"'Urgent' Variable"), ((rClient.Width() * 3) / 10), ILCT_COMBO);
+	AddCol(CLocalizer::TranslateText(L"'Urgent' Cutoff"), ((rClient.Width() * 2) / 10), ILCT_TEXT);
+	AddCol(CLocalizer::TranslateText(L"'Important' Variable"), ((rClient.Width() * 3) / 10), ILCT_COMBO);
+	AddCol(CLocalizer::TranslateText(L"'Important' Cutoff"), ((rClient.Width() * 2) / 10), ILCT_TEXT);
 
 	ShowGrid(TRUE, TRUE);
-	SetAutoRowPrompt(szNewRowPrompt);
 	AutoAdd(TRUE, FALSE);
+	SetAutoRowPrompt(CLocalizer::TranslateText(L"<new filter>"));
 
 	// Save these for populating the combobox
 	m_aVariables.Copy(aVars);
@@ -135,20 +128,56 @@ void CEisenhowerSetupListCtrl::DrawCellText(CDC* pDC, int nItem, int nCol, const
 {
 	if (!IsPrompt(nItem))
 	{
-		switch (nCol)
+		CString sCellPrompt = GetCellPrompt(nItem, nCol, sText);
+
+		if (!sCellPrompt.IsEmpty())
 		{
-		case XCUTOFF_COL:
-		case YCUTOFF_COL:
-			if (sText.IsEmpty())
-				CInputListCtrl::DrawCellText(pDC, nItem, nCol, rText, m_sCutoffPrompt, CWndPrompt::GetTextColor(), nDrawTextFlags | DT_CENTER);
-			else
-				CInputListCtrl::DrawCellText(pDC, nItem, nCol, rText, sText, crText, nDrawTextFlags | DT_RIGHT);
+			CInputListCtrl::DrawCellText(pDC, nItem, nCol, rText, sCellPrompt, CWndPrompt::GetTextColor(), nDrawTextFlags | DT_CENTER);
 			return;
 		}
 	}
 
-	// Variable columns
+	// All else
 	CInputListCtrl::DrawCellText(pDC, nItem, nCol, rText, sText, crText, nDrawTextFlags | DT_LEFT);
+}
+
+CString CEisenhowerSetupListCtrl::GetCellPrompt(int nItem, int nCol, const CString& sText) const
+{
+	if (!IsPrompt(nItem))
+	{
+		switch (nCol)
+		{
+		case XVAR_COL:
+		case YVAR_COL:
+			if (sText.IsEmpty())
+				return CLocalizer::TranslateText(L"Unknown");
+			break;
+
+		case XCUTOFF_COL:
+			return GetCellPrompt(nItem, nCol, sText, m_aFilters[nItem].nXVarIndex);
+
+		case YCUTOFF_COL:
+			return GetCellPrompt(nItem, nCol, sText, m_aFilters[nItem].nYVarIndex);
+		}
+	}
+
+	return L"";
+}
+
+CString CEisenhowerSetupListCtrl::GetCellPrompt(int nItem, int nCol, const CString& sText, int nVar) const
+{
+	switch (GetVarType(nVar))
+	{
+	case VAR_BOOLEAN:
+		return CLocalizer::TranslateText(L"True/False");
+
+	default:
+		if (sText.IsEmpty())
+			return CLocalizer::TranslateText(L"<data midpoint>");
+		break;
+	}
+
+	return L"";
 }
 
 int CEisenhowerSetupListCtrl::GetVarType(int nVar) const
@@ -505,25 +534,16 @@ void HostedEisenhowerSetupListCtrl::UpdateSize()
 	m_ListCtrl.MoveWindow(rSlider);
 }
 
-void HostedEisenhowerSetupListCtrl::Initialise(LPCWSTR szXVarColName,
-											   LPCWSTR szXCutoffColName,
-											   LPCWSTR szYVarColName,
-											   LPCWSTR szYCutoffColName,
-											   LPCWSTR szNewRowPrompt,
-											   LPCWSTR szCutoffPrompt,
+void HostedEisenhowerSetupListCtrl::Initialise(ITransText* pTrans,
 											   const CArray<VARIABLE, VARIABLE&>& aVars,
 											   const CArray<FILTER, FILTER&>& aFilters)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	m_ListCtrl.Initialise(szXVarColName,
-						  szXCutoffColName,
-						  szYVarColName,
-						  szYCutoffColName,
-						  szNewRowPrompt,
-						  szCutoffPrompt,
-						  aVars, 
-						  aFilters);
+	if (pTrans && !CLocalizer::IsInitialized())
+		CLocalizer::Initialize(pTrans);
+
+	m_ListCtrl.Initialise(aVars, aFilters);
 }
 
 int HostedEisenhowerSetupListCtrl::GetFilters(CArray<FILTER, FILTER&>& aFilters)
@@ -698,12 +718,7 @@ void EisenhowerFilterSetupListCtrl::CheckInitListCtrl()
 			aFilters.Add(filter);
 		}
 
-		ListCtrl(m_pMFCInfo)->Initialise(MarshalledString(m_Trans->Translate(L"'Urgent' Variable", Translator::Type::Header)),
-										 MarshalledString(m_Trans->Translate(L"'Urgent' Cutoff", Translator::Type::Header)),
-										 MarshalledString(m_Trans->Translate(L"'Important' Variable", Translator::Type::Header)),
-										 MarshalledString(m_Trans->Translate(L"'Important' Cutoff", Translator::Type::Header)),
-										 MarshalledString(m_Trans->Translate(L"<new filter>", Translator::Type::Text)),
-										 MarshalledString(m_Trans->Translate(L"<data midpoint>", Translator::Type::Text)),
+		ListCtrl(m_pMFCInfo)->Initialise(m_Trans->GetITransText(),
 										 aVars, 
 										 aFilters);
 	}
