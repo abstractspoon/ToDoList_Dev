@@ -58,9 +58,9 @@ enum
 	YCUTOFF_COL,
 };
 
-const int IDC_COMBO = 1001;
+const int IDC_VARIABLES = 1001;
 
-const UINT WM_ESLCN_EDITCHANGE = RegisterWindowMessage(L"WM_ESLC_NOTIFYEDIT");
+const UINT WM_ESLCN_EDITCHANGE = RegisterWindowMessage(L"WM_ESLCN_EDITCHANGE");
 
 // --------------------------------
 
@@ -71,6 +71,7 @@ CEisenhowerSetupListCtrl::CEisenhowerSetupListCtrl()
 BEGIN_MESSAGE_MAP(CEisenhowerSetupListCtrl, CInputListCtrl)
 	ON_WM_CREATE()
 	ON_NOTIFY(NM_CUSTOMDRAW, 0, OnHeaderCustomDraw)
+	ON_CBN_CLOSEUP(IDC_VARIABLES, OnVariableComboCloseUp)
 END_MESSAGE_MAP()
 
 int CEisenhowerSetupListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
@@ -379,7 +380,7 @@ void CEisenhowerSetupListCtrl::PrepareCombo(int nRow, int nCol)
 	m_cbVariables.SelectString(-1, GetVarLabel(nSelVar));
 }
 
-void CEisenhowerSetupListCtrl::OnComboSelChange()
+void CEisenhowerSetupListCtrl::OnVariableComboCloseUp()
 {
 	int nSelItem = GetCurSel();
 

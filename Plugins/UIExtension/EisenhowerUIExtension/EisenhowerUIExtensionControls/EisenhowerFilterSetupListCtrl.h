@@ -57,7 +57,7 @@ namespace EisenhowerUIExtension
 
 	protected:
 		afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
-		afx_msg void OnComboSelChange();
+		afx_msg void OnVariableComboCloseUp();
 		afx_msg void OnHeaderCustomDraw(NMHDR* pNMHDR, LPARAM* lResult);
 		DECLARE_MESSAGE_MAP()
 
