@@ -6,6 +6,7 @@
 
 #include <Shared\WndPrompt.h>
 #include <Shared\Localizer.h>
+#include <Shared\Themed.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -69,7 +70,7 @@ CEisenhowerSetupListCtrl::CEisenhowerSetupListCtrl()
 
 BEGIN_MESSAGE_MAP(CEisenhowerSetupListCtrl, CInputListCtrl)
 	ON_WM_CREATE()
-	ON_CBN_SELENDOK(IDC_COMBO, OnComboSelChange)
+	ON_NOTIFY(NM_CUSTOMDRAW, 0, OnHeaderCustomDraw)
 END_MESSAGE_MAP()
 
 int CEisenhowerSetupListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
@@ -86,10 +87,10 @@ void CEisenhowerSetupListCtrl::Initialise(const CArray<VARIABLE, VARIABLE&>& aVa
 	CRect rClient;
 	GetClientRect(rClient);
 
-	AddCol(CLocalizer::TranslateText(L"'Urgent' Variable"), ((rClient.Width() * 3) / 10), ILCT_COMBO);
-	AddCol(CLocalizer::TranslateText(L"'Urgent' Cutoff"), ((rClient.Width() * 2) / 10), ILCT_TEXT);
-	AddCol(CLocalizer::TranslateText(L"'Important' Variable"), ((rClient.Width() * 3) / 10), ILCT_COMBO);
-	AddCol(CLocalizer::TranslateText(L"'Important' Cutoff"), ((rClient.Width() * 2) / 10), ILCT_TEXT);
+	AddCol(CLocalizer::TranslateText(L"Variable"), ((rClient.Width() * 3) / 10), ILCT_COMBO);
+	AddCol(CLocalizer::TranslateText(L"Cutoff"), ((rClient.Width() * 2) / 10), ILCT_TEXT);
+	AddCol(CLocalizer::TranslateText(L"Variable"), ((rClient.Width() * 3) / 10), ILCT_COMBO);
+	AddCol(CLocalizer::TranslateText(L"Cutoff"), ((rClient.Width() * 2) / 10), ILCT_TEXT);
 
 	ShowGrid(TRUE, TRUE);
 	AutoAdd(TRUE, FALSE);
@@ -116,6 +117,8 @@ void CEisenhowerSetupListCtrl::Initialise(const CArray<VARIABLE, VARIABLE&>& aVa
 		if (CanEditCutOff(filter.nYVarIndex))
 			SetItemText(nRow, 3, filter.sYCutoff);
 	}
+
+	GetHeader()->SetRowCount(2);
 }
 
 int CEisenhowerSetupListCtrl::GetFilters(CArray<FILTER, FILTER&>& aFilters) const
@@ -464,6 +467,93 @@ void CEisenhowerSetupListCtrl::OnEndEdit(UINT uIDCtrl, int* pResult)
 	default:
 		ASSERT(0);
 	}
+}
+
+void CEisenhowerSetupListCtrl::OnHeaderCustomDraw(NMHDR* pNMHDR, LPARAM* lResult)
+{
+	NMCUSTOMDRAW* pNMCD = (NMCUSTOMDRAW*)pNMHDR;
+	*lResult = CDRF_DODEFAULT;
+
+	if (m_header.GetItemCount())
+	{
+		switch (pNMCD->dwDrawStage)
+		{
+		case CDDS_PREPAINT:
+			*lResult = CDRF_NOTIFYITEMDRAW;
+			break;
+
+		case CDDS_ITEMPREPAINT:
+			{
+				// For each column draw its own 'lower' text and 
+				// its portion of the double-width 'upper' text
+				// because I can find no way around the clipping
+				// rectangle assigned to each notification
+				int nItem = (int)pNMCD->dwItemSpec;
+				CDC* pDC = CDC::FromHandle(pNMCD->hdc);
+
+				// Lower text
+				CRect rDraw(pNMCD->rc);
+				rDraw.top += (rDraw.Height() / 2);
+
+				DrawHeaderRect(pDC, rDraw, m_header.GetItemText(nItem));
+
+				// Upper text
+				switch (nItem)
+				{
+				case XVAR_COL:
+				case XCUTOFF_COL:
+					{
+						m_header.GetItemRect(XVAR_COL, rDraw);
+
+						rDraw.right += m_header.GetItemWidth(XCUTOFF_COL);
+						rDraw.bottom -= (rDraw.Height() / 2);
+
+						DrawHeaderRect(pDC, rDraw, CLocalizer::TranslateText(L"Urgent"));
+					}
+					break;
+
+				case YVAR_COL:
+				case YCUTOFF_COL:
+					{
+						m_header.GetItemRect(YVAR_COL, rDraw);
+
+						rDraw.right += m_header.GetItemWidth(YCUTOFF_COL);
+						rDraw.bottom -= (rDraw.Height() / 2);
+
+						DrawHeaderRect(pDC, rDraw, CLocalizer::TranslateText(L"Important"));
+					}
+					break;
+
+				default:
+					ASSERT(0);
+				}
+			}
+			*lResult = CDRF_SKIPDEFAULT;
+			break;
+		}
+	}
+}
+
+void CEisenhowerSetupListCtrl::DrawHeaderRect(CDC* pDC, const CRect& rItem, const CString& sItem)
+{
+	if (CThemed::AreControlsThemed())
+	{
+		CThemed th;
+		VERIFY(th.Open(&m_header, _T("HEADER")));
+
+		th.DrawBackground(pDC, HP_HEADERITEM, HIS_NORMAL, rItem);
+	}
+	else
+	{
+		pDC->FillSolidRect(rItem, ::GetSysColor(COLOR_3DFACE));
+		pDC->Draw3dRect(rItem, ::GetSysColor(COLOR_3DHIGHLIGHT), ::GetSysColor(COLOR_3DSHADOW));
+	}
+
+	pDC->SetBkMode(TRANSPARENT);
+	pDC->SetTextColor(GetSysColor(COLOR_BTNTEXT));
+
+	UINT nFlags = (DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX | DT_CENTER);
+	pDC->DrawText(sItem, (LPRECT)(LPCRECT)rItem, nFlags);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////

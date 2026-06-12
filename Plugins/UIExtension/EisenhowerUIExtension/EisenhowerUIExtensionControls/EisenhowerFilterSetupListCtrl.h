@@ -58,6 +58,7 @@ namespace EisenhowerUIExtension
 	protected:
 		afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 		afx_msg void OnComboSelChange();
+		afx_msg void OnHeaderCustomDraw(NMHDR* pNMHDR, LPARAM* lResult);
 		DECLARE_MESSAGE_MAP()
 
 	protected:
@@ -77,6 +78,7 @@ namespace EisenhowerUIExtension
 		void NotifyEditChange();
 		CString GetCellPrompt(int nItem, int nCol, const CString& sText) const;
 		CString GetCellPrompt(int nItem, int nCol, const CString& sText, int nVar) const;
+		void DrawHeaderRect(CDC* pDC, const CRect& rItem, const CString& sItem);
 	};
 
 	///////////////////////////////////////////////////////////////////
