@@ -2,6 +2,14 @@
 // Microsoft Visual C++ generated include file.
 // Used by EisenhowerUIExtensionControls.rc
 //
+#define IDS_URGENCY_HEADER              101
+#define IDS_IMPORTANCE_HEADER           102
+#define IDS_VARIABLE_HEADER             103
+#define IDS_CUTOFF_HEADER               104
+#define IDS_FILTERROW_PROMPT            105
+#define IDS_BOOLCUTOFF_PROMPT           106
+#define IDS_UNDEFINEDVAR_PROMPT         107
+#define IDS_DEFCUTOFF_PROMPT            108
 #define IDS_LOG_TASKID                  51340
 #define IDS_LOG_TASKTITLE               51341
 #define IDS_LOG_USERID                  51342
@@ -22,7 +30,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        101
+#define _APS_NEXT_RESOURCE_VALUE        102
 #define _APS_NEXT_COMMAND_VALUE         40001
 #define _APS_NEXT_CONTROL_VALUE         1001
 #define _APS_NEXT_SYMED_VALUE           101

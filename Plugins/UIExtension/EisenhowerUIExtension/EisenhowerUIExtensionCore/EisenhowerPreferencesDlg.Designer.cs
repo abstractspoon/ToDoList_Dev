@@ -64,7 +64,7 @@
 			this.m_Error.Name = "m_Error";
 			this.m_Error.Size = new System.Drawing.Size(325, 38);
 			this.m_Error.TabIndex = 23;
-			this.m_Error.Text = "One or more rows is invalid";
+			this.m_Error.Text = "One or more rows is incomplete";
 			this.m_Error.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 			this.m_Error.Visible = false;
 			// 

@@ -2,9 +2,11 @@
 //
 
 #include "stdafx.h"
+#include "resource.h"
 #include "EisenhowerFilterSetupListCtrl.h"
 
 #include <Shared\WndPrompt.h>
+#include <Shared\EnString.h>
 #include <Shared\Localizer.h>
 #include <Shared\Themed.h>
 
@@ -88,14 +90,14 @@ void CEisenhowerSetupListCtrl::Initialise(const CArray<VARIABLE, VARIABLE&>& aVa
 	CRect rClient;
 	GetClientRect(rClient);
 
-	AddCol(CLocalizer::TranslateText(L"Variable"), ((rClient.Width() * 3) / 10), ILCT_COMBO);
-	AddCol(CLocalizer::TranslateText(L"Cutoff"), ((rClient.Width() * 2) / 10), ILCT_TEXT);
-	AddCol(CLocalizer::TranslateText(L"Variable"), ((rClient.Width() * 3) / 10), ILCT_COMBO);
-	AddCol(CLocalizer::TranslateText(L"Cutoff"), ((rClient.Width() * 2) / 10), ILCT_TEXT);
+	AddCol(CEnString(IDS_VARIABLE_HEADER), ((rClient.Width() * 3) / 10), ILCT_COMBO);
+	AddCol(CEnString(IDS_CUTOFF_HEADER), ((rClient.Width() * 2) / 10), ILCT_TEXT);
+	AddCol(CEnString(IDS_VARIABLE_HEADER), ((rClient.Width() * 3) / 10), ILCT_COMBO);
+	AddCol(CEnString(IDS_CUTOFF_HEADER), ((rClient.Width() * 2) / 10), ILCT_TEXT);
 
 	ShowGrid(TRUE, TRUE);
 	AutoAdd(TRUE, FALSE);
-	SetAutoRowPrompt(CLocalizer::TranslateText(L"<new filter>"));
+	SetAutoRowPrompt(CEnString(IDS_FILTERROW_PROMPT));
 
 	// Save these for populating the combobox
 	m_aVariables.Copy(aVars);
@@ -154,7 +156,7 @@ CString CEisenhowerSetupListCtrl::GetCellPrompt(int nItem, int nCol, const CStri
 		case XVAR_COL:
 		case YVAR_COL:
 			if (sText.IsEmpty())
-				return CLocalizer::TranslateText(L"Unknown");
+				return CEnString(IDS_UNDEFINEDVAR_PROMPT);
 			break;
 
 		case XCUTOFF_COL:
@@ -173,11 +175,11 @@ CString CEisenhowerSetupListCtrl::GetCellPrompt(int nItem, int nCol, const CStri
 	switch (GetVarType(nVar))
 	{
 	case VAR_BOOLEAN:
-		return CLocalizer::TranslateText(L"True/False");
+		return CEnString(IDS_BOOLCUTOFF_PROMPT);
 
 	default:
 		if (sText.IsEmpty())
-			return CLocalizer::TranslateText(L"<data midpoint>");
+			return CEnString(IDS_DEFCUTOFF_PROMPT);
 		break;
 	}
 
@@ -509,7 +511,7 @@ void CEisenhowerSetupListCtrl::OnHeaderCustomDraw(NMHDR* pNMHDR, LPARAM* lResult
 						rDraw.right += m_header.GetItemWidth(XCUTOFF_COL);
 						rDraw.bottom -= (rDraw.Height() / 2);
 
-						DrawHeaderRect(pDC, rDraw, CLocalizer::TranslateText(L"Urgent"));
+						DrawHeaderRect(pDC, rDraw, CEnString(IDS_URGENCY_HEADER));
 					}
 					break;
 
@@ -521,7 +523,7 @@ void CEisenhowerSetupListCtrl::OnHeaderCustomDraw(NMHDR* pNMHDR, LPARAM* lResult
 						rDraw.right += m_header.GetItemWidth(YCUTOFF_COL);
 						rDraw.bottom -= (rDraw.Height() / 2);
 
-						DrawHeaderRect(pDC, rDraw, CLocalizer::TranslateText(L"Important"));
+						DrawHeaderRect(pDC, rDraw, CEnString(IDS_IMPORTANCE_HEADER));
 					}
 					break;
 
