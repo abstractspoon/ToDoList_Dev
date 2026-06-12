@@ -277,6 +277,11 @@ void CEisenhowerSetupListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClick)
 	{
 	case XVAR_COL:
 	case YVAR_COL:
+		if (IsPrompt(nItem))
+		{
+			m_aFilters.Add(FILTER());
+			AddRow(L"");
+		}
 		ShowControl(m_cbVariables, nItem, nCol, bBtnClick);
 		return;
 	}
@@ -385,47 +390,39 @@ void CEisenhowerSetupListCtrl::PrepareCombo(int nRow, int nCol)
 void CEisenhowerSetupListCtrl::OnVariableComboCloseUp()
 {
 	int nSelItem = GetCurSel();
+	ASSERT (nSelItem < m_aFilters.GetSize());
+
+	FILTER& filter = m_aFilters[nSelItem];
+	BOOL bChange = FALSE;
 
 	int nSelVar = m_cbVariables.GetCurSel();
 	int nVar = (int)m_cbVariables.GetItemData(nSelVar);
 
-	if (nSelItem >= m_aFilters.GetSize())
+	switch (m_nCurCol)
 	{
-		FILTER filter;
-		filter.nXVarIndex = nVar;
-
-		m_aFilters.Add(filter);
-		AddRow(GetVarLabel(filter.nXVarIndex));
-	}
-	else // existing filter
-	{
-		int nFilter = nSelItem;
-		FILTER& filter = m_aFilters[nFilter];
-
-		switch (m_nCurCol)
+	case XVAR_COL:
+		if (nVar != filter.nXVarIndex)
 		{
-		case XVAR_COL:
-			if (nVar != filter.nXVarIndex)
-			{
-				filter.nXVarIndex = nVar;
-				SetItemText(nSelItem, m_nCurCol, GetVarLabel(nVar));
-			}
-			break;
-
-		case YVAR_COL:
-			if (nVar != filter.nYVarIndex)
-			{
-				filter.nYVarIndex = nVar;
-				SetItemText(nSelItem, m_nCurCol, GetVarLabel(nVar));
-			}
-			break;
-
-		default:
-			return;
+			filter.nXVarIndex = nVar;
+			bChange = TRUE;
 		}
+		break;
+
+	case YVAR_COL:
+		if (nVar != filter.nYVarIndex)
+		{
+			filter.nYVarIndex = nVar;
+			bChange = TRUE;
+		}
+		break;
 	}
 
-	NotifyEditChange();
+	if (bChange)
+	{
+		SetItemText(nSelItem, m_nCurCol, GetVarLabel(nVar));
+		NotifyEditChange();
+	}
+
 	HideControl(m_cbVariables);
 }
 
