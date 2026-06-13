@@ -79,6 +79,10 @@ SET FILELIST=%FILELIST%;WebBrowserEx.dll
 
 SET FILELIST=%FILELIST%;DayViewUIExtensionBridge.dll
 SET FILELIST=%FILELIST%;DayViewUIExtensionCore.dll
+SET FILELIST=%FILELIST%;EisenhowerMatrixUIExtensionBridge.dll
+SET FILELIST=%FILELIST%;EisenhowerMatrixUIExtensionControls.dll
+SET FILELIST=%FILELIST%;EisenhowerMatrixUIExtensionCore.dll
+SET FILELIST=%FILELIST%;EisenhowerMatrixUIExtensionData.dll
 SET FILELIST=%FILELIST%;EvidenceBoardUIExtensionBridge.dll
 SET FILELIST=%FILELIST%;EvidenceBoardUIExtensionCore.dll
 SET FILELIST=%FILELIST%;HTMLContentControlBridge.dll
