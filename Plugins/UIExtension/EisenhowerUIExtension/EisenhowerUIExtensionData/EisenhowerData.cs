@@ -93,9 +93,15 @@ namespace EisenhowerUIExtension
 
 	public class EisenhowerVariables : List<EisenhowerVariable>
 	{
+		private Translator m_Trans;
+
+		// -------------------------------------
+
 		public EisenhowerVariables(Translator trans)
 		{
-			// Fallback attributes
+			m_Trans = trans;
+
+			// Default attributes
 			var attribPriority = new TaskAttributeItem()
 			{
 				Label = trans.Translate("Priority", Translator.Type.Header),
@@ -113,7 +119,7 @@ namespace EisenhowerUIExtension
 
 		public List<EisenhowerVariable> Update(TaskList tasks)
 		{
-			var attribs = tasks.GetAvailableAttributes();
+			var attribs = tasks.GetAvailableAttributes(m_Trans);
 			var modifiedVars = new List<EisenhowerVariable>();
 
 			// Built-in attributes only get added
