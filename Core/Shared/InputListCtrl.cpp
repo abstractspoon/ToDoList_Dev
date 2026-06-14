@@ -1291,7 +1291,7 @@ void CInputListCtrl::HideControl(CWnd& ctrl, const CWnd* pWndIgnore)
 
 void CInputListCtrl::ShowControl(CWnd& ctrl, int nRow, int nCol, BOOL bBtnClick)
 {
-	PrepareControl(ctrl, nRow, nCol);
+	PrepareControl(ctrl, nRow, nCol); // For derived classes
 	ScrollCellIntoView(nRow, nCol);
 
 	CRect rCell;
