@@ -659,7 +659,6 @@ EisenhowerFilterSetupListCtrl::EisenhowerFilterSetupListCtrl()
 	: 
 	m_Trans(nullptr),
 	m_Filters(nullptr),
-	m_ModifiedFilters(nullptr),
 	m_Vars(nullptr)
 {
 } 
@@ -677,11 +676,18 @@ void EisenhowerFilterSetupListCtrl::Initialise(Translator^ trans,
 
 EisenhowerFilters^ EisenhowerFilterSetupListCtrl::Filters::get()
 {
+	CheckUpdateFilters();
+
+	return m_Filters;
+}
+
+void EisenhowerFilterSetupListCtrl::CheckUpdateFilters()
+{
 	// Build on demand only
-	if (m_ModifiedFilters == nullptr)
+	if (m_Filters == nullptr)
 	{
 		// Get modified filters
-		m_ModifiedFilters = gcnew EisenhowerFilters();
+		m_Filters = gcnew EisenhowerFilters();
 
 		CArray<FILTER, FILTER&> aFilters;
 		int numFilters = ListCtrl(m_pMFCInfo)->GetFilters(aFilters);
@@ -701,11 +707,9 @@ EisenhowerFilters^ EisenhowerFilterSetupListCtrl::Filters::get()
 			ef->XCutoff = gcnew String(filter.sXCutoff);
 			ef->YCutoff = gcnew String(filter.sYCutoff);
 
-			m_ModifiedFilters->Add(ef);
+			m_Filters->Add(ef);
 		}
 	}
-
-	return m_ModifiedFilters;
 }
 
 // ------------------------------------------------
@@ -722,6 +726,8 @@ void EisenhowerFilterSetupListCtrl::OnHandleDestroyed(EventArgs^ e)
 {
 	if (m_pMFCInfo != IntPtr::Zero)
 	{
+		CheckUpdateFilters();
+
 		// Clean up
 		ListCtrl(m_pMFCInfo)->Detach();
 		m_pMFCInfo = IntPtr::Zero;
@@ -748,7 +754,7 @@ void EisenhowerFilterSetupListCtrl::WndProc(Message% m)
 	// C# case statements must be const
 	if (m.Msg == WM_ESLCN_EDITCHANGE)
 	{
-		m_ModifiedFilters = nullptr;
+		m_Filters = nullptr;
 		ChangeEvent(this, gcnew EventArgs());
 
 		return;

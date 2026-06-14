@@ -126,7 +126,7 @@ namespace EisenhowerUIExtension
 		Translator^ m_Trans;
 
 		EisenhowerVariables^ m_Vars;
-		EisenhowerFilters ^m_Filters, ^m_ModifiedFilters;
+		EisenhowerFilters^ m_Filters;
 
 	protected:
 		void WndProc(Windows::Forms::Message% m) override;
@@ -136,6 +136,7 @@ namespace EisenhowerUIExtension
 
 	protected:
 		void CheckInitListCtrl();
+		void CheckUpdateFilters();
 	};
 
 }
