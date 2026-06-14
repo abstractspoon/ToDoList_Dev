@@ -210,6 +210,7 @@ namespace EisenhowerUIExtension
 	{
 		public TaskAttributeItem Attribute { get; private set; }
 		public ValueType Type { get; private set; }
+		public string ListData { get; private set; }
 
 		public double MinValue { get; private set; }
 		public double MaxValue { get; private set; }
@@ -285,6 +286,14 @@ namespace EisenhowerUIExtension
 			Type = GetValueType(attrib);
 			MinValue = MaxValue = 0;
 			ReadOnly = false; // For now
+
+			switch (attrib.AttributeId)
+			{
+			case Task.Attribute.Priority:
+			case Task.Attribute.Risk:
+				ListData = "0\n1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n"; // TODO
+				break;
+			}
 		}
 
 		public EisenhowerVariable(CustomAttributeDefinition attrib)
@@ -300,6 +309,7 @@ namespace EisenhowerUIExtension
 			MinValue = MaxValue = 0;
 			Type = GetValueType(attrib);
 			ReadOnly = (attrib.AttributeType == CustomAttributeDefinition.Attribute.Calculation);
+			ListData = attrib.ListData;
 
 			Debug.Assert(Type != ValueType.Unknown);
 		}

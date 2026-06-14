@@ -9,6 +9,10 @@
 #include <Shared\EnString.h>
 #include <Shared\Localizer.h>
 #include <Shared\Themed.h>
+#include <Shared\DialogHelper.h>
+#include <Shared\Misc.h>
+#include <Shared\GraphicsMisc.h>
+#include <Shared\DateHelper.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -60,7 +64,10 @@ enum
 	YCUTOFF_COL,
 };
 
-const int IDC_VARIABLES = 1001;
+const int IDC_VARIABLES		= 1001;
+const int IDC_LISTCUTOFFS	= 1002;
+const int IDC_DATECUTOFFS	= 1003;
+const int IDC_TIMECUTOFFS	= 1004;
 
 const UINT WM_ESLCN_EDITCHANGE = RegisterWindowMessage(L"WM_ESLCN_EDITCHANGE");
 
@@ -74,6 +81,9 @@ BEGIN_MESSAGE_MAP(CEisenhowerSetupListCtrl, CInputListCtrl)
 	ON_WM_CREATE()
 	ON_NOTIFY(NM_CUSTOMDRAW, 0, OnHeaderCustomDraw)
 	ON_CBN_CLOSEUP(IDC_VARIABLES, OnVariableComboCloseUp)
+	ON_CBN_CLOSEUP(IDC_LISTCUTOFFS, OnCutoffComboCloseUp)
+	ON_NOTIFY(DTN_DATETIMECHANGE, IDC_DATECUTOFFS, OnDateCutoffChange)
+	ON_EN_KILLFOCUS(IDC_TIMECUTOFFS, OnTimeCutoffKillFocus)
 END_MESSAGE_MAP()
 
 int CEisenhowerSetupListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
@@ -81,23 +91,35 @@ int CEisenhowerSetupListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (CInputListCtrl::OnCreate(lpCreateStruct) == -1)
 		return -1;
 
+	CreateControl(m_cbCutoffs, IDC_LISTCUTOFFS, CBS_DROPDOWNLIST);
+	CreateControl(m_cbVariables, IDC_VARIABLES, CBS_DROPDOWNLIST | CBS_SORT);
+	CreateControl(m_dtcCutoffs, IDC_DATECUTOFFS, DTS_SHOWNONE);
+	CreateControl(m_tpCutoffs, IDC_TIMECUTOFFS, ES_AUTOHSCROLL);
+
+	// Periods are always positive days
+	m_tpCutoffs.SetUnits(THU_DAYS);
+	m_tpCutoffs.EnableUnitsChanges(FALSE);
+	m_tpCutoffs.EnableNegativeTimes(FALSE);
+
 	return 0;
 }
 
 void CEisenhowerSetupListCtrl::Initialise(const CArray<VARIABLE, VARIABLE&>& aVars,
 										  const CArray<FILTER, FILTER&>& aFilters)
 {
+	// Set the row count before adding columns
+	GetHeader()->SetRowCount(2);
+	GetHeader()->EnableTracking(FALSE);
+
 	CRect rClient;
 	GetClientRect(rClient);
 
-	AddCol(CEnString(IDS_VARIABLE_HEADER), ((rClient.Width() * 3) / 10), ILCT_COMBO);
-	AddCol(CEnString(IDS_CUTOFF_HEADER), ((rClient.Width() * 2) / 10), ILCT_TEXT);
-	AddCol(CEnString(IDS_VARIABLE_HEADER), ((rClient.Width() * 3) / 10), ILCT_COMBO);
-	AddCol(CEnString(IDS_CUTOFF_HEADER), ((rClient.Width() * 2) / 10), ILCT_TEXT);
+	AddCol(CEnString(IDS_VARIABLE_HEADER), (rClient.Width() / 4), ILCT_COMBO);
+	AddCol(CEnString(IDS_CUTOFF_HEADER), (rClient.Width() / 4), ILCT_TEXT);
+	AddCol(CEnString(IDS_VARIABLE_HEADER), (rClient.Width() / 4), ILCT_COMBO);
+	AddCol(CEnString(IDS_CUTOFF_HEADER), (rClient.Width() / 4), ILCT_TEXT);
 
-	ShowGrid(TRUE, TRUE);
 	AutoAdd(TRUE, FALSE);
-	SetAutoRowPrompt(CEnString(IDS_FILTERROW_PROMPT));
 
 	// Save these for populating the combobox
 	m_aVariables.Copy(aVars);
@@ -106,22 +128,37 @@ void CEisenhowerSetupListCtrl::Initialise(const CArray<VARIABLE, VARIABLE&>& aVa
 	m_aFilters.Copy(aFilters);
 
 	for (int nFilter = 0; nFilter < aFilters.GetSize(); nFilter++)
-	{
-		const FILTER& filter = aFilters[nFilter];
+		AddRow();
 
-		int nRow = AddRow(GetVarLabel(filter.nXVarIndex));
-		ASSERT(nRow == nFilter);
+	SetCurSel(0, 0);
+}
 
-		if (CanEditCutOff(filter.nXVarIndex))
-			SetItemText(nRow, 1, filter.sXCutoff);
+void CEisenhowerSetupListCtrl::InitState()
+{
+	CInputListCtrl::InitState();
 
-		SetItemText(nRow, 2, GetVarLabel(filter.nYVarIndex));
+	ShowGrid(TRUE, TRUE);
+	SetAutoRowPrompt(CEnString(IDS_FILTERROW_PROMPT));
+}
 
-		if (CanEditCutOff(filter.nYVarIndex))
-			SetItemText(nRow, 3, filter.sYCutoff);
-	}
+int CEisenhowerSetupListCtrl::AddRow()
+{
+	int nFilter = (GetItemCount() - 1); // item before prompt 
+	ASSERT(nFilter <= m_aFilters.GetSize());
 
-	GetHeader()->SetRowCount(2);
+	if (nFilter == m_aFilters.GetSize())
+		m_aFilters.Add(FILTER());
+
+	const FILTER& filter = m_aFilters[nFilter];
+
+	int nRow = CInputListCtrl::AddRow(GetVarLabel(filter.nXVarIndex));
+	ASSERT(nRow == nFilter);
+
+	UpdateCellText(nRow, XCUTOFF_COL);
+	UpdateCellText(nRow, YVAR_COL);
+	UpdateCellText(nRow, YCUTOFF_COL);
+
+	return nRow;
 }
 
 int CEisenhowerSetupListCtrl::GetFilters(CArray<FILTER, FILTER&>& aFilters) const
@@ -130,21 +167,86 @@ int CEisenhowerSetupListCtrl::GetFilters(CArray<FILTER, FILTER&>& aFilters) cons
 	return aFilters.GetSize();
 }
 
-void CEisenhowerSetupListCtrl::DrawCellText(CDC* pDC, int nItem, int nCol, const CRect& rText, const CString& sText, COLORREF crText, UINT nDrawTextFlags)
+BOOL CEisenhowerSetupListCtrl::UpdateCellText(int nRow, int nCol)
 {
-	if (!IsPrompt(nItem))
-	{
-		CString sCellPrompt = GetCellPrompt(nItem, nCol, sText);
+	if (IsPrompt(nRow))
+		return FALSE;
 
-		if (!sCellPrompt.IsEmpty())
-		{
-			CInputListCtrl::DrawCellText(pDC, nItem, nCol, rText, sCellPrompt, CWndPrompt::GetTextColor(), nDrawTextFlags | DT_CENTER);
-			return;
-		}
+	const FILTER& filter = m_aFilters[nRow];
+	CString sNewText;
+
+	switch (nCol)
+	{
+	case XVAR_COL:
+	case XCUTOFF_COL:
+		sNewText = FormatCellText(nRow, nCol, filter.nXVarIndex, filter.sXCutoff);
+		break;
+
+	case YVAR_COL:
+	case YCUTOFF_COL:
+		sNewText = FormatCellText(nRow, nCol, filter.nYVarIndex, filter.sYCutoff);
+		break;
 	}
 
-	// All else
-	CInputListCtrl::DrawCellText(pDC, nItem, nCol, rText, sText, crText, nDrawTextFlags | DT_LEFT);
+	if (sNewText == GetItemText(nRow, nCol))
+		return FALSE;
+
+	SetItemText(nRow, nCol, sNewText);
+	return TRUE;
+}
+
+CString CEisenhowerSetupListCtrl::FormatCellText(int nRow, int nCol, int nVar, const CString& sCutoff) const
+{
+	const FILTER& filter = m_aFilters[nRow];
+
+	switch (nCol)
+	{
+	case XVAR_COL: 
+	case YVAR_COL: 
+		return GetVarLabel(nVar);
+
+	case XCUTOFF_COL:
+	case YCUTOFF_COL:
+		if (nVar != -1)
+		{
+			const VARIABLE& var = m_aVariables[nVar];
+
+			if (var.nType == VAR_BOOLEAN)
+				return CEnString(IDS_BOOLCUTOFF_PROMPT); // always\
+	
+			if (!CanEditCutOff(nVar))
+				return L"";
+
+			// else
+			switch (var.nType)
+			{
+			case VAR_INTEGER:
+			case VAR_DECIMAL:
+				break;
+
+			case VAR_TIMEPERIOD:
+				if (!sCutoff.IsEmpty())
+					return (sCutoff + ' ' + CLocalizer::TranslateText(_T("D")));
+				break;
+
+			case VAR_DATE:
+				if (!sCutoff.IsEmpty())
+					return CDateHelper::FormatDate(Misc::Atof(sCutoff));
+				break;
+
+			default:
+				ASSERT(0);
+				break;
+			}
+		}
+		break;
+
+	default: 
+		ASSERT(0);
+		break;
+	}
+
+	return (sCutoff.IsEmpty() ? CEnString(IDS_DEFCUTOFF_PROMPT) : sCutoff);
 }
 
 CString CEisenhowerSetupListCtrl::GetCellPrompt(int nItem, int nCol, const CString& sText) const
@@ -168,6 +270,25 @@ CString CEisenhowerSetupListCtrl::GetCellPrompt(int nItem, int nCol, const CStri
 	}
 
 	return L"";
+}
+
+int CEisenhowerSetupListCtrl::GetVarIndex(int nRow, int nCol) const
+{
+	if (!IsPrompt(nRow))
+	{
+		switch (nCol)
+		{
+		case XVAR_COL:
+		case XCUTOFF_COL:
+			return m_aFilters[nRow].nXVarIndex;
+
+		case YVAR_COL:
+		case YCUTOFF_COL:
+			return m_aFilters[nRow].nYVarIndex;
+		}
+	}
+
+	return -1;
 }
 
 CString CEisenhowerSetupListCtrl::GetCellPrompt(int nItem, int nCol, const CString& sText, int nVar) const
@@ -197,7 +318,7 @@ int CEisenhowerSetupListCtrl::GetVarType(int nVar) const
 CString CEisenhowerSetupListCtrl::GetVarLabel(int nVar) const
 {
 	if (nVar < 0 || nVar >= m_aVariables.GetSize())
-		return L"";
+		return CEnString(IDS_UNDEFINEDVAR_PROMPT);
 
 	return m_aVariables[nVar].sLabel;
 }
@@ -214,35 +335,75 @@ BOOL CEisenhowerSetupListCtrl::CanEditCutOff(int nVar) const
 	return TRUE;
 }
 
-void CEisenhowerSetupListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
+void CEisenhowerSetupListCtrl::PrepareControl(CWnd& /*ctrl*/, int nRow, int nCol)
 {
+	PrepareControl(nRow, nCol);
+}
+
+void CEisenhowerSetupListCtrl::PrepareControl(int nRow, int nCol)
+{
+	const FILTER& filter = m_aFilters[nRow];
+
 	switch (nCol)
 	{
 	case XVAR_COL:
 	case YVAR_COL:
-		PrepareCombo(nRow, nCol);
+		PrepareVariableCombo(nRow, nCol);
 		break;
 
 	case XCUTOFF_COL:
-		{
-			ASSERT(CanEditCutOff(m_aFilters[nRow].nXVarIndex));
-
-			if (GetVarType(m_aFilters[nRow].nXVarIndex) == VAR_INTEGER)
-				GetEditControl()->SetMask(L"0123456789");
-			else
-				GetEditControl()->SetMask(L"0123456789.", ME_LOCALIZEDECIMAL);
-		}
+		PrepareCutoffControl(filter.nXVarIndex, filter.sXCutoff);
 		break;
 
 	case YCUTOFF_COL:
-		{
-			ASSERT(CanEditCutOff(m_aFilters[nRow].nXVarIndex));
+		PrepareCutoffControl(filter.nYVarIndex, filter.sYCutoff);
+		break;
+	}
+}
 
-			if (GetVarType(m_aFilters[nRow].nYVarIndex) == VAR_INTEGER)
-				GetEditControl()->SetMask(L"0123456789");
-			else
-				GetEditControl()->SetMask(L"0123456789.", ME_LOCALIZEDECIMAL);
-		}
+void CEisenhowerSetupListCtrl::PrepareCutoffControl(int nVar, const CString& sCutoff)
+{
+	ASSERT(CanEditCutOff(nVar));
+
+	const VARIABLE& var = m_aVariables[nVar];
+
+	if (!var.sListData.IsEmpty())
+	{
+		m_cbCutoffs.ResetContent();
+
+		CStringArray aCutoffs;
+		Misc::Split(var.sListData, aCutoffs, '\n');
+
+		CDialogHelper::SetComboBoxItems(m_cbCutoffs, aCutoffs);
+		m_cbCutoffs.SelectString(-1, sCutoff);
+
+		return;
+	}
+
+	switch (var.nType)
+	{
+	case VAR_INTEGER:
+		CInputListCtrl::GetEditControl()->SetMask(L"0123456789");
+		break;
+
+	case VAR_DECIMAL:
+		CInputListCtrl::GetEditControl()->SetMask(L"0123456789.", ME_LOCALIZEDECIMAL);
+		break;
+
+	case VAR_TIMEPERIOD:
+		m_tpCutoffs.SetTime(Misc::Atof(sCutoff), THU_DAYS);
+		break;
+
+	case VAR_DATE:
+		if (sCutoff.IsEmpty())
+			m_dtcCutoffs.SendMessage(DTM_SETSYSTEMTIME, GDT_NONE);
+		else
+			m_dtcCutoffs.SetTime(Misc::Atof(sCutoff));
+		break;
+
+	case VAR_BOOLEAN:
+	default:
+		ASSERT(0);
 		break;
 	}
 }
@@ -276,63 +437,199 @@ void CEisenhowerSetupListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClick)
 	switch (nCol)
 	{
 	case XVAR_COL:
-	case YVAR_COL:
 		if (IsPrompt(nItem))
-		{
-			m_aFilters.Add(FILTER());
-			AddRow(L"");
-		}
+			SetCurSel(AddRow(), XVAR_COL);
+
 		ShowControl(m_cbVariables, nItem, nCol, bBtnClick);
+		break;
+
+	case YVAR_COL:
+		ShowControl(m_cbVariables, nItem, nCol, bBtnClick);
+		break;
+
+	case XCUTOFF_COL:
+		EditCutoffCell(nItem, nCol, m_aFilters[nItem].nXVarIndex, bBtnClick);
+		break;
+
+	case YCUTOFF_COL:
+		EditCutoffCell(nItem, nCol, m_aFilters[nItem].nYVarIndex, bBtnClick);
+		break;
+
+	default:
+		ASSERT(0);
+		break;
+	}
+}
+
+void CEisenhowerSetupListCtrl::EditCutoffCell(int nItem, int nCol, int nVar, BOOL bBtnClick)
+{
+	const VARIABLE& var = m_aVariables[nVar];
+
+	if (!var.sListData.IsEmpty())
+	{
+		ShowControl(m_cbCutoffs, nItem, nCol, bBtnClick);
 		return;
 	}
 
+	switch (var.nType)
+	{
+	case VAR_INTEGER:
+		CInputListCtrl::GetEditControl()->SetMask(L"0123456789");
+		break;
+
+	case VAR_DECIMAL:
+		CInputListCtrl::GetEditControl()->SetMask(L"0123456789.", ME_LOCALIZEDECIMAL);
+		break;
+
+	case VAR_TIMEPERIOD:
+		ShowControl(m_tpCutoffs, nItem, nCol, bBtnClick);
+		return;
+
+	case VAR_DATE:
+		ShowControl(m_dtcCutoffs, nItem, nCol, bBtnClick);
+		return;
+
+	case VAR_BOOLEAN:
+	default:
+		ASSERT(0);
+		break;
+	}
+
 	// default
-	return CInputListCtrl::EditCell(nItem, nCol, bBtnClick);
+	CInputListCtrl::EditCell(nItem, nCol, bBtnClick);
+}
+
+IL_COLUMNTYPE CEisenhowerSetupListCtrl::GetCellType(int nRow, int nCol) const
+{
+	switch (nCol)
+	{
+	case XVAR_COL:
+	case YVAR_COL:
+		return ILCT_COMBO;
+
+	case XCUTOFF_COL:
+		if (!IsPrompt(nRow))
+			return GetCutoffCellType(nRow, nCol, m_aFilters[nRow].nXVarIndex);
+		break;
+
+	case YCUTOFF_COL:
+		if (!IsPrompt(nRow))
+			return GetCutoffCellType(nRow, nCol, m_aFilters[nRow].nYVarIndex);
+		break;
+
+	default:
+		ASSERT(0);
+		break;
+	}
+
+	return CInputListCtrl::GetCellType(nRow, nCol);
+}
+
+IL_COLUMNTYPE CEisenhowerSetupListCtrl::GetCutoffCellType(int nRow, int nCol, int nVar) const
+{
+	if (nVar != -1)
+	{
+		const VARIABLE& var = m_aVariables[nVar];
+
+		if (!var.sListData.IsEmpty())
+			return ILCT_COMBO;
+
+		switch (var.nType)
+		{
+		case VAR_DATE:
+			return ILCT_DATE;
+
+		case VAR_TIMEPERIOD:
+			// Because we ALWAYS work in DAYS it would be
+			// misleading to show the drop-menu arrow so
+			// we always show time periods as text even though
+			// we use a CTimeEdit for the editing
+			break;
+
+		case VAR_INTEGER:
+		case VAR_DECIMAL:
+		case VAR_BOOLEAN:
+			break;
+
+		default:
+			ASSERT(0);
+			break;
+		}
+	}
+
+	return CInputListCtrl::GetCellType(nRow, nCol);
 }
 
 BOOL CEisenhowerSetupListCtrl::DeleteSelectedCell()
 {
-	int nRow = GetCurSel(), nCol = m_nCurCol;
-
 	if (!CInputListCtrl::DeleteSelectedCell())
 		return FALSE;
 
 	// Synchronise underlying filter array
+	int nRow = GetCurSel();
 	FILTER& filter = m_aFilters[nRow];
 
-	switch (nCol)
+	switch (m_nCurCol)
 	{
 		case XVAR_COL:
 			m_aFilters.RemoveAt(nRow);
-			NotifyEditChange();
 			break;
 
 		case YVAR_COL:
-			if (filter.nYVarIndex != -1)
-			{
-				filter.nYVarIndex = -1;
-				NotifyEditChange();
-			}
+			filter.nYVarIndex = -1;
 			break;
 
 		case XCUTOFF_COL:
-			if (!filter.sXCutoff.IsEmpty())
-			{
-				filter.sXCutoff.Empty();
-				NotifyEditChange();
-			}
+			filter.sXCutoff.Empty();
 			break;
 
 		case YCUTOFF_COL:
-			if (!filter.sYCutoff.IsEmpty())
-			{
-				filter.sYCutoff.Empty();
-				NotifyEditChange();
-			}
+			filter.sYCutoff.Empty();
 			break;
 	}
 
+	if (UpdateCellText(nRow, m_nCurCol))
+		NotifyEditChange();
+
 	return TRUE;
+}
+
+COLORREF CEisenhowerSetupListCtrl::GetItemTextColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const
+{
+	if (!IsPrompt(nItem))
+	{
+		const FILTER& filter = m_aFilters[nItem];
+		BOOL bHasValue = FALSE;
+
+		switch (nCol)
+		{
+		case XVAR_COL:
+			bHasValue = (filter.nXVarIndex != -1);
+			break;
+
+		case YVAR_COL:
+			bHasValue = (filter.nYVarIndex != -1);
+			break;
+
+		case XCUTOFF_COL:
+			bHasValue = !(filter.sXCutoff.IsEmpty() || (GetVarType(filter.nXVarIndex) == VAR_BOOLEAN));
+			break;
+
+		case YCUTOFF_COL:
+			bHasValue = !(filter.sYCutoff.IsEmpty() || (GetVarType(filter.nYVarIndex) == VAR_BOOLEAN));
+			break;
+
+		default:
+			ASSERT(0);
+			break;
+		}
+
+		if (!bHasValue)
+			return CWndPrompt::GetTextColor();
+	}
+
+	// else
+	return CInputListCtrl::GetItemTextColor(nItem, nCol, bSelected, bDropHighlighted, bWndFocus);
 }
 
 COLORREF CEisenhowerSetupListCtrl::GetItemBackColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const
@@ -344,11 +641,12 @@ COLORREF CEisenhowerSetupListCtrl::GetItemBackColor(int nItem, int nCol, BOOL bS
 	return CInputListCtrl::GetItemBackColor(nItem, nCol, bSelected, bDropHighlighted, bWndFocus);
 }
 
-void CEisenhowerSetupListCtrl::PrepareCombo(int nRow, int nCol)
+void CEisenhowerSetupListCtrl::PrepareVariableCombo(int nRow, int nCol)
 {
 	int nFilter = (IsPrompt(nRow) ? -1 : nRow);
 	int nVarExclude = -1, nSelVar = -1;
 
+	// Exclude whichever variable is selected in the 'other' variable cell
 	if ((nFilter != -1) && (nFilter < m_aFilters.GetSize()))
 	{
 		const FILTER& filter = m_aFilters[nFilter];
@@ -369,19 +667,16 @@ void CEisenhowerSetupListCtrl::PrepareCombo(int nRow, int nCol)
 			return;
 		}
 	}
-
-	if (!m_cbVariables.GetSafeHwnd())
-		CreateControl(m_cbVariables, 1001, CBS_DROPDOWNLIST | CBS_SORT);
-	else
-		m_cbVariables.ResetContent();
+	
+	m_cbVariables.ResetContent();
 
 	for (int nVar = 0; nVar < m_aVariables.GetSize(); nVar++)
 	{
-		if (nVar != nVarExclude)
-		{
-			int nItem = m_cbVariables.AddString(m_aVariables[nVar].sLabel);
-			m_cbVariables.SetItemData(nItem, nVar);
-		}
+		if (nVar == nVarExclude)
+			continue;
+
+		int nItem = m_cbVariables.AddString(m_aVariables[nVar].sLabel);
+		m_cbVariables.SetItemData(nItem, nVar); // Because the listed is sorted
 	}
 
 	m_cbVariables.SelectString(-1, GetVarLabel(nSelVar));
@@ -389,84 +684,132 @@ void CEisenhowerSetupListCtrl::PrepareCombo(int nRow, int nCol)
 
 void CEisenhowerSetupListCtrl::OnVariableComboCloseUp()
 {
-	int nSelItem = GetCurSel();
-	ASSERT (nSelItem < m_aFilters.GetSize());
-
-	FILTER& filter = m_aFilters[nSelItem];
-	BOOL bChange = FALSE;
-
-	int nSelVar = m_cbVariables.GetCurSel();
-	int nVar = (int)m_cbVariables.GetItemData(nSelVar);
-
-	switch (m_nCurCol)
+	int nRow, nCol;
+	
+	if (GetCurSel(nRow, nCol))
 	{
-	case XVAR_COL:
-		if (nVar != filter.nXVarIndex)
+		FILTER& filter = m_aFilters[nRow];
+
+		int nSelVar = m_cbVariables.GetCurSel();
+		int nVar = (int)m_cbVariables.GetItemData(nSelVar);
+
+		switch (nCol)
 		{
+		case XVAR_COL:
 			filter.nXVarIndex = nVar;
-			bChange = TRUE;
-		}
-		break;
+			break;
 
-	case YVAR_COL:
-		if (nVar != filter.nYVarIndex)
-		{
+		case YVAR_COL:
 			filter.nYVarIndex = nVar;
-			bChange = TRUE;
-		}
-		break;
-	}
+			break;
 
-	if (bChange)
-	{
-		SetItemText(nSelItem, m_nCurCol, GetVarLabel(nVar));
-		NotifyEditChange();
+		default:
+			ASSERT(0);
+			break;
+		}
+
+		if (UpdateCellText(nRow, nCol))
+			NotifyEditChange();
 	}
 
 	HideControl(m_cbVariables);
 }
 
-void CEisenhowerSetupListCtrl::NotifyEditChange()
+void CEisenhowerSetupListCtrl::OnCutoffComboCloseUp()
 {
-	GetParent()->SendMessage(WM_ESLCN_EDITCHANGE);
+	SetSelectedFilterCutoff(CDialogHelper::GetSelectedItem(m_cbCutoffs));
+	HideControl(m_cbCutoffs);
+}
+
+void CEisenhowerSetupListCtrl::OnDateCutoffChange(NMHDR* pNMHDR, LPARAM* lResult)
+{
+	NMDATETIMECHANGE* pNMDTC = (NMDATETIMECHANGE*)pNMHDR;
+	COleDateTime date;
+
+	if ((pNMDTC->dwFlags == GDT_NONE) || !m_dtcCutoffs.GetTime(date))
+		SetSelectedFilterCutoff(L"");
+	else
+		SetSelectedFilterCutoff(Misc::Format((int)date.m_dt));
+
+	HideControl(m_dtcCutoffs);
+}
+
+void CEisenhowerSetupListCtrl::OnTimeCutoffKillFocus()
+{
+	CString sText;
+	m_tpCutoffs.GetWindowText(sText);
+
+	SetSelectedFilterCutoff(sText);
+	HideControl(m_tpCutoffs);
 }
 
 void CEisenhowerSetupListCtrl::OnEndEdit(UINT uIDCtrl, int* pResult)
 {
-	switch (m_nEditCol)
+	CString sText;
+	CInputListCtrl::GetEditControl()->GetWindowText(sText);
+
+	SetSelectedFilterCutoff(sText);
+}
+
+void CEisenhowerSetupListCtrl::OnCancelEdit()
+{
+	// Reinitialise the ctrls with their original values to revert changes
+	int nRow, nCol;
+	
+	if (GetCurSel(nRow, nCol))
+		PrepareControl(nRow, nCol);
+
+	CInputListCtrl::OnCancelEdit();
+}
+
+BOOL CEisenhowerSetupListCtrl::SetSelectedFilterCutoff(const CString& sCutoff)
+{
+	int nRow, nCol;
+
+	if (!GetCurSel(nRow, nCol))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	FILTER& filter = m_aFilters[nRow];
+
+	switch (nCol)
 	{
 	case XCUTOFF_COL:
 		{
-			CString sText;
-			GetEditControl()->GetWindowText(sText);
+			if (sCutoff == filter.sXCutoff)
+				return FALSE;
 
-			if (sText != GetItemText(m_nEditItem, m_nEditCol))
-			{
-				m_aFilters[m_nEditItem].sXCutoff = sText;
-				SetItemText(m_nEditItem, m_nEditCol, sText);
-				NotifyEditChange();
-			}
+			// else
+			filter.sXCutoff = sCutoff;
 		}
 		break;
 
 	case YCUTOFF_COL:
 		{
-			CString sText;
-			GetEditControl()->GetWindowText(sText);
+			if (sCutoff == filter.sYCutoff)
+				return FALSE;
 
-			if (sText != GetItemText(m_nEditItem, m_nEditCol))
-			{
-				m_aFilters[m_nEditItem].sYCutoff = sText;
-				SetItemText(m_nEditItem, m_nEditCol, sText);
-				NotifyEditChange();
-			}
-			break;
+			// else
+			filter.sYCutoff = sCutoff;
 		}
 		break;
 
 	default:
 		ASSERT(0);
+		return FALSE;
 	}
+
+	VERIFY(UpdateCellText(nRow, nCol));
+	NotifyEditChange();
+	
+	return TRUE;
+}
+
+void CEisenhowerSetupListCtrl::NotifyEditChange()
+{
+	GetParent()->SendMessage(WM_ESLCN_EDITCHANGE);
 }
 
 void CEisenhowerSetupListCtrl::OnHeaderCustomDraw(NMHDR* pNMHDR, LPARAM* lResult)
@@ -495,7 +838,7 @@ void CEisenhowerSetupListCtrl::OnHeaderCustomDraw(NMHDR* pNMHDR, LPARAM* lResult
 				CRect rDraw(pNMCD->rc);
 				rDraw.top += (rDraw.Height() / 2);
 
-				DrawHeaderRect(pDC, rDraw, m_header.GetItemText(nItem));
+				DrawHeaderRect(pDC, rDraw, m_header.GetItemText(nItem), FALSE);
 
 				// Upper text
 				switch (nItem)
@@ -508,7 +851,7 @@ void CEisenhowerSetupListCtrl::OnHeaderCustomDraw(NMHDR* pNMHDR, LPARAM* lResult
 						rDraw.right += m_header.GetItemWidth(XCUTOFF_COL);
 						rDraw.bottom -= (rDraw.Height() / 2);
 
-						DrawHeaderRect(pDC, rDraw, CEnString(IDS_URGENCY_HEADER));
+						DrawHeaderRect(pDC, rDraw, CEnString(IDS_URGENCY_HEADER), TRUE);
 					}
 					break;
 
@@ -520,7 +863,7 @@ void CEisenhowerSetupListCtrl::OnHeaderCustomDraw(NMHDR* pNMHDR, LPARAM* lResult
 						rDraw.right += m_header.GetItemWidth(YCUTOFF_COL);
 						rDraw.bottom -= (rDraw.Height() / 2);
 
-						DrawHeaderRect(pDC, rDraw, CEnString(IDS_IMPORTANCE_HEADER));
+						DrawHeaderRect(pDC, rDraw, CEnString(IDS_IMPORTANCE_HEADER), TRUE);
 					}
 					break;
 
@@ -534,7 +877,7 @@ void CEisenhowerSetupListCtrl::OnHeaderCustomDraw(NMHDR* pNMHDR, LPARAM* lResult
 	}
 }
 
-void CEisenhowerSetupListCtrl::DrawHeaderRect(CDC* pDC, const CRect& rItem, const CString& sItem)
+void CEisenhowerSetupListCtrl::DrawHeaderRect(CDC* pDC, const CRect& rItem, const CString& sItem, BOOL bBold)
 {
 	if (CThemed::AreControlsThemed())
 	{
@@ -553,8 +896,40 @@ void CEisenhowerSetupListCtrl::DrawHeaderRect(CDC* pDC, const CRect& rItem, cons
 	pDC->SetTextColor(GetSysColor(COLOR_BTNTEXT));
 
 	UINT nFlags = (DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX | DT_CENTER);
-	pDC->DrawText(sItem, (LPRECT)(LPCRECT)rItem, nFlags);
+
+	if (bBold)
+	{
+		HFONT hFontBold = GraphicsMisc::CreateFont((HFONT)GetFont()->GetSafeHandle(), GMFS_BOLD);
+		HGDIOBJ hFontOld = pDC->SelectObject(hFontBold);
+
+		pDC->DrawText(sItem, (LPRECT)(LPCRECT)rItem, nFlags);
+
+		pDC->SelectObject(hFontOld);
+		GraphicsMisc::VerifyDeleteObject(hFontBold);
+	}
+	else
+	{
+		pDC->DrawText(sItem, (LPRECT)(LPCRECT)rItem, nFlags);
+	}
 }
+
+BOOL CEisenhowerSetupListCtrl::PreTranslateMessage(MSG* pMsg)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	return CInputListCtrl::PreTranslateMessage(pMsg);
+}
+
+void CEisenhowerSetupListCtrl::HideAllControls(const CWnd* pWndIgnore)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	CInputListCtrl::HideControl(m_cbVariables);
+	CInputListCtrl::HideControl(m_cbCutoffs);
+	CInputListCtrl::HideControl(m_dtcCutoffs);
+	CInputListCtrl::HideControl(m_tpCutoffs);
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -590,7 +965,7 @@ HostedEisenhowerSetupListCtrl* HostedEisenhowerSetupListCtrl::Attach(HWND hwndPa
 	if (!pCtrl->m_WndOfManagedHandle.IsWindowEnabled())
 		dwFlags |= WS_DISABLED;
 
-	pCtrl->m_ListCtrl.Create(dwFlags, rClient, &(pCtrl->m_WndOfManagedHandle), 1001);
+	pCtrl->m_ListCtrl.Create(dwFlags, rClient, &(pCtrl->m_WndOfManagedHandle), 101);
 	pCtrl->m_ListCtrl.ModifyStyleEx(0, WS_EX_CLIENTEDGE);
 	pCtrl->m_ListCtrl.SendMessage(WM_SETFONT, (WPARAM)hFont, 0);
 
@@ -619,6 +994,13 @@ void HostedEisenhowerSetupListCtrl::SetFocus()
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
 	m_ListCtrl.SetFocus();
+}
+
+bool HostedEisenhowerSetupListCtrl::PreTranslateMessage(MSG* pMsg)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	return (m_ListCtrl.PreTranslateMessage(pMsg) != FALSE);
 }
 
 void HostedEisenhowerSetupListCtrl::UpdateSize()
@@ -751,6 +1133,27 @@ void EisenhowerFilterSetupListCtrl::OnSizeChanged(EventArgs^ e)
 		ListCtrl(m_pMFCInfo)->UpdateSize();
 }
 
+bool EisenhowerFilterSetupListCtrl::PreProcessMessage(Message% m)
+{
+	if (m_pMFCInfo != IntPtr::Zero)
+	{
+		MSG msg = 
+		{
+			GetHwnd(m.HWnd),
+			(UINT)m.Msg,
+			(WPARAM)m.WParam.ToInt64(),
+			(LPARAM)m.LParam.ToInt64(),
+			0,
+			0
+		};
+
+		if (ListCtrl(m_pMFCInfo)->PreTranslateMessage(&msg))
+			return true;
+	}
+
+	return Control::PreProcessMessage(m);
+}
+
 void EisenhowerFilterSetupListCtrl::WndProc(Message% m)
 {
 	Control::WndProc(m);
@@ -798,6 +1201,7 @@ void EisenhowerFilterSetupListCtrl::CheckInitListCtrl()
 
 			var.sLabel = MarshalledString(ev->Attribute->Label);
 			var.nType = (int)ev->Type;
+			var.sListData = MarshalledString(ev->ListData);
 
 			if (ev->Attribute->IsCustom())
 				var.sAttribID = MarshalledString(ev->Attribute->CustomAttributeId);
