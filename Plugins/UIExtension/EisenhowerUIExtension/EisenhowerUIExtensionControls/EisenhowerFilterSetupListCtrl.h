@@ -96,6 +96,7 @@ namespace EisenhowerUIExtension
 
 		void Detach();
 		void DrawItem(WPARAM wp, LPARAM lp);
+		void SetFocus();
 		void UpdateSize();
 
 	protected:

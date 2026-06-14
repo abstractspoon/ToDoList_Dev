@@ -614,6 +614,13 @@ void HostedEisenhowerSetupListCtrl::DrawItem(WPARAM wp, LPARAM lp)
 	m_ListCtrl.SendMessage(WM_DRAWITEM, wp, lp);
 }
 
+void HostedEisenhowerSetupListCtrl::SetFocus()
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	m_ListCtrl.SetFocus();
+}
+
 void HostedEisenhowerSetupListCtrl::UpdateSize()
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
@@ -764,6 +771,14 @@ void EisenhowerFilterSetupListCtrl::WndProc(Message% m)
 	{
 	case WM_DRAWITEM:
 		ListCtrl(m_pMFCInfo)->DrawItem(m.WParam.ToInt32(), m.LParam.ToInt32());
+		break;
+
+	case WM_SETFOCUS:
+		ListCtrl(m_pMFCInfo)->SetFocus();
+		break;
+
+	case WM_GETDLGCODE:
+		m.Result = IntPtr(DLGC_WANTARROWS);
 		break;
 	}
 }
