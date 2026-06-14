@@ -1330,7 +1330,15 @@ void CInputListCtrl::ShowControl(CWnd& ctrl, int nRow, int nCol, BOOL bBtnClick)
 	else if (ctrl.IsKindOf(RUNTIME_CLASS(CDateTimeCtrl)))
 	{
 		if (bBtnClick)
-			ctrl.PostMessage(WM_SYSKEYDOWN, VK_DOWN, 0);
+		{
+			CRect rButton;
+			GetButtonRect(nRow, nCol, rButton);
+
+			POINT ptMouse = rButton.CenterPoint();
+			ClientToScreen(&ptMouse);
+
+			Misc::DoMouseClick(ptMouse);
+		}
 	}
 }
 

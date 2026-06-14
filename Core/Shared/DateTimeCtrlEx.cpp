@@ -175,7 +175,12 @@ void CDateTimeCtrlEx::OnLButtonDown(UINT nFlags, CPoint point)
 		case DTCHT_CHECKBOX:
 			if (m_bShowCalendarOnCompleting && !IsDateSet())
 			{
-				SendMessage(WM_SYSKEYDOWN, VK_DOWN);
+				CRect rButton = GetDropButtonRect();
+				POINT ptMouse = rButton.CenterPoint();
+
+				ClientToScreen(&ptMouse);
+				Misc::DoMouseClick(ptMouse);
+
 				return; // eat it
 			}
 			break;
@@ -551,7 +556,12 @@ void CDateTimeCtrlEx::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 	{
 		if ((nChar == VK_SPACE) && !IsDateSet())
 		{
-			SendMessage(WM_SYSKEYDOWN, VK_DOWN);
+			CRect rButton = GetDropButtonRect();
+			POINT ptMouse = rButton.CenterPoint();
+
+			ClientToScreen(&ptMouse);
+			Misc::DoMouseClick(ptMouse);
+
 			return; // eat it
 		}
 	}

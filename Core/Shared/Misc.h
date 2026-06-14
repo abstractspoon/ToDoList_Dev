@@ -267,6 +267,7 @@ namespace Misc
 	BOOL IsCursorKeyPressed(DWORD dwKeys = MKC_ANY);
 	CString GetKeyName(WORD wVirtKey, BOOL bExtended = FALSE); 
 	DWORD GetShortcut(WORD wVirtKeyCode, BOOL bExtended);
+	BOOL DoMouseClick(const CPoint& ptScreen, BOOL bLeft = TRUE);
 	
 	BOOL HasFlag(DWORD dwFlags, DWORD dwFlag);
 	BOOL FlagHasChanged(DWORD dwFlag, DWORD dwOldFlags, DWORD dwNewFlags);
