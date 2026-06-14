@@ -260,8 +260,16 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "EisenhowerUIExtension", "EisenhowerUIExtension", "{0B0A5830-1982-43A0-B5DC-7C96E7DF0174}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EisenhowerUIExtensionBridge", "UIExtension\EisenhowerUIExtension\EisenhowerUIExtensionBridge\EisenhowerUIExtensionBridge.vcxproj", "{C4E31B1D-3E1C-45DC-9E0C-F6AE22F302C4}"
+	ProjectSection(ProjectDependencies) = postProject
+		{5C8B7743-2C31-4CF9-A70F-5AB5077D0E7A} = {5C8B7743-2C31-4CF9-A70F-5AB5077D0E7A}
+		{2EA5F87A-CD7D-4ECA-AC91-B8180C3B0CE3} = {2EA5F87A-CD7D-4ECA-AC91-B8180C3B0CE3}
+		{139F16A6-439A-4D0F-80BD-02C863A38BAC} = {139F16A6-439A-4D0F-80BD-02C863A38BAC}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EisenhowerUIExtensionCore", "UIExtension\EisenhowerUIExtension\EisenhowerUIExtensionCore\EisenhowerUIExtensionCore.csproj", "{2EA5F87A-CD7D-4ECA-AC91-B8180C3B0CE3}"
+	ProjectSection(ProjectDependencies) = postProject
+		{139F16A6-439A-4D0F-80BD-02C863A38BAC} = {139F16A6-439A-4D0F-80BD-02C863A38BAC}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EisenhowerUIExtensionControls", "UIExtension\EisenhowerUIExtension\EisenhowerUIExtensionControls\EisenhowerUIExtensionControls.vcxproj", "{139F16A6-439A-4D0F-80BD-02C863A38BAC}"
 EndProject
