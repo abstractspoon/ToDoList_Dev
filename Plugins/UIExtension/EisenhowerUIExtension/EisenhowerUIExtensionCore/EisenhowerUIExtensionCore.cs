@@ -292,8 +292,8 @@ namespace EisenhowerUIExtension
 
 			m_FilterCombo.Populate(m_Filters, m_Trans);
 
-			var xUpdatedVar = m_Data.Variables.Find(m_EisenhowerCtrl.XFilterVariable);
-			var yUpdatedVar = m_Data.Variables.Find(m_EisenhowerCtrl.YFilterVariable);
+			var xUpdatedVar = m_Data.Variables.Find(selFilter.XVariable);
+			var yUpdatedVar = m_Data.Variables.Find(selFilter.YVariable);
 
 			if (selFilter != null)
 			{

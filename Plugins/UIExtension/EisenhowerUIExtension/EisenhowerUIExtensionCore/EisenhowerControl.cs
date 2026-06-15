@@ -35,6 +35,7 @@ namespace EisenhowerUIExtension
 
 		// local
 		private EisenhowerTasks m_Tasks;
+		private EisenhowerFilter m_Filter;
 		private bool m_DraggingHorzSplitBar, m_DraggingVertSplitBar;
 		private DragImage m_DragImage;
 		private Point m_SplitPos;
@@ -63,6 +64,7 @@ namespace EisenhowerUIExtension
 			m_Panes = new List<EisenhowerPane>() { m_TopLeftPane, m_TopRightPane, m_BottomLeftPane, m_BottomRightPane };
 			m_SplitPos = new Point(50, 50); // 0-100
 			m_ParentCalculatedValues = new HashSet<Task.Attribute>();
+			m_Filter = EisenhowerFilter.Null;
 		}
 
 		public void Initialize(EisenhowerTasks tasks, Translator trans, UIExtension.TaskIcon icons)
@@ -109,9 +111,6 @@ namespace EisenhowerUIExtension
 			m_BottomLeftPane.SetFilter(xHighVar, yLowVar);
 			m_BottomRightPane.SetFilter(xLowVar, yLowVar);
 		}
-
-		public EisenhowerVariable XFilterVariable { get { return m_Panes[0].Filter.XVariable; } }
-		public EisenhowerVariable YFilterVariable { get { return m_Panes[0].Filter.YVariable; } }
 
 		public void SetUITheme(UITheme theme)
 		{
@@ -501,8 +500,8 @@ namespace EisenhowerUIExtension
 			if (task.IsParent)
 			{
 				// Disallow dragging of parent tasks both of whose values are calculated
-				if (HasParentCalculatedValues(XFilterVariable.Attribute.AttributeId) &&
-					HasParentCalculatedValues(YFilterVariable.Attribute.AttributeId))
+				if (HasParentCalculatedValues(m_Filter.XVariable.Attribute.AttributeId) &&
+					HasParentCalculatedValues(m_Filter.YVariable.Attribute.AttributeId))
 				{
 					return false;
 				}
@@ -888,13 +887,13 @@ namespace EisenhowerUIExtension
 			if (task.IsParent)
 			{
 				// Disallow changing calculated parent values
-				if (HasParentCalculatedValues(XFilterVariable.Attribute.AttributeId) &&
+				if (HasParentCalculatedValues(m_Filter.XVariable.Attribute.AttributeId) &&
 					(destPane.Filter.XVariable.Range != srcPane.Filter.XVariable.Range))
 				{
 					return false;
 				}
 
-				if (HasParentCalculatedValues(YFilterVariable.Attribute.AttributeId) &&
+				if (HasParentCalculatedValues(m_Filter.YVariable.Attribute.AttributeId) &&
 					(destPane.Filter.YVariable.Range != srcPane.Filter.YVariable.Range))
 				{
 					return false;
