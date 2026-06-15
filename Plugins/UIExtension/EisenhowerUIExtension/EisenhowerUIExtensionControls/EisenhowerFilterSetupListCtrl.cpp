@@ -1088,10 +1088,10 @@ void EisenhowerFilterSetupListCtrl::CheckUpdateFilters()
 			auto ef = gcnew EisenhowerFilter();
 
 			if (filter.nXVarIndex != -1)
-				ef->XVar = m_Vars[filter.nXVarIndex];
+				ef->XVariable = m_Vars[filter.nXVarIndex];
 
 			if (filter.nYVarIndex != -1)
-				ef->YVar = m_Vars[filter.nYVarIndex];
+				ef->YVariable = m_Vars[filter.nYVarIndex];
 
 			ef->XCutoff = gcnew String(filter.sXCutoff);
 			ef->YCutoff = gcnew String(filter.sYCutoff);
@@ -1217,15 +1217,15 @@ void EisenhowerFilterSetupListCtrl::CheckInitListCtrl()
 		{
 			FILTER filter;
 
-			if (ef->XVar == nullptr)
+			if (ef->XVariable == nullptr)
 				filter.nXVarIndex = -1;
 			else
-				filter.nXVarIndex = m_Vars->IndexOf(ef->XVar);
+				filter.nXVarIndex = m_Vars->IndexOf(ef->XVariable);
 
-			if (ef->YVar == nullptr)
+			if (ef->YVariable == nullptr)
 				filter.nYVarIndex = -1;
 			else
-				filter.nYVarIndex = m_Vars->IndexOf(ef->YVar);
+				filter.nYVarIndex = m_Vars->IndexOf(ef->YVariable);
 
 			filter.sXCutoff = MarshalledString(ef->XCutoff);
 			filter.sYCutoff = MarshalledString(ef->YCutoff);

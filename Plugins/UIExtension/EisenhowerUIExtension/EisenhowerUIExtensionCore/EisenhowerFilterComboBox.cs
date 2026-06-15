@@ -41,8 +41,8 @@ namespace EisenhowerUIExtension
 				base(filter)
 			{
 				Label = string.Format("{0} / {1}", 
-										FormatFilterAttributeLabel(filter.XVar, trans),
-										FormatFilterAttributeLabel(filter.YVar, trans));
+									  FormatFilterAttributeLabel(filter.XVariable, trans),
+									  FormatFilterAttributeLabel(filter.YVariable, trans));
 			}
 
 			public override string ToString() { return Label; }

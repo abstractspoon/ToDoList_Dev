@@ -74,13 +74,13 @@ namespace EisenhowerUIExtension
 
 		// -------------------------------------------------
 
-		public EisenhowerVariable XVar
+		public EisenhowerVariable XVariable
 		{
 			get { return m_XVar; }
 			set { m_XVar = (value ?? EisenhowerVariable.Null); }
 		}
 
-		public EisenhowerVariable YVar
+		public EisenhowerVariable YVariable
 		{
 			get { return m_YVar; }
 			set { m_YVar = (value ?? EisenhowerVariable.Null); }
@@ -91,13 +91,13 @@ namespace EisenhowerUIExtension
 
 		public String Id
 		{
-			get { return string.Format("{0}.{1}", XVar?.Id, YVar?.Id); }
+			get { return string.Format("{0}.{1}", XVariable?.Id, YVariable?.Id); }
 		}
 
-		public double XCutoffValue { get { return GetCutoffValue(XCutoff, XVar); } }
-		public double YCutoffValue { get { return GetCutoffValue(YCutoff, YVar); } }
+		public double XCutoffValue { get { return GetCutoffValue(XCutoff, XVariable); } }
+		public double YCutoffValue { get { return GetCutoffValue(YCutoff, YVariable); } }
 
-		public bool HasNullVar { get { return (XVar.IsNull || YVar.IsNull); } }
+		public bool HasNullVar { get { return (XVariable.IsNull || YVariable.IsNull); } }
 
 		// -------------------------------------------------
 
@@ -107,8 +107,8 @@ namespace EisenhowerUIExtension
 
 		public EisenhowerFilter(EisenhowerFilter other)
 		{
-			XVar = other.XVar;
-			YVar = other.YVar;
+			XVariable = other.XVariable;
+			YVariable = other.YVariable;
 			XCutoff = other.XCutoff;
 			YCutoff = other.YCutoff;
 		}
@@ -125,8 +125,8 @@ namespace EisenhowerUIExtension
 			if (filter == null)
 				return false;
 
-			return (XVar.Equals(filter.XVar) &&
-					YVar.Equals(filter.YVar) &&
+			return (XVariable.Equals(filter.XVariable) &&
+					YVariable.Equals(filter.YVariable) &&
 					(XCutoff == filter.XCutoff) && 
 					(YCutoff == filter.YCutoff));
 		}
@@ -150,8 +150,8 @@ namespace EisenhowerUIExtension
 				{
 					return new EisenhowerFilter()
 					{
-						XVar = variables.Find(v => (v.Id == vars[0])) ?? EisenhowerVariable.Null,
-						YVar = variables.Find(v => (v.Id == vars[1])) ?? EisenhowerVariable.Null,
+						XVariable = variables.Find(v => (v.Id == vars[0])) ?? EisenhowerVariable.Null,
+						YVariable = variables.Find(v => (v.Id == vars[1])) ?? EisenhowerVariable.Null,
 
 						XCutoff = parts[1],
 						YCutoff = parts[2]

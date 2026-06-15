@@ -97,10 +97,12 @@ namespace EisenhowerUIExtension
 
 		public void SetFilter(EisenhowerFilter filter)
 		{
-			var xHighVar = new EisenhowerPaneFilterVariable(filter.XVar, EisenhowerPaneFilterVariable.ValueRange.High, filter.XCutoffValue);
-			var xLowVar  = new EisenhowerPaneFilterVariable(filter.XVar, EisenhowerPaneFilterVariable.ValueRange.Low, filter.XCutoffValue);
-			var yHighVar = new EisenhowerPaneFilterVariable(filter.YVar, EisenhowerPaneFilterVariable.ValueRange.High, filter.YCutoffValue);
-			var yLowVar  = new EisenhowerPaneFilterVariable(filter.YVar, EisenhowerPaneFilterVariable.ValueRange.Low, filter.YCutoffValue);
+			m_Filter = filter;
+
+			var xHighVar = new EisenhowerPaneFilterVariable(filter.XVariable, EisenhowerPaneFilterVariable.ValueRange.High, filter.XCutoffValue);
+			var xLowVar  = new EisenhowerPaneFilterVariable(filter.XVariable, EisenhowerPaneFilterVariable.ValueRange.Low, filter.XCutoffValue);
+			var yHighVar = new EisenhowerPaneFilterVariable(filter.YVariable, EisenhowerPaneFilterVariable.ValueRange.High, filter.YCutoffValue);
+			var yLowVar  = new EisenhowerPaneFilterVariable(filter.YVariable, EisenhowerPaneFilterVariable.ValueRange.Low, filter.YCutoffValue);
 
 			m_TopLeftPane.SetFilter(xHighVar, yHighVar);
 			m_TopRightPane.SetFilter(xLowVar, yHighVar);

@@ -261,16 +261,16 @@ namespace EisenhowerUIExtension
 				// Default filters
 				m_Filters.Add(new EisenhowerFilter()
 				{
-					XVar = m_Data.Variables.Find(Task.Attribute.Priority),
-					YVar = m_Data.Variables.Find(Task.Attribute.Risk),
+					XVariable = m_Data.Variables.Find(Task.Attribute.Priority),
+					YVariable = m_Data.Variables.Find(Task.Attribute.Risk),
 					XCutoff = "5",
 					YCutoff = "5"
 				});
 
 				m_Filters.Add(new EisenhowerFilter()
 				{
-					XVar = m_Data.Variables.Find(Task.Attribute.Risk),
-					YVar = m_Data.Variables.Find(Task.Attribute.Priority),
+					XVariable = m_Data.Variables.Find(Task.Attribute.Risk),
+					YVariable = m_Data.Variables.Find(Task.Attribute.Priority),
 					XCutoff = "5",
 					YCutoff = "5"
 				});
@@ -317,8 +317,8 @@ namespace EisenhowerUIExtension
 				{
 					selFilter = new EisenhowerFilter()
 					{
-						XVar = EisenhowerVariable.Null,
-						YVar = yUpdatedVar
+						XVariable = EisenhowerVariable.Null,
+						YVariable = yUpdatedVar
 					};
 				}
 				else
@@ -327,8 +327,8 @@ namespace EisenhowerUIExtension
 
 					selFilter = new EisenhowerFilter()
 					{
-						XVar = yUpdatedVar,
-						YVar = EisenhowerVariable.Null
+						XVariable = yUpdatedVar,
+						YVariable = EisenhowerVariable.Null
 					};
 				}
 			}
