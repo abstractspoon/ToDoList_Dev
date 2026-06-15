@@ -6,7 +6,7 @@
 #define IDS_IMPORTANCE_HEADER           102
 #define IDS_VARIABLE_HEADER             103
 #define IDS_CUTOFF_HEADER               104
-#define IDS_FILTERROW_PROMPT            105
+#define IDS_MATRIXROW_PROMPT            105
 #define IDS_BOOLCUTOFF_PROMPT           106
 #define IDS_UNDEFINEDVAR_PROMPT         107
 #define IDS_DEFCUTOFF_PROMPT            108

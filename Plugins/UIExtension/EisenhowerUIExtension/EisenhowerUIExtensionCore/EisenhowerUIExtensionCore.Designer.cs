@@ -32,8 +32,8 @@
 			this.m_EisenhowerCtrl = new EisenhowerUIExtension.EisenhowerControl();
 			this.m_Tooltip = new System.Windows.Forms.ToolTip(this.components);
 			this.button1 = new System.Windows.Forms.Button();
-			this.m_FilterLabel = new System.Windows.Forms.Label();
-			this.m_FilterCombo = new EisenhowerUIExtension.EisenhowerFilterComboBox();
+			this.m_MatricesLabel = new System.Windows.Forms.Label();
+			this.m_MatrixCombo = new EisenhowerUIExtension.EisenhowerMatrixComboBox();
 			this.SuspendLayout();
 			// 
 			// m_EisenhowerCtrl
@@ -56,28 +56,32 @@
 			this.button1.UseVisualStyleBackColor = true;
 			this.button1.Click += new System.EventHandler(this.OnPreferences);
 			// 
-			// m_FilterLabel
+			// m_MatricesLabel
 			// 
-			this.m_FilterLabel.AutoSize = true;
-			this.m_FilterLabel.Location = new System.Drawing.Point(-3, 4);
-			this.m_FilterLabel.Name = "m_FilterLabel";
-			this.m_FilterLabel.Size = new System.Drawing.Size(34, 13);
-			this.m_FilterLabel.TabIndex = 5;
-			this.m_FilterLabel.Text = "Filters";
+			this.m_MatricesLabel.AutoSize = true;
+			this.m_MatricesLabel.Location = new System.Drawing.Point(-3, 3);
+			this.m_MatricesLabel.Name = "m_MatricesLabel";
+			this.m_MatricesLabel.Size = new System.Drawing.Size(47, 13);
+			this.m_MatricesLabel.TabIndex = 25;
+			this.m_MatricesLabel.Text = "Matrices";
 			// 
-			// m_FilterCombo
 			// 
-			this.m_FilterCombo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-			this.m_FilterCombo.FormattingEnabled = true;
-			this.m_FilterCombo.Location = new System.Drawing.Point(0, 22);
-			this.m_FilterCombo.Name = "m_FilterCombo";
-			this.m_FilterCombo.Size = new System.Drawing.Size(218, 21);
-			this.m_FilterCombo.TabIndex = 6;
+			// 
+			// 
+			// m_MatrixCombo
+			// 
+			this.m_MatrixCombo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.m_MatrixCombo.FormattingEnabled = true;
+			this.m_MatrixCombo.Location = new System.Drawing.Point(0, 20);
+			this.m_MatrixCombo.Name = "m_MatrixCombo";
+			this.m_MatrixCombo.SelectedMatrix = null;
+			this.m_MatrixCombo.Size = new System.Drawing.Size(218, 21);
+			this.m_MatrixCombo.TabIndex = 6;
 			// 
 			// EisenhowerUIExtensionCore
 			// 
-			this.Controls.Add(this.m_FilterCombo);
-			this.Controls.Add(this.m_FilterLabel);
+			this.Controls.Add(this.m_MatricesLabel);
+			this.Controls.Add(this.m_MatrixCombo);
 			this.Controls.Add(this.button1);
 			this.Controls.Add(this.m_EisenhowerCtrl);
 			this.Name = "EisenhowerUIExtensionCore";
@@ -92,7 +96,7 @@
 		private EisenhowerControl m_EisenhowerCtrl;
 		private System.Windows.Forms.ToolTip m_Tooltip;
 		private System.Windows.Forms.Button button1;
-		private System.Windows.Forms.Label m_FilterLabel;
-		private EisenhowerFilterComboBox m_FilterCombo;
+		private EisenhowerMatrixComboBox m_MatrixCombo;
+		private System.Windows.Forms.Label m_MatricesLabel;
 	}
 }

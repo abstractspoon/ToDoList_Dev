@@ -89,7 +89,7 @@
     <Compile Include="EisenhowerPreferencesDlg.Designer.cs">
       <DependentUpon>EisenhowerPreferencesDlg.cs</DependentUpon>
     </Compile>
-    <Compile Include="EisenhowerFilterComboBox.cs">
+    <Compile Include="EisenhowerMatrixComboBox.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="EisenhowerUIExtensionCore.cs">

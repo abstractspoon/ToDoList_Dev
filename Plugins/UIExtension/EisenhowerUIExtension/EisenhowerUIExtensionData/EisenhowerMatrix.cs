@@ -7,22 +7,22 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 namespace EisenhowerUIExtension
 {
-	public class EisenhowerFilters : List<EisenhowerFilter>
+	public class EisenhowerMatrices : List<EisenhowerMatrix>
 	{
-		public EisenhowerFilter FirstOrNull
+		public EisenhowerMatrix FirstOrNull
 		{
-			get { return ((Count > 0) ? this[0] : EisenhowerFilter.Null); }
+			get { return ((Count > 0) ? this[0] : EisenhowerMatrix.Null); }
 		}
 
 		// ----------------------------------------
 
-		public EisenhowerFilters()
+		public EisenhowerMatrices()
 		{
 		}
 
 		public override bool Equals(object obj)
 		{
-			if (obj is EisenhowerFilters)
+			if (obj is EisenhowerMatrices)
 				return (ToString() == obj.ToString());
 
 			return false;
@@ -40,16 +40,16 @@ namespace EisenhowerUIExtension
 			return string.Join(";", this);
 		}
 
-		public int FromString(string filters, EisenhowerVariables variables)
+		public int FromString(string matrices, EisenhowerVariables variables)
 		{
 			Clear();
 
-			foreach (var f in filters.Split(';'))
+			foreach (var m in matrices.Split(';'))
 			{
-				var filter = EisenhowerFilter.FromString(f, variables);
+				var matrix = EisenhowerMatrix.FromString(m, variables);
 
-				if (filter != null)
-					Add(filter);
+				if (matrix != null)
+					Add(matrix);
 			}
 
 			return Count;
@@ -58,13 +58,13 @@ namespace EisenhowerUIExtension
 	
 	// -------------------------------------------------------------------
 
-	public class EisenhowerFilter
+	public class EisenhowerMatrix
 	{
-		public static EisenhowerFilter Null { get; private set; }
+		public static EisenhowerMatrix Null { get; private set; }
 
-		static EisenhowerFilter()
+		static EisenhowerMatrix()
 		{
-			Null = new EisenhowerFilter();
+			Null = new EisenhowerMatrix();
 		}
 
 		// -------------------------------------------------
@@ -101,11 +101,11 @@ namespace EisenhowerUIExtension
 
 		// -------------------------------------------------
 
-		public EisenhowerFilter()
+		public EisenhowerMatrix()
 		{
 		}
 
-		public EisenhowerFilter(EisenhowerFilter other)
+		public EisenhowerMatrix(EisenhowerMatrix other)
 		{
 			XVariable = other.XVariable;
 			YVariable = other.YVariable;
@@ -120,15 +120,15 @@ namespace EisenhowerUIExtension
 
 		public override bool Equals(object obj)
 		{
-			var filter = (obj as EisenhowerFilter);
+			var matrix = (obj as EisenhowerMatrix);
 
-			if (filter == null)
+			if (matrix == null)
 				return false;
 
-			return (XVariable.Equals(filter.XVariable) &&
-					YVariable.Equals(filter.YVariable) &&
-					(XCutoff == filter.XCutoff) && 
-					(YCutoff == filter.YCutoff));
+			return (XVariable.Equals(matrix.XVariable) &&
+					YVariable.Equals(matrix.YVariable) &&
+					(XCutoff == matrix.XCutoff) && 
+					(YCutoff == matrix.YCutoff));
 		}
 
 		public override int GetHashCode()
@@ -138,9 +138,9 @@ namespace EisenhowerUIExtension
 			return base.GetHashCode();
 		}
 
-		public static EisenhowerFilter FromString(string filter, EisenhowerVariables variables)
+		public static EisenhowerMatrix FromString(string matrix, EisenhowerVariables variables)
 		{
-			var parts = filter.Split(':');
+			var parts = matrix.Split(':');
 
 			if (parts.Length == 3)
 			{
@@ -148,7 +148,7 @@ namespace EisenhowerUIExtension
 
 				if (vars.Length == 2)
 				{
-					return new EisenhowerFilter()
+					return new EisenhowerMatrix()
 					{
 						XVariable = variables.Find(v => (v.Id == vars[0])) ?? EisenhowerVariable.Null,
 						YVariable = variables.Find(v => (v.Id == vars[1])) ?? EisenhowerVariable.Null,
@@ -175,7 +175,7 @@ namespace EisenhowerUIExtension
 
 	// ------------------------------
 
-	public class EisenhowerPaneFilterVariable : EisenhowerVariable
+	public class EisenhowerPaneMatrixVariable : EisenhowerVariable
 	{
 		public enum ValueRange
 		{
@@ -190,7 +190,7 @@ namespace EisenhowerUIExtension
 
 		// ----------------------------------------
 
-		public EisenhowerPaneFilterVariable(EisenhowerVariable var,
+		public EisenhowerPaneMatrixVariable(EisenhowerVariable var,
 											ValueRange range,
 											double cutoff)
 			:
@@ -257,7 +257,7 @@ namespace EisenhowerUIExtension
 
 		public override bool Equals(object other)
 		{
-			var var = (other as EisenhowerPaneFilterVariable);
+			var var = (other as EisenhowerPaneMatrixVariable);
 
 			return (Attribute.Equals(var?.Attribute) &&
 					(Range == var?.Range) && 
@@ -274,10 +274,10 @@ namespace EisenhowerUIExtension
 
 	////////////////////////////////////////////////////////////////////
 
-	public class EisenhowerPaneFilter
+	public class EisenhowerPaneMatrix
 	{
-		public EisenhowerPaneFilter(EisenhowerPaneFilterVariable xVar,
-									EisenhowerPaneFilterVariable yVar)
+		public EisenhowerPaneMatrix(EisenhowerPaneMatrixVariable xVar,
+									EisenhowerPaneMatrixVariable yVar)
 		{
 			XVariable = xVar;
 			YVariable = yVar;
@@ -285,8 +285,8 @@ namespace EisenhowerUIExtension
 			Debug.Assert(HasNull || (XVariable.Id != YVariable.Id));
 		}
 
-		public EisenhowerPaneFilterVariable XVariable { get; private set; }
-		public EisenhowerPaneFilterVariable YVariable { get; private set; }
+		public EisenhowerPaneMatrixVariable XVariable { get; private set; }
+		public EisenhowerPaneMatrixVariable YVariable { get; private set; }
 
 		public bool TaskMatches(EisenhowerTask task)
 		{
@@ -319,9 +319,9 @@ namespace EisenhowerUIExtension
 			if (HasNull)
 				return false;
 
-			var filter = (obj as EisenhowerPaneFilter);
+			var matrix = (obj as EisenhowerPaneMatrix);
 
-			return (XVariable.Equals(filter?.XVariable) && XVariable.Equals(filter?.YVariable));
+			return (XVariable.Equals(matrix?.XVariable) && XVariable.Equals(matrix?.YVariable));
 		}
 
 		public override int GetHashCode()

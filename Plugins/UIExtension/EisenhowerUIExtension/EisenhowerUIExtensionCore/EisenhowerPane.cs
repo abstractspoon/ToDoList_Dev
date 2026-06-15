@@ -20,7 +20,7 @@ namespace EisenhowerUIExtension
 	public partial class EisenhowerPane : UserControl, IDragRenderer
 	{
 		private EisenhowerTasks m_Tasks;
-		private EisenhowerPaneFilter m_Filter;
+		private EisenhowerPaneMatrix m_Matrix;
 		private Translator m_Trans;
 		private UITheme m_Theme = new UITheme();
 
@@ -63,7 +63,7 @@ namespace EisenhowerUIExtension
 			m_Icon.Image = paneIcon;
 
 			m_Tasks = taskItems;
-			m_Filter = null;
+			m_Matrix = null;
 			m_Trans = trans;
 			m_Theme = new UITheme();
 
@@ -94,13 +94,13 @@ namespace EisenhowerUIExtension
 			}
 		}
 
-		public bool SetFilter(EisenhowerPaneFilterVariable xVar, EisenhowerPaneFilterVariable yVar)
+		public bool SetMatrix(EisenhowerPaneMatrixVariable xVar, EisenhowerPaneMatrixVariable yVar)
 		{
-			var newFilter = new EisenhowerPaneFilter(xVar, yVar);
+			var newMatrix = new EisenhowerPaneMatrix(xVar, yVar);
 
-			if ((m_Filter == null) || !m_Filter.Equals(newFilter))
+			if ((m_Matrix == null) || !m_Matrix.Equals(newMatrix))
 			{
-				m_Filter = newFilter;
+				m_Matrix = newMatrix;
 				UpdateTitle();
 
 				// Note: column widths will be recalculated in RebuildTaskList
@@ -113,7 +113,7 @@ namespace EisenhowerUIExtension
 			return false; // no change
 		}
 
-		public EisenhowerPaneFilter Filter { get { return m_Filter; } }
+		public EisenhowerPaneMatrix Matrix { get { return m_Matrix; } }
 
 		public bool Selected
 		{
@@ -267,7 +267,7 @@ namespace EisenhowerUIExtension
 			m_List.BeginUpdate();
 			m_List.RemoveAll();
 
-			if ((m_Tasks == null) || (m_Filter == null))
+			if ((m_Tasks == null) || (m_Matrix == null))
 			{
 				Debug.Assert(false);
 				return false;
@@ -282,9 +282,9 @@ namespace EisenhowerUIExtension
 			return true;
 		}
 
-		public bool RefilterTasks(List<uint> taskIds)
+		public bool UpdateTasks(List<uint> taskIds)
 		{
-			if ((m_Tasks == null) || (m_Filter == null))
+			if ((m_Tasks == null) || (m_Matrix == null))
 			{
 				Debug.Assert(false);
 				return false;
@@ -297,7 +297,7 @@ namespace EisenhowerUIExtension
 				var task = m_Tasks.GetItem(taskId);
 
 				// Check if we need to remove or add it
-				if ((task == null) || !m_Filter.TaskMatches(task))
+				if ((task == null) || !m_Matrix.TaskMatches(task))
 				{
 					// No need to check if we already have it,
 					// the list will do that automatically
@@ -310,8 +310,8 @@ namespace EisenhowerUIExtension
 				else // update values
 				{
 					m_List.SetTaskValues(taskId, 
-										 task.GetAttributeDisplayValue(m_Filter.XVariable),
-										 task.GetAttributeDisplayValue(m_Filter.YVariable));
+										 task.GetAttributeDisplayValue(m_Matrix.XVariable),
+										 task.GetAttributeDisplayValue(m_Matrix.YVariable));
 				}
 			}
 
@@ -506,7 +506,7 @@ namespace EisenhowerUIExtension
 
 		private bool OnListIsTaskDraggable(object sender, ITaskBase task)
 		{
-			if (m_Filter.XVariable.ReadOnly && m_Filter.YVariable.ReadOnly)
+			if (m_Matrix.XVariable.ReadOnly && m_Matrix.YVariable.ReadOnly)
 				return false;
 
 			return (bool)IsTaskDraggable?.Invoke(this, task);
@@ -549,17 +549,17 @@ namespace EisenhowerUIExtension
 
 		private void UpdateTitle()
 		{
-			m_TitleBar.Text = m_Filter?.ToString(m_Trans);
+			m_TitleBar.Text = m_Matrix?.ToString(m_Trans);
 		}
 
 		private bool AddTask(EisenhowerTask task)
 		{
-			if (!m_Filter.TaskMatches(task))
+			if (!m_Matrix.TaskMatches(task))
 				return false;
 
 			return m_List.AddTask(task,
-								  task.GetAttributeDisplayValue(m_Filter.XVariable),
-								  task.GetAttributeDisplayValue(m_Filter.YVariable));
+								  task.GetAttributeDisplayValue(m_Matrix.XVariable),
+								  task.GetAttributeDisplayValue(m_Matrix.YVariable));
 		}
 	}
 }

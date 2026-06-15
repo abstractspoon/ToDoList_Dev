@@ -675,7 +675,7 @@ namespace EisenhowerUIExtension
 			if (!base.ProcessTaskUpdate(task))
 				return false;
 
-			// Filterable attributes -----------------------------------
+			// Matrix attributes -----------------------------------
 
 			// Built-in
 			foreach (var id in EisenhowerVariable.SupportedAttributeIds)

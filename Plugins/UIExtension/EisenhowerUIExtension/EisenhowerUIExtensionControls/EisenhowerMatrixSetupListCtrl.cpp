@@ -3,7 +3,7 @@
 
 #include "stdafx.h"
 #include "resource.h"
-#include "EisenhowerFilterSetupListCtrl.h"
+#include "EisenhowerMatrixSetupListCtrl.h"
 
 #include <Shared\WndPrompt.h>
 #include <Shared\EnString.h>
@@ -36,11 +36,11 @@ enum // Variable ValueType
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-FILTER::FILTER() : nXVarIndex(-1), nYVarIndex(-1)
+MATRIX::MATRIX() : nXVarIndex(-1), nYVarIndex(-1)
 {
 }
 
-BOOL FILTER::IsValid() const
+BOOL MATRIX::IsValid() const
 {
 	if ((nXVarIndex == -1) || (nYVarIndex == -1))
 		return FALSE;
@@ -86,7 +86,7 @@ BEGIN_MESSAGE_MAP(CEisenhowerSetupListCtrl, CInputListCtrl)
 END_MESSAGE_MAP()
 
 void CEisenhowerSetupListCtrl::Initialise(const CArray<VARIABLE, VARIABLE&>& aVars,
-										  const CArray<FILTER, FILTER&>& aFilters)
+										  const CArray<MATRIX, MATRIX&>& aMatrices)
 {
 	// Create all the child controls we'll need
 	CreateControl(m_cbCutoffs, IDC_LISTCUTOFFS, CBS_DROPDOWNLIST);
@@ -117,9 +117,9 @@ void CEisenhowerSetupListCtrl::Initialise(const CArray<VARIABLE, VARIABLE&>& aVa
 	m_aVariables.Copy(aVars);
 
 	// Populate the rows
-	m_aFilters.Copy(aFilters);
+	m_aMatrices.Copy(aMatrices);
 
-	for (int nFilter = 0; nFilter < aFilters.GetSize(); nFilter++)
+	for (int nMatrix = 0; nMatrix < aMatrices.GetSize(); nMatrix++)
 		AddRow();
 
 	SetCurSel(0, 0);
@@ -130,21 +130,21 @@ void CEisenhowerSetupListCtrl::InitState()
 	CInputListCtrl::InitState();
 
 	ShowGrid(TRUE, TRUE);
-	SetAutoRowPrompt(CEnString(IDS_FILTERROW_PROMPT));
+	SetAutoRowPrompt(CEnString(IDS_MATRIXROW_PROMPT));
 }
 
 int CEisenhowerSetupListCtrl::AddRow()
 {
-	int nFilter = (GetItemCount() - 1); // item before prompt 
-	ASSERT(nFilter <= m_aFilters.GetSize());
+	int nMatrix = (GetItemCount() - 1); // item before prompt 
+	ASSERT(nMatrix <= m_aMatrices.GetSize());
 
-	if (nFilter == m_aFilters.GetSize())
-		m_aFilters.Add(FILTER());
+	if (nMatrix == m_aMatrices.GetSize())
+		m_aMatrices.Add(MATRIX());
 
-	const FILTER& filter = m_aFilters[nFilter];
+	const MATRIX& matrix = m_aMatrices[nMatrix];
 
-	int nRow = CInputListCtrl::AddRow(GetVarLabel(filter.nXVarIndex));
-	ASSERT(nRow == nFilter);
+	int nRow = CInputListCtrl::AddRow(GetVarLabel(matrix.nXVarIndex));
+	ASSERT(nRow == nMatrix);
 
 	UpdateCellText(nRow, XCUTOFF_COL);
 	UpdateCellText(nRow, YVAR_COL);
@@ -153,10 +153,10 @@ int CEisenhowerSetupListCtrl::AddRow()
 	return nRow;
 }
 
-int CEisenhowerSetupListCtrl::GetFilters(CArray<FILTER, FILTER&>& aFilters) const
+int CEisenhowerSetupListCtrl::GetMatrices(CArray<MATRIX, MATRIX&>& aMatrices) const
 {
-	aFilters.Copy(m_aFilters);
-	return aFilters.GetSize();
+	aMatrices.Copy(m_aMatrices);
+	return aMatrices.GetSize();
 }
 
 BOOL CEisenhowerSetupListCtrl::UpdateCellText(int nRow, int nCol)
@@ -164,19 +164,19 @@ BOOL CEisenhowerSetupListCtrl::UpdateCellText(int nRow, int nCol)
 	if (IsPrompt(nRow))
 		return FALSE;
 
-	const FILTER& filter = m_aFilters[nRow];
+	const MATRIX& matrix = m_aMatrices[nRow];
 	CString sNewText;
 
 	switch (nCol)
 	{
 	case XVAR_COL:
 	case XCUTOFF_COL:
-		sNewText = FormatCellText(nRow, nCol, filter.nXVarIndex, filter.sXCutoff);
+		sNewText = FormatCellText(nRow, nCol, matrix.nXVarIndex, matrix.sXCutoff);
 		break;
 
 	case YVAR_COL:
 	case YCUTOFF_COL:
-		sNewText = FormatCellText(nRow, nCol, filter.nYVarIndex, filter.sYCutoff);
+		sNewText = FormatCellText(nRow, nCol, matrix.nYVarIndex, matrix.sYCutoff);
 		break;
 	}
 
@@ -187,10 +187,8 @@ BOOL CEisenhowerSetupListCtrl::UpdateCellText(int nRow, int nCol)
 	return TRUE;
 }
 
-CString CEisenhowerSetupListCtrl::FormatCellText(int nRow, int nCol, int nVar, const CString& sCutoff) const
+CString CEisenhowerSetupListCtrl::FormatCellText(int /*nRow*/, int nCol, int nVar, const CString& sCutoff) const
 {
-	const FILTER& filter = m_aFilters[nRow];
-
 	switch (nCol)
 	{
 	case XVAR_COL: 
@@ -254,10 +252,10 @@ CString CEisenhowerSetupListCtrl::GetCellPrompt(int nItem, int nCol, const CStri
 			break;
 
 		case XCUTOFF_COL:
-			return GetCellPrompt(nItem, nCol, sText, m_aFilters[nItem].nXVarIndex);
+			return GetCellPrompt(nItem, nCol, sText, m_aMatrices[nItem].nXVarIndex);
 
 		case YCUTOFF_COL:
-			return GetCellPrompt(nItem, nCol, sText, m_aFilters[nItem].nYVarIndex);
+			return GetCellPrompt(nItem, nCol, sText, m_aMatrices[nItem].nYVarIndex);
 		}
 	}
 
@@ -272,11 +270,11 @@ int CEisenhowerSetupListCtrl::GetVarIndex(int nRow, int nCol) const
 		{
 		case XVAR_COL:
 		case XCUTOFF_COL:
-			return m_aFilters[nRow].nXVarIndex;
+			return m_aMatrices[nRow].nXVarIndex;
 
 		case YVAR_COL:
 		case YCUTOFF_COL:
-			return m_aFilters[nRow].nYVarIndex;
+			return m_aMatrices[nRow].nYVarIndex;
 		}
 	}
 
@@ -334,7 +332,7 @@ void CEisenhowerSetupListCtrl::PrepareControl(CWnd& /*ctrl*/, int nRow, int nCol
 
 void CEisenhowerSetupListCtrl::PrepareControl(int nRow, int nCol)
 {
-	const FILTER& filter = m_aFilters[nRow];
+	const MATRIX& matrix = m_aMatrices[nRow];
 
 	switch (nCol)
 	{
@@ -344,11 +342,11 @@ void CEisenhowerSetupListCtrl::PrepareControl(int nRow, int nCol)
 		break;
 
 	case XCUTOFF_COL:
-		PrepareCutoffControl(filter.nXVarIndex, filter.sXCutoff);
+		PrepareCutoffControl(matrix.nXVarIndex, matrix.sXCutoff);
 		break;
 
 	case YCUTOFF_COL:
-		PrepareCutoffControl(filter.nYVarIndex, filter.sYCutoff);
+		PrepareCutoffControl(matrix.nYVarIndex, matrix.sYCutoff);
 		break;
 	}
 }
@@ -404,7 +402,7 @@ BOOL CEisenhowerSetupListCtrl::CanEditCell(int nRow, int nCol) const
 {
 	if (!IsPrompt(nRow))
 	{
-		const FILTER& filter = m_aFilters[nRow];
+		const MATRIX& matrix = m_aMatrices[nRow];
 
 		switch (nCol)
 		{
@@ -413,10 +411,10 @@ BOOL CEisenhowerSetupListCtrl::CanEditCell(int nRow, int nCol) const
 			return TRUE;
 
 		case XCUTOFF_COL:
-			return CanEditCutOff(filter.nXVarIndex);
+			return CanEditCutOff(matrix.nXVarIndex);
 
 		case YCUTOFF_COL:
-			return CanEditCutOff(filter.nYVarIndex);
+			return CanEditCutOff(matrix.nYVarIndex);
 		}
 	}
 
@@ -440,11 +438,11 @@ void CEisenhowerSetupListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClick)
 		break;
 
 	case XCUTOFF_COL:
-		EditCutoffCell(nItem, nCol, m_aFilters[nItem].nXVarIndex, bBtnClick);
+		EditCutoffCell(nItem, nCol, m_aMatrices[nItem].nXVarIndex, bBtnClick);
 		break;
 
 	case YCUTOFF_COL:
-		EditCutoffCell(nItem, nCol, m_aFilters[nItem].nYVarIndex, bBtnClick);
+		EditCutoffCell(nItem, nCol, m_aMatrices[nItem].nYVarIndex, bBtnClick);
 		break;
 
 	default:
@@ -501,12 +499,12 @@ IL_COLUMNTYPE CEisenhowerSetupListCtrl::GetCellType(int nRow, int nCol) const
 
 	case XCUTOFF_COL:
 		if (!IsPrompt(nRow))
-			return GetCutoffCellType(nRow, nCol, m_aFilters[nRow].nXVarIndex);
+			return GetCutoffCellType(nRow, nCol, m_aMatrices[nRow].nXVarIndex);
 		break;
 
 	case YCUTOFF_COL:
 		if (!IsPrompt(nRow))
-			return GetCutoffCellType(nRow, nCol, m_aFilters[nRow].nYVarIndex);
+			return GetCutoffCellType(nRow, nCol, m_aMatrices[nRow].nYVarIndex);
 		break;
 
 	default:
@@ -557,26 +555,26 @@ BOOL CEisenhowerSetupListCtrl::DeleteSelectedCell()
 	if (!CInputListCtrl::DeleteSelectedCell())
 		return FALSE;
 
-	// Synchronise underlying filter array
+	// Synchronise underlying matrix array
 	int nRow = GetCurSel();
-	FILTER& filter = m_aFilters[nRow];
+	MATRIX& matrix = m_aMatrices[nRow];
 
 	switch (m_nCurCol)
 	{
 		case XVAR_COL:
-			m_aFilters.RemoveAt(nRow);
+			m_aMatrices.RemoveAt(nRow);
 			break;
 
 		case YVAR_COL:
-			filter.nYVarIndex = -1;
+			matrix.nYVarIndex = -1;
 			break;
 
 		case XCUTOFF_COL:
-			filter.sXCutoff.Empty();
+			matrix.sXCutoff.Empty();
 			break;
 
 		case YCUTOFF_COL:
-			filter.sYCutoff.Empty();
+			matrix.sYCutoff.Empty();
 			break;
 	}
 
@@ -590,25 +588,25 @@ COLORREF CEisenhowerSetupListCtrl::GetItemTextColor(int nItem, int nCol, BOOL bS
 {
 	if (!IsPrompt(nItem))
 	{
-		const FILTER& filter = m_aFilters[nItem];
+		const MATRIX& matrix = m_aMatrices[nItem];
 		BOOL bHasValue = FALSE;
 
 		switch (nCol)
 		{
 		case XVAR_COL:
-			bHasValue = (filter.nXVarIndex != -1);
+			bHasValue = (matrix.nXVarIndex != -1);
 			break;
 
 		case YVAR_COL:
-			bHasValue = (filter.nYVarIndex != -1);
+			bHasValue = (matrix.nYVarIndex != -1);
 			break;
 
 		case XCUTOFF_COL:
-			bHasValue = !(filter.sXCutoff.IsEmpty() || (GetVarType(filter.nXVarIndex) == VAR_BOOLEAN));
+			bHasValue = !(matrix.sXCutoff.IsEmpty() || (GetVarType(matrix.nXVarIndex) == VAR_BOOLEAN));
 			break;
 
 		case YCUTOFF_COL:
-			bHasValue = !(filter.sYCutoff.IsEmpty() || (GetVarType(filter.nYVarIndex) == VAR_BOOLEAN));
+			bHasValue = !(matrix.sYCutoff.IsEmpty() || (GetVarType(matrix.nYVarIndex) == VAR_BOOLEAN));
 			break;
 
 		default:
@@ -635,24 +633,24 @@ COLORREF CEisenhowerSetupListCtrl::GetItemBackColor(int nItem, int nCol, BOOL bS
 
 void CEisenhowerSetupListCtrl::PrepareVariableCombo(int nRow, int nCol)
 {
-	int nFilter = (IsPrompt(nRow) ? -1 : nRow);
+	int nMatrix = (IsPrompt(nRow) ? -1 : nRow);
 	int nVarExclude = -1, nSelVar = -1;
 
 	// Exclude whichever variable is selected in the 'other' variable cell
-	if ((nFilter != -1) && (nFilter < m_aFilters.GetSize()))
+	if ((nMatrix != -1) && (nMatrix < m_aMatrices.GetSize()))
 	{
-		const FILTER& filter = m_aFilters[nFilter];
+		const MATRIX& matrix = m_aMatrices[nMatrix];
 
 		switch (nCol)
 		{
 		case XVAR_COL:
-			nSelVar = filter.nXVarIndex;
-			nVarExclude = filter.nYVarIndex;
+			nSelVar = matrix.nXVarIndex;
+			nVarExclude = matrix.nYVarIndex;
 			break;
 
 		case YVAR_COL:
-			nSelVar = filter.nYVarIndex;
-			nVarExclude = filter.nXVarIndex;
+			nSelVar = matrix.nYVarIndex;
+			nVarExclude = matrix.nXVarIndex;
 			break;
 
 		default:
@@ -680,7 +678,7 @@ void CEisenhowerSetupListCtrl::OnVariableComboCloseUp()
 	
 	if (GetCurSel(nRow, nCol))
 	{
-		FILTER& filter = m_aFilters[nRow];
+		MATRIX& matrix = m_aMatrices[nRow];
 
 		int nSelVar = m_cbVariables.GetCurSel();
 		int nVar = (int)m_cbVariables.GetItemData(nSelVar);
@@ -688,11 +686,11 @@ void CEisenhowerSetupListCtrl::OnVariableComboCloseUp()
 		switch (nCol)
 		{
 		case XVAR_COL:
-			filter.nXVarIndex = nVar;
+			matrix.nXVarIndex = nVar;
 			break;
 
 		case YVAR_COL:
-			filter.nYVarIndex = nVar;
+			matrix.nYVarIndex = nVar;
 			break;
 
 		default:
@@ -709,7 +707,7 @@ void CEisenhowerSetupListCtrl::OnVariableComboCloseUp()
 
 void CEisenhowerSetupListCtrl::OnCutoffComboCloseUp()
 {
-	SetSelectedFilterCutoff(CDialogHelper::GetSelectedItem(m_cbCutoffs));
+	SetSelectedMatrixCutoff(CDialogHelper::GetSelectedItem(m_cbCutoffs));
 	HideControl(m_cbCutoffs);
 }
 
@@ -719,9 +717,9 @@ void CEisenhowerSetupListCtrl::OnDateCutoffChange(NMHDR* pNMHDR, LPARAM* lResult
 	COleDateTime date;
 
 	if ((pNMDTC->dwFlags == GDT_NONE) || !m_dtcCutoffs.GetTime(date))
-		SetSelectedFilterCutoff(L"");
+		SetSelectedMatrixCutoff(L"");
 	else
-		SetSelectedFilterCutoff(Misc::Format((int)date.m_dt));
+		SetSelectedMatrixCutoff(Misc::Format((int)date.m_dt));
 
 	HideControl(m_dtcCutoffs);
 }
@@ -731,7 +729,7 @@ void CEisenhowerSetupListCtrl::OnTimeCutoffKillFocus()
 	CString sText;
 	m_tpCutoffs.GetWindowText(sText);
 
-	SetSelectedFilterCutoff(sText);
+	SetSelectedMatrixCutoff(sText);
 	HideControl(m_tpCutoffs);
 }
 
@@ -740,7 +738,7 @@ void CEisenhowerSetupListCtrl::OnEndEdit(UINT uIDCtrl, int* pResult)
 	CString sText;
 	CInputListCtrl::GetEditControl()->GetWindowText(sText);
 
-	SetSelectedFilterCutoff(sText);
+	SetSelectedMatrixCutoff(sText);
 }
 
 void CEisenhowerSetupListCtrl::OnCancelEdit()
@@ -754,7 +752,7 @@ void CEisenhowerSetupListCtrl::OnCancelEdit()
 	CInputListCtrl::OnCancelEdit();
 }
 
-BOOL CEisenhowerSetupListCtrl::SetSelectedFilterCutoff(const CString& sCutoff)
+BOOL CEisenhowerSetupListCtrl::SetSelectedMatrixCutoff(const CString& sCutoff)
 {
 	int nRow, nCol;
 
@@ -764,27 +762,27 @@ BOOL CEisenhowerSetupListCtrl::SetSelectedFilterCutoff(const CString& sCutoff)
 		return FALSE;
 	}
 
-	FILTER& filter = m_aFilters[nRow];
+	MATRIX& matrix = m_aMatrices[nRow];
 
 	switch (nCol)
 	{
 	case XCUTOFF_COL:
 		{
-			if (sCutoff == filter.sXCutoff)
+			if (sCutoff == matrix.sXCutoff)
 				return FALSE;
 
 			// else
-			filter.sXCutoff = sCutoff;
+			matrix.sXCutoff = sCutoff;
 		}
 		break;
 
 	case YCUTOFF_COL:
 		{
-			if (sCutoff == filter.sYCutoff)
+			if (sCutoff == matrix.sYCutoff)
 				return FALSE;
 
 			// else
-			filter.sYCutoff = sCutoff;
+			matrix.sYCutoff = sCutoff;
 		}
 		break;
 
@@ -1006,21 +1004,21 @@ void HostedEisenhowerSetupListCtrl::UpdateSize()
 
 void HostedEisenhowerSetupListCtrl::Initialise(ITransText* pTrans,
 											   const CArray<VARIABLE, VARIABLE&>& aVars,
-											   const CArray<FILTER, FILTER&>& aFilters)
+											   const CArray<MATRIX, MATRIX&>& aMatrices)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
 	if (pTrans && !CLocalizer::IsInitialized())
 		CLocalizer::Initialize(pTrans);
 
-	m_ListCtrl.Initialise(aVars, aFilters);
+	m_ListCtrl.Initialise(aVars, aMatrices);
 }
 
-int HostedEisenhowerSetupListCtrl::GetFilters(CArray<FILTER, FILTER&>& aFilters)
+int HostedEisenhowerSetupListCtrl::GetMatrices(CArray<MATRIX, MATRIX&>& aMatrices)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	return m_ListCtrl.GetFilters(aFilters);
+	return m_ListCtrl.GetMatrices(aMatrices);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1035,66 +1033,66 @@ HostedEisenhowerSetupListCtrl* ListCtrl(IntPtr ptr)
 
 // ------------------------------------------------
 
-EisenhowerFilterSetupListCtrl::EisenhowerFilterSetupListCtrl()
+EisenhowerMatrixSetupListCtrl::EisenhowerMatrixSetupListCtrl()
 	: 
 	m_Trans(nullptr),
-	m_Filters(nullptr),
+	m_Matrices(nullptr),
 	m_Vars(nullptr)
 {
 } 
 
-void EisenhowerFilterSetupListCtrl::Initialise(Translator^ trans,
+void EisenhowerMatrixSetupListCtrl::Initialise(Translator^ trans,
 											   EisenhowerVariables^ supportedVars,
-											   EisenhowerFilters^ filters)
+											   EisenhowerMatrices^ matrices)
 {
 	m_Trans = trans;
 	m_Vars = supportedVars;
-	m_Filters = filters;
+	m_Matrices = matrices;
 
 	CheckInitListCtrl();
 }
 
-EisenhowerFilters^ EisenhowerFilterSetupListCtrl::Filters::get()
+EisenhowerMatrices^ EisenhowerMatrixSetupListCtrl::Matrices::get()
 {
-	CheckUpdateFilters();
+	CheckUpdateMatrices();
 
-	return m_Filters;
+	return m_Matrices;
 }
 
-void EisenhowerFilterSetupListCtrl::CheckUpdateFilters()
+void EisenhowerMatrixSetupListCtrl::CheckUpdateMatrices()
 {
 	// Build on demand only
-	if (m_Filters == nullptr)
+	if (m_Matrices == nullptr)
 	{
-		// Get modified filters
-		m_Filters = gcnew EisenhowerFilters();
+		// Get modified matrices
+		m_Matrices = gcnew EisenhowerMatrices();
 
-		CArray<FILTER, FILTER&> aFilters;
-		int numFilters = ListCtrl(m_pMFCInfo)->GetFilters(aFilters);
+		CArray<MATRIX, MATRIX&> aMatrices;
+		int numMatrices = ListCtrl(m_pMFCInfo)->GetMatrices(aMatrices);
 
-		for (int f = 0; f < numFilters; f++)
+		for (int m = 0; m < numMatrices; m++)
 		{
-			const FILTER& filter = aFilters[f];
+			const MATRIX& matrix = aMatrices[m];
 
-			auto ef = gcnew EisenhowerFilter();
+			auto ef = gcnew EisenhowerMatrix();
 
-			if (filter.nXVarIndex != -1)
-				ef->XVariable = m_Vars[filter.nXVarIndex];
+			if (matrix.nXVarIndex != -1)
+				ef->XVariable = m_Vars[matrix.nXVarIndex];
 
-			if (filter.nYVarIndex != -1)
-				ef->YVariable = m_Vars[filter.nYVarIndex];
+			if (matrix.nYVarIndex != -1)
+				ef->YVariable = m_Vars[matrix.nYVarIndex];
 
-			ef->XCutoff = gcnew String(filter.sXCutoff);
-			ef->YCutoff = gcnew String(filter.sYCutoff);
+			ef->XCutoff = gcnew String(matrix.sXCutoff);
+			ef->YCutoff = gcnew String(matrix.sYCutoff);
 
-			m_Filters->Add(ef);
+			m_Matrices->Add(ef);
 		}
 	}
 }
 
 // ------------------------------------------------
 
-void EisenhowerFilterSetupListCtrl::OnHandleCreated(EventArgs^ e)
+void EisenhowerMatrixSetupListCtrl::OnHandleCreated(EventArgs^ e)
 {
 	Control::OnHandleCreated(e);
 
@@ -1102,11 +1100,11 @@ void EisenhowerFilterSetupListCtrl::OnHandleCreated(EventArgs^ e)
 	CheckInitListCtrl();
 }
 
-void EisenhowerFilterSetupListCtrl::OnHandleDestroyed(EventArgs^ e)
+void EisenhowerMatrixSetupListCtrl::OnHandleDestroyed(EventArgs^ e)
 {
 	if (m_pMFCInfo != IntPtr::Zero)
 	{
-		CheckUpdateFilters();
+		CheckUpdateMatrices();
 
 		// Clean up
 		ListCtrl(m_pMFCInfo)->Detach();
@@ -1116,7 +1114,7 @@ void EisenhowerFilterSetupListCtrl::OnHandleDestroyed(EventArgs^ e)
 	Control::OnHandleDestroyed(e);
 }
 
-void EisenhowerFilterSetupListCtrl::OnSizeChanged(EventArgs^ e)
+void EisenhowerMatrixSetupListCtrl::OnSizeChanged(EventArgs^ e)
 {
 	Control::OnSizeChanged(e);
 
@@ -1124,7 +1122,7 @@ void EisenhowerFilterSetupListCtrl::OnSizeChanged(EventArgs^ e)
 		ListCtrl(m_pMFCInfo)->UpdateSize();
 }
 
-bool EisenhowerFilterSetupListCtrl::PreProcessMessage(Message% m)
+bool EisenhowerMatrixSetupListCtrl::PreProcessMessage(Message% m)
 {
 	if (m_pMFCInfo != IntPtr::Zero)
 	{
@@ -1145,7 +1143,7 @@ bool EisenhowerFilterSetupListCtrl::PreProcessMessage(Message% m)
 	return Control::PreProcessMessage(m);
 }
 
-void EisenhowerFilterSetupListCtrl::WndProc(Message% m)
+void EisenhowerMatrixSetupListCtrl::WndProc(Message% m)
 {
 	Control::WndProc(m);
 
@@ -1155,7 +1153,7 @@ void EisenhowerFilterSetupListCtrl::WndProc(Message% m)
 	// C# case statements must be const
 	if (m.Msg == WM_ESLCN_EDITCHANGE)
 	{
-		m_Filters = nullptr;
+		m_Matrices = nullptr;
 		ChangeEvent(this, gcnew EventArgs());
 
 		return;
@@ -1177,11 +1175,11 @@ void EisenhowerFilterSetupListCtrl::WndProc(Message% m)
 	}
 }
 
-void EisenhowerFilterSetupListCtrl::CheckInitListCtrl()
+void EisenhowerMatrixSetupListCtrl::CheckInitListCtrl()
 {
 	if ((m_pMFCInfo != IntPtr::Zero) &&
 		(m_Vars != nullptr)	&&
-		(m_Filters != nullptr))
+		(m_Matrices != nullptr))
 	{
 		// Convert managed arrays to MFC equivalents
 		CArray<VARIABLE, VARIABLE&> aVars;
@@ -1202,30 +1200,30 @@ void EisenhowerFilterSetupListCtrl::CheckInitListCtrl()
 			aVars.Add(var);
 		}
 
-		CArray<FILTER, FILTER&> aFilters;
+		CArray<MATRIX, MATRIX&> aMatrices;
 
-		for each (EisenhowerFilter^ ef in m_Filters)
+		for each (EisenhowerMatrix^ ef in m_Matrices)
 		{
-			FILTER filter;
+			MATRIX matrix;
 
 			if (ef->XVariable == nullptr)
-				filter.nXVarIndex = -1;
+				matrix.nXVarIndex = -1;
 			else
-				filter.nXVarIndex = m_Vars->IndexOf(ef->XVariable);
+				matrix.nXVarIndex = m_Vars->IndexOf(ef->XVariable);
 
 			if (ef->YVariable == nullptr)
-				filter.nYVarIndex = -1;
+				matrix.nYVarIndex = -1;
 			else
-				filter.nYVarIndex = m_Vars->IndexOf(ef->YVariable);
+				matrix.nYVarIndex = m_Vars->IndexOf(ef->YVariable);
 
-			filter.sXCutoff = MarshalledString(ef->XCutoff);
-			filter.sYCutoff = MarshalledString(ef->YCutoff);
+			matrix.sXCutoff = MarshalledString(ef->XCutoff);
+			matrix.sYCutoff = MarshalledString(ef->YCutoff);
 
-			aFilters.Add(filter);
+			aMatrices.Add(matrix);
 		}
 
 		ListCtrl(m_pMFCInfo)->Initialise(m_Trans->GetITransText(),
 										 aVars, 
-										 aFilters);
+										 aMatrices);
 	}
 }

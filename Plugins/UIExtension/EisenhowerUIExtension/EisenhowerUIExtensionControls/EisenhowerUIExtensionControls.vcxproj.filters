@@ -24,7 +24,7 @@
     <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="EisenhowerFilterSetupListCtrl.h">
+    <ClInclude Include="EisenhowerMatrixSetupListCtrl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -32,7 +32,7 @@
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="EisenhowerFilterSetupListCtrl.cpp">
+    <ClCompile Include="EisenhowerMatrixSetupListCtrl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

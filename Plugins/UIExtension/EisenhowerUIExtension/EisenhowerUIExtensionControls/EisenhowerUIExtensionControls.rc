@@ -95,7 +95,7 @@ BEGIN
     IDS_IMPORTANCE_HEADER   "Importance"
     IDS_VARIABLE_HEADER     "Variable"
     IDS_CUTOFF_HEADER       "Cutoff"
-    IDS_FILTERROW_PROMPT    "<new filter>"
+    IDS_MATRIXROW_PROMPT    "<new matrix>"
     IDS_BOOLCUTOFF_PROMPT   "True/False"
     IDS_UNDEFINEDVAR_PROMPT "Undefined"
     IDS_DEFCUTOFF_PROMPT    "<data midpoint>"

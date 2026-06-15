@@ -30,9 +30,9 @@ namespace EisenhowerUIExtension
 
 	///////////////////////////////////////////////////////////////////
 
-	struct FILTER
+	struct MATRIX
 	{
-		FILTER();
+		MATRIX();
 
 		BOOL IsValid() const;
 
@@ -48,9 +48,9 @@ namespace EisenhowerUIExtension
 		CEisenhowerSetupListCtrl();
 
 		void Initialise(const CArray<VARIABLE, VARIABLE&>& aVars,
-						const CArray<FILTER, FILTER&>& aFilters);
+						const CArray<MATRIX, MATRIX&>& aMatrices);
 
-		int GetFilters(CArray<FILTER, FILTER&>& filters) const;
+		int GetMatrices(CArray<MATRIX, MATRIX&>& aMatrices) const;
 
 		BOOL PreTranslateMessage(MSG* pMsg);
 
@@ -61,7 +61,7 @@ namespace EisenhowerUIExtension
 		CTimeEdit m_tpCutoffs;
 
 		CArray<VARIABLE, VARIABLE&> m_aVariables;
-		CArray<FILTER, FILTER&> m_aFilters;
+		CArray<MATRIX, MATRIX&> m_aMatrices;
 
 	protected:
 		afx_msg void OnVariableComboCloseUp();
@@ -103,7 +103,7 @@ namespace EisenhowerUIExtension
 		BOOL UpdateCellText(int nRow, int nCol);
 		CString FormatCellText(int nRow, int nCol, int nVar, const CString& sCutoff) const;
 		int AddRow();
-		BOOL SetSelectedFilterCutoff(const CString& sCutoff);
+		BOOL SetSelectedMatrixCutoff(const CString& sCutoff);
 	};
 
 	///////////////////////////////////////////////////////////////////
@@ -114,10 +114,10 @@ namespace EisenhowerUIExtension
 		static HostedEisenhowerSetupListCtrl* Attach(HWND hwndParent, HFONT hFont);
 
 		void Initialise(ITransText* pTrans,
-						const CArray<VARIABLE, VARIABLE&>& vars,
-						const CArray<FILTER, FILTER&>& filters);
+						const CArray<VARIABLE, VARIABLE&>& aVars,
+						const CArray<MATRIX, MATRIX&>& aMatrices);
 
-		int GetFilters(CArray<FILTER, FILTER&>& filters);
+		int GetMatrices(CArray<MATRIX, MATRIX&>& aMatrices);
 
 		void Detach();
 		void SetFocus();
@@ -135,16 +135,16 @@ namespace EisenhowerUIExtension
 
 	///////////////////////////////////////////////////////////////////
 
-	public ref class EisenhowerFilterSetupListCtrl : Windows::Forms::Control
+	public ref class EisenhowerMatrixSetupListCtrl : Windows::Forms::Control
 	{
 	public:
-		EisenhowerFilterSetupListCtrl();
+		EisenhowerMatrixSetupListCtrl();
 
 		void Initialise(Translator^ trans,
 						EisenhowerVariables^ vars,
-						EisenhowerFilters^ filters);
+						EisenhowerMatrices^ matrices);
 
-		property EisenhowerFilters^ Filters { EisenhowerFilters^ get(); }
+		property EisenhowerMatrices^ Matrices { EisenhowerMatrices^ get(); }
 
 		event System::EventHandler^ ChangeEvent;
 
@@ -155,7 +155,7 @@ namespace EisenhowerUIExtension
 		Translator^ m_Trans;
 
 		EisenhowerVariables^ m_Vars;
-		EisenhowerFilters^ m_Filters;
+		EisenhowerMatrices^ m_Matrices;
 
 	protected:
 		void WndProc(Windows::Forms::Message% m) override;
@@ -166,7 +166,7 @@ namespace EisenhowerUIExtension
 
 	protected:
 		void CheckInitListCtrl();
-		void CheckUpdateFilters();
+		void CheckUpdateMatrices();
 	};
 
 }

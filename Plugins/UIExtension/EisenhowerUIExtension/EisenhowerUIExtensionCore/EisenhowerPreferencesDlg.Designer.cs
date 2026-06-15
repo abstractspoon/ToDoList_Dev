@@ -32,7 +32,7 @@
 			this.m_OK = new System.Windows.Forms.Button();
 			this.m_Cancel = new System.Windows.Forms.Button();
 			this.m_Error = new System.Windows.Forms.Label();
-			this.m_SetupListCtrl = new EisenhowerUIExtension.EisenhowerFilterSetupListCtrl();
+			this.m_SetupListCtrl = new EisenhowerUIExtension.EisenhowerMatrixSetupListCtrl();
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
 			this.SuspendLayout();
 			// 
@@ -61,7 +61,7 @@
 			// m_Error
 			// 
 			this.m_Error.ForeColor = System.Drawing.Color.Red;
-			this.m_Error.Location = new System.Drawing.Point(7, 242);
+			this.m_Error.Location = new System.Drawing.Point(7, 249);
 			this.m_Error.Name = "m_Error";
 			this.m_Error.Size = new System.Drawing.Size(325, 38);
 			this.m_Error.TabIndex = 2;
@@ -87,7 +87,7 @@
 			this.groupBox1.Size = new System.Drawing.Size(484, 241);
 			this.groupBox1.TabIndex = 24;
 			this.groupBox1.TabStop = false;
-			this.groupBox1.Text = "Variable Pairing Setup";
+			this.groupBox1.Text = "Matrix Setup";
 			// 
 			// EisenhowerPreferencesDlg
 			// 
@@ -111,7 +111,7 @@
 
 		#endregion
 
-		private EisenhowerUIExtension.EisenhowerFilterSetupListCtrl m_SetupListCtrl;
+		private EisenhowerUIExtension.EisenhowerMatrixSetupListCtrl m_SetupListCtrl;
 		private System.Windows.Forms.Button m_OK;
 		private System.Windows.Forms.Button m_Cancel;
 		private System.Windows.Forms.Label m_Error;

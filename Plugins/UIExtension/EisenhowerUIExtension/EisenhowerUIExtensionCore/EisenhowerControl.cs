@@ -35,7 +35,7 @@ namespace EisenhowerUIExtension
 
 		// local
 		private EisenhowerTasks m_Tasks;
-		private EisenhowerFilter m_Filter;
+		private EisenhowerMatrix m_Matrix;
 		private bool m_DraggingHorzSplitBar, m_DraggingVertSplitBar;
 		private DragImage m_DragImage;
 		private Point m_SplitPos;
@@ -64,7 +64,7 @@ namespace EisenhowerUIExtension
 			m_Panes = new List<EisenhowerPane>() { m_TopLeftPane, m_TopRightPane, m_BottomLeftPane, m_BottomRightPane };
 			m_SplitPos = new Point(50, 50); // 0-100
 			m_ParentCalculatedValues = new HashSet<Task.Attribute>();
-			m_Filter = EisenhowerFilter.Null;
+			m_Matrix = EisenhowerMatrix.Null;
 		}
 
 		public void Initialize(EisenhowerTasks tasks, Translator trans, UIExtension.TaskIcon icons)
@@ -97,19 +97,19 @@ namespace EisenhowerUIExtension
 			});
 		}
 
-		public void SetFilter(EisenhowerFilter filter)
+		public void SetMatrix(EisenhowerMatrix matrix)
 		{
-			m_Filter = filter;
+			m_Matrix = matrix;
 
-			var xHighVar = new EisenhowerPaneFilterVariable(filter.XVariable, EisenhowerPaneFilterVariable.ValueRange.High, filter.XCutoffValue);
-			var xLowVar  = new EisenhowerPaneFilterVariable(filter.XVariable, EisenhowerPaneFilterVariable.ValueRange.Low, filter.XCutoffValue);
-			var yHighVar = new EisenhowerPaneFilterVariable(filter.YVariable, EisenhowerPaneFilterVariable.ValueRange.High, filter.YCutoffValue);
-			var yLowVar  = new EisenhowerPaneFilterVariable(filter.YVariable, EisenhowerPaneFilterVariable.ValueRange.Low, filter.YCutoffValue);
+			var xHighVar = new EisenhowerPaneMatrixVariable(matrix.XVariable, EisenhowerPaneMatrixVariable.ValueRange.High, matrix.XCutoffValue);
+			var xLowVar  = new EisenhowerPaneMatrixVariable(matrix.XVariable, EisenhowerPaneMatrixVariable.ValueRange.Low, matrix.XCutoffValue);
+			var yHighVar = new EisenhowerPaneMatrixVariable(matrix.YVariable, EisenhowerPaneMatrixVariable.ValueRange.High, matrix.YCutoffValue);
+			var yLowVar  = new EisenhowerPaneMatrixVariable(matrix.YVariable, EisenhowerPaneMatrixVariable.ValueRange.Low, matrix.YCutoffValue);
 
-			m_TopLeftPane.SetFilter(xHighVar, yHighVar);
-			m_TopRightPane.SetFilter(xLowVar, yHighVar);
-			m_BottomLeftPane.SetFilter(xHighVar, yLowVar);
-			m_BottomRightPane.SetFilter(xLowVar, yLowVar);
+			m_TopLeftPane.SetMatrix(xHighVar, yHighVar);
+			m_TopRightPane.SetMatrix(xLowVar, yHighVar);
+			m_BottomLeftPane.SetMatrix(xHighVar, yLowVar);
+			m_BottomRightPane.SetMatrix(xLowVar, yLowVar);
 		}
 
 		public void SetUITheme(UITheme theme)
@@ -189,11 +189,11 @@ namespace EisenhowerUIExtension
 			if (pane == null)
 				pane = m_Panes[0];
 
-			if (pane.Filter != null)
+			if (pane.Matrix != null)
 			{
 				// TODO
-				task.SetPriority((byte)pane.Filter.XVariable.Cutoff);
-				task.SetRisk((byte)pane.Filter.XVariable.Cutoff);
+				task.SetPriority((byte)pane.Matrix.XVariable.Cutoff);
+				task.SetRisk((byte)pane.Matrix.XVariable.Cutoff);
 			}
 
 			return true;
@@ -274,7 +274,7 @@ namespace EisenhowerUIExtension
 			case UIExtension.UpdateType.Edit:
 			case UIExtension.UpdateType.New:
 			case UIExtension.UpdateType.Delete:
-				m_Panes.ForEach(p => p.RefilterTasks(taskIds));
+				m_Panes.ForEach(p => p.UpdateTasks(taskIds));
 				break;
 			}
 		}
@@ -500,8 +500,8 @@ namespace EisenhowerUIExtension
 			if (task.IsParent)
 			{
 				// Disallow dragging of parent tasks both of whose values are calculated
-				if (HasParentCalculatedValues(m_Filter.XVariable.Attribute.AttributeId) &&
-					HasParentCalculatedValues(m_Filter.YVariable.Attribute.AttributeId))
+				if (HasParentCalculatedValues(m_Matrix.XVariable.Attribute.AttributeId) &&
+					HasParentCalculatedValues(m_Matrix.YVariable.Attribute.AttributeId))
 				{
 					return false;
 				}
@@ -765,13 +765,13 @@ namespace EisenhowerUIExtension
 				return false;
 
 			// Disallow changing panes on a readonly variable
-			if (src.Filter.XVariable.ReadOnly && 
-				(src.Filter.XVariable.Range != dest.Filter.XVariable.Range))
+			if (src.Matrix.XVariable.ReadOnly && 
+				(src.Matrix.XVariable.Range != dest.Matrix.XVariable.Range))
 			{
 				return false;
 			}
-			else if (src.Filter.YVariable.ReadOnly &&
-					(src.Filter.YVariable.Range != dest.Filter.YVariable.Range))
+			else if (src.Matrix.YVariable.ReadOnly &&
+					(src.Matrix.YVariable.Range != dest.Matrix.YVariable.Range))
 			{
 				return false;
 			}
@@ -828,28 +828,28 @@ namespace EisenhowerUIExtension
 				// Weed out any non-droppable tasks
 				attribChangeArgs.TaskIds.RemoveAll(id => !IsTaskDroppable(m_Tasks.GetItem(id), srcPane, destPane));
 
-				var srcXRange = srcPane.Filter.XVariable.Range;
-				var srcYRange = srcPane.Filter.YVariable.Range;
-				var destXRange = destPane.Filter.XVariable.Range;
-				var destYRange = destPane.Filter.YVariable.Range;
+				var srcXRange = srcPane.Matrix.XVariable.Range;
+				var srcYRange = srcPane.Matrix.YVariable.Range;
+				var destXRange = destPane.Matrix.XVariable.Range;
+				var destYRange = destPane.Matrix.YVariable.Range;
 
 				if (destXRange != srcXRange)
 				{
-					attribChangeArgs.XAttrib = destPane.Filter.XVariable;
-					attribChangeArgs.XValue = destPane.Filter.XVariable.Cutoff;
+					attribChangeArgs.XAttrib = destPane.Matrix.XVariable;
+					attribChangeArgs.XValue = destPane.Matrix.XVariable.Cutoff;
 
 					// TODO
-					if (destXRange == EisenhowerPaneFilterVariable.ValueRange.High)
+					if (destXRange == EisenhowerPaneMatrixVariable.ValueRange.High)
 						attribChangeArgs.XValue++;
 				}
 
 				if (destYRange != srcYRange)
 				{
-					attribChangeArgs.YAttrib = destPane.Filter.YVariable;
-					attribChangeArgs.YValue = destPane.Filter.YVariable.Cutoff;
+					attribChangeArgs.YAttrib = destPane.Matrix.YVariable;
+					attribChangeArgs.YValue = destPane.Matrix.YVariable.Cutoff;
 
 					// TODO
-					if (destYRange == EisenhowerPaneFilterVariable.ValueRange.High)
+					if (destYRange == EisenhowerPaneMatrixVariable.ValueRange.High)
 						attribChangeArgs.YValue++;
 				}
 
@@ -870,8 +870,8 @@ namespace EisenhowerUIExtension
 							task.SetAttributeValue(attribChangeArgs.YAttrib, attribChangeArgs.YValue);
 					}
 
-					srcPane.RefilterTasks(attribChangeArgs.TaskIds);
-					destPane.RefilterTasks(attribChangeArgs.TaskIds);
+					srcPane.UpdateTasks(attribChangeArgs.TaskIds);
+					destPane.UpdateTasks(attribChangeArgs.TaskIds);
 
 					SelectTasks(attribChangeArgs.TaskIds);
 					destPane.Focus();
@@ -887,14 +887,14 @@ namespace EisenhowerUIExtension
 			if (task.IsParent)
 			{
 				// Disallow changing calculated parent values
-				if (HasParentCalculatedValues(m_Filter.XVariable.Attribute.AttributeId) &&
-					(destPane.Filter.XVariable.Range != srcPane.Filter.XVariable.Range))
+				if (HasParentCalculatedValues(m_Matrix.XVariable.Attribute.AttributeId) &&
+					(destPane.Matrix.XVariable.Range != srcPane.Matrix.XVariable.Range))
 				{
 					return false;
 				}
 
-				if (HasParentCalculatedValues(m_Filter.YVariable.Attribute.AttributeId) &&
-					(destPane.Filter.YVariable.Range != srcPane.Filter.YVariable.Range))
+				if (HasParentCalculatedValues(m_Matrix.YVariable.Attribute.AttributeId) &&
+					(destPane.Matrix.YVariable.Range != srcPane.Matrix.YVariable.Range))
 				{
 					return false;
 				}

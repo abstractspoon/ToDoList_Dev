@@ -19,31 +19,31 @@ namespace EisenhowerUIExtension
 		// ---------------------------------------------
 
 		public EisenhowerVariables Variables { get; private set; }
-		public EisenhowerFilters Filters { get; private set; }
+		public EisenhowerMatrices Matrices { get; private set; }
 
 		// ---------------------------------------------
 
 		public EisenhowerPreferencesDlg(Translator trans,
 										EisenhowerVariables variables,
-										EisenhowerFilters filters)
+										EisenhowerMatrices matrices)
 		{
 			m_Trans = trans;
 
 			Variables = variables;
-			Filters = filters;
+			Matrices = matrices;
 
 			InitializeComponent();
 
-			m_SetupListCtrl.ChangeEvent += (s, e) => OnFilterSetupChange(e);
+			m_SetupListCtrl.ChangeEvent += (s, e) => OnMatrixSetupChange(e);
 			m_Error.ForeColor = DrawingColor.GetErrorLabelTextColor(BackColor);
 		}
 
 		public new DialogResult ShowDialog()
 		{
-			// Note: just because we prevent invalid filters
+			// Note: just because we prevent invalid matrices
 			// within this dialog, there's no guarantee that
 			// they're valid on receipt
-			bool valid = (Filters.Find(f => f.HasNullVar) == null);
+			bool valid = (Matrices.Find(f => f.HasNullVar) == null);
 
 			m_OK.Enabled = valid;
 			m_Error.Visible = !valid;
@@ -51,11 +51,11 @@ namespace EisenhowerUIExtension
 			if (base.ShowDialog() == DialogResult.OK)
 			{
 				// Only return OK if there have been modifications
-				var filters = m_SetupListCtrl.Filters;
+				var matrices = m_SetupListCtrl.Matrices;
 
-				if (!filters.Equals(Filters))
+				if (!matrices.Equals(Matrices))
 				{
-					Filters = filters;
+					Matrices = matrices;
 					return DialogResult.OK;
 				}
 			}
@@ -66,10 +66,10 @@ namespace EisenhowerUIExtension
 
 		// ------------------------------------------------------
 
-		protected void OnFilterSetupChange(EventArgs e)
+		protected void OnMatrixSetupChange(EventArgs e)
 		{
-			// Only allow closing if all filters are valid
-			bool valid = (m_SetupListCtrl.Filters.Find(f => f.HasNullVar) == null);
+			// Only allow closing if all matrices are valid
+			bool valid = (m_SetupListCtrl.Matrices.Find(m => m.HasNullVar) == null);
 
 			m_OK.Enabled = valid;
 			m_Error.Visible = !valid;
@@ -79,7 +79,7 @@ namespace EisenhowerUIExtension
 		{
 			base.OnHandleCreated(e);
 
-			m_SetupListCtrl.Initialise(m_Trans, Variables, Filters);
+			m_SetupListCtrl.Initialise(m_Trans, Variables, Matrices);
 		}
 	}
 }

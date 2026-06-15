@@ -48,7 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="EisenhowerData.cs" />
-    <Compile Include="EisenhowerFilter.cs" />
+    <Compile Include="EisenhowerMatrix.cs" />
     <Compile Include="TaskItem.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>

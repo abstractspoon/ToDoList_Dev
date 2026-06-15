@@ -24,12 +24,12 @@ namespace EisenhowerUIExtension
 		private Translator m_Trans;
 
 		private EisenhowerData m_Data;
-		private EisenhowerFilters m_Filters;
+		private EisenhowerMatrices m_Matrices;
 		private UIExtension.TaskIcon m_TaskIcons;
 		private Font m_ControlsFont;
 
-		private string m_PrevFilters;
-		private string m_PrevSelFilter;
+		private string m_PrevMatrices;
+		private string m_PrevSelMatrix;
 
 		// ------------------------------------------------
 
@@ -45,7 +45,7 @@ namespace EisenhowerUIExtension
 			m_ControlsFont = new Font(FontName, 8, FontStyle.Regular);
 			m_TaskIcons = new UIExtension.TaskIcon(parentHandle);
 			m_Data = new EisenhowerData(trans);
-			m_Filters = new EisenhowerFilters();
+			m_Matrices = new EisenhowerMatrices();
 
 			m_EisenhowerCtrl.Initialize(m_Data.Tasks, trans, m_TaskIcons);
 
@@ -55,9 +55,9 @@ namespace EisenhowerUIExtension
 			m_EisenhowerCtrl.SelectionChange += new SelectionChangeEventHandler(OnEisenhowerCtrlSelectionChange);
 			m_EisenhowerCtrl.AttributeChange += new AttributeChangeEventHandler(OnEisenhowerCtrlAttributeChange);
 
-			EnableFilterComboEvents(true);
 
 			FormsUtil.SetFont(this, m_ControlsFont);
+			EnableMatrixComboEvents(true);
 		}
 
 		public void UpdateTasks(TaskList tasks, UIExtension.UpdateType type)
@@ -80,7 +80,7 @@ namespace EisenhowerUIExtension
 			// 
 			var result = m_Data.Update(tasks, type);
 
-			if (!InitialiseFilters() && !UpdateFilters(result))
+			if (!InitialiseMatrices() && !UpdateMatrices(result))
 			{
 				// In-place update
 				m_EisenhowerCtrl.OnUpdateTasks(type, result.ModifiedTaskIds);
@@ -190,7 +190,7 @@ namespace EisenhowerUIExtension
 
 			m_EisenhowerCtrl.SetUITheme(theme);
 
-			m_FilterLabel.ForeColor = theme.GetAppDrawingColor(UITheme.AppColor.AppText);
+			m_MatricesLabel.ForeColor = theme.GetAppDrawingColor(UITheme.AppColor.AppText);
 		}
 
 		public void SetTaskFont(String faceName, int pointSize)
@@ -205,8 +205,8 @@ namespace EisenhowerUIExtension
 
 		public void SavePreferences(Preferences prefs, String key)
 		{
-			prefs.WriteProfileString(key, "Filters", m_Filters.ToString());
-			prefs.WriteProfileString(key, "SelFilter", m_FilterCombo.SelectedFilter?.Id);
+			prefs.WriteProfileString(key, "Matrices", m_Matrices.ToString());
+			prefs.WriteProfileString(key, "SelMatrix", m_MatrixCombo.SelectedMatrix?.Id);
 
 			m_EisenhowerCtrl.SavePreferences(prefs, key);
 		}
@@ -217,9 +217,9 @@ namespace EisenhowerUIExtension
 
 			if (!appOnly)
 			{
-				// Load prior filters
-				m_PrevSelFilter = prefs.GetProfileString(key, "SelFilter", "");
-				m_PrevFilters = prefs.GetProfileString(key, "Filters", "");
+				// Load prior matrices
+				m_PrevSelMatrix = prefs.GetProfileString(key, "SelMatrix", "");
+				m_PrevMatrices = prefs.GetProfileString(key, "Matrices", "");
 			}
 
 			m_EisenhowerCtrl.LoadPreferences(prefs, key, appOnly);
@@ -235,13 +235,13 @@ namespace EisenhowerUIExtension
 
 				if (m_Data.Tasks.Count > 0)
 				{
-					var xVarAttribId = SelectedFilter.XVariable.Attribute.AttributeId;
-					var yVarAttribId = SelectedFilter.YVariable.Attribute.AttributeId;
+					var xVarAttribId = SelectedMatrix.XVariable.Attribute.AttributeId;
+					var yVarAttribId = SelectedMatrix.YVariable.Attribute.AttributeId;
 
-					if ((string.IsNullOrEmpty(SelectedFilter.XCutoff) &&
+					if ((string.IsNullOrEmpty(SelectedMatrix.XCutoff) &&
 						((xVarAttribId == Task.Attribute.Priority) ||
 						 (xVarAttribId == Task.Attribute.Risk))) ||
-						(string.IsNullOrEmpty(SelectedFilter.YCutoff) &&
+						(string.IsNullOrEmpty(SelectedMatrix.YCutoff) &&
 						((yVarAttribId == Task.Attribute.Priority) ||
 						 (yVarAttribId == Task.Attribute.Risk))))
 					{
@@ -251,15 +251,15 @@ namespace EisenhowerUIExtension
 			}
 		}
 
-		private bool InitialiseFilters()
+		private bool InitialiseMatrices()
 		{
-			if (m_PrevFilters == null)
+			if (m_PrevMatrices == null)
 				return false;
 
-			if (m_Filters.FromString(m_PrevFilters, m_Data.Variables) == 0)
+			if (m_Matrices.FromString(m_PrevMatrices, m_Data.Variables) == 0)
 			{
-				// Default filters
-				m_Filters.Add(new EisenhowerFilter()
+				// Default matrices
+				m_Matrices.Add(new EisenhowerMatrix()
 				{
 					XVariable = m_Data.Variables.Find(Task.Attribute.Priority),
 					YVariable = m_Data.Variables.Find(Task.Attribute.Risk),
@@ -267,7 +267,7 @@ namespace EisenhowerUIExtension
 					YCutoff = "5"
 				});
 
-				m_Filters.Add(new EisenhowerFilter()
+				m_Matrices.Add(new EisenhowerMatrix()
 				{
 					XVariable = m_Data.Variables.Find(Task.Attribute.Risk),
 					YVariable = m_Data.Variables.Find(Task.Attribute.Priority),
@@ -276,26 +276,26 @@ namespace EisenhowerUIExtension
 				});
 			}
 
-			m_PrevFilters = null;
+			m_PrevMatrices = null;
 
-			m_FilterCombo.Populate(m_Filters, m_Trans);
-			m_FilterCombo.SelectedFilter = m_Filters.FirstOrNull;
+			m_MatrixCombo.Populate(m_Matrices, m_Trans);
+			m_MatrixCombo.SelectedMatrix = m_Matrices.FirstOrNull;
 
-			m_EisenhowerCtrl.SetFilter(m_Filters.FirstOrNull);
+			m_EisenhowerCtrl.SetMatrix(m_Matrices.FirstOrNull);
 
 			return true;
 		}
 
-		private bool UpdateFilters(UpdateResult res)
+		private bool UpdateMatrices(UpdateResult res)
 		{
-			var selFilter = m_FilterCombo.SelectedFilter;
+			var selMatrix = m_MatrixCombo.SelectedMatrix;
 
-			m_FilterCombo.Populate(m_Filters, m_Trans);
+			m_MatrixCombo.Populate(m_Matrices, m_Trans);
 
-			var xUpdatedVar = m_Data.Variables.Find(selFilter.XVariable);
-			var yUpdatedVar = m_Data.Variables.Find(selFilter.YVariable);
+			var xUpdatedVar = m_Data.Variables.Find(selMatrix.XVariable);
+			var yUpdatedVar = m_Data.Variables.Find(selMatrix.YVariable);
 
-			if (selFilter != null)
+			if (selMatrix != null)
 			{
 				if (!res.ModifiedVariables.Contains(xUpdatedVar) &&
 					!res.ModifiedVariables.Contains(yUpdatedVar))
@@ -307,15 +307,15 @@ namespace EisenhowerUIExtension
 			}
 			else
 			{
-				// If the existing filter variables have been removed
+				// If the existing matrix variables have been removed
 				// then we need to revert to known types
 				if ((xUpdatedVar == null) || (yUpdatedVar == null))
 				{
-					selFilter = m_Filters.FirstOrNull;
+					selMatrix = m_Matrices.FirstOrNull;
 				}
 				else if (xUpdatedVar == null)
 				{
-					selFilter = new EisenhowerFilter()
+					selMatrix = new EisenhowerMatrix()
 					{
 						XVariable = EisenhowerVariable.Null,
 						YVariable = yUpdatedVar
@@ -325,7 +325,7 @@ namespace EisenhowerUIExtension
 				{
 					Debug.Assert(yUpdatedVar == null);
 
-					selFilter = new EisenhowerFilter()
+					selMatrix = new EisenhowerMatrix()
 					{
 						XVariable = yUpdatedVar,
 						YVariable = EisenhowerVariable.Null
@@ -333,7 +333,7 @@ namespace EisenhowerUIExtension
 				}
 			}
 
-			m_EisenhowerCtrl.SetFilter(selFilter);
+			m_EisenhowerCtrl.SetMatrix(selMatrix);
 			return true;
 		}
 
@@ -469,20 +469,20 @@ namespace EisenhowerUIExtension
 			}
 		}
 
-		private void EnableFilterComboEvents(bool enable)
+		private void EnableMatrixComboEvents(bool enable)
 		{
 			if (enable)
-				m_FilterCombo.SelectedIndexChanged += new EventHandler(OnFilterComboSelectionChange);
+				m_MatrixCombo.SelectedIndexChanged += new EventHandler(OnMatrixComboSelectionChange);
 			else
-				m_FilterCombo.SelectedIndexChanged -= new EventHandler(OnFilterComboSelectionChange);
+				m_MatrixCombo.SelectedIndexChanged -= new EventHandler(OnMatrixComboSelectionChange);
 		}
 
-		private void OnFilterComboSelectionChange(object sender, EventArgs e)
+		private void OnMatrixComboSelectionChange(object sender, EventArgs e)
 		{
-			// Update filter
+			// Update matrix
 			var selTaskIds = m_EisenhowerCtrl.SelectedTaskIds;
 
-			m_EisenhowerCtrl.SetFilter(m_FilterCombo.SelectedFilter);
+			m_EisenhowerCtrl.SetMatrix(m_MatrixCombo.SelectedMatrix);
 			m_EisenhowerCtrl.SelectTasks(selTaskIds);
 			m_EisenhowerCtrl.Focus();
 
@@ -494,31 +494,31 @@ namespace EisenhowerUIExtension
 			// TODO
 		}
 
-		private EisenhowerFilter SelectedFilter
+		private EisenhowerMatrix SelectedMatrix
 		{
-			get { return m_FilterCombo.SelectedFilter; }
+			get { return m_MatrixCombo.SelectedMatrix; }
 		}
 
 		private void OnPreferences(object sender, EventArgs e)
 		{
-			var prevSelFilter = SelectedFilter;
+			var prevSelMatrix = SelectedMatrix;
 
-			var dlg = new EisenhowerPreferencesDlg(m_Trans, m_Data.Variables, m_Filters);
+			var dlg = new EisenhowerPreferencesDlg(m_Trans, m_Data.Variables, m_Matrices);
 
 			if (dlg.ShowDialog() == DialogResult.OK)
 			{
-				EnableFilterComboEvents(true);
+				EnableMatrixComboEvents(true);
 
-				m_Filters = dlg.Filters;
-				m_FilterCombo.Populate(m_Filters, m_Trans);
+				m_Matrices = dlg.Matrices;
+				m_MatrixCombo.Populate(m_Matrices, m_Trans);
 
-				var newSelFilter = (SelectedFilter ?? m_Filters.FirstOrNull ?? EisenhowerFilter.Null);
+				var newSelMatrix = (SelectedMatrix ?? m_Matrices.FirstOrNull ?? EisenhowerMatrix.Null);
 
-				if (!newSelFilter.Equals(prevSelFilter))
-					m_EisenhowerCtrl.SetFilter(newSelFilter);
+				if (!newSelMatrix.Equals(prevSelMatrix))
+					m_EisenhowerCtrl.SetMatrix(newSelMatrix);
 
-				m_FilterCombo.SelectedFilter = newSelFilter;
-				EnableFilterComboEvents(false);
+				m_MatrixCombo.SelectedMatrix = newSelMatrix;
+				EnableMatrixComboEvents(false);
 			}
 		}
 	}
