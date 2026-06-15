@@ -17,6 +17,10 @@ namespace EisenhowerUIExtension
 
 	public class EisenhowerData
 	{
+		private int m_NumPriorityRiskLevels = 11; // 0-10
+
+		// -----------------------------------------
+
 		public EisenhowerTasks Tasks { get; private set; }
 		public EisenhowerVariables Variables { get; private set; }
 
@@ -24,6 +28,22 @@ namespace EisenhowerUIExtension
 		{
 			get { return Tasks.WorkingWeek; }
 			set { Tasks.WorkingWeek = value; }
+		}
+
+		public int NumPriorityRiskLevels
+		{
+			get { return m_NumPriorityRiskLevels; }
+
+			set
+			{
+				if (value != m_NumPriorityRiskLevels)
+				{
+					m_NumPriorityRiskLevels = value;
+
+					UpdateAttributeValueRange(Variables.Find(Task.Attribute.Priority));
+					UpdateAttributeValueRange(Variables.Find(Task.Attribute.Risk));
+				}
+			}
 		}
 
 		// -----------------------------------------
@@ -64,11 +84,8 @@ namespace EisenhowerUIExtension
 			case Task.Attribute.Priority:
 			case Task.Attribute.Risk:
 				{
-					minVal = -2;
-
-					// Adjust max val to match user-defined number of levels
-					// TODO
-					maxVal = 10;
+					minVal = 0;
+					maxVal = (m_NumPriorityRiskLevels - 1);
 				}
 				break;
 

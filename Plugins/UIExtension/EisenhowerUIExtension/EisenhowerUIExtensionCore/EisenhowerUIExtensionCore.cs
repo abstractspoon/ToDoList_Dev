@@ -223,6 +223,32 @@ namespace EisenhowerUIExtension
 			}
 
 			m_EisenhowerCtrl.LoadPreferences(prefs, key, appOnly);
+
+			SetPriorityRiskLevels(prefs.GetProfileInt("Preferences", "NumPriorityRiskLevels", 11));
+		}
+
+		private void SetPriorityRiskLevels(int numLevels)
+		{
+			if (numLevels != m_Data.NumPriorityRiskLevels)
+			{
+				m_Data.NumPriorityRiskLevels = numLevels;
+
+				if (m_Data.Tasks.Count > 0)
+				{
+					var xVarAttribId = SelectedFilter.XVariable.Attribute.AttributeId;
+					var yVarAttribId = SelectedFilter.YVariable.Attribute.AttributeId;
+
+					if ((string.IsNullOrEmpty(SelectedFilter.XCutoff) &&
+						((xVarAttribId == Task.Attribute.Priority) ||
+						 (xVarAttribId == Task.Attribute.Risk))) ||
+						(string.IsNullOrEmpty(SelectedFilter.YCutoff) &&
+						((yVarAttribId == Task.Attribute.Priority) ||
+						 (yVarAttribId == Task.Attribute.Risk))))
+					{
+						m_EisenhowerCtrl.OnUpdateTasks(UIExtension.UpdateType.All, null);
+					}
+				}
+			}
 		}
 
 		private bool InitialiseFilters()
