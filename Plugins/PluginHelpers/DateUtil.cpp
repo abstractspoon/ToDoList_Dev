@@ -128,7 +128,7 @@ Int32 WorkingDay::HoursToMilleseconds(double hours)
 	return (Int32)(hours * 60 * 60 * 1000);
 }
 
-double WorkingDay::CalculateDurationInHours(double fromHour, double toHour)
+double WorkingDay::DurationInHours(double fromHour, double toHour)
 {
 	fromHour = Math::Max(fromHour, m_StartOfDayInHours);
 	toHour = Math::Min(toHour, EndOfDayInHours());
@@ -216,7 +216,7 @@ void WorkingWeek::Load(Preferences^ prefs)
 	m_WeekendDays = DateUtil::MapDaysOfWeek(dwWeekends);
 }
 
-double WorkingWeek::CalculateDurationInHours(DateTime from, DateTime to)
+double WorkingWeek::DurationInHours(DateTime from, DateTime to)
 {
 	int nDaysDuration = (to.Date - from.Date).Days;
 
@@ -231,7 +231,7 @@ double WorkingWeek::CalculateDurationInHours(DateTime from, DateTime to)
 	{
 		// from and to are same day
 		if (!IsWeekend(from))
-			dHoursDuration = m_WorkingDay->CalculateDurationInHours(fromTimeOfDay, toTimeOfDay);
+			dHoursDuration = m_WorkingDay->DurationInHours(fromTimeOfDay, toTimeOfDay);
 	}
 	else
 	{
@@ -251,10 +251,10 @@ double WorkingWeek::CalculateDurationInHours(DateTime from, DateTime to)
 		
 		// part days
 		if (!IsWeekend(from))
-			dHoursDuration += m_WorkingDay->CalculateDurationInHours(fromTimeOfDay, m_WorkingDay->EndOfDayInHours());
+			dHoursDuration += m_WorkingDay->DurationInHours(fromTimeOfDay, m_WorkingDay->EndOfDayInHours());
 
 		if (!IsWeekend(to))
-			dHoursDuration += m_WorkingDay->CalculateDurationInHours(m_WorkingDay->StartOfDayInHours(), toTimeOfDay);
+			dHoursDuration += m_WorkingDay->DurationInHours(m_WorkingDay->StartOfDayInHours(), toTimeOfDay);
 	}
 
 	return dHoursDuration;

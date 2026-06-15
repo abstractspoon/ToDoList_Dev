@@ -352,9 +352,9 @@ namespace DayViewUIExtension
 			double hours = 0.0;
 
 			if (original)
-				hours = workWeek.CalculateDurationInHours(m_OrgDates.Start, m_OrgDates.End);
+				hours = workWeek.DurationInHours(m_OrgDates.Start, m_OrgDates.End);
 			else
-				hours = workWeek.CalculateDurationInHours(StartDate, EndDate);
+				hours = workWeek.DurationInHours(StartDate, EndDate);
 
 			if (TimeEstUnits == Task.TimeUnits.Minutes)
 				return (hours * 60);
