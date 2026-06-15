@@ -64,7 +64,6 @@ namespace EisenhowerUIExtension
 		CArray<FILTER, FILTER&> m_aFilters;
 
 	protected:
-		afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 		afx_msg void OnVariableComboCloseUp();
 		afx_msg void OnCutoffComboCloseUp();
 		afx_msg void OnHeaderCustomDraw(NMHDR* pNMHDR, LPARAM* lResult);

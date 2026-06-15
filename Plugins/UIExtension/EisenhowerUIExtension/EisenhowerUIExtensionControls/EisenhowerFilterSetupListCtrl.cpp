@@ -78,7 +78,6 @@ CEisenhowerSetupListCtrl::CEisenhowerSetupListCtrl()
 }
 
 BEGIN_MESSAGE_MAP(CEisenhowerSetupListCtrl, CInputListCtrl)
-	ON_WM_CREATE()
 	ON_NOTIFY(NM_CUSTOMDRAW, 0, OnHeaderCustomDraw)
 	ON_CBN_CLOSEUP(IDC_VARIABLES, OnVariableComboCloseUp)
 	ON_CBN_CLOSEUP(IDC_LISTCUTOFFS, OnCutoffComboCloseUp)
@@ -86,11 +85,10 @@ BEGIN_MESSAGE_MAP(CEisenhowerSetupListCtrl, CInputListCtrl)
 	ON_EN_KILLFOCUS(IDC_TIMECUTOFFS, OnTimeCutoffKillFocus)
 END_MESSAGE_MAP()
 
-int CEisenhowerSetupListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
+void CEisenhowerSetupListCtrl::Initialise(const CArray<VARIABLE, VARIABLE&>& aVars,
+										  const CArray<FILTER, FILTER&>& aFilters)
 {
-	if (CInputListCtrl::OnCreate(lpCreateStruct) == -1)
-		return -1;
-
+	// Create all the child controls we'll need
 	CreateControl(m_cbCutoffs, IDC_LISTCUTOFFS, CBS_DROPDOWNLIST);
 	CreateControl(m_cbVariables, IDC_VARIABLES, CBS_DROPDOWNLIST | CBS_SORT);
 	CreateControl(m_dtcCutoffs, IDC_DATECUTOFFS, DTS_SHOWNONE);
@@ -101,13 +99,7 @@ int CEisenhowerSetupListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_tpCutoffs.EnableUnitsChanges(FALSE);
 	m_tpCutoffs.EnableNegativeTimes(FALSE);
 
-	return 0;
-}
-
-void CEisenhowerSetupListCtrl::Initialise(const CArray<VARIABLE, VARIABLE&>& aVars,
-										  const CArray<FILTER, FILTER&>& aFilters)
-{
-	// Set the row count before adding columns
+	// Set the header row count before adding columns
 	GetHeader()->SetRowCount(2);
 	GetHeader()->EnableTracking(FALSE);
 
@@ -929,7 +921,6 @@ void CEisenhowerSetupListCtrl::HideAllControls(const CWnd* pWndIgnore)
 	CInputListCtrl::HideControl(m_dtcCutoffs);
 	CInputListCtrl::HideControl(m_tpCutoffs);
 }
-
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
