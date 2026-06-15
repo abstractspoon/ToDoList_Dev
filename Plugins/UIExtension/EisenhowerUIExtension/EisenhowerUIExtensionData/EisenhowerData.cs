@@ -20,6 +20,12 @@ namespace EisenhowerUIExtension
 		public EisenhowerTasks Tasks { get; private set; }
 		public EisenhowerVariables Variables { get; private set; }
 
+		public WorkingWeek WorkingWeek
+		{
+			get { return Tasks.WorkingWeek; }
+			set { Tasks.WorkingWeek = value; }
+		}
+
 		// -----------------------------------------
 
 		public EisenhowerData(Translator trans)
@@ -506,6 +512,10 @@ namespace EisenhowerUIExtension
 
 	public class EisenhowerTasks : Dictionary<uint, EisenhowerTask>
 	{
+		public WorkingWeek WorkingWeek;
+
+		// -----------------------------------
+
 		public List<uint> Update(TaskList tasks, UIExtension.UpdateType type)
 		{
 			List<uint> taskIds = null;
@@ -615,7 +625,7 @@ namespace EisenhowerUIExtension
 				uint taskId = task.GetID();
 				var item = GetItem(taskId, true);
 
-				if (!item.ProcessTaskUpdate(task))
+				if (!item.ProcessTaskUpdate(task, WorkingWeek))
 					return false;
 
 				modifiedTaskIds?.Add(taskId);
@@ -643,7 +653,7 @@ namespace EisenhowerUIExtension
 		{
 		}
 
-		public new bool ProcessTaskUpdate(Task task)
+		public bool ProcessTaskUpdate(Task task, WorkingWeek week)
 		{
 			if (!base.ProcessTaskUpdate(task))
 				return false;
@@ -654,7 +664,37 @@ namespace EisenhowerUIExtension
 			foreach (var id in EisenhowerVariable.SupportedAttributeIds)
 			{
 				if (task.IsAttributeAvailable(id) && (id != Task.Attribute.CustomAttribute))
-					SetAttributeValue(id.ToString(), task.GetAttributeValue(id, true, false));
+				{
+					switch (id)
+					{
+					case Task.Attribute.TimeEstimate:
+						{
+							// Convert to days
+							var units = Task.TimeUnits.Unknown;
+							double amount = task.GetTimeEstimate(ref units, true); // calculated
+
+							amount = TimeUtil.Convert(amount, units, Task.TimeUnits.Days, week);
+							SetAttributeValue(id.ToString(), amount);
+						}
+						break;
+
+					case Task.Attribute.TimeSpent:
+						{
+							// Convert to days
+							var units = Task.TimeUnits.Unknown;
+							double amount = task.GetTimeSpent(ref units, true); // calculated
+
+							amount = TimeUtil.Convert(amount, units, Task.TimeUnits.Days, week);
+							SetAttributeValue(id.ToString(), amount);
+						}
+						break;
+
+					default:
+						// as-is
+						SetAttributeValue(id.ToString(), task.GetAttributeValue(id, true, false)); // calculated
+						break;
+					}
+				}
 			}
 
 			// Custom

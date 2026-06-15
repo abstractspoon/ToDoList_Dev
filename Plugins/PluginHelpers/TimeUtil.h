@@ -1,0 +1,32 @@
+#pragma once
+
+#include "TaskList.h"
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+using namespace System;
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+namespace Abstractspoon
+{
+	namespace Tdl
+	{
+		namespace PluginHelpers
+		{
+			ref class WorkingWeek;
+
+			public ref class TimeUtil
+			{
+			public:
+				static double Convert(double amount, Task::TimeUnits fromUnits, Task::TimeUnits toUnits, WorkingWeek^ week);
+
+			private:
+				static int MapToTHUnits(Task::TimeUnits units);
+
+			};
+		}
+	}
+}
+////////////////////////////////////////////////////////////////////////////////////////////////
+

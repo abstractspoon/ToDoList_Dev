@@ -151,6 +151,7 @@ copy $(SolutionDir)$(ConfigurationName)\Microsoft.VisualStudio.OLE.Interop.dll "
     <ClInclude Include="TaskListView.h" />
     <ClInclude Include="TaskTimeLogUtil.h" />
     <ClInclude Include="TimeComboBox.h" />
+    <ClInclude Include="TimeUtil.h" />
     <ClInclude Include="Toolbars.h" />
     <ClInclude Include="Translator.h" />
     <ClInclude Include="TreeCtrl.h" />
@@ -189,6 +190,7 @@ copy $(SolutionDir)$(ConfigurationName)\Microsoft.VisualStudio.OLE.Interop.dll "
     <ClCompile Include="TaskListView.cpp" />
     <ClCompile Include="TaskTimeLogUtil.cpp" />
     <ClCompile Include="TimeComboBox.cpp" />
+    <ClCompile Include="TimeUtil.cpp" />
     <ClCompile Include="Toolbars.cpp" />
     <ClCompile Include="Translator.cpp" />
     <ClCompile Include="TreeCtrl.cpp" />

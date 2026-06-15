@@ -213,6 +213,8 @@ namespace EisenhowerUIExtension
 
 		public void LoadPreferences(Preferences prefs, String key, bool appOnly)
 		{
+			m_Data.WorkingWeek = new WorkingWeek(prefs);
+
 			if (!appOnly)
 			{
 				// Load prior filters
