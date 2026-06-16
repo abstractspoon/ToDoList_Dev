@@ -9,35 +9,31 @@ using Abstractspoon.Tdl.PluginHelpers;
 namespace MindMapUIExtension
 {
 	[System.ComponentModel.DesignerCategory("")]
-	class MindMapOptionsComboBox : CustomComboBox.CheckedComboBox
+
+	class MindMapOptionsComboBox : CheckComboBox
 	{
-		class MindMapOptionItem
+		class MindMapOptionItem : ICheckComboBoxItem
 		{
 			public MindMapOptionItem(string label, MindMapOption option)
 			{
 				Label = label;
-				Option = option;
+				ItemData = (int)option;
 			}
 
-			public override string ToString()
-			{
-				return Label;
-			}
-
-			public string Label;
-			public MindMapOption Option { get; private set; }
+			public virtual string Label { get; }
+			public virtual int ItemData { get; }
 		}
 
 		// ----------------------------------------------------------------
 
 		public MindMapOptionsComboBox(Translator trans)
 		{
-			None = trans.Translate("<none>", Translator.Type.ComboBox);
+			//None = trans.Translate("<none>", Translator.Type.ComboBox);
 
-			Items.Add(new MindMapOptionItem(trans.Translate("Show dependencies", Translator.Type.ComboBox), MindMapOption.ShowDependencies));
-			Items.Add(new MindMapOptionItem(trans.Translate("Straight line connections", Translator.Type.ComboBox), MindMapOption.StraightConnections));
+			AddItem("Show dependencies", MindMapOption.ShowDependencies, trans);
+			AddItem("Straight line connections", MindMapOption.StraightConnections, trans);
 
-			Sorted = true;
+			//Sorted = true;
 		}
 
 		public MindMapOption SelectedOptions
@@ -46,26 +42,25 @@ namespace MindMapUIExtension
 			{
 				MindMapOption options = MindMapOption.None;
 
-				foreach (var checkItem in CheckedItems)
-				{
-					var item = (MindMapOptionItem)checkItem;
-
-					options |= item.Option;
-				}
+				foreach (var item in CheckedItems)
+					options |= (MindMapOption)item.ItemData;
 
 				return options;
 			}
 
 			set
 			{
-				for (int index = 0; index < Items.Count; index++)
+				foreach (var item in Items)
 				{
-					var item = (MindMapOptionItem)Items[index];
-
-					ListBox.SetItemChecked(index, value.HasFlag(item.Option));
+					SetItemChecked(item, value.HasFlag((MindMapOption)item.ItemData));
 				}
-				RefreshTooltipText();
+				//RefreshTooltipText();
 			}
+		}
+
+		private void AddItem(string label, MindMapOption option, Translator trans)
+		{
+			base.AddItem(new MindMapOptionItem(trans.Translate(label, Translator.Type.ComboBox), MindMapOption.ShowDependencies), false);
 		}
 	}
 
