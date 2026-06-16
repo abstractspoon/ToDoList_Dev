@@ -19,6 +19,7 @@ namespace EisenhowerUIExtension
 		// --------------------------------------------------------
 
 		private bool m_Selected;
+
 		private int[] m_ColHeaderWidth			= new int[3] { -1, -1, -1 };
 		private int[] m_ColValueMaxCharWidth	= new int[3] { -1, -1, -1 };
 

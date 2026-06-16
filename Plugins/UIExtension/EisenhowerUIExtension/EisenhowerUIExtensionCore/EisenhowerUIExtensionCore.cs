@@ -55,6 +55,11 @@ namespace EisenhowerUIExtension
 			m_EisenhowerCtrl.SelectionChange += new SelectionChangeEventHandler(OnEisenhowerCtrlSelectionChange);
 			m_EisenhowerCtrl.AttributeChange += new AttributeChangeEventHandler(OnEisenhowerCtrlAttributeChange);
 
+			m_OptionsCombo.Initialise(trans);
+			m_OptionsCombo.Sorted = true;
+			m_OptionsCombo.DropDownClosed += new EventHandler(OnOptionsComboClosed);
+
+			m_Trans.Translate(this);
 
 			FormsUtil.SetFont(this, m_ControlsFont);
 			EnableMatrixComboEvents(true);
@@ -207,6 +212,7 @@ namespace EisenhowerUIExtension
 		{
 			prefs.WriteProfileString(key, "Matrices", m_Matrices.ToString());
 			prefs.WriteProfileString(key, "SelMatrix", m_MatrixCombo.SelectedMatrix?.Id);
+			prefs.WriteProfileEnum(key, "Options", m_OptionsCombo.SelectedOptions);
 
 			m_EisenhowerCtrl.SavePreferences(prefs, key);
 		}
@@ -220,6 +226,8 @@ namespace EisenhowerUIExtension
 				// Load prior matrices
 				m_PrevSelMatrix = prefs.GetProfileString(key, "SelMatrix", "");
 				m_PrevMatrices = prefs.GetProfileString(key, "Matrices", "");
+
+				m_OptionsCombo.SelectedOptions = prefs.GetProfileEnum(key, "Options", EisenhowerOptions.None);
 			}
 
 			m_EisenhowerCtrl.LoadPreferences(prefs, key, appOnly);
@@ -487,6 +495,12 @@ namespace EisenhowerUIExtension
 			m_EisenhowerCtrl.Focus();
 
 			UpdateToolbarButtonStates();
+		}
+
+		private void OnOptionsComboClosed(object sender, EventArgs e)
+		{
+			if (!m_OptionsCombo.Cancelled)
+				m_EisenhowerCtrl.Options = m_OptionsCombo.SelectedOptions;
 		}
 
 		private void UpdateToolbarButtonStates()

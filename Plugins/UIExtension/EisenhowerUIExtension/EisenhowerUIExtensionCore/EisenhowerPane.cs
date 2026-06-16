@@ -94,26 +94,22 @@ namespace EisenhowerUIExtension
 			}
 		}
 
-		public bool SetMatrix(EisenhowerPaneMatrixVariable xVar, EisenhowerPaneMatrixVariable yVar)
+		public EisenhowerPaneMatrix Matrix
 		{
-			var newMatrix = new EisenhowerPaneMatrix(xVar, yVar);
+			get { return m_Matrix; }
 
-			if ((m_Matrix == null) || !m_Matrix.Equals(newMatrix))
+			set
 			{
-				m_Matrix = newMatrix;
-				UpdateTitle();
+				if ((m_Matrix == null) || !m_Matrix.Equals(value))
+				{
+					m_Matrix = value;
+					UpdateTitle();
 
-				// Note: column widths will be recalculated in RebuildTaskList
-				m_List.SetAttributeNames(xVar.Attribute.Label, yVar.Attribute.Label, false); 
-
-				RebuildTaskList();
-				return true;
+					m_List.SetAttributeNames(value.XVariable.Attribute.Label, value.YVariable.Attribute.Label, false);
+					RebuildTaskList();
+				}
 			}
-
-			return false; // no change
 		}
-
-		public EisenhowerPaneMatrix Matrix { get { return m_Matrix; } }
 
 		public bool Selected
 		{

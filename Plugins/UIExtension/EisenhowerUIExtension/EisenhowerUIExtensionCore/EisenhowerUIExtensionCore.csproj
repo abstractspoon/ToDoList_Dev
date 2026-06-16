@@ -39,6 +39,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\3rdParty\CommandHandling\bin\Debug\CommandHandling.dll</HintPath>
     </Reference>
+    <Reference Include="CustomComboBox">
+      <HintPath>..\..\..\3rdParty\CustomComboBox\obj\Debug\CustomComboBox.dll</HintPath>
+    </Reference>
     <Reference Include="EisenhowerUIExtensionControls">
       <HintPath>..\..\..\Debug\EisenhowerUIExtensionControls.dll</HintPath>
     </Reference>
@@ -54,6 +57,7 @@
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Design" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Security" />
     <Reference Include="System.Windows.Forms" />
@@ -73,6 +77,9 @@
     <Compile Include="EisenhowerControl.cs" />
     <Compile Include="EisenhowerControl.Designer.cs">
       <DependentUpon>EisenhowerControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="EisenhowerOptionsComboBox.cs">
+      <SubType>Component</SubType>
     </Compile>
     <Compile Include="EisenhowerPane.cs">
       <SubType>UserControl</SubType>

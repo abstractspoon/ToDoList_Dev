@@ -41,6 +41,7 @@ namespace EisenhowerUIExtension
 		private Point m_SplitPos;
 		private List<EisenhowerPane> m_Panes;
 		private HashSet<Task.Attribute> m_ParentCalculatedValues;
+		private EisenhowerOptions m_Options;
 
 		// ---------------------------------------------
 
@@ -101,15 +102,10 @@ namespace EisenhowerUIExtension
 		{
 			m_Matrix = matrix;
 
-			var xHighVar = new EisenhowerPaneMatrixVariable(matrix.XVariable, EisenhowerPaneMatrixVariable.ValueRange.High, matrix.XCutoffValue);
-			var xLowVar  = new EisenhowerPaneMatrixVariable(matrix.XVariable, EisenhowerPaneMatrixVariable.ValueRange.Low, matrix.XCutoffValue);
-			var yHighVar = new EisenhowerPaneMatrixVariable(matrix.YVariable, EisenhowerPaneMatrixVariable.ValueRange.High, matrix.YCutoffValue);
-			var yLowVar  = new EisenhowerPaneMatrixVariable(matrix.YVariable, EisenhowerPaneMatrixVariable.ValueRange.Low, matrix.YCutoffValue);
-
-			m_TopLeftPane.SetMatrix(xHighVar, yHighVar);
-			m_TopRightPane.SetMatrix(xLowVar, yHighVar);
-			m_BottomLeftPane.SetMatrix(xHighVar, yLowVar);
-			m_BottomRightPane.SetMatrix(xLowVar, yLowVar);
+			SetPaneMatrix(m_TopLeftPane, true, true);
+			SetPaneMatrix(m_TopRightPane, false, true);
+			SetPaneMatrix(m_BottomLeftPane, true, false);
+			SetPaneMatrix(m_BottomRightPane, false, false);
 		}
 
 		public void SetUITheme(UITheme theme)
@@ -478,6 +474,18 @@ namespace EisenhowerUIExtension
 			RecalcPaneRects(false);
 		}
 
+		public EisenhowerOptions Options
+		{
+			set
+			{
+				if (value != m_Options)
+				{
+					m_Options = value;
+					SetMatrix(m_Matrix);
+				}
+			}
+		}
+
 		// Message handlers --------------------------------
 
 		private bool OnPaneEditTaskDone(object sender, ITaskBase task)
@@ -588,6 +596,22 @@ namespace EisenhowerUIExtension
 
 			if (update)
 				Update();
+		}
+
+		private void SetPaneMatrix(EisenhowerPane pane, bool xHigh, bool yHigh)
+		{
+			var xVar = new EisenhowerPaneMatrixVariable(m_Matrix.XVariable,
+														m_Matrix.XCutoffValue,
+														(xHigh ? EisenhowerPaneMatrixVariable.ValueRange.High :
+																 EisenhowerPaneMatrixVariable.ValueRange.Low));
+
+			var yVar = new EisenhowerPaneMatrixVariable(m_Matrix.YVariable,
+														m_Matrix.YCutoffValue,
+														(yHigh ? EisenhowerPaneMatrixVariable.ValueRange.High :
+																 EisenhowerPaneMatrixVariable.ValueRange.Low));
+			pane.Matrix = new EisenhowerPaneMatrix(xVar,
+												   yVar,
+												   m_Options.HasFlag(EisenhowerOptions.HideParentTasks));
 		}
 
 		protected bool IsSplitting

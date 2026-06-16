@@ -191,8 +191,8 @@ namespace EisenhowerUIExtension
 		// ----------------------------------------
 
 		public EisenhowerPaneMatrixVariable(EisenhowerVariable var,
-											ValueRange range,
-											double cutoff)
+											double cutoff,
+											ValueRange range)
 			:
 			base(var)
 		{
@@ -276,11 +276,17 @@ namespace EisenhowerUIExtension
 
 	public class EisenhowerPaneMatrix
 	{
+		private bool m_HideParentTasks;
+
+		// --------------------------------------------
+
 		public EisenhowerPaneMatrix(EisenhowerPaneMatrixVariable xVar,
-									EisenhowerPaneMatrixVariable yVar)
+									EisenhowerPaneMatrixVariable yVar,
+									bool hideParentTasks)
 		{
 			XVariable = xVar;
 			YVariable = yVar;
+			m_HideParentTasks = hideParentTasks;
 
 			Debug.Assert(HasNull || (XVariable.Id != YVariable.Id));
 		}
@@ -294,6 +300,9 @@ namespace EisenhowerUIExtension
 				return false;
 
 			if (task.IsDone)
+				return false;
+
+			if (m_HideParentTasks && task.IsParent)
 				return false;
 
 			return ((bool)XVariable?.TaskMatches(task) && (bool)YVariable?.TaskMatches(task));

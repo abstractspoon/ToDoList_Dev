@@ -29,26 +29,20 @@
 		private void InitializeComponent()
 		{
 			this.components = new System.ComponentModel.Container();
-			this.m_EisenhowerCtrl = new EisenhowerUIExtension.EisenhowerControl();
 			this.m_Tooltip = new System.Windows.Forms.ToolTip(this.components);
 			this.button1 = new System.Windows.Forms.Button();
 			this.m_MatricesLabel = new System.Windows.Forms.Label();
+			this.m_OptionsCombo = new EisenhowerOptionsComboBox();
+			this.m_OptionsLabel = new System.Windows.Forms.Label();
 			this.m_MatrixCombo = new EisenhowerUIExtension.EisenhowerMatrixComboBox();
+			this.m_EisenhowerCtrl = new EisenhowerUIExtension.EisenhowerControl();
 			this.SuspendLayout();
-			// 
-			// m_EisenhowerCtrl
-			// 
-			this.m_EisenhowerCtrl.Location = new System.Drawing.Point(0, 47);
-			this.m_EisenhowerCtrl.Margin = new System.Windows.Forms.Padding(0);
-			this.m_EisenhowerCtrl.Name = "m_EisenhowerCtrl";
-			this.m_EisenhowerCtrl.Size = new System.Drawing.Size(613, 399);
-			this.m_EisenhowerCtrl.TabIndex = 0;
 			// 
 			// button1
 			// 
 			this.button1.AutoSize = true;
 			this.button1.ImageAlign = System.Drawing.ContentAlignment.BottomRight;
-			this.button1.Location = new System.Drawing.Point(317, 21);
+			this.button1.Location = new System.Drawing.Point(512, 21);
 			this.button1.Name = "button1";
 			this.button1.Size = new System.Drawing.Size(50, 23);
 			this.button1.TabIndex = 4;
@@ -65,8 +59,28 @@
 			this.m_MatricesLabel.TabIndex = 25;
 			this.m_MatricesLabel.Text = "Matrices";
 			// 
+			// m_OptionsCombo
 			// 
+			this.m_OptionsCombo.AllowResizeDropDown = false;
+			this.m_OptionsCombo.ControlSize = new System.Drawing.Size(120, 96);
+			this.m_OptionsCombo.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
+			this.m_OptionsCombo.DropDownSizeMode = CustomComboBox.CustomComboBox.SizeMode.UseDropDownSize;
+			this.m_OptionsCombo.DropSize = new System.Drawing.Size(121, 106);
+			this.m_OptionsCombo.FormattingEnabled = true;
+			this.m_OptionsCombo.Location = new System.Drawing.Point(226, 20);
+			this.m_OptionsCombo.Name = "m_OptionsCombo";
+			this.m_OptionsCombo.None = "<none>";
+			this.m_OptionsCombo.Size = new System.Drawing.Size(158, 21);
+			this.m_OptionsCombo.TabIndex = 26;
 			// 
+			// m_OptionsLabel
+			// 
+			this.m_OptionsLabel.AutoSize = true;
+			this.m_OptionsLabel.Location = new System.Drawing.Point(223, 3);
+			this.m_OptionsLabel.Name = "m_OptionsLabel";
+			this.m_OptionsLabel.Size = new System.Drawing.Size(43, 13);
+			this.m_OptionsLabel.TabIndex = 27;
+			this.m_OptionsLabel.Text = "Options";
 			// 
 			// m_MatrixCombo
 			// 
@@ -78,8 +92,18 @@
 			this.m_MatrixCombo.Size = new System.Drawing.Size(218, 21);
 			this.m_MatrixCombo.TabIndex = 6;
 			// 
+			// m_EisenhowerCtrl
+			// 
+			this.m_EisenhowerCtrl.Location = new System.Drawing.Point(0, 47);
+			this.m_EisenhowerCtrl.Margin = new System.Windows.Forms.Padding(0);
+			this.m_EisenhowerCtrl.Name = "m_EisenhowerCtrl";
+			this.m_EisenhowerCtrl.Size = new System.Drawing.Size(613, 399);
+			this.m_EisenhowerCtrl.TabIndex = 0;
+			// 
 			// EisenhowerUIExtensionCore
 			// 
+			this.Controls.Add(this.m_OptionsLabel);
+			this.Controls.Add(this.m_OptionsCombo);
 			this.Controls.Add(this.m_MatricesLabel);
 			this.Controls.Add(this.m_MatrixCombo);
 			this.Controls.Add(this.button1);
@@ -98,5 +122,7 @@
 		private System.Windows.Forms.Button button1;
 		private EisenhowerMatrixComboBox m_MatrixCombo;
 		private System.Windows.Forms.Label m_MatricesLabel;
+		private EisenhowerOptionsComboBox m_OptionsCombo;
+		private System.Windows.Forms.Label m_OptionsLabel;
 	}
 }

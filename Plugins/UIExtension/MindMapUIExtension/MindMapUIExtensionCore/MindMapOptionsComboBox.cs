@@ -8,34 +8,14 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 namespace MindMapUIExtension
 {
-	[System.ComponentModel.DesignerCategory("")]
 	class MindMapOptionsComboBox : CustomComboBox.CheckedComboBox
 	{
-		class MindMapOptionItem
-		{
-			public MindMapOptionItem(string label, MindMapOption option)
-			{
-				Label = label;
-				Option = option;
-			}
-
-			public override string ToString()
-			{
-				return Label;
-			}
-
-			public string Label;
-			public MindMapOption Option { get; private set; }
-		}
-
-		// ----------------------------------------------------------------
-
 		public MindMapOptionsComboBox(Translator trans)
 		{
 			None = trans.Translate("<none>", Translator.Type.ComboBox);
 
-			Items.Add(new MindMapOptionItem(trans.Translate("Show dependencies", Translator.Type.ComboBox), MindMapOption.ShowDependencies));
-			Items.Add(new MindMapOptionItem(trans.Translate("Straight line connections", Translator.Type.ComboBox), MindMapOption.StraightConnections));
+			Items.Add(new ComboItem(trans, "Show dependencies", MindMapOption.ShowDependencies));
+			Items.Add(new ComboItem(trans, "Straight line connections", MindMapOption.StraightConnections));
 
 			Sorted = true;
 		}
@@ -46,12 +26,8 @@ namespace MindMapUIExtension
 			{
 				MindMapOption options = MindMapOption.None;
 
-				foreach (var checkItem in CheckedItems)
-				{
-					var item = (MindMapOptionItem)checkItem;
-
-					options |= item.Option;
-				}
+				foreach (var item in CheckedItems)
+					options |= (item as ComboItem).Option;
 
 				return options;
 			}
@@ -60,13 +36,30 @@ namespace MindMapUIExtension
 			{
 				for (int index = 0; index < Items.Count; index++)
 				{
-					var item = (MindMapOptionItem)Items[index];
-
+					var item = (Items[index] as ComboItem);
 					ListBox.SetItemChecked(index, value.HasFlag(item.Option));
 				}
 				RefreshTooltipText();
 			}
 		}
-	}
 
+		// ----------------------------------------------------------------
+
+		class ComboItem
+		{
+			public ComboItem(Translator trans, string label, MindMapOption option)
+			{
+				Label = trans.Translate(label, Translator.Type.ComboBox);
+				Option = option;
+			}
+
+			public override string ToString()
+			{
+				return Label;
+			}
+
+			public string Label { get; private set; }
+			public MindMapOption Option { get; private set; }
+		}
+	}
 }
