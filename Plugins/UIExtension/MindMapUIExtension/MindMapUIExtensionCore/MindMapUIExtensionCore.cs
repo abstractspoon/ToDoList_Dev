@@ -290,8 +290,7 @@ namespace MindMapUIExtension
 			this.Controls.Add(m_OptionsLabel);
 
 			m_OptionsCombo = new MindMapOptionsComboBox(m_Trans);
-// 			m_OptionsCombo.DropDownClosed += new EventHandler(OnOptionsComboClosed);
-// 			m_OptionsCombo.DrawMode = DrawMode.OwnerDrawFixed;
+ 			m_OptionsCombo.DropDownClosed += new EventHandler(OnOptionsComboClosed);
 			
 			InitialiseCombo(m_OptionsCombo, m_OptionsLabel, 150);
 			this.Controls.Add(m_OptionsCombo);
@@ -320,12 +319,13 @@ namespace MindMapUIExtension
 		{
 			combo.Font = m_ControlsFont;
 			combo.Width = DPIScaling.Scale(width);
+			combo.Height = DPIScaling.Scale(21);
 			combo.Location = new Point(prevLabel.Right + 5, 4);
 			combo.Visible = true;
-			combo.Height = DPIScaling.Scale(200);
 
 			if (combo is ComboBox)
 			{
+				(combo as ComboBox).DropDownHeight = DPIScaling.Scale(200);
 				(combo as ComboBox).DropDownStyle = ComboBoxStyle.DropDownList;
 				(combo as ComboBox).Sorted = true;
 			}
@@ -338,8 +338,7 @@ namespace MindMapUIExtension
 
 		void OnOptionsComboClosed(object sender, EventArgs e)
 		{
-			//if (!m_OptionsCombo.Cancelled)
-				m_MindMap.Options = m_OptionsCombo.SelectedOptions;
+			m_MindMap.Options = m_OptionsCombo.SelectedOptions;
 		}
 
 		Boolean OnMindMapEditTaskLabel(object sender, UInt32 taskId)

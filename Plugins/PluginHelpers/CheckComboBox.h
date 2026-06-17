@@ -14,7 +14,18 @@ namespace Abstractspoon
 	namespace Tdl
 	{
 		namespace PluginHelpers
-		{
+		{	
+			class CCheckComboBox_ : public CCheckComboBox
+			{
+			public:
+				// Because MFC message reflection appears not to work
+				void OnEditchange() { CCheckComboBox::OnEditchange(); }
+				void OnDropdown() { CCheckComboBox::OnDropdown(); }
+				void OnCloseUp() { CCheckComboBox::OnCloseUp(); }
+			};
+
+			// -------------------------------------------------------------------
+
 			class HostedCheckComboBox
 			{
 			public:
@@ -30,13 +41,19 @@ namespace Abstractspoon
 				void DrawItem(WPARAM wp, LPARAM lp);
 				void SetEnabled(bool enabled);
 				void Detach();
+				bool IsDropped() { return (m_Combo.GetDroppedState() != FALSE); }
+
+				// Because MFC message reflection appears not to work
+				void OnEditchange();
+				void OnDropdown();
+				void OnCloseUp();
 
 			protected:
 				HostedCheckComboBox(HWND hwndParent);
 
 			private:
 				CWnd m_WndOfManagedHandle;
-				CCheckComboBox m_Combo;
+				CCheckComboBox_ m_Combo;
 			};
 
 			// -------------------------------------------------------------------
@@ -48,7 +65,7 @@ namespace Abstractspoon
 				virtual property int ItemData { int get(); }
 			};
 
-			// -------------------------------------------------------------------
+			// --------------------------------------------------------
 
 			public ref class CheckComboBox : Windows::Forms::Control
 			{
@@ -60,8 +77,15 @@ namespace Abstractspoon
 				bool SetItemChecked(ICheckComboBoxItem^ item, bool checked);
 				void RemoveAllItems();
 
-				property IEnumerable<ICheckComboBoxItem^>^ Items { IEnumerable<ICheckComboBoxItem^>^ get() { return m_Items; } }
-				property IEnumerable<ICheckComboBoxItem^>^ CheckedItems { IEnumerable<ICheckComboBoxItem^>^ get() { return m_CheckedItems; } }
+				property IEnumerable<ICheckComboBoxItem^>^ Items 
+				{ 
+					IEnumerable<ICheckComboBoxItem^>^ get() { return m_Items; } 
+				}
+				
+				property IEnumerable<ICheckComboBoxItem^>^ CheckedItems 
+				{ 
+					IEnumerable<ICheckComboBoxItem^>^ get() { return m_CheckedItems; } 
+				}
 
 				property bool Enabled
 				{
@@ -69,8 +93,11 @@ namespace Abstractspoon
 					void set(bool enabled) { SetEnabled(enabled); }
 				}
 
+				event EventHandler^ DropDownClosed; // == edit completion
+
 			private:
 				IntPtr m_pMFCInfo = IntPtr::Zero;
+
 				List<ICheckComboBoxItem^>^ m_Items;
 				List<ICheckComboBoxItem^>^ m_CheckedItems;
 
@@ -80,7 +107,6 @@ namespace Abstractspoon
 				void OnHandleDestroyed(EventArgs^ e) override;
 
 				void CheckPopulateCombo();
-				void UpdateCheckStates();
 				void SetEnabled(bool enabled);
 			};
 

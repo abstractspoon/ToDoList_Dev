@@ -28,6 +28,7 @@ HostedCheckComboBox::HostedCheckComboBox(HWND hwndParent)
 	VERIFY(m_WndOfManagedHandle.Attach(hwndParent));
 }
 
+// static
 HostedCheckComboBox* HostedCheckComboBox::Attach(HWND hwndParent, HFONT hFont)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
@@ -38,7 +39,7 @@ HostedCheckComboBox* HostedCheckComboBox::Attach(HWND hwndParent, HFONT hFont)
 	CRect rClient;
 	pCtrl->m_WndOfManagedHandle.GetClientRect(rClient);
 
-	DWORD dwFlags = WS_CHILD | WS_VISIBLE | WS_VSCROLL | CBS_DROPDOWN | CBS_HASSTRINGS | CBS_OWNERDRAWFIXED;
+	DWORD dwFlags = WS_CHILD | WS_VISIBLE | WS_VSCROLL | CBS_DROPDOWNLIST | CBS_HASSTRINGS | CBS_OWNERDRAWFIXED;
 
 	if (!pCtrl->m_WndOfManagedHandle.IsWindowEnabled())
 		dwFlags |= WS_DISABLED;
@@ -53,7 +54,12 @@ int HostedCheckComboBox::AddItem(LPCWSTR szItem, int nItemData, bool checked)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	return CDialogHelper::AddStringT(m_Combo, szItem, nItemData);
+	int nItem = CDialogHelper::AddStringT(m_Combo, szItem, nItemData);
+
+	if ((nItem != CB_ERR) && checked)
+		m_Combo.SetCheck(nItem);
+
+	return nItem;
 }
 
 bool HostedCheckComboBox::IsItemChecked(int nItemData)
@@ -106,6 +112,27 @@ void HostedCheckComboBox::SetEnabled(bool enabled)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
 	m_Combo.EnableWindow(enabled);
+}
+
+void HostedCheckComboBox::OnEditchange()
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	m_Combo.OnEditchange();
+}
+
+void HostedCheckComboBox::OnDropdown()
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	m_Combo.OnDropdown();
+}
+
+void HostedCheckComboBox::OnCloseUp()
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	m_Combo.OnCloseUp();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -195,8 +222,6 @@ void CheckComboBox::OnHandleDestroyed(EventArgs^ e)
 
 	if (m_pMFCInfo != IntPtr::Zero)
 	{
-		UpdateCheckStates();
-
 		Combo(m_pMFCInfo)->Detach();
 		m_pMFCInfo = IntPtr::Zero;
 	}
@@ -209,30 +234,58 @@ void CheckComboBox::WndProc(Message% m)
 	if (m_pMFCInfo == IntPtr::Zero)
 		return;
 
+	auto pHost = Combo(m_pMFCInfo);
+
 	switch (m.Msg)
 	{
 	case WM_DRAWITEM:
 		// Forward to the MFC control
-		Combo(m_pMFCInfo)->DrawItem(m.WParam.ToInt32(), m.LParam.ToInt32());
+		pHost->DrawItem(m.WParam.ToInt32(), m.LParam.ToInt32());
 		break;
 
-// 	case WM_COMMAND:
-// 		switch (HIWORD(m.WParam.ToInt32()))
-// 		{
-// 		case CBN_SELCHANGE:
-// 		case CBN_SELENDOK:
-// 		case CBN_SELENDCANCEL:
-// 		case CBN_EDITCHANGE:
-// 		case CBN_EDITUPDATE:
-// 		case CBN_CLOSEUP:
-// 			::PostMessage(Win32::GetHwnd(Handle), CB_VALUECHANGE, 0, 0);
-// 			break;
-// 		}
-// 		break;
-// 
-// 	case CB_VALUECHANGE:
-// 		ChangeEvent(this, gcnew EventArgs());
-// 		break;
+	case WM_COMMAND:
+		switch (HIWORD(m.WParam.ToInt32()))
+		{
+		case CBN_SELCHANGE:
+			// Note: we do not update m_CheckedItems as we go
+			// in case the drop is cancelled and we need to use 
+			// them to undo any changes.
+			if (!pHost->IsDropped())
+			{
+				// Update check states
+				m_CheckedItems->Clear();
+
+				for each (auto item in m_Items)
+				{
+					if (pHost->IsItemChecked(item->ItemData))
+						m_CheckedItems->Add(item);
+				}
+
+				DropDownClosed(this, gcnew EventArgs());
+			}
+			break;
+
+		case CBN_SELENDCANCEL:
+			if (!pHost->IsDropped())
+			{
+				// Restore original checkstates
+				for each (auto item in m_Items)
+				{
+					bool checked = m_CheckedItems->Contains(item);
+					Combo(m_pMFCInfo)->SetItemChecked(item->ItemData, checked);
+				}
+
+				DropDownClosed(this, gcnew EventArgs());
+			}
+			break;
+
+		// MFC message reflection appears not to work in 
+		// this configuration, so we do it ourselves
+		case CBN_DROPDOWN:	pHost->OnDropdown();	break;
+		case CBN_CLOSEUP:	pHost->OnCloseUp();		break;
+		case CBN_EDITCHANGE:pHost->OnEditchange();	break;
+		}
+		break;
 	}
 }
 
@@ -247,20 +300,6 @@ void CheckComboBox::CheckPopulateCombo()
 		{
 			bool checked = m_CheckedItems->Contains(item);
 			Combo(m_pMFCInfo)->AddItem(MS(item->Label), item->ItemData, checked);
-		}
-	}
-}
-
-void CheckComboBox::UpdateCheckStates()
-{
-	if (m_pMFCInfo != IntPtr::Zero)
-	{
-		m_CheckedItems->Clear();
-
-		for each (auto item in m_Items)
-		{
-			if (Combo(m_pMFCInfo)->IsItemChecked(item->ItemData))
-				m_CheckedItems->Add(item);
 		}
 	}
 }

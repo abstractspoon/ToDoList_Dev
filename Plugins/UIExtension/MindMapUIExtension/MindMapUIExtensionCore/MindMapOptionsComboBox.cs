@@ -60,7 +60,7 @@ namespace MindMapUIExtension
 
 		private void AddItem(string label, MindMapOption option, Translator trans)
 		{
-			base.AddItem(new MindMapOptionItem(trans.Translate(label, Translator.Type.ComboBox), MindMapOption.ShowDependencies), false);
+			base.AddItem(new MindMapOptionItem(trans.Translate(label, Translator.Type.ComboBox), option), false);
 		}
 	}
 
