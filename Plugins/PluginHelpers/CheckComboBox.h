@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Shared\CheckComboBox.h>
+#include <Shared\WndPrompt.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -29,7 +30,7 @@ namespace Abstractspoon
 			class HostedCheckComboBox
 			{
 			public:
-				static HostedCheckComboBox* Attach(HWND hwndParent, HFONT hFont, BOOL bSorted);
+				static HostedCheckComboBox* Attach(HWND hwndParent, HFONT hFont, BOOL bSorted = TRUE);
 
 				int AddItem(LPCWSTR szItem, int nItemData, bool checked);
 				bool IsItemChecked(int nItemData);
@@ -42,6 +43,7 @@ namespace Abstractspoon
 				void SetEnabled(bool enabled);
 				void Detach();
 				bool IsDropped() { return (m_Combo.GetDroppedState() != FALSE); }
+				void SetPrompt(LPCWSTR szPrompt);
 
 				// Because MFC message reflection appears not to work
 				void OnEditchange();
@@ -54,6 +56,7 @@ namespace Abstractspoon
 			private:
 				CWnd m_WndOfManagedHandle;
 				CCheckComboBox_ m_Combo;
+				CWndPrompt m_ComboPrompt;
 			};
 
 			// -------------------------------------------------------------------
@@ -87,8 +90,10 @@ namespace Abstractspoon
 					IEnumerable<ICheckComboBoxItem^>^ get() { return m_CheckedItems; } 
 				}
 
-				property bool Sorted { bool get();	void set(bool sorted); }
-				property bool Enabled {	bool get(); void set(bool enabled); }
+				property bool Sorted	{ bool get(); void set(bool sorted); }
+				property bool Enabled	{ bool get(); void set(bool enabled); }
+
+				property String^ Prompt	{ void set(String^ prompt); }
 
 				event EventHandler^ DropDownClosed; // == edit completion
 
@@ -96,6 +101,7 @@ namespace Abstractspoon
 				IntPtr m_pMFCInfo = IntPtr::Zero;
 
 				bool m_Sorted = false;
+				String^ m_Prompt = L"<none>";
 
 				List<ICheckComboBoxItem^>^ m_Items;
 				List<ICheckComboBoxItem^>^ m_CheckedItems;

@@ -33,24 +33,24 @@ HostedCheckComboBox* HostedCheckComboBox::Attach(HWND hwndParent, HFONT hFont, B
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	HostedCheckComboBox* pCtrl = new HostedCheckComboBox(hwndParent);
+	HostedCheckComboBox* pHost = new HostedCheckComboBox(hwndParent);
 
 	// Create slider to fill the entire managed client area
 	CRect rClient;
-	pCtrl->m_WndOfManagedHandle.GetClientRect(rClient);
+	pHost->m_WndOfManagedHandle.GetClientRect(rClient);
 
 	DWORD dwFlags = (WS_CHILD | WS_VISIBLE | WS_VSCROLL | CBS_DROPDOWNLIST | CBS_HASSTRINGS | CBS_OWNERDRAWFIXED);
 
 	if (bSorted)
 		dwFlags |= CBS_SORT;
 
-	if (!pCtrl->m_WndOfManagedHandle.IsWindowEnabled())
+	if (!pHost->m_WndOfManagedHandle.IsWindowEnabled())
 		dwFlags |= WS_DISABLED;
 
-	pCtrl->m_Combo.Create(dwFlags, rClient, &(pCtrl->m_WndOfManagedHandle), 1001);
-	pCtrl->m_Combo.SendMessage(WM_SETFONT, (WPARAM)hFont, 0);
+	pHost->m_Combo.Create(dwFlags, rClient, &(pHost->m_WndOfManagedHandle), 1001);
+	pHost->m_Combo.SendMessage(WM_SETFONT, (WPARAM)hFont, 0);
 
-	return pCtrl;
+	return pHost;
 }
 
 int HostedCheckComboBox::AddItem(LPCWSTR szItem, int nItemData, bool checked)
@@ -117,6 +117,13 @@ void HostedCheckComboBox::SetEnabled(bool enabled)
 	m_Combo.EnableWindow(enabled);
 }
 
+void HostedCheckComboBox::SetPrompt(LPCWSTR szPrompt)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	m_ComboPrompt.Initialize(m_Combo, szPrompt, WM_GETTEXTLENGTH);
+}
+
 void HostedCheckComboBox::OnEditchange()
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
@@ -140,7 +147,7 @@ void HostedCheckComboBox::OnCloseUp()
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-HostedCheckComboBox* Combo(IntPtr ptr)
+HostedCheckComboBox* ComboHost(IntPtr ptr)
 {
 	if (ptr == IntPtr::Zero)
 		return nullptr;
@@ -167,7 +174,7 @@ int CheckComboBox::AddItem(ICheckComboBoxItem^ item, bool checked)
 		m_CheckedItems->Add(item);
 
 	if (m_pMFCInfo != IntPtr::Zero)
-		Combo(m_pMFCInfo)->AddItem(MS(item->Label), item->ItemData, checked);
+		ComboHost(m_pMFCInfo)->AddItem(MS(item->Label), item->ItemData, checked);
 
 	return (m_Items->Count - 1);
 }
@@ -192,7 +199,7 @@ bool CheckComboBox::SetItemChecked(ICheckComboBoxItem^ item, bool checked)
 	}
 
 	if (m_pMFCInfo != IntPtr::Zero)
-		Combo(m_pMFCInfo)->SetItemChecked(item->ItemData, checked);
+		ComboHost(m_pMFCInfo)->SetItemChecked(item->ItemData, checked);
 
 	return false;
 }
@@ -205,7 +212,7 @@ bool CheckComboBox::IsItemChecked(ICheckComboBoxItem^ item)
 void CheckComboBox::RemoveAllItems()
 {
 	if (m_pMFCInfo != IntPtr::Zero)
-		Combo(m_pMFCInfo)->RemoveAllItems();
+		ComboHost(m_pMFCInfo)->RemoveAllItems();
 }
 
 // ----------------------------------------------------
@@ -230,16 +237,23 @@ void CheckComboBox::Sorted::set(bool sorted)
 	m_Sorted = sorted;
 }
 
+void CheckComboBox::Prompt::set(String^ prompt)
+{
+	m_Prompt = prompt;
+
+	if (m_pMFCInfo != IntPtr::Zero)
+		ComboHost(m_pMFCInfo)->SetPrompt(MS(m_Prompt));
+}
+
 void CheckComboBox::OnHandleCreated(EventArgs^ e)
 {
 	Control::OnHandleCreated(e);
 
-	auto pHost = HostedCheckComboBox::Attach(Win32::GetHwnd(Handle), 
-											 Win32::GetHfont(Font->ToHfont()),
-											 m_Sorted);
-	m_pMFCInfo = IntPtr(pHost);
-
+	m_pMFCInfo = IntPtr(HostedCheckComboBox::Attach(Win32::GetHwnd(Handle),
+													Win32::GetHfont(Font->ToHfont()),
+													m_Sorted));
 	CheckPopulateCombo();
+	ComboHost(m_pMFCInfo)->SetPrompt(MS(m_Prompt));
 }
 
 void CheckComboBox::OnHandleDestroyed(EventArgs^ e)
@@ -248,7 +262,7 @@ void CheckComboBox::OnHandleDestroyed(EventArgs^ e)
 
 	if (m_pMFCInfo != IntPtr::Zero)
 	{
-		Combo(m_pMFCInfo)->Detach();
+		ComboHost(m_pMFCInfo)->Detach();
 		m_pMFCInfo = IntPtr::Zero;
 	}
 }
@@ -260,7 +274,7 @@ void CheckComboBox::WndProc(Message% m)
 	if (m_pMFCInfo == IntPtr::Zero)
 		return;
 
-	auto pHost = Combo(m_pMFCInfo);
+	auto pHost = ComboHost(m_pMFCInfo);
 
 	switch (m.Msg)
 	{
@@ -298,7 +312,7 @@ void CheckComboBox::WndProc(Message% m)
 				for each (auto item in m_Items)
 				{
 					bool checked = m_CheckedItems->Contains(item);
-					Combo(m_pMFCInfo)->SetItemChecked(item->ItemData, checked);
+					ComboHost(m_pMFCInfo)->SetItemChecked(item->ItemData, checked);
 				}
 
 				DropDownClosed(this, gcnew EventArgs());
@@ -318,14 +332,14 @@ void CheckComboBox::WndProc(Message% m)
 void CheckComboBox::CheckPopulateCombo()
 {
 	if ((m_pMFCInfo != IntPtr::Zero) &&
-		(m_Items->Count != Combo(m_pMFCInfo)->GetItemCount()))
+		(m_Items->Count != ComboHost(m_pMFCInfo)->GetItemCount()))
 	{
-		Combo(m_pMFCInfo)->RemoveAllItems();
+		ComboHost(m_pMFCInfo)->RemoveAllItems();
 
 		for each (auto item in m_Items)
 		{
 			bool checked = m_CheckedItems->Contains(item);
-			Combo(m_pMFCInfo)->AddItem(MS(item->Label), item->ItemData, checked);
+			ComboHost(m_pMFCInfo)->AddItem(MS(item->Label), item->ItemData, checked);
 		}
 	}
 }
@@ -335,7 +349,7 @@ void CheckComboBox::SetEnabled(bool enabled)
 	Windows::Forms::Control::Enabled = enabled;
 
 	if (m_pMFCInfo != IntPtr::Zero)
-		Combo(m_pMFCInfo)->SetEnabled(enabled);
+		ComboHost(m_pMFCInfo)->SetEnabled(enabled);
 }
 
 
