@@ -311,6 +311,25 @@ int Win32::PostMessage(IntPtr hWnd, UInt32 wMsg, UIntPtr wParam, IntPtr lParam)
 	return ::PostMessage(GetHwnd(hWnd), wMsg, (WPARAM)wParam, (LPARAM)lParam.ToInt32());
 }
 
+void Win32::MapMessage(System::Windows::Forms::Message^ fromMsg, MSG% toMsg)
+{
+	toMsg.message = fromMsg->Msg;
+	toMsg.hwnd = GetHwnd(fromMsg->HWnd);
+	toMsg.wParam = (WPARAM)fromMsg->WParam.ToInt64();
+	toMsg.lParam = (LPARAM)fromMsg->LParam.ToInt64();
+	toMsg.time = 0;
+
+	::GetCursorPos(&toMsg.pt);
+}
+
+System::Windows::Forms::Message^ Win32::MapMessage(MSG% fromMsg)
+{
+	return Message::Create((IntPtr)fromMsg.hwnd,
+						   (int)fromMsg.message,
+						   (IntPtr)(long long)fromMsg.wParam,
+						   (IntPtr)fromMsg.lParam);
+}
+
 int Win32::GetWmNotifyCode(IntPtr lParam)
 {
 	if (lParam == IntPtr::Zero)

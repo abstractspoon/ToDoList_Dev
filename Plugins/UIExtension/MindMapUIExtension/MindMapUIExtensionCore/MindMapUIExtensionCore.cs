@@ -104,6 +104,11 @@ namespace MindMapUIExtension
             return false;
         }
 
+		public void FilterToolTipMessage(IntPtr hwnd, UInt32 message, UInt32 wParam, UInt32 lParam, UInt32 time, Int32 xPos, Int32 yPos)
+		{
+			m_OptionsCombo.FilterTooltipMessage(Message.Create(hwnd, (Int32)message, (IntPtr)wParam, (IntPtr)lParam));
+		}
+
 		public bool DoIdleProcessing()
 		{
 			return m_MindMap.DoIdleProcessing();
@@ -290,10 +295,9 @@ namespace MindMapUIExtension
 			this.Controls.Add(m_OptionsLabel);
 
 			m_OptionsCombo = new MindMapOptionsComboBox(m_Trans);
-			m_OptionsCombo.DropDownClosed += new EventHandler(OnOptionsComboClosed);
-			m_OptionsCombo.DrawMode = DrawMode.OwnerDrawFixed;
+ 			m_OptionsCombo.DropDownClosed += new EventHandler(OnOptionsComboClosed);
 			
-			InitialiseCombo(m_OptionsCombo as ComboBox, m_OptionsLabel, 150);
+			InitialiseCombo(m_OptionsCombo, m_OptionsLabel, 150);
 			this.Controls.Add(m_OptionsCombo);
 		}
 
@@ -316,14 +320,20 @@ namespace MindMapUIExtension
 			return label;
 		}
 
-		void InitialiseCombo(ComboBox combo, Label prevLabel, int width)
+		void InitialiseCombo(Control combo, Label prevLabel, int width)
 		{
 			combo.Font = m_ControlsFont;
 			combo.Width = DPIScaling.Scale(width);
-			combo.Height = DPIScaling.Scale(200);
+			combo.Height = DPIScaling.Scale(21);
 			combo.Location = new Point(prevLabel.Right + 5, 4);
-			combo.DropDownStyle = ComboBoxStyle.DropDownList;
-			combo.Sorted = true;
+			combo.Visible = true;
+
+			if (combo is ComboBox)
+			{
+				(combo as ComboBox).DropDownHeight = DPIScaling.Scale(200);
+				(combo as ComboBox).DropDownStyle = ComboBoxStyle.DropDownList;
+				(combo as ComboBox).Sorted = true;
+			}
 		}
 
 		void OnAlignmentComboClosed(object sender, EventArgs e)
@@ -333,8 +343,7 @@ namespace MindMapUIExtension
 
 		void OnOptionsComboClosed(object sender, EventArgs e)
 		{
-			if (!m_OptionsCombo.Cancelled)
-				m_MindMap.Options = m_OptionsCombo.SelectedOptions;
+			m_MindMap.Options = m_OptionsCombo.SelectedOptions;
 		}
 
 		Boolean OnMindMapEditTaskLabel(object sender, UInt32 taskId)

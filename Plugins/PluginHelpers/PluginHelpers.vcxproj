@@ -124,6 +124,7 @@ copy $(SolutionDir)$(ConfigurationName)\Microsoft.VisualStudio.OLE.Interop.dll "
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="CheckComboBox.h" />
     <ClInclude Include="ClipboardUtil.h" />
     <ClInclude Include="ColorUtil.h" />
     <ClInclude Include="Compression.h" />
@@ -160,6 +161,7 @@ copy $(SolutionDir)$(ConfigurationName)\Microsoft.VisualStudio.OLE.Interop.dll "
     <ClInclude Include="YearMonthComboBox.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="CheckComboBox.cpp" />
     <ClCompile Include="ClipboardUtil.cpp" />
     <ClCompile Include="ColorUtil.cpp" />
     <ClCompile Include="Compression.cpp" />
