@@ -28,12 +28,12 @@ namespace MindMapUIExtension
 
 		public MindMapOptionsComboBox(Translator trans)
 		{
+			Sorted = true;
 			//None = trans.Translate("<none>", Translator.Type.ComboBox);
 
 			AddItem("Show dependencies", MindMapOption.ShowDependencies, trans);
 			AddItem("Straight line connections", MindMapOption.StraightConnections, trans);
 
-			//Sorted = true;
 		}
 
 		public MindMapOption SelectedOptions

@@ -29,7 +29,7 @@ HostedCheckComboBox::HostedCheckComboBox(HWND hwndParent)
 }
 
 // static
-HostedCheckComboBox* HostedCheckComboBox::Attach(HWND hwndParent, HFONT hFont)
+HostedCheckComboBox* HostedCheckComboBox::Attach(HWND hwndParent, HFONT hFont, BOOL bSorted)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
@@ -39,7 +39,10 @@ HostedCheckComboBox* HostedCheckComboBox::Attach(HWND hwndParent, HFONT hFont)
 	CRect rClient;
 	pCtrl->m_WndOfManagedHandle.GetClientRect(rClient);
 
-	DWORD dwFlags = WS_CHILD | WS_VISIBLE | WS_VSCROLL | CBS_DROPDOWNLIST | CBS_HASSTRINGS | CBS_OWNERDRAWFIXED;
+	DWORD dwFlags = (WS_CHILD | WS_VISIBLE | WS_VSCROLL | CBS_DROPDOWNLIST | CBS_HASSTRINGS | CBS_OWNERDRAWFIXED);
+
+	if (bSorted)
+		dwFlags |= CBS_SORT;
 
 	if (!pCtrl->m_WndOfManagedHandle.IsWindowEnabled())
 		dwFlags |= WS_DISABLED;
@@ -207,11 +210,34 @@ void CheckComboBox::RemoveAllItems()
 
 // ----------------------------------------------------
 
+bool CheckComboBox::Enabled::get() 
+{ 
+	return Windows::Forms::Control::Enabled; 
+}
+
+void CheckComboBox::Enabled::set(bool enabled) 
+{ 
+	SetEnabled(enabled);
+}
+
+bool CheckComboBox::Sorted::get()
+{
+	return m_Sorted;
+}
+
+void CheckComboBox::Sorted::set(bool sorted)
+{
+	m_Sorted = sorted;
+}
+
 void CheckComboBox::OnHandleCreated(EventArgs^ e)
 {
 	Control::OnHandleCreated(e);
 
-	m_pMFCInfo = IntPtr(HostedCheckComboBox::Attach(Win32::GetHwnd(Handle), Win32::GetHfont(Font->ToHfont())));
+	auto pHost = HostedCheckComboBox::Attach(Win32::GetHwnd(Handle), 
+											 Win32::GetHfont(Font->ToHfont()),
+											 m_Sorted);
+	m_pMFCInfo = IntPtr(pHost);
 
 	CheckPopulateCombo();
 }

@@ -29,7 +29,7 @@ namespace Abstractspoon
 			class HostedCheckComboBox
 			{
 			public:
-				static HostedCheckComboBox* Attach(HWND hwndParent, HFONT hFont);
+				static HostedCheckComboBox* Attach(HWND hwndParent, HFONT hFont, BOOL bSorted);
 
 				int AddItem(LPCWSTR szItem, int nItemData, bool checked);
 				bool IsItemChecked(int nItemData);
@@ -87,16 +87,15 @@ namespace Abstractspoon
 					IEnumerable<ICheckComboBoxItem^>^ get() { return m_CheckedItems; } 
 				}
 
-				property bool Enabled
-				{
-					bool get() { return Windows::Forms::Control::Enabled; }
-					void set(bool enabled) { SetEnabled(enabled); }
-				}
+				property bool Sorted { bool get();	void set(bool sorted); }
+				property bool Enabled {	bool get(); void set(bool enabled); }
 
 				event EventHandler^ DropDownClosed; // == edit completion
 
 			private:
 				IntPtr m_pMFCInfo = IntPtr::Zero;
+
+				bool m_Sorted = false;
 
 				List<ICheckComboBoxItem^>^ m_Items;
 				List<ICheckComboBoxItem^>^ m_CheckedItems;
