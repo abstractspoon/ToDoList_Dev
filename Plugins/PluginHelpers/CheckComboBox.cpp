@@ -49,6 +49,7 @@ HostedCheckComboBox* HostedCheckComboBox::Attach(HWND hwndParent, HFONT hFont, B
 
 	pHost->m_Combo.Create(dwFlags, rClient, &(pHost->m_WndOfManagedHandle), 1001);
 	pHost->m_Combo.SendMessage(WM_SETFONT, (WPARAM)hFont, 0);
+	pHost->m_Combo.EnableTooltip();
 
 	return pHost;
 }
@@ -101,6 +102,13 @@ void HostedCheckComboBox::Detach()
 	m_Combo.DestroyWindow();
 
 	delete this;
+}
+
+void HostedCheckComboBox::FilterTooltipMessage(MSG* pMsg) 
+{ 
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	m_Combo.FilterToolTipMessage(pMsg); 
 }
 
 void HostedCheckComboBox::DrawItem(WPARAM wp, LPARAM lp)
@@ -326,6 +334,17 @@ void CheckComboBox::WndProc(Message% m)
 		case CBN_EDITCHANGE:pHost->OnEditchange();	break;
 		}
 		break;
+	}
+}
+
+void CheckComboBox::FilterTooltipMessage(Windows::Forms::Message m)
+{
+	if (m_pMFCInfo != IntPtr::Zero)
+	{
+		MSG msg;
+		Win32::MapMessage(m, msg);
+
+		ComboHost(m_pMFCInfo)->FilterTooltipMessage(&msg);
 	}
 }
 

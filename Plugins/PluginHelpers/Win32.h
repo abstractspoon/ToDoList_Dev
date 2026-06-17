@@ -54,6 +54,8 @@ namespace Abstractspoon
 
 				static int SendMessage(IntPtr hWnd, UInt32 wMsg, UIntPtr wParam, IntPtr lParam);
 				static int PostMessage(IntPtr hWnd, UInt32 wMsg, UIntPtr wParam, IntPtr lParam);
+				static void MapMessage(System::Windows::Forms::Message^ pFromMsg, MSG% toMsg);
+				static System::Windows::Forms::Message^ MapMessage(MSG% toMsg);
 
 				// Misc
 				static void ActivateApp(IntPtr hWnd);

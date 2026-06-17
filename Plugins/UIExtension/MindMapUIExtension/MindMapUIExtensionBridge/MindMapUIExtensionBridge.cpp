@@ -181,6 +181,17 @@ bool CMindMapUIExtensionBridgeWindow::ProcessMessage(MSG* pMsg)
 										pMsg->pt.y);
 }
 
+void CMindMapUIExtensionBridgeWindow::FilterToolTipMessage(MSG* pMsg)
+{
+	return m_wnd->FilterToolTipMessage(IntPtr(pMsg->hwnd),
+									   pMsg->message,
+									   pMsg->wParam,
+									   pMsg->lParam,
+									   pMsg->time,
+									   pMsg->pt.x,
+									   pMsg->pt.y);
+}
+
 bool CMindMapUIExtensionBridgeWindow::DoIdleProcessing()
 {
 	return m_wnd->DoIdleProcessing();

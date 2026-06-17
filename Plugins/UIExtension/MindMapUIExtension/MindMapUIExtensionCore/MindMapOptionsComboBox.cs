@@ -53,7 +53,6 @@ namespace MindMapUIExtension
 				{
 					SetItemChecked(item, value.HasFlag((MindMapOption)item.ItemData));
 				}
-				//RefreshTooltipText();
 			}
 		}
 

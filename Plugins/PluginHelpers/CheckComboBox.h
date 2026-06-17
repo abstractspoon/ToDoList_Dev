@@ -40,9 +40,11 @@ namespace Abstractspoon
 				int GetItemCount();
 
 				void DrawItem(WPARAM wp, LPARAM lp);
-				void SetEnabled(bool enabled);
 				void Detach();
 				bool IsDropped() { return (m_Combo.GetDroppedState() != FALSE); }
+				void FilterTooltipMessage(MSG* pMsg);
+
+				void SetEnabled(bool enabled);
 				void SetPrompt(LPCWSTR szPrompt);
 
 				// Because MFC message reflection appears not to work
@@ -79,6 +81,7 @@ namespace Abstractspoon
 				bool IsItemChecked(ICheckComboBoxItem^ item);
 				bool SetItemChecked(ICheckComboBoxItem^ item, bool checked);
 				void RemoveAllItems();
+				void FilterTooltipMessage(Windows::Forms::Message m);
 
 				property IEnumerable<ICheckComboBoxItem^>^ Items 
 				{ 
