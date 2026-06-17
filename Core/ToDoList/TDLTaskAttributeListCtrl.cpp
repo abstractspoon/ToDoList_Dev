@@ -2518,7 +2518,7 @@ BOOL CTDLTaskAttributeListCtrl::GetCustomAttributeData(const CString& sAttribID,
 
 		data.Set(aMatched, aMixed, FALSE);
 	}
-	else if (pDef->IsDataType(TDCCA_DATE))
+	else if (pDef->IsDataType(TDCCA_DATE) && !sValue.IsEmpty())
 	{
 		COleDateTime date(_ttof(sValue));
 		
