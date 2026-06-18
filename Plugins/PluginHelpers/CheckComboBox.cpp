@@ -7,8 +7,7 @@
 #include "ColorUtil.h"
 #include "DPIScaling.h"
 #include "CheckComboBox.h"
-
-#include <Shared\DialogHelper.h>
+#include "Translator.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -54,30 +53,35 @@ HostedCheckComboBox* HostedCheckComboBox::Attach(HWND hwndParent, HFONT hFont, B
 	return pHost;
 }
 
-int HostedCheckComboBox::AddItem(LPCWSTR szItem, int nItemData, bool checked)
+int HostedCheckComboBox::AddItem(LPCWSTR szItem, int nUniqueId, bool bChecked)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	int nItem = CDialogHelper::AddStringT(m_Combo, szItem, nItemData);
+	int nItem = m_Combo.AddString(szItem);
 
-	if ((nItem != CB_ERR) && checked)
-		m_Combo.SetCheck(nItem);
+	if (nItem != CB_ERR)
+	{
+		m_Combo.SetItemData(nItem, nUniqueId);
+
+		if (bChecked)
+			m_Combo.SetCheck(nItem);
+	}
 
 	return nItem;
 }
 
-bool HostedCheckComboBox::IsItemChecked(int nItemData)
+bool HostedCheckComboBox::IsItemChecked(int nUniqueId)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	return (m_Combo.GetCheckByData(nItemData) == CCBC_CHECKED);
+	return (m_Combo.GetCheckByData(nUniqueId) == CCBC_CHECKED);
 }
 
-bool HostedCheckComboBox::SetItemChecked(int nItemData, bool checked)
+bool HostedCheckComboBox::SetItemChecked(int nUniqueId, bool bChecked)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	return (-1 != m_Combo.SetCheckByItemData(nItemData, (checked ? CCBC_CHECKED : CCBC_UNCHECKED)));
+	return (-1 != m_Combo.SetCheckByItemData(nUniqueId, (bChecked ? CCBC_CHECKED : CCBC_UNCHECKED)));
 }
 
 void HostedCheckComboBox::RemoveAllItems()
@@ -118,11 +122,11 @@ void HostedCheckComboBox::DrawItem(WPARAM wp, LPARAM lp)
 	m_Combo.SendMessage(WM_DRAWITEM, wp, lp);
 }
 
-void HostedCheckComboBox::SetEnabled(bool enabled)
+void HostedCheckComboBox::SetEnabled(bool bEnabled)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	m_Combo.EnableWindow(enabled);
+	m_Combo.EnableWindow(bEnabled);
 }
 
 void HostedCheckComboBox::SetPrompt(LPCWSTR szPrompt)
@@ -155,6 +159,31 @@ void HostedCheckComboBox::OnCloseUp()
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
+CheckComboBoxItem::CheckComboBoxItem(String^ label, int uniqueId)
+	:
+	m_Label(label),
+	m_UniqueId(uniqueId)
+{
+}
+
+CheckComboBoxItem::CheckComboBoxItem(String^ label, int uniqueId, Translator^ trans)
+	:
+	CheckComboBoxItem(trans->Translate(label, Translator::Type::ComboBox), uniqueId)
+{
+}
+
+String^ CheckComboBoxItem::Label::get() 
+{ 
+	return m_Label; 
+}
+
+int CheckComboBoxItem::UniqueId::get()
+{ 
+	return m_UniqueId;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
 HostedCheckComboBox* ComboHost(IntPtr ptr)
 {
 	if (ptr == IntPtr::Zero)
@@ -182,7 +211,7 @@ int CheckComboBox::AddItem(ICheckComboBoxItem^ item, bool checked)
 		m_CheckedItems->Add(item);
 
 	if (m_pMFCInfo != IntPtr::Zero)
-		ComboHost(m_pMFCInfo)->AddItem(MS(item->Label), item->ItemData, checked);
+		ComboHost(m_pMFCInfo)->AddItem(MS(item->Label), item->UniqueId, checked);
 
 	return (m_Items->Count - 1);
 }
@@ -207,7 +236,7 @@ bool CheckComboBox::SetItemChecked(ICheckComboBoxItem^ item, bool checked)
 	}
 
 	if (m_pMFCInfo != IntPtr::Zero)
-		ComboHost(m_pMFCInfo)->SetItemChecked(item->ItemData, checked);
+		ComboHost(m_pMFCInfo)->SetItemChecked(item->UniqueId, checked);
 
 	return false;
 }
@@ -305,7 +334,7 @@ void CheckComboBox::WndProc(Message% m)
 
 				for each (auto item in m_Items)
 				{
-					if (pHost->IsItemChecked(item->ItemData))
+					if (pHost->IsItemChecked(item->UniqueId))
 						m_CheckedItems->Add(item);
 				}
 
@@ -320,7 +349,7 @@ void CheckComboBox::WndProc(Message% m)
 				for each (auto item in m_Items)
 				{
 					bool checked = m_CheckedItems->Contains(item);
-					ComboHost(m_pMFCInfo)->SetItemChecked(item->ItemData, checked);
+					ComboHost(m_pMFCInfo)->SetItemChecked(item->UniqueId, checked);
 				}
 
 				DropDownClosed(this, gcnew EventArgs());
@@ -358,7 +387,7 @@ void CheckComboBox::CheckPopulateCombo()
 		for each (auto item in m_Items)
 		{
 			bool checked = m_CheckedItems->Contains(item);
-			ComboHost(m_pMFCInfo)->AddItem(MS(item->Label), item->ItemData, checked);
+			ComboHost(m_pMFCInfo)->AddItem(MS(item->Label), item->UniqueId, checked);
 		}
 	}
 }

@@ -8,31 +8,15 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 namespace MindMapUIExtension
 {
-	[System.ComponentModel.DesignerCategory("")]
-
 	class MindMapOptionsComboBox : CheckComboBox
 	{
-		class MindMapOptionItem : ICheckComboBoxItem
-		{
-			public MindMapOptionItem(string label, MindMapOption option)
-			{
-				Label = label;
-				ItemData = (int)option;
-			}
-
-			public virtual string Label { get; }
-			public virtual int ItemData { get; }
-		}
-
-		// ----------------------------------------------------------------
-
 		public MindMapOptionsComboBox(Translator trans)
 		{
 			Sorted = true;
 			Prompt = trans.Translate("<none>", Translator.Type.ComboBox);
 
-			AddItem("Show dependencies", MindMapOption.ShowDependencies, trans);
-			AddItem("Straight line connections", MindMapOption.StraightConnections, trans);
+			AddItem(new CheckComboBoxItem("Show dependencies", (int)MindMapOption.ShowDependencies, trans), false);
+			AddItem(new CheckComboBoxItem("Straight line connections", (int)MindMapOption.StraightConnections, trans), false);
 		}
 
 		public MindMapOption SelectedOptions
@@ -42,7 +26,7 @@ namespace MindMapUIExtension
 				MindMapOption options = MindMapOption.None;
 
 				foreach (var item in CheckedItems)
-					options |= (MindMapOption)item.ItemData;
+					options |= (MindMapOption)item.UniqueId;
 
 				return options;
 			}
@@ -51,14 +35,9 @@ namespace MindMapUIExtension
 			{
 				foreach (var item in Items)
 				{
-					SetItemChecked(item, value.HasFlag((MindMapOption)item.ItemData));
+					SetItemChecked(item, value.HasFlag((MindMapOption)item.UniqueId));
 				}
 			}
-		}
-
-		private void AddItem(string label, MindMapOption option, Translator trans)
-		{
-			base.AddItem(new MindMapOptionItem(trans.Translate(label, Translator.Type.ComboBox), option), false);
 		}
 	}
 

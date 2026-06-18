@@ -32,9 +32,9 @@ namespace Abstractspoon
 			public:
 				static HostedCheckComboBox* Attach(HWND hwndParent, HFONT hFont, BOOL bSorted = TRUE);
 
-				int AddItem(LPCWSTR szItem, int nItemData, bool checked);
-				bool IsItemChecked(int nItemData);
-				bool SetItemChecked(int nItemData, bool checked);
+				int AddItem(LPCWSTR szItem, int nUniqueId, bool bChecked);
+				bool IsItemChecked(int nUniqueId);
+				bool SetItemChecked(int nUniqueId, bool bChecked);
 
 				void RemoveAllItems();
 				int GetItemCount();
@@ -44,7 +44,7 @@ namespace Abstractspoon
 				bool IsDropped() { return (m_Combo.GetDroppedState() != FALSE); }
 				void FilterTooltipMessage(MSG* pMsg);
 
-				void SetEnabled(bool enabled);
+				void SetEnabled(bool bEnabled);
 				void SetPrompt(LPCWSTR szPrompt);
 
 				// Because MFC message reflection appears not to work
@@ -67,7 +67,27 @@ namespace Abstractspoon
 			{
 			public:
 				virtual property String^ Label { String^ get(); }
-				virtual property int ItemData { int get(); }
+				virtual property int UniqueId { int get(); }
+			};
+
+			// -------------------------------------------------------------------
+			// Minimal implementation
+
+			ref class Translator;
+
+			public ref class CheckComboBoxItem : public ICheckComboBoxItem
+			{
+			public:
+				CheckComboBoxItem(String^ label, int UniqueId);
+				CheckComboBoxItem(String^ label, int UniqueId, Translator^ trans);
+;
+			public:
+				virtual property String^ Label { String^ get(); }
+				virtual property int UniqueId { int get(); }
+
+			private:
+				String^ m_Label;
+				int m_UniqueId;
 			};
 
 			// --------------------------------------------------------

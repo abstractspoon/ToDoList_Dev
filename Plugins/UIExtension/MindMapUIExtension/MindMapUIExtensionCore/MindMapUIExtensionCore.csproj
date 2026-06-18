@@ -55,7 +55,9 @@
     <Compile Include="MindMapTaskItem.cs" />
     <Compile Include="MindMapUtils.cs" />
     <Compile Include="MindMapItem.cs" />
-    <Compile Include="MindMapOptionsComboBox.cs" />
+    <Compile Include="MindMapOptionsComboBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
