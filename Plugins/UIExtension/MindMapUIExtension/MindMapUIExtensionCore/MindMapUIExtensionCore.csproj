@@ -68,10 +68,6 @@
     <Compile Include="TdlMindMapControl.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\3rdParty\CustomComboBox\CustomComboBox.csproj">
-      <Project>{5563f985-67ac-4b91-a2c4-1fc9bafe7d49}</Project>
-      <Name>CustomComboBox</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\..\3rdParty\ImageHelper\ImageHelper.csproj">
       <Project>{819992e3-fc33-4fcd-8aa5-5bc8329b2c20}</Project>
       <Name>ImageHelper</Name>

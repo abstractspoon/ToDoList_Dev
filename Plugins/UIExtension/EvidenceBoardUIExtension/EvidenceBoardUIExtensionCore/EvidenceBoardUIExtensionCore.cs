@@ -260,7 +260,6 @@ namespace EvidenceBoardUIExtension
 			prefs.WriteProfileString(key, "LastBrowsedImageFolder", m_LastBrowsedImageFolder);
 
 			m_PrefsDlg.SavePreferences(prefs, key);
-			m_OptionsCombo.SavePreferences(prefs, key);
 			m_LinkVisibilityCombo.SavePreferences(prefs, key);
 			m_Control.SavePreferences(prefs, key);
 		}
@@ -272,7 +271,7 @@ namespace EvidenceBoardUIExtension
 				m_LastBrowsedImageFolder = prefs.GetProfileString(key, "LastBrowsedImageFolder", @"C:\");
 
 				m_Control.LoadPreferences(prefs, key);
-				m_Control.Options = m_OptionsCombo.LoadPreferences(prefs, key);
+				m_OptionsCombo.SelectedOptions = m_Control.Options;
 				m_Control.VisibleLinkTypes = m_LinkVisibilityCombo.LoadPreferences(prefs, key);
 
 				// Preferences
@@ -400,11 +399,8 @@ namespace EvidenceBoardUIExtension
 			m_OptionsLabel = CreateLabel("Options", null);
 			this.Controls.Add(m_OptionsLabel);
 
-			m_OptionsCombo = new EvidenceBoardOptionsComboBox();
-			m_OptionsCombo.Translate(m_Trans);
-
+			m_OptionsCombo = new EvidenceBoardOptionsComboBox(m_Trans);
 			m_OptionsCombo.DropDownClosed += new EventHandler(OnOptionsComboClosed);
-			m_OptionsCombo.DrawMode = DrawMode.OwnerDrawFixed;
 
 			InitialiseCtrl(m_OptionsCombo, m_OptionsLabel, ComboWidth);
 			this.Controls.Add(m_OptionsCombo);
@@ -509,27 +505,22 @@ namespace EvidenceBoardUIExtension
 			ctrl.Font = m_ControlsFont;
 			ctrl.Width = width;
 
-			if (ctrl is ComboBox)
+			if (ctrl is RangeSliderCtrl)
 			{
-				ctrl.Location = new Point(associatedLabel.Left, associatedLabel.Bottom + DPIScaling.Scale(3));
-				ctrl.Height = DPIScaling.Scale(200);
-				(ctrl as ComboBox).DropDownStyle = ComboBoxStyle.DropDownList;
-				(ctrl as ComboBox).Sorted = true;
+				ctrl.Location = new Point(associatedLabel.Left, associatedLabel.Bottom + DPIScaling.Scale(2));
 			}
 			else
 			{
-				ctrl.Location = new Point(associatedLabel.Left, associatedLabel.Bottom + DPIScaling.Scale(2));
+				ctrl.Location = new Point(associatedLabel.Left, associatedLabel.Bottom + DPIScaling.Scale(3));
+				ctrl.Height = DPIScaling.Scale(21);
 			}
 		}
 
 		void OnOptionsComboClosed(object sender, EventArgs e)
 		{
-			if (!m_OptionsCombo.Cancelled)
-			{
-				m_Control.Options = m_OptionsCombo.SelectedOptions;
+			m_Control.Options = m_OptionsCombo.SelectedOptions;
 
-				ShowDateSlider(m_Control.Options.HasFlag(EvidenceBoardOption.ShowDateSlider));
-			}
+			ShowDateSlider(m_Control.Options.HasFlag(EvidenceBoardOption.ShowDateSlider));
 		}
 
 		void OnLinkVisibilityComboClosed(object sender, EventArgs e)

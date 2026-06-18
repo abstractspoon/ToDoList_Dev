@@ -8,54 +8,25 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 namespace EvidenceBoardUIExtension
 {
-	class EvidenceBoardOptionsComboBox : CustomComboBox.CheckedComboBox
+	class EvidenceBoardOptionsComboBox : CheckComboBox
 	{
-		class EvidenceBoardOptionItem
-		{
-			public EvidenceBoardOptionItem(string label, EvidenceBoardOption option)
-			{
-				Label = label;
-				Option = option;
-			}
-
-			public override string ToString()
-			{
-				return Label;
-			}
-
-			public string Label;
-			public EvidenceBoardOption Option { get; private set; }
-		}
+		const EvidenceBoardOption DefaultOptions = (EvidenceBoardOption.DrawPins | EvidenceBoardOption.ShowDateSlider);
 
 		// ----------------------------------------------------------------
 
-		EvidenceBoardOption DefaultOptions = (EvidenceBoardOption.DrawPins | EvidenceBoardOption.ShowDateSlider);
-
-		// ----------------------------------------------------------------
-
-		public EvidenceBoardOptionsComboBox()
+		public EvidenceBoardOptionsComboBox(Translator trans)
 		{
-			None = "<none>";
+			Sorted = true;
+			Prompt = trans.Translate("<none>", Translator.Type.ComboBox);
 
 #if DEBUG
-			Items.Add(new EvidenceBoardOptionItem("Show root node", EvidenceBoardOption.ShowRootNode));
+			AddItem(new CheckComboBoxItem("Show root node", (int)EvidenceBoardOption.ShowRootNode), false);
 #endif
-			Items.Add(new EvidenceBoardOptionItem("Draw connections on top", EvidenceBoardOption.DrawLinksOnTop));
-			Items.Add(new EvidenceBoardOptionItem("Draw pins", EvidenceBoardOption.DrawPins));
-			Items.Add(new EvidenceBoardOptionItem("Show 'Visible Date Range' slider", EvidenceBoardOption.ShowDateSlider));
+			AddItem(new CheckComboBoxItem("Draw connections on top", (int)EvidenceBoardOption.DrawLinksOnTop, trans), false);
+			AddItem(new CheckComboBoxItem("Draw pins", (int)EvidenceBoardOption.DrawPins, trans), false);
+			AddItem(new CheckComboBoxItem("Show 'Visible Date Range' slider", (int)EvidenceBoardOption.ShowDateSlider, trans), false);
 
 			Sorted = true;
-		}
-
-		public void Translate(Translator trans)
-		{
-			None = trans.Translate(None, Translator.Type.ComboBox);
-
-			foreach (var item in Items)
-			{
-				var option = (item as EvidenceBoardOptionItem);
-				option.Label = trans.Translate(option.Label, Translator.Type.ComboBox);
-			}
 		}
 
 		public EvidenceBoardOption SelectedOptions
@@ -64,37 +35,19 @@ namespace EvidenceBoardUIExtension
 			{
 				EvidenceBoardOption options = EvidenceBoardOption.None;
 
-				foreach (var checkItem in CheckedItems)
-				{
-					var item = (EvidenceBoardOptionItem)checkItem;
-					options |= item.Option;
-				}
+				foreach (var item in CheckedItems)
+					options |= (EvidenceBoardOption)item.UniqueId;
 
 				return options;
 			}
 
 			set
 			{
-				for (int index = 0; index < Items.Count; index++)
+				foreach (var item in Items)
 				{
-					var item = (EvidenceBoardOptionItem)Items[index];
-
-					ListBox.SetItemChecked(index, value.HasFlag(item.Option));
+					SetItemChecked(item, value.HasFlag((EvidenceBoardOption)item.UniqueId));
 				}
-				RefreshTooltipText();
 			}
-		}
-
-		public EvidenceBoardOption LoadPreferences(Preferences prefs, String key)
-		{
-			SelectedOptions = prefs.GetProfileEnum(key, "Options", DefaultOptions);
-
-			return SelectedOptions;
-		}
-
-		public void SavePreferences(Preferences prefs, String key)
-		{
-			prefs.WriteProfileEnum(key, "Options", (int)SelectedOptions);
 		}
 	}
 
