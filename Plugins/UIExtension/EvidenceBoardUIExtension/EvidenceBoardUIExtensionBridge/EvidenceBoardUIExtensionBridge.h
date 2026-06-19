@@ -61,7 +61,7 @@ public:
    bool PrepareNewTask(ITaskList* pTask) const;
 
    bool ProcessMessage(MSG* pMsg);
-   void FilterToolTipMessage(MSG* pMsg) {/*.Net tooltips don't need this*/}
+   void FilterToolTipMessage(MSG* pMsg);
    bool DoIdleProcessing();
 
    bool DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData);

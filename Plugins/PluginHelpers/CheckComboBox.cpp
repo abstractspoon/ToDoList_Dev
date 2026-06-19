@@ -396,7 +396,7 @@ void CheckComboBox::WndProc(Message% m)
 	}
 }
 
-void CheckComboBox::FilterTooltipMessage(Windows::Forms::Message m)
+void CheckComboBox::FilterTooltipMessage(Windows::Forms::Message^ m)
 {
 	if (m_pMFCInfo != IntPtr::Zero)
 	{

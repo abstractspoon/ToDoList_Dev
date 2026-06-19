@@ -103,7 +103,7 @@ namespace Abstractspoon
 				bool IsItemChecked(ICheckComboBoxItem^ item);
 				bool SetItemChecked(ICheckComboBoxItem^ item, bool checked);
 				void RemoveAllItems();
-				void FilterTooltipMessage(Windows::Forms::Message m);
+				void FilterTooltipMessage(Windows::Forms::Message^ m);
 
 				property IEnumerable<ICheckComboBoxItem^>^ Items 
 				{ 
