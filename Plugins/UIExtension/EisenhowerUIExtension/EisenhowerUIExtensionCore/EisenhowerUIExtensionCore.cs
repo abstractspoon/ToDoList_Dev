@@ -9,6 +9,7 @@ using System.Windows.Forms.VisualStyles;
 using Abstractspoon.Tdl.PluginHelpers;
 using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
+///////////////////////////////////////////////////////////////////
 
 namespace EisenhowerUIExtension
 {
@@ -27,6 +28,7 @@ namespace EisenhowerUIExtension
 		private EisenhowerMatrices m_Matrices;
 		private UIExtension.TaskIcon m_TaskIcons;
 		private Font m_ControlsFont;
+		private UIThemeToolbarRenderer m_TBRenderer;
 
 		private string m_PrevMatrices;
 		private string m_PrevSelMatrix;
@@ -46,6 +48,11 @@ namespace EisenhowerUIExtension
 			m_TaskIcons = new UIExtension.TaskIcon(parentHandle);
 			m_Data = new EisenhowerData(trans);
 			m_Matrices = new EisenhowerMatrices();
+
+			m_TBRenderer = new UIThemeToolbarRenderer();
+			m_Toolbar.Renderer = m_TBRenderer;
+			Toolbars.FixupButtonSizes(m_Toolbar);
+
 
 			m_EisenhowerCtrl.Initialize(m_Data.Tasks, trans, m_TaskIcons);
 
@@ -192,10 +199,15 @@ namespace EisenhowerUIExtension
 		public void SetUITheme(UITheme theme)
 		{
 			BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight);
+			m_MatricesLabel.ForeColor = theme.GetAppDrawingColor(UITheme.AppColor.AppText);
 
 			m_EisenhowerCtrl.SetUITheme(theme);
 
-			m_MatricesLabel.ForeColor = theme.GetAppDrawingColor(UITheme.AppColor.AppText);
+			// Set the toolbar colors to be the same as the back color
+			theme.SetAppDrawingColor(UITheme.AppColor.ToolbarDark, BackColor);
+			theme.SetAppDrawingColor(UITheme.AppColor.ToolbarLight, BackColor);
+
+			m_TBRenderer.SetUITheme(theme);
 		}
 
 		public void SetTaskFont(String faceName, int pointSize)
@@ -531,6 +543,12 @@ namespace EisenhowerUIExtension
 				m_MatrixCombo.SelectedMatrix = newSelMatrix;
 				EnableMatrixComboEvents(false);
 			}
+		}
+
+		private void OnHelp(object sender, EventArgs e)
+		{
+			var notify = new UIExtension.ParentNotify(m_HwndParent);
+			notify.NotifyDoHelp(m_TypeID);
 		}
 	}
 

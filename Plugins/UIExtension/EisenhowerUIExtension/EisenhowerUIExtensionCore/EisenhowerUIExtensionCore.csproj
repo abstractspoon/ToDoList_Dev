@@ -155,6 +155,10 @@
     <EmbeddedResource Include="Resources\TopLeftPane.png" />
     <EmbeddedResource Include="Resources\TopRightPane.png" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Help.png" />
+    <EmbeddedResource Include="Resources\Prefs.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>mkdir "$(SolutionDir)$(ConfigurationName)"
