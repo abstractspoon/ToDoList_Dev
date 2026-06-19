@@ -8,184 +8,91 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 namespace EvidenceBoardUIExtension
 {
-	class EvidenceBoardLinkVisibilityComboBox : CustomComboBox.CheckedComboBox
+	class EvidenceBoardLinkVisibilityComboBox : CheckComboBox
 	{
-		class EvidenceBoardLinkVisibilityItem : TDLNodeControl.LinkType
-		{
-			public EvidenceBoardLinkVisibilityItem(string label, EvidenceBoardLinkType type)
-				:
-				base(label, type)
-			{
-				Label = label;
-			}
-
-			public override string ToString()
-			{
-				return Label;
-			}
-
-			public string Label;
-		}
-
-		// ----------------------------------------------------------------
-
+		Translator m_Trans;
+ 		List<ICheckComboBoxItem> m_PrevLinkVisibility;
 		HashSet<string> m_UserTypes = new HashSet<string>();
 
-		class LinkTypeVisibility : TDLNodeControl.LinkType
+		// -----------------------------------
+
+		public EvidenceBoardLinkVisibilityComboBox(Translator trans)
 		{
-			public LinkTypeVisibility(string label, EvidenceBoardLinkType type)
-				:
-				base(label, type)
-			{
-			}
+			m_Trans = trans;
 
-			public LinkTypeVisibility(TDLNodeControl.LinkType other)
-				:
-				base(other.Name, other.Type)
-			{
-			}
-
-			public bool Visible = true;
-		}
-		List<LinkTypeVisibility> m_PrevLinkVisibility;
-
-		// ----------------------------------------------------------------
-
-		public EvidenceBoardLinkVisibilityComboBox()
-		{
-			Items.Add(new EvidenceBoardLinkVisibilityItem("Untyped", EvidenceBoardLinkType.None));
-			Items.Add(new EvidenceBoardLinkVisibilityItem("Dependency", EvidenceBoardLinkType.Dependency));
-			Items.Add(new EvidenceBoardLinkVisibilityItem("Parent/Child", EvidenceBoardLinkType.ParentChild));
-
+			Prompt = trans.Translate("<none>", Translator.Type.ComboBox);
 			UserLinkTypes = null;
-			Sorted = true;
 
-			DropDownClosed += (s, e) => { m_PrevLinkVisibility = null; };
+			AddDefaultLinks();
 		}
 
-		public void Translate(Translator trans)
+		private void AddDefaultLinks()
 		{
-			None = trans.Translate(None, Translator.Type.ComboBox);
-
-			foreach (var item in Items)
-			{
-				var link = (item as EvidenceBoardLinkVisibilityItem);
-
-				if (link.Type != EvidenceBoardLinkType.User)
-					link.Label = trans.Translate(link.Label, Translator.Type.ComboBox);
-			}
+			AddItem(new LinkComboItem("Untyped", EvidenceBoardLinkType.None, m_Trans), true);
+			AddItem(new LinkComboItem("Dependency", EvidenceBoardLinkType.Dependency, m_Trans), true);
+			AddItem(new LinkComboItem("Parent/Child", EvidenceBoardLinkType.ParentChild, m_Trans), true);
 		}
 
 		public IEnumerable<string> UserLinkTypes
 		{
-			get
-			{
-				return m_UserTypes;
-			}
+			get { return m_UserTypes; }
 
 			set
 			{
 				if ((value != null) && m_UserTypes.SetEquals(value))
 					return;
 
-				// Cache the current selection
-				var prevVisibility = LinkVisibility;
+				// Cache the previous items and states
+				var prevItems = new List<ICheckComboBoxItem>(CheckedItems);
+				var prevCheckedItems = (m_PrevLinkVisibility ?? new List<ICheckComboBoxItem>(CheckedItems));
 
-				// Remove all user types
-				int iItem = Items.Count;
+				// Rebuild the combo
+				RemoveAllItems();
+				AddDefaultLinks();
 
-				while (iItem-- > 0)
-				{
-					var link = (Items[iItem] as EvidenceBoardLinkVisibilityItem);
+				m_UserTypes.Clear();
 
-					if (link.Type == EvidenceBoardLinkType.User)
-						Items.RemoveAt(iItem);
-				}
-
-				// Re-add
 				if (value != null)
 				{
+					int userId = (int)EvidenceBoardLinkType.User;
+
 					foreach (var name in value)
 					{
 						if (!String.IsNullOrWhiteSpace(name))
-							Items.Add(new EvidenceBoardLinkVisibilityItem(name, EvidenceBoardLinkType.User));
+						{
+							AddItem(new LinkComboItem(name, (EvidenceBoardLinkType)userId++, null), true);
+							m_UserTypes.Add(name);
+						}
 					}
 				}
 
-				// Restore the selection
-				for (int index = 0; index < Items.Count; index++)
+				// Restore the check states
+				foreach (var item in Items)
 				{
-					var item = (EvidenceBoardLinkVisibilityItem)Items[index];
-					ListBox.SetItemChecked(index, IsTypeVisible(prevVisibility, item.Type, item.Name));
+					bool isChecked = (!prevItems.Contains(item) || prevCheckedItems.Contains(item));
+					SetItemChecked(item, isChecked);
 				}
 
 				m_PrevLinkVisibility = null;
-
-				if (value != null)
-					m_UserTypes = new HashSet<string>(value);
-				else
-					m_UserTypes.Clear();
 			}
-		}
-
-		private List<LinkTypeVisibility> LinkVisibility
-		{
-			get
-			{
-				if (m_PrevLinkVisibility != null)
-					return m_PrevLinkVisibility;
-
-				// else
-				var linkVis = new List<LinkTypeVisibility>();
-
-				for (int index = 0; index < Items.Count; index++)
-				{
-					var item = (EvidenceBoardLinkVisibilityItem)Items[index];
-
-					linkVis.Add(new LinkTypeVisibility(item)
-					{
-						Visible = ListBox.GetItemChecked(index)
-					});
-				}
-
-				return linkVis;
-			}
-		}
-
-		private bool IsTypeVisible(List<LinkTypeVisibility> vis, EvidenceBoardLinkType type, string name = "")
-		{
-			int index = vis.FindIndex(x => ((x.Type == type) && (x.Name == name)));
-
-			return ((index == -1) ? true : vis[index].Visible);
 		}
 
 		public List<TDLNodeControl.LinkType> SelectedLinkTypes
 		{
 			get
 			{
-				var selOptions = new List<TDLNodeControl.LinkType>();
+				var selLinks = new List<TDLNodeControl.LinkType>();
 
-				foreach (var option in LinkVisibility)
+				foreach (var item in CheckedItems)
 				{
-					if (option.Visible)
-						selOptions.Add(new TDLNodeControl.LinkType(option.Name, option.Type));
+					var link = (item as LinkComboItem);
+					var type = (link.IsUserType ? EvidenceBoardLinkType.User : link.Type);
+
+					selLinks.Add(new TDLNodeControl.LinkType(link.Name, type));
 				}
 
-				return selOptions;
+				return selLinks;
 			}
-		}
-
-		int FindItemIndex(EvidenceBoardLinkType type, string name)
-		{
-			for (int index = 0; index < Items.Count; index++)
-			{
-				var item = (EvidenceBoardLinkVisibilityItem)Items[index];
-
-				if ((type == item.Type) && (name == item.Name))
-					return index;
-			}
-
-			return -1;
 		}
 
 		public List<TDLNodeControl.LinkType> LoadPreferences(Preferences prefs, String key)
@@ -194,12 +101,11 @@ namespace EvidenceBoardUIExtension
 
 			if (prevVisibility == "_")
 			{
-				CheckAll();
 				m_PrevLinkVisibility = null;
 			}
 			else
 			{
-				m_PrevLinkVisibility = new List<LinkTypeVisibility>();
+				m_PrevLinkVisibility = new List<ICheckComboBoxItem>();
 
 				var options = prevVisibility.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries );
 
@@ -222,10 +128,7 @@ namespace EvidenceBoardUIExtension
 						continue;
 					}
 
-					if ((type != (int)EvidenceBoardLinkType.Dependency) && 
-						(type != (int)EvidenceBoardLinkType.ParentChild) &&
-						(type != (int)EvidenceBoardLinkType.None) &&
-						(type != (int)EvidenceBoardLinkType.User))
+					if (type < 0)
 					{
 						Debug.Assert(false);
 						continue;
@@ -234,15 +137,8 @@ namespace EvidenceBoardUIExtension
 					int visible = 1;
 					int.TryParse(parts[2], out visible);
 					
-					int find = FindItemIndex((EvidenceBoardLinkType)type, parts[1]);
-
-					if (find != -1)
-						ListBox.SetItemChecked(find, (visible != 0));
-
-					m_PrevLinkVisibility.Add(new LinkTypeVisibility(parts[1], (EvidenceBoardLinkType)type)
-					{
-						Visible = (visible != 0)
-					});
+					if (visible != 0)
+						m_PrevLinkVisibility.Add(new LinkComboItem(parts[1], (EvidenceBoardLinkType)type, null));
 				}
 			}
 
@@ -253,12 +149,13 @@ namespace EvidenceBoardUIExtension
 		{
 			string options = string.Empty;
 
-			for (int index = 0; index < Items.Count; index++)
+			foreach (var item in Items)
 			{
-				bool visible = ListBox.GetItemChecked(index);
+				var linkItem = (item as LinkComboItem);
+				var type = (linkItem.IsUserType ? EvidenceBoardLinkType.User : linkItem.Type);
 
-				var item = (EvidenceBoardLinkVisibilityItem)Items[index];
-				var option = string.Format("{0}:{1}:{2}|", (int)item.Type, item.Name, (visible ? 1 : 0));
+				bool isChecked = IsItemChecked(item);
+				var option = string.Format("{0}:{1}:{2}|", (int)type, linkItem.Name, (isChecked ? 1 : 0));
 
 				options = options + option;
 			}
@@ -267,5 +164,46 @@ namespace EvidenceBoardUIExtension
 		}
 	}
 
-	// ----------------------------------------------------------------------------
+	///////////////////////////////////////////////////////
+
+	class LinkComboItem : TDLNodeControl.LinkType, ICheckComboBoxItem
+	{
+		private string m_Label;
+
+		// ------------------------
+
+		public LinkComboItem(string name, EvidenceBoardLinkType type, Translator trans) : base(name, type)
+		{
+			if (trans == null)
+				m_Label = name;
+			else
+				m_Label = trans.Translate(name, Translator.Type.ComboBox);
+		}
+
+		public String Label { get { return m_Label; } }
+		public int UniqueId { get { return (int)Type; } }
+		public bool IsUserType { get { return (Type >= EvidenceBoardLinkType.User); } }
+
+		public override bool Equals(object obj)
+		{
+			var link = (obj as TDLNodeControl.LinkType);
+
+			if (link != null)
+			{
+				switch (link.Type)
+				{
+				case EvidenceBoardLinkType.None:
+				case EvidenceBoardLinkType.Dependency:
+				case EvidenceBoardLinkType.ParentChild:
+					return (link.Type == this.Type);
+				}
+
+				// All else
+				Debug.Assert(link.Type >= EvidenceBoardLinkType.User);
+				return (link.Name == this.Name);
+			}
+
+			return false;
+		}
+	}
 }

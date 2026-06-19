@@ -173,13 +173,24 @@ bool CEvidenceBoardUIExtensionBridgeWindow::PrepareNewTask(ITaskList* pTask) con
 
 bool CEvidenceBoardUIExtensionBridgeWindow::ProcessMessage(MSG* pMsg)
 {
-	return m_wnd->ProcessMessage(IntPtr(pMsg->hwnd), 
-										pMsg->message, 
-										pMsg->wParam, 
-										pMsg->lParam, 
-										pMsg->time, 
-										pMsg->pt.x,
-										pMsg->pt.y);
+	return m_wnd->ProcessMessage(IntPtr(pMsg->hwnd),
+								 pMsg->message,
+								 pMsg->wParam,
+								 pMsg->lParam,
+								 pMsg->time,
+								 pMsg->pt.x,
+								 pMsg->pt.y);
+}
+
+void CEvidenceBoardUIExtensionBridgeWindow::FilterToolTipMessage(MSG* pMsg) 
+{
+	m_wnd->FilterToolTipMessage(IntPtr(pMsg->hwnd),
+								pMsg->message,
+								pMsg->wParam,
+								pMsg->lParam,
+								pMsg->time,
+								pMsg->pt.x,
+								pMsg->pt.y);
 }
 
 bool CEvidenceBoardUIExtensionBridgeWindow::DoIdleProcessing()

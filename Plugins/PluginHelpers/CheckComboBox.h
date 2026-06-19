@@ -35,6 +35,7 @@ namespace Abstractspoon
 				int AddItem(LPCWSTR szItem, int nUniqueId, bool bChecked);
 				bool IsItemChecked(int nUniqueId);
 				bool SetItemChecked(int nUniqueId, bool bChecked);
+				bool RemoveItem(int nUniqueId);
 
 				void RemoveAllItems();
 				int GetItemCount();
@@ -98,10 +99,11 @@ namespace Abstractspoon
 				CheckComboBox();
 
 				int AddItem(ICheckComboBoxItem^ item, bool checked);
+				bool RemoveItem(ICheckComboBoxItem^ item);
 				bool IsItemChecked(ICheckComboBoxItem^ item);
 				bool SetItemChecked(ICheckComboBoxItem^ item, bool checked);
 				void RemoveAllItems();
-				void FilterTooltipMessage(Windows::Forms::Message m);
+				void FilterTooltipMessage(Windows::Forms::Message^ m);
 
 				property IEnumerable<ICheckComboBoxItem^>^ Items 
 				{ 
@@ -115,7 +117,7 @@ namespace Abstractspoon
 
 				property bool Sorted	{ bool get(); void set(bool sorted); }
 				property bool Enabled	{ bool get(); void set(bool enabled); }
-
+				property int ItemCount	{ int  get(); }
 				property String^ Prompt	{ void set(String^ prompt); }
 
 				event EventHandler^ DropDownClosed; // == edit completion
