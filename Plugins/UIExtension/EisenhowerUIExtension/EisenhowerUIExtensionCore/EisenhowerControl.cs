@@ -12,6 +12,15 @@ using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
 namespace EisenhowerUIExtension
 {
+	[Flags]
+	public enum EisenhowerOption
+	{
+		None = 0x00,
+		HideParentTasks = 0x01,
+	}
+
+	// --------------------------------------------
+
 	public class AttributeChangeEventArgs : EventArgs
 	{
 		public List<uint> TaskIds;
@@ -41,7 +50,7 @@ namespace EisenhowerUIExtension
 		private Point m_SplitPos;
 		private List<EisenhowerPane> m_Panes;
 		private HashSet<Task.Attribute> m_ParentCalculatedValues;
-		private EisenhowerOptions m_Options;
+		private EisenhowerOption m_Options;
 
 		// ---------------------------------------------
 
@@ -119,6 +128,7 @@ namespace EisenhowerUIExtension
 		{
 			prefs.WriteProfileInt(key, "XSplit", m_SplitPos.X);
 			prefs.WriteProfileInt(key, "YSplit", m_SplitPos.Y);
+			prefs.WriteProfileEnum(key, "Options", m_Options);
 		}
 
 		public void LoadPreferences(Preferences prefs, String key, bool appOnly)
@@ -154,6 +164,8 @@ namespace EisenhowerUIExtension
 			{
 				m_SplitPos.X = prefs.GetProfileInt(key, "XSplit", 50);
 				m_SplitPos.Y = prefs.GetProfileInt(key, "YSplit", 50);
+
+				m_Options = prefs.GetProfileEnum(key, "Options", EisenhowerOption.None);
 			}
 		}
 
@@ -474,14 +486,21 @@ namespace EisenhowerUIExtension
 			RecalcPaneRects(false);
 		}
 
-		public EisenhowerOptions Options
+		public EisenhowerOption Options
 		{
+			get { return m_Options; }
+
 			set
 			{
 				if (value != m_Options)
 				{
 					m_Options = value;
 					SetMatrix(m_Matrix);
+
+					var selTaskIds = SelectedTaskIds;
+
+					if (SelectedTaskIds.Count == 0)
+						SelectionChange?.Invoke(this, selTaskIds);
 				}
 			}
 		}
@@ -611,7 +630,7 @@ namespace EisenhowerUIExtension
 																 EisenhowerPaneMatrixVariable.ValueRange.Low));
 			pane.Matrix = new EisenhowerPaneMatrix(xVar,
 												   yVar,
-												   m_Options.HasFlag(EisenhowerOptions.HideParentTasks));
+												   m_Options.HasFlag(EisenhowerOption.HideParentTasks));
 		}
 
 		protected bool IsSplitting

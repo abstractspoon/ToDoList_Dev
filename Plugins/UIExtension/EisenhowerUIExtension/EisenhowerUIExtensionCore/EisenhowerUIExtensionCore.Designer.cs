@@ -61,15 +61,8 @@
 			// 
 			// m_OptionsCombo
 			// 
-			this.m_OptionsCombo.AllowResizeDropDown = false;
-			this.m_OptionsCombo.ControlSize = new System.Drawing.Size(120, 96);
-			this.m_OptionsCombo.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
-			this.m_OptionsCombo.DropDownSizeMode = CustomComboBox.CustomComboBox.SizeMode.UseDropDownSize;
-			this.m_OptionsCombo.DropSize = new System.Drawing.Size(121, 106);
-			this.m_OptionsCombo.FormattingEnabled = true;
 			this.m_OptionsCombo.Location = new System.Drawing.Point(226, 20);
 			this.m_OptionsCombo.Name = "m_OptionsCombo";
-			this.m_OptionsCombo.None = "<none>";
 			this.m_OptionsCombo.Size = new System.Drawing.Size(158, 21);
 			this.m_OptionsCombo.TabIndex = 26;
 			// 
