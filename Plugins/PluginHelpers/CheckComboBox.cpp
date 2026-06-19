@@ -9,6 +9,8 @@
 #include "CheckComboBox.h"
 #include "Translator.h"
 
+#include <Shared\DialogHelper.h>
+
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 using namespace System::Windows::Forms;
@@ -68,6 +70,17 @@ int HostedCheckComboBox::AddItem(LPCWSTR szItem, int nUniqueId, bool bChecked)
 	}
 
 	return nItem;
+}
+
+bool HostedCheckComboBox::RemoveItem(int nUniqueId)
+{
+	int nItem = CDialogHelper::FindItemByDataT(m_Combo, nUniqueId);
+
+	if (nItem == CB_ERR)
+		return false;
+
+	m_Combo.DeleteString(nItem);
+	return true;
 }
 
 bool HostedCheckComboBox::IsItemChecked(int nUniqueId)
@@ -202,18 +215,30 @@ CheckComboBox::CheckComboBox()
 
 int CheckComboBox::AddItem(ICheckComboBoxItem^ item, bool checked)
 {
-	if (item == nullptr)
+	if ((item == nullptr) || m_Items->Contains(item))
 		return -1;
 
 	m_Items->Add(item);
-
-	if (checked)
-		m_CheckedItems->Add(item);
+	SetItemChecked(item, checked);
 
 	if (m_pMFCInfo != IntPtr::Zero)
 		ComboHost(m_pMFCInfo)->AddItem(MS(item->Label), item->UniqueId, checked);
 
 	return (m_Items->Count - 1);
+}
+
+bool CheckComboBox::RemoveItem(ICheckComboBoxItem^ item)
+{
+	if ((item == nullptr) || !m_Items->Contains(item))
+		return false;
+
+	m_Items->Remove(item);
+	m_CheckedItems->Remove(item);
+
+	if (m_pMFCInfo != IntPtr::Zero)
+		ComboHost(m_pMFCInfo)->RemoveItem(item->UniqueId);
+
+	return true;
 }
 
 bool CheckComboBox::SetItemChecked(ICheckComboBoxItem^ item, bool checked)
@@ -224,15 +249,12 @@ bool CheckComboBox::SetItemChecked(ICheckComboBoxItem^ item, bool checked)
 	if (m_Items->IndexOf(item) == -1)
 		return false;
 
-	int iChecked = m_CheckedItems->IndexOf(item);
-
-	if (!checked && (iChecked != -1))
+	if (checked != IsItemChecked(item))
 	{
-		m_CheckedItems->RemoveAt(iChecked);
-	}
-	else if (checked && (iChecked == -1))
-	{
-		m_CheckedItems->Add(item);
+		if (checked)
+			m_CheckedItems->Add(item);
+		else
+			m_CheckedItems->Remove(item);
 	}
 
 	if (m_pMFCInfo != IntPtr::Zero)
@@ -248,6 +270,9 @@ bool CheckComboBox::IsItemChecked(ICheckComboBoxItem^ item)
 
 void CheckComboBox::RemoveAllItems()
 {
+	m_Items->Clear();
+	m_CheckedItems->Clear();
+
 	if (m_pMFCInfo != IntPtr::Zero)
 		ComboHost(m_pMFCInfo)->RemoveAllItems();
 }
@@ -280,6 +305,11 @@ void CheckComboBox::Prompt::set(String^ prompt)
 
 	if (m_pMFCInfo != IntPtr::Zero)
 		ComboHost(m_pMFCInfo)->SetPrompt(MS(m_Prompt));
+}
+
+int CheckComboBox::ItemCount::get()
+{
+	return m_Items->Count;
 }
 
 void CheckComboBox::OnHandleCreated(EventArgs^ e)

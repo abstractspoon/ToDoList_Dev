@@ -409,11 +409,10 @@ namespace EvidenceBoardUIExtension
 			m_LinkVisibilityLabel = CreateLabel("Connection Visibility", m_OptionsCombo);
 			this.Controls.Add(m_LinkVisibilityLabel);
 
-			m_LinkVisibilityCombo = new EvidenceBoardLinkVisibilityComboBox();
-			m_LinkVisibilityCombo.Translate(m_Trans);
+			m_LinkVisibilityCombo = new EvidenceBoardLinkVisibilityComboBox(m_Trans);
 			m_LinkVisibilityCombo.DropDownClosed += new EventHandler(OnLinkVisibilityComboClosed);
 
-			InitialiseCtrl(m_LinkVisibilityCombo as ComboBox, m_LinkVisibilityLabel, ComboWidth);
+			InitialiseCtrl(m_LinkVisibilityCombo, m_LinkVisibilityLabel, ComboWidth);
 			this.Controls.Add(m_LinkVisibilityCombo);
 
 			// Toolbar 
@@ -525,8 +524,7 @@ namespace EvidenceBoardUIExtension
 
 		void OnLinkVisibilityComboClosed(object sender, EventArgs e)
 		{
- 			if (!m_LinkVisibilityCombo.Cancelled)
- 				m_Control.VisibleLinkTypes = m_LinkVisibilityCombo.SelectedLinkTypes;
+			m_Control.VisibleLinkTypes = m_LinkVisibilityCombo.SelectedLinkTypes;
 		}
 
 		bool OnEvidenceBoardEditTaskLabel(object sender, UInt32 taskId)
@@ -609,12 +607,12 @@ namespace EvidenceBoardUIExtension
 
 			if (dlg.ShowDialog() == DialogResult.OK)
 			{
-				m_Control.EditSelectedUserLink(dlg.LinkAttributes, UserLinkAttributes.Mask.All, false);
+				if (!m_Control.EditSelectedUserLink(dlg.LinkAttributes, UserLinkAttributes.Mask.All, false))
+					NotifyParentTaskModified(link.FromId);
 
 				m_LinkVisibilityCombo.UserLinkTypes = m_Control.UserLinkTypes;
 				m_Control.VisibleLinkTypes = m_LinkVisibilityCombo.SelectedLinkTypes;
 
-				NotifyParentTaskModified(link.FromId);
 				UpdateToolbarButtonStates();
 				Invalidate();
 
