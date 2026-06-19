@@ -35,10 +35,7 @@ namespace EvidenceBoardUIExtension
 
 		public IEnumerable<string> UserLinkTypes
 		{
-			get
-			{
-				return m_UserTypes;
-			}
+			get { return m_UserTypes; }
 
 			set
 			{
@@ -175,9 +172,7 @@ namespace EvidenceBoardUIExtension
 
 		// ------------------------
 
-		public LinkComboItem(string name, EvidenceBoardLinkType type, Translator trans)
-			:
-			base(name, type)
+		public LinkComboItem(string name, EvidenceBoardLinkType type, Translator trans) : base(name, type)
 		{
 			if (trans == null)
 				m_Label = name;
@@ -210,7 +205,5 @@ namespace EvidenceBoardUIExtension
 
 			return false;
 		}
-
 	}
-
 }

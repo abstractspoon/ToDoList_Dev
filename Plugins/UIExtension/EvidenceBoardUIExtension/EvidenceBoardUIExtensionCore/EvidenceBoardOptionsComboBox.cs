@@ -10,10 +10,6 @@ namespace EvidenceBoardUIExtension
 {
 	class EvidenceBoardOptionsComboBox : CheckComboBox
 	{
-		const EvidenceBoardOption DefaultOptions = (EvidenceBoardOption.DrawPins | EvidenceBoardOption.ShowDateSlider);
-
-		// ----------------------------------------------------------------
-
 		public EvidenceBoardOptionsComboBox(Translator trans)
 		{
 			Sorted = true;
@@ -50,6 +46,4 @@ namespace EvidenceBoardUIExtension
 			}
 		}
 	}
-
-	// ----------------------------------------------------------------------------
 }
