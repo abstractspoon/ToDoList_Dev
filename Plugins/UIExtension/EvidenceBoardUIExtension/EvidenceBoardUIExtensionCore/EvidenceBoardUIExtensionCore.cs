@@ -192,6 +192,14 @@ namespace EvidenceBoardUIExtension
 			return false;
 		}
 
+        public void FilterToolTipMessage(IntPtr hwnd, UInt32 message, UInt32 wParam, UInt32 lParam, UInt32 time, Int32 xPos, Int32 yPos)
+        {
+			var msg = Message.Create(hwnd, (Int32)message, (IntPtr)wParam, (IntPtr)lParam);
+
+			m_OptionsCombo.FilterTooltipMessage(msg);
+			m_LinkVisibilityCombo.FilterTooltipMessage(msg);
+		}
+
 		public bool DoIdleProcessing()
 		{
 			return false;
@@ -260,7 +268,6 @@ namespace EvidenceBoardUIExtension
 			prefs.WriteProfileString(key, "LastBrowsedImageFolder", m_LastBrowsedImageFolder);
 
 			m_PrefsDlg.SavePreferences(prefs, key);
-			m_OptionsCombo.SavePreferences(prefs, key);
 			m_LinkVisibilityCombo.SavePreferences(prefs, key);
 			m_Control.SavePreferences(prefs, key);
 		}
@@ -272,7 +279,7 @@ namespace EvidenceBoardUIExtension
 				m_LastBrowsedImageFolder = prefs.GetProfileString(key, "LastBrowsedImageFolder", @"C:\");
 
 				m_Control.LoadPreferences(prefs, key);
-				m_Control.Options = m_OptionsCombo.LoadPreferences(prefs, key);
+				m_OptionsCombo.SelectedOptions = m_Control.Options;
 				m_Control.VisibleLinkTypes = m_LinkVisibilityCombo.LoadPreferences(prefs, key);
 
 				// Preferences
@@ -400,11 +407,8 @@ namespace EvidenceBoardUIExtension
 			m_OptionsLabel = CreateLabel("Options", null);
 			this.Controls.Add(m_OptionsLabel);
 
-			m_OptionsCombo = new EvidenceBoardOptionsComboBox();
-			m_OptionsCombo.Translate(m_Trans);
-
+			m_OptionsCombo = new EvidenceBoardOptionsComboBox(m_Trans);
 			m_OptionsCombo.DropDownClosed += new EventHandler(OnOptionsComboClosed);
-			m_OptionsCombo.DrawMode = DrawMode.OwnerDrawFixed;
 
 			InitialiseCtrl(m_OptionsCombo, m_OptionsLabel, ComboWidth);
 			this.Controls.Add(m_OptionsCombo);
@@ -413,11 +417,10 @@ namespace EvidenceBoardUIExtension
 			m_LinkVisibilityLabel = CreateLabel("Connection Visibility", m_OptionsCombo);
 			this.Controls.Add(m_LinkVisibilityLabel);
 
-			m_LinkVisibilityCombo = new EvidenceBoardLinkVisibilityComboBox();
-			m_LinkVisibilityCombo.Translate(m_Trans);
+			m_LinkVisibilityCombo = new EvidenceBoardLinkVisibilityComboBox(m_Trans);
 			m_LinkVisibilityCombo.DropDownClosed += new EventHandler(OnLinkVisibilityComboClosed);
 
-			InitialiseCtrl(m_LinkVisibilityCombo as ComboBox, m_LinkVisibilityLabel, ComboWidth);
+			InitialiseCtrl(m_LinkVisibilityCombo, m_LinkVisibilityLabel, ComboWidth);
 			this.Controls.Add(m_LinkVisibilityCombo);
 
 			// Toolbar 
@@ -509,33 +512,27 @@ namespace EvidenceBoardUIExtension
 			ctrl.Font = m_ControlsFont;
 			ctrl.Width = width;
 
-			if (ctrl is ComboBox)
+			if (ctrl is RangeSliderCtrl)
 			{
-				ctrl.Location = new Point(associatedLabel.Left, associatedLabel.Bottom + DPIScaling.Scale(3));
-				ctrl.Height = DPIScaling.Scale(200);
-				(ctrl as ComboBox).DropDownStyle = ComboBoxStyle.DropDownList;
-				(ctrl as ComboBox).Sorted = true;
+				ctrl.Location = new Point(associatedLabel.Left, associatedLabel.Bottom + DPIScaling.Scale(2));
 			}
 			else
 			{
-				ctrl.Location = new Point(associatedLabel.Left, associatedLabel.Bottom + DPIScaling.Scale(2));
+				ctrl.Location = new Point(associatedLabel.Left, associatedLabel.Bottom + DPIScaling.Scale(3));
+				ctrl.Height = DPIScaling.Scale(21);
 			}
 		}
 
 		void OnOptionsComboClosed(object sender, EventArgs e)
 		{
-			if (!m_OptionsCombo.Cancelled)
-			{
-				m_Control.Options = m_OptionsCombo.SelectedOptions;
+			m_Control.Options = m_OptionsCombo.SelectedOptions;
 
-				ShowDateSlider(m_Control.Options.HasFlag(EvidenceBoardOption.ShowDateSlider));
-			}
+			ShowDateSlider(m_Control.Options.HasFlag(EvidenceBoardOption.ShowDateSlider));
 		}
 
 		void OnLinkVisibilityComboClosed(object sender, EventArgs e)
 		{
- 			if (!m_LinkVisibilityCombo.Cancelled)
- 				m_Control.VisibleLinkTypes = m_LinkVisibilityCombo.SelectedLinkTypes;
+			m_Control.VisibleLinkTypes = m_LinkVisibilityCombo.SelectedLinkTypes;
 		}
 
 		bool OnEvidenceBoardEditTaskLabel(object sender, UInt32 taskId)
@@ -599,12 +596,12 @@ namespace EvidenceBoardUIExtension
 
 			if (dlg.ShowDialog() == DialogResult.OK)
 			{
-				m_Control.EditSelectedUserLink(dlg.LinkAttributes, UserLinkAttributes.Mask.All, false);
+				if (!m_Control.EditSelectedUserLink(dlg.LinkAttributes, UserLinkAttributes.Mask.All, false))
+					NotifyParentTaskModified(link.FromId);
 
 				m_LinkVisibilityCombo.UserLinkTypes = m_Control.UserLinkTypes;
 				m_Control.VisibleLinkTypes = m_LinkVisibilityCombo.SelectedLinkTypes;
 
-				NotifyParentTaskModified(link.FromId);
 				UpdateToolbarButtonStates();
 				Invalidate();
 

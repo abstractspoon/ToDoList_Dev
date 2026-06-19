@@ -399,6 +399,7 @@ namespace EvidenceBoardUIExtension
 			var imageIds = string.Join("|", m_TaskItems.ExpandedImageIds);
 			prefs.WriteProfileString(key, "ExpandedImageIds", ((imageIds == string.Empty) ? "0" : imageIds));
 
+			prefs.WriteProfileEnum(key, "Options", Options);
 		}
 
 		private List<uint> ParseTaskIds(string prevIds)
@@ -428,6 +429,8 @@ namespace EvidenceBoardUIExtension
 			m_PrevZoomLevel = prefs.GetProfileInt(key, "ZoomLevel", -1);
 			m_PrevExpandedTaskIds = ParseTaskIds(prefs.GetProfileString(key, "ExpandedTaskIds", string.Empty));
 			m_PrevExpandedImageIds = ParseTaskIds(prefs.GetProfileString(key, "ExpandedImageIds", string.Empty));
+
+			Options = prefs.GetProfileEnum(key, "Options", DefaultOptions);
 		}
 
 		bool ShowingDependencyLinks
