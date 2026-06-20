@@ -53,7 +53,6 @@ namespace EisenhowerUIExtension
 			m_Toolbar.Renderer = m_TBRenderer;
 			Toolbars.FixupButtonSizes(m_Toolbar);
 
-
 			m_EisenhowerCtrl.Initialize(m_Data.Tasks, trans, m_TaskIcons);
 
 			m_EisenhowerCtrl.EditTaskDone    += new EditTaskCompletionEventHandler(OnEisenhowerCtrlEditTaskDone);

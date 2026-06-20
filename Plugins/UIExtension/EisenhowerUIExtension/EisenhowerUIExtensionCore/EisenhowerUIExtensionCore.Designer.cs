@@ -61,7 +61,6 @@
 			// 
 			// m_Toolbar
 			// 
-			this.m_Toolbar.Anchor = System.Windows.Forms.AnchorStyles.Left;
 			this.m_Toolbar.CanOverflow = false;
 			this.m_Toolbar.Dock = System.Windows.Forms.DockStyle.None;
 			this.m_Toolbar.GripMargin = new System.Windows.Forms.Padding(0);
@@ -69,7 +68,7 @@
             this.toolStripPreferencesBtn,
             this.toolStripHelpBtn});
 			this.m_Toolbar.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.Flow;
-			this.m_Toolbar.Location = new System.Drawing.Point(391, 17);
+			this.m_Toolbar.Location = new System.Drawing.Point(391, 16);
 			this.m_Toolbar.Name = "m_Toolbar";
 			this.m_Toolbar.Size = new System.Drawing.Size(78, 23);
 			this.m_Toolbar.TabIndex = 28;
