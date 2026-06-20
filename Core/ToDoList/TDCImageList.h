@@ -18,8 +18,16 @@
 
 //////////////////////////////////////////////////////////////////////
 
-typedef CMap<CString, LPCTSTR, int, int> CMapStringToInt;
-typedef CMap<int, int, CString, CString&> CMapIntToString;
+// typedef CMap<CString, LPCTSTR, int, int> CMapStringToInt;
+// typedef CMap<int, int, CString, CString&> CMapIntToString;
+
+//////////////////////////////////////////////////////////////////////
+
+struct TDCIMAGE
+{
+	CString sName;
+	CString sFilePath; // Can be empty
+};
 
 //////////////////////////////////////////////////////////////////////
 
@@ -37,10 +45,12 @@ public:
 	BOOL HasImage(const CString& sImageFile) const;
 	int GetImageIndex(const CString& sImageName) const;
 	CString GetImageName(int nIndex) const;
+	CString GetImagePath(int nIndex) const;
 
 protected:
-	CMapStringToInt m_mapNameToIndex;
-	CMapIntToString m_mapIndexToName;
+	CMap<CString, LPCTSTR, int, int> m_mapNameToIndex;
+	CArray<TDCIMAGE, TDCIMAGE&> m_aImages;
+	//CMapIntToString m_mapIndexToName;
 
 	BOOL m_bWantToolbars, m_bWantDefaultIcons;
 	CString m_sTasklistPath;
@@ -49,8 +59,9 @@ protected:
 protected:
 	// Images must be loaded
 	BOOL Attach(HIMAGELIST hImageList) { return CEnImageList::Attach(hImageList); }
+	void Clear();
 
-	void MapImage(int nIndex, const CString& sName);
+	void MapImage(int nIndex, const CString& sName, const CString& sFilePath);
 	BOOL NeedLoadImages(const CString& sTaskList, COLORREF crTransparent,
 						BOOL bWantDefaultIcons, BOOL bWantToolbars) const;
 

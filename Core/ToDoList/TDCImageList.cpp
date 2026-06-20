@@ -28,6 +28,8 @@ enum
 	TDCIL_LOADEDIMAGES	= 0x02,
 };
 
+const CString EMPTY_STR;
+
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
@@ -49,7 +51,7 @@ CTDCImageList::~CTDCImageList()
 
 int CTDCImageList::LoadDefaultImages(BOOL bWantToolbars)
 {
-	return LoadImages(_T(""), colorMagenta, TRUE, bWantToolbars);
+	return LoadImages(EMPTY_STR, colorMagenta, TRUE, bWantToolbars);
 }
 
 BOOL CTDCImageList::NeedLoadImages(const CString& sTaskList, COLORREF crTransparent,
@@ -73,6 +75,14 @@ BOOL CTDCImageList::NeedLoadImages(const CString& sTaskList, COLORREF crTranspar
 	return FALSE;
 }
 
+void CTDCImageList::Clear()
+{
+	DeleteImageList();
+
+	m_mapNameToIndex.RemoveAll();
+	m_aImages.RemoveAll();
+}
+
 int CTDCImageList::LoadImages(const CString& sTaskList, COLORREF crTransparent,
 							   BOOL bWantDefaultIcons, BOOL bWantToolbars)
 {
@@ -82,14 +92,14 @@ int CTDCImageList::LoadImages(const CString& sTaskList, COLORREF crTransparent,
 		return GetImageCount();
 	}
 
-	DeleteImageList();
+	Clear();
 	
 	if (Create(16, 16, ILC_COLOR32 | ILC_MASK, 0, 200))
 	{
 		// Add a dummy placeholder for the 'folder' icon which we
 		// will replace once we have rescaled the imagelist
 		Add(CIcon(IDI_NULL, 16));
-		MapImage(0, _T("0"));
+		MapImage(0, _T("0"), EMPTY_STR);
 		
 		// because the icon set must come first for backwards compatibility
 		// we must first see if any other images exist before we add them.
@@ -120,7 +130,7 @@ int CTDCImageList::LoadImages(const CString& sTaskList, COLORREF crTransparent,
 				if (bm.LoadBitmap(IDB_TASKICONS_STD))
 				{
 					bm.RemapSysColors();
-					AddImage(_T(""), bm, crTransparent, this, nNextNameIndex);
+					AddImage(EMPTY_STR, bm, crTransparent, this, nNextNameIndex);
 				}
 			}
 		}
@@ -133,7 +143,7 @@ int CTDCImageList::LoadImages(const CString& sTaskList, COLORREF crTransparent,
 			if (bm.LoadBitmap(IDB_APP_TOOLBAR_STD))
 			{
 				bm.RemapSysColors();
-				AddImage(_T(""), bm, crTransparent, this, nNextNameIndex);
+				AddImage(EMPTY_STR, bm, crTransparent, this, nNextNameIndex);
 			}
 			
 			bm.DeleteObject();
@@ -142,7 +152,7 @@ int CTDCImageList::LoadImages(const CString& sTaskList, COLORREF crTransparent,
 			if (bm.LoadBitmap(IDB_APP_EXTRA_STD))
 			{
 				bm.RemapSysColors();
-				AddImage(_T(""), bm, crTransparent, this, nNextNameIndex);
+				AddImage(EMPTY_STR, bm, crTransparent, this, nNextNameIndex);
 			}
 		}
 		
@@ -167,6 +177,8 @@ int CTDCImageList::LoadImages(const CString& sTaskList, COLORREF crTransparent,
 		m_bWantDefaultIcons = bWantDefaultIcons;
 		m_bWantToolbars = bWantToolbars;
 	}
+
+	ASSERT(m_aImages.GetSize() == m_mapNameToIndex.GetCount());
 	
 	return (GetSafeHandle() ? GetImageCount() : 0);
 }
@@ -187,10 +199,16 @@ int CTDCImageList::GetImageIndex(const CString& sImageName) const
 
 CString CTDCImageList::GetImageName(int nIndex) const
 {
-	CString sName;
-	m_mapIndexToName.Lookup(nIndex, sName);
+	ASSERT((nIndex >= 0) && (nIndex < m_aImages.GetSize()));
 
-	return sName;
+	return m_aImages[nIndex].sName;
+}
+
+CString CTDCImageList::GetImagePath(int nIndex) const
+{
+	ASSERT((nIndex >= 0) && (nIndex < m_aImages.GetSize()));
+
+	return m_aImages[nIndex].sFilePath;
 }
 
 BOOL CTDCImageList::AddImage(const CString& sImageFile, CBitmap& bmImage, COLORREF crTransparent, 
@@ -249,7 +267,7 @@ BOOL CTDCImageList::MapLastImage(const CString& sImageFile, int nStartIndex, CTD
 	if (nEndIndex == nStartIndex)
 	{
 		CString sName = FileMisc::GetFileNameFromPath(sImageFile);
-		pImages->MapImage(nStartIndex, sName);
+		pImages->MapImage(nStartIndex, sName, sImageFile);
 	}
 	else if (nStartIndex > nNextNameIndex)
 	{
@@ -261,17 +279,22 @@ BOOL CTDCImageList::MapLastImage(const CString& sImageFile, int nStartIndex, CTD
 		for (int nIndex = nStartIndex; nIndex <= nEndIndex; nIndex++)
 		{
 			CString sName = Misc::Format(nNextNameIndex++);
-			pImages->MapImage(nIndex, sName);
+			pImages->MapImage(nIndex, sName, sImageFile);
 		}
 	}
 
 	return TRUE;
 }
 
-void CTDCImageList::MapImage(int nIndex, const CString& sName)
+void CTDCImageList::MapImage(int nIndex, const CString& sName, const CString& sFilePath)
 {
 	m_mapNameToIndex[Misc::ToLower(sName)] = nIndex;
-	m_mapIndexToName[nIndex] = sName;
+
+	TDCIMAGE image;
+	image.sName = sName;
+	image.sFilePath = sFilePath;
+
+	VERIFY(m_aImages.Add(image) == nIndex);
 }
 
 DWORD CTDCImageList::LoadImagesFromFolder(const CString& sFolder, COLORREF crTransparent, CTDCImageList* pImages, int& nNextNameIndex)
