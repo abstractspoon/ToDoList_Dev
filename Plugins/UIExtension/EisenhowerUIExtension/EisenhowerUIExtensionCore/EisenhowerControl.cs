@@ -496,11 +496,6 @@ namespace EisenhowerUIExtension
 				{
 					m_Options = value;
 					SetMatrix(m_Matrix);
-
-					var selTaskIds = SelectedTaskIds;
-
-					if (SelectedTaskIds.Count == 0)
-						SelectionChange?.Invoke(this, selTaskIds);
 				}
 			}
 		}
