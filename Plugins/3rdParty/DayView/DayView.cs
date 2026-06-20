@@ -151,7 +151,7 @@ namespace Calendar
 			return new DrawTool();
 		}
 
-		public Boolean IsResizingAppointment()
+		public bool IsResizingAppointment()
 		{
 			return ((activeTool == selectionTool) && selectionTool.IsEditing);
 		}
@@ -779,7 +779,7 @@ namespace Calendar
             }
         }
 
-		public static Boolean IsValidSlotsPerHour(int numSlots)
+		public static bool IsValidSlotsPerHour(int numSlots)
 		{
 			switch (numSlots)
 			{
@@ -1491,7 +1491,7 @@ namespace Calendar
 
         public void StartEditing()
         {
-            if (!selectedAppointment.Locked && appointmentViews.ContainsKey(selectedAppointment))
+            if (!selectedAppointment.IsLocked && appointmentViews.ContainsKey(selectedAppointment))
             {
                 Rectangle editBounds = appointmentViews[selectedAppointment].Rectangle;
 

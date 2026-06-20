@@ -117,6 +117,15 @@
     <ClInclude Include="TaskTimeLogUtil.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="TaskListView.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ITaskBase.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TimeUtil.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="CheckComboBox.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -216,6 +225,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="TaskTimeLogUtil.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TaskListView.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TimeUtil.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="CheckComboBox.cpp">

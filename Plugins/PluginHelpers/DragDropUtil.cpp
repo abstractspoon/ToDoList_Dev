@@ -55,17 +55,22 @@ bool DragImage::Begin(IntPtr wnd, Font^ font, String^ text, int width, int heigh
 	return Begin(wnd, bm, width, height, hotX, hotY);
 }
 
-bool DragImage::Begin(IntPtr wnd, IDragRenderer^ renderer, Object^ object, int width, int height, int hotX, int hotY)
+bool DragImage::Begin(IntPtr wnd, IDragRenderer^ renderer, Object^ object)
 {
 	if (m_hImageList != NULL)
 		return false;
 
-	Bitmap^ bm = gcnew Bitmap(width, height);
+	auto size = renderer->GetDragImageSize();
+
+	if (size == Size::Empty)
+		return false;
+
+	Bitmap^ bm = gcnew Bitmap(size.Width, size.Height);
 	Graphics^ g = Graphics::FromImage(bm);
 
-	renderer->DrawDragImage(g, object, width, height);
+	renderer->DrawDragImage(g, object, size);
 
-	return Begin(wnd, bm, width, height, hotX, hotY);
+	return Begin(wnd, bm, size.Width, size.Height, size.Width, size.Height);
 }
 
 bool DragImage::Begin(IntPtr wnd, Bitmap^ bm, int width, int height, int hotX, int hotY)

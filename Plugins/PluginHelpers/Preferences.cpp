@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "pluginhelpers.h"
 #include "Preferences.h"
+#include "ColorUtil.h"
 
 #include <Interfaces\IPreferences.h>
 
@@ -56,6 +57,18 @@ int Preferences::GetProfileInt(String^ sSection, String^ sEntry, int nDefault)
 bool Preferences::WriteProfileInt(String^ sSection, String^ sEntry, int nValue)
 {
    return SETPREF(WriteProfileInt, nValue);
+}
+
+Drawing::Color Preferences::GetProfileColor(String^ sSection, String^ sEntry, Drawing::Color defColor)
+{
+	int color = GetProfileInt(sSection, sEntry, defColor.ToArgb());
+
+	return ColorUtil::DrawingColor::ToColor((UInt32)color);
+}
+
+bool Preferences::WriteProfileColor(String^ sSection, String^ sEntry, Drawing::Color color)
+{
+	return WriteProfileInt(sSection, sEntry, RGB(color.R, color.G, color.B));
 }
 
 String^ Preferences::GetProfileString(String^ sSection, String^ sEntry, String^ sDefault)

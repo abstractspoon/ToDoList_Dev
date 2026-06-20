@@ -1178,7 +1178,7 @@ namespace DayViewUIExtension
 			if (taskItem.IsDone && StrikeThruDoneTasks)
 				fontStyle |= FontStyle.Strikeout;
 
-			if (taskItem.IsTopLevel && !(appt is TaskFutureOccurrence))
+			if (taskItem.IsTopLevel() && !(appt is TaskFutureOccurrence))
 				fontStyle |= FontStyle.Bold;
 
 			m_RenderHelper.DrawItemText(g, appt.Title, rect, textColor, fontStyle, apptView.IsLong);

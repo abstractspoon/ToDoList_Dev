@@ -34,11 +34,8 @@ namespace MindMapUIExtension
 			set
 			{
 				foreach (var item in Items)
-				{
 					SetItemChecked(item, value.HasFlag((MindMapOption)item.UniqueId));
-				}
 			}
 		}
 	}
-
 }

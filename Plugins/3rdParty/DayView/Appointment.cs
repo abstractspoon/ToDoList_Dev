@@ -179,7 +179,7 @@ namespace Calendar
         private bool locked;
 
         [System.ComponentModel.DefaultValue(false)]
-        public bool Locked
+        public bool IsLocked
         {
             get
             {

@@ -30,83 +30,7 @@ namespace LoggedTimeUIExtension
 
 	// ---------------------------------------------------------------
 
-/*
-	public class DateSortedTasks
-	{
-		public class TaskList : List<TaskItem>
-		{
-			public int FindItem(uint taskID)
-			{
-				return FindIndex(x => (x.Id == taskID));
-			}
-
-			public int NextIndex(uint taskID, bool forwards)
-			{
-				return NextIndex(FindItem(taskID), forwards);
-			}
-
-			public int NextIndex(int item, bool forwards)
-			{
-				if (item == -1)
-					return -1;
-
-				item = (forwards ? item + 1 : item - 1);
-
-				if ((item < 0) || (item >= Count))
-					return -1;
-
-				return item;
-			}
-		}
-
-		// ------------------
-
-		private TaskList m_SortedTaskList;
-		private TaskItems m_TaskItems; // read-only
-		private bool m_NeedsResort = true;
-
-		// ------------------
-
-		public DateSortedTasks(TaskItems items)
-		{
-			m_TaskItems = items;
-			m_SortedTaskList = new TaskList();
-			m_NeedsResort = true;
-		}
-
-		public TaskList Items
-		{
-			get
-			{
-				if (m_SortedTaskList.Count == 0)
-					m_SortedTaskList.AddRange(m_TaskItems.Values);
-
-				if (m_NeedsResort)
-				{
-					m_NeedsResort = false;
-					m_SortedTaskList.Sort((a, b) => TaskItem.CompareDates(a, b));
-				}
-
-				return m_SortedTaskList;
-			}
-		}
-
-		public void SetNeedsRebuild()
-		{
-			m_SortedTaskList.Clear();
-			m_NeedsResort = true;
-		}
-
-		public void SetNeedsResort()
-		{
-			m_NeedsResort = true;
-		}
-	}
-*/
-
-	// ---------------------------------------------------------------
-
-	public class TaskItem : ITask
+	public class TaskItem : ITaskBase
 	{
 		public TaskItem()
 		{
@@ -143,7 +67,7 @@ namespace LoggedTimeUIExtension
 
 		public bool HasTaskTextColor
 		{
-			get { return !TaskTextColor.IsEmpty; }
+			get { return !TextColor.IsEmpty; }
 		}
 
 		static public TaskItem None(string title)
@@ -154,17 +78,13 @@ namespace LoggedTimeUIExtension
 		public string Title { get; private set; }
 		public string Position { get; private set; }
 		public uint Id { get; private set; }
-		public bool Locked { get; private set; }
+		public bool IsLocked { get; private set; }
 		public bool IsParent { get; private set; }
 		public bool HasIcon { get; private set; }
         public bool IsDone { get; private set; }
-        public bool IsGoodAsDone { get; private set; }
-		public int Depth { get; private set; }
-		public Color TaskTextColor { get; private set; }
+		public Color TextColor { get; private set; }
 
-		public bool IsDoneOrGoodAsDone { get { return IsDone || IsGoodAsDone; } }
-
-		public bool UpdateTaskAttributes(Task task, UIExtension.UpdateType type, bool newTask, int depth)
+		public bool UpdateTaskAttributes(Task task, UIExtension.UpdateType type, bool newTask)
 		{
 			if (!task.IsValid())
 				return false;
@@ -172,8 +92,8 @@ namespace LoggedTimeUIExtension
 			UInt32 taskID = task.GetID();
 
 			// Always
-			TaskTextColor = task.GetTextDrawingColor();
-			Locked = task.IsLocked(true);
+			TextColor = task.GetTextDrawingColor();
+			IsLocked = task.IsLocked(true);
 			IsParent = task.IsParent();
 			Position = task.GetPositionString();
 
@@ -182,9 +102,7 @@ namespace LoggedTimeUIExtension
 				Title = task.GetTitle();
 				HasIcon = task.HasIcon();
 				Id = taskID;
-				Depth = depth;
 				IsDone = task.IsDone();
-                IsGoodAsDone = task.IsGoodAsDone();
 			}
 			else
 			{
@@ -195,10 +113,7 @@ namespace LoggedTimeUIExtension
 					HasIcon = task.HasIcon();
 
 				if (task.IsAttributeAvailable(Task.Attribute.DoneDate))
-				{
 				    IsDone = task.IsDone();
-                    IsGoodAsDone = task.IsGoodAsDone();
-				}
 			}
 
 			return true;

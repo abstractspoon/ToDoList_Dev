@@ -96,8 +96,6 @@ namespace Abstractspoon
 				String^ FormatRange();
 
 			protected:
-
-			protected:
 				void OnHandleCreated(EventArgs^ e) override;
 
 			protected:

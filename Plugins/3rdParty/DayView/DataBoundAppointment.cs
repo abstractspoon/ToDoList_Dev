@@ -43,7 +43,7 @@ namespace Calendar
         {
             base.OnLockedChanged();
 
-            row["Locked"] = this.Locked;
+            row["Locked"] = this.IsLocked;
         }
 
         protected override void OnTitleChanged()

@@ -71,7 +71,7 @@ namespace LoggedTimeUIExtension
 					m_TaskId.Text = taskId.ToString();
 
 					var taskItem = m_TaskItems.Where(x => (x.Id == taskId)).FirstOrDefault();
-					m_Attributes.ReadOnlyTask = ((taskItem == null) || taskItem.Locked);
+					m_Attributes.ReadOnlyTask = ((taskItem == null) || taskItem.IsLocked);
 				}
 			}
 			else

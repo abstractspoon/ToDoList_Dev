@@ -83,9 +83,9 @@ namespace EvidenceBoardUIExtension
 			return true;
         }
 
-        public bool SelectTasks(uint[] pdwTaskIDs)
+        public bool SelectTasks(uint[] taskIDs)
         {
-			bool success = m_Control.SelectNodes(new List<uint>(pdwTaskIDs));
+			bool success = m_Control.SelectNodes(taskIDs);
 
 			UpdateToolbarButtonStates();
 
@@ -560,26 +560,7 @@ namespace EvidenceBoardUIExtension
 		void OnEvidenceBoardSelectionChange(object sender, IList<uint> nodeIds)
 		{
 			var notify = new UIExtension.ParentNotify(m_HwndParent);
-
-			switch (nodeIds.Count)
-			{
-			case 0:
-				notify.NotifySelChange(0);
-				break;
-
-			case 1:
-				notify.NotifySelChange(nodeIds[0]);
-				break;
-
-			default:
-				{
-					uint[] pdwTaskIds = new uint[nodeIds.Count];
-					nodeIds.CopyTo(pdwTaskIds, 0);
-
-					notify.NotifySelChange(pdwTaskIds);
-				}
-				break;
-			}
+			notify.NotifySelChange(nodeIds);
 
 			UpdateToolbarButtonStates();
 		}

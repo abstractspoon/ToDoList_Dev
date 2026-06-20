@@ -6,7 +6,8 @@ using namespace System;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-class ITransText;
+#include <Interfaces\ITransText.h>
+#pragma make_public(ITransText)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -62,6 +63,8 @@ namespace Abstractspoon
 
 				void AddPreTranslation(String^ sText, String^ sTranslation);
 				void InitialiseLocalizer();
+
+				ITransText* GetITransText() { return m_pTransText; }
 
 			private:
 				ITransText* m_pTransText;

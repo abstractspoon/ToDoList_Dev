@@ -15,6 +15,8 @@
 #include <Shared\GraphicsMisc.h>
 #include <Shared\Misc.h>
 
+#include <3rdParty\T64Utils.h>
+
 #include <ShellAPI.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -139,7 +141,7 @@ UIExtension::ParentNotify::IUITaskMod::IUITaskMod(Task::Attribute attrib, DateTi
 	:
 	nAttrib(attrib),
 	dataType(DataType::Date),
-	tValue(value)
+	dtValue(value)
 {
 
 }
@@ -248,7 +250,7 @@ UIExtension::ParentNotify::IUITaskMod::IUITaskMod(UInt32 taskID, Task::Attribute
 	dwSelectedTaskID(taskID),
 	nAttrib(attrib),
 	dataType(DataType::Date),
-	tValue(value)
+	dtValue(value)
 {
 
 }
@@ -375,10 +377,10 @@ bool UIExtension::ParentNotify::IUITaskMod::CopyTo(IUITASKMOD& mod)
 		break;
 
 	case DataType::Date:
-		if (tValue == DateTime::MinValue)
-			mod.tValue = 0xffffffffffffffff;
+		if (dtValue == DateTime::MinValue)
+			mod.tValue = T64Utils::T64_NULL;
 		else
-			mod.tValue = static_cast<__int64>(Task::MapDate(tValue));
+			mod.tValue = static_cast<__int64>(Task::MapDate(dtValue));
 		break;
 
 	case DataType::Integer:
@@ -817,13 +819,23 @@ bool UIExtension::ParentNotify::NotifySelChange(UInt32 taskID)
 	return (bRet != FALSE);
 }
 
-bool UIExtension::ParentNotify::NotifySelChange(cli::array<UInt32>^ pdwTaskIDs)
+bool UIExtension::ParentNotify::NotifySelChange(IList<UInt32>^ taskIDs)
 {
-	if (!IsWindow(m_hwndParent) || !pdwTaskIDs->Length)
+	switch (taskIDs->Count)
+	{
+	case 0:	return NotifySelChange(0);
+	case 1:	return NotifySelChange(taskIDs[0]);
+	}
+
+	// Multi-selection
+	if (!IsWindow(m_hwndParent))
 		return false;
 
-	pin_ptr<UInt32> p = &pdwTaskIDs[0];
-	BOOL bRet = ::SendMessage(m_hwndParent, WM_IUI_SELECTTASK, (WPARAM)p, pdwTaskIDs->Length);
+	auto aTaskIDs = gcnew cli::array<UInt32>(taskIDs->Count);
+	taskIDs->CopyTo(aTaskIDs, 0);
+
+	pin_ptr<UInt32> p = &aTaskIDs[0];
+	BOOL bRet = ::SendMessage(m_hwndParent, WM_IUI_SELECTTASK, (WPARAM)p, taskIDs->Count);
 
 	return (bRet != FALSE);
 }

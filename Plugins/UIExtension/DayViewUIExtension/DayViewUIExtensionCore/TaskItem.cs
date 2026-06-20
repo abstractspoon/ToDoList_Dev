@@ -142,7 +142,7 @@ namespace DayViewUIExtension
 
 	// ---------------------------------------------------------------
 
-	public class TaskItem : Calendar.Appointment, ITask
+	public class TaskItem : Calendar.Appointment, ITaskBase
 	{
 		private Calendar.AppointmentDates m_OrgDates = new Calendar.AppointmentDates();
 		private DateTime m_PrevDueDate = NullDate;
@@ -293,18 +293,14 @@ namespace DayViewUIExtension
 
 		public string Position { get; private set; }
 		public bool IsParent { get; private set; }
-		public bool IsTopLevel { get; private set; }
 		public bool HasIcon { get; private set; }
         public bool IsDone { get; private set; }
-        public bool IsGoodAsDone { get; private set; }
+		public bool IsDoneOrGoodAsDone { get; private set; }
 		public bool HasDependencies { get; private set; }
 		public bool IsRecurring { get; private set; }
 		public double TimeEstimate { get; private set; }
         public Task.TimeUnits TimeEstUnits { get; private set; }
-		public int Depth { get; private set; }
 		public Color TaskTextColor { get; private set; }
-
-		public bool IsDoneOrGoodAsDone { get { return IsDone || IsGoodAsDone; } }
 
 		public bool HasTag(string tag)
 		{
@@ -356,9 +352,9 @@ namespace DayViewUIExtension
 			double hours = 0.0;
 
 			if (original)
-				hours = workWeek.CalculateDurationInHours(m_OrgDates.Start, m_OrgDates.End);
+				hours = workWeek.DurationInHours(m_OrgDates.Start, m_OrgDates.End);
 			else
-				hours = workWeek.CalculateDurationInHours(StartDate, EndDate);
+				hours = workWeek.DurationInHours(StartDate, EndDate);
 
 			if (TimeEstUnits == Task.TimeUnits.Minutes)
 				return (hours * 60);
@@ -421,7 +417,7 @@ namespace DayViewUIExtension
 			}
 		}
 
-		public bool UpdateTaskAttributes(Task task, List<CustomAttributeDefinition> dateAttribs, UIExtension.UpdateType type, bool newTask, string metaDataKey, int depth)
+		public bool UpdateTaskAttributes(Task task, List<CustomAttributeDefinition> dateAttribs, UIExtension.UpdateType type, bool newTask, string metaDataKey)
 		{
 			if (!task.IsValid())
 				return false;
@@ -430,9 +426,8 @@ namespace DayViewUIExtension
 
 			// Always
 			TaskTextColor = task.GetTextDrawingColor();
-			Locked = task.IsLocked(true);
+			IsLocked = task.IsLocked(true);
 			IsParent = task.IsParent();
-			IsTopLevel = (task.GetParentID() == 0);
 
 			if (newTask)
 			{
@@ -442,7 +437,6 @@ namespace DayViewUIExtension
 				DrawBorder = true;
 				HasDependencies = (task.GetDependency().Count > 0);
 				IsRecurring = task.IsRecurring();
-				Depth = depth;
 				Position = task.GetPositionString();
 
 				m_Tags = task.GetTag();
@@ -455,7 +449,7 @@ namespace DayViewUIExtension
 				m_UsingCalculatedParentStartDate = (IsParent && task.HasCalculatedAttribute(Task.Attribute.StartDate));
 
 				IsDone = task.IsDone();
-                IsGoodAsDone = task.IsGoodAsDone();
+                IsDoneOrGoodAsDone = (IsDone || task.IsGoodAsDone());
 
 				var dueDate = task.GetDueDate(IsParent);
 				m_UsingCalculatedParentEndDate = (IsParent && task.HasCalculatedAttribute(Task.Attribute.DueDate));
@@ -517,7 +511,7 @@ namespace DayViewUIExtension
 					bool wasDone = IsDone;
 
 				    IsDone = task.IsDone();
-                    IsGoodAsDone = task.IsGoodAsDone();
+                    IsDoneOrGoodAsDone = (IsDone || task.IsGoodAsDone());
 
 					if (IsDone)
 					{
@@ -537,7 +531,6 @@ namespace DayViewUIExtension
 			}
 
 			UpdateOriginalDates();
-
 			return true;
 		}
 

@@ -230,8 +230,8 @@ namespace LoggedTimeUIExtension
 				}
 				else if ((taskItem != null) && taskItem.HasTaskTextColor)
 				{
-					textColor = UIExtension.SelectionRect.GetTextColor(UIExtension.SelectionRect.Style.Selected, taskItem.TaskTextColor);
-					barColor = taskItem.TaskTextColor;
+					textColor = UIExtension.SelectionRect.GetTextColor(UIExtension.SelectionRect.Style.Selected, taskItem.TextColor);
+					barColor = taskItem.TextColor;
 				}
 				else
 				{
@@ -249,7 +249,7 @@ namespace LoggedTimeUIExtension
 			}
 			else if ((taskItem != null) && taskItem.HasTaskTextColor)
 			{
-				textColor = borderColor = taskItem.TaskTextColor;
+				textColor = borderColor = taskItem.TextColor;
 				fillColor = DrawingColor.SetLuminance(textColor, 0.95f);
 
 				if (TaskColorIsBackground)

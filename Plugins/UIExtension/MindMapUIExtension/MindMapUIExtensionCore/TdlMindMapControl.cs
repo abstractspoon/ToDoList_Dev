@@ -668,7 +668,7 @@ namespace MindMapUIExtension
 
 			if (taskItem.IsTask) // else non-task root item
             {
-				bool isDone = taskItem.IsDone(false);
+				bool isDone = taskItem.IsDone;
 
                 if (taskItem.ParentID == 0)
                 {
@@ -1175,7 +1175,7 @@ namespace MindMapUIExtension
 
         CheckBoxState GetItemCheckboxState(MindMapTaskItem taskItem)
         {
-            if (taskItem.IsDone(false))
+            if (taskItem.IsDone)
                 return CheckBoxState.CheckedNormal;
 
             if (taskItem.HasSomeSubtasksDone && ShowMixedCompletionState)
@@ -1567,7 +1567,7 @@ namespace MindMapUIExtension
                 if (HitTestCheckbox(node, e.Location))
                 {
 					if (EditTaskDone != null)
-						EditTaskDone(this, taskItem.ID, !taskItem.IsDone(false));
+						EditTaskDone(this, taskItem.ID, !taskItem.IsDone);
 				}
                 else if (HitTestIcon(node, e.Location))
                 {
@@ -1708,26 +1708,21 @@ namespace MindMapUIExtension
 		{
 			base.OnDragEnter(e);
 
-			var rect = GetItemLabelRect(SelectedNode);
-			rect.Offset(-rect.Left, -rect.Top);
-
-			m_DragImage.Begin(Handle, 
-								this,
-								SelectedNode, 
-								rect.Width, 
-								rect.Height, 
-								rect.Width, 
-								rect.Height);
+			m_DragImage.Begin(Handle, this,	SelectedNode);
 		}
 
+		public Size GetDragImageSize()
+		{
+			return GetItemLabelRect(SelectedNode).Size;
+		}
 
-		public void DrawDragImage(Graphics graphics, Object obj, int width, int height)
+		public void DrawDragImage(Graphics graphics, Object obj, Size size)
 		{
 			var node = (obj as TreeNode);
 
 			DrawItemLabel(graphics,
 							TaskItem(node), 
-							new Rectangle(0, 0, width, height),
+							new Rectangle(Point.Empty, size),
 							NodeDrawState.Selected,
 							NodeDrawPos.Root,
 							GetNodeTitleFont(node),

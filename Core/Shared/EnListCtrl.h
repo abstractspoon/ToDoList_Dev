@@ -214,7 +214,7 @@ protected:
 	virtual COLORREF GetItemTextColor(int nItem, int nSubItem, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
 	virtual COLORREF GetItemBackColor(int nItem, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
 	virtual CFont* GetItemFont(int /*nItem*/, int /*nSubItem*/) const { return NULL; }
-	virtual CString GetNoItemsText() const { return ""; }
+	virtual CString GetNoItemsText() const { return _T(""); }
 	virtual CColumnData* GetNewColumnData() const { return new CColumnData; }
 	virtual void GetCellRect(int nRow, int nCol, CRect& rCell) const;
 	virtual void GetCellEditRect(int nRow, int nCol, CRect& rCell) const;

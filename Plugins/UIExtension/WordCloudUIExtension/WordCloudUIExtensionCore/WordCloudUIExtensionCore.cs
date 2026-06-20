@@ -43,6 +43,7 @@ namespace WordCloudUIExtension
         private Task.Attribute m_Attrib;
 		private Translator m_Trans;
 		private String m_TypeId, m_UiName;
+		private UIExtension.TaskIcon m_TaskIcons;
 
 		private bool m_Splitting;
 		private Color m_SplitterColor;
@@ -81,6 +82,7 @@ namespace WordCloudUIExtension
             m_ExcludedWords = new CommonWords(); // English by default
 
 			m_ControlsFont = new Font(FontName, 8, FontStyle.Regular);
+			m_TaskIcons = new UIExtension.TaskIcon(hwndParent);
 
 			m_CommentsTimer = new Timer();
 			m_CommentsTimer.Interval = 2000;
@@ -97,7 +99,7 @@ namespace WordCloudUIExtension
 
 		// IUIExtension ------------------------------------------------------------------
 
-		public new Boolean Focused
+		public new bool Focused
         {
             get { return m_TaskMatchesList.Focused; }
         }
@@ -107,7 +109,7 @@ namespace WordCloudUIExtension
 			if (m_Attrib == Task.Attribute.Unknown)
 				return false;
 
-			if (!m_TaskMatchesList.HasMatchId(taskId))
+			if (!m_TaskMatchesList.HasTaskId(taskId))
 			{
 				// Get the Cloud items having this id
 				CloudTaskItem item;
@@ -140,7 +142,7 @@ namespace WordCloudUIExtension
 				RebuldMatchList();
 			}
 
-			m_TaskMatchesList.SetSelectedMatchId(taskId);
+			m_TaskMatchesList.SelectTask(taskId);
 			return true;
 		}
 
@@ -162,7 +164,7 @@ namespace WordCloudUIExtension
 
 		public bool CanScrollToSelectedTask()
 		{
-			return (m_TaskMatchesList.GetSelectedMatchId() != 0);
+			return (m_TaskMatchesList.SelectedTaskId != 0);
 		}
 
 		public void UpdateTasks(TaskList tasks, UIExtension.UpdateType type)
@@ -249,20 +251,20 @@ namespace WordCloudUIExtension
 
 				// If the selected match also changed then we may
 				// may need to change the currently selected word
-				if (changedTaskIds.Contains(m_TaskMatchesList.GetSelectedMatchId()))
+				if (changedTaskIds.Contains(m_TaskMatchesList.SelectedTaskId))
 					FixupWordCloudSelection();
 			}
 			else
 			{
 				// Pick a word that ensures the currently selected
 				// item in the match list will be preserved
-				var selMatch = m_TaskMatchesList.GetSelectedMatch();
-				var selWord = FixupWordCloudSelection(selMatch);
+				var selMatch = m_TaskMatchesList.SelectedTask;
+				var selWord = FixupWordCloudSelection(selMatch as CloudTaskItem);
 				
 				RebuldMatchList();
 
 				if (selMatch != null)
-					m_TaskMatchesList.SetSelectedMatchId(selMatch.Id);
+					m_TaskMatchesList.SelectTask(selMatch.Id);
 			}
 
             m_TaskMatchesList.EnsureSelectionVisible();
@@ -308,20 +310,7 @@ namespace WordCloudUIExtension
 
 		public bool GetTask(UIExtension.GetTask getTask, ref UInt32 taskId)
 		{
-			taskId = 0;
-
-			switch (getTask)
-			{
-				case UIExtension.GetTask.GetNextTask:
-				case UIExtension.GetTask.GetNextVisibleTask:
-					taskId = m_TaskMatchesList.GetNextSelectedMatchId();
-					break;
-
-				case UIExtension.GetTask.GetPrevTask:
-				case UIExtension.GetTask.GetPrevVisibleTask:
-					taskId = m_TaskMatchesList.GetPrevSelectedMatchId();
-					break;
-			}
+			taskId = m_TaskMatchesList.GetTaskId(getTask);
 
 			return (taskId != 0);
 		}
@@ -353,7 +342,7 @@ namespace WordCloudUIExtension
             }
 
 			// Then on the match list
-			if (m_TaskMatchesList.SelectMatch(text, selectTask, caseSensitive, wholeWord, findReplace))
+			if (m_TaskMatchesList.SelectTaskEx(text, selectTask, caseSensitive, wholeWord, findReplace))
 			{
 				return true;
 			}
@@ -416,7 +405,7 @@ namespace WordCloudUIExtension
 
 		public bool GetLabelEditRect(ref Int32 left, ref Int32 top, ref Int32 right, ref Int32 bottom)
 		{
-			Rectangle editRect = m_TaskMatchesList.GetSelectedMatchEditRect();
+			Rectangle editRect = m_TaskMatchesList.SelectedTaskLabelRect;
 
 			if (!editRect.IsEmpty)
 			{
@@ -572,6 +561,18 @@ namespace WordCloudUIExtension
 			m_TaskMatchesList.ShowLabelTips = !prefs.GetProfileBool("Preferences", "ShowInfoTips", false);
 			m_TaskMatchesList.ShowMixedCompletionState = prefs.GetProfileBool("Preferences", "ShowMixedCompletionState", true);
 
+			// Alternate line color
+			if (prefs.GetProfileBool("Preferences", "AlternateLineColor", true))
+				m_TaskMatchesList.AlternateLineColor = prefs.GetProfileColor("Preferences\\Colors", "AlternateLines", Color.Empty);
+			else
+				m_TaskMatchesList.AlternateLineColor = Color.Empty;
+
+			// Grid color
+			if (prefs.GetProfileBool("Preferences", "SpecifyGridColor", true))
+				m_TaskMatchesList.GridlineColor = prefs.GetProfileColor("Preferences\\Colors", "GridLines", Color.Empty);
+			else
+				m_TaskMatchesList.GridlineColor = Color.Empty;
+
 			UpdateBlacklist();
         }
 
@@ -639,8 +640,8 @@ namespace WordCloudUIExtension
 
 		private void CreateTaskMatchesListView()
 		{
-			m_TaskMatchesList = new TaskMatchesListView(m_HwndParent);
-			m_TaskMatchesList.Initialise(m_Trans);
+			m_TaskMatchesList = new TaskMatchesListView();
+			m_TaskMatchesList.Initialize(m_Trans, m_TaskIcons);
 
 			m_TaskMatchesList.Font = m_ControlsFont;
 			m_TaskMatchesList.Location = new Point(0, ComboTop);
@@ -928,7 +929,7 @@ namespace WordCloudUIExtension
 			if (selWord != null)
 			{
 				CloudTaskItem selItem = null;
-				UInt32 selItemId = m_TaskMatchesList.GetSelectedMatchId();
+				UInt32 selItemId = m_TaskMatchesList.SelectedTaskId;
 
 				// Build a list of task items containing this value
 				m_TaskMatchesList.BeginUpdate();
@@ -951,7 +952,7 @@ namespace WordCloudUIExtension
 				if (m_TaskMatchesList.Items.Count > 0)
 				{
 					// See if our currently selected task is in the new match list
-					selItemId = m_TaskMatchesList.SetSelectedMatchId(selItemId);
+					selItemId = m_TaskMatchesList.SelectTask(selItemId);
 
 					if ((selItem == null) || (selItemId != selItem.Id))
 						NotifyParentSelChange(selItemId);
@@ -1040,7 +1041,7 @@ namespace WordCloudUIExtension
 			String selWord = m_WordCloud.SelectedWord;
 
 			if (selMatch == null)
-				selMatch = m_TaskMatchesList.GetSelectedMatch();
+				selMatch = (m_TaskMatchesList.SelectedTask as CloudTaskItem);
 
 			if ((selMatch != null) && (selWord != null))
 			{
@@ -1067,28 +1068,28 @@ namespace WordCloudUIExtension
 
 		private void OnTaskMatchesSelChanged(object sender, EventArgs args)
 		{
-			UInt32 selTaskId = m_TaskMatchesList.GetSelectedMatchId();
+			UInt32 selTaskId = m_TaskMatchesList.SelectedTaskId;
 
 			if (selTaskId != 0)
 				NotifyParentSelChange(selTaskId);
 		}
 
-        private Boolean OnTaskMatchesEditTaskDone(object sender, UInt32 taskId, bool completed)
+        private bool OnTaskMatchesEditTaskDone(object sender, ITaskBase task)
         {
             var notify = new UIExtension.ParentNotify(m_HwndParent);
 
             return notify.NotifyMod(Task.Attribute.DoneDate,
-                                    (completed ? DateTime.Now : DateTime.MinValue));
+                                    (task.IsDone ? DateTime.Now : DateTime.MinValue));
         }
 
-        private Boolean OnTaskMatchesEditTaskIcon(object sender, UInt32 taskId)
+        private bool OnTaskMatchesEditTaskIcon(object sender, ITaskBase task)
         {
             var notify = new UIExtension.ParentNotify(m_HwndParent);
 
             return notify.NotifyEditIcon();
         }
 
-        private Boolean OnTaskMatchesEditTaskLabel(object sender, UInt32 taskId)
+        private bool OnTaskMatchesEditTaskLabel(object sender, ITaskBase task)
         {
             var notify = new UIExtension.ParentNotify(m_HwndParent);
 

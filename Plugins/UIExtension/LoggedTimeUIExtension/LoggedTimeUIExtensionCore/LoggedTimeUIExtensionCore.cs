@@ -207,12 +207,10 @@ namespace LoggedTimeUIExtension
 			m_WorkWeek.Load(prefs);
             m_TimeLog.WeekendDays = m_WorkWeek.WeekendDays();
 
-            int gridColor = -1;
-
             if (prefs.GetProfileBool("Preferences", "SpecifyGridColor", true))
-                gridColor = prefs.GetProfileInt("Preferences\\Colors", "GridLines", -1);
-
-            m_TimeLog.GridlineColor = ((gridColor == -1) ? DefGridColor : DrawingColor.ToColor((UInt32)gridColor));
+                m_TimeLog.GridlineColor = prefs.GetProfileColor("Preferences\\Colors", "GridLines", DefGridColor);
+			else
+				m_TimeLog.GridlineColor = DefGridColor;
             
             if (appOnly)
 			{
@@ -263,7 +261,7 @@ namespace LoggedTimeUIExtension
 			return false; // not supported
 		}
 
-		public new Boolean Focus()
+		public new bool Focus()
         {
             if (Focused)
                 return false;
@@ -271,7 +269,7 @@ namespace LoggedTimeUIExtension
             return m_TimeLog.Focus();
         }
 
-        public new Boolean Focused
+        public new bool Focused
         {
             get { return base.Focused || m_TimeLog.Focused; }
         }
@@ -630,7 +628,7 @@ namespace LoggedTimeUIExtension
 			var dlg = new EditLoggedEntryDlg(entry, 
 											 m_WorkWeek,
 											 m_TimeLog.DisplayDatesInISO,
-											 (m_TimeLog.ReadOnly || (taskItem == null) || taskItem.Locked),
+											 (m_TimeLog.ReadOnly || (taskItem == null) || taskItem.IsLocked),
 											 m_Trans);
 
 			FormsUtil.SetFont(dlg, m_ControlsFont);
@@ -829,7 +827,7 @@ namespace LoggedTimeUIExtension
 			return m_TimeLog.SaveToImage();
 		}
 
-		public Boolean CanSaveToImage()
+		public bool CanSaveToImage()
 		{
 			return m_TimeLog.CanSaveToImage();
 		}

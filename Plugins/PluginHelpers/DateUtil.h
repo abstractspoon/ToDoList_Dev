@@ -35,7 +35,7 @@ namespace Abstractspoon
 				TimeSpan StartOfLunch();
 				TimeSpan EndOfLunch();
 
-				double CalculateDurationInHours(double fromHour, double toHour);
+				double DurationInHours(double fromHour, double toHour);
 				double DayLengthInHours(bool includingLunch);
 				double LunchLengthInHours();
 
@@ -59,7 +59,7 @@ namespace Abstractspoon
 				WorkingWeek();
 				WorkingWeek(Preferences^ prefs);
 
-				double CalculateDurationInHours(DateTime from, DateTime to);
+				double DurationInHours(DateTime from, DateTime to);
 				bool IsWeekend(DateTime date);
 
 				void Load(Preferences^ prefs);
@@ -91,6 +91,7 @@ namespace Abstractspoon
 
 				static int DateInMonths(DateTime date);
 				static DateTime DateFromMonths(int nMonths);
+				static bool IsEndOfMonth(DateTime date);
 
 				static int GetDay(DateTime date);
 				static int GetMonth(DateTime date);

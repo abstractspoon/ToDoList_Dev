@@ -104,8 +104,8 @@ namespace Abstractspoon
 				Task(const ITaskList* pTaskList, HTASKITEM hTask);  // GET ONLY
 				Task(const Task^ task);
 
-				Boolean IsValid();
-				Boolean IsAttributeAvailable(Attribute attrib);
+				bool IsValid();
+				bool IsAttributeAvailable(Attribute attrib);
 
 				Task^ GetFirstSubtask();
 				Task^ GetNextTask();
@@ -124,7 +124,7 @@ namespace Abstractspoon
 				String^ GetPath(String^ delimiter);
 
 				String^ GetIcon();
-				Boolean HasIcon();
+				bool HasIcon();
 
 				UInt32 GetID();
 				UInt32 GetParentID();
@@ -172,22 +172,22 @@ namespace Abstractspoon
 				String^ GetLastModifiedDateString();
 				String^ GetLastModifiedBy();
 
-				Boolean IsDone();
-				Boolean IsDue();
-				Boolean IsGoodAsDone();
-				Boolean HasSomeSubtasksDone();
-				Boolean IsFlagged(bool calculated);
-				Boolean IsParent();
-				Boolean IsLocked(bool calculated);
-				Boolean IsRecurring();
-				Boolean IsReference();
+				bool IsDone();
+				bool IsDue();
+				bool IsGoodAsDone();
+				bool HasSomeSubtasksDone();
+				bool IsFlagged(bool calculated);
+				bool IsParent();
+				bool IsLocked(bool calculated);
+				bool IsRecurring();
+				bool IsReference();
 
 				double GetTimeEstimate(TimeUnits% cUnits, bool calculated);
 				double GetTimeSpent(TimeUnits% cUnits, bool calculated);
 
 				String^ GetAttributeValue(Attribute attrib, bool calculated, bool display);
-				Boolean HasAttribute(Attribute attrib);
-				Boolean HasCalculatedAttribute(Attribute attrib);
+				bool HasAttribute(Attribute attrib);
+				bool HasCalculatedAttribute(Attribute attrib);
 
 				String^ GetCustomAttributeValue(String^ sID, bool display);
 				Dictionary<String^, String^>^ GetCustomAttributeValues(bool display);
@@ -197,42 +197,42 @@ namespace Abstractspoon
 
 				Task^ NewSubtask(String^ sTitle);
 
-				Boolean SetTitle(String^ sTitle);
-				Boolean SetComments(String^ sComments);
-				Boolean SetAllocatedBy(String^ sAllocBy);
-				Boolean SetStatus(String^ sStatus);
-				Boolean SetVersion(String^ sVersion);
-				Boolean SetExternalID(String^ sExternalID);
-				Boolean SetCreatedBy(String^ sCreatedBy);
-				Boolean SetPosition(String^ sPosition);
-				Boolean SetIcon(String^ sIcon);
+				bool SetTitle(String^ sTitle);
+				bool SetComments(String^ sComments);
+				bool SetAllocatedBy(String^ sAllocBy);
+				bool SetStatus(String^ sStatus);
+				bool SetVersion(String^ sVersion);
+				bool SetExternalID(String^ sExternalID);
+				bool SetCreatedBy(String^ sCreatedBy);
+				bool SetPosition(String^ sPosition);
+				bool SetIcon(String^ sIcon);
 
-				Boolean AddAllocatedTo(String^ sAllocTo);
-				Boolean AddCategory(String^ sCategory);
-				Boolean AddTag(String^ sTag);
-				Boolean AddDependency(String^ sDependency);
-				Boolean AddFileLink(String^ sFileLink);
+				bool AddAllocatedTo(String^ sAllocTo);
+				bool AddCategory(String^ sCategory);
+				bool AddTag(String^ sTag);
+				bool AddDependency(String^ sDependency);
+				bool AddFileLink(String^ sFileLink);
 
-				Boolean SetColor(UInt32 color);
-				Boolean SetPriority(Byte nPriority);
-				Boolean SetRisk(Byte Risk);
+				bool SetColor(UInt32 color);
+				bool SetPriority(Byte nPriority);
+				bool SetRisk(Byte Risk);
 
-				Boolean SetPercentDone(Byte nPercent);
-				Boolean SetCost(double dCost, bool isRate);
-				Boolean SetFlag(Boolean bFlag);
+				bool SetPercentDone(Byte nPercent);
+				bool SetCost(double dCost, bool isRate);
+				bool SetFlag(bool bFlag);
 
-				Boolean SetLastModified(DateTime^ dtLastMod);
-				Boolean SetDoneDate(DateTime^ dtCompletion);
-				Boolean SetDueDate(DateTime^ dtDue);
-				Boolean SetStartDate(DateTime^ dtStart);
-				Boolean SetCreationDate(DateTime^ dtCreation);
+				bool SetLastModified(DateTime^ dtLastMod);
+				bool SetDoneDate(DateTime^ dtCompletion);
+				bool SetDueDate(DateTime^ dtDue);
+				bool SetStartDate(DateTime^ dtStart);
+				bool SetCreationDate(DateTime^ dtCreation);
 
-				Boolean SetTimeEstimate(double dTime, TimeUnits cUnits);
-				Boolean SetTimeSpent(double dTime, TimeUnits cUnits);
-				Boolean SetCustomAttributeValue(String^ sID, String^ sValue);
-				Boolean ClearCustomAttributeValue(String^ sID);
-				Boolean SetMetaDataValue(String^ sKey, String^ sValue);
-				Boolean ClearMetaDataValue(String^ sKey);
+				bool SetTimeEstimate(double dTime, TimeUnits cUnits);
+				bool SetTimeSpent(double dTime, TimeUnits cUnits);
+				bool SetCustomAttributeValue(String^ sID, String^ sValue);
+				bool ClearCustomAttributeValue(String^ sID);
+				bool SetMetaDataValue(String^ sKey, String^ sValue);
+				bool ClearMetaDataValue(String^ sKey);
 
 				// MISC -------------------------------------------------------
 
@@ -291,6 +291,7 @@ namespace Abstractspoon
 
 			public:
 				Attribute AttributeType;
+				Attribute CalculationResultType;
 				List ListType;
 
 				String^ Id;
@@ -303,14 +304,10 @@ namespace Abstractspoon
 			public ref class TaskAttributeItem
 			{
 			public:
-				TaskAttributeItem()
-					:
-					Label(String::Empty),
-					AttributeId(Task::Attribute::Unknown),
-					CustomAttributeId(String::Empty),
-					CustomAttributeType(CustomAttributeDefinition::Attribute::Unknown)
-				{
-				}
+				TaskAttributeItem();
+				TaskAttributeItem(TaskAttributeItem^ attrib);
+
+				bool IsCustom();
 
 			public:
 				String^ Label;
@@ -340,20 +337,20 @@ namespace Abstractspoon
 				String^ GetFilePath();
 				String^ GetMetaData(String^ sKey);
 
-				Boolean HasCustomAttributes();
+				bool HasCustomAttributes();
 				List<CustomAttributeDefinition^>^ GetCustomAttributes();
 				List<CustomAttributeDefinition^>^ GetCustomAttributes(CustomAttributeDefinition::Attribute attribType);
 
 				UInt32 GetTaskCount();
-				Boolean HasTask(UInt32 dwTaskID);
+				bool HasTask(UInt32 dwTaskID);
 				Task^ FindTask(UInt32 dwTaskID);
 
 				Task^ GetFirstTask();
 				Task^ NewTask(String^ sTitle);
 
-				Boolean AddCustomAttribute(String^ sID, String^ sLabel, String^ sColumn);
-				Boolean SetMetaData(String^ sKey, String^ sValue);
-				Boolean ClearMetaData(String^ sKey);
+				bool AddCustomAttribute(String^ sID, String^ sLabel, String^ sColumn);
+				bool SetMetaData(String^ sKey, String^ sValue);
+				bool ClearMetaData(String^ sKey);
 				
 				static String^ GetAttributeName(Task::Attribute attrib);
 				static String^ GetAttributeName(Task::Attribute attrib, Translator^ trans);
@@ -369,11 +366,14 @@ namespace Abstractspoon
 				String^ GetCustomAttributeLabel(int nIndex);
 				String^ GetCustomAttributeID(int nIndex);
 				String^ GetCustomAttributeListData(int nIndex);
-				Boolean IsCustomAttributeEnabled(int nIndex);
+				bool IsCustomAttributeEnabled(int nIndex);
 				String^ GetCustomAttributeValue(int nIndex, String^ sItem);
 
 				CustomAttributeDefinition::Attribute GetCustomAttributeType(int nIndex);
+				CustomAttributeDefinition::Attribute GetCustomAttributeCalculationResultType(int nIndex);
 				CustomAttributeDefinition::List GetCustomAttributeListType(int nIndex);
+
+				CustomAttributeDefinition::Attribute MapAttributeType(UInt32 nType);
 			};
 
 			////////////////////////////////////////////////////////////////////////////////////////////////

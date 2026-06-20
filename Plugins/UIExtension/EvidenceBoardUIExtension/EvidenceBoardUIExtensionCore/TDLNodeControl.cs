@@ -1228,7 +1228,7 @@ namespace EvidenceBoardUIExtension
 
 			if (!taskItem.TextColor.IsEmpty)
 			{
-				if (m_TaskColorIsBkgnd && !selected && !taskItem.IsDone(true))
+				if (m_TaskColorIsBkgnd && !selected)
 					return DrawingColor.SetLuminance(taskItem.TextColor, 0.3f);
 
 				// else
@@ -1243,14 +1243,14 @@ namespace EvidenceBoardUIExtension
 		{
 			if (taskItem.IsTopLevel)
 			{
-				if (taskItem.IsDone(false))
+				if (taskItem.IsDone)
 					return m_BoldDoneLabelFont;
 
 				// else
 				return m_BoldLabelFont;
 			}
 
-			if (taskItem.IsDone(false))
+			if (taskItem.IsDone)
 				return m_DoneLabelFont;
 
 			return TextFont;

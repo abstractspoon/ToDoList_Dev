@@ -1125,6 +1125,8 @@ BOOL CTaskFile::SetCustomAttributeDefs(const CTDCCustomAttribDefinitionArray& aA
 			{
 				pXIAttribDef->SetItemValue(TDL_CUSTOMATTRIBCALCSECONDOPERANDVALUE, calc.dSecondOperandValue);
 			}
+
+			pXIAttribDef->SetItemValue(TDL_CUSTOMATTRIBCALCRESULTTYPE, (int)aAttribs.GetCalculationResultDataType(calc));
 		}
 	}
 
@@ -1360,6 +1362,11 @@ unsigned long CTaskFile::GetCustomAttributeFeatures(int nIndex) const
 LPCTSTR CTaskFile::GetCustomAttributeListData(int nIndex) const
 {
 	return GetCustomAttributeValue(nIndex, TDL_CUSTOMATTRIBLISTDATA);
+}
+
+unsigned long CTaskFile::GetCustomAttributeCalculationResultType(int nIndex) const
+{
+	return _ttol(GetCustomAttributeValue(nIndex, TDL_CUSTOMATTRIBCALCRESULTTYPE));
 }
 
 bool CTaskFile::IsCustomAttributeEnabled(int nIndex) const
@@ -2682,35 +2689,33 @@ unsigned long CTaskFile::GetCustomAttributeTypeByID(LPCTSTR szID) const
 
 LPCTSTR CTaskFile::GetTaskCustomAttributeData(HTASKITEM hTask, LPCTSTR szID, bool bDisplay) const
 {
+	const CXmlItem* pXICustData = GetTaskCustomAttribute(hTask, szID);
+
+	if (!pXICustData)
+		return EMPTY_STR;
+
+	// NOTE: It's very important to respect empty values if the XML item
+	// exists because numeric types have the option to hide zero values
+	const CXmlItem* pXIVal = NULL;
+
+	// Try for calculation display value first
 	if (bDisplay)
 	{
-		const CXmlItem* pXICustData = GetTaskCustomAttribute(hTask, szID);
-	
-		if (pXICustData)
-		{
-			// NOTE: It's very important to respect empty values if the XML item
-			// exists because numeric types have the option to hide zero values
+		pXIVal = pXICustData->GetItem(TDL_TASKCUSTOMATTRIBCALCDISPLAYSTRING);
 
-			// Try for calculation display value first
-			const CXmlItem* pXIVal = pXICustData->GetItem(TDL_TASKCUSTOMATTRIBCALCDISPLAYSTRING);
-
-			if (!pXIVal)
-			{
-				// else try for regular display value
-				pXIVal = pXICustData->GetItem(TDL_TASKCUSTOMATTRIBDISPLAYSTRING);
-
-				// else try for regular calculation value
-				if (!pXIVal)
-					pXIVal = pXICustData->GetItem(TDL_TASKCUSTOMATTRIBCALCVALUE);
-			}
-
-			if (pXIVal)
-				return pXIVal->GetValue();
-		}
+		if (!pXIVal) // else try for regular display value
+			pXIVal = pXICustData->GetItem(TDL_TASKCUSTOMATTRIBDISPLAYSTRING);
 	}
 
+	// else try for regular calculation value
+	if (!pXIVal)
+		pXIVal = pXICustData->GetItem(TDL_TASKCUSTOMATTRIBCALCVALUE);
+
+	if (pXIVal)
+		return pXIVal->GetValue();
+
 	// all else
-	return GetTaskCustomAttributeData(hTask, szID);
+	return pXICustData->GetItemValue(TDL_TASKCUSTOMATTRIBVALUE);
 }
 
 // DEPRECATED

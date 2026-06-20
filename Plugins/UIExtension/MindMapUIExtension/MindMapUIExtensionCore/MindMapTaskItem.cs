@@ -118,17 +118,10 @@ namespace MindMapUIExtension
 		public bool IsLocked { get { return m_IsLocked; } }
 		public bool IsReference { get { return (m_ReferenceId != 0); } }
 		public bool IsTask { get { return (m_TaskID != 0); } }
+		public bool IsDone { get { return m_IsDone; } }
         public bool HasSomeSubtasksDone { get { return m_SomeSubtasksDone; } }
 		public bool HasLocalDependencies {  get { return (m_LocalDepends != null) && (m_LocalDepends.Count > 0); } }
 		public List<UInt32> LocalDependencies { get { return m_LocalDepends; } }
-
-		public bool IsDone(bool includeGoodAsDone) 
-        { 
-            if (includeGoodAsDone && m_IsGoodAsDone)
-                return true;
-
-            return m_IsDone; 
-        }
 
 		public bool SetDone(bool done = true)
 		{

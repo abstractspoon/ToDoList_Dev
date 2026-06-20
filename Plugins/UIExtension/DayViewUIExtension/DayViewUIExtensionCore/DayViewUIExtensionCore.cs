@@ -268,12 +268,10 @@ namespace DayViewUIExtension
 			m_WorkWeek.Load(prefs);
             m_DayView.WeekendDays = m_WorkWeek.WeekendDays();
 
-            int gridColor = -1;
-
             if (prefs.GetProfileBool("Preferences", "SpecifyGridColor", true))
-                gridColor = prefs.GetProfileInt("Preferences\\Colors", "GridLines", -1);
-
-            m_DayView.GridlineColor = ((gridColor == -1) ? DefGridColor : DrawingColor.ToColor((UInt32)gridColor));
+                m_DayView.GridlineColor = prefs.GetProfileColor("Preferences\\Colors", "GridLines", DefGridColor);
+			else
+				m_DayView.GridlineColor = DefGridColor;
             
             if (appOnly)
 			{
@@ -324,7 +322,7 @@ namespace DayViewUIExtension
 			return (m_SelectedTaskId != 0);
 		}
 
-		public new Boolean Focus()
+		public new bool Focus()
         {
             if (Focused)
                 return false;
@@ -332,7 +330,7 @@ namespace DayViewUIExtension
             return m_DayView.Focus();
         }
 
-        public new Boolean Focused
+        public new bool Focused
         {
             get { return m_DayView.Focused; }
         }
@@ -934,7 +932,7 @@ namespace DayViewUIExtension
 			// Handle icon click on all types
 			var realAppt = m_DayView.GetRealAppointment(appt);
 
-			if (!m_DayView.ReadOnly && !realAppt.Locked &&
+			if (!m_DayView.ReadOnly && !realAppt.IsLocked &&
 				(m_DayView.IconHitTest(m_DayView.PointToScreen(e.Location)) > 0))
 			{
 				var notify = new UIExtension.ParentNotify(m_HwndParent);
@@ -948,7 +946,7 @@ namespace DayViewUIExtension
 			{
 				if (appt is TaskItem)
 				{
-					if (!m_DayView.ReadOnly && !appt.Locked)
+					if (!m_DayView.ReadOnly && !appt.IsLocked)
 					{
 						var notify = new UIExtension.ParentNotify(m_HwndParent);
 						notify.NotifyEditLabel();
@@ -1238,7 +1236,7 @@ namespace DayViewUIExtension
 			return m_DayView.SaveToImage();
 		}
 
-		public Boolean CanSaveToImage()
+		public bool CanSaveToImage()
 		{
 			return m_DayView.CanSaveToImage();
 		}

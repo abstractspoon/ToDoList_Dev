@@ -9,8 +9,6 @@
 #include <Shared\wclassdefines.h>
 #include <Shared\localizer.h>
 
-#include <Interfaces\ITransText.h>
-
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 using namespace System::Windows::Forms;

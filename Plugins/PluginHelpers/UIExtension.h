@@ -182,7 +182,7 @@ namespace Abstractspoon
 					bool NotifyCopy(UInt32 taskID, UInt32 parentTaskID, UInt32 afterSiblingID);
 
 					bool NotifySelChange(UInt32 taskID);
-					bool NotifySelChange(cli::array<UInt32>^ pdwTaskIDs);
+					bool NotifySelChange(IList<UInt32>^ taskIDs);
 
 					bool NotifyEditLabel();
 					bool NotifyEditIcon();
@@ -238,7 +238,7 @@ namespace Abstractspoon
 							int nValue;
 							double dValue;
 							String^ szValue;
-							DateTime tValue;
+							DateTime dtValue;
 							bool bValue;
 							UInt32 crValue;
 						//};

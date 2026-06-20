@@ -19,39 +19,40 @@ using namespace Abstractspoon::Tdl::PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-public ref class TaskPosComparer : public IComparer<ITask^>
+public ref class TaskPosComparer : public IComparer<ITaskBase^>
 {
 public:
-	virtual int Compare(ITask^ task1, ITask^ task2)
+	virtual int Compare(ITaskBase^ task1, ITaskBase^ task2)
 	{
 		return StringUtil::NaturalCompare(task1->Position, task2->Position);
 	}
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
-// Private class to override ToString()
+// Private class to override ToString() for the base ComboBox
 
-ref class WrappedITask : ITask
+ref class ComboTask : ITaskBase
 {
 public:
-	WrappedITask(ITask^ task)
-	{
-		m_ITask = task;
-	}
+	ComboTask(ITaskBase^ task) { m_ITask = task; }
 
-	String^ ToString() override { return Title; }
-
+	// ITaskBase
 	virtual property UInt32 Id { UInt32 get()			{ return m_ITask->Id ; } }
 	virtual property String^ Title { String^ get()		{ return m_ITask->Title; }; }
 	virtual property String^ Position { String^ get()	{ return m_ITask->Position; } }
-	virtual property int Depth { int get()				{ return m_ITask->Depth; } }
 	virtual property bool HasIcon { bool get()			{ return m_ITask->HasIcon; } }
+	virtual property bool IsLocked { bool get()			{ return m_ITask->IsLocked; } }
+	virtual property bool IsParent { bool get()			{ return m_ITask->IsParent; } }
+	virtual property bool IsDone { bool get()			{ return m_ITask->IsDone; } }
 
-	property bool IsTopLevel { bool get()				{ return (Depth == 0); } }
-	property bool IsNone { bool get()					{ return (Id == 0); } }
+	virtual property Drawing::Color TextColor { Drawing::Color get() { return m_ITask->TextColor; } }
+
+	// Local attributes
+	String^ ToString() override { return Title; }
+	property bool IsNone { bool get(){ return (Id == 0); } }
 
 private: 
-	ITask^ m_ITask;
+	ITaskBase^ m_ITask;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -68,23 +69,23 @@ TaskComboBox::TaskComboBox()
 	AutoCompleteMode = System::Windows::Forms::AutoCompleteMode::None;
 }
 
-void TaskComboBox::Initialise(IEnumerable<ITask^>^ taskItems,
+void TaskComboBox::Initialise(IEnumerable<ITaskBase^>^ taskItems,
 							  UIExtension::TaskIcon^ taskIcons, 
 							  UInt32 selTaskId)
 {
 	Initialise(taskItems, taskIcons, selTaskId, nullptr);
 }
 
-void TaskComboBox::Initialise(IEnumerable<ITask^>^ taskItems, 
+void TaskComboBox::Initialise(IEnumerable<ITaskBase^>^ taskItems, 
 							  UIExtension::TaskIcon^ taskIcons, 
 							  UInt32 selTaskId, 
-							  ITask^ noneTask)
+							  ITaskBase^ noneTask)
 {
 	m_TaskIcons = taskIcons;
 
 	if (noneTask != nullptr)
 	{
-		auto wrap = gcnew WrappedITask(noneTask);
+		auto wrap = gcnew ComboTask(noneTask);
 		Items->Add(wrap);
 
 		m_NoneTask = wrap;
@@ -95,7 +96,7 @@ void TaskComboBox::Initialise(IEnumerable<ITask^>^ taskItems,
 
 	for each(auto task in sortedTasks)
 	{
-		auto wrap = gcnew WrappedITask(task);
+		auto wrap = gcnew ComboTask(task);
 		Items->Add(wrap);
 
 		if (task->Id == selTaskId)
@@ -111,7 +112,7 @@ void TaskComboBox::Initialise(IEnumerable<ITask^>^ taskItems,
 
 UInt32 TaskComboBox::SelectedTaskId::get()
 {
-	auto selItem = ASTYPE(SelectedItem, ITask);
+	auto selItem = ASTYPE(SelectedItem, ITaskBase);
 
 	return ((selItem == nullptr) ? 0 : selItem->Id);
 }
@@ -121,7 +122,7 @@ String^ TaskComboBox::SelectedTaskTitle::get()
 	if (SelectedTaskId::get() == 0)
 		return String::Empty;
 
-	return ASTYPE(SelectedItem, ITask)->Title;
+	return ASTYPE(SelectedItem, ITaskBase)->Title;
 }
 
 void TaskComboBox::OnMeasureItem(MeasureItemEventArgs^ e)
@@ -138,13 +139,13 @@ void TaskComboBox::OnDrawItem(DrawItemEventArgs^ e)
 	if (e->Index < 0)
 		return;
 
-	auto taskItem = ASTYPE(Items[e->Index], WrappedITask);
+	auto task = ASTYPE(Items[e->Index], ComboTask);
 
-	if (taskItem != nullptr)
+	if (task != nullptr)
 	{
 		auto rect = e->Bounds;
 
-		bool hasIcon = (taskItem->HasIcon && m_TaskIcons->Get(taskItem->Id));
+		bool hasIcon = (task->HasIcon && m_TaskIcons->Get(task->Id));
 		bool listItem = !(e->State.HasFlag(DrawItemState::ComboBoxEdit));
 
 		if (listItem)
@@ -163,21 +164,21 @@ void TaskComboBox::OnDrawItem(DrawItemEventArgs^ e)
 		}
 
 		auto brush = TextBrush(e);
-		auto font = ((!taskItem->IsNone && taskItem->IsTopLevel) ? m_BoldFont : Font);
+		auto font = ((!task->IsNone && ITaskBaseExt::IsTopLevel(task)) ? m_BoldFont : Font);
 
-		e->Graphics->DrawString(taskItem->Title, font, brush, rect);
+		e->Graphics->DrawString(task->Title, font, brush, rect);
 		e->DrawFocusRectangle();
 	}
 }
 
 int TaskComboBox::GetListItemTextOffset(Object^ obj)
 {
-	auto taskItem = ASTYPE(obj, WrappedITask);
+	auto task = ASTYPE(obj, ComboTask);
 
-	if ((taskItem == nullptr) || (taskItem == m_NoneTask))
+	if ((task == nullptr) || (task == m_NoneTask))
 		return 0;
 
-	int offset = ((UIExtension::TaskIcon::IconSize * taskItem->Depth) +
+	int offset = ((UIExtension::TaskIcon::IconSize * ITaskBaseExt::GetDepth(task)) +
 				  UIExtension::TaskIcon::IconSize);
 
 	return offset;
@@ -185,14 +186,14 @@ int TaskComboBox::GetListItemTextOffset(Object^ obj)
 
 int TaskComboBox::GetListItemTextLength(Object^ obj, Graphics^ graphics)
 {
-	auto taskItem = ASTYPE(obj, WrappedITask);
+	auto task = ASTYPE(obj, ComboTask);
 
-	if ((taskItem == nullptr) || (taskItem == m_NoneTask))
+	if ((task == nullptr) || (task == m_NoneTask))
 		return 0;
 
-	auto font = (taskItem->IsTopLevel ? m_BoldFont : Font);
+	auto font = (ITaskBaseExt::IsTopLevel(task) ? m_BoldFont : Font);
 
-	return (int)graphics->MeasureString(taskItem->Title, font).Width;
+	return (int)graphics->MeasureString(task->Title, font).Width;
 }
 
 void TaskComboBox::OnTextChanged(EventArgs^ e)

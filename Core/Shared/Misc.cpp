@@ -2566,6 +2566,27 @@ DWORD Misc::GetShortcut(WORD wVirtKeyCode, BOOL bExtended)
 	return MAKELONG(wVirtKeyCode, wModifiers);
 }
 
+BOOL Misc::DoMouseClick(const CPoint& ptScreen, BOOL bLeft)
+{
+	CArray<INPUT, INPUT&> aInputs;
+	aInputs.SetSize(2);
+
+	// Mouse down
+	aInputs[0].type = INPUT_MOUSE;
+	aInputs[0].mi.dx = ptScreen.x;
+	aInputs[0].mi.dy = ptScreen.y;
+	aInputs[0].mi.mouseData = 0;
+	aInputs[0].mi.time = 0;
+	aInputs[0].mi.dwExtraInfo = 0;
+	aInputs[0].mi.dwFlags = (MOUSEEVENTF_ABSOLUTE | (bLeft ? MOUSEEVENTF_LEFTDOWN : MOUSEEVENTF_RIGHTDOWN));
+
+	// Mouse up
+	aInputs[1] = aInputs[0];
+	aInputs[1].mi.dwFlags = (MOUSEEVENTF_ABSOLUTE | (bLeft ? MOUSEEVENTF_LEFTUP : MOUSEEVENTF_RIGHTUP));
+
+	return (2 == SendInput(2, aInputs.GetData(), sizeof(INPUT)));
+}
+
 BOOL Misc::HasFlag(DWORD dwFlags, DWORD dwFlag)
 {
 	return (((dwFlags & dwFlag) == dwFlag) ? TRUE : FALSE);

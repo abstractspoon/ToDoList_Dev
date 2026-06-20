@@ -23,6 +23,7 @@ namespace EvidenceBoardUIExtension
 		public bool IsTopLevel { get; private set; }
 		public bool SomeSubtasksDone { get; private set; }
 		public bool IsLocked { get; private set; }
+		public bool IsDone { get; private set; }
 
 		public DateTime StartDate, EndDate;
 
@@ -34,9 +35,6 @@ namespace EvidenceBoardUIExtension
 
 		List<UserLink> m_UserLinks;
 		public IEnumerable<UserLink> UserLinks { get { return m_UserLinks; } }
-
-		private bool Done;
-		private bool GoodAsDone;
 
 		public Point UserPosition;
 		public bool HasUserPosition { get { return (UserPosition != NullPoint); } }
@@ -108,13 +106,12 @@ namespace EvidenceBoardUIExtension
 			IsFlagged = task.IsFlagged(false);
 			IsParent = task.IsParent();
 			IsTopLevel = (task.GetParentID() == 0);
-			Done = task.IsDone();
-			GoodAsDone = task.IsGoodAsDone();
+			IsDone = task.IsDone();
 			SomeSubtasksDone = task.HasSomeSubtasksDone();
 			IsLocked = task.IsLocked(true);
 
 			StartDate = task.GetStartDate(true);
-			EndDate = (Done ? task.GetDoneDate() : task.GetDueDate(true));
+			EndDate = (IsDone ? task.GetDoneDate() : task.GetDueDate(true));
 
 			ParentId = task.GetParentID();
 			TaskId = task.GetID();
@@ -147,14 +144,6 @@ namespace EvidenceBoardUIExtension
 		}
 
 		public bool HasLocalDependencies { get { return (DependIds != null) && (DependIds.Count > 0); } }
-
-		public bool IsDone(bool includeGoodAsDone)
-		{
-			if (includeGoodAsDone && GoodAsDone)
-				return true;
-
-			return Done;
-		}
 
 		public string EncodeMetaData()
 		{
@@ -407,14 +396,14 @@ namespace EvidenceBoardUIExtension
 			if (task.HasAttribute(Task.Attribute.StartDate))
 				StartDate = task.GetStartDate(true);
 
-			if (!Done && task.HasAttribute(Task.Attribute.DueDate))
-				EndDate = task.GetDueDate(true);
-
 			if (task.IsAttributeAvailable(Task.Attribute.DoneDate))
 			{
-				Done = task.IsDone();
+				IsDone = task.IsDone();
 				EndDate = task.GetDoneDate();
 			}
+
+			if (!IsDone && task.HasAttribute(Task.Attribute.DueDate))
+				EndDate = task.GetDueDate(true);
 
 			if (task.IsAttributeAvailable(Task.Attribute.FileLink))
 				UpdateImage(task);
@@ -427,7 +416,6 @@ namespace EvidenceBoardUIExtension
 
 			IsParent = task.IsParent();
 			IsLocked = task.IsLocked(true);
-			GoodAsDone = task.IsGoodAsDone();
 
 			Debug.Assert(task.GetParentID() == ParentId);
 			IsTopLevel = (task.GetParentID() == 0);

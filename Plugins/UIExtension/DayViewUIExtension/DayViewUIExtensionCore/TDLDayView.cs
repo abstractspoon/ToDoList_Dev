@@ -529,7 +529,7 @@ namespace DayViewUIExtension
 
 				if (IsItemDisplayable(task))
 				{
-					if (!topLevel || task.IsTopLevel)
+					if (!topLevel || task.IsTopLevel())
 					{
 						taskID = task.Id;
 						return true;
@@ -1077,7 +1077,7 @@ namespace DayViewUIExtension
 			Task task = tasks.GetFirstTask();
 			bool datesChanged = false;
 
-			while (ProcessTaskUpdate(task, type, metaDataKey, 0, ref datesChanged))
+			while (ProcessTaskUpdate(task, type, metaDataKey, ref datesChanged))
 				task = task.GetNextTask();
 
 			if (datesChanged)
@@ -1093,7 +1093,7 @@ namespace DayViewUIExtension
 			Invalidate();
         }
 
-		private bool ProcessTaskUpdate(Task task, UIExtension.UpdateType type, string metaDataKey, int depth, ref bool datesChanged)
+		private bool ProcessTaskUpdate(Task task, UIExtension.UpdateType type, string metaDataKey, ref bool datesChanged)
 		{
 			if (!task.IsValid())
 				return false;
@@ -1106,7 +1106,7 @@ namespace DayViewUIExtension
 
 			TaskItem taskItem = m_TaskItems.GetItem(taskId, newTask);
 
-			taskItem.UpdateTaskAttributes(task, m_CustomDateDefs, type, newTask, metaDataKey, depth);
+			taskItem.UpdateTaskAttributes(task, m_CustomDateDefs, type, newTask, metaDataKey);
 			taskItem.TreatOverdueTasksAsDueToday = m_TreatOverdueTasksAsDueToday;
 
 			// Update Time Blocks
@@ -1121,7 +1121,7 @@ namespace DayViewUIExtension
 			// Process children
 			Task subtask = task.GetFirstSubtask();
 
-			while (ProcessTaskUpdate(subtask, type, metaDataKey, (depth + 1), ref datesChanged))
+			while (ProcessTaskUpdate(subtask, type, metaDataKey, ref datesChanged))
 				subtask = subtask.GetNextTask();
 
 			return true;
@@ -1718,7 +1718,7 @@ namespace DayViewUIExtension
 			if (appt == null)
 				return false;
 			
-			if (appt.Locked)
+			if (appt.IsLocked)
 				return false;
 			
 			if (appt is TaskFutureOccurrence)
@@ -1852,7 +1852,7 @@ namespace DayViewUIExtension
 
 				if (!ReadOnly && (IconHitTest(PointToScreen(e.Location)) > 0))
 				{
-					if (realAppt.Locked)
+					if (realAppt.IsLocked)
 						return UIExtension.AppCursor(UIExtension.AppCursorType.LockedTask);
 
 					return UIExtension.HandCursor();
@@ -1880,7 +1880,7 @@ namespace DayViewUIExtension
 				}
 				else
 				{
-					if (realAppt.Locked)
+					if (realAppt.IsLocked)
 						return UIExtension.AppCursor(UIExtension.AppCursorType.LockedTask);
 
 					if (mode == Calendar.SelectionTool.Mode.Move)
