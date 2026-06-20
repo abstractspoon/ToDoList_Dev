@@ -154,6 +154,11 @@ namespace EisenhowerUIExtension
 			return false;
 		}
 
+		public void FilterToolTipMessage(IntPtr hwnd, UInt32 message, UInt32 wParam, UInt32 lParam, UInt32 time, Int32 xPos, Int32 yPos)
+		{
+			m_OptionsCombo.FilterTooltipMessage(Message.Create(hwnd, (Int32)message, (IntPtr)wParam, (IntPtr)lParam));
+		}
+
 		public bool DoIdleProcessing()
 		{
 			return m_EisenhowerCtrl.DoIdleProcessing();

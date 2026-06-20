@@ -172,13 +172,24 @@ bool CEisenhowerUIExtensionBridgeWindow::PrepareNewTask(ITaskList* pTask) const
 
 bool CEisenhowerUIExtensionBridgeWindow::ProcessMessage(MSG* pMsg)
 {
-	return m_wnd->ProcessMessage(IntPtr(pMsg->hwnd), 
-										pMsg->message, 
-										pMsg->wParam, 
-										pMsg->lParam, 
-										pMsg->time, 
-										pMsg->pt.x,
-										pMsg->pt.y);
+	return m_wnd->ProcessMessage(IntPtr(pMsg->hwnd),
+								 pMsg->message,
+								 pMsg->wParam,
+								 pMsg->lParam,
+								 pMsg->time,
+								 pMsg->pt.x,
+								 pMsg->pt.y);
+}
+
+void CEisenhowerUIExtensionBridgeWindow::FilterToolTipMessage(MSG* pMsg)
+{
+	m_wnd->FilterToolTipMessage(IntPtr(pMsg->hwnd),
+								pMsg->message,
+								pMsg->wParam,
+								pMsg->lParam,
+								pMsg->time,
+								pMsg->pt.x,
+								pMsg->pt.y);
 }
 
 bool CEisenhowerUIExtensionBridgeWindow::DoIdleProcessing()
