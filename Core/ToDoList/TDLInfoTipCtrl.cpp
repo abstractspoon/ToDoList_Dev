@@ -44,15 +44,11 @@ CTDLInfoTipCtrl::~CTDLInfoTipCtrl()
 
 
 BEGIN_MESSAGE_MAP(CTDLInfoTipCtrl, CToolTipCtrlEx)
-	//{{AFX_MSG_MAP(CTDLInfoTipCtrl)
-		// NOTE - the ClassWizard will add and remove mapping macros here.
-	//}}AFX_MSG_MAP
 	ON_WM_CREATE()
 	ON_WM_TIMER()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
-// CTDLInfoTipCtrl message handlers
 
 int CTDLInfoTipCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
