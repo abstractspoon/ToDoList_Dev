@@ -751,6 +751,7 @@ enum TDC_HITTESTREASON
 	TDCHTR_NONE,
 	TDCHTR_INFOTIP,
 	TDCHTR_CONTEXTMENU,
+	TDCHTR_TASKICON,
 };
 
 /////////////////////////////////////////////////////////////////////////////

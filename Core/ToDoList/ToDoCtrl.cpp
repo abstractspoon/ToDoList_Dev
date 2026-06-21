@@ -3923,6 +3923,15 @@ DWORD CToDoCtrl::SetStyle(TDC_STYLE nStyle, BOOL bEnable)
 
 int CToDoCtrl::OnToolHitTest(CPoint point, TOOLINFO * pTI) const
 {
+	CWnd::ClientToScreen(&point);
+
+	/////////////////////////////////////////////////
+	if (HitTestTask(point, TDCHTR_TASKICON))
+	{
+		int breakpoint = 0;
+	}
+	/////////////////////////////////////////////////
+
 	// Don't yet know why but updating the info tip text while
 	// multiple selecting causes the mouse-down message to get
 	// mislaid/eaten and the multiple-selection fails so if the
@@ -3936,7 +3945,6 @@ int CToDoCtrl::OnToolHitTest(CPoint point, TOOLINFO * pTI) const
 		!Misc::IsKeyPressed(VK_CONTROL) &&
 		!Misc::IsKeyPressed(VK_SHIFT))
 	{
-		CWnd::ClientToScreen(&point);
 
 		DWORD dwTaskID = HitTestTask(point, TDCHTR_INFOTIP);
 
@@ -6141,7 +6149,7 @@ TDC_HITTEST CToDoCtrl::HitTest(const CPoint& ptScreen, TDC_HITTESTREASON /*nReas
 
 DWORD CToDoCtrl::HitTestTask(const CPoint& ptScreen, TDC_HITTESTREASON nReason) const
 {
-	return m_taskTree.HitTestTask(ptScreen, (nReason == TDCHTR_INFOTIP));
+	return m_taskTree.HitTestTask(ptScreen, nReason);
 }
 
 TDC_COLUMN CToDoCtrl::HitTestColumn(const CPoint& ptScreen) const

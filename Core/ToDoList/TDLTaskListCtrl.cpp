@@ -218,6 +218,27 @@ BOOL CTDLTaskListCtrl::BuildColumns()
 	return TRUE;
 }
 
+DWORD CTDLTaskListCtrl::HitTestTask(const CPoint& ptScreen, TDC_HITTESTREASON nReason) const
+{
+	if ((nReason == TDCHTR_TASKICON) && !IsColumnShowing(TDCC_ICON))
+	{
+		CPoint ptClient(ptScreen);
+		m_lcTasks.ScreenToClient(&ptClient);
+
+		UINT nFlags = 0;
+		int nItem = m_lcTasks.HitTest(ptClient, &nFlags);
+
+		if ((nItem != -1) && (nFlags & LVHT_ONITEMICON))
+			return GetTaskID(nItem);
+
+		// else
+		return 0L;
+	}
+
+	// else
+	return CTDLTaskCtrlBase::HitTestTask(ptScreen, nReason);
+}
+
 DWORD CTDLTaskListCtrl::HitTestTasksTask(const CPoint& ptScreen) const
 {
 	// see if we hit a task in the tree
@@ -1581,7 +1602,7 @@ void CTDLTaskListCtrl::OnListSelectionChange(NMLISTVIEW* /*pNMLV*/)
 	if (!GetSelectedCount())
 	{
 		BOOL bManualDeslection = (Misc::IsKeyPressed(VK_CONTROL) && 
-								  HitTestTask(GetMessagePos(), FALSE) && 
+								  HitTestTask(GetMessagePos()) && 
 								  !Misc::IsKeyPressed(VK_LBUTTON));
 
 		if (!bManualDeslection)

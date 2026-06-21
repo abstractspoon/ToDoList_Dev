@@ -86,6 +86,7 @@ public:
 	BOOL GetSelectionBoundingRect(CRect& rSelection) const;
 
 	DWORD GetNextTaskID(DWORD dwTaskID, TTC_NEXTTASK nNext, BOOL bExcludeSelected) const;
+	DWORD HitTestTask(const CPoint& ptScreen, TDC_HITTESTREASON nReason = TDCHTR_NONE) const;
 
 	// list related
 	int GetSelectedItem() const;

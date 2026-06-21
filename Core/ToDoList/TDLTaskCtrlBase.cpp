@@ -1560,13 +1560,39 @@ int CTDLTaskCtrlBase::CompareTasks(LPARAM lParam1,
 									flags.WantIncludeTime(sort.nColumnID));
 }
 
-DWORD CTDLTaskCtrlBase::HitTestTask(const CPoint& ptScreen, BOOL bTitleColumnOnly) const
+DWORD CTDLTaskCtrlBase::HitTestTask(const CPoint& ptScreen, TDC_HITTESTREASON nReason) const
 {
-	DWORD dwTaskID = HitTestTasksTask(ptScreen);
-	
-	if (!dwTaskID && !bTitleColumnOnly)
-		dwTaskID = HitTestColumnsTask(ptScreen);
+	DWORD dwTaskID = 0;
 
+	switch (nReason)
+	{
+	case TDCHTR_INFOTIP:
+		dwTaskID = HitTestTasksTask(ptScreen); // Title column only
+		break;
+
+	case TDCHTR_TASKICON:
+		if (IsColumnShowing(TDCC_ICON))
+		{
+			TDC_COLUMN nColID = TDCC_NONE;
+
+			if (HitTestColumnsItem(ptScreen, FALSE, nColID, &dwTaskID) != -1)
+			{
+				if (nColID != TDCC_ICON)
+					dwTaskID = 0;
+			}
+		}
+		// else derived class handles
+		break;
+
+	case TDCHTR_NONE:
+	case TDCHTR_CONTEXTMENU:
+		dwTaskID = HitTestTasksTask(ptScreen);
+
+		if (!dwTaskID)
+			dwTaskID = HitTestColumnsTask(ptScreen);
+		break;
+	}
+	
 	return dwTaskID;
 }
 

@@ -2906,7 +2906,7 @@ DWORD CTabbedToDoCtrl::HitTestTask(const CPoint& ptScreen, TDC_HITTESTREASON nRe
 		return CToDoCtrl::HitTestTask(ptScreen, nReason);
 
 	case FTCV_TASKLIST:
-		return m_taskList.HitTestTask(ptScreen, (nReason == TDCHTR_INFOTIP));
+		return m_taskList.HitTestTask(ptScreen, nReason);
 
 	case FTCV_UIEXTENSION1:
 	case FTCV_UIEXTENSION2:

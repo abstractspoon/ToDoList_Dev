@@ -177,7 +177,7 @@ public:
 
 	TDC_HITTEST HitTest(const CPoint& ptScreen) const;
 	TDC_COLUMN HitTestColumn(const CPoint& ptScreen) const;
-	DWORD HitTestTask(const CPoint& ptScreen, BOOL bTitleColumnOnly) const;
+	DWORD HitTestTask(const CPoint& ptScreen, TDC_HITTESTREASON nReason = TDCHTR_NONE) const;
 	int HitTestColumnsItem(const CPoint& pt, BOOL bClient, TDC_COLUMN& nColID, DWORD* pTaskID = NULL, LPRECT pRect = NULL) const;
 	int HitTestFileLinkColumn(const CPoint& ptScreen) const;
 
