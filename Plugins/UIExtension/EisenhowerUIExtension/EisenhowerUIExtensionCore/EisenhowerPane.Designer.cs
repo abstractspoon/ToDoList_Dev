@@ -54,6 +54,7 @@
 			// 
 			this.m_Icon.Location = new System.Drawing.Point(2, 1);
 			this.m_Icon.Margin = new System.Windows.Forms.Padding(0);
+			this.m_Icon.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
 			this.m_Icon.Name = "m_Icon";
 			this.m_Icon.Size = new System.Drawing.Size(17, 17);
 			this.m_Icon.TabIndex = 2;

@@ -39,6 +39,25 @@ namespace EisenhowerUIExtension
 		{
 			InitializeComponent();
 
+			// Fixup the control positions under high DPI
+			if (DPIScaling.WantScaling())
+			{
+				foreach (Control ctrl in Controls)
+				{
+					ctrl.Size = DPIScaling.Scale(ctrl.Size);
+					ctrl.Location = DPIScaling.Scale(ctrl.Location);
+				}
+
+				// Manual tweaking
+				m_EisenhowerCtrl.Top -= 4;
+				m_EisenhowerCtrl.Height += 4;
+
+				int imageSize = DPIScaling.Scale(16);
+
+				m_Toolbar.ImageScalingSize = new Size(imageSize, imageSize);
+				m_Toolbar.Height = (imageSize + 7); // MFC
+			}
+
 			m_TypeID = typeID;
 			m_UiName = uiName;
 			m_Trans = trans;
