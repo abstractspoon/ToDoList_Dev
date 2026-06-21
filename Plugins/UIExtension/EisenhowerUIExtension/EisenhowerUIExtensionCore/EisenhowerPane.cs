@@ -373,11 +373,11 @@ namespace EisenhowerUIExtension
 				if (UITheme.IsDarkMode())
 					return SystemColors.ButtonHighlight;
 					
-				if (DrawingColor.GetLuminance(BackColor) < 0.5)
-					return m_Theme.GetAppDrawingColor(UITheme.AppColor.AppLinesLight);
+				if (DrawingColor.GetLuminance(BackColor) > 0.5)
+					return SystemColors.ButtonShadow;
 
 				//else
-				return m_Theme.GetAppDrawingColor(UITheme.AppColor.AppLinesDark);
+				return SystemColors.ButtonHighlight;
 			}
 		}
 
