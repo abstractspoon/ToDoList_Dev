@@ -198,7 +198,9 @@ int CTDCImageList::GetImageIndex(const CString& sImageName) const
 
 CString CTDCImageList::GetImageName(int nIndex) const
 {
-	ASSERT((nIndex >= 0) && (nIndex < m_aImageInfo.GetSize()));
+	if ((nIndex < 0) || (nIndex >= m_aImageInfo.GetSize()))
+		return EMPTY_STR;
+
 	return m_aImageInfo[nIndex].sName;
 }
 
