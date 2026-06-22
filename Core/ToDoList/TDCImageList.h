@@ -18,12 +18,7 @@
 
 //////////////////////////////////////////////////////////////////////
 
-// typedef CMap<CString, LPCTSTR, int, int> CMapStringToInt;
-// typedef CMap<int, int, CString, CString&> CMapIntToString;
-
-//////////////////////////////////////////////////////////////////////
-
-struct TDCIMAGE
+struct TDCIMAGEINFO
 {
 	CString sName;
 	CString sFilePath; // Can be empty
@@ -45,12 +40,11 @@ public:
 	BOOL HasImage(const CString& sImageFile) const;
 	int GetImageIndex(const CString& sImageName) const;
 	CString GetImageName(int nIndex) const;
-	CString GetImagePath(int nIndex) const;
+	BOOL GetImageInfo(const CString& sImageName, TDCIMAGEINFO& info) const;
 
 protected:
 	CMap<CString, LPCTSTR, int, int> m_mapNameToIndex;
-	CArray<TDCIMAGE, TDCIMAGE&> m_aImages;
-	//CMapIntToString m_mapIndexToName;
+	CArray<TDCIMAGEINFO, TDCIMAGEINFO&> m_aImageInfo;
 
 	BOOL m_bWantToolbars, m_bWantDefaultIcons;
 	CString m_sTasklistPath;

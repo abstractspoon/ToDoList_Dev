@@ -80,7 +80,7 @@ void CTDCImageList::Clear()
 	DeleteImageList();
 
 	m_mapNameToIndex.RemoveAll();
-	m_aImages.RemoveAll();
+	m_aImageInfo.RemoveAll();
 }
 
 int CTDCImageList::LoadImages(const CString& sTaskList, COLORREF crTransparent,
@@ -178,7 +178,7 @@ int CTDCImageList::LoadImages(const CString& sTaskList, COLORREF crTransparent,
 		m_bWantToolbars = bWantToolbars;
 	}
 
-	ASSERT(m_aImages.GetSize() == m_mapNameToIndex.GetCount());
+	ASSERT(m_aImageInfo.GetSize() == m_mapNameToIndex.GetCount());
 	
 	return (GetSafeHandle() ? GetImageCount() : 0);
 }
@@ -190,7 +190,6 @@ int CTDCImageList::GetImageIndex(const CString& sImageName) const
 	if (!sImageName.IsEmpty())
 	{
 		CString sName = Misc::ToLower(FileMisc::GetFileNameFromPath(sImageName));
-
 		m_mapNameToIndex.Lookup(Misc::ToLower(sName), nIndex);
 	}
 	
@@ -199,16 +198,19 @@ int CTDCImageList::GetImageIndex(const CString& sImageName) const
 
 CString CTDCImageList::GetImageName(int nIndex) const
 {
-	ASSERT((nIndex >= 0) && (nIndex < m_aImages.GetSize()));
-
-	return m_aImages[nIndex].sName;
+	ASSERT((nIndex >= 0) && (nIndex < m_aImageInfo.GetSize()));
+	return m_aImageInfo[nIndex].sName;
 }
 
-CString CTDCImageList::GetImagePath(int nIndex) const
+BOOL CTDCImageList::GetImageInfo(const CString& sImageName, TDCIMAGEINFO& info) const
 {
-	ASSERT((nIndex >= 0) && (nIndex < m_aImages.GetSize()));
+	int nIndex = GetImageIndex(sImageName);
 
-	return m_aImages[nIndex].sFilePath;
+	if (nIndex == -1)
+		return FALSE;
+
+	info = m_aImageInfo[nIndex];
+	return TRUE;
 }
 
 BOOL CTDCImageList::AddImage(const CString& sImageFile, CBitmap& bmImage, COLORREF crTransparent, 
@@ -290,11 +292,11 @@ void CTDCImageList::MapImage(int nIndex, const CString& sName, const CString& sF
 {
 	m_mapNameToIndex[Misc::ToLower(sName)] = nIndex;
 
-	TDCIMAGE image;
+	TDCIMAGEINFO image;
 	image.sName = sName;
 	image.sFilePath = sFilePath;
 
-	VERIFY(m_aImages.Add(image) == nIndex);
+	VERIFY(m_aImageInfo.Add(image) == nIndex);
 }
 
 DWORD CTDCImageList::LoadImagesFromFolder(const CString& sFolder, COLORREF crTransparent, CTDCImageList* pImages, int& nNextNameIndex)

@@ -1570,7 +1570,7 @@ DWORD CTDLTaskCtrlBase::HitTestTask(const CPoint& ptScreen, TDC_HITTESTREASON nR
 		dwTaskID = HitTestTasksTask(ptScreen); // Title column only
 		break;
 
-	case TDCHTR_TASKICON:
+	case TDCHTR_IMAGETIP:
 		if (IsColumnShowing(TDCC_ICON))
 		{
 			TDC_COLUMN nColID = TDCC_NONE;

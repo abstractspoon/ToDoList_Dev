@@ -3538,7 +3538,7 @@ BOOL CToDoCtrl::GetLabelEditRect(CRect& rScreen)
 
 BOOL CToDoCtrl::EditSelectedTaskTitle(BOOL bTaskIsNew)
 {
-	if (HasStyle(TDCS_SHOWINFOTIPS) && m_infoTip.GetSafeHwnd())
+	if (m_infoTip.GetSafeHwnd())
 		m_infoTip.Pop();
 
 	if (!CanEditSelectedTask(TDCA_TASKNAME))
@@ -3823,19 +3823,8 @@ DWORD CToDoCtrl::SetStyle(TDC_STYLE nStyle, BOOL bEnable)
 		break;
 
 	case TDCS_SHOWINFOTIPS:
-		if (bEnable)
-		{
-			ASSERT(!m_infoTip.GetSafeHwnd());
-
-			if (!m_infoTip.Create(this))
-				return FALSE;
-
-			m_infoTip.SetFont(CFont::FromHandle(m_hFontTree));
-		}
-		else if (m_infoTip.GetSafeHwnd())
-		{
-			m_infoTip.DestroyWindow();
-		}
+	case TDCS_SHOWIMAGETIPS:
+		// Handled in NotifyEndPreferencesUpdate
 		break;
 
 	case TDCS_USEEARLIESTDUEDATE:
@@ -3923,57 +3912,71 @@ DWORD CToDoCtrl::SetStyle(TDC_STYLE nStyle, BOOL bEnable)
 
 int CToDoCtrl::OnToolHitTest(CPoint point, TOOLINFO * pTI) const
 {
-	CWnd::ClientToScreen(&point);
+	if (IsTaskLabelEditing())
+		return 0;
 
-	/////////////////////////////////////////////////
-	if (HitTestTask(point, TDCHTR_TASKICON))
-	{
-		int breakpoint = 0;
-	}
-	/////////////////////////////////////////////////
+	if (!m_infoTip.GetSafeHwnd())
+		return 0;
 
-	// Don't yet know why but updating the info tip text while
-	// multiple selecting causes the mouse-down message to get
-	// mislaid/eaten and the multiple-selection fails so if the
-	// ctrl or shift keys are down we don't return a tooltip
 	TDC_MAXSTATE nMaxState = m_layout.GetMaximiseState();
 
-	if (!IsTaskLabelEditing() &&
-		HasStyle(TDCS_SHOWINFOTIPS) &&
-		m_infoTip.GetSafeHwnd() &&
-		(nMaxState != TDCMS_MAXCOMMENTS) && 
-		!Misc::IsKeyPressed(VK_CONTROL) &&
-		!Misc::IsKeyPressed(VK_SHIFT))
-	{
+	if (nMaxState == TDCMS_MAXCOMMENTS)
+		return 0;
 
-		DWORD dwTaskID = HitTestTask(point, TDCHTR_INFOTIP);
+	CWnd::ClientToScreen(&point);
+
+	DWORD dwTaskID = 0;
+	CString sTip;
+
+	if (HasStyle(TDCS_SHOWIMAGETIPS))
+	{
+		dwTaskID = HitTestTask(point, TDCHTR_IMAGETIP);
 
 		if (dwTaskID)
 		{
-			CTDCAttributeMap mapAttrib;
-			TDC::MapColumnsToAttributes(m_visColEdit.GetVisibleColumns(), mapAttrib);
-
-			// Always add path for context
-			mapAttrib.Add(TDCA_PATH);
-
-			if (nMaxState == TDCMS_NORMAL)
-				mapAttrib.Add(TDCA_COMMENTS);
-
-			CString sInfoTip = m_infoTip.FormatTip(dwTaskID, 
-												   mapAttrib, 
-												   m_nMaxInfotipCommentsLength,
-												   m_sCompletionStatus);
-			ASSERT(!sInfoTip.IsEmpty());
-
-			HWND hwndHit = CDialogHelper::GetWindowFromPoint(GetSafeHwnd(), point);
-			ASSERT(hwndHit);
-
-			return CToolTipCtrlEx::SetToolInfo(*pTI, hwndHit, sInfoTip, dwTaskID);
+			TDCIMAGEINFO info;
+		
+			if (!m_ilTaskIcons.GetImageInfo(m_data.GetTaskIcon(dwTaskID), info)/* || info.sFilePath.IsEmpty()*/)
+				return 0;
+		
+			sTip = info.sName;//sFilePath;
+			dwTaskID += m_dwNextUniqueID; // so it's distinguishable from an infotip for the same task
+		}
+		else
+		{
+			int breakpoint = 0;
 		}
 	}
 
-	// Don't want default behaviour
-	return 0;
+	if (!dwTaskID && HasStyle(TDCS_SHOWINFOTIPS))
+	{
+		dwTaskID = HitTestTask(point, TDCHTR_INFOTIP);
+
+		if (!dwTaskID)
+			return 0;
+
+		CTDCAttributeMap mapAttrib;
+		TDC::MapColumnsToAttributes(m_visColEdit.GetVisibleColumns(), mapAttrib);
+
+		// Always add path for context
+		mapAttrib.Add(TDCA_PATH);
+
+		if (nMaxState == TDCMS_NORMAL)
+			mapAttrib.Add(TDCA_COMMENTS);
+
+		sTip = m_infoTip.FormatTip(dwTaskID,
+								   mapAttrib,
+								   m_nMaxInfotipCommentsLength,
+								   m_sCompletionStatus);
+	}
+
+	ASSERT(!sTip.IsEmpty());
+	ASSERT(dwTaskID);
+
+	HWND hwndHit = CDialogHelper::GetWindowFromPoint(GetSafeHwnd(), point);
+	ASSERT(hwndHit);
+
+	return CToolTipCtrlEx::SetToolInfo(*pTI, hwndHit, sTip, dwTaskID);
 }
 
 void CToDoCtrl::SetReadonly(BOOL bReadOnly)
@@ -4084,6 +4087,18 @@ void CToDoCtrl::NotifyEndPreferencesUpdate()
 
 	// Update active comments
 	m_ctrlComments.UpdateAppPreferences();
+
+	// And infotips
+	if (HasStyle(TDCS_SHOWINFOTIPS) || HasStyle(TDCS_SHOWIMAGETIPS))
+	{
+		VERIFY(m_infoTip.GetSafeHwnd() || m_infoTip.Create(this));
+
+		m_infoTip.SetFont(CFont::FromHandle(m_hFontTree));
+	}
+	else if (m_infoTip.GetSafeHwnd())
+	{
+		m_infoTip.DestroyWindow();
+	}
 }
 
 void CToDoCtrl::UpdateVisibleColumns(const CTDCColumnIDMap& mapChanges)

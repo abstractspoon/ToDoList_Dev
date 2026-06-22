@@ -220,7 +220,7 @@ BOOL CTDLTaskListCtrl::BuildColumns()
 
 DWORD CTDLTaskListCtrl::HitTestTask(const CPoint& ptScreen, TDC_HITTESTREASON nReason) const
 {
-	if ((nReason == TDCHTR_TASKICON) && !IsColumnShowing(TDCC_ICON))
+	if ((nReason == TDCHTR_IMAGETIP) && !IsColumnShowing(TDCC_ICON))
 	{
 		CPoint ptClient(ptScreen);
 		m_lcTasks.ScreenToClient(&ptClient);

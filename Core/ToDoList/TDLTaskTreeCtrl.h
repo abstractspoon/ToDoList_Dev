@@ -136,7 +136,8 @@ public:
 	BOOL GetSelectionBoundingRect(CRect& rSelection) const;
 	BOOL GetLabelEditRect(CRect& rLabel) const;
 	HTREEITEM GetItem(DWORD dwTaskID) const;
-	
+	DWORD HitTestTask(const CPoint& ptScreen, TDC_HITTESTREASON nReason = TDCHTR_NONE) const;
+
 	void ExpandAll(BOOL bExpand = TRUE);
 	void ExpandSelection(BOOL bExpand = TRUE, BOOL bFully = FALSE);
 	int GetExpandedTasks(CDWordArray& aExpanded) const;
