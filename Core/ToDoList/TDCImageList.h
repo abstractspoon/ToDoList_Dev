@@ -20,8 +20,11 @@
 
 struct TDCIMAGEINFO
 {
+	TDCIMAGEINFO() : sizeImage(0, 0) {}
+
 	CString sName;
 	CString sFilePath; // Can be empty
+	CSize sizeImage;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -55,7 +58,7 @@ protected:
 	BOOL Attach(HIMAGELIST hImageList) { return CEnImageList::Attach(hImageList); }
 	void Clear();
 
-	void MapImage(int nIndex, const CString& sName, const CString& sFilePath);
+	void MapImage(int nIndex, const CString& sName, const CString& sFilePath, const CSize& size);
 	BOOL NeedLoadImages(const CString& sTaskList, COLORREF crTransparent,
 						BOOL bWantDefaultIcons, BOOL bWantToolbars) const;
 
@@ -63,7 +66,7 @@ protected:
 	static BOOL LoadImage(const CString& sImageFile, COLORREF crTransparent, CTDCImageList* pImages, int& nNextNameIndex);
 	static BOOL AddImage(const CString& sImageFile, CBitmap& bmImage, COLORREF crTransparent, CTDCImageList* pImages, int& nNextNameIndex);
 	static BOOL AddImage(const CString& sImageFile, HICON hIcon, CTDCImageList* pImages, int& nNextNameIndex);
-	static BOOL MapLastImage(const CString& sImageFile, int nStartIndex, CTDCImageList* pImages, int& nNextNameIndex);
+	static BOOL MapLastImage(const CString& sImageFile, const CSize& size, int nStartIndex, CTDCImageList* pImages, int& nNextNameIndex);
 
 };
 

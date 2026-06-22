@@ -11,8 +11,12 @@
 #include "TDCCustomAttributeDef.h"
 
 #include "..\Shared\Misc.h"
+#include "..\Shared\FileMisc.h"
 #include "..\Shared\GraphicsMisc.h"
 #include "..\Shared\Localizer.h"
+#include "..\Shared\EnBitmap.h"
+
+#include "..\3rdParty\MemDC.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -46,6 +50,7 @@ CTDLInfoTipCtrl::~CTDLInfoTipCtrl()
 BEGIN_MESSAGE_MAP(CTDLInfoTipCtrl, CToolTipCtrlEx)
 	ON_WM_CREATE()
 	ON_WM_TIMER()
+	ON_NOTIFY_REFLECT_EX(TTN_SHOW, OnNotifyShow)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -75,6 +80,70 @@ void CTDLInfoTipCtrl::OnTimer(UINT nIDEvent)
 	}
 
 	CToolTipCtrlEx::OnTimer(nIDEvent);
+}
+
+BOOL CTDLInfoTipCtrl::OnNotifyShow(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	CString sText;
+	GetWindowText(sText);
+
+	if (FileMisc::IsPath(sText))
+	{
+		CEnBitmap bmp;
+
+		if (!bmp.LoadImage(sText))
+		{
+			Pop();
+			return TRUE;
+		}
+
+		CRect rTooltip;
+		GetWindowRect(rTooltip);
+		
+		rTooltip = CRect(rTooltip.TopLeft(), bmp.GetSize());
+		FitTooltipToScreen(rTooltip);
+
+		SetWindowPos(NULL, rTooltip.left, rTooltip.top, rTooltip.Width(), rTooltip.Height(), (SWP_NOACTIVATE | SWP_NOZORDER));
+		*pResult = 1;
+
+		return TRUE; // always
+	}
+
+	return CToolTipCtrlEx::OnNotifyShow(pNMHDR, pResult);
+}
+
+void CTDLInfoTipCtrl::OnPaintTooltip(CDC* pDC)
+{
+	CString sText;
+	GetWindowText(sText);
+
+	if (FileMisc::IsPath(sText))
+	{
+		CEnBitmap bmp;
+		VERIFY(bmp.LoadImage(sText));
+
+		CRect rClient;
+		GetClientRect(rClient);
+
+		CClientDC dcDesktop(CWnd::GetDesktopWindow());
+		ASSERT_VALID(&dcDesktop);
+
+		CBitmap bmMem;
+		CDC dcMem;
+
+		if (dcMem.CreateCompatibleDC(&dcDesktop))
+		{
+			CBitmap* pOldBM = dcMem.SelectObject(&bmp);
+
+			pDC->BitBlt(0, 0, rClient.Width(), rClient.Height(), &dcMem, 0, 0, SRCCOPY);
+			dcMem.SelectObject(pOldBM);
+		}
+		
+		return; // always
+	}
+
+	// All else
+	CToolTipCtrlEx::OnPaintTooltip(pDC);
 }
 
 CString CTDLInfoTipCtrl::FormatTip(DWORD dwTaskID,

@@ -3936,11 +3936,17 @@ int CToDoCtrl::OnToolHitTest(CPoint point, TOOLINFO * pTI) const
 		{
 			TDCIMAGEINFO info;
 		
-			if (!m_ilTaskIcons.GetImageInfo(m_data.GetTaskIcon(dwTaskID), info)/* || info.sFilePath.IsEmpty()*/)
+			if (!m_ilTaskIcons.GetImageInfo(m_data.GetTaskIcon(dwTaskID), info))
+				return 0;
+
+			if (info.sFilePath.IsEmpty())
+				return 0;
+
+			if ((info.sizeImage.cx == 16) || (info.sizeImage.cy == 16))
 				return 0;
 		
-			sTip = info.sName;//sFilePath;
-			dwTaskID += m_dwNextUniqueID; // so it's distinguishable from an infotip for the same task
+			sTip = info.sFilePath;
+			dwTaskID += m_dwNextUniqueID; // so it's distinguishable from a text infotip of the same task
 		}
 		else
 		{

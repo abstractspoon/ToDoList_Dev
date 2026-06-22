@@ -99,7 +99,7 @@ int CTDCImageList::LoadImages(const CString& sTaskList, COLORREF crTransparent,
 		// Add a dummy placeholder for the 'folder' icon which we
 		// will replace once we have rescaled the imagelist
 		Add(CIcon(IDI_NULL, 16));
-		MapImage(0, _T("0"), EMPTY_STR);
+		MapImage(0, _T("0"), EMPTY_STR, CSize(16, 16));
 		
 		// because the icon set must come first for backwards compatibility
 		// we must first see if any other images exist before we add them.
@@ -227,7 +227,7 @@ BOOL CTDCImageList::AddImage(const CString& sImageFile, CBitmap& bmImage, COLORR
 	int nStartIndex = pImages->GetImageCount();
 	
 	if (pImages->Add(&bmImage, crTransparent) == nStartIndex)
-		return MapLastImage(sImageFile, nStartIndex, pImages, nNextNameIndex);
+		return MapLastImage(sImageFile, CEnBitmap::GetImageSize(bmImage), nStartIndex, pImages, nNextNameIndex);
 
 	return FALSE;
 }
@@ -257,12 +257,12 @@ BOOL CTDCImageList::AddImage(const CString& sImageFile, HICON hIcon, CTDCImageLi
 	int nStartIndex = pImages->GetImageCount();
 	
 	if (pImages->Add(hIcon) == nStartIndex)
-		return MapLastImage(sImageFile, nStartIndex, pImages, nNextNameIndex);
+		return MapLastImage(sImageFile, CIcon(hIcon, FALSE).GetSize(), nStartIndex, pImages, nNextNameIndex);
 
 	return FALSE;
 }
 
-BOOL CTDCImageList::MapLastImage(const CString& sImageFile, int nStartIndex, CTDCImageList* pImages, int& nNextNameIndex)
+BOOL CTDCImageList::MapLastImage(const CString& sImageFile, const CSize& size, int nStartIndex, CTDCImageList* pImages, int& nNextNameIndex)
 {
 	// map the images
 	int nEndIndex = (pImages->GetImageCount() - 1);
@@ -271,7 +271,7 @@ BOOL CTDCImageList::MapLastImage(const CString& sImageFile, int nStartIndex, CTD
 	if (nEndIndex == nStartIndex)
 	{
 		CString sName = FileMisc::GetFileNameFromPath(sImageFile);
-		pImages->MapImage(nStartIndex, sName, sImageFile);
+		pImages->MapImage(nStartIndex, sName, sImageFile, size);
 	}
 	else if (nStartIndex > nNextNameIndex)
 	{
@@ -283,20 +283,21 @@ BOOL CTDCImageList::MapLastImage(const CString& sImageFile, int nStartIndex, CTD
 		for (int nIndex = nStartIndex; nIndex <= nEndIndex; nIndex++)
 		{
 			CString sName = Misc::Format(nNextNameIndex++);
-			pImages->MapImage(nIndex, sName, sImageFile);
+			pImages->MapImage(nIndex, sName, sImageFile, size);
 		}
 	}
 
 	return TRUE;
 }
 
-void CTDCImageList::MapImage(int nIndex, const CString& sName, const CString& sFilePath)
+void CTDCImageList::MapImage(int nIndex, const CString& sName, const CString& sFilePath, const CSize& size)
 {
 	m_mapNameToIndex[Misc::ToLower(sName)] = nIndex;
 
 	TDCIMAGEINFO image;
 	image.sName = sName;
 	image.sFilePath = sFilePath;
+	image.sizeImage = size;
 
 	VERIFY(m_aImageInfo.Add(image) == nIndex);
 }

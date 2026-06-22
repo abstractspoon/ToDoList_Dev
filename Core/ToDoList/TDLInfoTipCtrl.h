@@ -44,8 +44,12 @@ protected:
 protected:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnTimer(UINT nIDEvent);
+	afx_msg BOOL OnNotifyShow(NMHDR* pNMHDR, LRESULT* pResult);
 
 	DECLARE_MESSAGE_MAP()
+
+protected:
+	virtual void OnPaintTooltip(CDC* pDC);
 
 protected:
 	int BuildSortedAttributeArray(DWORD dwTaskID, 

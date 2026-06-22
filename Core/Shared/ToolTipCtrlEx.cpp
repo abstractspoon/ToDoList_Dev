@@ -61,7 +61,7 @@ CToolTipCtrlEx::CToolTipCtrlEx()
 	m_bUsingRelayEvent(-1), 
 	m_nLastHit(-1),
 	m_ptTrackingOffset(0, 0),
-	m_sizeTooltip(0, 0)
+	m_sizeTrackingTooltip(0, 0)
 {
 	InitToolInfo(m_tiLast, FALSE);
 }
@@ -266,7 +266,7 @@ void CToolTipCtrlEx::FilterToolTipMessage(MSG* pMsg, BOOL bSendHitTestMessage)
 
 				if (m_scTracking.IsValid())
 				{
-					CRect rTooltip(ptTip, m_sizeTooltip);
+					CRect rTooltip(ptTip, m_sizeTrackingTooltip);
 
 					if (FitTooltipToScreen(rTooltip))
 						ptTip = rTooltip.TopLeft();
@@ -308,7 +308,7 @@ LRESULT CToolTipCtrlEx::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM 
 					if (FitTooltipToScreen(rTooltip))
 						SetWindowPos(NULL, rTooltip.left, rTooltip.top, 0, 0, (SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOSIZE));
 
-					m_sizeTooltip = rTooltip.Size();
+					m_sizeTrackingTooltip = rTooltip.Size();
 				}
 				return TRUE; // we handled it
 			}
@@ -576,16 +576,21 @@ BOOL CToolTipCtrlEx::AdjustRect(LPRECT lprc, BOOL bLarger) const
 
 void CToolTipCtrlEx::OnPaint()
 {
+	CPaintDC dc(this);
+
 	if (IsTracking())
 	{
 		// Prevent flicker
-		CPaintDC dc(this); 
 		CMemDC dcMem(&dc);
-
-		DefWindowProc(WM_PRINTCLIENT, (WPARAM)(HDC)dcMem, 0);
+		OnPaintTooltip(&dcMem);
 	}
 	else
 	{
-		Default();
+		OnPaintTooltip(&dc);
 	}
+}
+
+void CToolTipCtrlEx::OnPaintTooltip(CDC* pDC)
+{
+	DefWindowProc(WM_PRINTCLIENT, (WPARAM)pDC->GetSafeHdc(), 0);
 }

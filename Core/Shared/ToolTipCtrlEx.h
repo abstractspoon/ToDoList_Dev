@@ -60,7 +60,7 @@ protected:
 
 	int m_nLastHit;
 	TOOLINFO m_tiLast;
-	CSize m_sizeTooltip;
+	CSize m_sizeTrackingTooltip;
 
 protected:
 	afx_msg void OnPaint();
@@ -71,6 +71,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 protected:
+	virtual void OnPaintTooltip(CDC* pDC);
 	virtual LRESULT ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp);
 
 	BOOL FitTooltipToScreen(CRect& rTooltip) const;
