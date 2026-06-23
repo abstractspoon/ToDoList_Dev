@@ -86,21 +86,13 @@ void CTDLInfoTipCtrl::OnTimer(UINT nIDEvent)
 
 BOOL CTDLInfoTipCtrl::OnNotifyShow(NMHDR* pNMHDR, LRESULT* pResult)
 {
-	CString sText;
-	GetWindowText(sText);
+	CString sTip;
+	GetWindowText(sTip);
 
-	if (FileMisc::IsPath(sText))
+	if (m_bmpImageTip.LoadImage(sTip))
 	{
-		CEnBitmap bmp;
-
-		if (!bmp.LoadImage(sText))
-		{
-			Pop();
-			return TRUE;
-		}
-
 		// Restrict tip size to a sensible maximum
-		CSize size = bmp.GetSize();
+		CSize size = m_bmpImageTip.GetSize();
 
 		if ((size.cx > size.cy) && (size.cx > MAX_IMAGETIP_SIZE))
 		{
@@ -114,14 +106,15 @@ BOOL CTDLInfoTipCtrl::OnNotifyShow(NMHDR* pNMHDR, LRESULT* pResult)
 		}
 
 		CRect rTooltip;
+		CPoint ptCursor(::GetMessagePos());
+	
 		GetWindowRect(rTooltip);
-		
 		rTooltip = CRect(rTooltip.TopLeft(), size);
-		FitTooltipToScreen(rTooltip);
 
+		GraphicsMisc::FitRectToScreen(rTooltip, &ptCursor, MONITOR_DEFAULTTONEAREST);
 		SetWindowPos(NULL, rTooltip.left, rTooltip.top, rTooltip.Width(), rTooltip.Height(), (SWP_NOACTIVATE | SWP_NOZORDER));
-		*pResult = 1;
 
+		*pResult = 1;
 		return TRUE; // always
 	}
 
@@ -130,14 +123,8 @@ BOOL CTDLInfoTipCtrl::OnNotifyShow(NMHDR* pNMHDR, LRESULT* pResult)
 
 void CTDLInfoTipCtrl::OnPaintTip(CDC* pDC)
 {
-	CString sText;
-	GetWindowText(sText);
-
-	if (FileMisc::IsPath(sText))
+	if (m_bmpImageTip.GetSafeHandle())
 	{
-		CEnBitmap bmp;
-		VERIFY(bmp.LoadImage(sText));
-
 		CRect rClient;
 		GetClientRect(rClient);
 
@@ -149,12 +136,18 @@ void CTDLInfoTipCtrl::OnPaintTip(CDC* pDC)
 
 		if (dcMem.CreateCompatibleDC(&dcDesktop))
 		{
-			CBitmap* pOldBM = dcMem.SelectObject(&bmp);
+			CSize size = m_bmpImageTip.GetSize();
+			CBitmap* pOldBM = dcMem.SelectObject(&m_bmpImageTip);
 
-			pDC->BitBlt(0, 0, rClient.Width(), rClient.Height(), &dcMem, 0, 0, SRCCOPY);
+			if (size == rClient.Size())
+				pDC->BitBlt(0, 0, rClient.Width(), rClient.Height(), &dcMem, 0, 0, SRCCOPY);
+			else
+				pDC->StretchBlt(0, 0, rClient.Width(), rClient.Height(), &dcMem, 0, 0, size.cx, size.cy, SRCCOPY);
+
 			dcMem.SelectObject(pOldBM);
 		}
 		
+		m_bmpImageTip.DeleteObject();
 		return; // always
 	}
 
