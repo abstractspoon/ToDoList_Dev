@@ -28,6 +28,8 @@ static char THIS_FILE[] = __FILE__;
 
 static const CString EMPTY_STR;
 
+static const int MAX_IMAGETIP_SIZE = GraphicsMisc::ScaleByDPIFactor(256);
+
 /////////////////////////////////////////////////////////////////////////////
 // CTDLInfoTipCtrl
 
@@ -97,10 +99,24 @@ BOOL CTDLInfoTipCtrl::OnNotifyShow(NMHDR* pNMHDR, LRESULT* pResult)
 			return TRUE;
 		}
 
+		// Restrict tip size to a sensible maximum
+		CSize size = bmp.GetSize();
+
+		if ((size.cx > size.cy) && (size.cx > MAX_IMAGETIP_SIZE))
+		{
+			size.cy = ((size.cy * MAX_IMAGETIP_SIZE) / size.cx);
+			size.cx = MAX_IMAGETIP_SIZE;
+		}
+		else if ((size.cy > size.cx) && (size.cy > MAX_IMAGETIP_SIZE))
+		{
+			size.cx = ((size.cx * MAX_IMAGETIP_SIZE) / size.cy);
+			size.cy = MAX_IMAGETIP_SIZE;
+		}
+
 		CRect rTooltip;
 		GetWindowRect(rTooltip);
 		
-		rTooltip = CRect(rTooltip.TopLeft(), bmp.GetSize());
+		rTooltip = CRect(rTooltip.TopLeft(), size);
 		FitTooltipToScreen(rTooltip);
 
 		SetWindowPos(NULL, rTooltip.left, rTooltip.top, rTooltip.Width(), rTooltip.Height(), (SWP_NOACTIVATE | SWP_NOZORDER));
