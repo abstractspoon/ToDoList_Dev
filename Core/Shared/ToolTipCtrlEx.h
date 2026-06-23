@@ -71,7 +71,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	virtual void OnPaintTooltip(CDC* pDC);
+	virtual void OnPaintTip(CDC* pDC);
 	virtual LRESULT ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp);
 
 	BOOL FitTooltipToScreen(CRect& rTooltip) const;

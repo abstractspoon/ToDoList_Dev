@@ -112,7 +112,7 @@ BOOL CTDLInfoTipCtrl::OnNotifyShow(NMHDR* pNMHDR, LRESULT* pResult)
 	return CToolTipCtrlEx::OnNotifyShow(pNMHDR, pResult);
 }
 
-void CTDLInfoTipCtrl::OnPaintTooltip(CDC* pDC)
+void CTDLInfoTipCtrl::OnPaintTip(CDC* pDC)
 {
 	CString sText;
 	GetWindowText(sText);
@@ -143,7 +143,7 @@ void CTDLInfoTipCtrl::OnPaintTooltip(CDC* pDC)
 	}
 
 	// All else
-	CToolTipCtrlEx::OnPaintTooltip(pDC);
+	CToolTipCtrlEx::OnPaintTip(pDC);
 }
 
 CString CTDLInfoTipCtrl::FormatTip(DWORD dwTaskID,

@@ -582,15 +582,15 @@ void CToolTipCtrlEx::OnPaint()
 	{
 		// Prevent flicker
 		CMemDC dcMem(&dc);
-		OnPaintTooltip(&dcMem);
+		OnPaintTip(&dcMem);
 	}
 	else
 	{
-		OnPaintTooltip(&dc);
+		OnPaintTip(&dc);
 	}
 }
 
-void CToolTipCtrlEx::OnPaintTooltip(CDC* pDC)
+void CToolTipCtrlEx::OnPaintTip(CDC* pDC)
 {
 	DefWindowProc(WM_PRINTCLIENT, (WPARAM)pDC->GetSafeHdc(), 0);
 }

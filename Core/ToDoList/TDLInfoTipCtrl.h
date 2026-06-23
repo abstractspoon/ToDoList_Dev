@@ -49,7 +49,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	virtual void OnPaintTooltip(CDC* pDC);
+	virtual void OnPaintTip(CDC* pDC);
 
 protected:
 	int BuildSortedAttributeArray(DWORD dwTaskID, 
