@@ -10,7 +10,8 @@
 #include "ToDoCtrlDataUtils.h"
 
 #include "..\Shared\ToolTipCtrlEx.h"
-#include "..\Shared\EnBitmap.h"
+
+#include "..\3rdParty\GdiPlus.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -42,7 +43,7 @@ protected:
 	CTDCTaskFormatter m_formatter;
 	CTDCTaskCalculator m_calculator;
 	
-	CEnBitmap m_bmpImageTip;
+	CGdiPlusBitmap m_bmpImageTip;
 
 protected:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);

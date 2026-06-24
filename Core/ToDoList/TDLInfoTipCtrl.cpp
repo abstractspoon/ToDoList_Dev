@@ -89,10 +89,10 @@ BOOL CTDLInfoTipCtrl::OnNotifyShow(NMHDR* pNMHDR, LRESULT* pResult)
 	CString sTip;
 	GetWindowText(sTip);
 
-	if (m_bmpImageTip.LoadImage(sTip))
+	if (m_bmpImageTip.LoadFromFile(sTip))
 	{
 		// Restrict tip size to a sensible maximum
-		CSize size = m_bmpImageTip.GetSize();
+		CSize size(CGdiPlus::GetImageDimension(m_bmpImageTip));
 
 		if ((size.cx > size.cy) && (size.cx > MAX_IMAGETIP_SIZE))
 		{
@@ -123,31 +123,14 @@ BOOL CTDLInfoTipCtrl::OnNotifyShow(NMHDR* pNMHDR, LRESULT* pResult)
 
 void CTDLInfoTipCtrl::OnPaintTip(CDC* pDC)
 {
-	if (m_bmpImageTip.GetSafeHandle())
+	if (m_bmpImageTip.IsValid())
 	{
 		CRect rClient;
 		GetClientRect(rClient);
 
-		CClientDC dcDesktop(CWnd::GetDesktopWindow());
-		ASSERT_VALID(&dcDesktop);
+		CGdiPlusGraphics graphics(*pDC);
+		CGdiPlus::DrawImage(graphics, m_bmpImageTip, rClient);
 
-		CBitmap bmMem;
-		CDC dcMem;
-
-		if (dcMem.CreateCompatibleDC(&dcDesktop))
-		{
-			CSize size = m_bmpImageTip.GetSize();
-			CBitmap* pOldBM = dcMem.SelectObject(&m_bmpImageTip);
-
-			if (size == rClient.Size())
-				pDC->BitBlt(0, 0, rClient.Width(), rClient.Height(), &dcMem, 0, 0, SRCCOPY);
-			else
-				pDC->StretchBlt(0, 0, rClient.Width(), rClient.Height(), &dcMem, 0, 0, size.cx, size.cy, SRCCOPY);
-
-			dcMem.SelectObject(pOldBM);
-		}
-		
-		m_bmpImageTip.DeleteObject();
 		return; // always
 	}
 
