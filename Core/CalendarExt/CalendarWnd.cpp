@@ -583,11 +583,31 @@ DWORD CCalendarWnd::HitTestTask(POINT ptScreen, IUI_HITTESTREASON nReason) const
 	CPoint ptBigCal(ptScreen);
 	m_BigCalendar.ScreenToClient(&ptBigCal);
 
-	BOOL bCustomDate = FALSE;
-	DWORD dwTaskID = m_BigCalendar.HitTestTask(ptBigCal, bCustomDate);
+	DWORD dwTaskID = 0;
 
-	if (bCustomDate && (nReason == IUI_CONTEXTMENU))
-		dwTaskID = 0;
+	switch (nReason)
+	{
+	case IUI_IMAGETIP:
+		dwTaskID = m_BigCalendar.HitTestTaskIcon(ptBigCal);
+		break;
+
+	case IUI_CONTEXTMENU:
+		{
+			BOOL bCustomDate = FALSE;
+			dwTaskID = m_BigCalendar.HitTestTask(ptBigCal, bCustomDate);
+
+			if (bCustomDate)
+				dwTaskID = 0;
+		}
+		break;
+
+	default:
+		{
+			BOOL bUnused = FALSE;
+			dwTaskID = m_BigCalendar.HitTestTask(ptBigCal, bUnused);
+		}
+		break;
+	}
 
 	return dwTaskID;
 }
