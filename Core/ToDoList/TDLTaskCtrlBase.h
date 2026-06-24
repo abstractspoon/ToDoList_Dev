@@ -343,7 +343,7 @@ protected:
 	virtual BOOL BuildColumns() = 0;
 	virtual void Release() = 0;
 	virtual DWORD GetColumnItemTaskID(int nItem) const = 0;
-	virtual DWORD HitTestTasksTask(const CPoint& ptScreen) const = 0;
+	virtual DWORD HitTestTasksTask(const CPoint& ptScreen, TDC_HITTESTREASON nReason) const = 0;
 	virtual void SetTasksImageList(HIMAGELIST hil, BOOL bState, BOOL bOn = TRUE) = 0;
 	virtual HWND Tasks() const = 0;
 	virtual GM_ITEMSTATE GetColumnItemState(int nItem) const = 0;

@@ -218,40 +218,22 @@ BOOL CTDLTaskListCtrl::BuildColumns()
 	return TRUE;
 }
 
-DWORD CTDLTaskListCtrl::HitTestTask(const CPoint& ptScreen, TDC_HITTESTREASON nReason) const
+DWORD CTDLTaskListCtrl::HitTestTasksTask(const CPoint& ptScreen, TDC_HITTESTREASON nReason) const
 {
-	if ((nReason == TDCHTR_IMAGETIP) && !IsColumnShowing(TDCC_ICON))
-	{
-		CPoint ptClient(ptScreen);
-		m_lcTasks.ScreenToClient(&ptClient);
-
-		UINT nFlags = 0;
-		int nItem = m_lcTasks.HitTest(ptClient, &nFlags);
-
-		if ((nItem != -1) && (nFlags & LVHT_ONITEMICON))
-			return GetTaskID(nItem);
-
-		// else
-		return 0L;
-	}
-
-	// else
-	return CTDLTaskCtrlBase::HitTestTask(ptScreen, nReason);
-}
-
-DWORD CTDLTaskListCtrl::HitTestTasksTask(const CPoint& ptScreen) const
-{
-	// see if we hit a task in the tree
 	CPoint ptClient(ptScreen);
 	m_lcTasks.ScreenToClient(&ptClient);
 	
-	int nItem = m_lcTasks.HitTest(ptClient);
+	UINT nFlags = 0;
+	int nItem = HitTestItem(ptClient, &nFlags);
 
-	if (nItem != -1)
-		return GetTaskID(nItem);
+	if (nItem == -1)
+		return 0;
+
+	if ((nReason == TDCHTR_IMAGETIP) && !(nFlags & LVHT_ONITEMICON))
+		return 0;
 
 	// all else
-	return 0;
+	return GetTaskID(nItem);
 }
 
 void CTDLTaskListCtrl::Release() 

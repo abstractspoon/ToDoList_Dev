@@ -1562,35 +1562,33 @@ int CTDLTaskCtrlBase::CompareTasks(LPARAM lParam1,
 
 DWORD CTDLTaskCtrlBase::HitTestTask(const CPoint& ptScreen, TDC_HITTESTREASON nReason) const
 {
-	DWORD dwTaskID = 0;
+	DWORD dwTaskID = HitTestTasksTask(ptScreen, nReason); // Title column only;
 
-	switch (nReason)
+	if (dwTaskID == 0)
 	{
-	case TDCHTR_INFOTIP:
-		dwTaskID = HitTestTasksTask(ptScreen); // Title column only
-		break;
-
-	case TDCHTR_IMAGETIP:
-		if (IsColumnShowing(TDCC_ICON))
+		switch (nReason)
 		{
-			TDC_COLUMN nColID = TDCC_NONE;
+		case TDCHTR_INFOTIP:
+			break;
 
-			if (HitTestColumnsItem(ptScreen, FALSE, nColID, &dwTaskID) != -1)
+		case TDCHTR_IMAGETIP:
+			if (IsColumnShowing(TDCC_ICON))
 			{
-				if (nColID != TDCC_ICON)
-					dwTaskID = 0;
+				TDC_COLUMN nColID = TDCC_NONE;
+
+				if (HitTestColumnsItem(ptScreen, FALSE, nColID, &dwTaskID) != -1)
+				{
+					if (nColID != TDCC_ICON)
+						dwTaskID = 0;
+				}
 			}
-		}
-		// else derived class handles
-		break;
+			break;
 
-	case TDCHTR_NONE:
-	case TDCHTR_CONTEXTMENU:
-		dwTaskID = HitTestTasksTask(ptScreen);
-
-		if (!dwTaskID)
+		case TDCHTR_NONE:
+		case TDCHTR_CONTEXTMENU:
 			dwTaskID = HitTestColumnsTask(ptScreen);
-		break;
+			break;
+		}
 	}
 	
 	return dwTaskID;
@@ -1675,38 +1673,17 @@ int CTDLTaskCtrlBase::HitTestFileLinkColumn(const CPoint& ptScreen) const
 
 TDC_HITTEST CTDLTaskCtrlBase::HitTest(const CPoint& ptScreen) const
 {
-	if (PtInClientRect(ptScreen, m_hdrTasks, TRUE)) // task header
-	{
+	// Tasks header
+	if (PtInClientRect(ptScreen, m_hdrTasks, TRUE))
 		return TDCHT_COLUMNHEADER;
-	}
-	else if (PtInClientRect(ptScreen, m_hdrColumns, TRUE))	// column header
-	{
+
+	// Columns header
+	if (PtInClientRect(ptScreen, m_hdrColumns, TRUE)) // column header
 		return TDCHT_COLUMNHEADER;
-	}
-	else if (PtInClientRect(ptScreen, Tasks(), TRUE))
-	{
-		// see if we hit a task
-		if (HitTestTasksTask(ptScreen))
-		{
-			return TDCHT_TASK;
-		}
-		else if (PtInClientRect(ptScreen, Tasks(), TRUE))
-		{
-			return TDCHT_TASKLIST;
-		}
-	}
-	else if (PtInClientRect(ptScreen, m_lcColumns, TRUE))
-	{
-		// see if we hit a task
-		if (HitTestColumnsTask(ptScreen))
-		{
-			return TDCHT_TASK;
-		}
-		else if (PtInClientRect(ptScreen, m_lcColumns, TRUE))
-		{
-			return TDCHT_TASKLIST;
-		}
-	}
+
+	// Rest of this control
+	if (PtInClientRect(ptScreen, *this, TRUE))
+		return (HitTestTask(ptScreen, TDCHTR_NONE) ? TDCHT_TASK : TDCHT_TASKLIST);
 	
 	// all else
 	return TDCHT_NOWHERE;
