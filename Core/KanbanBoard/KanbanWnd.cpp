@@ -500,12 +500,12 @@ bool CKanbanWnd::GetLabelEditRect(LPRECT pEdit)
 	return false;
 }
 
-IUI_HITTEST CKanbanWnd::HitTest(POINT ptScreen, IUI_HITTESTREASON /*nReason*/) const
+IUI_HITTEST CKanbanWnd::HitTest(POINT ptScreen, IUI_HITTESTREASON nReason) const
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
 	// specific task
-	if (m_ctrlKanban.HitTestTask(ptScreen))
+	if (m_ctrlKanban.HitTestTask(ptScreen, (nReason == IUI_IMAGETIP)))
 		return IUI_TASK;
 
 	// else check elsewhere in ctrl client
@@ -519,9 +519,9 @@ IUI_HITTEST CKanbanWnd::HitTest(POINT ptScreen, IUI_HITTESTREASON /*nReason*/) c
 	return IUI_NOWHERE;
 }
 
-DWORD CKanbanWnd::HitTestTask(POINT ptScreen, IUI_HITTESTREASON /*nReason*/) const
+DWORD CKanbanWnd::HitTestTask(POINT ptScreen, IUI_HITTESTREASON nReason) const
 {
-	return m_ctrlKanban.HitTestTask(ptScreen);
+	return m_ctrlKanban.HitTestTask(ptScreen, (nReason == IUI_IMAGETIP));
 }
 
 bool CKanbanWnd::SelectTask(DWORD dwTaskID, bool /*bTaskLink*/)

@@ -630,6 +630,7 @@ namespace TDC
 		case TDCHTR_NONE:			return IUI_NONE;
 		case TDCHTR_INFOTIP:		return IUI_INFOTIP;
 		case TDCHTR_CONTEXTMENU:	return IUI_CONTEXTMENU;
+		case TDCHTR_IMAGETIP:		return IUI_IMAGETIP;
 		}
 
 		ASSERT(0);
