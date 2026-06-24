@@ -48,11 +48,9 @@ CTDLInfoTipCtrl::~CTDLInfoTipCtrl()
 {
 }
 
-
 BEGIN_MESSAGE_MAP(CTDLInfoTipCtrl, CToolTipCtrlEx)
 	ON_WM_CREATE()
 	ON_WM_TIMER()
-	ON_NOTIFY_REFLECT_EX(TTN_SHOW, OnNotifyShow)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -84,7 +82,7 @@ void CTDLInfoTipCtrl::OnTimer(UINT nIDEvent)
 	CToolTipCtrlEx::OnTimer(nIDEvent);
 }
 
-BOOL CTDLInfoTipCtrl::OnNotifyShow(NMHDR* pNMHDR, LRESULT* pResult)
+BOOL CTDLInfoTipCtrl::CalculateTipSize(CSize& size) const
 {
 	CString sTip;
 	GetWindowText(sTip);
@@ -92,7 +90,7 @@ BOOL CTDLInfoTipCtrl::OnNotifyShow(NMHDR* pNMHDR, LRESULT* pResult)
 	if (m_bmpImageTip.LoadFromFile(sTip))
 	{
 		// Restrict tip size to a sensible maximum
-		CSize size(CGdiPlus::GetImageDimension(m_bmpImageTip));
+		size = CGdiPlus::GetImageDimension(m_bmpImageTip);
 
 		if ((size.cx > size.cy) && (size.cx > MAX_IMAGETIP_SIZE))
 		{
@@ -105,20 +103,11 @@ BOOL CTDLInfoTipCtrl::OnNotifyShow(NMHDR* pNMHDR, LRESULT* pResult)
 			size.cy = MAX_IMAGETIP_SIZE;
 		}
 
-		CRect rTooltip;
-		CPoint ptCursor(::GetMessagePos());
-	
-		GetWindowRect(rTooltip);
-		rTooltip = CRect(rTooltip.TopLeft(), size);
-
-		GraphicsMisc::FitRectToScreen(rTooltip, &ptCursor, MONITOR_DEFAULTTONEAREST);
-		SetWindowPos(NULL, rTooltip.left, rTooltip.top, rTooltip.Width(), rTooltip.Height(), (SWP_NOACTIVATE | SWP_NOZORDER));
-
-		*pResult = 1;
-		return TRUE; // always
+		return TRUE;
 	}
 
-	return CToolTipCtrlEx::OnNotifyShow(pNMHDR, pResult);
+	// else
+	return CToolTipCtrlEx::CalculateTipSize(size);
 }
 
 void CTDLInfoTipCtrl::OnPaintTip(CDC* pDC)

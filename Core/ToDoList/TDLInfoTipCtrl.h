@@ -43,17 +43,17 @@ protected:
 	CTDCTaskFormatter m_formatter;
 	CTDCTaskCalculator m_calculator;
 	
-	CGdiPlusBitmap m_bmpImageTip;
+	mutable CGdiPlusBitmap m_bmpImageTip;
 
 protected:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnTimer(UINT nIDEvent);
-	afx_msg BOOL OnNotifyShow(NMHDR* pNMHDR, LRESULT* pResult);
 
 	DECLARE_MESSAGE_MAP()
 
 protected:
 	virtual void OnPaintTip(CDC* pDC);
+	virtual BOOL CalculateTipSize(CSize& size) const;
 
 protected:
 	int BuildSortedAttributeArray(DWORD dwTaskID, 
