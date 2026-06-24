@@ -56,7 +56,7 @@ public:
 	BOOL EditSelectedTaskDependency(DWORD dwFromDependID, DWORD dwToDependID);
 	BOOL DeleteSelectedTaskDependency(DWORD dwDependID);
 
-	DWORD HitTestTask(const CPoint& ptScreen, bool bTitleColumnOnly) const;
+	DWORD HitTestTask(const CPoint& ptScreen, IUI_HITTESTREASON nReason) const;
 
 	BOOL ZoomIn(BOOL bIn = TRUE);
 	BOOL ZoomBy(int nAmount);
@@ -263,7 +263,7 @@ protected:
 	GANTTITEM* GetGanttItem(DWORD dwTaskID) const;
 	BOOL RestoreGanttItems(const CGanttItemArray& aGIPrev);
 
-	DWORD TreeHitTestTask(const CPoint& point, BOOL bScreen) const;
+	DWORD TreeHitTestTask(const CPoint& point, BOOL bScreen, IUI_HITTESTREASON nReason) const;
 	DWORD ListHitTestTask(const CPoint& point, BOOL bScreen, GTLC_HITTEST& nHit) const;
 	DWORD ListDependencyHitTest(const CPoint& ptClient, DWORD& dwToTaskID);
 	int GetDependencyListItem(DWORD dwTaskID) const;

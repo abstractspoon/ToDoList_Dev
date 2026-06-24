@@ -476,7 +476,7 @@ IUI_HITTEST CGanttChartWnd::HitTest(POINT ptScreen, IUI_HITTESTREASON nReason) c
 		return IUI_NOWHERE;
 
 	// then specific task
-	if (m_ctrlGantt.HitTestTask(ptScreen, (nReason == IUI_INFOTIP)))
+	if (m_ctrlGantt.HitTestTask(ptScreen, nReason))
 		return IUI_TASK;
 
 	// else 
@@ -487,7 +487,7 @@ DWORD CGanttChartWnd::HitTestTask(POINT ptScreen, IUI_HITTESTREASON nReason) con
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	return m_ctrlGantt.HitTestTask(ptScreen, (nReason == IUI_INFOTIP));
+	return m_ctrlGantt.HitTestTask(ptScreen, nReason);
 }
 
 bool CGanttChartWnd::SelectTask(DWORD dwTaskID, bool /*bTaskLink*/)
