@@ -424,33 +424,20 @@ namespace WordCloudUIExtension
 			return false;
 		}
 
-		public UIExtension.HitTestResult HitTest(Int32 xPos, Int32 yPos, UIExtension.HitTestReason reason)
+		public UIExtension.HitTestResult HitTest(Int32 xScreen, Int32 yScreen, UIExtension.HitTestReason reason)
 		{
-			Point ptClient = m_TaskMatchesList.PointToClient(new Point(xPos, yPos));
-			ListViewHitTestInfo lvHit = m_TaskMatchesList.HitTest(ptClient);
-
-			if (lvHit.Item != null)
+			if (HitTestTask(xScreen, yScreen, reason) != 0)
 				return UIExtension.HitTestResult.Task;
 
             // else
 			return UIExtension.HitTestResult.Nowhere;
 		}
 
-		public UInt32 HitTestTask(Int32 xPos, Int32 yPos, UIExtension.HitTestReason reason)
+		public UInt32 HitTestTask(Int32 xScreen, Int32 yScreen, UIExtension.HitTestReason reason)
 		{
-			Point ptClient = m_TaskMatchesList.PointToClient(new Point(xPos, yPos));
-			ListViewHitTestInfo lvHit = m_TaskMatchesList.HitTest(ptClient);
+			var task = m_TaskMatchesList.HitTestTask(new Point(xScreen, yScreen), (reason == UIExtension.HitTestReason.ImageTip));
 
-			if (lvHit.Item != null)
-			{
-				var task = (lvHit.Item.Tag as CloudTaskItem);
-
-				if (task != null)
-					return task.Id;
-			}
-
-            // else
-			return 0;
+			return task?.Id ?? 0;
 		}
 
 		public void SetUITheme(UITheme theme)

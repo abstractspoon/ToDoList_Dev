@@ -556,6 +556,20 @@ String^ TaskListView::Translate(String^ text, Translator::Type type)
 	return m_Trans->Translate(text, type);
 }
 
+ITaskBase^ TaskListView::HitTestTask(Drawing::Point ptScreen, bool icon)
+{
+	auto pt = PointToClient(ptScreen);
+	auto lvHit = HitTest(pt)->Item;
+
+	if (lvHit == nullptr)
+		return nullptr;
+
+	if (icon && !CalcIconRect(lvHit->Bounds).Contains(pt))
+		return nullptr;
+
+	return ASTYPE(lvHit->Tag, ITaskBase);
+}
+
 Windows::Forms::Control^ TaskListView::GetOwner()
 {
 	return this;
