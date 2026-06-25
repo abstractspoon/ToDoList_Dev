@@ -67,6 +67,7 @@ UIExtension::HitTestReason UIExtension::MapHitTestReason(IUI_HITTESTREASON reaso
 	case IUI_NONE:			return UIExtension::HitTestReason::None;
 	case IUI_INFOTIP:		return UIExtension::HitTestReason::InfoTip;
 	case IUI_CONTEXTMENU:	return UIExtension::HitTestReason::ContextMenu;
+	case IUI_IMAGETIP:		return UIExtension::HitTestReason::ImageTip;
 	}
 
 	ASSERT(0);

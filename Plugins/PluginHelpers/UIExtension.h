@@ -86,6 +86,7 @@ namespace Abstractspoon
 					None,
 					InfoTip,
 					ContextMenu,
+					ImageTip,
 				};
 
 				// -----------------------------------------------

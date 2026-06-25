@@ -3948,36 +3948,33 @@ int CToDoCtrl::OnToolHitTest(CPoint point, TOOLINFO * pTI) const
 			sTip = info.sFilePath;
 			dwTaskID += m_dwNextUniqueID; // so it's distinguishable from a text infotip of the same task
 		}
-		else
-		{
-			int breakpoint = 0;
-		}
 	}
 
 	if (!dwTaskID && HasStyle(TDCS_SHOWINFOTIPS))
 	{
 		dwTaskID = HitTestTask(point, TDCHTR_INFOTIP);
 
-		if (!dwTaskID)
-			return 0;
+		if (dwTaskID)
+		{
+			CTDCAttributeMap mapAttrib;
+			TDC::MapColumnsToAttributes(m_visColEdit.GetVisibleColumns(), mapAttrib);
 
-		CTDCAttributeMap mapAttrib;
-		TDC::MapColumnsToAttributes(m_visColEdit.GetVisibleColumns(), mapAttrib);
+			// Always add path for context
+			mapAttrib.Add(TDCA_PATH);
 
-		// Always add path for context
-		mapAttrib.Add(TDCA_PATH);
+			if (nMaxState == TDCMS_NORMAL)
+				mapAttrib.Add(TDCA_COMMENTS);
 
-		if (nMaxState == TDCMS_NORMAL)
-			mapAttrib.Add(TDCA_COMMENTS);
-
-		sTip = m_infoTip.FormatTip(dwTaskID,
-								   mapAttrib,
-								   m_nMaxInfotipCommentsLength,
-								   m_sCompletionStatus);
+			sTip = m_infoTip.FormatTip(dwTaskID,
+									   mapAttrib,
+									   m_nMaxInfotipCommentsLength,
+									   m_sCompletionStatus);
+		}
 	}
+	ASSERT((sTip.IsEmpty() && !dwTaskID) || (!sTip.IsEmpty() && dwTaskID));
 
-	ASSERT(!sTip.IsEmpty());
-	ASSERT(dwTaskID);
+	if (!dwTaskID)
+		return 0;
 
 	HWND hwndHit = CDialogHelper::GetWindowFromPoint(GetSafeHwnd(), point);
 	ASSERT(hwndHit);

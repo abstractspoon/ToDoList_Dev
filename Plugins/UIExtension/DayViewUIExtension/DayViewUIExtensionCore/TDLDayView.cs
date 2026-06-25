@@ -788,17 +788,34 @@ namespace DayViewUIExtension
 			Point pt = PointToClient(new Point(xScreen, yScreen));
 			Calendar.Appointment appt = GetAppointmentAt(pt.X, pt.Y);
 
-			if ((appt != null) &&
-				(reason != UIExtension.HitTestReason.ContextMenu) ||
-				AppointmentSupportsTaskContextMenu(appt))
-			{
-				if (appt is TaskExtensionItem)
-					return (appt as TaskExtensionItem).RealTaskId;
+			if (appt == null)
+				return 0;
 
-				return appt.Id;
+			switch (reason)
+			{
+			case UIExtension.HitTestReason.ContextMenu:
+				if (!AppointmentSupportsTaskContextMenu(appt))
+					return 0;
+				break;
+
+			case UIExtension.HitTestReason.ImageTip:
+				{
+					var apptView = (GetAppointmentView(appt) as TDLAppointmentView);
+
+					if ((apptView == null) || !apptView.IconRect.Contains(pt))
+						return 0;
+				}
+				break;
+
+			case UIExtension.HitTestReason.InfoTip:
+			case UIExtension.HitTestReason.None:
+				break;
 			}
 
-			return 0;
+			if (appt is TaskExtensionItem)
+				return (appt as TaskExtensionItem).RealTaskId;
+
+			return appt.Id;
 		}
 
 		public Calendar.Appointment GetRealAppointmentAt(int x, int y)
