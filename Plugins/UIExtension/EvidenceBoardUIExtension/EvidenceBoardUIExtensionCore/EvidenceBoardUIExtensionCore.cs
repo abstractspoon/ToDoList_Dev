@@ -194,7 +194,7 @@ namespace EvidenceBoardUIExtension
 
         public void FilterToolTipMessage(IntPtr hwnd, UInt32 message, UInt32 wParam, UInt32 lParam, UInt32 time, Int32 xPos, Int32 yPos)
         {
-			var msg = Message.Create(hwnd, (Int32)message, (IntPtr)wParam, (IntPtr)lParam);
+			var msg = Message.Create(hwnd, (Int32)message, (IntPtr)(int)wParam, (IntPtr)(int)lParam);
 
 			m_OptionsCombo.FilterTooltipMessage(msg);
 			m_LinkVisibilityCombo.FilterTooltipMessage(msg);
