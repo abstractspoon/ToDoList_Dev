@@ -133,13 +133,11 @@ namespace MindMapUIExtension
 
         public UIExtension.HitTestResult HitTest(Int32 xPos, Int32 yPos, UIExtension.HitTestReason reason)
         {
-			var ptScreen = new Point(xPos, yPos);
-
-			if (m_MindMap.HitTestTask(ptScreen) != 0)
+			if (HitTestTask(xPos, yPos, reason) != 0)
 				return UIExtension.HitTestResult.Task;
 
 			// else
-			if (m_MindMap.RectangleToScreen(m_MindMap.ClientRectangle).Contains(ptScreen))
+			if (m_MindMap.RectangleToScreen(m_MindMap.ClientRectangle).Contains(xPos, yPos))
 				return UIExtension.HitTestResult.Tasklist;
 			
 			return UIExtension.HitTestResult.Nowhere;
@@ -147,7 +145,7 @@ namespace MindMapUIExtension
 
         public UInt32 HitTestTask(Int32 xPos, Int32 yPos, UIExtension.HitTestReason reason)
         {
-			return m_MindMap.HitTestTask(new Point(xPos, yPos));
+			return m_MindMap.HitTestTask(new Point(xPos, yPos), (reason == UIExtension.HitTestReason.ImageTip));
         }
 
         public void SetUITheme(UITheme theme)
