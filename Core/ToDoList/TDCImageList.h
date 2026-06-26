@@ -20,7 +20,11 @@
 
 struct TDCIMAGEINFO
 {
-	TDCIMAGEINFO() : sizeImage(0, 0) {}
+	TDCIMAGEINFO(const CString& sName = _T(""), 
+				 const CString& sFilePath = _T(""),
+				 const CSize& sizeImage = CSize(16, 16));
+
+	TDCIMAGEINFO(const CString& sFilePath, const CSize& sizeImage);
 
 	CString sName;
 	CString sFilePath; // Can be empty
@@ -58,15 +62,15 @@ protected:
 	BOOL Attach(HIMAGELIST hImageList) { return CEnImageList::Attach(hImageList); }
 	void Clear();
 
-	void MapImage(int nIndex, const CString& sName, const CString& sFilePath, const CSize& size);
+	void MapImage(TDCIMAGEINFO& info, int nIndex);
 	BOOL NeedLoadImages(const CString& sTaskList, COLORREF crTransparent,
 						BOOL bWantDefaultIcons, BOOL bWantToolbars) const;
 
 	static DWORD LoadImagesFromFolder(const CString& sFolder, COLORREF crTransparent, CTDCImageList* pImages, int& nNextNameIndex);
 	static BOOL LoadImage(const CString& sImageFile, COLORREF crTransparent, CTDCImageList* pImages, int& nNextNameIndex);
-	static BOOL AddImage(const CString& sImageFile, CBitmap& bmImage, COLORREF crTransparent, CTDCImageList* pImages, int& nNextNameIndex);
-	static BOOL AddImage(const CString& sImageFile, HICON hIcon, CTDCImageList* pImages, int& nNextNameIndex);
-	static BOOL MapLastImage(const CString& sImageFile, const CSize& size, int nStartIndex, CTDCImageList* pImages, int& nNextNameIndex);
+	static BOOL AddImage(TDCIMAGEINFO& info, CBitmap& bmImage, COLORREF crTransparent, CTDCImageList* pImages, int& nNextNameIndex);
+	static BOOL AddImage(TDCIMAGEINFO& info, HICON hIcon, CTDCImageList* pImages, int& nNextNameIndex);
+	static BOOL MapLastImage(TDCIMAGEINFO& info, int nStartIndex, CTDCImageList* pImages, int& nNextNameIndex);
 
 };
 
