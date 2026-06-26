@@ -53,7 +53,7 @@ protected:
 
 protected:
 	virtual void OnPaintTip(CDC* pDC);
-	virtual BOOL CalculateTipSize(CSize& size) const;
+	virtual BOOL AdjustTipPosition(CRect& rPos) const;
 
 protected:
 	int BuildSortedAttributeArray(DWORD dwTaskID, 

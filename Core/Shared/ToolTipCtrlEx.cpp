@@ -295,19 +295,14 @@ LRESULT CToolTipCtrlEx::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM 
 			{
 			case TTN_SHOW:
 				{
-					CRect rCurPos;
-					GetWindowRect(rCurPos);
+					CRect rPos;
+					GetWindowRect(rPos);
 
-					CSize size;
-					CRect rNewPos = (CalculateTipSize(size) ? CRect(rCurPos.TopLeft(), size) : rCurPos);
-
-					FitTooltipToScreen(rNewPos);
-
-					if (rNewPos != rCurPos)
-						SetWindowPos(NULL, rNewPos.left, rNewPos.top, rNewPos.Width(), rNewPos.Height(), (SWP_NOACTIVATE | SWP_NOZORDER));
+					if (AdjustTipPosition(rPos) || FitTooltipToScreen(rPos))
+						SetWindowPos(NULL, rPos.left, rPos.top, rPos.Width(), rPos.Height(), (SWP_NOACTIVATE | SWP_NOZORDER));
 
 					if (IsTracking())
-						m_sizeTrackingTooltip = rNewPos.Size();
+						m_sizeTrackingTooltip = rPos.Size();
 					else
 						m_sizeTrackingTooltip = CSize(0, 0);
 

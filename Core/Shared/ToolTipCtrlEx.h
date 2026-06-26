@@ -72,7 +72,7 @@ protected:
 
 protected:
 	virtual void OnPaintTip(CDC* pDC);
-	virtual BOOL CalculateTipSize(CSize& /*size*/) const { return FALSE; }
+	virtual BOOL AdjustTipPosition(CRect& /*rPos*/) const { return FALSE; }
 
 	virtual LRESULT ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp);
 

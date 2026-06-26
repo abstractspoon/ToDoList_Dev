@@ -28,6 +28,7 @@ static char THIS_FILE[] = __FILE__;
 
 static const CString EMPTY_STR;
 
+static const int ICON_SIZE = GraphicsMisc::ScaleByDPIFactor(16);
 static const int IMAGETIP_BORDER = GraphicsMisc::ScaleByDPIFactor(4);
 static const int MAX_IMAGETIP_SIZE = (GraphicsMisc::ScaleByDPIFactor(256) + (2 * IMAGETIP_BORDER));
 
@@ -83,32 +84,37 @@ void CTDLInfoTipCtrl::OnTimer(UINT nIDEvent)
 	CToolTipCtrlEx::OnTimer(nIDEvent);
 }
 
-BOOL CTDLInfoTipCtrl::CalculateTipSize(CSize& size) const
+BOOL CTDLInfoTipCtrl::AdjustTipPosition(CRect& rPos) const
 {
 	CString sTip;
 	GetWindowText(sTip);
 
-	if (m_bmpImageTip.LoadFromFile(sTip))
+	if (!m_bmpImageTip.LoadFromFile(sTip))
+		return FALSE;
+
+	// Restrict tip size to a sensible maximum
+	CSize size(CGdiPlus::GetImageDimension(m_bmpImageTip));
+
+	if ((size.cx > size.cy) && (size.cx > MAX_IMAGETIP_SIZE))
 	{
-		// Restrict tip size to a sensible maximum
-		size = CGdiPlus::GetImageDimension(m_bmpImageTip);
-
-		if ((size.cx > size.cy) && (size.cx > MAX_IMAGETIP_SIZE))
-		{
-			size.cy = ((size.cy * MAX_IMAGETIP_SIZE) / size.cx);
-			size.cx = MAX_IMAGETIP_SIZE;
-		}
-		else if ((size.cy > size.cx) && (size.cy > MAX_IMAGETIP_SIZE))
-		{
-			size.cx = ((size.cx * MAX_IMAGETIP_SIZE) / size.cy);
-			size.cy = MAX_IMAGETIP_SIZE;
-		}
-
-		return TRUE;
+		size.cy = ((size.cy * MAX_IMAGETIP_SIZE) / size.cx);
+		size.cx = MAX_IMAGETIP_SIZE;
+	}
+	else if ((size.cy > size.cx) && (size.cy > MAX_IMAGETIP_SIZE))
+	{
+		size.cx = ((size.cx * MAX_IMAGETIP_SIZE) / size.cy);
+		size.cy = MAX_IMAGETIP_SIZE;
 	}
 
-	// else
-	return CToolTipCtrlEx::CalculateTipSize(size);
+	rPos = CRect(rPos.TopLeft(), size);
+
+	if (GraphicsMisc::FitRectToScreen(rPos, NULL, MONITOR_DEFAULTTONEAREST))
+	{
+		// Nudge it to the right so as not to overlay the icon itself
+		rPos.OffsetRect(ICON_SIZE, 0);
+	}
+
+	return TRUE;
 }
 
 void CTDLInfoTipCtrl::OnPaintTip(CDC* pDC)
