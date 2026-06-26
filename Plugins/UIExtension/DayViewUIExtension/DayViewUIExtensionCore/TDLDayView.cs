@@ -763,21 +763,13 @@ namespace DayViewUIExtension
 
 		public UIExtension.HitTestResult HitTest(Int32 xScreen, Int32 yScreen, UIExtension.HitTestReason reason)
 		{
-			Point pt = PointToClient(new Point(xScreen, yScreen));
-			Calendar.Appointment appt = GetAppointmentAt(pt.X, pt.Y);
+			if (HitTestTask(xScreen, yScreen, reason) != 0)
+				return UIExtension.HitTestResult.Task;
 
-			if (appt != null)
-			{
-				if ((reason != UIExtension.HitTestReason.ContextMenu) ||
-					AppointmentSupportsTaskContextMenu(appt))
-				{
-					return UIExtension.HitTestResult.Task;
-				}
-			}
-			else if (GetTrueRectangle().Contains(pt))
-			{
+			Point ptClient = PointToClient(new Point(xScreen, yScreen));
+
+			if (GetTrueRectangle().Contains(ptClient))
 				return UIExtension.HitTestResult.Tasklist;
-			}
 
 			// else
 			return UIExtension.HitTestResult.Nowhere;
@@ -785,8 +777,8 @@ namespace DayViewUIExtension
 
 		public uint HitTestTask(Int32 xScreen, Int32 yScreen, UIExtension.HitTestReason reason)
 		{
-			Point pt = PointToClient(new Point(xScreen, yScreen));
-			Calendar.Appointment appt = GetAppointmentAt(pt.X, pt.Y);
+			Point ptClient = PointToClient(new Point(xScreen, yScreen));
+			Calendar.Appointment appt = GetAppointmentAt(ptClient.X, ptClient.Y);
 
 			if (appt == null)
 				return 0;
@@ -802,7 +794,7 @@ namespace DayViewUIExtension
 				{
 					var apptView = (GetAppointmentView(appt) as TDLAppointmentView);
 
-					if ((apptView == null) || !apptView.IconRect.Contains(pt))
+					if ((apptView == null) || !apptView.IconRect.Contains(ptClient))
 						return 0;
 				}
 				break;

@@ -429,7 +429,10 @@ namespace WordCloudUIExtension
 			if (HitTestTask(xScreen, yScreen, reason) != 0)
 				return UIExtension.HitTestResult.Task;
 
-            // else
+			// else
+			if (m_TaskMatchesList.RectangleToScreen(m_TaskMatchesList.ClientRectangle).Contains(xScreen, yScreen));
+				return UIExtension.HitTestResult.Tasklist;
+
 			return UIExtension.HitTestResult.Nowhere;
 		}
 

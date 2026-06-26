@@ -609,9 +609,10 @@ namespace EvidenceBoardUIExtension
 			return false;
 		}
 
-		public uint HitTestTaskId(Point ptClient, bool icon)
+		public uint HitTestTaskId(Point ptScreen, bool icon)
 		{
-			TaskItem task = (icon ? HitTestTaskIcon(ptClient) : HitTestTask(ptClient));
+			var ptClient = PointToClient(ptScreen);
+			var task = (icon ? HitTestTaskIcon(ptClient) : HitTestTask(ptClient));
 
 			return task?.TaskId ?? 0;
 		}
