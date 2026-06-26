@@ -16,7 +16,7 @@
 #include "..\Shared\Localizer.h"
 #include "..\Shared\EnBitmap.h"
 
-#include "..\3rdParty\MemDC.h"
+#include "..\3rdParty\XNamedColors.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -28,7 +28,8 @@ static char THIS_FILE[] = __FILE__;
 
 static const CString EMPTY_STR;
 
-static const int MAX_IMAGETIP_SIZE = GraphicsMisc::ScaleByDPIFactor(256);
+static const int IMAGETIP_BORDER = GraphicsMisc::ScaleByDPIFactor(4);
+static const int MAX_IMAGETIP_SIZE = (GraphicsMisc::ScaleByDPIFactor(256) + (2 * IMAGETIP_BORDER));
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLInfoTipCtrl
@@ -117,6 +118,11 @@ void CTDLInfoTipCtrl::OnPaintTip(CDC* pDC)
 		CRect rClient;
 		GetClientRect(rClient);
 
+		// Draw a border
+		GraphicsMisc::DrawRect(pDC, rClient, GetSysColor(COLOR_INFOBK), colorGray);
+		rClient.DeflateRect(IMAGETIP_BORDER, IMAGETIP_BORDER);
+
+		// Then the image
 		CGdiPlusGraphics graphics(*pDC);
 		CGdiPlus::DrawImage(graphics, m_bmpImageTip, rClient);
 
