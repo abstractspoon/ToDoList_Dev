@@ -23,9 +23,6 @@ CPreferencesUITasklistPage::CPreferencesUITasklistPage()
 	CPreferencesPageBase(IDD_PREFUITASKLIST_PAGE),
 	m_cbPriorityRiskLevels(-1)
 {
-	//{{AFX_DATA_INIT(CPreferencesUITasklistPage)
-	//}}AFX_DATA_INIT
-
 }
 
 CPreferencesUITasklistPage::~CPreferencesUITasklistPage()
@@ -35,7 +32,11 @@ CPreferencesUITasklistPage::~CPreferencesUITasklistPage()
 void CPreferencesUITasklistPage::DoDataExchange(CDataExchange* pDX)
 { 
 	CPreferencesPageBase::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CPreferencesUITasklistPage)
+
+	DDX_Text(pDX, IDC_COLWIDTHS, m_nMaxColumnWidth);
+	DDX_Text(pDX, IDC_DATETIMETRAIL, m_sDateTimeTrailText);
+	DDX_Text(pDX, IDC_INFOTIPCOMMENTSMAX, m_nMaxInfoTipCommentsLength);
+
 	DDX_Check(pDX, IDC_USEISODATEFORMAT, m_bUseISOForDates);
 	DDX_Check(pDX, IDC_SHOWWEEKDAYINDATES, m_bShowWeekdayInDates);
 	DDX_Check(pDX, IDC_SHOWPARENTSASFOLDERS, m_bShowParentsAsFolders);
@@ -44,19 +45,16 @@ void CPreferencesUITasklistPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_AUTOFOCUSTASKLIST, m_bAutoFocusTasklist);
 	DDX_Check(pDX, IDC_RIGHTSIDECOLUMNS, m_bShowColumnsOnRight);
 	DDX_Check(pDX, IDC_LIMITCOLWIDTHS, m_bLimitColumnWidths);
-	DDX_Text(pDX, IDC_COLWIDTHS, m_nMaxColumnWidth);
 	DDX_Check(pDX, IDC_HIDELISTPARENTS, m_bHideListParents);
 	DDX_Check(pDX, IDC_HIDEZEROPERCENT, m_bHideZeroPercentDone);
-	DDX_Text(pDX, IDC_DATETIMETRAIL, m_sDateTimeTrailText);
 	DDX_Check(pDX, IDC_APPENDUSERTODATETIMEPASTE, m_bAppendUserToDateTimePaste);
 	DDX_Check(pDX, IDC_APPENDTEXTTODATETIMEPASTE, m_bAppendTextToDateTimePaste);
 	DDX_Check(pDX, IDC_SHOWREMINDERSASDATES, m_bShowRemindersAsDateAndTime);
-	//}}AFX_DATA_MAP
 	DDX_Check(pDX, IDC_DISPLAYPATHINHEADER, m_bShowPathInHeader);
 	DDX_Check(pDX, IDC_STRIKETHROUGHDONE, m_bStrikethroughDone);
+	DDX_Check(pDX, IDC_SHOWIMAGETIPS, m_bShowImageTips);
 	DDX_Check(pDX, IDC_SHOWINFOTIPS, m_bShowInfoTips);
 	DDX_Check(pDX, IDC_SHOWCOMMENTS, m_bShowComments);
-	DDX_Text(pDX, IDC_INFOTIPCOMMENTSMAX, m_nMaxInfoTipCommentsLength);
 	DDX_Check(pDX, IDC_HIDEUNDEFINEDTIMEST, m_bHideZeroTimeCost);
 	DDX_Check(pDX, IDC_HIDESTARTDUEFORDONETASKS, m_bHideStartDueForDoneTasks);
 	DDX_Check(pDX, IDC_ROUNDTIMEFRACTIONS, m_bRoundTimeFractions);
@@ -78,7 +76,6 @@ void CPreferencesUITasklistPage::DoDataExchange(CDataExchange* pDX)
 }
 
 BEGIN_MESSAGE_MAP(CPreferencesUITasklistPage, CPreferencesPageBase)
-	//{{AFX_MSG_MAP(CPreferencesUITasklistPage)
 	ON_BN_CLICKED(IDC_SHOWCOMMENTS, OnShowcomments)
 	ON_BN_CLICKED(IDC_SHOWINFOTIPS, OnShowinfotips)
 	ON_BN_CLICKED(IDC_LIMITINFOTIPCOMMENTS, OnLimitinfotipcomments)
@@ -87,18 +84,15 @@ BEGIN_MESSAGE_MAP(CPreferencesUITasklistPage, CPreferencesPageBase)
 	ON_BN_CLICKED(IDC_APPENDTEXTTODATETIMEPASTE, OnAppendTextToDateTimePaste)
 	ON_BN_CLICKED(IDC_SETNUMPRIORITYRISKLEVELS, OnSetNumPriorityRiskLevels)
 	ON_CBN_SELCHANGE(IDC_SETNUMPRIORITYRISKLEVELS, OnSelChangeNumPriorityRiskLevels)
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
-// CPreferencesUITasklistPage message handlers
 
 BOOL CPreferencesUITasklistPage::OnInitDialog() 
 {
 	CPreferencesPageBase::OnInitDialog();
 
-	return TRUE;  // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX Property Pages should return FALSE
+	return TRUE; 
 }
 
 void CPreferencesUITasklistPage::OnFirstShow()
@@ -158,7 +152,7 @@ void CPreferencesUITasklistPage::OnLimitinfotipcomments()
 
 void CPreferencesUITasklistPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey)
 {
-	// prefs
+	m_bShowImageTips = pPrefs->GetProfileInt(szKey, _T("ShowImageTips"), TRUE);
 	m_bShowInfoTips = pPrefs->GetProfileInt(szKey, _T("ShowInfoTips"), FALSE);
 	m_bShowComments = pPrefs->GetProfileInt(szKey, _T("ShowComments"), TRUE);
 	m_bDisplayFirstCommentLine = pPrefs->GetProfileInt(szKey, _T("DisplayFirstCommentLine"), FALSE);
@@ -198,6 +192,7 @@ void CPreferencesUITasklistPage::LoadPreferences(const IPreferences* pPrefs, LPC
 
 void CPreferencesUITasklistPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 {
+	pPrefs->WriteProfileInt(szKey, _T("ShowImageTips"), m_bShowImageTips);
 	pPrefs->WriteProfileInt(szKey, _T("ShowInfoTips"), m_bShowInfoTips);
 	pPrefs->WriteProfileInt(szKey, _T("ShowComments"), m_bShowComments);
 	pPrefs->WriteProfileInt(szKey, _T("DisplayFirstCommentLine"), m_bDisplayFirstCommentLine);
