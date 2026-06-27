@@ -317,12 +317,18 @@ namespace EisenhowerUIExtension
 				});
 			}
 
+			var selMatrix = m_Matrices.Find(m => (m.Id == m_PrevSelMatrix));
+			
+			if (selMatrix == null)
+				selMatrix = m_Matrices.FirstOrNull;
+
 			m_PrevMatrices = null;
+			m_PrevSelMatrix = null;
 
 			m_MatrixCombo.Populate(m_Matrices, m_Trans);
-			m_MatrixCombo.SelectedMatrix = m_Matrices.FirstOrNull;
+			m_MatrixCombo.SelectedMatrix = selMatrix;
 
-			m_EisenhowerCtrl.SetMatrix(m_Matrices.FirstOrNull);
+			m_EisenhowerCtrl.SetMatrix(selMatrix);
 
 			return true;
 		}
