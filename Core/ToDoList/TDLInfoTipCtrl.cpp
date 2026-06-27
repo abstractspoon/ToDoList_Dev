@@ -52,6 +52,7 @@ CTDLInfoTipCtrl::~CTDLInfoTipCtrl()
 
 BEGIN_MESSAGE_MAP(CTDLInfoTipCtrl, CToolTipCtrlEx)
 	ON_WM_CREATE()
+	ON_WM_DESTROY()
 	ON_WM_TIMER()
 END_MESSAGE_MAP()
 
@@ -72,6 +73,13 @@ int CTDLInfoTipCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	return 0;
 }
 
+void CTDLInfoTipCtrl::OnDestroy()
+{
+	m_bmpImageTip.Delete();
+
+	CToolTipCtrlEx::OnDestroy();
+}
+
 void CTDLInfoTipCtrl::OnTimer(UINT nIDEvent)
 {
 	// CImplicit check for mouse-down
@@ -88,6 +96,9 @@ BOOL CTDLInfoTipCtrl::AdjustTipPosition(CRect& rPos) const
 {
 	CString sTip;
 	GetWindowText(sTip);
+
+	if (m_bmpImageTip.IsValid())
+		m_bmpImageTip.Delete();
 
 	if (!m_bmpImageTip.LoadFromFile(sTip))
 		return FALSE;

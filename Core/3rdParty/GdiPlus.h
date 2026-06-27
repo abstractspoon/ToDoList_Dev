@@ -221,6 +221,7 @@ public:
 	BOOL Create(COLORREF color, float fWidth, gdix_PenStyle nStyle);
 	BOOL IsValid() const { return (m_pen != NULL); }
 	BOOL SetStyle(gdix_PenStyle nStyle);
+	void Delete();
 
 protected:
 	gdix_Pen* m_pen;
@@ -239,6 +240,7 @@ public:
 
 	BOOL Create(COLORREF color, BYTE alpha = 255);
 	BOOL IsValid() const { return (m_brush != NULL); }
+	void Delete();
 
 protected:
 	gdix_Brush* m_brush;
@@ -263,6 +265,7 @@ public:
 	BOOL IsValid() const { return (m_bitmap != NULL); }
 	BOOL LoadFromFile(const WCHAR* filename);
 	BOOL SaveAsFile(const WCHAR* filename);
+	void Delete();
 
 protected:
 	gdix_Bitmap* m_bitmap;

@@ -109,8 +109,11 @@ BOOL CGdiPlusPen::Create(COLORREF color, int nWidth, gdix_PenStyle nStyle)
 
 BOOL CGdiPlusPen::Create(COLORREF color, float fWidth, gdix_PenStyle nStyle)
 {
-	CGdiPlus::DeleteBrush(m_pen);
-	m_pen = NULL;
+	if (IsValid())
+	{
+		ASSERT(0);
+		return FALSE;
+	}
 
 	if (!CGdiPlus::CreatePen(CGdiPlus::MakeARGB(color), fWidth, &m_pen))
 		return FALSE;
@@ -128,7 +131,13 @@ BOOL CGdiPlusPen::SetStyle(gdix_PenStyle nStyle)
 
 CGdiPlusPen::~CGdiPlusPen()
 {
-	VERIFY(!m_pen || CGdiPlus::DeletePen(m_pen));
+	Delete();
+}
+
+void CGdiPlusPen::Delete()
+{
+	CGdiPlus::DeletePen(m_pen);
+	m_pen = NULL;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -144,15 +153,24 @@ CGdiPlusBrush::CGdiPlusBrush(COLORREF color, BYTE alpha) : m_brush(NULL)
 
 BOOL CGdiPlusBrush::Create(COLORREF color, BYTE alpha)
 {
-	CGdiPlus::DeleteBrush(m_brush);
-	m_brush = NULL;
+	if (IsValid())
+	{
+		ASSERT(0);
+		return FALSE;
+	}
 
 	return CGdiPlus::CreateBrush(CGdiPlus::MakeARGB(color, alpha), &m_brush);
 }
 
 CGdiPlusBrush::~CGdiPlusBrush()
 {
-	VERIFY(!m_brush || CGdiPlus::DeleteBrush(m_brush));
+	Delete();
+}
+
+void CGdiPlusBrush::Delete()
+{
+	CGdiPlus::DeleteBrush(m_brush);
+	m_brush = NULL;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -253,7 +271,7 @@ CGdiPlusBitmap::CGdiPlusBitmap(int width, int height, gdix_PixelFormat format)
 
 CGdiPlusBitmap::~CGdiPlusBitmap()
 {
-	CGdiPlus::DeleteBitmap(m_bitmap);
+	Delete();
 }
 
 BOOL CGdiPlusBitmap::SaveAsFile(const WCHAR* filename)
@@ -263,10 +281,19 @@ BOOL CGdiPlusBitmap::SaveAsFile(const WCHAR* filename)
 
 BOOL CGdiPlusBitmap::LoadFromFile(const WCHAR* filename)
 {
-	CGdiPlus::DeleteBitmap(m_bitmap);
-	m_bitmap = NULL;
+	if (IsValid())
+	{
+		ASSERT(0);
+		return FALSE;
+	}
 
 	return CGdiPlus::CreateBitmapFromFile(filename, &m_bitmap);
+}
+
+void CGdiPlusBitmap::Delete()
+{
+	CGdiPlus::DeleteBitmap(m_bitmap);
+	m_bitmap = NULL;
 }
 
 //////////////////////////////////////////////////////////////////////
