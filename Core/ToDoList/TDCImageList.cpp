@@ -368,6 +368,8 @@ BOOL CTDCImageList::LoadImage(const CString& sImageFile, COLORREF crTransparent,
 		break;
 
 	case FT_PNG:
+	case FT_GIF:
+	case FT_JPG:
 		{
 			CIcon icon(CEnBitmapEx::LoadImageFileAsIcon(sImageFile));
 			
@@ -395,24 +397,6 @@ BOOL CTDCImageList::LoadImage(const CString& sImageFile, COLORREF crTransparent,
 					return TRUE;
 
 				image.RemapSysColors();
-				return AddImage(TDCIMAGEINFO(sImageFile, sizeOrg), image, crTransparent, pImages, nNextNameIndex);
-			}
-		}
-		break;
-
-	case FT_GIF:
-	case FT_JPG:
-		{
-			CEnBitmapEx image;
-
-			if (image.LoadImage(sImageFile, crTransparent))
-			{
-				CSize sizeOrg = image.GetSize();
-				image.ResizeImage(16, 16, crTransparent);
-
-				if (pImages == NULL)
-					return TRUE;
-
 				return AddImage(TDCIMAGEINFO(sImageFile, sizeOrg), image, crTransparent, pImages, nNextNameIndex);
 			}
 		}
