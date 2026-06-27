@@ -386,9 +386,6 @@ BOOL CTDCImageList::LoadImage(const CString& sImageFile, COLORREF crTransparent,
 				if (pImages == NULL)
 					return TRUE;
 
-				if (nType == FT_BMP)
-					image.RemapSysColors();
-
 				return AddImage(TDCIMAGEINFO(sImageFile, sizeOrg), image, crTransparent, pImages, nNextNameIndex);
 			}
 		}
