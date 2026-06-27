@@ -218,6 +218,7 @@ void CTDCToDoCtrlPreferenceHelper::PopulateStyles(const CPreferencesDlg& prefs, 
 	styles[TDCS_SHOWDEFAULTTASKICONS] = prefs.GetShowDefaultTaskIcons();
 	styles[TDCS_SHOWFIRSTCOMMENTLINEINLIST] = prefs.GetDisplayFirstCommentLine();
 	styles[TDCS_SHOWINFOTIPS] = prefs.GetShowInfoTips();
+	styles[TDCS_SHOWIMAGETIPS] = prefs.GetShowImageTips();
 	styles[TDCS_SHOWPARENTSASFOLDERS] = prefs.GetShowParentsAsFolders();
 	styles[TDCS_SHOWPATHINHEADER] = prefs.GetShowPathInHeader();
 	styles[TDCS_SHOWPERCENTASPROGRESSBAR] = prefs.GetShowPercentAsProgressbar();

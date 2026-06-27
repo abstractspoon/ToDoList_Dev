@@ -2107,7 +2107,7 @@ HWND CDialogHelper::GetWindowFromPoint(HWND hwndParent, POINT ptScreen)
 		
 		HWND hwndChild = ::ChildWindowFromPoint(hWnd, ptScreen);
 		
-		if ((hwndChild == NULL) || (hwndChild == hWnd))
+		if ((hwndChild == NULL) || (hwndChild == hWnd) || !::IsWindowVisible(hwndChild))
 			break;
 		
 		hWnd = hwndChild; // keep going

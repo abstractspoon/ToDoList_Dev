@@ -264,6 +264,7 @@ public:
 	void SetDefaultColumnEditFilterVisibility(const TDCCOLEDITFILTERVISIBILITY& vis) { m_pageUIVisibility.SetColumnAttributeVisibility(vis); }
 
 	// CPreferencesUITasklistPage
+	BOOL GetShowImageTips() const { return m_pageUITasklist.GetShowImageTips(); }
 	BOOL GetShowInfoTips() const { return m_pageUITasklist.GetShowInfoTips(); }
 	BOOL GetShowComments() const { return m_pageUITasklist.GetShowComments(); }
 	BOOL GetShowPathInHeader() const { return m_pageUITasklist.GetShowPathInHeader(); }

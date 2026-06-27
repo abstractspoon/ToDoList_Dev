@@ -43,7 +43,7 @@ public:
 	void SetReadOnly(BOOL bReadOnly);
 	int GetVisibleTaskCount() const;
 	float GetAverageCharWidth();
-	DWORD HitTestTask(const CPoint& ptScreen) const;
+	DWORD HitTestTask(const CPoint& ptScreen, BOOL bIcon) const;
 	void SetAttributeLabelVisibility(KBC_ATTRIBLABELS nLabelVis);
 	void FilterToolTipMessage(MSG* pMsg);
 	void SetFullColumnColor(COLORREF crFull);
@@ -74,8 +74,6 @@ public:
 	void SetFont(HFONT hFont);
 
 protected:
-	DWORD HitTestTask(const CPoint& ptScreen, CKanbanColumnCtrl*& pCol) const;
-
 	static int SortProc(const void* pV1, const void* pV2);
 
 };

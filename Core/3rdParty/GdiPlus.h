@@ -171,6 +171,12 @@ struct gdix_PointF
 	gdix_Real y;
 };
 
+struct gdix_SizeF
+{
+	gdix_Real cx;
+	gdix_Real cy;
+};
+
 struct gdix_RectF 
 {
 	gdix_Real x;
@@ -215,6 +221,7 @@ public:
 	BOOL Create(COLORREF color, float fWidth, gdix_PenStyle nStyle);
 	BOOL IsValid() const { return (m_pen != NULL); }
 	BOOL SetStyle(gdix_PenStyle nStyle);
+	void Delete();
 
 protected:
 	gdix_Pen* m_pen;
@@ -233,6 +240,7 @@ public:
 
 	BOOL Create(COLORREF color, BYTE alpha = 255);
 	BOOL IsValid() const { return (m_brush != NULL); }
+	void Delete();
 
 protected:
 	gdix_Brush* m_brush;
@@ -243,6 +251,7 @@ protected:
 class CGdiPlusBitmap
 {
 public:
+	CGdiPlusBitmap();
 	CGdiPlusBitmap(IStream* stream);
 	CGdiPlusBitmap(const WCHAR* filename);
 	CGdiPlusBitmap(HBITMAP hbitmap);
@@ -254,7 +263,9 @@ public:
 	gdix_Image* AsImage() const { return (gdix_Image*)m_bitmap; }
 
 	BOOL IsValid() const { return (m_bitmap != NULL); }
+	BOOL LoadFromFile(const WCHAR* filename);
 	BOOL SaveAsFile(const WCHAR* filename);
+	void Delete();
 
 protected:
 	gdix_Bitmap* m_bitmap;
@@ -301,11 +312,10 @@ public:
 	static BOOL CreateBitmapFromHBITMAP(HBITMAP hbitmap, HPALETTE hPal, gdix_Bitmap **bitmap);
 	static BOOL CreateBitmap(int width, int height, gdix_Bitmap **bitmap, gdix_PixelFormat format = gdix_PixelFormat32bppRGB);
 
-	static BOOL CreateHBITMAPFromBitmap(gdix_Bitmap* bitmap, HBITMAP* hbmReturn, gdix_ARGB background);
-	static BOOL CreateHICONFromBitmap(gdix_Bitmap* bitmap, HICON* hicoReturn);
 	static BOOL DeleteBitmap(gdix_Bitmap* bitmap);
 	static BOOL SaveBitmapToFile(gdix_Bitmap* bitmap, const WCHAR* filename);
 	static BOOL SaveBitmapToStream(gdix_Bitmap* bitmap, IStream* pStream, const CLSID& clsidEncoder);
+	static BOOL GetImageDimension(gdix_Image* image, gdix_SizeF* size);
 
 	static BOOL CreatePen(gdix_ARGB color, gdix_Real width, gdix_Pen** pen);
 	static BOOL DeletePen(gdix_Pen* pen);
@@ -327,6 +337,7 @@ public:
 	static BOOL DrawRect(gdix_Graphics* graphics, gdix_Pen* pen, const gdix_RectF* rect, gdix_Brush* brush = NULL);
 	static BOOL DrawPie(gdix_Graphics* graphics, gdix_Pen* pen, const gdix_RectF* rect, float startDegrees, float sweepDegrees, gdix_Brush* brush = NULL);
 	static BOOL DrawArc(gdix_Graphics* graphics, gdix_Pen* pen, const gdix_RectF* rect, float startDegrees, float sweepDegrees);
+	static BOOL DrawImage(gdix_Graphics* graphics, gdix_Bitmap* bmp, const gdix_RectF* rect);
 
 	static BOOL FillPolygon(gdix_Graphics* graphics, gdix_Brush* brush, const gdix_PointF* points, int count);
 	static BOOL FillEllipse(gdix_Graphics* graphics, gdix_Brush* brush, const gdix_RectF* rect);
@@ -337,6 +348,9 @@ public:
 	static BOOL SetSmoothingMode(gdix_Graphics* graphics, gdix_SmoothingMode mode);
 
 	// Win32 support
+	static BOOL CreateHBITMAPFromBitmap(gdix_Bitmap* bitmap, HBITMAP* hbmReturn, gdix_ARGB background);
+	static BOOL CreateHICONFromBitmap(gdix_Bitmap* bitmap, HICON* hicoReturn);
+
 	static BOOL DrawLine(CGdiPlusGraphics& graphics, CGdiPlusPen& pen, const POINT& from, const POINT& to);
 	static BOOL DrawLines(CGdiPlusGraphics& graphics, CGdiPlusPen& pen, const POINT points[], int count);
 	static BOOL DrawPolygon(CGdiPlusGraphics& graphics, CGdiPlusPen& pen, const POINT points[], int count, gdix_Brush* brush = NULL);
@@ -344,6 +358,7 @@ public:
 	static BOOL DrawRect(gdix_Graphics* graphics, gdix_Pen* pen, const RECT& rect, gdix_Brush* brush = NULL);
 	static BOOL DrawPie(gdix_Graphics* graphics, gdix_Pen* pen, const RECT& rect, float startDegrees, float sweepDegrees, gdix_Brush* brush = NULL);
 	static BOOL DrawArc(gdix_Graphics* graphics, gdix_Pen* pen, const RECT& rect, float startDegrees, float sweepDegrees);
+	static BOOL DrawImage(gdix_Graphics* graphics, gdix_Bitmap* bmp, const RECT& rect);
 	
 	static BOOL FillPolygon(gdix_Graphics* graphics, gdix_Brush* brush, const POINT points[], int count);
 	static BOOL FillEllipse(gdix_Graphics* graphics, gdix_Brush* brush, const RECT& rect);
@@ -351,6 +366,7 @@ public:
 	static BOOL FillPie(gdix_Graphics* graphics, gdix_Brush* brush, const RECT& rect, float startDegrees, float sweepDegrees);
 
 	static void GetPointFs(const POINT points[], int count, CArray<gdix_PointF, gdix_PointF&>& pointFs);
+	static SIZE GetImageDimension(gdix_Image* image);
 
 protected:
 	static HMODULE s_hGdiPlus;

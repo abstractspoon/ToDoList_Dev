@@ -21,11 +21,11 @@ const UINT WM_PUITCP_NUMPRORITYRISKLEVELS = ::RegisterWindowMessage(_T("WM_PUITC
 
 class CPreferencesUITasklistPage : public CPreferencesPageBase
 {
-// Construction
 public:
 	CPreferencesUITasklistPage();
 	~CPreferencesUITasklistPage();
 
+	BOOL GetShowImageTips() const { return m_bShowImageTips; }
 	BOOL GetShowInfoTips() const { return m_bShowInfoTips; }
 	BOOL GetShowComments() const { return m_bShowComments; }
 	BOOL GetShowPathInHeader() const { return m_bShowPathInHeader; }
@@ -59,9 +59,6 @@ public:
 	//	BOOL Get() const { return m_b; }
 
 protected:
-// Dialog Data
-	//{{AFX_DATA(CPreferencesUITasklistPage)
-	//}}AFX_DATA
 	CComboBox	m_cbPercentIncrement;
 	CTabbedComboBox m_cbPriorityRiskLevels;
 
@@ -85,6 +82,7 @@ protected:
 	BOOL	m_bAppendTextToDateTimePaste;
 	BOOL	m_bShowPathInHeader;
 	BOOL	m_bStrikethroughDone;
+	BOOL	m_bShowImageTips;
 	BOOL	m_bShowInfoTips;
 	BOOL	m_bShowComments;
 	BOOL	m_bHideZeroTimeCost;
@@ -100,20 +98,12 @@ protected:
 	BOOL	m_bSetNumPriorityRiskLevels;
 	int		m_nNumPriorityRiskLevels;
 
-// Overrides
-	// ClassWizard generate virtual function overrides
-	//{{AFX_VIRTUAL(CPreferencesUITasklistPage)
-	//}}AFX_VIRTUAL
-
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	virtual void DoDataExchange(CDataExchange* pDX);
 	virtual BOOL OnInitDialog();
 	virtual void OnFirstShow();
 
-// Implementation
 protected:
-	// Generated message map functions
-	//{{AFX_MSG(CPreferencesUITasklistPage)
 	afx_msg void OnShowcomments();
 	afx_msg void OnShowinfotips();
 	afx_msg void OnLimitinfotipcomments();
@@ -122,7 +112,7 @@ protected:
 	afx_msg void OnAppendTextToDateTimePaste();
 	afx_msg void OnSetNumPriorityRiskLevels();
 	afx_msg void OnSelChangeNumPriorityRiskLevels();
-	//}}AFX_MSG
+
 	DECLARE_MESSAGE_MAP()
 
 protected:

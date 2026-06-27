@@ -11,6 +11,8 @@
 
 #include "..\Shared\ToolTipCtrlEx.h"
 
+#include "..\3rdParty\GdiPlus.h"
+
 /////////////////////////////////////////////////////////////////////////////
 
 class CTDCAttributeMap;
@@ -40,21 +42,19 @@ protected:
 
 	CTDCTaskFormatter m_formatter;
 	CTDCTaskCalculator m_calculator;
+	
+	mutable CGdiPlusBitmap m_bmpImageTip;
 
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CTDLInfoTipCtrl)
-	//}}AFX_VIRTUAL
-
-	// Generated message map functions
 protected:
-	//{{AFX_MSG(CTDLInfoTipCtrl)
-		// NOTE - the ClassWizard will add and remove member functions here.
-	//}}AFX_MSG
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
+	afx_msg void OnDestroy();
 	afx_msg void OnTimer(UINT nIDEvent);
 
 	DECLARE_MESSAGE_MAP()
+
+protected:
+	virtual void OnPaintTip(CDC* pDC);
+	virtual BOOL AdjustTipPosition(CRect& rPos) const;
 
 protected:
 	int BuildSortedAttributeArray(DWORD dwTaskID, 
@@ -67,8 +67,5 @@ protected:
 };
 
 /////////////////////////////////////////////////////////////////////////////
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
 #endif // !defined(AFX_TDLINFOTIPCTRL_H__4BBE69FD_312A_4C7E_A8BE_A435C740EB7A__INCLUDED_)

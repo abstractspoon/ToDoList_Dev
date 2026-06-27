@@ -2186,7 +2186,7 @@ void CGanttCtrl::OnDependencyEditMouseMove(UINT /*nFlags*/, CPoint ptScreen)
 {
 	if (IsPickingDependencyFromTask() || IsPickingDependencyToTask())
 	{
-		DWORD dwTaskID = HitTestTask(ptScreen, false);
+		DWORD dwTaskID = HitTestTask(ptScreen, IUI_NONE);
 		m_tree.SelectDropTarget(GetTreeItem(dwTaskID));
 	}
 }
@@ -2239,7 +2239,7 @@ BOOL CGanttCtrl::OnDependencyEditLButtonDown(UINT /*nFlags*/, CPoint ptScreen)
 
 	if (IsPickingDependencyFromTask())
 	{
-		DWORD dwFromTaskID = HitTestTask(ptScreen, FALSE);
+		DWORD dwFromTaskID = HitTestTask(ptScreen, IUI_NONE);
 
 		if (dwFromTaskID)
 		{
@@ -2262,7 +2262,7 @@ BOOL CGanttCtrl::OnDependencyEditLButtonDown(UINT /*nFlags*/, CPoint ptScreen)
 	}
 	else if (IsPickingDependencyToTask())
 	{
-		DWORD dwToTaskID = HitTestTask(ptScreen, FALSE);
+		DWORD dwToTaskID = HitTestTask(ptScreen, IUI_NONE);
 		m_pDependEdit->SetToTask(dwToTaskID);
 
 		return TRUE; // handled
@@ -5314,24 +5314,47 @@ bool CGanttCtrl::PrepareNewTask(ITaskList* pTaskList) const
 	return true;
 }
 
-DWORD CGanttCtrl::HitTestTask(const CPoint& ptScreen, bool bTitleColumnOnly) const
+DWORD CGanttCtrl::HitTestTask(const CPoint& ptScreen, IUI_HITTESTREASON nReason) const
 {
-	HTREEITEM htiHit = HitTestItem(ptScreen, bTitleColumnOnly);
+	DWORD dwTaskID = TreeHitTestTask(ptScreen, TRUE, nReason);
 
-	if (htiHit)
-		return GetTaskID(htiHit);
+	if (!dwTaskID)
+	{
+		switch (nReason)
+		{
+		case IUI_CONTEXTMENU:
+		case IUI_NONE:
+			dwTaskID = GetTaskID(ListHitTestItem(ptScreen, TRUE));
+			break;
+		}
+	}
 
-	return 0;
+	return dwTaskID;
 }
 
-DWORD CGanttCtrl::TreeHitTestTask(const CPoint& ptScreen, BOOL bScreen) const
+DWORD CGanttCtrl::TreeHitTestTask(const CPoint& point, BOOL bScreen, IUI_HITTESTREASON nReason) const
 {
-	HTREEITEM htiHit = TreeHitTestItem(ptScreen, bScreen);
-	
-	if (htiHit)
-		return GetTaskID(htiHit);
+	UINT nFlags = 0;
+	HTREEITEM htiHit = TreeHitTestItem(point, bScreen, &nFlags);
 
-	return 0;
+	switch (nReason)
+	{
+	case IUI_INFOTIP:
+		if (htiHit && !(nFlags & TVHT_ONITEMLABEL))
+			htiHit = NULL;
+		break;
+
+	case IUI_IMAGETIP:
+		if (htiHit && !(nFlags & TVHT_ONITEMICON))
+			htiHit = NULL;
+		break;
+
+	case IUI_CONTEXTMENU:
+	case IUI_NONE:
+		break;
+	}
+
+	return (htiHit ? GetTaskID(htiHit) : 0L);
 }
 
 BOOL CGanttCtrl::GetListItemRect(int nItem, CRect& rItem) const

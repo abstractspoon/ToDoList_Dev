@@ -61,7 +61,7 @@ CToolTipCtrlEx::CToolTipCtrlEx()
 	m_bUsingRelayEvent(-1), 
 	m_nLastHit(-1),
 	m_ptTrackingOffset(0, 0),
-	m_sizeTooltip(0, 0)
+	m_sizeTrackingTooltip(0, 0)
 {
 	InitToolInfo(m_tiLast, FALSE);
 }
@@ -76,7 +76,6 @@ BEGIN_MESSAGE_MAP(CToolTipCtrlEx, CToolTipCtrl)
 	ON_WM_PAINT()
 	ON_WM_TIMER()
 	ON_WM_CREATE()
-	ON_NOTIFY_REFLECT_EX(TTN_SHOW, OnNotifyShow)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -234,17 +233,14 @@ void CToolTipCtrlEx::FilterToolTipMessage(MSG* pMsg, BOOL bSendHitTestMessage)
 					//	TRACE(_T("CToolTipCtrlEx::Activate(TRUE, -callback-)\n"), tiHit.lpszText);
 #endif
  					if (IsTracking())
-					{
  						SendMessage(TTM_TRACKACTIVATE, TRUE, (LPARAM)&ti);
 
-						// Hook the hit tested window (which may be different from pOwner)
-						// so we can handle the TTN_SHOW message for 'fitting' the tip
-						m_scTracking.HookWindow(ti.hwnd, this);
-					}
+					// Hook the hit tested window (which may be different from pOwner)
+					// so we can handle the TTN_SHOW message for 'fitting' the tip
+					m_scTool.HookWindow(ti.hwnd, this);
 
 					// bring the tooltip window above other popup windows
-					SetWindowPos(&CWnd::wndTop, 0, 0, 0, 0,
-									SWP_NOACTIVATE|SWP_NOSIZE|SWP_NOMOVE|SWP_NOOWNERZORDER);
+					SetWindowPos(&CWnd::wndTop, 0, 0, 0, 0,	SWP_NOACTIVATE|SWP_NOSIZE|SWP_NOMOVE|SWP_NOOWNERZORDER);
 				}
 
 				m_tiLast = tiHit;
@@ -264,9 +260,9 @@ void CToolTipCtrlEx::FilterToolTipMessage(MSG* pMsg, BOOL bSendHitTestMessage)
 				CPoint ptTip(pMsg->pt);
 				ptTip.Offset(m_ptTrackingOffset);
 
-				if (m_scTracking.IsValid())
+				if (m_scTool.IsValid())
 				{
-					CRect rTooltip(ptTip, m_sizeTooltip);
+					CRect rTooltip(ptTip, m_sizeTrackingTooltip);
 
 					if (FitTooltipToScreen(rTooltip))
 						ptTip = rTooltip.TopLeft();
@@ -299,43 +295,25 @@ LRESULT CToolTipCtrlEx::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM 
 			{
 			case TTN_SHOW:
 				{
-					ASSERT(IsTracking());
+					CRect rPos;
+					GetWindowRect(rPos);
 
-					// Ensure the tooltip is wholly on the same monitor as the cursor
-					CRect rTooltip;
-					GetWindowRect(rTooltip);
+					if (AdjustTipPosition(rPos) || FitTooltipToScreen(rPos))
+						SetWindowPos(NULL, rPos.left, rPos.top, rPos.Width(), rPos.Height(), (SWP_NOACTIVATE | SWP_NOZORDER));
 
-					if (FitTooltipToScreen(rTooltip))
-						SetWindowPos(NULL, rTooltip.left, rTooltip.top, 0, 0, (SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOSIZE));
+					if (IsTracking())
+						m_sizeTrackingTooltip = rPos.Size();
+					else
+						m_sizeTrackingTooltip = CSize(0, 0);
 
-					m_sizeTooltip = rTooltip.Size();
+					return TRUE; // we handled it
 				}
-				return TRUE; // we handled it
 			}
 		}
 		break;
 	}
 
-	return ScDefault(m_scTracking);
-}
-
-BOOL CToolTipCtrlEx::OnNotifyShow(NMHDR* pNMHDR, LRESULT* pResult)
-{
-	if (!IsTracking()) 
-	{
-		CRect rTooltip;
-		GetWindowRect(rTooltip);
-
-		if (FitTooltipToScreen(rTooltip))
-		{
-			SetWindowPos(NULL, rTooltip.left, rTooltip.top, 0, 0, (SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOSIZE));
-			*pResult = 1;
-
-			return TRUE;
-		}
-	}
-	
-	return FALSE; // Route to parent
+	return ScDefault(m_scTool);
 }
 
 BOOL CToolTipCtrlEx::FitTooltipToScreen(CRect& rTooltip) const
@@ -544,8 +522,8 @@ void CToolTipCtrlEx::Activate(BOOL bActivate)
 	{
 		KillTimer(ID_TIMERLEAVE);
 
-		if (m_scTracking.IsValid())
-			m_scTracking.HookWindow(NULL);
+		if (m_scTool.IsValid())
+			m_scTool.HookWindow(NULL);
 
 		SendMessage(TTM_DELTOOL, 0, (LPARAM)&m_tiLast);
 		
@@ -576,16 +554,21 @@ BOOL CToolTipCtrlEx::AdjustRect(LPRECT lprc, BOOL bLarger) const
 
 void CToolTipCtrlEx::OnPaint()
 {
+	CPaintDC dc(this);
+
 	if (IsTracking())
 	{
 		// Prevent flicker
-		CPaintDC dc(this); 
 		CMemDC dcMem(&dc);
-
-		DefWindowProc(WM_PRINTCLIENT, (WPARAM)(HDC)dcMem, 0);
+		OnPaintTip(&dcMem);
 	}
 	else
 	{
-		Default();
+		OnPaintTip(&dc);
 	}
+}
+
+void CToolTipCtrlEx::OnPaintTip(CDC* pDC)
+{
+	DefWindowProc(WM_PRINTCLIENT, (WPARAM)pDC->GetSafeHdc(), 0);
 }

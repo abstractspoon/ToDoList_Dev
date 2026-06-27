@@ -11,8 +11,12 @@
 #include "TDCCustomAttributeDef.h"
 
 #include "..\Shared\Misc.h"
+#include "..\Shared\FileMisc.h"
 #include "..\Shared\GraphicsMisc.h"
 #include "..\Shared\Localizer.h"
+#include "..\Shared\EnBitmap.h"
+
+#include "..\3rdParty\XNamedColors.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -23,6 +27,10 @@ static char THIS_FILE[] = __FILE__;
 //////////////////////////////////////////////////////////////////////
 
 static const CString EMPTY_STR;
+
+static const int ICON_SIZE = GraphicsMisc::ScaleByDPIFactor(16);
+static const int IMAGETIP_BORDER = GraphicsMisc::ScaleByDPIFactor(4);
+static const int MAX_IMAGETIP_SIZE = (GraphicsMisc::ScaleByDPIFactor(256) + (2 * IMAGETIP_BORDER));
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLInfoTipCtrl
@@ -42,17 +50,13 @@ CTDLInfoTipCtrl::~CTDLInfoTipCtrl()
 {
 }
 
-
 BEGIN_MESSAGE_MAP(CTDLInfoTipCtrl, CToolTipCtrlEx)
-	//{{AFX_MSG_MAP(CTDLInfoTipCtrl)
-		// NOTE - the ClassWizard will add and remove mapping macros here.
-	//}}AFX_MSG_MAP
 	ON_WM_CREATE()
+	ON_WM_DESTROY()
 	ON_WM_TIMER()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
-// CTDLInfoTipCtrl message handlers
 
 int CTDLInfoTipCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
@@ -69,6 +73,13 @@ int CTDLInfoTipCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	return 0;
 }
 
+void CTDLInfoTipCtrl::OnDestroy()
+{
+	m_bmpImageTip.Delete();
+
+	CToolTipCtrlEx::OnDestroy();
+}
+
 void CTDLInfoTipCtrl::OnTimer(UINT nIDEvent)
 {
 	// CImplicit check for mouse-down
@@ -79,6 +90,64 @@ void CTDLInfoTipCtrl::OnTimer(UINT nIDEvent)
 	}
 
 	CToolTipCtrlEx::OnTimer(nIDEvent);
+}
+
+BOOL CTDLInfoTipCtrl::AdjustTipPosition(CRect& rPos) const
+{
+	CString sTip;
+	GetWindowText(sTip);
+
+	if (m_bmpImageTip.IsValid())
+		m_bmpImageTip.Delete();
+
+	if (!m_bmpImageTip.LoadFromFile(sTip))
+		return FALSE;
+
+	// Restrict tip size to a sensible maximum
+	CSize size(CGdiPlus::GetImageDimension(m_bmpImageTip));
+
+	if ((size.cx > size.cy) && (size.cx > MAX_IMAGETIP_SIZE))
+	{
+		size.cy = ((size.cy * MAX_IMAGETIP_SIZE) / size.cx);
+		size.cx = MAX_IMAGETIP_SIZE;
+	}
+	else if ((size.cy > size.cx) && (size.cy > MAX_IMAGETIP_SIZE))
+	{
+		size.cx = ((size.cx * MAX_IMAGETIP_SIZE) / size.cy);
+		size.cy = MAX_IMAGETIP_SIZE;
+	}
+
+	rPos = CRect(rPos.TopLeft(), size);
+
+	if (GraphicsMisc::FitRectToScreen(rPos, NULL, MONITOR_DEFAULTTONEAREST))
+	{
+		// Nudge it to the right so as not to overlay the icon itself
+		rPos.OffsetRect(ICON_SIZE, 0);
+	}
+
+	return TRUE;
+}
+
+void CTDLInfoTipCtrl::OnPaintTip(CDC* pDC)
+{
+	if (m_bmpImageTip.IsValid())
+	{
+		CRect rClient;
+		GetClientRect(rClient);
+
+		// Draw a border
+		GraphicsMisc::DrawRect(pDC, rClient, GetSysColor(COLOR_INFOBK), colorGray);
+		rClient.DeflateRect(IMAGETIP_BORDER, IMAGETIP_BORDER);
+
+		// Then the image
+		CGdiPlusGraphics graphics(*pDC);
+		CGdiPlus::DrawImage(graphics, m_bmpImageTip, rClient);
+
+		return; // always
+	}
+
+	// All else
+	CToolTipCtrlEx::OnPaintTip(pDC);
 }
 
 CString CTDLInfoTipCtrl::FormatTip(DWORD dwTaskID,

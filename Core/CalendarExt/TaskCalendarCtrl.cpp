@@ -1932,6 +1932,17 @@ DWORD CTaskCalendarCtrl::HitTestTask(const CPoint& ptClient, BOOL& bCustomDate) 
 	return HitTestTask(ptClient, TRUE, bCustomDate);
 }
 
+DWORD CTaskCalendarCtrl::HitTestTaskIcon(const CPoint& ptClient) const
+{
+	TCC_HITTEST nHit = TCCHT_NOWHERE;
+	DWORD dwTaskID = HitTestTask(ptClient, nHit);
+
+	if (nHit == TCCHT_ICON)
+		return GetRealTaskID(dwTaskID);
+
+	return 0;
+}
+
 // Internal method
 DWORD CTaskCalendarCtrl::HitTestTask(const CPoint& ptClient, BOOL bRealTaskID, BOOL& bCustomDate) const
 {

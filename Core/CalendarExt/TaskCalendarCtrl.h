@@ -52,6 +52,7 @@ public:
 	BOOL SelectTask(const IUISELECTTASK& select, IUI_APPCOMMAND nCmd);
 
 	DWORD HitTestTask(const CPoint& ptClient, BOOL& bCustomDate) const;
+	DWORD HitTestTaskIcon(const CPoint& ptClient) const;
 	DWORD GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const;
 	BOOL CanGetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const;
 

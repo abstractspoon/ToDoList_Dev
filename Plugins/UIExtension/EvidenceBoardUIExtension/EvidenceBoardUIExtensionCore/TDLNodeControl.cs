@@ -609,11 +609,12 @@ namespace EvidenceBoardUIExtension
 			return false;
 		}
 
-		public uint HitTestTaskId(Point ptClient)
+		public uint HitTestTaskId(Point ptScreen, bool icon)
 		{
-			var node = base.HitTestNode(ptClient, true);
-			
-			return node?.Data ?? 0;
+			var ptClient = PointToClient(ptScreen);
+			var task = (icon ? HitTestTaskIcon(ptClient) : HitTestTask(ptClient));
+
+			return task?.TaskId ?? 0;
 		}
 
 		Rectangle CalcTaskLabelRect(TaskItem taskItem, Rectangle rect, bool multiLine)

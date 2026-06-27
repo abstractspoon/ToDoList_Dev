@@ -55,22 +55,25 @@ public:
 
 protected:
 	BOOL m_bUsingRelayEvent;
-	CPoint m_ptTrackingOffset;
-	CSubclassWnd m_scTracking;
+	CSubclassWnd m_scTool;
 
 	int m_nLastHit;
 	TOOLINFO m_tiLast;
-	CSize m_sizeTooltip;
+
+	CPoint m_ptTrackingOffset;
+	CSize m_sizeTrackingTooltip;
 
 protected:
 	afx_msg void OnPaint();
 	afx_msg void OnTimer(UINT nIDEvent);
 	afx_msg int OnCreate(LPCREATESTRUCT pCreateStruct);
-	afx_msg BOOL OnNotifyShow(NMHDR* pNMHDR, LRESULT* pResult);
 
 	DECLARE_MESSAGE_MAP()
 
 protected:
+	virtual void OnPaintTip(CDC* pDC);
+	virtual BOOL AdjustTipPosition(CRect& /*rPos*/) const { return FALSE; }
+
 	virtual LRESULT ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp);
 
 	BOOL FitTooltipToScreen(CRect& rTooltip) const;

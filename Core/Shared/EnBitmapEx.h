@@ -33,6 +33,7 @@ public:
 	BOOL BlurImage(int nAmount = 5);
 	BOOL SharpenImage(int nAmount = 5);
 	BOOL ResizeImage(double dFactor, COLORREF crMask = CLR_NONE);
+	BOOL ResizeImage(int cx, int cy, COLORREF crBack = CLR_NONE) { return CEnBitmap::ResizeImage(cx, cy, crBack); }
 	BOOL FlipImage(BOOL bHorz, BOOL bVert = 0);
 	BOOL NegateImage();
 	BOOL ReplaceColor(COLORREF crFrom, COLORREF crTo);

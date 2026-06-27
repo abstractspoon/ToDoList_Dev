@@ -94,12 +94,12 @@ CGdiPlusPen::CGdiPlusPen() : m_pen(NULL)
 
 CGdiPlusPen::CGdiPlusPen(COLORREF color, int nWidth, gdix_PenStyle nStyle) : m_pen(NULL)
 {
-	Create(color, nWidth, nStyle);
+	VERIFY(Create(color, nWidth, nStyle));
 }
 
 CGdiPlusPen::CGdiPlusPen(COLORREF color, float fWidth, gdix_PenStyle nStyle) : m_pen(NULL)
 {
-	Create(color, fWidth, nStyle);
+	VERIFY(Create(color, fWidth, nStyle));
 }
 
 BOOL CGdiPlusPen::Create(COLORREF color, int nWidth, gdix_PenStyle nStyle)
@@ -109,11 +109,14 @@ BOOL CGdiPlusPen::Create(COLORREF color, int nWidth, gdix_PenStyle nStyle)
 
 BOOL CGdiPlusPen::Create(COLORREF color, float fWidth, gdix_PenStyle nStyle)
 {
-	if (!CGdiPlus::CreatePen(CGdiPlus::MakeARGB(color), fWidth, &m_pen))
+	if (IsValid())
 	{
 		ASSERT(0);
 		return FALSE;
 	}
+
+	if (!CGdiPlus::CreatePen(CGdiPlus::MakeARGB(color), fWidth, &m_pen))
+		return FALSE;
 
 	if (nStyle != gdix_PenStyleSolid)
 		VERIFY(SetStyle(nStyle));
@@ -128,7 +131,13 @@ BOOL CGdiPlusPen::SetStyle(gdix_PenStyle nStyle)
 
 CGdiPlusPen::~CGdiPlusPen()
 {
-	VERIFY(!m_pen || CGdiPlus::DeletePen(m_pen));
+	Delete();
+}
+
+void CGdiPlusPen::Delete()
+{
+	CGdiPlus::DeletePen(m_pen);
+	m_pen = NULL;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -139,23 +148,29 @@ CGdiPlusBrush::CGdiPlusBrush() : m_brush(NULL)
 
 CGdiPlusBrush::CGdiPlusBrush(COLORREF color, BYTE alpha) : m_brush(NULL)
 {
-	Create(color, alpha);
+	VERIFY(Create(color, alpha));
 }
 
 BOOL CGdiPlusBrush::Create(COLORREF color, BYTE alpha)
 {
-	if (!CGdiPlus::CreateBrush(CGdiPlus::MakeARGB(color, alpha), &m_brush))
+	if (IsValid())
 	{
 		ASSERT(0);
 		return FALSE;
 	}
 
-	return TRUE;
+	return CGdiPlus::CreateBrush(CGdiPlus::MakeARGB(color, alpha), &m_brush);
 }
 
 CGdiPlusBrush::~CGdiPlusBrush()
 {
-	VERIFY(!m_brush || CGdiPlus::DeleteBrush(m_brush));
+	Delete();
+}
+
+void CGdiPlusBrush::Delete()
+{
+	CGdiPlus::DeleteBrush(m_brush);
+	m_brush = NULL;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -230,6 +245,10 @@ CGdiPlusRectF::CGdiPlusRectF(const gdix_PointF& ptTopLeft, const gdix_PointF& pt
 
 //////////////////////////////////////////////////////////////////////
 
+CGdiPlusBitmap::CGdiPlusBitmap() : m_bitmap(NULL)
+{
+}
+
 CGdiPlusBitmap::CGdiPlusBitmap(IStream* stream) : m_bitmap(NULL)
 {
 	CGdiPlus::CreateBitmapFromStream(stream, &m_bitmap);
@@ -250,14 +269,31 @@ CGdiPlusBitmap::CGdiPlusBitmap(int width, int height, gdix_PixelFormat format)
 	CGdiPlus::CreateBitmap(width, height, &m_bitmap, format);
 }
 
+CGdiPlusBitmap::~CGdiPlusBitmap()
+{
+	Delete();
+}
+
 BOOL CGdiPlusBitmap::SaveAsFile(const WCHAR* filename)
 {
 	return CGdiPlus::SaveBitmapToFile(m_bitmap, filename);
 }
 
-CGdiPlusBitmap::~CGdiPlusBitmap()
+BOOL CGdiPlusBitmap::LoadFromFile(const WCHAR* filename)
+{
+	if (IsValid())
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	return CGdiPlus::CreateBitmapFromFile(filename, &m_bitmap);
+}
+
+void CGdiPlusBitmap::Delete()
 {
 	CGdiPlus::DeleteBitmap(m_bitmap);
+	m_bitmap = NULL;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -328,6 +364,7 @@ typedef gdix_Status (STDAPICALLTYPE *PFNDRAWLINES)(gdix_Graphics*,gdix_Pen*,cons
 typedef gdix_Status (STDAPICALLTYPE *PFNDRAWPOLYGON)(gdix_Graphics*,gdix_Pen*,const gdix_PointF*,INT);
 typedef gdix_Status (STDAPICALLTYPE *PFNDRAWELLIPSE)(gdix_Graphics*,gdix_Pen*,gdix_Real,gdix_Real,gdix_Real,gdix_Real);
 typedef gdix_Status (STDAPICALLTYPE *PFNDRAWRECTANGLE)(gdix_Graphics*,gdix_Pen*,gdix_Real,gdix_Real,gdix_Real,gdix_Real);
+typedef gdix_Status (STDAPICALLTYPE *PFNDRAWIMAGERECT)(gdix_Graphics*,gdix_Image*,gdix_Real,gdix_Real,gdix_Real,gdix_Real);
 
 // Fill methods 
 typedef gdix_Status (STDAPICALLTYPE *PFNFILLRECTANGLE)(gdix_Graphics*,gdix_Brush*,gdix_Real,gdix_Real,gdix_Real,gdix_Real);
@@ -353,8 +390,9 @@ typedef gdix_Status (STDAPICALLTYPE *PFNCREATEBITMAPFROMFILE2)(const WCHAR*, gdi
 typedef gdix_Status (STDAPICALLTYPE *PFNCREATEHBITMAPFROMBITMAP2)(gdix_Bitmap*, HBITMAP*, gdix_ARGB);
 
 // Image methods
-typedef gdix_Status(STDAPICALLTYPE *PFNSAVEIMAGETOFILE)(gdix_Image*, const WCHAR*, const CLSID*, const void*);
-typedef gdix_Status(STDAPICALLTYPE *PFNSAVEIMAGETOSTREAM)(gdix_Image*, IStream* pStream, const CLSID*, const void*);
+typedef gdix_Status (STDAPICALLTYPE *PFNSAVEIMAGETOFILE)(gdix_Image*, const WCHAR*, const CLSID*, const void*);
+typedef gdix_Status (STDAPICALLTYPE *PFNSAVEIMAGETOSTREAM)(gdix_Image*, IStream* pStream, const CLSID*, const void*);
+typedef gdix_Status (STDAPICALLTYPE *PFNGETIMAGEDIMENSION)(gdix_Image*,gdix_Real*,gdix_Real*);
 
 // Misc
 typedef gdix_Status (STDAPICALLTYPE *PFNGETIMAGEENCODERS)(UINT, UINT, IMAGECODECINFO*);
@@ -493,6 +531,12 @@ BOOL CGdiPlus::CreateBitmap(int width, int height, gdix_Bitmap **bitmap, gdix_Pi
 {
 	GETPROCADDRESS(PFNCREATEBITMAPFROMSCAN0, "GdipCreateBitmapFromScan0");
 	return (pFN(width, height, 0, (int)format, NULL, bitmap) == gdix_Ok);
+}
+
+BOOL CGdiPlus::GetImageDimension(gdix_Image* image, gdix_SizeF* size)
+{
+	GETPROCADDRESS(PFNGETIMAGEDIMENSION, "GdipGetImageDimension");
+	return (pFN(image, &size->cx, &size->cy) == gdix_Ok);
 }
 
 BOOL CGdiPlus::GetImageMimeType(const WCHAR* filename, CString& sMimeType)
@@ -734,6 +778,13 @@ BOOL CGdiPlus::DrawArc(gdix_Graphics* graphics, gdix_Pen* pen, const gdix_RectF*
 	return (pFN(graphics, pen, rect->x, rect->y, rect->w, rect->h, startDegrees, sweepDegrees) == gdix_Ok);
 }
 
+BOOL CGdiPlus::DrawImage(gdix_Graphics* graphics, gdix_Image* image, const gdix_RectF* rect)
+{
+	GETPROCADDRESS(PFNDRAWIMAGERECT, "GdipDrawImageRect");
+
+	return (pFN(graphics, image, rect->x, rect->y, rect->w, rect->h) == gdix_Ok);
+}
+
 BOOL CGdiPlus::FillPolygon(gdix_Graphics* graphics, gdix_Brush* brush, const gdix_PointF* points, int count)
 {
 	GETPROCADDRESS(PFNFILLPOLYGON2, "GdipFillPolygon2");
@@ -805,6 +856,11 @@ BOOL CGdiPlus::DrawArc(gdix_Graphics* graphics, gdix_Pen* pen, const RECT& rect,
 	return DrawArc(graphics, pen, CGdiPlusRectF(rect), startDegrees, sweepDegrees);
 }
 
+BOOL CGdiPlus::DrawImage(gdix_Graphics* graphics, gdix_Image* image, const RECT& rect)
+{
+	return DrawImage(graphics, image, CGdiPlusRectF(rect));
+}
+
 BOOL CGdiPlus::FillPolygon(gdix_Graphics* graphics, gdix_Brush* brush, const POINT points[], int count)
 {
 	CArray<gdix_PointF, gdix_PointF&> pointFs;
@@ -837,6 +893,20 @@ void CGdiPlus::GetPointFs(const POINT points[], int count, CArray<gdix_PointF, g
 		pointFs[nPt].x = (float)points[nPt].x;
 		pointFs[nPt].y = (float)points[nPt].y;
 	}
+}
+
+SIZE CGdiPlus::GetImageDimension(gdix_Image* image)
+{
+	gdix_SizeF sizeF;
+	SIZE sizeI = { -1, -1 };
+
+	if (GetImageDimension(image, &sizeF))
+	{
+		sizeI.cx = (int)sizeF.cx;
+		sizeI.cy = (int)sizeF.cy;
+	}
+
+	return sizeI;
 }
 
 BOOL CGdiPlus::GetImageEncoders(UINT numEncoders, UINT sizeEncoderArray, IMAGECODECINFO* pEncoders)

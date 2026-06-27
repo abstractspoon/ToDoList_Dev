@@ -194,6 +194,7 @@ enum IUI_HITTESTREASON
 	IUI_NONE		= 0,
 	IUI_INFOTIP,
 	IUI_CONTEXTMENU,
+	IUI_IMAGETIP,
 
 	// new values here
 };

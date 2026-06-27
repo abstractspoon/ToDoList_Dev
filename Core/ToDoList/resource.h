@@ -243,6 +243,7 @@
 #define IDC_PRIORITYCOLORS              1032
 #define IDC_DEFAULTTIMESPENT            1032
 #define IDC_USEEARLIESTSTARTDATE        1032
+#define IDC_SHOWIMAGETIPS               1032
 #define IDC_HDIVIDER                    1033
 #define IDC_DEFAULTTAGS                 1033
 #define IDC_USELATESTSTARTDATE          1033

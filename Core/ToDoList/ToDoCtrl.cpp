@@ -3538,7 +3538,7 @@ BOOL CToDoCtrl::GetLabelEditRect(CRect& rScreen)
 
 BOOL CToDoCtrl::EditSelectedTaskTitle(BOOL bTaskIsNew)
 {
-	if (HasStyle(TDCS_SHOWINFOTIPS) && m_infoTip.GetSafeHwnd())
+	if (m_infoTip.GetSafeHwnd())
 		m_infoTip.Pop();
 
 	if (!CanEditSelectedTask(TDCA_TASKNAME))
@@ -3823,19 +3823,8 @@ DWORD CToDoCtrl::SetStyle(TDC_STYLE nStyle, BOOL bEnable)
 		break;
 
 	case TDCS_SHOWINFOTIPS:
-		if (bEnable)
-		{
-			ASSERT(!m_infoTip.GetSafeHwnd());
-
-			if (!m_infoTip.Create(this))
-				return FALSE;
-
-			m_infoTip.SetFont(CFont::FromHandle(m_hFontTree));
-		}
-		else if (m_infoTip.GetSafeHwnd())
-		{
-			m_infoTip.DestroyWindow();
-		}
+	case TDCS_SHOWIMAGETIPS:
+		// Handled in NotifyEndPreferencesUpdate
 		break;
 
 	case TDCS_USEEARLIESTDUEDATE:
@@ -3923,22 +3912,47 @@ DWORD CToDoCtrl::SetStyle(TDC_STYLE nStyle, BOOL bEnable)
 
 int CToDoCtrl::OnToolHitTest(CPoint point, TOOLINFO * pTI) const
 {
-	// Don't yet know why but updating the info tip text while
-	// multiple selecting causes the mouse-down message to get
-	// mislaid/eaten and the multiple-selection fails so if the
-	// ctrl or shift keys are down we don't return a tooltip
+	if (IsTaskLabelEditing())
+		return 0;
+
+	if (!m_infoTip.GetSafeHwnd())
+		return 0;
+
 	TDC_MAXSTATE nMaxState = m_layout.GetMaximiseState();
 
-	if (!IsTaskLabelEditing() &&
-		HasStyle(TDCS_SHOWINFOTIPS) &&
-		m_infoTip.GetSafeHwnd() &&
-		(nMaxState != TDCMS_MAXCOMMENTS) && 
-		!Misc::IsKeyPressed(VK_CONTROL) &&
-		!Misc::IsKeyPressed(VK_SHIFT))
-	{
-		CWnd::ClientToScreen(&point);
+	if (nMaxState == TDCMS_MAXCOMMENTS)
+		return 0;
 
-		DWORD dwTaskID = HitTestTask(point, TDCHTR_INFOTIP);
+	CWnd::ClientToScreen(&point);
+
+	DWORD dwTaskID = 0;
+	CString sTip;
+
+	if (HasStyle(TDCS_SHOWIMAGETIPS))
+	{
+		dwTaskID = HitTestTask(point, TDCHTR_IMAGETIP);
+
+		if (dwTaskID)
+		{
+			TDCIMAGEINFO info;
+		
+			if (!m_ilTaskIcons.GetImageInfo(m_data.GetTaskIcon(dwTaskID), info))
+				return 0;
+
+			if (info.sFilePath.IsEmpty())
+				return 0;
+
+			if ((info.sizeImage.cx == 16) || (info.sizeImage.cy == 16))
+				return 0;
+		
+			sTip = info.sFilePath;
+			dwTaskID += m_dwNextUniqueID; // so it's distinguishable from a text infotip of the same task
+		}
+	}
+
+	if (!dwTaskID && HasStyle(TDCS_SHOWINFOTIPS))
+	{
+		dwTaskID = HitTestTask(point, TDCHTR_INFOTIP);
 
 		if (dwTaskID)
 		{
@@ -3951,21 +3965,21 @@ int CToDoCtrl::OnToolHitTest(CPoint point, TOOLINFO * pTI) const
 			if (nMaxState == TDCMS_NORMAL)
 				mapAttrib.Add(TDCA_COMMENTS);
 
-			CString sInfoTip = m_infoTip.FormatTip(dwTaskID, 
-												   mapAttrib, 
-												   m_nMaxInfotipCommentsLength,
-												   m_sCompletionStatus);
-			ASSERT(!sInfoTip.IsEmpty());
-
-			HWND hwndHit = CDialogHelper::GetWindowFromPoint(GetSafeHwnd(), point);
-			ASSERT(hwndHit);
-
-			return CToolTipCtrlEx::SetToolInfo(*pTI, hwndHit, sInfoTip, dwTaskID);
+			sTip = m_infoTip.FormatTip(dwTaskID,
+									   mapAttrib,
+									   m_nMaxInfotipCommentsLength,
+									   m_sCompletionStatus);
 		}
 	}
+	ASSERT((sTip.IsEmpty() && !dwTaskID) || (!sTip.IsEmpty() && dwTaskID));
 
-	// Don't want default behaviour
-	return 0;
+	if (!dwTaskID)
+		return 0;
+
+	HWND hwndHit = CDialogHelper::GetWindowFromPoint(GetSafeHwnd(), point);
+	ASSERT(hwndHit);
+
+	return CToolTipCtrlEx::SetToolInfo(*pTI, hwndHit, sTip, dwTaskID);
 }
 
 void CToDoCtrl::SetReadonly(BOOL bReadOnly)
@@ -4076,6 +4090,18 @@ void CToDoCtrl::NotifyEndPreferencesUpdate()
 
 	// Update active comments
 	m_ctrlComments.UpdateAppPreferences();
+
+	// And infotips
+	if (HasStyle(TDCS_SHOWINFOTIPS) || HasStyle(TDCS_SHOWIMAGETIPS))
+	{
+		VERIFY(m_infoTip.GetSafeHwnd() || m_infoTip.Create(this));
+
+		m_infoTip.SetFont(CFont::FromHandle(m_hFontTree));
+	}
+	else if (m_infoTip.GetSafeHwnd())
+	{
+		m_infoTip.DestroyWindow();
+	}
 }
 
 void CToDoCtrl::UpdateVisibleColumns(const CTDCColumnIDMap& mapChanges)
@@ -6141,7 +6167,7 @@ TDC_HITTEST CToDoCtrl::HitTest(const CPoint& ptScreen, TDC_HITTESTREASON /*nReas
 
 DWORD CToDoCtrl::HitTestTask(const CPoint& ptScreen, TDC_HITTESTREASON nReason) const
 {
-	return m_taskTree.HitTestTask(ptScreen, (nReason == TDCHTR_INFOTIP));
+	return m_taskTree.HitTestTask(ptScreen, nReason);
 }
 
 TDC_COLUMN CToDoCtrl::HitTestColumn(const CPoint& ptScreen) const

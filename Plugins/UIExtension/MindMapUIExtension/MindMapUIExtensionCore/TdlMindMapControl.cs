@@ -334,12 +334,12 @@ namespace MindMapUIExtension
             return false;
         }
         		
-		public UInt32 HitTestTask(Point screenPos)
+		public UInt32 HitTestTask(Point screenPos, bool icon)
 		{
 			var clientPos = PointToClient(screenPos);
 			var node = HitTestPositions(clientPos);
 
-			if (node != null)
+			if ((node != null) && (!icon || HitTestIcon(node, clientPos)))
 				return UniqueID(node);
 			
 			// else

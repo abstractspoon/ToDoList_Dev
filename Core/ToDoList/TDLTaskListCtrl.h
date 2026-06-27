@@ -75,6 +75,7 @@ public:
 	DWORD GetTaskID(int nItem) const;
 	DWORD GetSelectedTaskID() const;
 	DWORD GetTrueTaskID(int nItem) const;
+	DWORD GetNextTaskID(DWORD dwTaskID, TTC_NEXTTASK nNext, BOOL bExcludeSelected) const;
 	int GetSelectedTaskIDs(CDWordArray& aTaskIDs, BOOL bTrue, BOOL bOrdered = FALSE) const; // ordered by design
 	int GetSelectedTaskIDs(CDWordArray& aTaskIDs, DWORD& dwFocusedTaskID) const;
 	BOOL SelectTask(DWORD dwTaskID);
@@ -84,8 +85,6 @@ public:
 	BOOL IsTaskSelected(DWORD dwTaskID, BOOL bSingly = FALSE) const;
 	BOOL EnsureSelectionVisible(BOOL bPartialOK);
 	BOOL GetSelectionBoundingRect(CRect& rSelection) const;
-
-	DWORD GetNextTaskID(DWORD dwTaskID, TTC_NEXTTASK nNext, BOOL bExcludeSelected) const;
 
 	// list related
 	int GetSelectedItem() const;
@@ -165,7 +164,7 @@ protected:
 	BOOL BuildColumns();
 	void Release();
 	DWORD GetColumnItemTaskID(int nItem) const;
-	DWORD HitTestTasksTask(const CPoint& ptScreen) const;
+	DWORD HitTestTasksTask(const CPoint& ptScreen, TDC_HITTESTREASON nReason) const;
 	void SetTasksImageList(HIMAGELIST hil, BOOL bState, BOOL bOn = TRUE);
 	HWND Tasks() const { return m_lcTasks; }
 	GM_ITEMSTATE GetColumnItemState(int nItem) const;

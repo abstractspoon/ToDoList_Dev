@@ -335,9 +335,9 @@ protected:
 	int CalcTreeWidthFromSplitPos(int nSplitPos = -1) const;
 	int CalcSplitPosFromTreeWidth(int nTreeWidth = -1) const;
 
-	HTREEITEM HitTestItem(const CPoint& ptScreen, BOOL bTitleColumnOnly) const;
-	HTREEITEM TreeHitTestItem(const CPoint& point, BOOL bScreen) const;
-	HTREEITEM TreeHitTestItem(const CPoint& point, BOOL bScreen, int& nCol) const;
+	HTREEITEM HitTestItem(const CPoint& ptScreen, UINT* pFlags = NULL) const;
+	HTREEITEM TreeHitTestItem(const CPoint& point, BOOL bScreen, UINT* pFlags = NULL) const;
+	HTREEITEM TreeHitTestItem(const CPoint& point, BOOL bScreen, int& nCol, UINT* pFlags = NULL) const;
 	int ListHitTestItem(const CPoint& point, BOOL bScreen) const;
 	int ListHitTestItem(const CPoint& point, BOOL bScreen, int& nCol) const;
 

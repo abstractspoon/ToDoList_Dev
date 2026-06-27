@@ -186,19 +186,22 @@ BOOL CTDLTaskTreeCtrl::BuildColumns()
 	return CTDLTaskCtrlBase::BuildColumns();
 }
 
-DWORD CTDLTaskTreeCtrl::HitTestTasksTask(const CPoint& ptScreen) const
+DWORD CTDLTaskTreeCtrl::HitTestTasksTask(const CPoint& ptScreen, TDC_HITTESTREASON nReason) const
 {
-	// see if we hit a task in the tree
 	CPoint ptClient(ptScreen);
 	m_tcTasks.ScreenToClient(&ptClient);
-	
-	HTREEITEM hti = m_tcTasks.HitTest(ptClient);
 
-	if (hti)
-		return GetTaskID(hti);
+	UINT nFlags = 0;
+	HTREEITEM hti = HitTestItem(ptClient, &nFlags);
+
+	if (!hti)
+		return 0;
+
+	if ((nReason == TDCHTR_IMAGETIP) && !(nFlags & TVHT_ONITEMICON))
+		return 0;
 
 	// all else
-	return 0;
+	return GetTaskID(hti);
 }
 
 void CTDLTaskTreeCtrl::Release() 

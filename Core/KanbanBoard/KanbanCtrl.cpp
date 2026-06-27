@@ -3176,9 +3176,9 @@ bool CKanbanCtrl::PrepareNewTask(ITaskList* pTask) const
 	return true;
 }
 
-DWORD CKanbanCtrl::HitTestTask(const CPoint& ptScreen) const
+DWORD CKanbanCtrl::HitTestTask(const CPoint& ptScreen, BOOL bIcon) const
 {
-	return m_aColumns.HitTestTask(ptScreen);
+	return m_aColumns.HitTestTask(ptScreen, bIcon);
 }
 
 int CKanbanCtrl::HitTestColumn(const CPoint& ptScreen, BOOL& bHeader) const
@@ -3640,7 +3640,7 @@ void CKanbanCtrl::OnBeginDragColumnItem(NMHDR* pNMHDR, LRESULT* pResult)
 BOOL CKanbanCtrl::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 {
 	CPoint ptCursor(GetMessagePos());
-	DWORD dwTaskID = HitTestTask(ptCursor);
+	DWORD dwTaskID = HitTestTask(ptCursor, FALSE);
 
 	if (dwTaskID)
 	{

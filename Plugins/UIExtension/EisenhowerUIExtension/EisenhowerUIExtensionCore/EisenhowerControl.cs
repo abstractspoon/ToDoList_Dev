@@ -316,10 +316,18 @@ namespace EisenhowerUIExtension
 			return EisenhowerVariable.Supports(attribId);
 	}
 
-		public uint HitTestTask(Point screenPos)
+		public uint HitTestTask(Point screenPos, bool icon)
 		{
-			EisenhowerPane unused;
-			return HitTestTask(screenPos, out unused);
+			foreach (var p in m_Panes)
+			{
+				uint taskId = p.HitTestTask(screenPos, icon);
+
+				if (taskId != 0)
+					return taskId;
+			}
+
+			// else
+			return 0;
 		}
 
 		public uint GetTaskId(UIExtension.GetTask getTask)
@@ -939,24 +947,6 @@ namespace EisenhowerUIExtension
 			}
 
 			return true;
-		}
-
-		private uint HitTestTask(Point screenPos, out EisenhowerPane pane)
-		{
-			foreach (var p in m_Panes)
-			{
-				uint taskId = p.HitTestTask(screenPos);
-
-				if (taskId != 0)
-				{
-					pane = p;
-					return taskId;
-				}
-			}
-
-			// else
-			pane = null;
-			return 0;
 		}
 
 		private EisenhowerPane HitTestPane(Point screenPos)

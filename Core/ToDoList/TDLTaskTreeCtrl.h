@@ -136,7 +136,7 @@ public:
 	BOOL GetSelectionBoundingRect(CRect& rSelection) const;
 	BOOL GetLabelEditRect(CRect& rLabel) const;
 	HTREEITEM GetItem(DWORD dwTaskID) const;
-	
+
 	void ExpandAll(BOOL bExpand = TRUE);
 	void ExpandSelection(BOOL bExpand = TRUE, BOOL bFully = FALSE);
 	int GetExpandedTasks(CDWordArray& aExpanded) const;
@@ -230,7 +230,7 @@ protected:
 	BOOL SelectItem(HTREEITEM hti, BOOL bSyncAndNotify, SELCHANGE_ACTION nBy); // internal version
 	BOOL ProcessSelectionChange(BOOL bSelChange, SELCHANGE_ACTION nBy);
 	int GetListItem(HTREEITEM hti) const;
-	DWORD HitTestTasksTask(const CPoint& ptScreen) const;
+	DWORD HitTestTasksTask(const CPoint& ptScreen, TDC_HITTESTREASON nReason) const;
 	BOOL MultiSelectItem(HTREEITEM hti, TSH_SELECT nState = TSHS_SELECT);
 	BOOL HandleClientColumnClick(const CPoint& pt, BOOL bDblClk);
 	void RefreshItemBoldState(HTREEITEM hti = NULL, BOOL bAndChildren = TRUE);

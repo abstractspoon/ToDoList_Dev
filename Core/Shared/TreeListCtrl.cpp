@@ -2370,37 +2370,39 @@ BOOL CTreeListCtrl::GetListColumnRect(int nCol, CRect& rColumn, BOOL bScrolled) 
 	return FALSE;
 }
 
-HTREEITEM CTreeListCtrl::HitTestItem(const CPoint& ptScreen, BOOL bTitleColumnOnly) const
+HTREEITEM CTreeListCtrl::HitTestItem(const CPoint& ptScreen, UINT* pFlags) const
 {
-	HTREEITEM htiHit = TreeHitTestItem(ptScreen, TRUE);
+	HTREEITEM htiHit = TreeHitTestItem(ptScreen, TRUE, pFlags);
 
-	if (htiHit || bTitleColumnOnly)
+	if (htiHit)
 		return htiHit;
 
 	// else
+	if (pFlags)
+		*pFlags = 0;
+
 	return GetTreeItem(ListHitTestItem(ptScreen, TRUE));
 }
 
-HTREEITEM CTreeListCtrl::TreeHitTestItem(const CPoint& point, BOOL bScreen) const
+HTREEITEM CTreeListCtrl::TreeHitTestItem(const CPoint& point, BOOL bScreen, UINT* pFlags) const
 {
 	int nUnused;
-	return TreeHitTestItem(point, bScreen, nUnused);
+	return TreeHitTestItem(point, bScreen, nUnused, pFlags);
 }
 
-HTREEITEM CTreeListCtrl::TreeHitTestItem(const CPoint& point, BOOL bScreen, int& nCol) const
+HTREEITEM CTreeListCtrl::TreeHitTestItem(const CPoint& point, BOOL bScreen, int& nCol, UINT* pFlags) const
 {
 	CPoint ptClient(point);
 
 	if (bScreen)
 		m_tree.ScreenToClient(&ptClient);
 
-	HTREEITEM htiHit = m_tree.HitTest(ptClient);
+	HTREEITEM htiHit = m_tree.HitTest(ptClient, pFlags);
 
 	if (!htiHit)
 		return NULL;
 
 	nCol = m_treeHeader.HitTest(CPoint(ptClient.x, 4));
-
 	return htiHit;
 }
 
@@ -2442,9 +2444,10 @@ int CTreeListCtrl::ListHitTestItem(const CPoint& point, BOOL bScreen, int& nCol)
 
 CString CTreeListCtrl::GetItemLabelTip(CPoint ptScreen) const
 {
-	HTREEITEM htiHit = HitTestItem(ptScreen, TRUE);
+	UINT nFlags = 0;
+	HTREEITEM htiHit = HitTestItem(ptScreen, &nFlags);
 
-	if (htiHit)
+	if (htiHit && (nFlags & TVHT_ONITEMLABEL))
 	{
 		CRect rItem;
 

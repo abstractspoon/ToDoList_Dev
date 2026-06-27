@@ -202,23 +202,21 @@ namespace EisenhowerUIExtension
 			return true;
 		}
 
-		public UIExtension.HitTestResult HitTest(Int32 xPos, Int32 yPos, UIExtension.HitTestReason reason)
+		public UIExtension.HitTestResult HitTest(Int32 xScreen, Int32 yScreen, UIExtension.HitTestReason reason)
 		{
-			var ptScreen = new Point(xPos, yPos);
-			
-			if (m_EisenhowerCtrl.HitTestTask(ptScreen) != 0)
+			if (HitTestTask(xScreen, yScreen, reason) != 0)
 				return UIExtension.HitTestResult.Task;
 			
 			// else
-			if (m_EisenhowerCtrl.RectangleToScreen(m_EisenhowerCtrl.ClientRectangle).Contains(ptScreen))
+			if (m_EisenhowerCtrl.RectangleToScreen(m_EisenhowerCtrl.ClientRectangle).Contains(xScreen, yScreen))
 				return UIExtension.HitTestResult.Tasklist;
 
 			return UIExtension.HitTestResult.Nowhere;
 		}
 
-		public UInt32 HitTestTask(Int32 xPos, Int32 yPos, UIExtension.HitTestReason reason)
+		public UInt32 HitTestTask(Int32 xScreen, Int32 yScreen, UIExtension.HitTestReason reason)
 		{
-			return m_EisenhowerCtrl.HitTestTask(new Point(xPos, yPos));
+			return m_EisenhowerCtrl.HitTestTask(new Point(xScreen, yScreen), (reason == UIExtension.HitTestReason.ImageTip));
 		}
 
 		public void SetUITheme(UITheme theme)

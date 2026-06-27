@@ -99,7 +99,7 @@ public:
 
 	BOOL GetLabelEditRect(LPRECT pEdit);
 	BOOL GetItemBounds(HTREEITEM hti, LPRECT lpRect) const;
-	HTREEITEM HitTestItemSidebar(const CPoint& ptScreen) const;
+	HTREEITEM HitTestItem(const CPoint& ptScreen, BOOL bIcon) const;
 
 	void ClearSelection();
 	void SetSelected(BOOL bSelected);
