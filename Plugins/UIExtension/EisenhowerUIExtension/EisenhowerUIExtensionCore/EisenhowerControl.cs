@@ -45,12 +45,15 @@ namespace EisenhowerUIExtension
 		// local
 		private EisenhowerTasks m_Tasks;
 		private EisenhowerMatrix m_Matrix;
-		private bool m_DraggingHorzSplitBar, m_DraggingVertSplitBar;
 		private DragImage m_DragImage;
 		private Point m_SplitPos;
 		private List<EisenhowerPane> m_Panes;
 		private HashSet<Task.Attribute> m_ParentCalculatedValues;
 		private EisenhowerOption m_Options;
+
+		private bool m_DraggingHorzSplitBar;
+		private bool m_DraggingVertSplitBar;
+		private bool m_SelectionEventsEnabled = true;
 
 		// ---------------------------------------------
 
@@ -111,10 +114,18 @@ namespace EisenhowerUIExtension
 		{
 			m_Matrix = matrix;
 
-			SetPaneMatrix(m_TopLeftPane, true, true);
-			SetPaneMatrix(m_TopRightPane, false, true);
-			SetPaneMatrix(m_BottomLeftPane, true, false);
-			SetPaneMatrix(m_BottomRightPane, false, false);
+			var selTaskIds = SelectedTaskIds;
+
+			SetPaneMatrices();
+			SelectTasks(selTaskIds);
+
+			CheckNotifySelectionChange(selTaskIds);
+		}
+
+		private void CheckNotifySelectionChange(IList<uint> prevSelTaskIds)
+		{
+			if (!prevSelTaskIds.All(SelectedTaskIds.Contains))
+				SelectionChange?.Invoke(this, SelectedTaskIds);
 		}
 
 		public void SetUITheme(UITheme theme)
@@ -209,30 +220,25 @@ namespace EisenhowerUIExtension
 
 		public bool SelectTask(uint taskID)
 		{
-			foreach (var p in m_Panes)
-			{
-				if (p.SelectTask(taskID))
-				{
-					SelectedPane = p;
-					return true;
-				}
-			}
-
-			return false;
+			return SelectTasks(new List<uint>() { taskID });
 		}
 
 		public bool SelectTasks(IList<uint> taskIDs)
 		{
+			bool success = false;
+			m_SelectionEventsEnabled = false;
+
 			foreach (var p in m_Panes)
 			{
 				if (p.SelectTasks(taskIDs))
 				{
 					SelectedPane = p;
-					return true;
+					success = true;
 				}
 			}
 
-			return false;
+			m_SelectionEventsEnabled = true;
+			return success;
 		}
 
 		protected EisenhowerPane SelectedPane
@@ -273,6 +279,8 @@ namespace EisenhowerUIExtension
 
 		public void OnUpdateTasks(UIExtension.UpdateType type, List<uint> taskIds)
 		{
+			m_SelectionEventsEnabled = false;
+
 			switch (type)
 			{
 			case UIExtension.UpdateType.All:
@@ -285,6 +293,11 @@ namespace EisenhowerUIExtension
 				m_Panes.ForEach(p => p.UpdateTasks(taskIds));
 				break;
 			}
+
+			// Note: No need to notify any selection change
+			// because the app always re-sets the selection
+			// after an update
+			m_SelectionEventsEnabled = true;
 		}
 
 		public bool TaskColorIsBackground		{ set { m_Panes.ForEach(p => p.TaskColorIsBackground = value); } }
@@ -503,7 +516,11 @@ namespace EisenhowerUIExtension
 				if (value != m_Options)
 				{
 					m_Options = value;
-					SetMatrix(m_Matrix);
+
+					var selTaskIds = SelectedTaskIds;
+
+					SetPaneMatrices();
+					CheckNotifySelectionChange(selTaskIds);
 				}
 			}
 		}
@@ -542,7 +559,8 @@ namespace EisenhowerUIExtension
 
 		private void OnPaneSelectionChange(object sender, IList<uint> taskIds)
 		{
-			SelectionChange?.Invoke(sender, taskIds);
+			if (m_SelectionEventsEnabled)
+				SelectionChange?.Invoke(sender, taskIds);
 		}
 
 		private void OnPaneGotFocus(object sender, EventArgs e)
@@ -550,7 +568,7 @@ namespace EisenhowerUIExtension
 			// Prevent selection from moving to a pane without a selected task
 			var pane = (sender as EisenhowerPane);
 
-			if (pane != null)
+			if ((pane != null) && (pane != SelectedPane))
 			{
 				if (pane.HasSelection || pane.IsBoundSelecting)
 				{
@@ -618,6 +636,18 @@ namespace EisenhowerUIExtension
 
 			if (update)
 				Update();
+		}
+
+		private void SetPaneMatrices()
+		{
+			m_SelectionEventsEnabled = false;
+
+			SetPaneMatrix(m_TopLeftPane, true, true);
+			SetPaneMatrix(m_TopRightPane, false, true);
+			SetPaneMatrix(m_BottomLeftPane, true, false);
+			SetPaneMatrix(m_BottomRightPane, false, false);
+
+			m_SelectionEventsEnabled = true;
 		}
 
 		private void SetPaneMatrix(EisenhowerPane pane, bool xHigh, bool yHigh)
@@ -866,10 +896,8 @@ namespace EisenhowerUIExtension
 
 			if (GetDragPanes(e, out srcPane, out destPane))
 			{
-				var attribChangeArgs = new AttributeChangeEventArgs()
-				{
-					TaskIds = srcPane.SelectedTaskIds
-				};
+				var selTaskIds = srcPane.SelectedTaskIds;
+				var attribChangeArgs = new AttributeChangeEventArgs() {	TaskIds = new List<uint>(selTaskIds) };
 
 				// Weed out any non-droppable tasks
 				attribChangeArgs.TaskIds.RemoveAll(id => !IsTaskDroppable(m_Tasks.GetItem(id), srcPane, destPane));
@@ -916,10 +944,18 @@ namespace EisenhowerUIExtension
 							task.SetAttributeValue(attribChangeArgs.YAttrib, attribChangeArgs.YValue);
 					}
 
-					srcPane.UpdateTasks(attribChangeArgs.TaskIds);
-					destPane.UpdateTasks(attribChangeArgs.TaskIds);
+					{
+						m_SelectionEventsEnabled = false;
 
-					SelectTasks(attribChangeArgs.TaskIds);
+						srcPane.UpdateTasks(attribChangeArgs.TaskIds);
+						destPane.UpdateTasks(attribChangeArgs.TaskIds);
+
+						SelectTasks(attribChangeArgs.TaskIds);
+
+						m_SelectionEventsEnabled = true;
+						CheckNotifySelectionChange(selTaskIds);
+					}
+
 					destPane.Focus();
 				}
 			}

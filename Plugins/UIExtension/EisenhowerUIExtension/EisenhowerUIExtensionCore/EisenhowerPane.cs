@@ -196,11 +196,6 @@ namespace EisenhowerUIExtension
 			}
 		}
 
-		public bool SelectTask(uint taskID)
-		{
-			return m_List.SelectTask(taskID);
-		}
-
 		public bool SelectTask(String text, UIExtension.SelectTask selectTask, bool caseSensitive, bool wholeWord, bool findReplace)
 		{
 			return m_List.SelectTask(text, selectTask, caseSensitive, wholeWord, wholeWord);

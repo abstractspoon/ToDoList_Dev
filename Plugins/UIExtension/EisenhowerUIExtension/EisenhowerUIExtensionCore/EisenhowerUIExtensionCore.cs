@@ -527,10 +527,7 @@ namespace EisenhowerUIExtension
 		private void OnMatrixComboSelectionChange(object sender, EventArgs e)
 		{
 			// Update matrix
-			var selTaskIds = m_EisenhowerCtrl.SelectedTaskIds;
-
 			m_EisenhowerCtrl.SetMatrix(m_MatrixCombo.SelectedMatrix);
-			m_EisenhowerCtrl.SelectTasks(selTaskIds);
 			m_EisenhowerCtrl.Focus();
 
 			UpdateToolbarButtonStates();
