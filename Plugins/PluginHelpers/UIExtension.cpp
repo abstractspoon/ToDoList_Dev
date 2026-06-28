@@ -53,7 +53,6 @@ IUI_HITTEST UIExtension::MapHitTestResult(UIExtension::HitTestResult result)
 	{
 	case UIExtension::HitTestResult::Nowhere:		return IUI_NOWHERE;
 	case UIExtension::HitTestResult::Tasklist:		return IUI_TASKLIST;
-	case UIExtension::HitTestResult::ColumnHeader:	return IUI_COLUMNHEADER;
 	case UIExtension::HitTestResult::Task:			return IUI_TASK;
 	}
 

@@ -623,6 +623,19 @@ namespace TDC
 		return IUI_EDIT;
 	}
 
+	static TDC_HITTEST MapIUIHitTestToHitTest(IUI_HITTEST nReason)
+	{
+		switch (nReason)
+		{
+		case IUI_TASK:		return TDCHT_TASK;
+		case IUI_TASKLIST:	return TDCHT_TASKLIST;
+		case IUI_NOWHERE:	return TDCHT_NOWHERE;
+		}
+
+		ASSERT(0);
+		return TDCHT_NOWHERE;
+	}
+
 	static IUI_HITTESTREASON MapHitTestReasonToIUIReason(TDC_HITTESTREASON nReason)
 	{
 		switch (nReason)

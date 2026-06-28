@@ -95,7 +95,7 @@ namespace Abstractspoon
 				{
 					Nowhere,
 					Tasklist,
-					ColumnHeader,
+					Deprecated, // ColumnHeader
 					Task,
 				};
 

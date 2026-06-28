@@ -4965,7 +4965,6 @@ TDC_HITTEST CTabbedToDoCtrl::HitTest(const CPoint& ptScreen, TDC_HITTESTREASON n
 				switch (nHit)
 				{
 				case IUI_TASKLIST:		return TDCHT_TASKLIST;
-				case IUI_COLUMNHEADER:	return TDCHT_COLUMNHEADER;
 				case IUI_TASK:			return TDCHT_TASK;
 
 				case IUI_NOWHERE:
