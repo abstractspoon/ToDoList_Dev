@@ -1560,40 +1560,6 @@ int CTDLTaskCtrlBase::CompareTasks(LPARAM lParam1,
 									flags.WantIncludeTime(sort.nColumnID));
 }
 
-// DWORD CTDLTaskCtrlBase::HitTestTask(const CPoint& ptScreen, TDC_HITTESTREASON nReason) const
-// {
-// 	DWORD dwTaskID = HitTestTasksTask(ptScreen, nReason); // Title column only;
-// 
-// 	if (dwTaskID == 0)
-// 	{
-// 		switch (nReason)
-// 		{
-// 		case TDCHTR_INFOTIP:
-// 			break;
-// 
-// 		case TDCHTR_IMAGETIP:
-// 			if (IsColumnShowing(TDCC_ICON))
-// 			{
-// 				TDC_COLUMN nColID = TDCC_NONE;
-// 
-// 				if (HitTestColumnsItem(ptScreen, FALSE, nColID, &dwTaskID) != -1)
-// 				{
-// 					if (nColID != TDCC_ICON)
-// 						dwTaskID = 0;
-// 				}
-// 			}
-// 			break;
-// 
-// 		case TDCHTR_NONE:
-// 		case TDCHTR_CONTEXTMENU:
-// 			dwTaskID = HitTestColumnsTask(ptScreen);
-// 			break;
-// 		}
-// 	}
-// 	
-// 	return dwTaskID;
-// }
-
 int CTDLTaskCtrlBase::HitTestColumnsItem(const CPoint& pt, BOOL bClient, TDC_COLUMN& nColID, DWORD* pTaskID, LPRECT pRect) const
 {
 	LVHITTESTINFO lvHit = { 0 };
@@ -1717,52 +1683,8 @@ BOOL CTDLTaskCtrlBase::HitTest(const CPoint& ptScreen, TDCHITTESTRESULT& htRes) 
 		return TRUE;
 	}
 
-	// 'Tasks' handled by derived classes
+	// Derived classes responsible for 'Tasks' hit-testing
 	return FALSE;
-}
-
-// DWORD CTDLTaskCtrlBase::HitTestColumnsTask(const CPoint& ptScreen) const
-// {
-// 	// see if we hit a task in the list
-// 	CPoint ptClient(ptScreen);
-// 	m_lcColumns.ScreenToClient(&ptClient);
-// 	
-// 	int nItem = m_lcColumns.HitTest(ptClient);
-// 
-// 	if (nItem != -1)
-// 		return GetColumnItemTaskID(nItem);
-// 
-// 	// all else
-// 	return 0;
-// }
-
-TDC_COLUMN CTDLTaskCtrlBase::HitTestColumn(const CPoint& ptScreen) const
-{
-	if (PtInClientRect(ptScreen, m_hdrTasks, TRUE) || // tree header
-		PtInClientRect(ptScreen, Tasks(), TRUE)) // tree
-	{
-		return TDCC_CLIENT;
-	}
-	else if (PtInClientRect(ptScreen, m_hdrColumns, TRUE))	// column header
-	{
-		CPoint ptHeader(ptScreen);
-		m_hdrColumns.ScreenToClient(&ptHeader);
-		
-		int nCol = m_hdrColumns.HitTest(ptHeader);
-		
-		if (nCol >= 0)
-			return GetColumnID(nCol);
-	}
-	else if (PtInClientRect(ptScreen, m_lcColumns, TRUE)) // columns
-	{
-		TDC_COLUMN nColID = TDCC_NONE;
-		
-		if (HitTestColumnsItem(ptScreen, FALSE, nColID) != -1)
-			return nColID;
-	}
-
-	// else
-	return TDCC_NONE;
 }
 
 BOOL CTDLTaskCtrlBase::PtInClientRect(POINT point, HWND hWnd, BOOL bScreenCoords)

@@ -6159,16 +6159,6 @@ BOOL CToDoCtrl::HitTest(const CPoint& ptScreen, TDCHITTESTRESULT& htRes) const
 	return m_taskTree.HitTest(ptScreen, htRes);
 }
 
-// DWORD CToDoCtrl::HitTestTask(const CPoint& ptScreen, TDC_HITTESTREASON nReason) const
-// {
-// 	return 0;//m_taskTree.HitTestTask(ptScreen, nReason);
-// }
-
-// TDC_COLUMN CToDoCtrl::HitTestColumn(const CPoint& ptScreen) const
-// {
-// 	return m_taskTree.HitTestColumn(ptScreen);
-// }
-
 LRESULT CToDoCtrl::OnTDCNotifyAutoComboAddDelete(WPARAM wp, LPARAM /*lp*/)
 {
 	TDC_ATTRIBUTE nAttribID = (TDC_ATTRIBUTE)LOWORD(wp);

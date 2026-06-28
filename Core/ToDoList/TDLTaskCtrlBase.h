@@ -176,10 +176,6 @@ public:
 	int GetTaskIconIndex(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 
 	BOOL HitTest(const CPoint& ptScreen, TDCHITTESTRESULT& htRes) const;
-	TDC_COLUMN HitTestColumn(const CPoint& ptScreen) const;
-//	DWORD HitTestTask(const CPoint& ptScreen, TDC_HITTESTREASON nReason = TDCHTR_NONE) const;
-	int HitTestColumnsItem(const CPoint& pt, BOOL bClient, TDC_COLUMN& nColID, DWORD* pTaskID = NULL, LPRECT pRect = NULL) const;
-	int HitTestFileLinkColumn(const CPoint& ptScreen) const;
 
 	void GetWindowRect(CRect& rWindow) const { CWnd::GetWindowRect(rWindow); }
 	virtual void GetBoundingRect(CRect& rect) const { CWnd::GetClientRect(rect); }
@@ -343,7 +339,6 @@ protected:
 	virtual BOOL BuildColumns() = 0;
 	virtual void Release() = 0;
 	virtual DWORD GetColumnItemTaskID(int nItem) const = 0;
-//	virtual BOOL HitTestTasksTask(const CPoint& ptScreen, TDCHITTESTINFO& htRes) const = 0;
 	virtual void SetTasksImageList(HIMAGELIST hil, BOOL bState, BOOL bOn = TRUE) = 0;
 	virtual HWND Tasks() const = 0;
 	virtual GM_ITEMSTATE GetColumnItemState(int nItem) const = 0;
@@ -358,7 +353,6 @@ protected:
 	virtual POSITION GetFirstSelectedTaskPos() const;
 	virtual DWORD GetNextSelectedTaskID(POSITION& pos) const;
 
-// 	DWORD HitTestColumnsTask(const CPoint& ptScreen) const;
 	BOOL IsAlternateColumnLine(int nItem) const;
 	void SetColor(COLORREF& color, COLORREF crNew);
 	BOOL HasStyle(TDC_STYLE nStyle) const { return m_styles.IsStyleEnabled(nStyle); }
@@ -379,6 +373,8 @@ protected:
 	CPoint CalcColumnIconTopLeft(const CRect& rSubItem, int nImageSize = 16, int nImage = 0, int nCount = 1) const;
 	BOOL CalcFileIconRect(const CRect& rSubItem, CRect& rIcon, int nImage = 0) const;
  	void SetTasksWndStyle(DWORD dwStyles, BOOL bSet, BOOL bExStyle);
+	int HitTestColumnsItem(const CPoint& pt, BOOL bClient, TDC_COLUMN& nColID, DWORD* pTaskID = NULL, LPRECT pRect = NULL) const;
+	int HitTestFileLinkColumn(const CPoint& ptScreen) const;
 
 	CString GetTaskColumnText(DWORD dwTaskID, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_COLUMN nColID, BOOL bCopying = FALSE) const;
 	CString FormatTaskDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_DATE nDate) const;

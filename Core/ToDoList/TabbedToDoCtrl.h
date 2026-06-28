@@ -87,9 +87,6 @@ public:
 	BOOL SaveTaskViewToImage(const CString& sFilePath);
 	BOOL CanSaveTaskViewToImage() const;
 
-	virtual BOOL HitTest(const CPoint& ptScreen, TDCHITTESTRESULT& htRes) const;
-//	TDC_COLUMN HitTestColumn(const CPoint& ptScreen) const;
-
 	virtual BOOL IsSorting() const;
 	virtual BOOL CanSortBy(TDC_COLUMN nBy) const;
 	virtual void Resort(BOOL bAllowToggle = FALSE);
@@ -101,6 +98,7 @@ public:
 	virtual BOOL IsMultiSorting() const;
 	virtual BOOL CanMultiSort() const;
 
+	virtual BOOL HitTest(const CPoint& ptScreen, TDCHITTESTRESULT& htRes) const;
 	virtual HTREEITEM GetUpdateControlsItem() const;
 	virtual CString FormatSelectedTaskTitles(BOOL bFullPath, TCHAR cSep = 0, int nMaxTasks = -1) const;
 	virtual CString GetControlDescription(const CWnd* pCtrl) const;
@@ -251,7 +249,6 @@ protected:
 	virtual void RebuildList(BOOL bChangeGroup = FALSE, TDC_COLUMN nNewGroupBy = TDCC_NONE, const void* pContext = NULL);
 	virtual BOOL WantAddTreeTaskToList(DWORD dwTaskID, const void* pContext = NULL) const;
 	virtual BOOL GetLabelEditRect(CRect& rScreen); // screen coords
-//	virtual DWORD HitTestTask(const CPoint& ptScreen, TDC_HITTESTREASON nReason) const;
 	virtual BOOL CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const;
 
 	void UpdateSelectedTaskPath();
