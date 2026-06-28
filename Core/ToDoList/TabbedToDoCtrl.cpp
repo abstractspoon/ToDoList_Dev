@@ -2597,13 +2597,6 @@ void CTabbedToDoCtrl::SetMaximizeState(TDC_MAXSTATE nState)
 	}
 }
 
-BOOL CTabbedToDoCtrl::WantTaskContextMenu() const
-{
-	FTC_VIEW nView = GetActiveTaskView();
-
-	return (ViewSupportsNewTask(nView) || ViewHasTaskSelection(nView));
-}
-
 BOOL CTabbedToDoCtrl::GetSelectionBoundingRect(CRect& rSelection) const
 {
 	rSelection.SetRectEmpty();
@@ -4959,18 +4952,17 @@ TDC_HITTEST CTabbedToDoCtrl::HitTest(const CPoint& ptScreen, TDC_HITTESTREASON n
 
 			if (pExt)
 			{
-				IUI_HITTESTREASON nIUIReason = TDC::MapHitTestReasonToIUIReason(nReason);
-				IUI_HITTEST nHit = pExt->HitTest(ptScreen, nIUIReason);
-
-				switch (nHit)
+				if ((nReason == TDCHTR_CONTEXTMENU) && 
+					!ViewSupportsNewTask(nView) && 
+					!ViewHasTaskSelection(nView))
 				{
-				case IUI_TASKLIST:		return TDCHT_TASKLIST;
-				case IUI_TASK:			return TDCHT_TASK;
-
-				case IUI_NOWHERE:
-				default: // fall thru
-					break;
+					return TDCHT_NOWHERE;
 				}
+
+				IUI_HITTESTREASON nIUIReason = TDC::MapHitTestReasonToIUIReason(nReason);
+				IUI_HITTEST nIUIHit = pExt->HitTest(ptScreen, nIUIReason);
+
+				return TDC::MapIUIHitTestToHitTest(nIUIHit);
 			}
 		}
 		break;

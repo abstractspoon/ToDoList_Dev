@@ -401,7 +401,6 @@ public:
 	virtual CString FormatSelectedTaskTitles(BOOL bFullPath, TCHAR cSep = 0, int nMaxTasks = -1) const;
 	virtual BOOL DoIdleProcessing();
 	virtual void SetMaximizeState(TDC_MAXSTATE nState);
-	virtual BOOL WantTaskContextMenu() const { return TRUE; }
 
 	TDC_MAXSTATE GetMaximizeState() const { return m_layout.GetMaximiseState(); }
 	BOOL CanSelectTasksInHistory(BOOL bForward) const { return m_taskTree.CanSelectTasksInHistory(bForward); }
