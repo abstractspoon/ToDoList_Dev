@@ -351,7 +351,9 @@ DWORD CTDCImageList::LoadImagesFromFolder(const CString& sFolder, COLORREF crTra
 
 BOOL CTDCImageList::LoadImage(const CString& sImageFile, COLORREF crTransparent, CTDCImageList* pImages, int& nNextNameIndex)
 {
-	switch (CEnBitmap::GetFileType(sImageFile))
+	EB_IMAGETYPE nType = CEnBitmap::GetFileType(sImageFile);
+
+	switch (nType)
 	{
 	case FT_ICO:
 		{
@@ -362,47 +364,18 @@ BOOL CTDCImageList::LoadImage(const CString& sImageFile, COLORREF crTransparent,
 				if (pImages == NULL)
 					return TRUE;
 
-				return AddImage(TDCIMAGEINFO(_T(""), sImageFile), icon, pImages, nNextNameIndex);
+				return AddImage(TDCIMAGEINFO(sImageFile, CSize(16, 16)), icon, pImages, nNextNameIndex);
 			}
 		}
 		break;
 
 	case FT_PNG:
-		{
-			CIcon icon(CEnBitmapEx::LoadImageFileAsIcon(sImageFile));
-			
-			if (icon.IsValid())
-			{
-				if (pImages == NULL)
-					return TRUE;
-	
-				// We let the image list do the resizing
-				return AddImage(TDCIMAGEINFO(sImageFile, icon.GetSize()), icon, pImages, nNextNameIndex);
-			}
-		}
-		break;
-
-	case FT_BMP:
-		{
-			CEnBitmapEx image;
-
-			if (image.LoadImage(sImageFile, crTransparent))
-			{
-				CSize sizeOrg = image.GetSize();
-				image.ResizeImage(16, 16, crTransparent);
-
-				if (pImages == NULL)
-					return TRUE;
-
-				image.RemapSysColors();
-				return AddImage(TDCIMAGEINFO(sImageFile, sizeOrg), image, crTransparent, pImages, nNextNameIndex);
-			}
-		}
-		break;
-
 	case FT_GIF:
 	case FT_JPG:
+	case FT_BMP:
 		{
+			// We don't use CEnBitmapEx::LoadImageFileAsIcon here
+			// because we need to save off the original size
 			CEnBitmapEx image;
 
 			if (image.LoadImage(sImageFile, crTransparent))
