@@ -3912,6 +3912,9 @@ DWORD CToDoCtrl::SetStyle(TDC_STYLE nStyle, BOOL bEnable)
 
 int CToDoCtrl::OnToolHitTest(CPoint point, TOOLINFO * pTI) const
 {
+	if (!HasStyle(TDCS_SHOWIMAGETIPS) && !HasStyle(TDCS_SHOWINFOTIPS))
+		return 0;
+
 	if (IsTaskLabelEditing())
 		return 0;
 
@@ -3923,63 +3926,54 @@ int CToDoCtrl::OnToolHitTest(CPoint point, TOOLINFO * pTI) const
 	if (nMaxState == TDCMS_MAXCOMMENTS)
 		return 0;
 
+	TDCHITTESTRESULT htRes;
 	CWnd::ClientToScreen(&point);
 
-	DWORD dwTaskID = 0;
+	if (!HitTest(point, htRes) || (htRes.dwTaskID == 0))
+		return 0;
+
 	CString sTip;
 
-	if (HasStyle(TDCS_SHOWIMAGETIPS))
+	if (HasStyle(TDCS_SHOWIMAGETIPS) && (htRes.nColumnID == TDCC_ICON))
 	{
-		dwTaskID = HitTestTask(point, TDCHTR_IMAGETIP);
-
-		if (dwTaskID)
-		{
-			TDCIMAGEINFO info;
+		TDCIMAGEINFO info;
 		
-			if (!m_ilTaskIcons.GetImageInfo(m_data.GetTaskIcon(dwTaskID), info))
-				return 0;
+		if (!m_ilTaskIcons.GetImageInfo(m_data.GetTaskIcon(htRes.dwTaskID), info))
+			return 0;
 
-			if (info.sFilePath.IsEmpty())
-				return 0;
+		if (info.sFilePath.IsEmpty())
+			return 0;
 
-			if ((info.sizeImage.cx == 16) || (info.sizeImage.cy == 16))
-				return 0;
+		if ((info.sizeImage.cx == 16) || (info.sizeImage.cy == 16))
+			return 0;
 		
-			sTip = info.sFilePath;
-			dwTaskID += m_dwNextUniqueID; // so it's distinguishable from a text infotip of the same task
-		}
+		sTip = info.sFilePath;
+		htRes.dwTaskID += m_dwNextUniqueID; // so it's distinguishable from a text infotip of the same task
+	}
+	else if (HasStyle(TDCS_SHOWINFOTIPS) && (htRes.nColumnID == TDCC_CLIENT))
+	{
+		CTDCAttributeMap mapAttrib;
+		TDC::MapColumnsToAttributes(m_visColEdit.GetVisibleColumns(), mapAttrib);
+
+		// Always add path for context
+		mapAttrib.Add(TDCA_PATH);
+
+		if (nMaxState == TDCMS_NORMAL)
+			mapAttrib.Add(TDCA_COMMENTS);
+
+		sTip = m_infoTip.FormatTip(htRes.dwTaskID,
+								   mapAttrib,
+								   m_nMaxInfotipCommentsLength,
+								   m_sCompletionStatus);
 	}
 
-	if (!dwTaskID && HasStyle(TDCS_SHOWINFOTIPS))
-	{
-		dwTaskID = HitTestTask(point, TDCHTR_INFOTIP);
-
-		if (dwTaskID)
-		{
-			CTDCAttributeMap mapAttrib;
-			TDC::MapColumnsToAttributes(m_visColEdit.GetVisibleColumns(), mapAttrib);
-
-			// Always add path for context
-			mapAttrib.Add(TDCA_PATH);
-
-			if (nMaxState == TDCMS_NORMAL)
-				mapAttrib.Add(TDCA_COMMENTS);
-
-			sTip = m_infoTip.FormatTip(dwTaskID,
-									   mapAttrib,
-									   m_nMaxInfotipCommentsLength,
-									   m_sCompletionStatus);
-		}
-	}
-	ASSERT((sTip.IsEmpty() && !dwTaskID) || (!sTip.IsEmpty() && dwTaskID));
-
-	if (!dwTaskID)
+	if (sTip.IsEmpty())
 		return 0;
 
 	HWND hwndHit = CDialogHelper::GetWindowFromPoint(GetSafeHwnd(), point);
 	ASSERT(hwndHit);
 
-	return CToolTipCtrlEx::SetToolInfo(*pTI, hwndHit, sTip, dwTaskID);
+	return CToolTipCtrlEx::SetToolInfo(*pTI, hwndHit, sTip, htRes.dwTaskID);
 }
 
 void CToDoCtrl::SetReadonly(BOOL bReadOnly)
@@ -6160,20 +6154,20 @@ void CToDoCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 	CRuntimeDlg::OnContextMenu(pWnd, point);
 }
 
-TDC_HITTEST CToDoCtrl::HitTest(const CPoint& ptScreen, TDC_HITTESTREASON /*nReason*/) const
+BOOL CToDoCtrl::HitTest(const CPoint& ptScreen, TDCHITTESTRESULT& htRes) const
 {
-	return m_taskTree.HitTest(ptScreen);
+	return m_taskTree.HitTest(ptScreen, htRes);
 }
 
-DWORD CToDoCtrl::HitTestTask(const CPoint& ptScreen, TDC_HITTESTREASON nReason) const
-{
-	return m_taskTree.HitTestTask(ptScreen, nReason);
-}
+// DWORD CToDoCtrl::HitTestTask(const CPoint& ptScreen, TDC_HITTESTREASON nReason) const
+// {
+// 	return 0;//m_taskTree.HitTestTask(ptScreen, nReason);
+// }
 
-TDC_COLUMN CToDoCtrl::HitTestColumn(const CPoint& ptScreen) const
-{
-	return m_taskTree.HitTestColumn(ptScreen);
-}
+// TDC_COLUMN CToDoCtrl::HitTestColumn(const CPoint& ptScreen) const
+// {
+// 	return m_taskTree.HitTestColumn(ptScreen);
+// }
 
 LRESULT CToDoCtrl::OnTDCNotifyAutoComboAddDelete(WPARAM wp, LPARAM /*lp*/)
 {

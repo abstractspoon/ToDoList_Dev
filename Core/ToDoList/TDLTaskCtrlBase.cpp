@@ -1560,39 +1560,39 @@ int CTDLTaskCtrlBase::CompareTasks(LPARAM lParam1,
 									flags.WantIncludeTime(sort.nColumnID));
 }
 
-DWORD CTDLTaskCtrlBase::HitTestTask(const CPoint& ptScreen, TDC_HITTESTREASON nReason) const
-{
-	DWORD dwTaskID = HitTestTasksTask(ptScreen, nReason); // Title column only;
-
-	if (dwTaskID == 0)
-	{
-		switch (nReason)
-		{
-		case TDCHTR_INFOTIP:
-			break;
-
-		case TDCHTR_IMAGETIP:
-			if (IsColumnShowing(TDCC_ICON))
-			{
-				TDC_COLUMN nColID = TDCC_NONE;
-
-				if (HitTestColumnsItem(ptScreen, FALSE, nColID, &dwTaskID) != -1)
-				{
-					if (nColID != TDCC_ICON)
-						dwTaskID = 0;
-				}
-			}
-			break;
-
-		case TDCHTR_NONE:
-		case TDCHTR_CONTEXTMENU:
-			dwTaskID = HitTestColumnsTask(ptScreen);
-			break;
-		}
-	}
-	
-	return dwTaskID;
-}
+// DWORD CTDLTaskCtrlBase::HitTestTask(const CPoint& ptScreen, TDC_HITTESTREASON nReason) const
+// {
+// 	DWORD dwTaskID = HitTestTasksTask(ptScreen, nReason); // Title column only;
+// 
+// 	if (dwTaskID == 0)
+// 	{
+// 		switch (nReason)
+// 		{
+// 		case TDCHTR_INFOTIP:
+// 			break;
+// 
+// 		case TDCHTR_IMAGETIP:
+// 			if (IsColumnShowing(TDCC_ICON))
+// 			{
+// 				TDC_COLUMN nColID = TDCC_NONE;
+// 
+// 				if (HitTestColumnsItem(ptScreen, FALSE, nColID, &dwTaskID) != -1)
+// 				{
+// 					if (nColID != TDCC_ICON)
+// 						dwTaskID = 0;
+// 				}
+// 			}
+// 			break;
+// 
+// 		case TDCHTR_NONE:
+// 		case TDCHTR_CONTEXTMENU:
+// 			dwTaskID = HitTestColumnsTask(ptScreen);
+// 			break;
+// 		}
+// 	}
+// 	
+// 	return dwTaskID;
+// }
 
 int CTDLTaskCtrlBase::HitTestColumnsItem(const CPoint& pt, BOOL bClient, TDC_COLUMN& nColID, DWORD* pTaskID, LPRECT pRect) const
 {
@@ -1617,9 +1617,7 @@ int CTDLTaskCtrlBase::HitTestColumnsItem(const CPoint& pt, BOOL bClient, TDC_COL
 	}
 
 	if (pRect)
-	{
 		ListView_GetSubItemRect(m_lcColumns, lvHit.iItem, lvHit.iSubItem, LVIR_BOUNDS, pRect);
-	}
 		
 	return lvHit.iItem;
 }
@@ -1671,38 +1669,72 @@ int CTDLTaskCtrlBase::HitTestFileLinkColumn(const CPoint& ptScreen) const
 	return -1;
 }
 
-TDC_HITTEST CTDLTaskCtrlBase::HitTest(const CPoint& ptScreen) const
+BOOL CTDLTaskCtrlBase::HitTest(const CPoint& ptScreen, TDCHITTESTRESULT& htRes) const
 {
 	// Tasks header
 	if (PtInClientRect(ptScreen, m_hdrTasks, TRUE))
-		return TDCHT_COLUMNHEADER;
+	{
+		htRes.nResult = TDCHT_COLUMNHEADER;
+		htRes.nColumnID = TDCC_CLIENT;
+
+		return TRUE;
+	}
 
 	// Columns header
 	if (PtInClientRect(ptScreen, m_hdrColumns, TRUE)) // column header
-		return TDCHT_COLUMNHEADER;
+	{
+		CPoint ptHeader(ptScreen);
+		m_hdrColumns.ScreenToClient(&ptHeader);
 
-	// Rest of this control
-	if (PtInClientRect(ptScreen, *this, TRUE))
-		return (HitTestTask(ptScreen, TDCHTR_NONE) ? TDCHT_TASK : TDCHT_TASKLIST);
-	
-	// all else
-	return TDCHT_NOWHERE;
+		int nCol = m_hdrColumns.HitTest(ptHeader);
+
+		if (nCol < 0)
+			return FALSE;
+
+		htRes.nResult = TDCHT_COLUMNHEADER;
+		htRes.nColumnID = GetColumnID(nCol);
+
+		return TRUE;
+	}
+
+	// Columns
+	if (PtInClientRect(ptScreen, m_lcColumns, TRUE))
+	{
+		TDC_COLUMN nColID = TDCC_NONE;
+		DWORD dwTaskID = 0;
+
+		if (HitTestColumnsItem(ptScreen, FALSE, nColID, &dwTaskID) != -1)
+		{
+			htRes.nResult = TDCHT_TASK;
+			htRes.dwTaskID = dwTaskID;
+			htRes.nColumnID = nColID;
+		}
+		else
+		{
+			htRes.nResult = TDCHT_TASKLIST;
+		}
+
+		return TRUE;
+	}
+
+	// 'Tasks' handled by derived classes
+	return FALSE;
 }
 
-DWORD CTDLTaskCtrlBase::HitTestColumnsTask(const CPoint& ptScreen) const
-{
-	// see if we hit a task in the list
-	CPoint ptClient(ptScreen);
-	m_lcColumns.ScreenToClient(&ptClient);
-	
-	int nItem = m_lcColumns.HitTest(ptClient);
-
-	if (nItem != -1)
-		return GetColumnItemTaskID(nItem);
-
-	// all else
-	return 0;
-}
+// DWORD CTDLTaskCtrlBase::HitTestColumnsTask(const CPoint& ptScreen) const
+// {
+// 	// see if we hit a task in the list
+// 	CPoint ptClient(ptScreen);
+// 	m_lcColumns.ScreenToClient(&ptClient);
+// 	
+// 	int nItem = m_lcColumns.HitTest(ptClient);
+// 
+// 	if (nItem != -1)
+// 		return GetColumnItemTaskID(nItem);
+// 
+// 	// all else
+// 	return 0;
+// }
 
 TDC_COLUMN CTDLTaskCtrlBase::HitTestColumn(const CPoint& ptScreen) const
 {

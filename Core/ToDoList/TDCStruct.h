@@ -17,6 +17,18 @@
 
 //////////////////////////////////////////////////////////////////////
 
+struct TDCHITTESTRESULT
+{
+	TDCHITTESTRESULT() : nResult(TDCHT_NOWHERE), dwTaskID(0), nColumnID(TDCC_NONE) {}
+
+	TDC_HITTEST nResult;
+	DWORD dwTaskID;
+	CString sFileLinkPath;
+	TDC_COLUMN nColumnID;
+};
+
+//////////////////////////////////////////////////////////////////////
+
 struct TDCDATEOFFSET
 {
 	TDCDATEOFFSET(int amount = 0, TDC_UNITS units = TDCU_NULL);

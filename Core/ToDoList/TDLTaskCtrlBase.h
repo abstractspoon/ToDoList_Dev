@@ -175,9 +175,9 @@ public:
 	int GetTaskIconIndex(DWORD dwTaskID) const;
 	int GetTaskIconIndex(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 
-	TDC_HITTEST HitTest(const CPoint& ptScreen) const;
+	BOOL HitTest(const CPoint& ptScreen, TDCHITTESTRESULT& htRes) const;
 	TDC_COLUMN HitTestColumn(const CPoint& ptScreen) const;
-	DWORD HitTestTask(const CPoint& ptScreen, TDC_HITTESTREASON nReason = TDCHTR_NONE) const;
+//	DWORD HitTestTask(const CPoint& ptScreen, TDC_HITTESTREASON nReason = TDCHTR_NONE) const;
 	int HitTestColumnsItem(const CPoint& pt, BOOL bClient, TDC_COLUMN& nColID, DWORD* pTaskID = NULL, LPRECT pRect = NULL) const;
 	int HitTestFileLinkColumn(const CPoint& ptScreen) const;
 
@@ -343,7 +343,7 @@ protected:
 	virtual BOOL BuildColumns() = 0;
 	virtual void Release() = 0;
 	virtual DWORD GetColumnItemTaskID(int nItem) const = 0;
-	virtual DWORD HitTestTasksTask(const CPoint& ptScreen, TDC_HITTESTREASON nReason) const = 0;
+//	virtual BOOL HitTestTasksTask(const CPoint& ptScreen, TDCHITTESTINFO& htRes) const = 0;
 	virtual void SetTasksImageList(HIMAGELIST hil, BOOL bState, BOOL bOn = TRUE) = 0;
 	virtual HWND Tasks() const = 0;
 	virtual GM_ITEMSTATE GetColumnItemState(int nItem) const = 0;
@@ -358,7 +358,7 @@ protected:
 	virtual POSITION GetFirstSelectedTaskPos() const;
 	virtual DWORD GetNextSelectedTaskID(POSITION& pos) const;
 
-	DWORD HitTestColumnsTask(const CPoint& ptScreen) const;
+// 	DWORD HitTestColumnsTask(const CPoint& ptScreen) const;
 	BOOL IsAlternateColumnLine(int nItem) const;
 	void SetColor(COLORREF& color, COLORREF crNew);
 	BOOL HasStyle(TDC_STYLE nStyle) const { return m_styles.IsStyleEnabled(nStyle); }

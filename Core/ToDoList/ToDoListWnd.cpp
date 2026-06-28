@@ -4059,38 +4059,41 @@ void CToDoListWnd::OnContextMenu(CWnd* pWnd, CPoint point)
 			}
 		}
 
-		TDC_HITTEST nHit = tdc.HitTest(point, TDCHTR_CONTEXTMENU);
-
-		switch (nHit)
+		TDCHITTESTRESULT htRes;
+		
+		if (tdc.HitTest(point, htRes))
 		{
-		case TDCHT_NOWHERE:
-			break;
-
-		case TDCHT_TASKLIST:
-			if (!tdc.GetSelectedTaskCount())
+			switch (htRes.nResult)
 			{
-				nMenuID = MM_TASKCONTEXTNOSEL;
-			}
-			else
-			{
-				nMenuID = MM_TASKCONTEXT;
-				nColID = tdc.HitTestColumn(point);
-			}
-			break;
+			case TDCHT_NOWHERE:
+				break;
 
-		case TDCHT_TASK:
-			{
-				ASSERT(tdc.GetSelectedTaskCount());
+			case TDCHT_TASKLIST:
+				if (!tdc.GetSelectedTaskCount())
+				{
+					nMenuID = MM_TASKCONTEXTNOSEL;
+				}
+				else
+				{
+					nMenuID = MM_TASKCONTEXT;
+					nColID = htRes.nColumnID;
+				}
+				break;
 
-				nMenuID = MM_TASKCONTEXT;
-				nColID = tdc.HitTestColumn(point);
+			case TDCHT_TASK:
+				{
+					ASSERT(tdc.GetSelectedTaskCount());
+
+					nMenuID = MM_TASKCONTEXT;
+					nColID = htRes.nColumnID;
+				}
+				break;
+
+			case TDCHT_COLUMNHEADER:
+				nMenuID = MM_HEADERCONTEXT;
+				nColID = htRes.nColumnID;
+				break;
 			}
-			break;
-
-		case TDCHT_COLUMNHEADER:
-			nMenuID = MM_HEADERCONTEXT;
-			nColID = tdc.HitTestColumn(point);
-			break;
 		}
 	}
 	

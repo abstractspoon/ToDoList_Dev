@@ -186,22 +186,40 @@ BOOL CTDLTaskTreeCtrl::BuildColumns()
 	return CTDLTaskCtrlBase::BuildColumns();
 }
 
-DWORD CTDLTaskTreeCtrl::HitTestTasksTask(const CPoint& ptScreen, TDC_HITTESTREASON nReason) const
+BOOL CTDLTaskTreeCtrl::HitTest(const CPoint& ptScreen, TDCHITTESTRESULT& htRes) const
 {
-	CPoint ptClient(ptScreen);
-	m_tcTasks.ScreenToClient(&ptClient);
+	if (CTDLTaskCtrlBase::HitTest(ptScreen, htRes))
+		return TRUE;
 
-	UINT nFlags = 0;
-	HTREEITEM hti = HitTestItem(ptClient, &nFlags);
+	// Hit test the 'Tasks'
+	if (PtInClientRect(ptScreen, m_tcTasks, TRUE))
+	{
+		CPoint ptClient(ptScreen);
+		m_tcTasks.ScreenToClient(&ptClient);
 
-	if (!hti)
-		return 0;
+		UINT nFlags = 0;
+		HTREEITEM hti = m_tcTasks.HitTest(ptClient, &nFlags);
 
-	if ((nReason == TDCHTR_IMAGETIP) && !(nFlags & TVHT_ONITEMICON))
-		return 0;
+		if (hti == NULL)
+		{
+			htRes.nResult = TDCHT_TASKLIST;
+			htRes.nColumnID = TDCC_CLIENT;
+		}
+		else
+		{
+			htRes.nResult = TDCHT_TASK;
+			htRes.dwTaskID = GetTaskID(hti);
 
-	// all else
-	return GetTaskID(hti);
+			if (nFlags & TVHT_ONITEMICON)
+				htRes.nColumnID = TDCC_ICON;
+			else
+				htRes.nColumnID = TDCC_CLIENT;
+		}
+
+		return TRUE;
+	}
+
+	return FALSE;
 }
 
 void CTDLTaskTreeCtrl::Release() 

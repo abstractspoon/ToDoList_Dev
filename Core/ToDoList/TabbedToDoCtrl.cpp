@@ -2888,6 +2888,7 @@ void CTabbedToDoCtrl::SetEditTitleTaskID(DWORD dwTaskID)
 	m_taskList.SetEditTitleTaskID(dwTaskID);
 }
 
+/*
 DWORD CTabbedToDoCtrl::HitTestTask(const CPoint& ptScreen, TDC_HITTESTREASON nReason) const
 {
 	FTC_VIEW nView = GetActiveTaskView();
@@ -2940,6 +2941,7 @@ DWORD CTabbedToDoCtrl::HitTestTask(const CPoint& ptScreen, TDC_HITTESTREASON nRe
 
 	return 0;
 }
+*/
 
 DWORD CTabbedToDoCtrl::SetStyle(TDC_STYLE nStyle, BOOL bEnable)
 {
@@ -4917,7 +4919,7 @@ void CTabbedToDoCtrl::OnListClick(NMHDR* pNMHDR, LRESULT* pResult)
 	*pResult = 0;
 }
 
-TDC_HITTEST CTabbedToDoCtrl::HitTest(const CPoint& ptScreen, TDC_HITTESTREASON nReason) const
+BOOL CTabbedToDoCtrl::HitTest(const CPoint& ptScreen, TDCHITTESTRESULT& htRes) const
 {
 	FTC_VIEW nView = GetActiveTaskView();
 
@@ -4925,10 +4927,10 @@ TDC_HITTEST CTabbedToDoCtrl::HitTest(const CPoint& ptScreen, TDC_HITTESTREASON n
 	{
 	case FTCV_TASKTREE:
 	case FTCV_UNSET:
-		return CToDoCtrl::HitTest(ptScreen, nReason);
+		return CToDoCtrl::HitTest(ptScreen, htRes);
 
 	case FTCV_TASKLIST:
-		return m_taskList.HitTest(ptScreen);
+		return m_taskList.HitTest(ptScreen, htRes);
 
 	case FTCV_UIEXTENSION1:
 	case FTCV_UIEXTENSION2:
@@ -4952,17 +4954,17 @@ TDC_HITTEST CTabbedToDoCtrl::HitTest(const CPoint& ptScreen, TDC_HITTESTREASON n
 
 			if (pExt)
 			{
-				if ((nReason == TDCHTR_CONTEXTMENU) && 
-					!ViewSupportsNewTask(nView) && 
-					!ViewHasTaskSelection(nView))
-				{
-					return TDCHT_NOWHERE;
-				}
-
-				IUI_HITTESTREASON nIUIReason = TDC::MapHitTestReasonToIUIReason(nReason);
-				IUI_HITTEST nIUIHit = pExt->HitTest(ptScreen, nIUIReason);
-
-				return TDC::MapIUIHitTestToHitTest(nIUIHit);
+// 				if ((nReason == TDCHTR_CONTEXTMENU) && 
+// 					!ViewSupportsNewTask(nView) && 
+// 					!ViewHasTaskSelection(nView))
+// 				{
+// 					return TDCHT_NOWHERE;
+// 				}
+// 
+// 				IUI_HITTESTREASON nIUIReason = TDC::MapHitTestReasonToIUIReason(nReason);
+// 				IUI_HITTEST nIUIHit = pExt->HitTest(ptScreen, nIUIReason);
+// 
+// 				return TDC::MapIUIHitTestToHitTest(nIUIHit);
 			}
 		}
 		break;
@@ -4975,6 +4977,7 @@ TDC_HITTEST CTabbedToDoCtrl::HitTest(const CPoint& ptScreen, TDC_HITTESTREASON n
 	return TDCHT_NOWHERE;
 }
 
+/*
 TDC_COLUMN CTabbedToDoCtrl::HitTestColumn(const CPoint& ptScreen) const
 {
 	FTC_VIEW nView = GetActiveTaskView();
@@ -5011,6 +5014,7 @@ TDC_COLUMN CTabbedToDoCtrl::HitTestColumn(const CPoint& ptScreen) const
 	}
 	return TDCC_NONE;
 }
+*/
 
 int CTabbedToDoCtrl::GetSortableColumns(CTDCColumnIDMap& mapColIDs) const
 {

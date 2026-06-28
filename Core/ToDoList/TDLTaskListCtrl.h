@@ -70,7 +70,6 @@ public:
 	inline int GetSelectedCount() const { return m_lcTasks.GetSelectedCount(); }
 	inline int GetItemCount() const { return m_lcTasks.GetItemCount(); }
 	inline int GetVisibleItemCount() const { return m_lcTasks.GetItemCount(); }
-	inline int HitTestItem(POINT point, UINT* pFlags = NULL) const { return m_lcTasks.HitTest(point, pFlags); }
 
 	DWORD GetTaskID(int nItem) const;
 	DWORD GetSelectedTaskID() const;
@@ -120,6 +119,7 @@ public:
 	void OnBuildComplete();
 	void Resort(BOOL bAllowToggle = FALSE);
 	BOOL ModsNeedResort(const CTDCAttributeMap& attribIDs) const;
+	BOOL HitTest(const CPoint& ptScreen, TDCHITTESTRESULT& htRes) const;
 
 protected:
 	CListCtrl m_lcTasks;
@@ -164,7 +164,6 @@ protected:
 	BOOL BuildColumns();
 	void Release();
 	DWORD GetColumnItemTaskID(int nItem) const;
-	DWORD HitTestTasksTask(const CPoint& ptScreen, TDC_HITTESTREASON nReason) const;
 	void SetTasksImageList(HIMAGELIST hil, BOOL bState, BOOL bOn = TRUE);
 	HWND Tasks() const { return m_lcTasks; }
 	GM_ITEMSTATE GetColumnItemState(int nItem) const;
