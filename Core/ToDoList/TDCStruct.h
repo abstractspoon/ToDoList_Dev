@@ -23,7 +23,7 @@ struct TDCHITTESTRESULT
 
 	TDC_HITTEST nResult;
 	DWORD dwTaskID;
-	CString sFileLinkPath;
+	//CString sFileLinkPath;
 	TDC_COLUMN nColumnID;
 };
 
