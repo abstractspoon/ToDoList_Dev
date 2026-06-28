@@ -54,7 +54,6 @@ public:
 
    bool SelectTask(DWORD dwTaskID, bool bTaskLink);
    bool SelectTasks(const DWORD* pdwTaskIDs, int nTaskCount);
-   bool SupportsTaskSelection() const { return false; }
 
    void UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate);
    bool WantTaskUpdate(TDC_ATTRIBUTE nAttribID) const;
