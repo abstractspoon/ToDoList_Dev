@@ -236,7 +236,7 @@ void CToolTipCtrlEx::FilterToolTipMessage(MSG* pMsg, BOOL bSendHitTestMessage)
  						SendMessage(TTM_TRACKACTIVATE, TRUE, (LPARAM)&ti);
 
 					// Hook the hit tested window (which may be different from pOwner)
-					// so we can handle the TTN_SHOW message for 'fitting' the tip
+					// so we can handle the TTN_SHOW message for positioning the tip
 					m_scTool.HookWindow(ti.hwnd, this);
 
 					// bring the tooltip window above other popup windows
@@ -295,6 +295,10 @@ LRESULT CToolTipCtrlEx::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM 
 			{
 			case TTN_SHOW:
 				{
+					// Unhook at first opportunity
+					m_scTool.HookWindow(NULL);
+
+					// Set tip size and location
 					CRect rPos;
 					GetWindowRect(rPos);
 
