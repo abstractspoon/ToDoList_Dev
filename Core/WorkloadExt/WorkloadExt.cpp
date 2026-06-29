@@ -30,7 +30,7 @@ DLL_DECLSPEC IUIExtension* CreateUIExtensionInterface()
 	return &theApp;
 }
 
-DLL_DECLSPEC int GetInterfaceVersion() 
+DLL_DECLSPEC int GetInterfaceVersion()
 { 
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	

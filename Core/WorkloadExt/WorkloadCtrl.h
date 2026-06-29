@@ -41,7 +41,7 @@ public:
 	BOOL HandleEraseBkgnd(CDC* pDC);
 
 	void UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate);
-	bool PrepareNewTask(ITaskList* pTask) const;
+	BOOL PrepareNewTask(ITaskList* pTask) const;
 
 	BOOL SelectTask(DWORD dwTaskID);
 	BOOL SelectTasks(const CDWordArray& aTaskIDs);
@@ -63,7 +63,7 @@ public:
 
 	BOOL CanMoveSelectedTask(const IUITASKMOVE& move) const;
 	BOOL MoveSelectedTask(const IUITASKMOVE& move);
-	DWORD HitTestTask(const CPoint& ptScreen, IUI_HITTESTREASON nReason) const;
+	BOOL HitTest(const CPoint& ptScreen, IUIHITTESTRESULT& htRes) const;
 
 	void SetSortByAllocTo(LPCTSTR szAllocTo);
 	void Sort(WLC_COLUMNID nBy, BOOL bAscending);
@@ -168,7 +168,6 @@ protected:
 	BOOL GetTreeItemRect(HTREEITEM hti, int nCol, CRect& rItem, BOOL bText = FALSE) const;
 
 	WORKLOADITEM* GetWorkloadItem(DWORD dwTaskID) const;
-	DWORD TreeHitTestTask(const CPoint& point, BOOL bScreen, IUI_HITTESTREASON nReason) const;
 	BOOL SelectTask(HTREEITEM hti, const IUISELECTTASK& select, BOOL bForwards);
 
 	DWORD GetTaskID(HTREEITEM hti) const;

@@ -2808,7 +2808,7 @@ int CWorkloadCtrl::CompareTasks(DWORD dwTaskID1, DWORD dwTaskID2, const WORKLOAD
 	return (col.bAscending ? nCompare : -nCompare);
 }
 
-bool CWorkloadCtrl::PrepareNewTask(ITaskList* pTaskList) const
+BOOL CWorkloadCtrl::PrepareNewTask(ITaskList* pTaskList) const
 {
 	ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pTaskList, IID_TASKLISTBASE);
 
@@ -2834,47 +2834,43 @@ bool CWorkloadCtrl::PrepareNewTask(ITaskList* pTaskList) const
 	return true;
 }
 
-DWORD CWorkloadCtrl::HitTestTask(const CPoint& ptScreen, IUI_HITTESTREASON nReason) const
+BOOL CWorkloadCtrl::HitTest(const CPoint& ptScreen, IUIHITTESTRESULT& htRes) const
 {
-	DWORD dwTaskID = TreeHitTestTask(ptScreen, TRUE, nReason);
+	if (PointInHeader(ptScreen))
+		return FALSE;
 
-	if (!dwTaskID)
+	UINT nFlags = 0;
+	int nCol = 0;
+
+	HTREEITEM htiHit = TreeHitTestItem(ptScreen, TRUE, nCol, &nFlags);
+
+	if (htiHit)
 	{
-		switch (nReason)
+		htRes.dwTaskID = GetTaskID(htiHit);
+
+		if (nCol == WLCC_TITLE)
 		{
-		case IUI_CONTEXTMENU:
-		case IUI_NONE:
-			dwTaskID = GetTaskID(ListHitTestItem(ptScreen, TRUE));
-			break;
+			if (nFlags & TVHT_ONITEMICON)
+				htRes.nResult = IUI_TASKICON;
+			else
+				htRes.nResult = IUI_TASKTITLE;
+		}
+		else
+		{
+			htRes.nResult = IUI_TASK;
 		}
 	}
-
-	return dwTaskID;
-}
-
-DWORD CWorkloadCtrl::TreeHitTestTask(const CPoint& point, BOOL bScreen, IUI_HITTESTREASON nReason) const
-{
-	UINT nFlags = 0;
-	HTREEITEM htiHit = TreeHitTestItem(point, bScreen, &nFlags);
-
-	switch (nReason)
+	else
 	{
-	case IUI_INFOTIP:
-		if (htiHit && !(nFlags & TVHT_ONITEMLABEL))
-			htiHit = NULL;
-		break;
+		htRes.dwTaskID = GetTaskID(ListHitTestItem(ptScreen, TRUE));
 
-	case IUI_IMAGETIP:
-		if (htiHit && !(nFlags & TVHT_ONITEMICON))
-			htiHit = NULL;
-		break;
-
-	case IUI_CONTEXTMENU:
-	case IUI_NONE:
-		break;
+		if (htRes.dwTaskID)
+			htRes.nResult = IUI_TASK;
+		else
+			htRes.nResult = IUI_TASKLIST;
 	}
 
-	return (htiHit ? GetTaskID(htiHit) : 0L);
+	return TRUE;
 }
 
 DWORD CWorkloadCtrl::GetTaskID(HTREEITEM htiFrom) const
