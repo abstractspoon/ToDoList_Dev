@@ -95,8 +95,9 @@ namespace Abstractspoon
 				{
 					Nowhere,
 					Tasklist,
-					Deprecated, // ColumnHeader
 					Task,
+					TaskTitle,
+					TaskIcon
 				};
 
 				// -----------------------------------------------
@@ -121,7 +122,6 @@ namespace Abstractspoon
 
 				static UpdateType MapUpdateType(IUI_UPDATETYPE type);
 				static IUI_HITTEST MapHitTestResult(HitTestResult result);
-				static HitTestReason MapHitTestReason(IUI_HITTESTREASON reason);
 
 				static bool MapGetTaskCmd(IUI_APPCOMMAND nCmd, GetTask% getTask);
 				static bool MapSelectTaskCmd(IUI_APPCOMMAND nCmd, SelectTask% selectTask);
@@ -377,7 +377,16 @@ namespace Abstractspoon
 				};
 
 				// -----------------------------------------------
+
+				ref class UIHitTestResult
+				{
+				public:
+					HitTestResult result = HitTestResult::Nowhere;
+					UInt32 taskId = 0;
+				};
 			};
+
+			// -----------------------------------------------
 
 			public interface class IUIExtension
 			{
@@ -393,10 +402,9 @@ namespace Abstractspoon
 
 				bool ProcessMessage(IntPtr hwnd, UInt32 message, UInt32 wParam, UInt32 lParam, UInt32 time, Int32 xPos, Int32 yPos);
 				bool DoIdleProcessing();
-				bool GetLabelEditRect(Int32% left, Int32% top, Int32% right, Int32% bottom); // screen coordinates
 
-				UIExtension::HitTestResult HitTest(Int32 xPos, Int32 yPos, UIExtension::HitTestReason reason);
-				UInt32 HitTestTask(Int32 xPos, Int32 yPos, UIExtension::HitTestReason reason);
+				bool GetLabelEditRect(Int32% left, Int32% top, Int32% right, Int32% bottom); // screen coordinates
+				bool HitTest(Int32 xPos, Int32 yPos, UIExtension::UIHitTestResult^ result);
 
 				void SetUITheme(UITheme^ theme);
 				void SetReadOnly(bool bReadOnly);
