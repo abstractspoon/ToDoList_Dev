@@ -40,7 +40,7 @@ public:
 	BOOL Create(DWORD dwStyle, const RECT &rect, CWnd* pParentWnd, UINT nID);
 
 	void UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate);
-	bool PrepareNewTask(ITaskList* pTask) const;
+	BOOL PrepareNewTask(ITaskList* pTask) const;
 
 	int GetSelectedTaskIDs(CDWordArray& aTaskIDs) const;
 	BOOL SelectTasks(const CDWordArray& aTaskIDs);
@@ -49,8 +49,7 @@ public:
 	BOOL SelectAllInSelectedColumn();
 
 	DWORD GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const;
-	DWORD HitTestTask(const CPoint& ptScreen, BOOL bIcon) const;
-	int HitTestColumn(const CPoint& ptScreen, BOOL& bHeader) const;
+	BOOL HitTest(const CPoint& ptScreen, IUIHITTESTRESULT& htRes) const;
 	void ScrollToSelectedTask();
 
 	BOOL IsTaskLocked(DWORD dwTaskID) const { return m_data.IsLocked(dwTaskID); }
@@ -211,6 +210,7 @@ protected:
 	void SelectNextTask(LPCTSTR szStartingWith);
 	int MapHeaderItemToColumn(int nItem) const;
 	int CalcMinRequiredColumnsWidth() const;
+	int HitTestColumn(const CPoint& ptScreen, BOOL& bHeader) const;
 
 	inline BOOL UsingFixedColumns() const { return m_aFixedColDefs.GetSize(); }
 	inline BOOL UsingDynamicColumns() const { return !UsingFixedColumns(); }

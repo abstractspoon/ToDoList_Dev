@@ -537,20 +537,15 @@ CKanbanColumnCtrl* CKanbanColumnCtrlArray::HitTest(const CPoint& ptScreen, HTREE
 	return NULL;
 }
 
-DWORD CKanbanColumnCtrlArray::HitTestTask(const CPoint& ptScreen, BOOL bIcon) const
+DWORD CKanbanColumnCtrlArray::HitTestTask(const CPoint& ptScreen) const
 {
 	CKanbanColumnCtrl* pCol = HitTest(ptScreen);
 
-	if (pCol)
-	{
-		HTREEITEM hti = pCol->HitTestItem(ptScreen, bIcon);
+	if (pCol == NULL)
+		return 0L;
 
-		if (hti)
-			return pCol->GetTaskID(hti);
-	}
-
-	// else
-	return 0L;
+	BOOL bUnused;
+	return pCol->HitTestTask(ptScreen, bUnused);
 }
 
 void CKanbanColumnCtrlArray::FilterToolTipMessage(MSG* pMsg)

@@ -1684,21 +1684,18 @@ LRESULT CKanbanColumnCtrl::OnGetNextItem(WPARAM wp, LPARAM /*lp*/)
 	return (LRESULT)hti;
 }
 
-HTREEITEM CKanbanColumnCtrl::HitTestItem(const CPoint& ptScreen, BOOL bIcon) const
+DWORD CKanbanColumnCtrl::HitTestTask(const CPoint& ptScreen, BOOL& bIcon) const
 {
 	CPoint ptClient(ptScreen);
 	ScreenToClient(&ptClient);
 
-	UINT nFlags = 0;
-	HTREEITEM hti = CTreeCtrl::HitTest(ptClient, &nFlags);
+	HTREEITEM htiHit = HitTest(ptClient);
 
-	if (hti)
-	{
-		if (bIcon && (HitTestImage(hti, ptClient) != KBCI_ICON))
-			hti = NULL;
-	}
+	if (!htiHit)
+		return 0;
 
-	return hti;
+	bIcon = (HitTestImage(htiHit, ptClient) == KBCI_ICON);
+	return GetTaskID(htiHit);
 }
 
 HTREEITEM CKanbanColumnCtrl::FindItem(const IUISELECTTASK& select, BOOL bNext, HTREEITEM htiStart) const

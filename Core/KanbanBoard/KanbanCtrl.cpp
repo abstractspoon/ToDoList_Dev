@@ -139,8 +139,7 @@ protected:
 };
 
 //////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
+// CKanbanCtrl window
 
 CKanbanCtrl::CKanbanCtrl() 
 	:
@@ -3111,14 +3110,14 @@ void CKanbanCtrl::ScrollToColumn(const CKanbanColumnCtrl* pCol)
 	}
 }
 
-bool CKanbanCtrl::PrepareNewTask(ITaskList* pTask) const
+BOOL CKanbanCtrl::PrepareNewTask(ITaskList* pTask) const
 {
 	ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pTask, IID_TASKLISTBASE);
 
 	if (pTasks == NULL)
 	{
 		ASSERT(0);
-		return false;
+		return FALSE;
 	}
 
 	HTASKITEM hNewTask = pTasks->GetFirstTask();
@@ -3131,7 +3130,7 @@ bool CKanbanCtrl::PrepareNewTask(ITaskList* pTask) const
 	pCol->GetWindowRect(rColCtrl);
 
 	if (!GetColumnAttributeValue(pCol, rColCtrl.CenterPoint(), sValue))
-		return false;
+		return FALSE;
 
 	switch (m_nTrackedAttributeID)
 	{
@@ -3173,12 +3172,27 @@ bool CKanbanCtrl::PrepareNewTask(ITaskList* pTask) const
 		break;
 	}
 
-	return true;
+	return TRUE;
 }
 
-DWORD CKanbanCtrl::HitTestTask(const CPoint& ptScreen, BOOL bIcon) const
+BOOL CKanbanCtrl::HitTest(const CPoint& ptScreen, IUIHITTESTRESULT& htRes) const
 {
-	return m_aColumns.HitTestTask(ptScreen, bIcon);
+	BOOL bHeader = FALSE;
+	int nCol = HitTestColumn(ptScreen, bHeader);
+
+	if (bHeader || (nCol == -1))
+		return IUI_NOWHERE;
+
+	// specific task
+	BOOL bIcon = FALSE;
+	htRes.dwTaskID = m_aColumns[nCol]->HitTestTask(ptScreen, bIcon);
+
+	if (htRes.dwTaskID)
+		htRes.nResult = (bIcon ? IUI_TASKICON : IUI_TASK);
+	else
+		htRes.nResult = IUI_TASKLIST;
+
+	return TRUE;
 }
 
 int CKanbanCtrl::HitTestColumn(const CPoint& ptScreen, BOOL& bHeader) const
@@ -3640,7 +3654,7 @@ void CKanbanCtrl::OnBeginDragColumnItem(NMHDR* pNMHDR, LRESULT* pResult)
 BOOL CKanbanCtrl::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 {
 	CPoint ptCursor(GetMessagePos());
-	DWORD dwTaskID = HitTestTask(ptCursor, FALSE);
+	DWORD dwTaskID = m_aColumns.HitTestTask(ptCursor);
 
 	if (dwTaskID)
 	{
