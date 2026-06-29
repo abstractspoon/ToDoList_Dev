@@ -4897,7 +4897,7 @@ BOOL CTabbedToDoCtrl::HitTest(const CPoint& ptScreen, TDCHITTESTRESULT& htRes) c
 			IUIExtensionWindow* pExt = GetExtensionWnd(nView);
 			ASSERT(pExt);
 
-			IUIHITTESTRESULT iuiRes;
+			IUIHITTESTRESULT iuiRes = {	IUI_NOWHERE, 0 };
 
 			if (pExt && pExt->HitTest(ptScreen, iuiRes))
 			{
