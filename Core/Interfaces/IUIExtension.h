@@ -189,17 +189,6 @@ enum IUI_HITTEST
 	// new values here
 };
 
-enum IUI_HITTESTREASON
-{
-	// NEVER CHANGE THE ORDER OF THIS LIST
-	IUI_NONE		= 0,
-	IUI_INFOTIP,
-	IUI_CONTEXTMENU,
-	IUI_IMAGETIP,
-
-	// new values here
-};
-
 //////////////////////////////////////////////////////////////////////
 
 struct IUIHITTESTRESULT
