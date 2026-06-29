@@ -51,7 +51,7 @@ public:
 	BOOL SelectTask(DWORD dwTaskID, BOOL bEnsureVisible);
 	BOOL SelectTask(const IUISELECTTASK& select, IUI_APPCOMMAND nCmd);
 
-	DWORD HitTestTask(const CPoint& ptClient, BOOL& bCustomDate) const;
+	DWORD HitTestTask(const CPoint& ptClient) const;
 	DWORD HitTestTaskIcon(const CPoint& ptClient) const;
 	DWORD GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const;
 	BOOL CanGetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const;
@@ -184,16 +184,17 @@ protected:
 	int CalcRequiredTaskFontPointSize() const;
 	CFont* GetTaskFont(const TASKCALITEM* pTCI);
 	void CalcScrollBarRect(const CRect& rCell, CRect& rScrollbar) const;
-	BOOL HitTestTaskIconRect(const TASKCALITEM* pTCI, const CRect& rTask, const CPoint& ptClient) const;
 	void CalcOverflowBtnRect(const CRect& rCell, CRect& rOverflowBtn) const;
 	int CalcEffectiveCellContentItemCount(const CCalendarCell* pCell) const;
 	void RecalcCellHeaderDateFormats();
 	CString FormatCellDate(const COleDateTime& date, BOOL bShowMonth, CString& sWeekNum) const;
 
-	DWORD HitTestTask(const CPoint& ptClient, BOOL bRealTaskID, BOOL& bCustomDate) const;
+	DWORD HitTestTask(const CPoint& ptClient, BOOL bRealTaskID) const;
 	DWORD HitTestTask(const CPoint& ptClient, TCC_HITTEST& nHit, LPRECT pRect = NULL) const;
+	BOOL HitTestTaskIconRect(const TASKCALITEM* pTCI, const CRect& rTask, const CPoint& ptClient) const;
 	BOOL HitTestCellOverflowBtn(const CPoint& ptClient) const;
 	BOOL HitTestCellOverflowBtn(const CPoint& ptClient, CRect& rBtn) const;
+
 	BOOL GetDateFromPoint(const CPoint& ptCursor, COleDateTime& date) const;
 	BOOL StartDragging(const CPoint& ptCursor);
 	BOOL EndDragging(const CPoint& ptCursor);

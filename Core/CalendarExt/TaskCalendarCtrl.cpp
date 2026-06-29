@@ -1927,9 +1927,9 @@ void CTaskCalendarCtrl::AddTasksToCell(const CTaskCalItemMap& mapTasks, const CO
 }
 
 // External method
-DWORD CTaskCalendarCtrl::HitTestTask(const CPoint& ptClient, BOOL& bCustomDate) const
+DWORD CTaskCalendarCtrl::HitTestTask(const CPoint& ptClient) const
 {
-	return HitTestTask(ptClient, TRUE, bCustomDate);
+	return HitTestTask(ptClient, TRUE);
 }
 
 DWORD CTaskCalendarCtrl::HitTestTaskIcon(const CPoint& ptClient) const
@@ -1944,15 +1944,13 @@ DWORD CTaskCalendarCtrl::HitTestTaskIcon(const CPoint& ptClient) const
 }
 
 // Internal method
-DWORD CTaskCalendarCtrl::HitTestTask(const CPoint& ptClient, BOOL bRealTaskID, BOOL& bCustomDate) const
+DWORD CTaskCalendarCtrl::HitTestTask(const CPoint& ptClient, BOOL bRealTaskID) const
 {
 	TCC_HITTEST nHit = TCCHT_NOWHERE;
 	DWORD dwTaskID = HitTestTask(ptClient, nHit);
 
 	if (nHit == TCCHT_NOWHERE)
 		return 0;
-
-	bCustomDate = IsCustomDate(dwTaskID);
 
 	if (bRealTaskID)
 		dwTaskID = GetRealTaskID(dwTaskID);
@@ -2726,8 +2724,7 @@ DWORD CTaskCalendarCtrl::GetSelectedTaskID() const
 
 void CTaskCalendarCtrl::OnLButtonDown(UINT nFlags, CPoint point) 
 {
-	BOOL bCustomDate = FALSE;
-	DWORD dwHitID = HitTestTask(point, FALSE, bCustomDate);
+	DWORD dwHitID = HitTestTask(point, FALSE);
 	
 	if (dwHitID)
 	{
@@ -3571,8 +3568,7 @@ void CTaskCalendarCtrl::CancelDrag(BOOL bReleaseCapture)
 
 void CTaskCalendarCtrl::OnRButtonDown(UINT nFlags, CPoint point) 
 {
-	BOOL bUnused;
-	DWORD dwTaskID = HitTestTask(point, FALSE, bUnused);
+	DWORD dwTaskID = HitTestTask(point, FALSE);
 
 	// If we didn't hit any task, and the currently selected 
 	// task is a custom date, select its 'real' task so that the

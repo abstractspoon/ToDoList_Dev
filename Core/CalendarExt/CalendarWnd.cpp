@@ -544,72 +544,36 @@ bool CCalendarWnd::GetLabelEditRect(LPRECT pEdit)
 	return false;
 }
 
-IUI_HITTEST CCalendarWnd::HitTest(POINT ptScreen, IUI_HITTESTREASON nReason) const
+bool CCalendarWnd::HitTest(POINT ptScreen, IUIHITTESTRESULT& htRes) const
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	
-	// try header
-	// 6.9: disable header click because it changes the 
-	// tree/list columns not the calendar columns
-	if (m_BigCalendar.PtInHeader(ptScreen))
-		return IUI_NOWHERE;
 
-	// then specific task
 	CPoint ptBigCal(ptScreen);
 	m_BigCalendar.ScreenToClient(&ptBigCal);
 
-	BOOL bCustomDate = FALSE;
+	CRect rBigCal;
+	m_BigCalendar.GetClientRect(rBigCal);
 
-	if (m_BigCalendar.HitTestTask(ptBigCal, bCustomDate))
+	if (!rBigCal.PtInRect(ptBigCal))
+		return false;
+
+	htRes.dwTaskID = m_BigCalendar.HitTestTaskIcon(ptBigCal);
+
+	if (htRes.dwTaskID)
 	{
-		if (bCustomDate && (nReason == IUI_CONTEXTMENU))
-			return IUI_NOWHERE;
+		htRes.nResult = IUI_TASKICON;
+	}
+	else
+	{
+		htRes.dwTaskID = m_BigCalendar.HitTestTask(ptBigCal);
 
-		// else
-		return IUI_TASK;
+		if (htRes.dwTaskID)
+			htRes.nResult = IUI_TASKTITLE;
+		else
+			htRes.nResult = IUI_TASKLIST;
 	}
 
-	// else try rest of big cal
-	CRect rCal;
-	m_BigCalendar.GetClientRect(rCal);
-
-	return (rCal.PtInRect(ptBigCal) ? IUI_TASKLIST : IUI_NOWHERE);
-}
-
-DWORD CCalendarWnd::HitTestTask(POINT ptScreen, IUI_HITTESTREASON nReason) const
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	
-	CPoint ptBigCal(ptScreen);
-	m_BigCalendar.ScreenToClient(&ptBigCal);
-
-	DWORD dwTaskID = 0;
-
-	switch (nReason)
-	{
-	case IUI_IMAGETIP:
-		dwTaskID = m_BigCalendar.HitTestTaskIcon(ptBigCal);
-		break;
-
-	case IUI_CONTEXTMENU:
-		{
-			BOOL bCustomDate = FALSE;
-			dwTaskID = m_BigCalendar.HitTestTask(ptBigCal, bCustomDate);
-
-			if (bCustomDate)
-				dwTaskID = 0;
-		}
-		break;
-
-	default:
-		{
-			BOOL bUnused = FALSE;
-			dwTaskID = m_BigCalendar.HitTestTask(ptBigCal, bUnused);
-		}
-		break;
-	}
-
-	return dwTaskID;
+	return true;
 }
 
 bool CCalendarWnd::SelectTask(DWORD dwTaskID, bool /*bTaskLink*/)
@@ -799,8 +763,8 @@ void CCalendarWnd::OnBigCalendarNotifyDblClk(NMHDR* /*pNMHDR*/, LRESULT* pResult
 	CPoint ptBigCal(GetMessagePos());
 	m_BigCalendar.ScreenToClient(&ptBigCal);
 
-	BOOL bUnused = FALSE;
-	DWORD dwTaskID = m_BigCalendar.HitTestTask(ptBigCal, bUnused);
+//	BOOL bUnused = FALSE;
+	DWORD dwTaskID = m_BigCalendar.HitTestTask(ptBigCal/*, bUnused*/);
 
 	if (dwTaskID)
 		GetParent()->SendMessage(WM_IUI_EDITSELECTEDTASKTITLE, dwTaskID);
