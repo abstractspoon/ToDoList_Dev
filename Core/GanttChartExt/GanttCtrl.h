@@ -37,8 +37,9 @@ public:
 	BOOL SetFont(HFONT hFont, BOOL bRedraw = TRUE);
 
 	void UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate);
-	bool PrepareNewTask(ITaskList* pTask) const;
+	BOOL PrepareNewTask(ITaskList* pTask) const;
 	BOOL CancelOperation();
+	BOOL HitTest(const CPoint& ptScreen, IUIHITTESTRESULT& htRes) const;
 
 	BOOL SelectTask(DWORD dwTaskID);
 	BOOL SelectTasks(const CDWordArray& aTaskIDs);
@@ -55,8 +56,6 @@ public:
 	BOOL AddSelectedTaskDependency(DWORD dwDependID);
 	BOOL EditSelectedTaskDependency(DWORD dwFromDependID, DWORD dwToDependID);
 	BOOL DeleteSelectedTaskDependency(DWORD dwDependID);
-
-	DWORD HitTestTask(const CPoint& ptScreen, IUI_HITTESTREASON nReason) const;
 
 	BOOL ZoomIn(BOOL bIn = TRUE);
 	BOOL ZoomBy(int nAmount);
@@ -263,7 +262,7 @@ protected:
 	GANTTITEM* GetGanttItem(DWORD dwTaskID) const;
 	BOOL RestoreGanttItems(const CGanttItemArray& aGIPrev);
 
-	DWORD TreeHitTestTask(const CPoint& point, BOOL bScreen, IUI_HITTESTREASON nReason) const;
+	DWORD HitTestTask(const CPoint& point, BOOL bScreen) const;
 	DWORD ListHitTestTask(const CPoint& point, BOOL bScreen, GTLC_HITTEST& nHit) const;
 	DWORD ListDependencyHitTest(const CPoint& ptClient, DWORD& dwToTaskID);
 	int GetDependencyListItem(DWORD dwTaskID) const;

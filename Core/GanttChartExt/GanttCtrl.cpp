@@ -2033,7 +2033,7 @@ LRESULT CGanttCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 					}
 					else // centre on the task beneath the mouse
 					{
-						dwScrollID = HitTestTask(::GetMessagePos(), IUI_NONE);
+						dwScrollID = HitTestTask(::GetMessagePos(), TRUE);
 					}
 
 					// For reasons I don't understand, the resource context is
@@ -2186,7 +2186,7 @@ void CGanttCtrl::OnDependencyEditMouseMove(UINT /*nFlags*/, CPoint ptScreen)
 {
 	if (IsPickingDependencyFromTask() || IsPickingDependencyToTask())
 	{
-		DWORD dwTaskID = HitTestTask(ptScreen, IUI_NONE);
+		DWORD dwTaskID = HitTestTask(ptScreen, TRUE);
 		m_tree.SelectDropTarget(GetTreeItem(dwTaskID));
 	}
 }
@@ -2239,7 +2239,7 @@ BOOL CGanttCtrl::OnDependencyEditLButtonDown(UINT /*nFlags*/, CPoint ptScreen)
 
 	if (IsPickingDependencyFromTask())
 	{
-		DWORD dwFromTaskID = HitTestTask(ptScreen, IUI_NONE);
+		DWORD dwFromTaskID = HitTestTask(ptScreen, TRUE);
 
 		if (dwFromTaskID)
 		{
@@ -2262,7 +2262,7 @@ BOOL CGanttCtrl::OnDependencyEditLButtonDown(UINT /*nFlags*/, CPoint ptScreen)
 	}
 	else if (IsPickingDependencyToTask())
 	{
-		DWORD dwToTaskID = HitTestTask(ptScreen, IUI_NONE);
+		DWORD dwToTaskID = HitTestTask(ptScreen, TRUE);
 		m_pDependEdit->SetToTask(dwToTaskID);
 
 		return TRUE; // handled
@@ -5275,14 +5275,14 @@ int CGanttCtrl::FindColumn(int nScrollPos) const
 	return -1;
 }
 
-bool CGanttCtrl::PrepareNewTask(ITaskList* pTaskList) const
+BOOL CGanttCtrl::PrepareNewTask(ITaskList* pTaskList) const
 {
 	ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pTaskList, IID_TASKLISTBASE);
 
 	if (pTasks == NULL)
 	{
 		ASSERT(0);
-		return false;
+		return FALSE;
 	}
 
 	HTASKITEM hNewTask = pTasks->GetFirstTask();
@@ -5311,50 +5311,53 @@ bool CGanttCtrl::PrepareNewTask(ITaskList* pTaskList) const
 	pTasks->SetTaskStartDate64(hNewTask, tDate);
 	pTasks->SetTaskDueDate64(hNewTask, tDate); // end of same day
 
-	return true;
+	return TRUE;
 }
 
-DWORD CGanttCtrl::HitTestTask(const CPoint& ptScreen, IUI_HITTESTREASON nReason) const
+BOOL CGanttCtrl::HitTest(const CPoint& ptScreen, IUIHITTESTRESULT& htRes) const
 {
-	DWORD dwTaskID = TreeHitTestTask(ptScreen, TRUE, nReason);
+	if (PointInHeader(ptScreen))
+		return FALSE;
+	
+	UINT nFlags = 0;
+	int nCol = 0;
 
-	if (!dwTaskID)
+	HTREEITEM htiHit = TreeHitTestItem(ptScreen, TRUE, nCol, &nFlags);
+
+	if (htiHit)
 	{
-		switch (nReason)
+		htRes.dwTaskID = GetTaskID(htiHit);
+
+		if (nCol == GTLCC_TITLE)
 		{
-		case IUI_CONTEXTMENU:
-		case IUI_NONE:
-			dwTaskID = GetTaskID(ListHitTestItem(ptScreen, TRUE));
-			break;
+			if (nFlags & TVHT_ONITEMICON)
+				htRes.nResult = IUI_TASKICON;
+			else
+				htRes.nResult = IUI_TASKTITLE;
+		}
+		else
+		{
+			htRes.nResult = IUI_TASK; 
 		}
 	}
-
-	return dwTaskID;
-}
-
-DWORD CGanttCtrl::TreeHitTestTask(const CPoint& point, BOOL bScreen, IUI_HITTESTREASON nReason) const
-{
-	UINT nFlags = 0;
-	HTREEITEM htiHit = TreeHitTestItem(point, bScreen, &nFlags);
-
-	switch (nReason)
+	else
 	{
-	case IUI_INFOTIP:
-		if (htiHit && !(nFlags & TVHT_ONITEMLABEL))
-			htiHit = NULL;
-		break;
+		htRes.dwTaskID = GetTaskID(ListHitTestItem(ptScreen, TRUE));
 
-	case IUI_IMAGETIP:
-		if (htiHit && !(nFlags & TVHT_ONITEMICON))
-			htiHit = NULL;
-		break;
-
-	case IUI_CONTEXTMENU:
-	case IUI_NONE:
-		break;
+		if (htRes.dwTaskID)
+			htRes.nResult = IUI_TASK;
+		else
+			htRes.nResult = IUI_TASKLIST;
 	}
 
-	return (htiHit ? GetTaskID(htiHit) : 0L);
+	return TRUE;
+}
+
+DWORD CGanttCtrl::HitTestTask(const CPoint& point, BOOL bScreen) const
+{
+	HTREEITEM htiHit = HitTestItem(point, bScreen);
+
+	return (htiHit ? GetTaskID(htiHit) : 0);
 }
 
 BOOL CGanttCtrl::GetListItemRect(int nItem, CRect& rItem) const

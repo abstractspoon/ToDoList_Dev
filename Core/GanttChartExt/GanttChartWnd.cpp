@@ -450,7 +450,7 @@ bool CGanttChartWnd::PrepareNewTask(ITaskList* pTask) const
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
-	return m_ctrlGantt.PrepareNewTask(pTask);
+	return (m_ctrlGantt.PrepareNewTask(pTask) != FALSE);
 }
 
 bool CGanttChartWnd::GetLabelEditRect(LPRECT pEdit)
@@ -467,27 +467,11 @@ bool CGanttChartWnd::GetLabelEditRect(LPRECT pEdit)
 	return false;
 }
 
-IUI_HITTEST CGanttChartWnd::HitTest(POINT ptScreen, IUI_HITTESTREASON nReason) const
+bool CGanttChartWnd::HitTest(POINT ptScreen, IUIHITTESTRESULT& htRes) const
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	// try tree header
-	if (m_ctrlGantt.PointInHeader(ptScreen))
-		return IUI_NOWHERE;
-
-	// then specific task
-	if (m_ctrlGantt.HitTestTask(ptScreen, nReason))
-		return IUI_TASK;
-
-	// else 
-	return IUI_NOWHERE;
-}
-
-DWORD CGanttChartWnd::HitTestTask(POINT ptScreen, IUI_HITTESTREASON nReason) const
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-
-	return m_ctrlGantt.HitTestTask(ptScreen, nReason);
+	return (m_ctrlGantt.HitTest(ptScreen, htRes) != FALSE);
 }
 
 bool CGanttChartWnd::SelectTask(DWORD dwTaskID, bool /*bTaskLink*/)

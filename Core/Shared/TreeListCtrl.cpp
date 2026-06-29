@@ -2370,9 +2370,9 @@ BOOL CTreeListCtrl::GetListColumnRect(int nCol, CRect& rColumn, BOOL bScrolled) 
 	return FALSE;
 }
 
-HTREEITEM CTreeListCtrl::HitTestItem(const CPoint& ptScreen, UINT* pFlags) const
+HTREEITEM CTreeListCtrl::HitTestItem(const CPoint& point, BOOL bScreen, UINT* pFlags) const
 {
-	HTREEITEM htiHit = TreeHitTestItem(ptScreen, TRUE, pFlags);
+	HTREEITEM htiHit = TreeHitTestItem(point, bScreen, pFlags);
 
 	if (htiHit)
 		return htiHit;
@@ -2381,7 +2381,7 @@ HTREEITEM CTreeListCtrl::HitTestItem(const CPoint& ptScreen, UINT* pFlags) const
 	if (pFlags)
 		*pFlags = 0;
 
-	return GetTreeItem(ListHitTestItem(ptScreen, TRUE));
+	return GetTreeItem(ListHitTestItem(point, bScreen));
 }
 
 HTREEITEM CTreeListCtrl::TreeHitTestItem(const CPoint& point, BOOL bScreen, UINT* pFlags) const
@@ -2445,7 +2445,7 @@ int CTreeListCtrl::ListHitTestItem(const CPoint& point, BOOL bScreen, int& nCol)
 CString CTreeListCtrl::GetItemLabelTip(CPoint ptScreen) const
 {
 	UINT nFlags = 0;
-	HTREEITEM htiHit = HitTestItem(ptScreen, &nFlags);
+	HTREEITEM htiHit = HitTestItem(ptScreen, TRUE, &nFlags);
 
 	if (htiHit && (nFlags & TVHT_ONITEMLABEL))
 	{
