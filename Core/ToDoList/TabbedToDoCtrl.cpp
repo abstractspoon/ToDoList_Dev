@@ -4897,29 +4897,33 @@ BOOL CTabbedToDoCtrl::HitTest(const CPoint& ptScreen, TDCHITTESTRESULT& htRes) c
 			IUIExtensionWindow* pExt = GetExtensionWnd(nView);
 			ASSERT(pExt);
 
-			if (pExt)
+			IUIHITTESTRESULT iuiRes;
+
+			if (pExt && pExt->HitTest(ptScreen, iuiRes))
 			{
-// 				if ((nReason == TDCHTR_CONTEXTMENU) && 
-// 					!ViewSupportsNewTask(nView) && 
-// 					!ViewHasTaskSelection(nView))
-// 				{
-// 					return TDCHT_NOWHERE;
-// 				}
-// 
-// 				IUI_HITTESTREASON nIUIReason = TDC::MapHitTestReasonToIUIReason(nReason);
-// 				IUI_HITTEST nIUIHit = pExt->HitTest(ptScreen, nIUIReason);
-// 
-// 				return TDC::MapIUIHitTestToHitTest(nIUIHit);
+				switch (htRes.nResult)
+				{
+				case IUI_TASK:
+				case IUI_TASKICON:
+				case IUI_TASKTITLE:
+				case IUI_TASKLIST:
+					if (!ViewSupportsNewTask(nView) && !ViewHasTaskSelection(nView))
+						return FALSE;
+					break;
+				}
+
+				return TDC::MapIUIHitTestResultToHitTestResult(iuiRes, htRes);
 			}
 		}
 		break;
 
 	default:
 		ASSERT(0);
+		break;
 	}
 
 	// else
-	return TDCHT_NOWHERE;
+	return FALSE;
 }
 
 int CTabbedToDoCtrl::GetSortableColumns(CTDCColumnIDMap& mapColIDs) const

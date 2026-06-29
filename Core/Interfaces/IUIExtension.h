@@ -26,7 +26,7 @@
 
 //////////////////////////////////////////////////////////////////////
 
-const UINT IUIEXTENSION_VERSION = 2;
+const UINT IUIEXTENSION_VERSION = 3;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -182,8 +182,9 @@ enum IUI_HITTEST
 	// NEVER CHANGE THE ORDER OF THIS LIST
 	IUI_NOWHERE		= 0,
 	IUI_TASKLIST,
-	IUI_DEPRECATED, // IUI_COLUMNHEADER
 	IUI_TASK,
+	IUI_TASKTITLE,
+	IUI_TASKICON,
 
 	// new values here
 };
@@ -197,6 +198,14 @@ enum IUI_HITTESTREASON
 	IUI_IMAGETIP,
 
 	// new values here
+};
+
+//////////////////////////////////////////////////////////////////////
+
+struct IUIHITTESTRESULT
+{
+	IUI_HITTEST nResult;
+	DWORD dwTaskID;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -369,8 +378,7 @@ public:
 	virtual bool CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA* pData = NULL) const = 0;
 
 	virtual bool GetLabelEditRect(LPRECT pEdit) = 0; // screen coordinates
-	virtual IUI_HITTEST HitTest(POINT ptScreen, IUI_HITTESTREASON nReason) const = 0;
-	virtual DWORD HitTestTask(POINT ptScreen, IUI_HITTESTREASON nReason) const = 0;
+	virtual bool HitTest(POINT ptScreen, IUIHITTESTRESULT& htRes) const = 0;
 
 	virtual void SetUITheme(const UITHEME* pTheme) = 0;
 	virtual void SetTaskFont(HFONT hFont) = 0;
