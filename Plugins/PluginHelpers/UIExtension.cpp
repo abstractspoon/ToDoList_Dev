@@ -47,14 +47,14 @@ UIExtension::UpdateType UIExtension::MapUpdateType(IUI_UPDATETYPE type)
 	return UIExtension::UpdateType::Unknown;
 }
 
-IUI_HITTEST UIExtension::MapHitTestResult(UIExtension::HitTestResult result)
+IUI_HITTEST UIExtension::MapHitTestResult(UIExtension::HitTest result)
 {
 	switch (result)
 	{
-	case UIExtension::HitTestResult::Tasklist:		return IUI_TASKLIST;
-	case UIExtension::HitTestResult::Task:			return IUI_TASK;
-	case UIExtension::HitTestResult::TaskTitle:		return IUI_TASKTITLE;
-	case UIExtension::HitTestResult::TaskIcon:		return IUI_TASKICON;
+	case UIExtension::HitTest::Tasklist:		return IUI_TASKLIST;
+	case UIExtension::HitTest::Task:			return IUI_TASK;
+	case UIExtension::HitTest::TaskTitle:		return IUI_TASKTITLE;
+	case UIExtension::HitTest::TaskIcon:		return IUI_TASKICON;
 	}
 
 	return IUI_NOWHERE;

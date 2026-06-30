@@ -229,7 +229,7 @@ namespace EisenhowerUIExtension
 			return m_List.SelectTasks(taskIDs);
 		}
 
-		public bool HitTest(Point screenPos, UIExtension.UIHitTestResult result)
+		public bool HitTest(Point screenPos, UIExtension.HitTestResult result)
 		{
 			return m_List.HitTest(screenPos, result);
 		}

@@ -91,7 +91,7 @@ namespace Abstractspoon
 
 				// -----------------------------------------------
 
-				enum class HitTestResult
+				enum class HitTest
 				{
 					Nowhere,
 					Tasklist,
@@ -121,7 +121,7 @@ namespace Abstractspoon
 				// -----------------------------------------------
 
 				static UpdateType MapUpdateType(IUI_UPDATETYPE type);
-				static IUI_HITTEST MapHitTestResult(HitTestResult result);
+				static IUI_HITTEST MapHitTestResult(HitTest result);
 
 				static bool MapGetTaskCmd(IUI_APPCOMMAND nCmd, GetTask% getTask);
 				static bool MapSelectTaskCmd(IUI_APPCOMMAND nCmd, SelectTask% selectTask);
@@ -378,10 +378,10 @@ namespace Abstractspoon
 
 				// -----------------------------------------------
 
-				ref class UIHitTestResult
+				ref class HitTestResult
 				{
 				public:
-					HitTestResult result = HitTestResult::Nowhere;
+					HitTest result = HitTest::Nowhere;
 					UInt32 taskId = 0;
 				};
 			};
@@ -403,7 +403,7 @@ namespace Abstractspoon
 				bool DoIdleProcessing();
 
 				bool GetLabelEditRect(Int32% left, Int32% top, Int32% right, Int32% bottom); // screen coordinates
-				bool HitTest(Int32 xPos, Int32 yPos, UIExtension::UIHitTestResult^ result);
+				bool HitTest(Int32 xPos, Int32 yPos, UIExtension::HitTestResult^ result);
 
 				void SetUITheme(UITheme^ theme);
 				void SetReadOnly(bool bReadOnly);

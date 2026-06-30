@@ -211,7 +211,7 @@ namespace DayViewUIExtension
             return false;
 		}
 
-		public bool HitTest(int xScreen, int yScreen, UIExtension.UIHitTestResult result)
+		public bool HitTest(int xScreen, int yScreen, UIExtension.HitTestResult result)
 		{
 			return m_DayView.HitTest(xScreen, yScreen, result);
 		}
