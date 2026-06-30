@@ -310,14 +310,17 @@ bool CWordCloudUIExtensionBridgeWindow::GetLabelEditRect(LPRECT pEdit)
 	return m_wnd->GetLabelEditRect((Int32&)pEdit->left, (Int32&)pEdit->top, (Int32&)pEdit->right, (Int32&)pEdit->bottom);
 }
 
-IUI_HITTEST CWordCloudUIExtensionBridgeWindow::HitTest(POINT ptScreen, IUI_HITTESTREASON nReason) const
+bool CWordCloudUIExtensionBridgeWindow::HitTest(POINT ptScreen, IUIHITTESTRESULT& htRes) const
 {
-	return UIExtension::MapHitTestResult(m_wnd->HitTest(ptScreen.x, ptScreen.y, UIExtension::MapHitTestReason(nReason)));
-}
+	auto uiRes = gcnew UIExtension::HitTestResult();
 
-DWORD CWordCloudUIExtensionBridgeWindow::HitTestTask(POINT ptScreen, IUI_HITTESTREASON nReason) const
-{
-	return m_wnd->HitTestTask(ptScreen.x, ptScreen.y, UIExtension::MapHitTestReason(nReason));
+	if (!m_wnd->HitTest(ptScreen.x, ptScreen.y, uiRes))
+		return false;
+
+	htRes.dwTaskID = uiRes->taskId;
+	htRes.nResult = UIExtension::MapHitTestResult(uiRes->result);
+
+	return true;
 }
 
 void CWordCloudUIExtensionBridgeWindow::SetUITheme(const UITHEME* pTheme)

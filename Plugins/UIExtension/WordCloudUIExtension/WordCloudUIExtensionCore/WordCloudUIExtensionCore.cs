@@ -419,23 +419,9 @@ namespace WordCloudUIExtension
 			return false;
 		}
 
-		public UIExtension.HitTestResult HitTest(Int32 xScreen, Int32 yScreen, UIExtension.HitTestReason reason)
+		public bool HitTest(Int32 xScreen, Int32 yScreen, UIExtension.HitTestResult result)
 		{
-			if (HitTestTask(xScreen, yScreen, reason) != 0)
-				return UIExtension.HitTestResult.Task;
-
-			// else
-			if (m_TaskMatchesList.RectangleToScreen(m_TaskMatchesList.ClientRectangle).Contains(xScreen, yScreen));
-				return UIExtension.HitTestResult.Tasklist;
-
-			return UIExtension.HitTestResult.Nowhere;
-		}
-
-		public UInt32 HitTestTask(Int32 xScreen, Int32 yScreen, UIExtension.HitTestReason reason)
-		{
-			var task = m_TaskMatchesList.HitTestTask(new Point(xScreen, yScreen), (reason == UIExtension.HitTestReason.ImageTip));
-
-			return task?.Id ?? 0;
+			return m_TaskMatchesList.HitTest(new Point(xScreen, yScreen), result);
 		}
 
 		public void SetUITheme(UITheme theme)
