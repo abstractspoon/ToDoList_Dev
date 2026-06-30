@@ -397,7 +397,6 @@ namespace Abstractspoon
 
 				void UpdateTasks(TaskList^ tasks, UIExtension::UpdateType update);
 				bool WantTaskUpdate(Task::Attribute attribute);
-				bool WantSortUpdate(Task::Attribute attribute);
 				bool PrepareNewTask(Task^% task);
 
 				bool ProcessMessage(IntPtr hwnd, UInt32 message, UInt32 wParam, UInt32 lParam, UInt32 time, Int32 xPos, Int32 yPos);

@@ -118,11 +118,6 @@ namespace DayViewUIExtension
 			return false;
 		}
 
-		public bool WantSortUpdate(Task.Attribute attrib)
-		{
-			return false;
-		}
-	   
 		public bool PrepareNewTask(ref Task task)
 		{
 			return m_DayView.PrepareNewTask(ref task);

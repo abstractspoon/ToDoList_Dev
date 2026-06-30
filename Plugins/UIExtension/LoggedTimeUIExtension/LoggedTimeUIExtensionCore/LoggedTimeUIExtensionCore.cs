@@ -91,11 +91,6 @@ namespace LoggedTimeUIExtension
 			// all else
 			return false;
 		}
-
-		public bool WantSortUpdate(Task.Attribute attrib)
-		{
-			return false; // not supported
-		}
 	   
 		public bool PrepareNewTask(ref Task task)
 		{
