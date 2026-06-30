@@ -761,53 +761,31 @@ namespace DayViewUIExtension
 			return ((appt != null) && ((appt is TaskItem) || (appt is TaskFutureOccurrence)));
 		}
 
-		public UIExtension.HitTestResult HitTest(Int32 xScreen, Int32 yScreen, UIExtension.HitTestReason reason)
-		{
-			if (HitTestTask(xScreen, yScreen, reason) != 0)
-				return UIExtension.HitTestResult.Task;
-
-			Point ptClient = PointToClient(new Point(xScreen, yScreen));
-
-			if (GetTrueRectangle().Contains(ptClient))
-				return UIExtension.HitTestResult.Tasklist;
-
-			// else
-			return UIExtension.HitTestResult.Nowhere;
-		}
-
-		public uint HitTestTask(Int32 xScreen, Int32 yScreen, UIExtension.HitTestReason reason)
+		public bool HitTest(Int32 xScreen, Int32 yScreen, UIExtension.UIHitTestResult result)
 		{
 			Point ptClient = PointToClient(new Point(xScreen, yScreen));
 			Calendar.Appointment appt = GetAppointmentAt(ptClient.X, ptClient.Y);
 
-			if (appt == null)
-				return 0;
-
-			switch (reason)
+			if (appt != null)
 			{
-			case UIExtension.HitTestReason.ContextMenu:
-				if (!AppointmentSupportsTaskContextMenu(appt))
-					return 0;
-				break;
+				var apptView = (GetAppointmentView(appt) as TDLAppointmentView);
 
-			case UIExtension.HitTestReason.ImageTip:
-				{
-					var apptView = (GetAppointmentView(appt) as TDLAppointmentView);
+				if (apptView == null)
+					return false;
 
-					if ((apptView == null) || !apptView.IconRect.Contains(ptClient))
-						return 0;
-				}
-				break;
+				result.taskId = m_TaskItems.GetRealTaskId(appt);
 
-			case UIExtension.HitTestReason.InfoTip:
-			case UIExtension.HitTestReason.None:
-				break;
+				if (apptView.IconRect.Contains(ptClient))
+					result.result = UIExtension.HitTestResult.TaskIcon;
+				else
+					result.result = UIExtension.HitTestResult.TaskTitle;
+			}
+			else if (GetTrueRectangle().Contains(ptClient))
+			{
+				result.result = UIExtension.HitTestResult.Tasklist;
 			}
 
-			if (appt is TaskExtensionItem)
-				return (appt as TaskExtensionItem).RealTaskId;
-
-			return appt.Id;
+			return (result.result != UIExtension.HitTestResult.Nowhere);
 		}
 
 		public Calendar.Appointment GetRealAppointmentAt(int x, int y)

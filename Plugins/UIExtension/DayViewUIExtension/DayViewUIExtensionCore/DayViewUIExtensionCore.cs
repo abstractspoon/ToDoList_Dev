@@ -68,6 +68,7 @@ namespace DayViewUIExtension
 			UpdateMonthYearCombos(DateTime.Now);
 		}
 
+		// IUIExtension
 		public bool SelectTask(UInt32 taskId)
 		{
             if (taskId == m_SelectedTaskId)
@@ -126,6 +127,7 @@ namespace DayViewUIExtension
 		public bool ProcessMessage(IntPtr hwnd, UInt32 message, UInt32 wParam, UInt32 lParam, UInt32 time, Int32 xPos, Int32 yPos)
 		{
 			const int WM_KEYDOWN = 0x0100;
+			const int WM_RBUTTONUP = 0x0205;
 
 			switch (message)
 			{
@@ -164,11 +166,23 @@ namespace DayViewUIExtension
 							return EditSelectedTimeBlockSeries();
 						}
 						break;
+
+					case Keys.F10: // Context menu handling
+						if (ModifierKeys.HasFlag(Keys.Shift))
+							return OnDayViewContextMenu();
+						break;
+
+					case Keys.Apps:	// Context menu handling
+						return OnDayViewContextMenu();
 					}
 				}
 				break;
+
+			case WM_RBUTTONUP: // Context menu handling
+				return OnDayViewContextMenu();
 			}
 
+			// all else
 			return false;
 		}
 
@@ -197,14 +211,9 @@ namespace DayViewUIExtension
             return false;
 		}
 
-		public UIExtension.HitTestResult HitTest(Int32 xScreen, Int32 yScreen, UIExtension.HitTestReason reason)
+		public bool HitTest(int xScreen, int yScreen, UIExtension.UIHitTestResult result)
 		{
-			return m_DayView.HitTest(xScreen, yScreen, reason);
-		}
-
-		public UInt32 HitTestTask(Int32 xScreen, Int32 yScreen, UIExtension.HitTestReason reason)
-		{
-			return m_DayView.HitTestTask(xScreen, yScreen, reason);
+			return m_DayView.HitTest(xScreen, yScreen, result);
 		}
 
 		public void SetUITheme(UITheme theme)
@@ -317,6 +326,8 @@ namespace DayViewUIExtension
 			return (m_SelectedTaskId != 0);
 		}
 
+		// end IUIExtension
+
 		public new bool Focus()
         {
             if (Focused)
@@ -366,7 +377,6 @@ namespace DayViewUIExtension
 			m_DayView.WeekChange += new Calendar.WeekChangeEventHandler(OnDayViewWeekChanged);
 			m_DayView.MouseWheel += new MouseEventHandler(OnDayViewMouseWheel);
 			m_DayView.MouseDoubleClick += new MouseEventHandler(OnDayViewMouseDoubleClick);
-			m_DayView.ContextMenu += new TDLContextMenuEventHandler(OnDayViewContextMenu);
 
 			// Performing icon editing from a 'MouseUp' or 'MouseClick' event 
 			// causes the edit icon dialog to fail to correctly get focus but
@@ -398,9 +408,10 @@ namespace DayViewUIExtension
 			return item;
 		}
 
-		bool OnDayViewContextMenu(object sender, MouseEventArgs e)
+		bool OnDayViewContextMenu()
 		{
-			var appt = m_DayView.GetAppointmentAt(e.X, e.Y);
+			var point = m_DayView.PointToClient(Control.MousePosition);
+			var appt = m_DayView.GetAppointmentAt(point.X, point.Y);
 
 			if ((appt == null) || m_DayView.AppointmentSupportsTaskContextMenu(appt))
 				return false;
@@ -446,7 +457,7 @@ namespace DayViewUIExtension
 				m_Trans.Translate(menu.Items, true);
 
 				menu.Renderer = m_ToolbarRenderer;
-				menu.Show(m_DayView, e.Location);
+				menu.Show(m_DayView, point);
 			}
 
 			return true; // handled

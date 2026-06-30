@@ -37,6 +37,14 @@ namespace DayViewUIExtension
 				}
 			}
 		}
+
+		public uint GetRealTaskId(Calendar.Appointment appt)
+		{
+			if (appt is TaskExtensionItem)
+				return (appt as TaskExtensionItem).RealTaskId;
+
+			return appt.Id;
+		}
 	}
 
 	// ---------------------------------------------------------------
