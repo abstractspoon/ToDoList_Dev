@@ -323,7 +323,7 @@ bool CEisenhowerUIExtensionBridgeWindow::GetLabelEditRect(LPRECT pEdit)
 
 bool CEisenhowerUIExtensionBridgeWindow::HitTest(POINT ptScreen, IUIHITTESTRESULT& htRes) const
 {
-	auto uiRes = gcnew UIExtension::UIHitTestResult();
+	auto uiRes = gcnew UIExtension::HitTestResult();
 
 	if (!m_wnd->HitTest(ptScreen.x, ptScreen.y, uiRes))
 		return false;

@@ -197,7 +197,7 @@ namespace EisenhowerUIExtension
 			return true;
 		}
 
-		public bool HitTest(Int32 xScreen, Int32 yScreen, UIExtension.UIHitTestResult result)
+		public bool HitTest(Int32 xScreen, Int32 yScreen, UIExtension.HitTestResult result)
 		{
 			return (m_EisenhowerCtrl.HitTest(new Point(xScreen, yScreen), result));
 		}

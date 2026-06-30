@@ -329,7 +329,7 @@ namespace EisenhowerUIExtension
 			return EisenhowerVariable.Supports(attribId);
 	}
 
-		public bool HitTest(Point screenPos, UIExtension.UIHitTestResult result)
+		public bool HitTest(Point screenPos, UIExtension.HitTestResult result)
 		{
 			foreach (var p in m_Panes)
 			{

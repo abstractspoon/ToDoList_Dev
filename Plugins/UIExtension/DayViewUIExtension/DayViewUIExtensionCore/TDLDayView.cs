@@ -761,7 +761,7 @@ namespace DayViewUIExtension
 			return ((appt != null) && ((appt is TaskItem) || (appt is TaskFutureOccurrence)));
 		}
 
-		public bool HitTest(Int32 xScreen, Int32 yScreen, UIExtension.UIHitTestResult result)
+		public bool HitTest(Int32 xScreen, Int32 yScreen, UIExtension.HitTestResult result)
 		{
 			Point ptClient = PointToClient(new Point(xScreen, yScreen));
 			Calendar.Appointment appt = GetAppointmentAt(ptClient.X, ptClient.Y);
@@ -776,16 +776,16 @@ namespace DayViewUIExtension
 				result.taskId = m_TaskItems.GetRealTaskId(appt);
 
 				if (apptView.IconRect.Contains(ptClient))
-					result.result = UIExtension.HitTestResult.TaskIcon;
+					result.result = UIExtension.HitTest.TaskIcon;
 				else
-					result.result = UIExtension.HitTestResult.TaskTitle;
+					result.result = UIExtension.HitTest.TaskTitle;
 			}
 			else if (GetTrueRectangle().Contains(ptClient))
 			{
-				result.result = UIExtension.HitTestResult.Tasklist;
+				result.result = UIExtension.HitTest.Tasklist;
 			}
 
-			return (result.result != UIExtension.HitTestResult.Nowhere);
+			return (result.result != UIExtension.HitTest.Nowhere);
 		}
 
 		public Calendar.Appointment GetRealAppointmentAt(int x, int y)
