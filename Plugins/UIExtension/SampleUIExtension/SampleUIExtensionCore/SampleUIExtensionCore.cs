@@ -285,14 +285,9 @@ namespace SampleUIExtension
 			return false;
 	    }
 
-        public UIExtension.HitTestResult HitTest(Int32 xPos, Int32 yPos, UIExtension.HitTestReason reason)
+        public bool HitTest(Int32 xPos, Int32 yPos, UIExtension.HitTestResult result)
 	    {
-            return UIExtension.HitTestResult.Nowhere;
-	    }
-
-		public UInt32 HitTestTask(Int32 xPos, Int32 yPos, UIExtension.HitTestReason reason)
-		{
-			return 0;
+            return false;
 		}
 
 		public void SetUITheme(UITheme theme)
