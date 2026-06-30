@@ -81,23 +81,14 @@ namespace Abstractspoon
 
 				// -----------------------------------------------
 
-				enum class HitTestReason
-				{
-					None,
-					InfoTip,
-					ContextMenu,
-					ImageTip,
-				};
-
-				// -----------------------------------------------
-
 				enum class HitTest
 				{
 					Nowhere,
 					Tasklist,
 					Task,
 					TaskTitle,
-					TaskIcon
+					TaskIcon,
+					TaskCheckbox,
 				};
 
 				// -----------------------------------------------

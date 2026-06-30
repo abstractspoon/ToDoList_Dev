@@ -210,7 +210,6 @@ protected:
 	void SelectNextTask(LPCTSTR szStartingWith);
 	int MapHeaderItemToColumn(int nItem) const;
 	int CalcMinRequiredColumnsWidth() const;
-	int HitTestColumn(const CPoint& ptScreen, BOOL& bHeader) const;
 
 	inline BOOL UsingFixedColumns() const { return m_aFixedColDefs.GetSize(); }
 	inline BOOL UsingDynamicColumns() const { return !UsingFixedColumns(); }

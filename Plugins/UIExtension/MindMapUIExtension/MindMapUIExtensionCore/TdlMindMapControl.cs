@@ -150,6 +150,11 @@ namespace MindMapUIExtension
 			m_DoneLabelFont = null;
 		}
 
+		private bool IsDragging
+		{
+			get { return (bool)m_DragImage?.IsValid(); }
+		}
+
 		// ILabelTipHandler implementation
 		public Control GetOwner()
 		{
@@ -158,6 +163,9 @@ namespace MindMapUIExtension
 
 		public LabelTipInfo ToolHitTest(Point ptScreen)
 		{
+			if (IsDragging)
+				return null;
+
 			var pt = PointToClient(ptScreen);
 			var hit = HitTestPositions(pt);
 
@@ -182,6 +190,12 @@ namespace MindMapUIExtension
 				Rect = labelRect,
 				Font = GetNodeTooltipFont(hit),
 			};
+		}
+
+		public bool ShowLabelTips
+		{
+			set { m_LabelTip.Active = value; }
+			get { return m_LabelTip.Active; }
 		}
 
 		protected override void WndProc(ref Message m)
@@ -353,15 +367,14 @@ namespace MindMapUIExtension
 				{
 					result.result = UIExtension.HitTest.TaskIcon;
 				}
-				else if (!CalcCheckboxRect(labelRect).Contains(clientPos))
+				else if (CalcCheckboxRect(labelRect).Contains(clientPos))
 				{
-					result.result = UIExtension.HitTest.TaskTitle;
+					result.result = UIExtension.HitTest.TaskCheckbox;
 				}
 				else
 				{
-					result.result = UIExtension.HitTest.Task;
+					result.result = UIExtension.HitTest.TaskTitle;
 				}
-
 				result.taskId = UniqueID(node);
 			}
 

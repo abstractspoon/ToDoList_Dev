@@ -55,6 +55,7 @@ namespace Abstractspoon
 				bool Move(int x, int y);
 				bool End();
 				bool ShowNoLock(bool show);
+				bool IsValid() { return (m_hImageList != NULL); }
 
 			protected:
 				HIMAGELIST m_hImageList;

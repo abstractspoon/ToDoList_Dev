@@ -177,7 +177,8 @@ namespace MindMapUIExtension
 			m_MindMap.ShowParentsAsFolders = prefs.GetProfileBool("Preferences", "ShowParentsAsFolders", false);
             m_MindMap.ShowCompletionCheckboxes = prefs.GetProfileBool("Preferences", "AllowCheckboxAgainstTreeItem", false);
             m_MindMap.ShowMixedCompletionState = prefs.GetProfileBool("Preferences", "ShowMixedCompletionState", true);
-			
+			m_MindMap.ShowLabelTips = !prefs.GetProfileBool("Preferences", "ShowInfoTips", false);
+
 			m_MindMap.SetStrikeThruDone(prefs.GetProfileBool("Preferences", "StrikethroughDone", true));
         }
 

@@ -616,27 +616,31 @@ namespace EvidenceBoardUIExtension
 			if (!ClientRectangle.Contains(ptClient))
 				return false;
 
-			result.result = UIExtension.HitTest.Tasklist;
 
 			var node = HitTestNode(ptClient, true); // exclude root node
 
-			if (node != null)
+			if (node == null)
 			{
+				result.result = UIExtension.HitTest.Tasklist;
+			}
+			else
+			{
+				var labelRect = GetNodeClientRect(node);
 				var task = GetTaskItem(node.Data);
-				result.taskId = task.TaskId;
 
-				if (CalcIconRect(GetNodeClientRect(node)).Contains(ptClient))
+				if (CalcIconRect(labelRect).Contains(ptClient))
 				{
 					result.result = UIExtension.HitTest.TaskIcon;
 				}
-				else if (!CalcImageRect(task, GetNodeClientRect(node), false).Contains(ptClient))
-				{
-					result.result = UIExtension.HitTest.TaskTitle;
-				}
-				else
+				else if (CalcImageRect(task, labelRect, false).Contains(ptClient))
 				{
 					result.result = UIExtension.HitTest.Task;
 				}
+				else
+				{
+					result.result = UIExtension.HitTest.TaskTitle;
+				}
+				result.taskId = task.TaskId;
 			}
 			
 			return true;

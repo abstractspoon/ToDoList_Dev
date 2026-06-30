@@ -57,7 +57,7 @@ bool DragImage::Begin(IntPtr wnd, Font^ font, String^ text, int width, int heigh
 
 bool DragImage::Begin(IntPtr wnd, IDragRenderer^ renderer, Object^ object)
 {
-	if (m_hImageList != NULL)
+	if (IsValid())
 		return false;
 
 	auto size = renderer->GetDragImageSize();
@@ -75,13 +75,13 @@ bool DragImage::Begin(IntPtr wnd, IDragRenderer^ renderer, Object^ object)
 
 bool DragImage::Begin(IntPtr wnd, Bitmap^ bm, int width, int height, int hotX, int hotY)
 {
-	if (m_hImageList != NULL)
+	if (IsValid())
 		return false;
 
 	m_hwndLock = Win32::GetHwnd(wnd);
 	m_hImageList = ImageList_Create(width, height, ILC_COLOR32, 0, 1);
 
-	if (m_hImageList != NULL)
+	if (IsValid())
 	{
 		HBITMAP hbm = Win32::GetHBitmap(bm->GetHbitmap());
 
@@ -102,7 +102,7 @@ bool DragImage::Begin(IntPtr wnd, Bitmap^ bm, int width, int height, int hotX, i
 
 bool DragImage::Move(int xScreen, int yScreen)
 {
-	if (m_hImageList == NULL)
+	if (!IsValid())
 		return false;
 
 	CRect rWindow;
@@ -113,7 +113,7 @@ bool DragImage::Move(int xScreen, int yScreen)
 
 bool DragImage::End()
 {
-	if (m_hImageList == NULL)
+	if (!IsValid())
 		return false;
 
 	ImageList_EndDrag();
@@ -128,7 +128,7 @@ bool DragImage::End()
 
 bool DragImage::ShowNoLock(bool show)
 {
-	if (m_hImageList == NULL)
+	if (!IsValid())
 		return false;
 
 	ImageList_DragShowNolock(show);

@@ -585,20 +585,29 @@ bool TaskListView::HitTest(Drawing::Point ptScreen, UIExtension::HitTestResult^ 
 	}
 	else
 	{
-		result->taskId = ASTYPE(htInfo->Item->Tag, ITaskBase)->Id;
+		if (htInfo->SubItem == htInfo->Item->SubItems[0])
+		{
+			auto labelRect = htInfo->SubItem->Bounds;
 
-		if (CalcIconRect(htInfo->Item->Bounds).Contains(ptClient))
-		{
-			result->result = UIExtension::HitTest::TaskIcon;
-		}
-		else if (htInfo->SubItem == htInfo->Item->SubItems[0])
-		{
-			result->result = UIExtension::HitTest::TaskTitle;
+			if (CalcIconRect(labelRect).Contains(ptClient))
+			{
+				result->result = UIExtension::HitTest::TaskIcon;
+			}
+			else if (CalcCheckboxRect(labelRect).Contains(ptClient))
+			{
+				result->result = UIExtension::HitTest::TaskCheckbox;
+			}
+			else
+			{
+				result->result = UIExtension::HitTest::TaskTitle;
+			}
 		}
 		else
 		{
 			result->result = UIExtension::HitTest::Task;
 		}
+
+		result->taskId = ASTYPE(htInfo->Item->Tag, ITaskBase)->Id;
 	}
 	
 	return true;

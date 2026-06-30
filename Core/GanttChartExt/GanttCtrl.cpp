@@ -5331,9 +5331,17 @@ BOOL CGanttCtrl::HitTest(const CPoint& ptScreen, IUIHITTESTRESULT& htRes) const
 		if (nCol == GTLCC_TITLE)
 		{
 			if (nFlags & TVHT_ONITEMICON)
+			{
 				htRes.nResult = IUI_TASKICON;
+			}
+			else if (nFlags & TVHT_ONITEMSTATEICON)
+			{
+				htRes.nResult = IUI_TASKCHECKBOX;
+			}
 			else
+			{
 				htRes.nResult = IUI_TASKTITLE;
+			}
 		}
 		else
 		{

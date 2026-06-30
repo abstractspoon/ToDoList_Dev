@@ -656,6 +656,15 @@ namespace TDC
 			}
 			break;
 
+		case IUI_TASKCHECKBOX:
+			if (iuiRes.dwTaskID)
+			{
+				htRes.nResult = TDCHT_TASK;
+				htRes.nColumnID = TDCC_DONE;
+				htRes.dwTaskID = iuiRes.dwTaskID;
+			}
+			break;
+
 		case IUI_TASKLIST:	
 			htRes.nResult = TDCHT_TASKLIST;
 			break;
