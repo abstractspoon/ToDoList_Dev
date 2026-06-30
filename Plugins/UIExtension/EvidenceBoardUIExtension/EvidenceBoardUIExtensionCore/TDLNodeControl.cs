@@ -609,12 +609,37 @@ namespace EvidenceBoardUIExtension
 			return false;
 		}
 
-		public uint HitTestTaskId(Point ptScreen, bool icon)
+		public bool HitTest(Point ptScreen, UIExtension.HitTestResult result)
 		{
 			var ptClient = PointToClient(ptScreen);
-			var task = (icon ? HitTestTaskIcon(ptClient) : HitTestTask(ptClient));
 
-			return task?.TaskId ?? 0;
+			if (!ClientRectangle.Contains(ptClient))
+				return false;
+
+			result.result = UIExtension.HitTest.Tasklist;
+
+			var node = HitTestNode(ptClient, true); // exclude root node
+
+			if (node != null)
+			{
+				var task = GetTaskItem(node.Data);
+				result.taskId = task.TaskId;
+
+				if (CalcIconRect(GetNodeClientRect(node)).Contains(ptClient))
+				{
+					result.result = UIExtension.HitTest.TaskIcon;
+				}
+				else if (!CalcImageRect(task, GetNodeClientRect(node), false).Contains(ptClient))
+				{
+					result.result = UIExtension.HitTest.TaskTitle;
+				}
+				else
+				{
+					result.result = UIExtension.HitTest.Task;
+				}
+			}
+			
+			return true;
 		}
 
 		Rectangle CalcTaskLabelRect(TaskItem taskItem, Rectangle rect, bool multiLine)
