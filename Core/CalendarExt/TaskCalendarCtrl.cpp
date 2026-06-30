@@ -1926,24 +1926,38 @@ void CTaskCalendarCtrl::AddTasksToCell(const CTaskCalItemMap& mapTasks, const CO
 	}
 }
 
-// External method
-DWORD CTaskCalendarCtrl::HitTestTask(const CPoint& ptClient) const
+BOOL CTaskCalendarCtrl::HitTest(const CPoint& ptScreen, IUIHITTESTRESULT& htRes) const
 {
-	return HitTestTask(ptClient, TRUE);
-}
+	CPoint ptClient(ptScreen);
+	ScreenToClient(&ptClient);
 
-DWORD CTaskCalendarCtrl::HitTestTaskIcon(const CPoint& ptClient) const
-{
+	CRect rClient;
+	GetClientRect(rClient);
+
+	if (!rClient.PtInRect(ptClient) /* || PtInHeader()*/)
+		return false;
+
 	TCC_HITTEST nHit = TCCHT_NOWHERE;
-	DWORD dwTaskID = HitTestTask(ptClient, nHit);
+	htRes.dwTaskID = GetRealTaskID(HitTestTask(ptClient, nHit));
 
-	if (nHit == TCCHT_ICON)
-		return GetRealTaskID(dwTaskID);
+	switch (nHit)
+	{
+	case TCCHT_NOWHERE:
+		htRes.nResult = IUI_TASK;
+		break;
 
-	return 0;
+	case TCCHT_ICON:
+		htRes.nResult = IUI_TASKICON;
+		break;
+
+	default:
+		htRes.nResult = IUI_TASKTITLE;
+		break;
+	}
+
+	return true;
 }
 
-// Internal method
 DWORD CTaskCalendarCtrl::HitTestTask(const CPoint& ptClient, BOOL bRealTaskID) const
 {
 	TCC_HITTEST nHit = TCCHT_NOWHERE;

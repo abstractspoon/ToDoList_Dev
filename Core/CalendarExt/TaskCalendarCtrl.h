@@ -51,8 +51,7 @@ public:
 	BOOL SelectTask(DWORD dwTaskID, BOOL bEnsureVisible);
 	BOOL SelectTask(const IUISELECTTASK& select, IUI_APPCOMMAND nCmd);
 
-	DWORD HitTestTask(const CPoint& ptClient) const;
-	DWORD HitTestTaskIcon(const CPoint& ptClient) const;
+	BOOL HitTest(const CPoint& ptScreen, IUIHITTESTRESULT& htRes) const;
 	DWORD GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const;
 	BOOL CanGetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const;
 
