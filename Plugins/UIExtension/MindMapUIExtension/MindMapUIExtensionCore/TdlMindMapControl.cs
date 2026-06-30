@@ -334,16 +334,38 @@ namespace MindMapUIExtension
             return false;
         }
         		
-		public UInt32 HitTestTask(Point screenPos, bool icon)
+		public bool HitTest(Point screenPos, UIExtension.HitTestResult result)
 		{
 			var clientPos = PointToClient(screenPos);
+
+			if (!ClientRectangle.Contains(clientPos))
+				return false;
+
+			result.result = UIExtension.HitTest.Tasklist;
+
 			var node = HitTestPositions(clientPos);
 
-			if ((node != null) && (!icon || HitTestIcon(node, clientPos)))
-				return UniqueID(node);
-			
-			// else
-			return 0;
+			if (node != null)
+			{
+				var labelRect = base.GetItemLabelRect(node);
+
+				if (CalcIconRect(labelRect).Contains(clientPos))
+				{
+					result.result = UIExtension.HitTest.TaskIcon;
+				}
+				else if (!CalcCheckboxRect(labelRect).Contains(clientPos))
+				{
+					result.result = UIExtension.HitTest.TaskTitle;
+				}
+				else
+				{
+					result.result = UIExtension.HitTest.Task;
+				}
+
+				result.taskId = UniqueID(node);
+			}
+
+			return true;
 		}
 
 		public new Rectangle GetSelectedItemLabelRect()

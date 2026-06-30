@@ -128,21 +128,9 @@ namespace MindMapUIExtension
             return true;
         }
 
-        public UIExtension.HitTestResult HitTest(Int32 xScreen, Int32 yScreen, UIExtension.HitTestReason reason)
+        public bool HitTest(Int32 xScreen, Int32 yScreen, UIExtension.HitTestResult result)
         {
-			if (HitTestTask(xScreen, yScreen, reason) != 0)
-				return UIExtension.HitTestResult.Task;
-
-			// else
-			if (m_MindMap.RectangleToScreen(m_MindMap.ClientRectangle).Contains(xScreen, yScreen))
-				return UIExtension.HitTestResult.Tasklist;
-			
-			return UIExtension.HitTestResult.Nowhere;
-        }
-
-        public UInt32 HitTestTask(Int32 xScreen, Int32 yScreen, UIExtension.HitTestReason reason)
-        {
-			return m_MindMap.HitTestTask(new Point(xScreen, yScreen), (reason == UIExtension.HitTestReason.ImageTip));
+			return m_MindMap.HitTest(new Point(xScreen, yScreen), result);
         }
 
         public void SetUITheme(UITheme theme)
