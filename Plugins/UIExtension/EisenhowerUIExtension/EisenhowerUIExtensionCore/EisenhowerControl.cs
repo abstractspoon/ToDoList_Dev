@@ -329,18 +329,16 @@ namespace EisenhowerUIExtension
 			return EisenhowerVariable.Supports(attribId);
 	}
 
-		public uint HitTestTask(Point screenPos, bool icon)
+		public bool HitTest(Point screenPos, UIExtension.UIHitTestResult result)
 		{
 			foreach (var p in m_Panes)
 			{
-				uint taskId = p.HitTestTask(screenPos, icon);
-
-				if (taskId != 0)
-					return taskId;
+				if (p.HitTest(screenPos, result))
+					return true;
 			}
 
 			// else
-			return 0;
+			return false;
 		}
 
 		public uint GetTaskId(UIExtension.GetTask getTask)

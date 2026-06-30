@@ -71,6 +71,14 @@ namespace Abstractspoon
 					list->ColumnWidthChanging += gcnew ColumnWidthChangingEventHandler(this, &HeaderControl::OnColumnWidthChanging);
 				}
 
+				bool PointInHeader(Point ptScreen)
+				{
+					CRect rWindow;
+					::GetWindowRect(Win32::GetHwnd(Handle), rWindow);
+
+					return (rWindow.PtInRect({ptScreen.X, ptScreen.Y}) != FALSE);
+				}
+
 			public:
 				property bool EnableTracking;
 
@@ -556,18 +564,44 @@ String^ TaskListView::Translate(String^ text, Translator::Type type)
 	return m_Trans->Translate(text, type);
 }
 
-ITaskBase^ TaskListView::HitTestTask(Drawing::Point ptScreen, bool icon)
+bool TaskListView::HitTest(Drawing::Point ptScreen, UIExtension::UIHitTestResult^ result)
 {
-	auto pt = PointToClient(ptScreen);
-	auto lvHit = HitTest(pt)->Item;
+	if (m_HeaderCtrl->PointInHeader(ptScreen))
+		return false;
 
-	if (lvHit == nullptr)
-		return nullptr;
+	auto ptClient = PointToClient(ptScreen);
 
-	if (icon && !CalcIconRect(lvHit->Bounds).Contains(pt))
-		return nullptr;
+	if (!ClientRectangle.Contains(ptClient))
+		return false;
 
-	return ASTYPE(lvHit->Tag, ITaskBase);
+	auto htInfo = HitTest(ptClient);
+
+	if (htInfo == nullptr)
+		return false;
+
+	if (htInfo->Item == nullptr)
+	{
+		result->result = UIExtension::HitTestResult::Tasklist;
+	}
+	else
+	{
+		result->taskId = ASTYPE(htInfo->Item->Tag, ITaskBase)->Id;
+
+		if (CalcIconRect(htInfo->Item->Bounds).Contains(ptClient))
+		{
+			result->result = UIExtension::HitTestResult::TaskIcon;
+		}
+		else if (htInfo->SubItem == htInfo->Item->SubItems[0])
+		{
+			result->result = UIExtension::HitTestResult::TaskTitle;
+		}
+		else
+		{
+			result->result = UIExtension::HitTestResult::Task;
+		}
+	}
+	
+	return true;
 }
 
 Windows::Forms::Control^ TaskListView::GetOwner()
