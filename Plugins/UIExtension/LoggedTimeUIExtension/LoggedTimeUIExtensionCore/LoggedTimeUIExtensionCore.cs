@@ -46,8 +46,6 @@ namespace LoggedTimeUIExtension
 		private UIThemeToolbarRenderer m_ToolbarRenderer;
 		private Font m_ControlsFont;
 
-// 		private LogEntry m_DefaultNewLogEntryAttributes;
-		
 		// --------------------------------------------------------------------------------------
 
 		public LoggedTimeUIExtensionCore(String typeID, String uiName, IntPtr hwndParent, Translator trans)
@@ -57,20 +55,10 @@ namespace LoggedTimeUIExtension
 			m_TypeId = typeID;
 			m_UiName = uiName;
 
-// 			m_DefaultNewLogEntryAttributes = new LogEntry(0);
-
 			InitializeComponent();
 		}
 		
-		public bool SelectTask(UInt32 dwTaskID)
-		{
-			return false; // not supported
-		}
-
-		public bool SelectTasks(UInt32[] pdwTaskIDs)
-		{
-			return false; // not supported
-		}
+		// UIExtension implementation ---------------------------------------
 
 		public void UpdateTasks(TaskList tasks, UIExtension.UpdateType type)
 		{
@@ -91,12 +79,7 @@ namespace LoggedTimeUIExtension
 			// all else
 			return false;
 		}
-	   
-		public bool PrepareNewTask(ref Task task)
-		{
-			return false; // not supported
-		}
-
+		
 		public bool DoIdleProcessing()
 		{
 			m_TimeLog.DoIdleProcessing();
@@ -139,21 +122,6 @@ namespace LoggedTimeUIExtension
 			return false;
 		}
 
-		public bool GetLabelEditRect(ref Int32 left, ref Int32 top, ref Int32 right, ref Int32 bottom)
-		{
-            return false; // not supported
-		}
-
-		public UIExtension.HitTestResult HitTest(Int32 xScreen, Int32 yScreen, UIExtension.HitTestReason reason)
-		{
-			return m_TimeLog.HitTest(xScreen, yScreen, reason);
-		}
-
-		public UInt32 HitTestTask(Int32 xScreen, Int32 yScreen, UIExtension.HitTestReason reason)
-		{
-			return 0; // not supported
-		}
-
 		public void SetUITheme(UITheme theme)
 		{
 			BackColor = m_Toolbar.BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight);
@@ -181,9 +149,6 @@ namespace LoggedTimeUIExtension
 
 		public void SavePreferences(Preferences prefs, String key)
 		{
-// 			prefs.WriteProfileEnum(key, "DefaultTimeBlockEditMask", m_DefaultTimeBlockEditMask);
-// 			prefs.WriteProfileString(key, "DefaultNewTimeBlockAttributes", m_DefaultNewLogEntryAttributes.Encode());
-
 			m_TimeLog.SavePreferences(prefs, key);
 			m_PrefsDlg.SavePreferences(prefs, key);
 
@@ -195,7 +160,6 @@ namespace LoggedTimeUIExtension
 			m_TimeLog.TaskColorIsBackground = prefs.GetProfileBool("Preferences", "ColorTaskBackground", false);
 			m_TimeLog.ShowParentsAsFolder = prefs.GetProfileBool("Preferences", "ShowParentsAsFolders", false);
             m_TimeLog.StrikeThruDoneTasks = prefs.GetProfileBool("Preferences", "StrikethroughDone", true);
-			m_TimeLog.ShowLabelTips = !prefs.GetProfileBool("Preferences", "ShowInfoTips", false);
 			m_TimeLog.DisplayDatesInISO = prefs.GetProfileBool("Preferences", "DisplayDatesInISO", false);
 			m_TimeLog.LogTasksSeparately = prefs.GetProfileBool("Preferences", "LogTasksSeparately", false);
 
@@ -214,20 +178,6 @@ namespace LoggedTimeUIExtension
 			else
             {
 				// private settings
-// 				m_DefaultTimeBlockEditMask = prefs.GetProfileEnum(key, "DefaultTimeBlockEditMask", m_DefaultTimeBlockEditMask);
-
-// 				var newTimeBlockAttrib = TimeBlockSeriesAttributes.Decode(prefs.GetProfileString(key, "DefaultNewTimeBlockAttributes", string.Empty));
-// 
-// 				if (newTimeBlockAttrib != null)
-// 				{
-// 					m_DefaultNewLogEntryAttributes = newTimeBlockAttrib;
-// 				}
-// 				else
-// 				{
-// 					m_DefaultNewLogEntryAttributes.FromTime = m_WorkWeek.WorkDay().StartOfDay();
-// 					m_DefaultNewLogEntryAttributes.ToTime = m_WorkWeek.WorkDay().StartOfLunch();
-// 				}
-
 				m_TimeLog.LoadPreferences(prefs, key);
 				m_PrefsDlg.LoadPreferences(prefs, key);
 
@@ -236,25 +186,19 @@ namespace LoggedTimeUIExtension
             }
  		}
 
-		public bool GetTask(UIExtension.GetTask getTask, ref UInt32 taskID)
-		{
-            return false; // not supported
-		}
 
-        public bool SelectTask(String text, UIExtension.SelectTask selectTask, bool caseSensitive, bool wholeWord, bool findReplace)
-		{
-            return false;//m_TimeLog.SelectTask(text, selectTask, caseSensitive, wholeWord, findReplace);
-		}
-		
-		public bool ScrollToSelectedTask()
-		{
-			return false; // not supported
-		}
+		// Unsupported requirements
+		public bool SelectTask(UInt32 dwTaskID) { return false; }
+		public bool SelectTasks(UInt32[] pdwTaskIDs) { return false; }
+		public bool PrepareNewTask(ref Task task) { return false; }
+		public bool GetLabelEditRect(ref Int32 left, ref Int32 top, ref Int32 right, ref Int32 bottom) { return false; }
+		public bool HitTest(Int32 xScreen, Int32 yScreen, UIExtension.UIHitTestResult result) { return false; }
+		public bool GetTask(UIExtension.GetTask getTask, ref UInt32 taskID) { return false; }
+		public bool SelectTask(String text, UIExtension.SelectTask selectTask, bool caseSensitive, bool wholeWord, bool findReplace) { return false; }
+		public bool ScrollToSelectedTask() { return false; }
+		public bool CanScrollToSelectedTask() { return false; }
 
-		public bool CanScrollToSelectedTask()
-		{
-			return false; // not supported
-		}
+		// end UIExtension implementation --------------------
 
 		public new bool Focus()
         {
@@ -338,28 +282,31 @@ namespace LoggedTimeUIExtension
 
 		bool OnTimeLogContextMenu(object sender, MouseEventArgs e)
 		{
-			var appt = m_TimeLog.GetAppointmentAt(e.X, e.Y);
-			var menu = new ContextMenuStrip();
+			if (m_TimeLog.GetTrueRectangle().Contains(e.X, e.Y))
+			{
+				var appt = m_TimeLog.GetAppointmentAt(e.X, e.Y);
+				var menu = new ContextMenuStrip();
 
-			var item = AddMenuItem(menu, "New Log Entry", Keys.None, 6);
-			item.Enabled = ((m_TimeLog.CanAddNewLogEntry || !m_TimeLog.HasTasklistPath) && (appt == null));
-			item.Click += (s, a) => { OnCreateLogEntry(sender, e); };
+				var item = AddMenuItem(menu, "New Log Entry", Keys.None, 6);
+				item.Enabled = ((m_TimeLog.CanAddNewLogEntry || !m_TimeLog.HasTasklistPath) && (appt == null));
+				item.Click += (s, a) => { OnCreateLogEntry(sender, e); };
 
-			item = AddMenuItem(menu, "Edit Log Entry", (Keys.Control | Keys.F2), 7);
-			item.Enabled = m_TimeLog.CanModifySelectedLogEntry;
-			item.Click += (s, a) => { OnEditLogEntry(sender, e); };
+				item = AddMenuItem(menu, "Edit Log Entry", (Keys.Control | Keys.F2), 7);
+				item.Enabled = m_TimeLog.CanModifySelectedLogEntry;
+				item.Click += (s, a) => { OnEditLogEntry(sender, e); };
 
-			item = AddMenuItem(menu, "Delete Log Entry", Keys.Delete, 8);
-			item.Enabled = m_TimeLog.CanDeleteSelectedLogEntry;
-			item.Click += (s, a) => { OnDeleteLogEntry(sender, e); };
+				item = AddMenuItem(menu, "Delete Log Entry", Keys.Delete, 8);
+				item.Enabled = m_TimeLog.CanDeleteSelectedLogEntry;
+				item.Click += (s, a) => { OnDeleteLogEntry(sender, e); };
 
-			menu.Items.Add(new ToolStripSeparator());
-			menu.Items.Add("Cancel");
+				menu.Items.Add(new ToolStripSeparator());
+				menu.Items.Add("Cancel");
 
-			m_Trans.Translate(menu.Items, true);
+				m_Trans.Translate(menu.Items, true);
 
-			menu.Renderer = m_ToolbarRenderer;
-			menu.Show(m_TimeLog, e.Location);
+				menu.Renderer = m_ToolbarRenderer;
+				menu.Show(m_TimeLog, e.Location);
+			}
 
 			return true; // handled
 		}

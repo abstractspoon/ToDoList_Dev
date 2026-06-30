@@ -51,13 +51,9 @@ public:
    HICON GetIcon() const;
    LPCWSTR GetMenuText() const; // caller must copy result only
    LPCWSTR GetTypeID() const; // caller must copy result only
-
-   bool SelectTask(DWORD dwTaskID, bool bTaskLink);
-   bool SelectTasks(const DWORD* pdwTaskIDs, int nTaskCount);
-
+   
    void UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate);
    bool WantTaskUpdate(TDC_ATTRIBUTE nAttribID) const;
-   bool PrepareNewTask(ITaskList* pTask) const;
 
    bool ProcessMessage(MSG* pMsg);
    void FilterToolTipMessage(MSG* pMsg) {/*.Net tooltips don't need this*/}
@@ -66,10 +62,6 @@ public:
    bool DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData);
    bool CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA* pData) const;
 
-   bool GetLabelEditRect(LPRECT pEdit); // screen coordinates
-   IUI_HITTEST HitTest(POINT ptScreen, IUI_HITTESTREASON nReason) const;
-   DWORD HitTestTask(POINT ptScreen, IUI_HITTESTREASON nReason) const;
-
    void SetUITheme(const UITHEME* pTheme);
    void SetReadOnly(bool bReadOnly);
    HWND GetHwnd() const;
@@ -77,14 +69,17 @@ public:
 
    void SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const;
    void LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey, bool bAppOnly);
+
+   // Unsupported
+   bool SelectTask(DWORD dwTaskID, bool bTaskLink) { return false; }
+   bool SelectTasks(const DWORD* pdwTaskIDs, int nTaskCount) { return false; }
+   bool PrepareNewTask(ITaskList* pTask) const { return false; }
+   bool GetLabelEditRect(LPRECT pEdit) { return false; }
+   bool HitTest(POINT ptScreen, IUIHITTESTRESULT& htRes) const { return false; }
    
 protected:
    gcroot<LoggedTimeUIExtensionCore^> m_wnd;
    ITransText* m_pTT;
-
-protected:
-	bool DoAppSelectCommand(IUI_APPCOMMAND nCmd, const IUISELECTTASK& select);
-	DWORD GetNextTask(IUI_APPCOMMAND nCmd, DWORD dwFromTaskID) const;
 };
 
 DLL_DECLSPEC int GetInterfaceVersion()

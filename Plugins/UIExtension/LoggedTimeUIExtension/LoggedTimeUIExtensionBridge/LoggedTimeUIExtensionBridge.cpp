@@ -137,21 +137,6 @@ LPCWSTR CLoggedTimeUIExtensionBridgeWindow::GetTypeID() const
 	return TIMELOG_GUID;
 }
 
-bool CLoggedTimeUIExtensionBridgeWindow::SelectTask(DWORD dwTaskID, bool /*bTaskLink*/)
-{
-	return m_wnd->SelectTask(dwTaskID);
-}
-
-bool CLoggedTimeUIExtensionBridgeWindow::SelectTasks(const DWORD* pdwTaskIDs, int nTaskCount)
-{
-	array<UInt32>^ taskIDs = gcnew array<UInt32>(nTaskCount);
-
-	for (int i = 0; i < nTaskCount; i++)
-		taskIDs[i] = pdwTaskIDs[i];
-
-	return m_wnd->SelectTasks(taskIDs);
-}
-
 void CLoggedTimeUIExtensionBridgeWindow::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate)
 {
 	msclr::auto_gcroot<TaskList^> tasks = gcnew TaskList(pTasks);
@@ -162,13 +147,6 @@ void CLoggedTimeUIExtensionBridgeWindow::UpdateTasks(const ITaskList* pTasks, IU
 bool CLoggedTimeUIExtensionBridgeWindow::WantTaskUpdate(TDC_ATTRIBUTE nAttribID) const
 {
 	return m_wnd->WantTaskUpdate(Task::MapAttribute(nAttribID));
-}
-
-bool CLoggedTimeUIExtensionBridgeWindow::PrepareNewTask(ITaskList* pTask) const
-{
-	msclr::auto_gcroot<TaskList^> task = gcnew TaskList(pTask);
-
-	return m_wnd->PrepareNewTask(task.get()->GetFirstTask());
 }
 
 bool CLoggedTimeUIExtensionBridgeWindow::ProcessMessage(MSG* pMsg)
@@ -191,33 +169,6 @@ bool CLoggedTimeUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAP
 {
 	switch (nCmd)
 	{
-	case IUI_GETNEXTTASK:
-	case IUI_GETNEXTVISIBLETASK:
-	case IUI_GETNEXTTOPLEVELTASK:
-	case IUI_GETPREVTASK:
-	case IUI_GETPREVVISIBLETASK:
-	case IUI_GETPREVTOPLEVELTASK:
-		if (pData)
-		{
-			UInt32 taskID = GetNextTask(nCmd, pData->dwTaskID);
-
-			if ((taskID != 0) && (taskID != pData->dwTaskID))
-			{
-				pData->dwTaskID = taskID;
-				return true;
-			}
-		}
-		break;
-
-	case IUI_SELECTFIRSTTASK:
-	case IUI_SELECTNEXTTASK:
-	case IUI_SELECTNEXTTASKINCLCURRENT:
-	case IUI_SELECTPREVTASK:
-	case IUI_SELECTLASTTASK:
-		if (pData)
-			return DoAppSelectCommand(nCmd, pData->select);
-		break;
-
 	case IUI_SETFOCUS:
 		return m_wnd->Focus();
 
@@ -233,6 +184,7 @@ bool CLoggedTimeUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAP
 				return UIExtension::SaveImageToFile(image, sImagePath.get());
 			}
 		}
+ 		break;
 
 	case IUI_SCROLLTOSELECTEDTASK:
 		return m_wnd->ScrollToSelectedTask();
@@ -246,28 +198,8 @@ bool CLoggedTimeUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd, co
 {
 	switch (nCmd)
 	{
-	case IUI_SELECTFIRSTTASK:
-	case IUI_SELECTNEXTTASK:
-	case IUI_SELECTNEXTTASKINCLCURRENT:
-	case IUI_SELECTPREVTASK:
-	case IUI_SELECTLASTTASK:
-		return true;
-
 	case IUI_SETFOCUS:
 		return !m_wnd->Focused;
-
-	case IUI_GETNEXTTASK:
-	case IUI_GETNEXTVISIBLETASK:
-	case IUI_GETNEXTTOPLEVELTASK:
-	case IUI_GETPREVTASK:
-	case IUI_GETPREVVISIBLETASK:
-	case IUI_GETPREVTOPLEVELTASK:
-		if (pData)
-		{
-			DWORD dwTaskID = GetNextTask(nCmd, pData->dwTaskID);
-			return ((dwTaskID != 0) && (dwTaskID != pData->dwTaskID));
-		}
-		break;
 
 	case IUI_SAVETOIMAGE:
 		return m_wnd->CanSaveToImage();
@@ -278,48 +210,6 @@ bool CLoggedTimeUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd, co
 
 	// all else
 	return false;
-}
-
-DWORD CLoggedTimeUIExtensionBridgeWindow::GetNextTask(IUI_APPCOMMAND nCmd, DWORD dwFromTaskID) const
-{
-	UIExtension::GetTask getTask;
-
-	if (!UIExtension::MapGetTaskCmd(nCmd, getTask))
-		return 0;
-
-	UInt32 taskID = dwFromTaskID;
-
-	if (!m_wnd->GetTask(getTask, taskID))
-		return 0;
-
-	return taskID;
-}
-
-bool CLoggedTimeUIExtensionBridgeWindow::DoAppSelectCommand(IUI_APPCOMMAND nCmd, const IUISELECTTASK& select)
-{
-	UIExtension::SelectTask selectWhat;
-
-	if (!UIExtension::MapSelectTaskCmd(nCmd, selectWhat))
-		return false;
-
-	String^ sWords = gcnew String(select.szWords);
-
-	return m_wnd->SelectTask(sWords, selectWhat, select.bCaseSensitive, select.bWholeWord, select.bFindReplace);
-}
-
-bool CLoggedTimeUIExtensionBridgeWindow::GetLabelEditRect(LPRECT pEdit)
-{
-	return m_wnd->GetLabelEditRect((Int32&)pEdit->left, (Int32&)pEdit->top, (Int32&)pEdit->right, (Int32&)pEdit->bottom);
-}
-
-IUI_HITTEST CLoggedTimeUIExtensionBridgeWindow::HitTest(POINT ptScreen, IUI_HITTESTREASON nReason) const
-{
-	return UIExtension::MapHitTestResult(m_wnd->HitTest(ptScreen.x, ptScreen.y, UIExtension::MapHitTestReason(nReason)));
-}
-
-DWORD CLoggedTimeUIExtensionBridgeWindow::HitTestTask(POINT ptScreen, IUI_HITTESTREASON nReason) const
-{
-	return m_wnd->HitTestTask(ptScreen.x, ptScreen.y, UIExtension::MapHitTestReason(nReason));
 }
 
 void CLoggedTimeUIExtensionBridgeWindow::SetUITheme(const UITHEME* pTheme)
