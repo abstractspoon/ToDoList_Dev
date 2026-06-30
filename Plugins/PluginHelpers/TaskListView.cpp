@@ -1031,41 +1031,45 @@ void TaskListView::WndProc(Message% m)
 					m_BoundSelectionTimer->Start();
 
 					// then default handling
-					break;
 				}
-
-				// else
-				Focus();
-				return;
-			}
-
-			auto task = ASTYPE(lvHit->Tag, ITaskBase);
-
-			if (IsTaskEditable(task))
-			{
-				if (CalcCheckboxRect(lvHit->Bounds).Contains(pos))
+				else
 				{
-					if (!lvHit->Selected)
-						ListView::WndProc(m); // Default handling to select task
-
-					EditTaskDone(this, task);
-					return;
-				}
-				else if (CalcIconRect(lvHit->Bounds).Contains(pos))
-				{
-					if (!lvHit->Selected)
-						ListView::WndProc(m); // Default handling to select task
-
-					EditTaskIcon(this, task);
-					return;
-				}
-				// If the item is selected but we're not focused, 
-				// prevent the base class from starting a label edit
-				else if (lvHit->Selected && !Focused)
-				{
+					// else
 					Focus();
 					return;
 				}
+			}
+			else
+			{
+				auto task = ASTYPE(lvHit->Tag, ITaskBase);
+
+				if (IsTaskEditable(task))
+				{
+					if (CalcCheckboxRect(lvHit->Bounds).Contains(pos))
+					{
+						if (!lvHit->Selected)
+							ListView::WndProc(m); // Default handling to select task
+
+						EditTaskDone(this, task);
+						return;
+					}
+					else if (CalcIconRect(lvHit->Bounds).Contains(pos))
+					{
+						if (!lvHit->Selected)
+							ListView::WndProc(m); // Default handling to select task
+
+						EditTaskIcon(this, task);
+						return;
+					}
+					// If the item is selected but we're not focused, 
+					// prevent the base class from starting a label edit
+					else if (lvHit->Selected && !Focused)
+					{
+						Focus();
+						return;
+					}
+				}
+				// else default handling
 			}
 		}
 		break;
@@ -1075,18 +1079,19 @@ void TaskListView::WndProc(Message% m)
 			Point pos = Win32::GetPoint(m.LParam);
 			auto lvHit = HitTest(pos)->Item;
 
-			if (lvHit == nullptr)
-				break;
+			if (lvHit != nullptr)
+			{
+				Debug::Assert(lvHit->Selected);
 
-			Debug::Assert(lvHit->Selected);
+				auto task = ASTYPE(lvHit->Tag, ITaskBase);
 
-			auto task = ASTYPE(lvHit->Tag, ITaskBase);
+				if (IsTaskEditable(task) && GetTaskLabelRect(task->Id).Contains(pos))
+					EditTaskLabel(this, task);
 
-			if (IsTaskEditable(task) && GetTaskLabelRect(task->Id).Contains(pos))
-				EditTaskLabel(this, task);
-
+				return; // always
+			}
 		}
-		return; // always
+		break;
 
 	case WM_LBUTTONUP:
 		{
@@ -1094,6 +1099,28 @@ void TaskListView::WndProc(Message% m)
 
 			if (HitTest(pos)->Item == nullptr)
 				return;
+		}
+		break;
+
+	case WM_RBUTTONDOWN:
+		if (SelectionCount > 0)
+		{
+			// Prevent loss of selection when right-clicking in 'whitespace'
+			Point pos = Win32::GetPoint(m.LParam);
+			auto lvHit = HitTest(pos)->Item;
+
+			if (lvHit == nullptr)
+			{
+				// Cache selection 
+				auto selTaskIds = SelectedTaskIds;
+
+				// default handling
+				ListView::WndProc(m);
+
+				// Restore selection
+				SelectTasks(selTaskIds);
+				return;
+			}
 		}
 		break;
 	}
