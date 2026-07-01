@@ -467,7 +467,9 @@ BOOL CTabbedToDoCtrl::PreTranslateMessage(MSG* pMsg)
 				CPoint ptScreen(pMsg->lParam);
 				::ClientToScreen(pMsg->hwnd, &ptScreen);
 
-				if (pExtWnd->HitTest(ptScreen, IUI_CONTEXTMENU) != IUI_NOWHERE)
+				IUIHITTESTRESULT htRes = { IUI_NOWHERE, 0L };
+
+				if (pExtWnd->HitTest(ptScreen, htRes) && (htRes.nResult != IUI_NOWHERE))
 				{
 					SendMessage(WM_CONTEXTMENU, pMsg->wParam, MAKELPARAM(ptScreen.x, ptScreen.y));
 					return TRUE;
