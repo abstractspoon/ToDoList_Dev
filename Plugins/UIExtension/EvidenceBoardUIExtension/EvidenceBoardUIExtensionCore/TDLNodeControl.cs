@@ -616,7 +616,6 @@ namespace EvidenceBoardUIExtension
 			if (!ClientRectangle.Contains(ptClient))
 				return false;
 
-
 			var node = HitTestNode(ptClient, true); // exclude root node
 
 			if (node == null)
