@@ -243,9 +243,17 @@ BOOL CTDLTaskListCtrl::HitTest(const CPoint& ptScreen, TDCHITTESTRESULT& htRes) 
 			htRes.dwTaskID = GetTaskID(nItem);
 
 			if (nFlags & LVHT_ONITEMICON)
+			{
 				htRes.nColumnID = TDCC_ICON;
+			}
+			else if (nFlags & LVHT_ONITEMSTATEICON)
+			{
+				htRes.nColumnID = TDCC_DONE;
+			}
 			else
+			{
 				htRes.nColumnID = TDCC_CLIENT;
+			}
 		}
 
 		return TRUE;
