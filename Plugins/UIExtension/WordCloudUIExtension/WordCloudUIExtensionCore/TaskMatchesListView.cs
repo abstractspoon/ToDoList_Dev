@@ -43,6 +43,10 @@ namespace WordCloudUIExtension
 				Columns.Add(Translate("ID", Translator.Type.Header));
 
 				Columns[1].Width = -2; // Header width
+
+				// Hack to prevent base class showing a 'no-drag' cursor
+				// until we can work out a better fix
+				IsTaskDraggable += (s, e) => { return true; };
 			}
 
             return true;

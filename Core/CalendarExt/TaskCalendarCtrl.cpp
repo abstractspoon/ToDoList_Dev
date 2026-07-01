@@ -1940,7 +1940,9 @@ BOOL CTaskCalendarCtrl::HitTest(const CPoint& ptScreen, IUIHITTESTRESULT& htRes)
 		return FALSE;
 
 	TCC_HITTEST nHit = TCCHT_NOWHERE;
+
 	htRes.dwTaskID = GetRealTaskID(HitTestTask(ptClient, nHit));
+	htRes.nResult = IUI_TASKTITLE;
 
 	switch (nHit)
 	{
@@ -1950,10 +1952,6 @@ BOOL CTaskCalendarCtrl::HitTest(const CPoint& ptScreen, IUIHITTESTRESULT& htRes)
 
 	case TCCHT_ICON:
 		htRes.nResult = IUI_TASKICON;
-		break;
-
-	default:
-		htRes.nResult = IUI_TASKTITLE;
 		break;
 	}
 

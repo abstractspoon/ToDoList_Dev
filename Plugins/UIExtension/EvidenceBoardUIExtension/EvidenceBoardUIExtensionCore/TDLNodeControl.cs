@@ -627,19 +627,24 @@ namespace EvidenceBoardUIExtension
 				var labelRect = GetNodeClientRect(node);
 				var task = GetTaskItem(node.Data);
 
+				result.taskId = task.TaskId;
+				result.result = UIExtension.HitTest.Task;
+
 				if (CalcIconRect(labelRect).Contains(ptClient))
 				{
 					result.result = UIExtension.HitTest.TaskIcon;
 				}
-				else if (CalcImageRect(task, labelRect, false).Contains(ptClient))
-				{
-					result.result = UIExtension.HitTest.Task;
-				}
-				else
+				else if (!task.HasImage)
 				{
 					result.result = UIExtension.HitTest.TaskTitle;
 				}
-				result.taskId = task.TaskId;
+				else if (!CalcImageRect(task, labelRect, false).Contains(ptClient))
+				{
+					// Check we are to the right of the icon to avoid 
+					// the expansion button and the spaces in between
+					if (ptClient.X > (labelRect.Left + (int)(UIExtension.TaskIcon.IconSize * ZoomFactor)))
+						result.result = UIExtension.HitTest.TaskTitle;
+				}
 			}
 			
 			return true;

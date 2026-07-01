@@ -773,12 +773,17 @@ namespace DayViewUIExtension
 				if (apptView == null)
 					return false;
 
+				result.result = UIExtension.HitTest.Task;
 				result.taskId = m_TaskItems.GetRealTaskId(appt);
 
 				if (apptView.IconRect.Contains(ptClient))
+				{
 					result.result = UIExtension.HitTest.TaskIcon;
-				else
+				}
+				else if (GetItemLabelRect(appt).Contains(ptClient))
+				{
 					result.result = UIExtension.HitTest.TaskTitle;
+				}
 			}
 			else if (GetTrueRectangle().Contains(ptClient))
 			{
@@ -865,6 +870,14 @@ namespace DayViewUIExtension
 			EnsureVisible(appt, false);
 			Update(); // make sure draw rects are updated
 
+			rect = GetItemLabelRect(appt);
+			return !rect.IsEmpty;
+		}
+
+		private Rectangle GetItemLabelRect(Calendar.Appointment appt)
+		{
+			Rectangle rect = Rectangle.Empty;
+
 			if (GetAppointmentRect(appt, ref rect))
 			{
 				TaskItem item = (appt as TaskItem);
@@ -901,11 +914,9 @@ namespace DayViewUIExtension
 
 					rect.Height = (m_RenderHelper.FontHeight + 4); // 4 = border
 				}
-
-				return true;
 			}
 
-			return false;
+			return rect;
 		}
 
 		private bool IsTodayVisible
