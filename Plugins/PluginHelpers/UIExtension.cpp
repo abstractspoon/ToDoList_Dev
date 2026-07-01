@@ -55,7 +55,6 @@ IUI_HITTEST UIExtension::MapHitTestResult(UIExtension::HitTest result)
 	case UIExtension::HitTest::Task:			return IUI_TASK;
 	case UIExtension::HitTest::TaskTitle:		return IUI_TASKTITLE;
 	case UIExtension::HitTest::TaskIcon:		return IUI_TASKICON;
-	case UIExtension::HitTest::TaskCheckbox:	return IUI_TASKCHECKBOX;
 	}
 
 	return IUI_NOWHERE;

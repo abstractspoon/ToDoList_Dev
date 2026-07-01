@@ -214,11 +214,7 @@ BOOL CTDLTaskTreeCtrl::HitTest(const CPoint& ptScreen, TDCHITTESTRESULT& htRes) 
 			{
 				htRes.nColumnID = TDCC_ICON;
 			}
-			else if (nFlags & TVHT_ONITEMSTATEICON)
-			{
-				htRes.nColumnID = TDCC_DONE;
-			}
-			else
+			else if (nFlags & (TVHT_ONITEMLABEL | TVHT_ONITEMRIGHT))
 			{
 				htRes.nColumnID = TDCC_CLIENT;
 			}

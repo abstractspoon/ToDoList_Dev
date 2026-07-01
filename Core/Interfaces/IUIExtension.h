@@ -185,7 +185,6 @@ enum IUI_HITTEST
 	IUI_TASK,
 	IUI_TASKTITLE,
 	IUI_TASKICON,
-	IUI_TASKCHECKBOX,
 
 	// new values here
 };

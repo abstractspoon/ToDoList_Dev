@@ -361,21 +361,17 @@ namespace MindMapUIExtension
 
 			if (node != null)
 			{
-				var labelRect = base.GetItemLabelRect(node);
+				result.taskId = UniqueID(node);
+				result.result = UIExtension.HitTest.Task;
 
-				if (CalcIconRect(labelRect).Contains(clientPos))
-				{
-					result.result = UIExtension.HitTest.TaskIcon;
-				}
-				else if (CalcCheckboxRect(labelRect).Contains(clientPos))
-				{
-					result.result = UIExtension.HitTest.TaskCheckbox;
-				}
-				else
+				if (GetItemLabelRect(node).Contains(clientPos))
 				{
 					result.result = UIExtension.HitTest.TaskTitle;
 				}
-				result.taskId = UniqueID(node);
+				else if (CalcIconRect(base.GetItemLabelRect(node)).Contains(clientPos))
+				{
+					result.result = UIExtension.HitTest.TaskIcon;
+				}
 			}
 
 			return true;

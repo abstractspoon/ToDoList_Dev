@@ -1703,11 +1703,10 @@ BOOL CKanbanColumnCtrl::HitTest(const CPoint& ptScreen, IUIHITTESTRESULT& htRes)
 	}
 	else
 	{
-		if (HitTestCheckbox(htiHit, ptClient))
-		{
-			htRes.nResult = IUI_TASKCHECKBOX;
-		}
-		else
+		htRes.dwTaskID = GetTaskID(htiHit);
+		htRes.nResult = IUI_TASK;
+
+		if (!HitTestCheckbox(htiHit, ptClient))
 		{
 			switch (HitTestImage(htiHit, ptClient))
 			{
@@ -1718,14 +1717,8 @@ BOOL CKanbanColumnCtrl::HitTest(const CPoint& ptScreen, IUIHITTESTRESULT& htRes)
 			case KBCI_NONE:
 				htRes.nResult = IUI_TASKTITLE;
 				break;
-
-			default:
-				htRes.nResult = IUI_TASK;
-				break;
 			}
 		}
-
-		htRes.dwTaskID = GetTaskID(htiHit);
 	}
 	
 	return TRUE;

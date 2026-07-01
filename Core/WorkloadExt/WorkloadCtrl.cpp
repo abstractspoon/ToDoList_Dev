@@ -2847,6 +2847,7 @@ BOOL CWorkloadCtrl::HitTest(const CPoint& ptScreen, IUIHITTESTRESULT& htRes) con
 	if (htiHit)
 	{
 		htRes.dwTaskID = GetTaskID(htiHit);
+		htRes.nResult = IUI_TASK;
 
 		if (nCol == WLCC_TITLE)
 		{
@@ -2854,18 +2855,10 @@ BOOL CWorkloadCtrl::HitTest(const CPoint& ptScreen, IUIHITTESTRESULT& htRes) con
 			{
 				htRes.nResult = IUI_TASKICON;
 			}
-			else if (nFlags & TVHT_ONITEMSTATEICON)
-			{
-				htRes.nResult = IUI_TASKCHECKBOX;
-			}
-			else
+			else if (nFlags & (TVHT_ONITEMLABEL | TVHT_ONITEMRIGHT))
 			{
 				htRes.nResult = IUI_TASKTITLE;
 			}
-		}
-		else
-		{
-			htRes.nResult = IUI_TASK;
 		}
 	}
 	else

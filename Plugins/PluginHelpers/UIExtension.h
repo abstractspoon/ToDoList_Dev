@@ -88,7 +88,6 @@ namespace Abstractspoon
 					Task,
 					TaskTitle,
 					TaskIcon,
-					TaskCheckbox,
 				};
 
 				// -----------------------------------------------
