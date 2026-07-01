@@ -1934,8 +1934,10 @@ BOOL CTaskCalendarCtrl::HitTest(const CPoint& ptScreen, IUIHITTESTRESULT& htRes)
 	CRect rClient;
 	GetClientRect(rClient);
 
-	if (!rClient.PtInRect(ptClient) /* || PtInHeader()*/)
-		return false;
+	rClient.top = m_nHeaderHeight;
+	
+	if (!rClient.PtInRect(ptClient))
+		return FALSE;
 
 	TCC_HITTEST nHit = TCCHT_NOWHERE;
 	htRes.dwTaskID = GetRealTaskID(HitTestTask(ptClient, nHit));
@@ -1943,7 +1945,7 @@ BOOL CTaskCalendarCtrl::HitTest(const CPoint& ptScreen, IUIHITTESTRESULT& htRes)
 	switch (nHit)
 	{
 	case TCCHT_NOWHERE:
-		htRes.nResult = IUI_TASK;
+		htRes.nResult = IUI_TASKLIST;
 		break;
 
 	case TCCHT_ICON:
@@ -1955,7 +1957,7 @@ BOOL CTaskCalendarCtrl::HitTest(const CPoint& ptScreen, IUIHITTESTRESULT& htRes)
 		break;
 	}
 
-	return true;
+	return TRUE;
 }
 
 DWORD CTaskCalendarCtrl::HitTestTask(const CPoint& ptClient, BOOL bRealTaskID) const
