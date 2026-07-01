@@ -14,30 +14,11 @@
 
 class CCalendarCtrlEx : public CCalendarCtrl
 {
-// Construction
 public:
 	CCalendarCtrlEx();
-
-// Attributes
-public:
-
-// Operations
-public:
-
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CCalendarCtrlEx)
-	//}}AFX_VIRTUAL
-
-// Implementation
-public:
 	virtual ~CCalendarCtrlEx();
 
-	// Generated message map functions
 protected:
-	//{{AFX_MSG(CCalendarCtrlEx)
-		// NOTE - the ClassWizard will add and remove member functions here.
-	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
 protected:
@@ -48,8 +29,5 @@ protected:
 };
 
 /////////////////////////////////////////////////////////////////////////////
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
 #endif // !defined(AFX_CALENDARCTRLEX_H__A8C8254B_FDE4_4844_9381_70A67A469B3E__INCLUDED_)

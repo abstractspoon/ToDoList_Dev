@@ -24,16 +24,10 @@ CCalendarCtrlEx::~CCalendarCtrlEx()
 {
 }
 
-
 BEGIN_MESSAGE_MAP(CCalendarCtrlEx, CCalendarCtrl)
-	//{{AFX_MSG_MAP(CCalendarCtrlEx)
-		// NOTE - the ClassWizard will add and remove mapping macros here.
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
-
 /////////////////////////////////////////////////////////////////////////////
-// CCalendarCtrlEx message handlers
 
 CString CCalendarCtrlEx::GetMonthName(const COleDateTime& date, BOOL bShort) const
 {
