@@ -2381,7 +2381,7 @@ BOOL CTaskCalendarCtrl::GetTaskLabelRect(DWORD dwTaskID, CRect& rLabel) const
 	}
 
 	if (pTCI->HasIcon(HasOption(TCCO_SHOWPARENTTASKSASFOLDER)))
-		rLabel.left += (IMAGE_SIZE + TIP_PADDING);
+		rLabel.left += (IMAGE_SIZE + TEXT_PADDING);
 
 	return TRUE;
 }
@@ -3688,8 +3688,8 @@ int CTaskCalendarCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 	}
 
 	TCC_HITTEST nHit;
-	CRect rHit;
-	DWORD dwTaskID = HitTestTask(point, nHit, rHit);
+	CRect rLabel;
+	DWORD dwTaskID = HitTestTask(point, nHit, rLabel);
 
 	// Don't show tooltip when hovering over 'ends'
 	if (dwTaskID && (nHit == TCCHT_MIDDLE))
@@ -3734,10 +3734,13 @@ int CTaskCalendarCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 				}
 				else
 				{
+					if (pTCI->HasIcon(HasOption(TCCO_SHOWPARENTTASKSASFOLDER)))
+						rLabel.left += (IMAGE_SIZE + TEXT_PADDING);
+
 					CFontCache& fonts = const_cast<CFontCache&>(m_fonts);
 
 					int nTextLen = GraphicsMisc::GetTextWidth(pTCI->GetName(), m_tooltip, fonts.GetHFont(pTCI->bTopLevel ? GMFS_BOLD : 0));
-					bWantTooltip = (nTextLen > rHit.Width());
+					bWantTooltip = (nTextLen > rLabel.Width());
 				}
 			}
 
@@ -3746,7 +3749,7 @@ int CTaskCalendarCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 		}
 
 		if (!sTooltip.IsEmpty())
-			return CToolTipCtrlEx::SetToolInfo(*pTI, this, sTooltip, dwTaskID, rHit);
+			return CToolTipCtrlEx::SetToolInfo(*pTI, this, sTooltip, dwTaskID, rLabel);
 	}
 
 	// else
@@ -3804,6 +3807,9 @@ void CTaskCalendarCtrl::OnShowTooltip(NMHDR* pNMHDR, LRESULT* pResult)
 
 			TCC_HITTEST nUnused;
 			VERIFY(HitTestTask(ptTip, nUnused, rLabel));
+
+			if (pTCI->HasIcon(HasOption(TCCO_SHOWPARENTTASKSASFOLDER)))
+				rLabel.left += (IMAGE_SIZE + TEXT_PADDING);
 		}
 
 		ClientToScreen(rLabel);
