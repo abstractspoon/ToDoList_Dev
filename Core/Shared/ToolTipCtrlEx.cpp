@@ -295,20 +295,24 @@ LRESULT CToolTipCtrlEx::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM 
 			{
 			case TTN_SHOW:
 				{
-					// Unhook at first opportunity
+					// Let owner go first
+					BOOL bHandled = ScDefault(m_scTool);
 					m_scTool.HookWindow(NULL);
 
-					// Set tip size and location
-					CRect rPos;
-					GetWindowRect(rPos);
+					if (!bHandled)
+					{
+						// Set tip size and location
+						CRect rPos;
+						GetWindowRect(rPos);
 
-					if (AdjustTipPosition(rPos) || FitTooltipToScreen(rPos))
-						SetWindowPos(NULL, rPos.left, rPos.top, rPos.Width(), rPos.Height(), (SWP_NOACTIVATE | SWP_NOZORDER));
+						if (AdjustTipPosition(rPos) || FitTooltipToScreen(rPos))
+							SetWindowPos(NULL, rPos.left, rPos.top, rPos.Width(), rPos.Height(), (SWP_NOACTIVATE | SWP_NOZORDER));
 
-					if (IsTracking())
-						m_sizeTrackingTooltip = rPos.Size();
-					else
-						m_sizeTrackingTooltip = CSize(0, 0);
+						if (IsTracking())
+							m_sizeTrackingTooltip = rPos.Size();
+						else
+							m_sizeTrackingTooltip = CSize(0, 0);
+					}
 
 					return TRUE; // we handled it
 				}
