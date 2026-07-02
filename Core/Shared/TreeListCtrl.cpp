@@ -1529,27 +1529,26 @@ BOOL CTreeListCtrl::OnPrimaryHeaderBeginTracking(NMHEADER* pHDN)
 
 BOOL CTreeListCtrl::OnTreeLButtonDown(UINT nFlags, CPoint point)
 {
-	UINT nHitFlags = 0;
-	HTREEITEM htiHit = m_tree.HitTest(point, &nHitFlags);
-
-	BOOL bHitCheck = (nHitFlags & TVHT_ONITEMSTATEICON);
-	BOOL bCtrlOrShift = (nFlags & (MK_CONTROL | MK_SHIFT));
-
+	// Update the selection
 	BOOL bSelChange = FALSE;
-
-	if (htiHit && (bCtrlOrShift || !bHitCheck))
-		TSH().OnTreeLButtonDown(nFlags, MAKELPARAM(point.x, point.y), bSelChange);
+	TSH().OnTreeLButtonDown(nFlags, MAKELPARAM(point.x, point.y), bSelChange);
 
 	ProcessSelectionChange(bSelChange);
 
 	// Handle checkbox clicking
-	if (!bCtrlOrShift && bHitCheck)
+	if (0 == (nFlags & (MK_CONTROL | MK_SHIFT)))
 	{
-		// Derived class gets first refusal
-		if (!OnTreeCheckChange(htiHit))
-			GetParent()->SendMessage(WM_TLC_ITEMCHECKCHANGE, GetDlgCtrlID(), (LPARAM)htiHit);
+		UINT nHitFlags = 0;
+		HTREEITEM htiHit = m_tree.HitTest(point, &nHitFlags);
 
-		return TRUE;
+		BOOL bHitCheck = (nHitFlags & TVHT_ONITEMSTATEICON);
+
+		if (bHitCheck)
+		{
+			// Derived class gets first refusal
+			if (!OnTreeCheckChange(htiHit))
+				GetParent()->SendMessage(WM_TLC_ITEMCHECKCHANGE, GetDlgCtrlID(), (LPARAM)htiHit);
+		}
 	}
 
 	return bSelChange;
