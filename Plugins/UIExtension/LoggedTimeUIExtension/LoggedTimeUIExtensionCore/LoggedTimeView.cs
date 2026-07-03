@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading;
 
+using IIControls;
 using Abstractspoon.Tdl.PluginHelpers;
 
 namespace LoggedTimeUIExtension
@@ -105,13 +106,10 @@ namespace LoggedTimeUIExtension
 			if (IsResizingAppointment())
 				return null;
 
-			var tip = new LabelTipInfo()
-			{
-				Font = BaseFont(),
-			};
-
 			var pt = PointToClient(ptScreen);
-			var apptView = GetAppointmentViewAt(pt.X, pt.Y, out tip.Rect);
+			var tipRect = Rectangle.Empty;
+
+			var apptView = GetAppointmentViewAt(pt.X, pt.Y, out tipRect);
 
 			if (apptView == null)
 				return null;
@@ -130,13 +128,23 @@ namespace LoggedTimeUIExtension
 			if (entry.HasTitle)
 				text.Insert(0, entry.Title);
 
-			tip.Id = entry.Id;
-			tip.MultiLine = true; // always
-			tip.Text = string.Join("\n", text);
+			// Display as regular tooltip
+			pt.Offset(m_RenderHelper.TextPadding, ToolStripEx.GetActualCursorHeight(Cursor));
+			tipRect.Location = pt;
 
 			// Inflate the rect now we've done all our calculations
-			tip.Rect.Inflate(m_RenderHelper.TextPadding, m_RenderHelper.TextPadding);
+			tipRect.Inflate(m_RenderHelper.TextPadding, m_RenderHelper.TextPadding);
 
+			var tip = new LabelTipInfo()
+			{
+				Font = BaseFont(),
+				Rect = tipRect,
+				Id = entry.Id,
+				MultiLine = true, // always
+				Text = string.Join("\n", text),
+				InitialDelay = 500,
+			};
+			
 			return tip;
 		}
 		
