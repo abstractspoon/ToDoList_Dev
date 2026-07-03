@@ -48,7 +48,6 @@ namespace LoggedTimeUIExtension
 
 		// ----------------------------------------------------------------
 
-		public new event TDLContextMenuEventHandler ContextMenu;
 		public event LogAccessStatusEventHandler LogAccessStatusChanged;
 
 		// ----------------------------------------------------------------
@@ -472,11 +471,6 @@ namespace LoggedTimeUIExtension
 			Invalidate();
         }
 
-		public bool AppointmentSupportsTaskContextMenu(Calendar.Appointment appt)
-		{
-			return ((appt != null) && (appt is LogEntry));
-		}
-
 		private bool IsTodayVisible
 		{
 			get
@@ -879,14 +873,6 @@ namespace LoggedTimeUIExtension
 			// Cancel resizing if our task is not editable
 			if (IsResizingAppointment() && !CanModifySelectedLogEntry)
 				CancelAppointmentResizing();
-		}
-
-		protected override void OnMouseClick(MouseEventArgs e)
-		{
-			if ((e.Button == MouseButtons.Right) && (ContextMenu?.Invoke(this, e) == true))
-				return; // handled
-						
-			base.OnMouseClick(e);
 		}
 
 		private Calendar.SelectionTool.Mode GetMode(Calendar.Appointment appt, Point mousePos)

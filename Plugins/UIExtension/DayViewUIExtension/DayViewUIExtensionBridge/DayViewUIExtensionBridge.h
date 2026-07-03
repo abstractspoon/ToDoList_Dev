@@ -60,7 +60,6 @@ public:
    bool PrepareNewTask(ITaskList* pTask) const;
 
    bool ProcessMessage(MSG* pMsg);
-   void FilterToolTipMessage(MSG* pMsg) {/*.Net tooltips don't need this*/}
    bool DoIdleProcessing();
 
    bool DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData);
@@ -68,6 +67,7 @@ public:
 
    bool GetLabelEditRect(LPRECT pEdit); // screen coordinates
    bool HitTest(POINT ptScreen, IUIHITTESTRESULT& htRes) const;
+   bool ShowContextMenu(POINT ptScreen);
 
    void SetUITheme(const UITHEME* pTheme);
    void SetReadOnly(bool bReadOnly);
@@ -76,7 +76,10 @@ public:
 
    void SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const;
    void LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey, bool bAppOnly);
-   
+
+   // Not requird
+   void FilterToolTipMessage(MSG* /*pMsg*/) { }
+
 protected:
    gcroot<DayViewUIExtensionCore^> m_wnd;
    ITransText* m_pTT;

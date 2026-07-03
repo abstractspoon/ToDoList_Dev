@@ -3495,46 +3495,50 @@ void CTaskCalendarCtrl::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 	CCalendarCtrlEx::OnKeyDown(nChar, nRepCnt, nFlags);
 }
 
-void CTaskCalendarCtrl::OnContextMenu(CWnd* pWnd, CPoint pos)
+BOOL CTaskCalendarCtrl::ShowContextMenu(const CPoint& ptScreen)
 {
-	if (GetSelectedTaskID() == 0)
-		return ;
+	if (!IsCustomDate(m_dwSelectedTaskID))
+		return FALSE;
 
-	TASKCALITEM* pTCI = GetTaskCalItem(m_dwSelectedTaskID);
-	ASSERT(pTCI);
+	CPoint ptMenu(ptScreen);
 
-	if (pTCI && ISCUSTOMDATE(pTCI))
+	if (ptMenu == CPoint(-1, -1))
 	{
-		CMenu menu;
+		CRect rLabel;
 
-		if (menu.LoadMenu(IDR_CUSTOMDATE_POPUP))
-		{
-			CMenu* pPopup = menu.GetSubMenu(0);
+		if (!GetTaskLabelRect(m_dwSelectedTaskID, rLabel))
+			return FALSE;
 
-			if (pPopup)
-			{
-				// check pos
-				if (pos.x == -1 && pos.y == -1)
-				{
-					pos = GetCaretPos();
-					::ClientToScreen(*this, &pos);
-				}
-
-				UINT nCmdID = pPopup->TrackPopupMenu(TPM_LEFTALIGN | TPM_LEFTBUTTON | TPM_RETURNCMD, pos.x, pos.y, this);
-
-				switch (nCmdID)
-				{
-				case ID_CAL_CLEARCUSTOMDATE:
-					ClearSelectedCustomDate();
-					break;
-				}
-			}
-		}
-
-		return;
+		ptMenu = rLabel.CenterPoint();
+		ClientToScreen(&ptMenu);
 	}
 
-	CCalendarCtrlEx::OnContextMenu(pWnd, pos);
+	// Sanity check
+#ifdef _DEBUG
+	CPoint ptClient(ptMenu);
+	ScreenToClient(&ptClient);
+
+	ASSERT(HitTestTask(ptClient, FALSE) == m_dwSelectedTaskID);
+#endif
+
+	CMenu menu;
+
+	if (menu.LoadMenu(IDR_CUSTOMDATE_POPUP))
+	{
+		CMenu* pPopup = menu.GetSubMenu(0);
+
+		if (pPopup)
+		{
+			switch (pPopup->TrackPopupMenu(TPM_LEFTALIGN | TPM_LEFTBUTTON | TPM_RETURNCMD, ptMenu.x, ptMenu.y, this))
+			{
+			case ID_CAL_CLEARCUSTOMDATE:
+				ClearSelectedCustomDate();
+				break;
+			}
+		}
+	}
+
+	return TRUE;
 }
 
 BOOL CTaskCalendarCtrl::IsCellScrollBarActive() const

@@ -51,6 +51,7 @@ public:
 	BOOL SelectTask(DWORD dwTaskID, BOOL bEnsureVisible);
 	BOOL SelectTask(const IUISELECTTASK& select, IUI_APPCOMMAND nCmd);
 
+	BOOL ShowContextMenu(const CPoint& ptScreen);
 	BOOL HitTest(const CPoint& ptScreen, IUIHITTESTRESULT& htRes) const;
 	DWORD GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const;
 	BOOL CanGetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const;
@@ -138,7 +139,6 @@ protected:
 	afx_msg void OnShowTooltip(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
-	afx_msg void OnContextMenu(CWnd* pWnd, CPoint pos);
 
 	afx_msg LRESULT OnGetFont(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnSetFont(WPARAM wp, LPARAM lp);

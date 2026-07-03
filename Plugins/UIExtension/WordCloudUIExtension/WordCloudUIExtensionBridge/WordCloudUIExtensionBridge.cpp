@@ -323,6 +323,11 @@ bool CWordCloudUIExtensionBridgeWindow::HitTest(POINT ptScreen, IUIHITTESTRESULT
 	return true;
 }
 
+bool CWordCloudUIExtensionBridgeWindow::ShowContextMenu(POINT ptScreen)
+{
+	return m_wnd->ShowContextMenu(ptScreen.x, ptScreen.y);
+}
+
 void CWordCloudUIExtensionBridgeWindow::SetUITheme(const UITHEME* pTheme)
 {
 	msclr::auto_gcroot<UITheme^> theme = gcnew UITheme(pTheme);

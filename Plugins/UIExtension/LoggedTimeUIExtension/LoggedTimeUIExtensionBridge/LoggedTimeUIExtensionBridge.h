@@ -56,8 +56,8 @@ public:
    bool WantTaskUpdate(TDC_ATTRIBUTE nAttribID) const;
 
    bool ProcessMessage(MSG* pMsg);
-   void FilterToolTipMessage(MSG* pMsg) {/*.Net tooltips don't need this*/}
    bool DoIdleProcessing();
+   bool ShowContextMenu(POINT ptScreen);
 
    bool DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData);
    bool CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA* pData) const;
@@ -70,13 +70,14 @@ public:
    void SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const;
    void LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey, bool bAppOnly);
 
-   // Unsupported
-   bool SelectTask(DWORD dwTaskID, bool bTaskLink) { return false; }
-   bool SelectTasks(const DWORD* pdwTaskIDs, int nTaskCount) { return false; }
-   bool PrepareNewTask(ITaskList* pTask) const { return false; }
-   bool GetLabelEditRect(LPRECT pEdit) { return false; }
-   bool HitTest(POINT ptScreen, IUIHITTESTRESULT& htRes) const { return false; }
-   
+   // Not required
+   bool SelectTask(DWORD /*dwTaskID*/, bool /*bTaskLink*/) { return false; }
+   bool SelectTasks(const DWORD* /*pdwTaskIDs*/, int /*nTaskCount*/) { return false; }
+   bool PrepareNewTask(ITaskList* /*pTask*/) const { return false; }
+   bool GetLabelEditRect(LPRECT /*pEdit*/) { return false; }
+   bool HitTest(POINT /*ptScreen*/, IUIHITTESTRESULT& /*htRes*/) const { return false; }
+   void FilterToolTipMessage(MSG* /*pMsg*/) { }
+
 protected:
    gcroot<LoggedTimeUIExtensionCore^> m_wnd;
    ITransText* m_pTT;

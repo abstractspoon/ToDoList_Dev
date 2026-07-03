@@ -57,7 +57,7 @@ public:
 	bool DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData);
 	bool CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA* pData) const;
 
-	// Unsupported IUIExtensionWindow methods
+	// Not required
 	bool DoIdleProcessing() { return false; }
 	bool ProcessMessage(MSG* /*pMsg*/) { return false; }
 	void SetReadOnly(bool /*bReadOnly*/) {}
@@ -66,6 +66,7 @@ public:
 	bool HitTest(POINT /*ptScreen*/, IUIHITTESTRESULT& /*htRes*/) const { return false; }
 	bool SelectTask(DWORD /*dwTaskID*/, bool /*bTaskLink*/) { return false; }
 	bool SelectTasks(const DWORD* /*pdwTaskIDs*/, int /*nTaskCount*/) { return false; }
+	bool ShowContextMenu(POINT /*ptScreen*/) { return false; }
 
 protected:
 	CIcon m_icon;

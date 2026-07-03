@@ -186,6 +186,62 @@ namespace LoggedTimeUIExtension
             }
  		}
 
+		public bool ShowContextMenu(Int32 xScreen, Int32 yScreen)
+		{
+			Point ptMenu = m_TimeLog.PointToClient(new Point(xScreen, yScreen));
+			var appt = m_TimeLog.SelectedAppointment;
+
+			if ((xScreen == -1) && (yScreen == -1))
+			{
+				Rectangle rect = Rectangle.Empty;
+				m_TimeLog.GetAppointmentRect(appt, ref rect);
+
+				if (rect.IsEmpty)
+				{
+					rect = m_TimeLog.DaySelectionRect;
+
+					if (rect.IsEmpty)
+						rect = ClientRectangle;
+				}
+
+				ptMenu = RectUtil.CentrePoint(rect);
+			}
+			else if (m_TimeLog.GetTrueRectangle().Contains(ptMenu))
+			{
+				appt = m_TimeLog.GetAppointmentAt(ptMenu.X, ptMenu.Y);
+
+				if ((appt != null) && (appt != m_TimeLog.SelectedAppointment))
+					m_TimeLog.SelectedAppointment = appt;
+			}
+			else
+			{
+				return true;
+			}
+
+			var menu = new ContextMenuStrip();
+
+			var item = AddMenuItem(menu, "New Log Entry", Keys.None, 6);
+			item.Enabled = ((m_TimeLog.CanAddNewLogEntry || !m_TimeLog.HasTasklistPath) && (appt == null));
+			item.Click += (s, a) => { OnCreateLogEntry(this, new EventArgs()); };
+
+			item = AddMenuItem(menu, "Edit Log Entry", (Keys.Control | Keys.F2), 7);
+			item.Enabled = m_TimeLog.CanModifySelectedLogEntry;
+			item.Click += (s, a) => { OnEditLogEntry(this, new EventArgs()); };
+
+			item = AddMenuItem(menu, "Delete Log Entry", Keys.Delete, 8);
+			item.Enabled = m_TimeLog.CanDeleteSelectedLogEntry;
+			item.Click += (s, a) => { OnDeleteLogEntry(this, new EventArgs()); };
+
+			menu.Items.Add(new ToolStripSeparator());
+			menu.Items.Add("Cancel");
+
+			m_Trans.Translate(menu.Items, true);
+
+			menu.Renderer = m_ToolbarRenderer;
+			menu.Show(m_TimeLog, ptMenu);
+
+			return true; // always
+		}
 
 		// Unsupported requirements
 		public bool SelectTask(UInt32 dwTaskID) { return false; }
@@ -247,7 +303,6 @@ namespace LoggedTimeUIExtension
 			m_TimeLog.WeekChange += new Calendar.WeekChangeEventHandler(OnTimeLogWeekChanged);
 			m_TimeLog.MouseWheel += new MouseEventHandler(OnTimeLogMouseWheel);
 			m_TimeLog.MouseDoubleClick += new MouseEventHandler(OnTimeLogMouseDoubleClick);
-			m_TimeLog.ContextMenu += new TDLContextMenuEventHandler(OnTimeLogContextMenu);
 			m_TimeLog.LogAccessStatusChanged += new LogAccessStatusEventHandler(OnTimeLogAccessStatusChanged);
 
 			m_TimeLog.StartDate = DateTime.Now;
@@ -278,37 +333,6 @@ namespace LoggedTimeUIExtension
 		void OnTimeLogAccessStatusChanged(object sender, LogAccessEventArgs e)
 		{
 			UpdateToolbarButtonStates();
-		}
-
-		bool OnTimeLogContextMenu(object sender, MouseEventArgs e)
-		{
-			if (m_TimeLog.GetTrueRectangle().Contains(e.X, e.Y))
-			{
-				var appt = m_TimeLog.GetAppointmentAt(e.X, e.Y);
-				var menu = new ContextMenuStrip();
-
-				var item = AddMenuItem(menu, "New Log Entry", Keys.None, 6);
-				item.Enabled = ((m_TimeLog.CanAddNewLogEntry || !m_TimeLog.HasTasklistPath) && (appt == null));
-				item.Click += (s, a) => { OnCreateLogEntry(sender, e); };
-
-				item = AddMenuItem(menu, "Edit Log Entry", (Keys.Control | Keys.F2), 7);
-				item.Enabled = m_TimeLog.CanModifySelectedLogEntry;
-				item.Click += (s, a) => { OnEditLogEntry(sender, e); };
-
-				item = AddMenuItem(menu, "Delete Log Entry", Keys.Delete, 8);
-				item.Enabled = m_TimeLog.CanDeleteSelectedLogEntry;
-				item.Click += (s, a) => { OnDeleteLogEntry(sender, e); };
-
-				menu.Items.Add(new ToolStripSeparator());
-				menu.Items.Add("Cancel");
-
-				m_Trans.Translate(menu.Items, true);
-
-				menu.Renderer = m_ToolbarRenderer;
-				menu.Show(m_TimeLog, e.Location);
-			}
-
-			return true; // handled
 		}
 
 		private void CreateWeekLabel()

@@ -32,7 +32,6 @@ namespace DayViewUIExtension
 	}
 
 	public delegate void TDLAppointmentEventHandler(object sender, TDLMoveAppointmentEventArgs args);
-	public delegate bool TDLContextMenuEventHandler(object sender, MouseEventArgs args);
 
 	// ------------------------------------------------------------------------------
 
@@ -74,7 +73,6 @@ namespace DayViewUIExtension
 		// ----------------------------------------------------------------
 
 		public new event TDLAppointmentEventHandler AppointmentMove;
-		public new event TDLContextMenuEventHandler ContextMenu;
 
 		// ----------------------------------------------------------------
 
@@ -1513,16 +1511,6 @@ namespace DayViewUIExtension
 					CancelAppointmentResizing();
 				}
 			}
-		}
-
-		protected override void OnMouseClick(MouseEventArgs e)
-		{
-			if ((e.Button == MouseButtons.Right) && (ContextMenu?.Invoke(this, e) == true))
-			{
-				return; // handled
-			}
-						
-			base.OnMouseClick(e);
 		}
 
 		private Calendar.SelectionTool.Mode GetMode(Calendar.Appointment appt, Point mousePos)

@@ -65,6 +65,7 @@ public:
 
    bool GetLabelEditRect(LPRECT pEdit); // screen coordinates
    bool HitTest(POINT ptScreen, IUIHITTESTRESULT& htRes) const;
+   bool ShowContextMenu(POINT ptScreen) { /*TODO*/ return false; }
 
    void SetUITheme(const UITHEME* pTheme);
    void SetReadOnly(bool bReadOnly);

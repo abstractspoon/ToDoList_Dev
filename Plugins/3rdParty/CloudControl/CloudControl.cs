@@ -179,14 +179,13 @@ namespace Gma.CodeCloud.Controls
         
         protected override void OnMouseMove(MouseEventArgs e)
         {
-            LayoutItem nextItemUnderMouse;
-            Point mousePositionRelativeToControl = this.PointToClient(new Point(MousePosition.X, MousePosition.Y));
-            this.TryGetItemAtLocation(mousePositionRelativeToControl, out nextItemUnderMouse);
-            if (nextItemUnderMouse != m_ItemUnderMouse)
+			var item = HitTest(MousePosition);
+
+			if (item != m_ItemUnderMouse)
             {
-                if (nextItemUnderMouse != null)
+                if (item != null)
                 {
-                    Rectangle newRectangleToInvalidate = RectangleGrow(nextItemUnderMouse.Rectangle, 6);
+                    Rectangle newRectangleToInvalidate = RectangleGrow(item.Rectangle, 6);
                     this.Invalidate(newRectangleToInvalidate);
                 }
                 if (m_ItemUnderMouse != null)
@@ -194,12 +193,21 @@ namespace Gma.CodeCloud.Controls
                     Rectangle prevRectangleToInvalidate = RectangleGrow(m_ItemUnderMouse.Rectangle, 6);
                     this.Invalidate(prevRectangleToInvalidate);
                 }
-                m_ItemUnderMouse = nextItemUnderMouse;
+                m_ItemUnderMouse = item;
             }
             base.OnMouseMove(e);
         }
 
-        protected override void OnResize(EventArgs eventargs)
+		protected LayoutItem HitTest(Point ptScreen)
+		{
+			LayoutItem item = null;
+			Point ptClient = this.PointToClient(ptScreen);
+
+			this.TryGetItemAtLocation(ptClient, out item);
+			return item;
+		}
+
+		protected override void OnResize(EventArgs eventargs)
         {
             BuildLayout();
             base.OnResize(eventargs);
@@ -329,16 +337,27 @@ namespace Gma.CodeCloud.Controls
             return m_Layout.GetWordsInArea(area);
         }
 
-        public bool TryGetItemAtLocation(Point location, out LayoutItem foundItem)
-        {
-            foundItem = null;
-            IEnumerable<LayoutItem> itemsInArea = GetItemsInArea(new RectangleF(location, new SizeF(0, 0)));
-            foreach (LayoutItem item in itemsInArea)
-            {
-                foundItem = item;
-                return true;
-            }
-            return false;
-        }
-    }
+		public LayoutItem GetItem(string word)
+		{
+			foreach (var item in GetItemsInArea(ClientRectangle))
+			{
+				if (item.Word.Text == word)
+					return item;
+			}
+
+			return null;
+		}
+
+		public bool TryGetItemAtLocation(Point location, out LayoutItem foundItem)
+		{
+			foundItem = null;
+			IEnumerable<LayoutItem> itemsInArea = GetItemsInArea(new RectangleF(location, new SizeF(0, 0)));
+			foreach (LayoutItem item in itemsInArea)
+			{
+				foundItem = item;
+				return true;
+			}
+			return false;
+		}
+	}
 }

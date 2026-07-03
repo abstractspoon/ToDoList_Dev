@@ -250,3 +250,7 @@ void CLoggedTimeUIExtensionBridgeWindow::LoadPreferences(const IPreferences* pPr
 	m_wnd->LoadPreferences(prefs.get(), key.get(), bAppOnly);
 }
 
+bool CLoggedTimeUIExtensionBridgeWindow::ShowContextMenu(POINT ptScreen)
+{
+	return m_wnd->ShowContextMenu(ptScreen.x, ptScreen.y);
+}

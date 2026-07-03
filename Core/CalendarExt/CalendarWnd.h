@@ -48,6 +48,7 @@ public:
 
 	bool GetLabelEditRect(LPRECT pEdit);
 	bool HitTest(POINT ptScreen, IUIHITTESTRESULT& htRes) const;
+	bool ShowContextMenu(POINT ptScreen);
 
 	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool bAppOnly);
 	void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;

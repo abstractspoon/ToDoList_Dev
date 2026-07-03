@@ -424,6 +424,67 @@ namespace WordCloudUIExtension
 			return m_TaskMatchesList.HitTest(new Point(xScreen, yScreen), result);
 		}
 
+		public bool ShowContextMenu(Int32 xScreen, Int32 yScreen)
+		{
+			bool keyboardMenu = ((xScreen == -1) && (yScreen == -1));
+
+			if (keyboardMenu && !m_WordCloud.Focused)
+				return false;
+
+			var ptScreen = new Point(xScreen, yScreen);
+			var ptMenu = m_WordCloud.PointToClient(ptScreen);
+
+			if (!keyboardMenu && !m_WordCloud.ClientRectangle.Contains(ptMenu))
+				return false;
+
+			if (String.IsNullOrEmpty(m_UserIgnoreFilePath))
+				return true; // handled
+
+			if (keyboardMenu)
+			{
+				var selItem = m_WordCloud.SelectedItem;
+
+				if (selItem == null)
+					return true; // handled
+
+				ptMenu = RectUtil.CentrePoint(Rectangle.Ceiling(selItem.Rectangle));
+			}
+			else
+			{
+				var word = m_WordCloud.HitTestWord(ptScreen);
+
+				if (word == null)
+					return true; // handled
+
+				m_WordCloud.SelectedWord = word;
+			}
+
+			var menu = new ContextMenuStrip();
+
+			string format = m_Trans.Translate("&Ignore '{0}'", Translator.Type.Menu);
+			string menuText = string.Format(format, m_WordCloud.SelectedWord);
+			var item = menu.Items.Add(menuText);
+
+			item.Click += OnWordCloudIgnoreWord;
+			item.Tag = m_WordCloud.SelectedWord;
+			item.Image = m_TBImageList.Images[0];
+			item.Name = "IgnoreWord";
+
+			item = menu.Items.Add(m_Trans.Translate("&Edit Ignore List", Translator.Type.Menu));
+
+			item.Click += OnWordCloudEditIgnoreList;
+			item.Image = m_TBImageList.Images[1];
+			item.Name = "EditIgnoreList";
+
+			int imageSize = DPIScaling.Scale(16);
+
+			menu.ImageScalingSize = new Size(imageSize, imageSize);
+			menu.Renderer = new UIThemeToolbarRenderer();
+			menu.Show(m_WordCloud, ptMenu);
+	
+			return true;
+		}
+
 		public void SetUITheme(UITheme theme)
 		{
             this.BackColor = m_Toolbar.BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight);
@@ -600,13 +661,11 @@ namespace WordCloudUIExtension
 			m_WordCloud.Size = new Size(100, 100);
 			m_WordCloud.Cursor = Cursors.Default;
 			m_WordCloud.LayoutType = Gma.CodeCloud.Controls.LayoutType.Spiral;
+            m_WordCloud.SetFont(FontName, 10); // default
 
 			this.Controls.Add(m_WordCloud);
 
 			m_WordCloud.SelectionChange += new SelectionChangeEventHandler(OnWordSelectionChanged);
-			m_WordCloud.MouseClick += new MouseEventHandler(OnWordCloudMouseClick);
-
-            m_WordCloud.SetFont(FontName, 10); // default
 		}
 
 		private void CreateTaskMatchesListView()
@@ -934,35 +993,6 @@ namespace WordCloudUIExtension
 				{
 					m_TaskMatchesList.Columns[0].Text = headerText;
 				}
-			}
-		}
-
-		private void OnWordCloudMouseClick(object sender, MouseEventArgs e)
-		{
-			if (!String.IsNullOrEmpty(m_UserIgnoreFilePath) && (e.Button == MouseButtons.Right) && m_WordCloud.HasItemUnderMouse())
-			{
-				var menu = new ContextMenuStrip();
-
-				string format = m_Trans.Translate("&Ignore '{0}'", Translator.Type.Menu);
-				string menuText = string.Format(format, m_WordCloud.SelectedWord);
-				var item = menu.Items.Add(menuText);
-
-				item.Click += OnWordCloudIgnoreWord;
-				item.Tag = m_WordCloud.SelectedWord;
-				item.Image = m_TBImageList.Images[0];
-				item.Name = "IgnoreWord";
-
-				item = menu.Items.Add(m_Trans.Translate("&Edit Ignore List", Translator.Type.Menu));
-
-				item.Click += OnWordCloudEditIgnoreList;
-				item.Image = m_TBImageList.Images[1];
-				item.Name = "EditIgnoreList";
-
-				int imageSize = DPIScaling.Scale(16);
-
-				menu.ImageScalingSize = new Size(imageSize, imageSize);
-				menu.Renderer = new UIThemeToolbarRenderer();
-				menu.Show(m_WordCloud, e.Location);
 			}
 		}
 

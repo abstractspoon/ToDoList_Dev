@@ -76,7 +76,10 @@ public:
 
    void SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const;
    void LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey, bool bAppOnly = FALSE);
-   
+
+   // Not required
+   bool ShowContextMenu(POINT /*ptScreen*/) { return false; }
+
 protected:
    gcroot<MindMapUIExtensionCore^> m_wnd;
    ITransText* m_pTT;

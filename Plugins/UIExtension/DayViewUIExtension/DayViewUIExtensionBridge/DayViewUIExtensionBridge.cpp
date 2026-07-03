@@ -327,6 +327,11 @@ bool CDayViewUIExtensionBridgeWindow::HitTest(POINT ptScreen, IUIHITTESTRESULT& 
 	return true;
 }
 
+bool CDayViewUIExtensionBridgeWindow::ShowContextMenu(POINT ptScreen)
+{
+	return m_wnd->ShowContextMenu(ptScreen.x, ptScreen.y);
+}
+
 void CDayViewUIExtensionBridgeWindow::SetUITheme(const UITHEME* pTheme)
 {
 	msclr::auto_gcroot<UITheme^> theme = gcnew UITheme(pTheme);

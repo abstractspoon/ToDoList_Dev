@@ -368,6 +368,7 @@ public:
 
 	virtual bool GetLabelEditRect(LPRECT pEdit) = 0; // screen coordinates
 	virtual bool HitTest(POINT ptScreen, IUIHITTESTRESULT& htRes) const = 0;
+	virtual bool ShowContextMenu(POINT ptScreen) = 0;
 
 	virtual void SetUITheme(const UITHEME* pTheme) = 0;
 	virtual void SetTaskFont(HFONT hFont) = 0;
