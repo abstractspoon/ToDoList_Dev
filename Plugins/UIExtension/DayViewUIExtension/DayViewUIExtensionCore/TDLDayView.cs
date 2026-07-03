@@ -128,24 +128,46 @@ namespace DayViewUIExtension
 			if (IsResizingAppointment())
 				return null;
 
-			var tip = new LabelTipInfo()
-			{
-				Font = BaseFont(),
-			};
-
 			var pt = PointToClient(ptScreen);
-			var tdlView = (GetAppointmentViewAt(pt.X, pt.Y, out tip.Rect) as TDLAppointmentView);
+
+			var tipRect = Rectangle.Empty;
+			var tdlView = (GetAppointmentViewAt(pt.X, pt.Y, out tipRect) as TDLAppointmentView);
 
 			if (tdlView == null)
 				return null;
 
-			bool startPortion = (tip.Rect.Right < tdlView.Rectangle.Right);
+			var appt = GetRealAppointment(tdlView.Appointment);
 
-			tip.Rect.Offset(startPortion ? tdlView.TextHorzOffset : 0, m_RenderHelper.TextOffset);
+			var tip = new LabelTipInfo()
+			{
+				Font = m_RenderHelper.GetFont(GetTaskFontStyle(tdlView.Appointment)),
+				Id = appt.Id,
+				MultiLine = false, // always
+			};
 
-			var appt = tdlView.Appointment;
-			tip.Id = appt.Id;
+			// Tip position
+			int xOffset = 0;
 
+			if (!IsLongAppt(appt) || DisplayLongTasksContinuous)
+			{
+				TaskItem item = (appt as TaskItem);
+
+				if (TaskHasIcon(item))
+					xOffset += (m_RenderHelper.ImageSize + (2 * m_RenderHelper.TextPadding));
+			}
+			else
+			{
+				bool startPortion = (tipRect.Right < tdlView.Rectangle.Right);
+
+				if (startPortion)
+					xOffset += tdlView.TextHorzOffset;
+			}
+
+			tipRect.Offset(xOffset, m_RenderHelper.TextOffset);
+			tipRect.Width -= xOffset;
+			tip.Rect = tipRect;
+
+			// Tip text and size
 			if (appt is TaskExtensionItem)
 			{
 				// NOTE: - Must match 'Calendar' View in 'Core' project
@@ -186,8 +208,6 @@ namespace DayViewUIExtension
 
 					if ((tipSize.Width <= tip.Rect.Width) && (tipSize.Height <= tip.Rect.Height))
 						return null;
-
-					tip.MultiLine = false; // always
 				}
 				else
 				{
@@ -209,8 +229,6 @@ namespace DayViewUIExtension
 						if ((tipSize.Width <= tip.Rect.Width) && (tipSize.Height <= tip.Rect.Height))
 							return null;
 					}
-
-					tip.MultiLine = true; // always
 				}
 			}
 
@@ -879,39 +897,37 @@ namespace DayViewUIExtension
 			if (GetAppointmentRect(appt, ref rect))
 			{
 				TaskItem item = (appt as TaskItem);
+
 				bool hasIcon = TaskHasIcon(item);
+				int xOffset = 0;
+
+				if (hasIcon)
+					xOffset += (m_RenderHelper.ImageSize + (2 * m_RenderHelper.TextPadding));
 
 				if (IsLongAppt(appt))
 				{
 					// Gripper
 					if (appt.StartDate >= StartDate)
-						rect.X += 8;
+						xOffset += 8;
 					else
-						rect.X -= 3;
+						xOffset -= 3;
 
-					if (hasIcon)
-						rect.X += 16;
-
-					rect.X += 1;
+					xOffset += 1;
 					rect.Height += 1;
 				}
 				else
 				{
-					if (hasIcon)
-					{
-						rect.X += 18;
-					}
-					else
-					{
-						// Gripper
-						rect.X += 8;
-					}
+					if (!hasIcon)
+						xOffset += 8; // Gripper
 
-					rect.X += 1;
+					xOffset += 1;
 					rect.Y += 1;
 
-					rect.Height = (m_RenderHelper.FontHeight + 4); // 4 = border
+					rect.Height = (m_RenderHelper.FontHeight + (2 * m_RenderHelper.TextPadding));
 				}
+
+				rect.X += xOffset;
+				rect.Width -= xOffset;
 			}
 
 			return rect;
