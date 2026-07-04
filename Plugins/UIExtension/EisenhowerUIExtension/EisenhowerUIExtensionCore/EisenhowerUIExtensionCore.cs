@@ -158,11 +158,6 @@ namespace EisenhowerUIExtension
 			return m_EisenhowerCtrl.HasSelection;
 		}
 
-		public bool WantSortUpdate(Task.Attribute attrib)
-		{
-			return false;
-		}
-
 		public bool PrepareNewTask(ref Task task)
 		{
 			return m_EisenhowerCtrl.PrepareNewTask(ref task);

@@ -89,11 +89,6 @@ namespace MindMapUIExtension
             return m_MindMap.WantTaskUpdate(attrib);
         }
 
-        public bool WantSortUpdate(Task.Attribute attrib)
-        {
-            return false;
-        }
-
         public bool PrepareNewTask(ref Task task)
         {
             return true;
