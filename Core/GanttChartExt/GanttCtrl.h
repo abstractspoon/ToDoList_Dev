@@ -37,7 +37,7 @@ public:
 	BOOL SetFont(HFONT hFont, BOOL bRedraw = TRUE);
 
 	void UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate);
-	bool PrepareNewTask(ITaskList* pTask) const;
+	BOOL PrepareNewTask(ITaskList* pTask) const;
 	BOOL CancelOperation();
 
 	BOOL SelectTask(DWORD dwTaskID);

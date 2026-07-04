@@ -612,6 +612,13 @@ DWORD CCalendarWnd::HitTestTask(POINT ptScreen, IUI_HITTESTREASON nReason) const
 	return dwTaskID;
 }
 
+bool CCalendarWnd::ShowContextMenu(POINT ptScreen)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	return (m_BigCalendar.ShowContextMenu(ptScreen) != FALSE);
+}
+
 bool CCalendarWnd::SelectTask(DWORD dwTaskID, bool /*bTaskLink*/)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());

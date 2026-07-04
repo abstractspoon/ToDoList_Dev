@@ -54,7 +54,6 @@ public:
 
    bool SelectTask(DWORD dwTaskID, bool bTaskLink);
    bool SelectTasks(const DWORD* pdwTaskIDs, int nTaskCount);
-   bool SupportsTaskSelection() const { return false; }
 
    void UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate);
    bool WantTaskUpdate(TDC_ATTRIBUTE nAttribID) const;
@@ -78,7 +77,10 @@ public:
 
    void SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const;
    void LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey, bool bAppOnly = FALSE);
-   
+
+   // Not required
+   bool ShowContextMenu(POINT /*ptScreen*/) { return false; }
+
 protected:
    gcroot<MindMapUIExtensionCore^> m_wnd;
    ITransText* m_pTT;

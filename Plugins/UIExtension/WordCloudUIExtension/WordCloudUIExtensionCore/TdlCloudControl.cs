@@ -33,6 +33,8 @@ namespace WordCloudUIExtension
 		private IntPtr m_hWnd;
 		private bool m_SavingToImage = false;
 
+		// ----------------------------------------------------------
+
 		public TdlCloudControl(IntPtr hWnd, Translator trans)
 		{
             base.MinFontSize = 10;
@@ -59,6 +61,8 @@ namespace WordCloudUIExtension
             BuildLayout();
         }
 
+		public LayoutItem SelectedItem { get { return GetItem(m_SelectedWord); } }
+
 		public string SelectedWord
 		{
 			get 
@@ -78,8 +82,7 @@ namespace WordCloudUIExtension
 					Invalidate();
 					Update();
 
-					if (SelectionChange != null)
-						SelectionChange(this);
+					SelectionChange?.Invoke(this);
 				}
 			}
 		}
@@ -124,7 +127,12 @@ namespace WordCloudUIExtension
             return finalImage;
         }
 
-        // ------------------------------------------------------------------------------------------
+		public string HitTestWord(Point ptScreen)
+		{
+			return (HitTest(ptScreen)?.Word.Text ?? string.Empty);
+		}
+
+		// ------------------------------------------------------------------------------------------
 
         protected override ILayout CreateLayout(LayoutType layoutType, SizeF size)
         {

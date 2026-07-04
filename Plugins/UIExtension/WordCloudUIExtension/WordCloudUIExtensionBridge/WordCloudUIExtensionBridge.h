@@ -48,14 +48,12 @@ public:
 
 	bool SelectTask(DWORD dwTaskID, bool bTaskLink);
 	bool SelectTasks(const DWORD* pdwTaskIDs, int nTaskCount);
-	bool SupportsTaskSelection() const { return false; }
 
 	void UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate);
 	bool WantTaskUpdate(TDC_ATTRIBUTE nAttribID) const;
 	bool PrepareNewTask(ITaskList* pTask) const;
 
 	bool ProcessMessage(MSG* pMsg);
-	void FilterToolTipMessage(MSG* pMsg) {/*.Net tooltips don't need this*/}
 	bool DoIdleProcessing();
 
 	bool DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData);
@@ -64,6 +62,7 @@ public:
 	bool GetLabelEditRect(LPRECT pEdit); // screen coordinates
 	IUI_HITTEST HitTest(POINT ptScreen, IUI_HITTESTREASON nReason) const;
 	DWORD HitTestTask(POINT ptScreen, IUI_HITTESTREASON nReason) const;
+	bool ShowContextMenu(POINT ptScreen);
 
 	void SetUITheme(const UITHEME* pTheme);
 	void SetReadOnly(bool bReadOnly);
@@ -72,6 +71,9 @@ public:
 
 	void SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const;
 	void LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey, bool bAppOnly);
+
+	// Not required
+	void FilterToolTipMessage(MSG* /*pMsg*/) { }
 
 protected:
 	gcroot<WordCloudUIExtension::WordCloudUIExtensionCore^> m_wnd;

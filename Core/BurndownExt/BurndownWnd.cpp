@@ -50,7 +50,7 @@ enum // m_dwUpdateGraphOnShow
 /////////////////////////////////////////////////////////////////////////////
 // CBurndownWnd dialog
 
-CBurndownWnd::CBurndownWnd(CWnd* pParent /*=NULL*/)
+CBurndownWnd::CBurndownWnd(CWnd* pParent)
 	: 
 	CDialog(IDD_STATISTICS_DLG, pParent),
 	m_dwUpdateGraphOnShow(0),
@@ -63,8 +63,6 @@ CBurndownWnd::CBurndownWnd(CWnd* pParent /*=NULL*/)
 	m_nActiveGraph(DEF_GRAPH),
 	m_nSelOption(BGO_INVALID)
 {
-	//{{AFX_DATA_INIT(CBurndownWnd)
-	//}}AFX_DATA_INIT
 	m_icon.Load(IDR_STATISTICS);
 	m_sliderDateRange.SetMinMaxRangeWidths(1.0); // min range = 1 month
 	m_graphAttrib.Initialise(m_mapGraphs);
@@ -78,10 +76,9 @@ CBurndownWnd::~CBurndownWnd()
 void CBurndownWnd::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CBurndownWnd)
+
 	DDX_Control(pDX, IDC_FRAME, m_stFrame);
 	DDX_Control(pDX, IDC_DISPLAY, m_cbGraphs);
-	//}}AFX_DATA_MAP
 	DDX_Control(pDX, IDC_OPTIONS, m_cbOptions);
 	DDX_Control(pDX, IDC_ACTIVEDATERANGE, m_sliderDateRange);
 
@@ -91,10 +88,8 @@ void CBurndownWnd::DoDataExchange(CDataExchange* pDX)
 
 
 BEGIN_MESSAGE_MAP(CBurndownWnd, CDialog)
-	//{{AFX_MSG_MAP(CBurndownWnd)
 	ON_WM_CTLCOLOR()
 	ON_WM_SIZE()
-	//}}AFX_MSG_MAP
 	ON_COMMAND(ID_HELP, OnHelp)
 	ON_COMMAND(ID_BURNDOWN_PREF, OnPreferences)
 	ON_WM_HELPINFO()
@@ -167,8 +162,7 @@ BOOL CBurndownWnd::OnInitDialog()
 	CRect rText = CDialogHelper::GetCtrlRect(this, IDC_ACTIVEDATERANGE_TEXT);
 	CDialogHelper::ResizeCtrl(this, IDC_ACTIVEDATERANGE_TEXT, (DATE_RANGE_WIDTH - rText.Width()), 0);
 
-	return TRUE;  // return TRUE unless you set the focus to a control
-	// EXCEPTION: OCX Property Pages should return FALSE
+	return TRUE;
 }
 
 void CBurndownWnd::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const 
@@ -277,19 +271,6 @@ void CBurndownWnd::SetTaskFont(HFONT hFont)
 	m_chart.SetFont(sFontName, nFontSize);
 }
 
-bool CBurndownWnd::ProcessMessage(MSG* /*pMsg*/) 
-{
-//	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	
-//	if (!IsWindowEnabled())
-//		return false;
-
-	// process editing shortcuts
-	// TODO
-
-	return false;
-}
-
 void CBurndownWnd::FilterToolTipMessage(MSG* pMsg)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
@@ -297,56 +278,8 @@ void CBurndownWnd::FilterToolTipMessage(MSG* pMsg)
 	m_chart.FilterToolTipMessage(pMsg);
 }
 
-bool CBurndownWnd::GetLabelEditRect(LPRECT /*pEdit*/)
-{
-//	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	
-	return false;
-}
-
-bool CBurndownWnd::PrepareNewTask(ITaskList* /*pTask*/) const 
-{ 
-//	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	
-	return false; 
-}
-
-IUI_HITTEST CBurndownWnd::HitTest(POINT /*ptScreen*/, IUI_HITTESTREASON /*nReason*/) const
-{
-//	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	
-	return IUI_NOWHERE;
-}
-
-DWORD CBurndownWnd::HitTestTask(POINT /*ptScreen*/, IUI_HITTESTREASON /*nReason*/) const
-{
-//	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	
-	return 0L;
-}
-
-bool CBurndownWnd::SelectTask(DWORD /*dwTaskID*/, bool /*bTaskLink*/)
-{
-//	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	
-	// because we can't change the selection
-	// in this plugin we don't care what it's set to
-	return false;
-}
-
-bool CBurndownWnd::SelectTasks(const DWORD* /*pdwTaskIDs*/, int /*nTaskCount*/)
-{
-//	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	
-	// because we can't change the selection
-	// in this plugin we don't care what it's set to
-	return false;
-}
-
 bool CBurndownWnd::WantTaskUpdate(TDC_ATTRIBUTE nAttribute) const
 {
-//	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	
 	switch (nAttribute)
 	{
 	case TDCA_DONEDATE:

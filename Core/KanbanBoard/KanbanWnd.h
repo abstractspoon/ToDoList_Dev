@@ -6,6 +6,7 @@
 #endif // _MSC_VER > 1000
 // KanbanWnd.h : header file
 //
+/////////////////////////////////////////////////////////////////////////////
 
 #include "KanbanCtrl.h"
 #include "KanbanPreferencesDlg.h"
@@ -32,9 +33,9 @@ public:
 	CKanbanWnd(CWnd* pParent = NULL);
 	virtual ~CKanbanWnd();
 
-	// IUIExtensionWindow
 	BOOL Create(DWORD dwStyle, const RECT &rect, CWnd* pParentWnd, UINT nID);
 
+	// IUIExtensionWindow
 	LPCTSTR GetMenuText() const { return _T("Kanban"); } 
 	HICON GetIcon() const { return m_icon; }
 	LPCTSTR GetTypeID() const { return KANBAN_TYPEID; }
@@ -61,15 +62,15 @@ public:
 
 	bool ProcessMessage(MSG* pMsg);
 	void FilterToolTipMessage(MSG* pMsg);
-	bool DoIdleProcessing() { return false; }
 
 	bool DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData);
 	bool CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA* pData) const;
 
+	// Not required
+	bool DoIdleProcessing() { return false; }
+	bool ShowContextMenu(POINT /*ptScreen*/) { return false; }
+
 protected:
-// Dialog Data
-	//{{AFX_DATA(CKanbanWnd)
-	//}}AFX_DATA
 	CKanbanCtrl m_ctrlKanban;
 	CKanbanPreferencesDlg m_dlgPrefs;
 	CKanbanAttributeComboBox m_cbAttributes;
@@ -88,24 +89,16 @@ protected:
 	CDWordArray m_aSelTaskIDs;
 	CWndPromptManager m_mgrPrompts;
 
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CKanbanWnd)
-	protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-	//}}AFX_VIRTUAL
+protected:
+	virtual void DoDataExchange(CDataExchange* pDX);
 	virtual BOOL OnInitDialog();
 	virtual void OnCancel() {}
 	virtual void OnOK() {}
 
-// Implementation
 protected:
-	// Generated message map functions
-	//{{AFX_MSG(CKanbanWnd)
 	afx_msg void OnSelchangeTrackedAttribute();
 	afx_msg void OnSelchangeOptions();
 	afx_msg void OnSelchangeGroupBy();
-	//}}AFX_MSG
 	afx_msg void OnHelp();
 	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
@@ -143,8 +136,5 @@ protected:
 };
 
 /////////////////////////////////////////////////////////////////////////////
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
 #endif // !defined(AFX_KANBANWND_H__1571B442_7ED5_45D8_A040_C359EAE9FDE1__INCLUDED_)

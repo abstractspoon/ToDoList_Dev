@@ -379,6 +379,8 @@ namespace Abstractspoon
 				// -----------------------------------------------
 			};
 
+			// -----------------------------------------------
+
 			public interface class IUIExtension
 			{
 				bool SelectTask(UInt32 taskID);

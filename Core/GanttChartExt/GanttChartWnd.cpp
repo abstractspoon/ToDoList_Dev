@@ -450,7 +450,7 @@ bool CGanttChartWnd::PrepareNewTask(ITaskList* pTask) const
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
-	return m_ctrlGantt.PrepareNewTask(pTask);
+	return (m_ctrlGantt.PrepareNewTask(pTask) != FALSE);
 }
 
 bool CGanttChartWnd::GetLabelEditRect(LPRECT pEdit)

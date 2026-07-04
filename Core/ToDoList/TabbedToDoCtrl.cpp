@@ -935,6 +935,7 @@ IUIExtensionWindow* CTabbedToDoCtrl::GetCreateExtensionWnd(FTC_VIEW nView)
 		VERIFY(task.NewTask(_T("Test Task"), NULL, 0, 0));
 
 		pVData->bCanPrepareNewTask = pExtWnd->PrepareNewTask(&task);
+		ASSERT(pVData->bCanPrepareNewTask || !pVData->pExtension->SupportsTaskSelection());
 	}
 	
 	PopulateExtensionViewAttributes(pExtWnd, pVData);
@@ -2597,13 +2598,6 @@ void CTabbedToDoCtrl::SetMaximizeState(TDC_MAXSTATE nState)
 	}
 }
 
-BOOL CTabbedToDoCtrl::WantTaskContextMenu() const
-{
-	FTC_VIEW nView = GetActiveTaskView();
-
-	return (ViewSupportsNewTask(nView) || ViewHasTaskSelection(nView));
-}
-
 BOOL CTabbedToDoCtrl::GetSelectionBoundingRect(CRect& rSelection) const
 {
 	rSelection.SetRectEmpty();
@@ -3212,7 +3206,7 @@ void CTabbedToDoCtrl::BeginExtensionProgress(const TDCEXTVIEWDATA* pVData, UINT 
 		nMsg = IDS_UPDATINGTABBEDVIEW;
 
 	CEnString sMsg;
-	sMsg.Format(nMsg, pVData->pExtension->GetMenuText());
+	sMsg.Format(nMsg, CEnString(pVData->pExtension->GetMenuText()));
 
 	GetParent()->SendMessage(WM_TDCM_LENGTHYOPERATION, TRUE, (LPARAM)(LPCTSTR)sMsg);
 }
@@ -4978,6 +4972,7 @@ TDC_HITTEST CTabbedToDoCtrl::HitTest(const CPoint& ptScreen, TDC_HITTESTREASON n
 
 	default:
 		ASSERT(0);
+		break;
 	}
 
 	// else
@@ -7353,7 +7348,53 @@ void CTabbedToDoCtrl::ResizeAttributeColumnsToFit()
 
 void CTabbedToDoCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 {
-	// We only handle this if it came from Linux
+	FTC_VIEW nView = GetActiveTaskView();
+
+	switch (nView)
+	{
+	case FTCV_TASKTREE:
+	case FTCV_UNSET:
+	case FTCV_TASKLIST:
+		// App handles
+		break;
+
+	case FTCV_UIEXTENSION1:
+	case FTCV_UIEXTENSION2:
+	case FTCV_UIEXTENSION3:
+	case FTCV_UIEXTENSION4:
+	case FTCV_UIEXTENSION5:
+	case FTCV_UIEXTENSION6:
+	case FTCV_UIEXTENSION7:
+	case FTCV_UIEXTENSION8:
+	case FTCV_UIEXTENSION9:
+	case FTCV_UIEXTENSION10:
+	case FTCV_UIEXTENSION11:
+	case FTCV_UIEXTENSION12:
+	case FTCV_UIEXTENSION13:
+	case FTCV_UIEXTENSION14:
+	case FTCV_UIEXTENSION15:
+	case FTCV_UIEXTENSION16:
+		{
+			// Try plugins first
+			IUIExtensionWindow* pExt = NULL;
+			TDCEXTVIEWDATA* pVData = NULL;
+
+			if (!GetExtensionWnd(nView, pExt, pVData))
+				return; // handled
+
+			if (!pVData->bCanPrepareNewTask && !pVData->pExtension->SupportsTaskSelection())
+				return; // handled
+
+			if (pExt->ShowContextMenu(point))
+				return; // handled
+		}
+		break;
+
+	default:
+		ASSERT(0);
+	}
+
+	// Linux doesn't forward to main window
 	if (COSVersion() == OSV_LINUX)
 	{
 		AfxGetMainWnd()->SendMessage(WM_CONTEXTMENU, (WPARAM)GetSafeHwnd(), MAKELPARAM(point.x, point.y)); 

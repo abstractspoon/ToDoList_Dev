@@ -422,7 +422,7 @@ bool CWorkloadWnd::PrepareNewTask(ITaskList* pTask) const
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
-	return m_ctrlWorkload.PrepareNewTask(pTask);
+	return (m_ctrlWorkload.PrepareNewTask(pTask) != FALSE);
 }
 
 bool CWorkloadWnd::GetLabelEditRect(LPRECT pEdit)
