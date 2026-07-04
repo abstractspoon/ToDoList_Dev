@@ -549,8 +549,6 @@ IUI_HITTEST CCalendarWnd::HitTest(POINT ptScreen, IUI_HITTESTREASON nReason) con
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
 	// try header
-	// 6.9: disable header click because it changes the 
-	// tree/list columns not the calendar columns
 	if (m_BigCalendar.PtInHeader(ptScreen))
 		return IUI_NOWHERE;
 
