@@ -480,7 +480,7 @@ IUI_HITTEST CGanttChartWnd::HitTest(POINT ptScreen, IUI_HITTESTREASON nReason) c
 		return IUI_TASK;
 
 	// else 
-	return IUI_NOWHERE;
+	return IUI_TASKLIST;
 }
 
 DWORD CGanttChartWnd::HitTestTask(POINT ptScreen, IUI_HITTESTREASON nReason) const

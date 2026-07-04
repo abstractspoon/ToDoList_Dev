@@ -452,7 +452,7 @@ IUI_HITTEST CWorkloadWnd::HitTest(POINT ptScreen, IUI_HITTESTREASON nReason) con
 		return IUI_TASK;
 
 	// else 
-	return IUI_NOWHERE;
+	return IUI_TASKLIST;
 }
 
 DWORD CWorkloadWnd::HitTestTask(POINT ptScreen, IUI_HITTESTREASON nReason) const
