@@ -44,6 +44,7 @@ namespace Abstractspoon
 
 				ITaskBase^ GetTask(int index);
 				ITaskBase^ HitTestTask(Drawing::Point ptScreen, bool icon);
+				bool PointInHeader(Drawing::Point ptScreen);
 				UInt32 GetTaskId(int index);
 				UInt32 GetTaskIdEx(UIExtension::GetTask getTask, bool fromSelTask);
 				UInt32 GetNextTaskId(int index, bool next, bool topLevel);
