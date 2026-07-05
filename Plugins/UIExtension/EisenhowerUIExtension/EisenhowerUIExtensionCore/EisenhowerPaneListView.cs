@@ -92,20 +92,14 @@ namespace EisenhowerUIExtension
 				return UIExtension.HitTestResult.Nowhere;
 
 			Point ptClient = PointToClient(screenPos);
+
+			if (!ClientRectangle.Contains(ptClient))
+				return UIExtension.HitTestResult.Nowhere;
+
 			var lvHit = base.HitTest(ptClient);
 
 			if (lvHit.Item != null)
 				return UIExtension.HitTestResult.Task;
-
-			switch (lvHit.Location)
-			{
-			case ListViewHitTestLocations.None:
-			case ListViewHitTestLocations.BelowClientArea:
-			case ListViewHitTestLocations.AboveClientArea:
-			case ListViewHitTestLocations.RightOfClientArea:
-			case ListViewHitTestLocations.LeftOfClientArea:
-				return UIExtension.HitTestResult.Nowhere;
-			}
 
 			// else
 			return UIExtension.HitTestResult.Tasklist;
