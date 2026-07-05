@@ -4045,7 +4045,8 @@ void CToDoListWnd::OnContextMenu(CWnd* pWnd, CPoint point)
 	}
 	else if (pWnd == (CWnd*)&tdc) // try active todoctrl
 	{
-		// if point.x,y are both -1 then we just use the selected task
+		// if point.x,y are both -1 then we just use the 
+		// selected task if there is one
 		if (bKeyboard)
 		{
 			CRect rSelection;
@@ -4056,6 +4057,10 @@ void CToDoListWnd::OnContextMenu(CWnd* pWnd, CPoint point)
 				point.y = rSelection.top + 8;
 
 				tdc.ClientToScreen(&point);
+			}
+			else
+			{
+				return;
 			}
 		}
 
