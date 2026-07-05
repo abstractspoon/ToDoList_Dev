@@ -10,6 +10,7 @@
 #include "EnBitmap.h"
 #include "graphicsMisc.h"
 #include "clipboard.h"
+#include "icon.h"
 
 #include "..\3rdParty\DibData.h"
 #include "..\3rdParty\gdiplus.h"
@@ -76,38 +77,33 @@ HBITMAP CEnBitmap::LoadImageFile(LPCTSTR szImagePath, COLORREF crBack, int cx, i
 	}
 
 	EB_IMAGETYPE nType = GetFileType(szImagePath);
-	HBITMAP hbm = NULL;
 
 	switch (nType)
 	{
 	case FT_BMP:
-		{
-			hbm = (HBITMAP)::LoadImage(NULL, szImagePath, IMAGE_BITMAP, cx, cy, LR_LOADFROMFILE | LR_LOADMAP3DCOLORS);
-		}
-		break;
+		return (HBITMAP)::LoadImage(NULL, szImagePath, IMAGE_BITMAP, cx, cy, LR_LOADFROMFILE | LR_LOADMAP3DCOLORS);
 		
 	case FT_ICO:
 		{
-			HICON hIcon = (HICON)::LoadImage(NULL, szImagePath, IMAGE_ICON, 0, 0, LR_LOADFROMFILE);
+			CIcon icon((HICON)::LoadImage(NULL, szImagePath, IMAGE_ICON, 0, 0, LR_LOADFROMFILE));
 			
-			if (hIcon)
+			if (icon.IsValid())
 			{
 				CEnBitmap bmp;
-				
-				if (bmp.CopyImage(hIcon, crBack, cx, cy))
-					hbm = (HBITMAP)bmp.Detach();
-		
-				// cleanup
-				::DestroyIcon(hIcon);
+				bmp.CopyImage(icon, crBack, cx, cy);
+
+				return (HBITMAP)bmp.Detach();
 			}
 		}
 		break;
 		
 	case FT_PNG:
+	case FT_JPG:
+	case FT_GIF:
 		{
-			gdix_Bitmap* gdBitmap = NULL;
+			CGdiPlusBitmap gdBitmap(szImagePath);
 
-			if (CGdiPlus::CreateBitmapFromFile(szImagePath, &gdBitmap))
+			if (gdBitmap.IsValid())
 			{
 				HBITMAP hbmGdip = NULL;
 
@@ -115,46 +111,29 @@ HBITMAP CEnBitmap::LoadImageFile(LPCTSTR szImagePath, COLORREF crBack, int cx, i
 				{
 					if (cx && cy)
 					{
-						hbm = ResizeImage(hbmGdip, cx, cy);
+						HBITMAP hbm = ResizeImage(hbmGdip, cx, cy);
 
 						if (hbm != hbmGdip)
 							GraphicsMisc::VerifyDeleteObject(hbmGdip);
+
+						return hbm;
 					}
-					else // as-is
-					{
-						hbm = hbmGdip;
-					}
+
+					// else
+					return hbmGdip;
 				}
 
 				VERIFY(CGdiPlus::DeleteBitmap(gdBitmap));
 			}
 		}
 		break;
-
-	case FT_JPG:
-	case FT_GIF:
-		{
-			USES_CONVERSION;
-			
-			IPicture* pPicture = NULL;
-			HRESULT hr = ::OleLoadPicturePath(T2OLE((LPTSTR)szImagePath), NULL, 0, crBack, IID_IPicture, (LPVOID*)&pPicture);
-			
-			if (SUCCEEDED(hr) && pPicture)
-			{
-				hbm = ExtractBitmap(pPicture, crBack, cx, cy);
-				pPicture->Release();
-			}
-		}
-		break;
-
 		
 	default: // all the rest
 		ASSERT(nType == FT_UNKNOWN);
 		break;
-		
 	}
 	
-	return hbm;
+	return NULL;
 }
 
 BOOL CEnBitmap::ResizeImage(int cx, int cy, COLORREF crBack)
@@ -322,45 +301,35 @@ HICON CEnBitmap::LoadImageFileAsIcon(LPCTSTR szImagePath, COLORREF crMask, int c
 		return (HICON)::LoadImage(NULL, szImagePath, IMAGE_ICON, cx, cy, LR_LOADFROMFILE);
 
 	case FT_PNG:
-		{
-			gdix_Bitmap* gdBitmap = NULL;
-			HICON hicoGdip = NULL;
-
-			if (CGdiPlus::CreateBitmapFromFile(szImagePath, &gdBitmap))
-			{
-				VERIFY(CGdiPlus::CreateHICONFromBitmap(gdBitmap, &hicoGdip));
-
-				if (hicoGdip && cx && cy)
-				{
-					CSize size = GraphicsMisc::GetIconSize(hicoGdip);
-
-					if ((cx != size.cx) || (cy != size.cy))
-					{
-						CImageList ilTemp;
-
-						if (ilTemp.Create(cx, cy, ILC_COLOR32, 1, 1) && (ilTemp.Add(hicoGdip) == 0))
-						{
-							::DestroyIcon(hicoGdip);
-							hicoGdip = ilTemp.ExtractIcon(0);
-						}
-					}
-				}
-
-				VERIFY(CGdiPlus::DeleteBitmap(gdBitmap));
-			}
-
-			return hicoGdip;
-		}
-		break;
-
 	case FT_BMP:
 	case FT_JPG:
 	case FT_GIF:
 		{
-			CEnBitmap bmp;
+			CGdiPlusBitmap gdBitmap(szImagePath);
 
-			if (bmp.LoadImage(szImagePath))
-				return bmp.ExtractIcon(crMask, cx, cy);
+			if (gdBitmap.IsValid())
+			{
+				HICON hicoGdip = NULL;
+				
+				if (CGdiPlus::CreateHICONFromBitmap(gdBitmap, &hicoGdip))
+				{
+					if (cx && cy)
+					{
+						CSize size = GraphicsMisc::GetIconSize(hicoGdip);
+
+						if ((cx != size.cx) || (cy != size.cy))
+						{
+							CImageList ilTemp;
+
+							if (ilTemp.Create(cx, cy, ILC_COLOR32, 1, 1) && (ilTemp.Add(hicoGdip) == 0))
+							{
+								::DestroyIcon(hicoGdip);
+								return ilTemp.ExtractIcon(0);
+							}
+						}
+					}
+				}
+			}
 		}
 		break;
 	}
