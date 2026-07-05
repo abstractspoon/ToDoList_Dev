@@ -1047,10 +1047,32 @@ void TaskListView::WndProc(Message% m)
 
 	case WM_LBUTTONUP:
 		{
+			// Eat this if clicking into whitespace to prevent
+			// loss of selection
 			Point pos = Win32::GetPoint(m.LParam);
 
 			if (HitTest(pos)->Item == nullptr)
 				return;
+		}
+		break;
+
+	case WM_RBUTTONDBLCLK:
+		return; // always
+
+	case WM_RBUTTONDOWN:
+		{
+			// Eat this if clicking in whitespace to prevent
+			// loss of selection
+			Point pos = Win32::GetPoint(m.LParam);
+
+			if (HitTest(pos)->Item == nullptr)
+			{
+				// and forward as context menu msg to parent
+				pos = PointToScreen(pos);
+
+				Win32::SendMessage(m.HWnd, WM_CONTEXTMENU, (UIntPtr)Win32::GetHwnd(m.HWnd), (IntPtr)Win32::MakeLParam(pos.X, pos.Y));
+				return;
+			}
 		}
 		break;
 	}
