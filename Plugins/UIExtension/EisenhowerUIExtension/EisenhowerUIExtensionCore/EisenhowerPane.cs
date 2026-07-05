@@ -424,8 +424,9 @@ namespace EisenhowerUIExtension
 			if (m_List.IsBoundSelecting)
 				return;
 
-			// 2. If NOT bounds selecting and nothing is selected
-			if (m_List.SelectionCount == 0)
+			// 2. Nothing is selected and the control key is NOT pressed
+			//    ie. It's not a deliberate deselection
+			if ((m_List.SelectionCount == 0) && !ModifierKeys.HasFlag(Keys.Control))
 				return;
 
 			// 3. During keyboard navigation
