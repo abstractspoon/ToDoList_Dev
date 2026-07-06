@@ -1478,14 +1478,17 @@ BOOL CToDoCtrl::PasteText(const CString& sText)
 	return TRUE;
 }
 
-void CToDoCtrl::BeginSelectedTaskEdit()
+void CToDoCtrl::BeginSelectedTaskEdit(BOOL bNewTask)
 {
 	ASSERT(!m_bInSelectedTaskEdit);
 
 	m_bInSelectedTaskEdit = TRUE;
 
 	// Aggregate all mods in a single undo operation
-	VERIFY(m_data.BeginNewUndoAction(TDCUAT_EDIT));
+	if (bNewTask)
+		VERIFY(m_data.ExtendLastUndoAction(TDCUAT_ADD));
+	else
+		VERIFY(m_data.BeginNewUndoAction(TDCUAT_EDIT));
 }
 
 void CToDoCtrl::EndSelectedTaskEdit()
