@@ -3212,7 +3212,7 @@ void CTabbedToDoCtrl::BeginExtensionProgress(const TDCEXTVIEWDATA* pVData, UINT 
 		nMsg = IDS_UPDATINGTABBEDVIEW;
 
 	CEnString sMsg;
-	sMsg.Format(nMsg, pVData->pExtension->GetMenuText());
+	sMsg.Format(nMsg, CEnString(pVData->pExtension->GetMenuText()));
 
 	GetParent()->SendMessage(WM_TDCM_LENGTHYOPERATION, TRUE, (LPARAM)(LPCTSTR)sMsg);
 }
