@@ -850,12 +850,15 @@ void CRTFContentControl::OnUpdateEditCut(CCmdUI* pCmdUI)
 
 void CRTFContentControl::OnEditDelete() 
 {
+	if (!m_rtf.HasSelection())
+		m_rtf.SelectCharacterAtCaret(TRUE);
+
 	m_rtf.ReplaceSel(_T(""), TRUE);
 }
 
 void CRTFContentControl::OnUpdateEditDelete(CCmdUI* pCmdUI) 
 {
-	pCmdUI->Enable(m_rtf.CanEdit() && m_rtf.HasSelection());
+	pCmdUI->Enable(m_rtf.CanEdit());
 }
 
 void CRTFContentControl::OnEditFileBrowse() 
