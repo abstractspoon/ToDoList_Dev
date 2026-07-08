@@ -2077,6 +2077,9 @@ namespace EvidenceBoardUIExtension
 			m_EditTimer.Stop();
 			m_PreviouslySelectedTask = (Focused ? SingleSelectedTask : null);
 
+			if (e.Button != MouseButtons.Left)
+				return;
+
 			TaskItem taskItem = null;
 			BaseNode node = HitTestNode(e.Location, true);
 
