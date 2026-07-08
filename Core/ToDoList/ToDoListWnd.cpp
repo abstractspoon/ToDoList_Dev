@@ -4078,7 +4078,7 @@ void CToDoListWnd::OnContextMenu(CWnd* pWnd, CPoint point)
 				nMenuID = MM_TASKCONTEXT;
 				nColID = tdc.HitTestColumn(point);
 			}
-			else
+			else if (tdc.CanEditSelectedTask(TDCA_NEWTASK))
 			{
 				nMenuID = MM_TASKCONTEXTNOSEL;
 			}

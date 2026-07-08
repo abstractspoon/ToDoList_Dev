@@ -935,7 +935,7 @@ IUIExtensionWindow* CTabbedToDoCtrl::GetCreateExtensionWnd(FTC_VIEW nView)
 		VERIFY(task.NewTask(_T("Test Task"), NULL, 0, 0));
 
 		pVData->bCanPrepareNewTask = pExtWnd->PrepareNewTask(&task);
-		ASSERT(pVData->bCanPrepareNewTask || !pVData->pExtension->SupportsTaskSelection());
+		ASSERT(!pVData->bCanPrepareNewTask || pVData->pExtension->SupportsTaskSelection());
 	}
 	
 	PopulateExtensionViewAttributes(pExtWnd, pVData);
@@ -1761,6 +1761,9 @@ BOOL CTabbedToDoCtrl::CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const
 	if (!CToDoCtrl::CanEditTask(dwTaskID, nAttribID))
 		return FALSE;
 
+	if ((nAttribID == TDCA_NEWTASK) && !ViewSupportsNewTask(GetActiveTaskView()))
+		return FALSE;
+
 	if (GetUpdateControlsItem() == NULL)
 	{
 		// Disable task editing
@@ -1774,6 +1777,7 @@ BOOL CTabbedToDoCtrl::CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const
 		}
 	}
 
+	// All else
 	return TRUE;
 }
 
