@@ -6146,17 +6146,23 @@ int CTDCMultiTasker::CanEditAnyTask(const CDWordArray& aTaskIDs, TDC_ATTRIBUTE n
 {
 	for (int nID = 0; nID < aTaskIDs.GetSize(); nID++)
 	{
-		if (CanEditTask(aTaskIDs[nID], nAttribID))
+		switch (CanEditTask(aTaskIDs[nID], nAttribID))
 		{
+		case -1:
+			// If we don't recognise the task attribute then
+			// that will be the case for all tasks
+			return -1;
+
+		case FALSE:
+			break;
+
+		default:
 			// special handling
 			switch (nAttribID)
 			{
-			case TDCA_COMMENTS:
-				// All must have the same format
+			case TDCA_COMMENTS:	// All MUST have the same format
 				return GetTasksCommentsFormat(aTaskIDs, CString());
 			}
-
-			// else
 			return TRUE;
 		}
 	}

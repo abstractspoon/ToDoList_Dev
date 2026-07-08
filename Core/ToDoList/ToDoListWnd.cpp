@@ -5599,6 +5599,8 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 	}
 	
 	// 3. Select/Create the task ----------------------------------
+	BOOL bNewTask = FALSE, bEditNewTaskLabel = FALSE;
+
 	if (startup.HasFlag(TLD_TASKLINK))
 	{
 		CStringArray aFiles;
@@ -5619,14 +5621,15 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 	}
 	else if (startup.HasFlag(TLD_NEWTASK))
 	{
-		CEnString sNewTask;
-		BOOL bEditLabel = FALSE;
+		bNewTask = TRUE;
 
 		// we edit the task name if no name was supplied
+		CEnString sNewTask;
+
 		if (!startup.GetNewTaskTitle(sNewTask))
 		{
 			sNewTask.LoadString(IDS_TASK);
-			bEditLabel = TRUE;
+			bEditNewTaskLabel = TRUE;
 		}
 
 		TDC_INSERTWHERE nWhere = TDC::MapInsertIDToInsertWhere(GetNewTaskCmdID()); // default
@@ -5656,13 +5659,6 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 
 		if (startup.GetTaskCreationDate(date))
 			tdc.SetSelectedTaskDate(TDCD_CREATE, date);
-
-		// edit task title?
-		if (bEditLabel)
-		{	
-			PostMessage(WM_COMMAND, ID_EDIT_TASKTEXT, NEWTASKFROMCMDLINE);
-			return TRUE;
-		}
 	}
 	else if (startup.GetTaskID())
 	{
@@ -5677,7 +5673,7 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 	}
 		
 	// 4. Modify the task --------------------------------------
-	tdc.BeginSelectedTaskEdit();
+	tdc.BeginSelectedTaskEdit(bNewTask);
 
 	CStringArray aItems;
 	CString sItem;
@@ -5862,6 +5858,15 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 	}
 
 	tdc.EndSelectedTaskEdit();
+
+	// If we were creating a new task we end here
+	if (bNewTask)
+	{
+		if (bEditNewTaskLabel)
+			PostMessage(WM_COMMAND, ID_EDIT_TASKTEXT, NEWTASKFROMCMDLINE);
+
+		return TRUE;
+	}
 	
 	// 5. Execute any commands -------------------------------
 	if (startup.HasCommandID())
