@@ -421,14 +421,7 @@ namespace WordCloudUIExtension
 
 		public UIExtension.HitTestResult HitTest(Int32 xScreen, Int32 yScreen, UIExtension.HitTestReason reason)
 		{
-			if (HitTestTask(xScreen, yScreen, reason) != 0)
-				return UIExtension.HitTestResult.Task;
-
-			// else
-			if (m_TaskMatchesList.RectangleToScreen(m_TaskMatchesList.ClientRectangle).Contains(xScreen, yScreen));
-				return UIExtension.HitTestResult.Tasklist;
-
-			return UIExtension.HitTestResult.Nowhere;
+			return m_TaskMatchesList.HitTest(new Point(xScreen, yScreen));
 		}
 
 		public UInt32 HitTestTask(Int32 xScreen, Int32 yScreen, UIExtension.HitTestReason reason)
@@ -437,6 +430,7 @@ namespace WordCloudUIExtension
 
 			return task?.Id ?? 0;
 		}
+
 		public bool ShowContextMenu(Int32 xScreen, Int32 yScreen)
 		{
 			bool keyboardMenu = ((xScreen == -1) && (yScreen == -1));
@@ -466,7 +460,7 @@ namespace WordCloudUIExtension
 			{
 				var word = m_WordCloud.HitTestWord(ptScreen);
 
-				if (word == null)
+				if (string.IsNullOrEmpty(word))
 					return true; // handled
 
 				m_WordCloud.SelectedWord = word;
