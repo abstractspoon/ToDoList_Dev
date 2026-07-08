@@ -324,11 +324,13 @@ HICON CEnBitmap::LoadImageFileAsIcon(LPCTSTR szImagePath, COLORREF crMask, int c
 							if (ilTemp.Create(cx, cy, ILC_COLOR32, 1, 1) && (ilTemp.Add(hicoGdip) == 0))
 							{
 								::DestroyIcon(hicoGdip);
-								return ilTemp.ExtractIcon(0);
+								hicoGdip = ilTemp.ExtractIcon(0);
 							}
 						}
 					}
 				}
+
+				return hicoGdip;
 			}
 		}
 		break;
