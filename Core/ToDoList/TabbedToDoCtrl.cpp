@@ -7380,16 +7380,9 @@ void CTabbedToDoCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 	case FTCV_UIEXTENSION16:
 		{
 			// Try plugins first
-			IUIExtensionWindow* pExt = NULL;
-			TDCEXTVIEWDATA* pVData = NULL;
+			IUIExtensionWindow* pExt = GetExtensionWnd(nView);
 
-			if (!GetExtensionWnd(nView, pExt, pVData))
-				return; // handled
-
-			if (!pVData->bCanPrepareNewTask && !pVData->pExtension->SupportsTaskSelection())
-				return; // handled
-
-			if (pExt->ShowContextMenu(point))
+			if (!pExt || pExt->ShowContextMenu(point))
 				return; // handled
 		}
 		break;
@@ -7398,7 +7391,7 @@ void CTabbedToDoCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 		ASSERT(0);
 	}
 
-	// Linux doesn't forward to main window
+	// Linux/Wine doesn't appear to forward to main window
 	if (COSVersion() == OSV_LINUX)
 	{
 		AfxGetMainWnd()->SendMessage(WM_CONTEXTMENU, (WPARAM)GetSafeHwnd(), MAKELPARAM(point.x, point.y)); 
