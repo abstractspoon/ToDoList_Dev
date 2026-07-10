@@ -1002,7 +1002,10 @@ BOOL CKanbanCtrl::UpdateData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL 
 				BOOL bDue = pTasks->IsTaskDue(hTask);
 
 				if (pKI->IsDue() != bDue)
-					bRebuild = TRUE;
+				{
+					bRebuild |= ((m_nTrackedAttributeID == TDCA_PRIORITY) ||
+								 (m_nTrackedAttributeID == TDCA_RISK));
+				}
 			}
 
 			if (pTasks->IsAttributeAvailable(TDCA_SUBTASKDONE))

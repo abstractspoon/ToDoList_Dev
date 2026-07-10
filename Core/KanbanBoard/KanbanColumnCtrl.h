@@ -222,6 +222,7 @@ protected:
 	int CompareAttributeValues(const KANBANITEM* pKI1, const KANBANITEM* pKI2, TDC_ATTRIBUTE nBy, BOOL bAscending) const;
 	int BuildSortedSelection(CHTIList& lstHTI) const;
 	BOOL IsSorting() const { return (m_nSortBy != TDCA_NONE); }
+	BOOL IsSorted() const;
 
 	BOOL GetItemLabelTextRect(HTREEITEM hti, CRect& rItem, BOOL bEdit = FALSE) const;
 	BOOL GetItemTooltipRect(HTREEITEM hti, CRect& rItem) const;

@@ -1933,15 +1933,38 @@ BOOL CKanbanColumnCtrl::Sort(TDC_ATTRIBUTE nBy, BOOL bAscending)
 	return TRUE;
 }
 
+BOOL CKanbanColumnCtrl::IsSorted() const
+{
+	HTREEITEM hti = GetFirstItem();
+
+	while (hti)
+	{
+		HTREEITEM htiNext = GetNextItem(hti, TVGN_NEXT);
+
+		if (!htiNext)
+			break;
+
+		if (CompareItems(GetTaskID(hti), GetTaskID(htiNext)) > 0)
+			return FALSE;
+
+		hti = htiNext;
+	}
+
+	return TRUE;
+}
+
 void CKanbanColumnCtrl::DoSort()
 {
 	if (CTreeCtrl::GetCount() < 2)
 		return;
 
-	TVSORTCB tvs = { NULL, SortProc, (LPARAM)this };
+	if (!IsSorted())
+	{
+		TVSORTCB tvs = { NULL, SortProc, (LPARAM)this };
 
-	SortChildrenCB(&tvs);
-	ScrollToSelection();
+		SortChildrenCB(&tvs);
+		ScrollToSelection();
+	}
 }
 
 // static function
