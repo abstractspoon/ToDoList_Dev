@@ -1850,17 +1850,20 @@ namespace Calendar
 			{
 				Rectangle selectionRectangle = GetHourRangeRectangle(SelectedDates.Start, SelectedDates.End, rect);
 
-				selectionRectangle.X += (dayGripWidth + 1);
-				selectionRectangle.Width -= (dayGripWidth + 1);
+				if (!selectionRectangle.IsEmpty)
+				{
+					selectionRectangle.X += (dayGripWidth + 1);
+					selectionRectangle.Width -= (dayGripWidth + 1);
 
-				// GDI+ off-by-one bug
-				selectionRectangle.Width--;
-				selectionRectangle.Height++;
+					// GDI+ off-by-one bug
+					selectionRectangle.Width--;
+					selectionRectangle.Height++;
 
-				if (WantDrawDaySelection && (selectionRectangle.Height > 1))
-					renderer.DrawHourRange(e.Graphics, selectionRectangle, false, true);
+					if (WantDrawDaySelection && (selectionRectangle.Height > 1))
+						renderer.DrawHourRange(e.Graphics, selectionRectangle, false, true);
 
-				DaySelectionRect = selectionRectangle;
+					DaySelectionRect = selectionRectangle;
+				}
 			}
 		}
 
