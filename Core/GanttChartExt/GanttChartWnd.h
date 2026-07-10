@@ -31,9 +31,9 @@ public:
 	CGanttChartWnd(CWnd* pParent = NULL);
 	virtual ~CGanttChartWnd();
 
-	// IUIExtensionWindow
 	BOOL Create(DWORD dwStyle, const RECT &rect, CWnd* pParentWnd, UINT nID);
 
+	// IUIExtensionWindow
 	LPCTSTR GetMenuText() const { return _T("Gantt Chart"); }
 	HICON GetIcon() const { return m_icon; }
 	LPCTSTR GetTypeID() const { return GANTT_TYPEID; }
@@ -60,10 +60,13 @@ public:
 
 	bool ProcessMessage(MSG* pMsg);
 	void FilterToolTipMessage(MSG* pMsg);
-	bool DoIdleProcessing() { return false; }
 
 	bool DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData);
 	bool CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA* pData) const;
+
+	// Not required
+	bool DoIdleProcessing() { return false; }
+	bool ShowContextMenu(POINT /*ptScreen*/) { return false; }
 
 protected:
 	CGanttSnapComboBox m_cbSnapModes;

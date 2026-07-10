@@ -4045,8 +4045,9 @@ void CToDoListWnd::OnContextMenu(CWnd* pWnd, CPoint point)
 	}
 	else if (pWnd == (CWnd*)&tdc) // try active todoctrl
 	{
-		// if point.x,y are both -1 then we just use the selected task
-		if (bKeyboard && tdc.WantTaskContextMenu())
+		// if point.x,y are both -1 then we just use the 
+		// selected task if there is one
+		if (bKeyboard)
 		{
 			CRect rSelection;
 			
@@ -4056,6 +4057,10 @@ void CToDoListWnd::OnContextMenu(CWnd* pWnd, CPoint point)
 				point.y = rSelection.top + 8;
 
 				tdc.ClientToScreen(&point);
+			}
+			else
+			{
+				return;
 			}
 		}
 
@@ -4068,17 +4073,14 @@ void CToDoListWnd::OnContextMenu(CWnd* pWnd, CPoint point)
 
 		case TDCHT_TASKLIST:
 		case TDCHT_TASK:
-			if (tdc.WantTaskContextMenu())
+			if (tdc.GetSelectedTaskCount())
 			{
-				if (tdc.GetSelectedTaskCount())
-				{
-					nMenuID = MM_TASKCONTEXT;
-					nColID = tdc.HitTestColumn(point);
-				}
-				else
-				{
-					nMenuID = MM_TASKCONTEXTNOSEL;
-				}
+				nMenuID = MM_TASKCONTEXT;
+				nColID = tdc.HitTestColumn(point);
+			}
+			else if (tdc.CanEditSelectedTask(TDCA_NEWTASK))
+			{
+				nMenuID = MM_TASKCONTEXTNOSEL;
 			}
 			break;
 

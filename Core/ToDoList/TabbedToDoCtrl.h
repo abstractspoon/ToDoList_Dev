@@ -89,7 +89,6 @@ public:
 
 	TDC_HITTEST HitTest(const CPoint& ptScreen, TDC_HITTESTREASON nReason) const;
 	TDC_COLUMN HitTestColumn(const CPoint& ptScreen) const;
-	BOOL WantTaskContextMenu() const;
 
 	virtual BOOL IsSorting() const;
 	virtual BOOL CanSortBy(TDC_COLUMN nBy) const;

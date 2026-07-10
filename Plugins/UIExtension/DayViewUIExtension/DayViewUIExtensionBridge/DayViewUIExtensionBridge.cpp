@@ -234,6 +234,7 @@ bool CDayViewUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCO
 				return UIExtension::SaveImageToFile(image, sImagePath.get());
 			}
 		}
+		break;
 
 	case IUI_SCROLLTOSELECTEDTASK:
 		return m_wnd->ScrollToSelectedTask();
@@ -321,6 +322,11 @@ IUI_HITTEST CDayViewUIExtensionBridgeWindow::HitTest(POINT ptScreen, IUI_HITTEST
 DWORD CDayViewUIExtensionBridgeWindow::HitTestTask(POINT ptScreen, IUI_HITTESTREASON nReason) const
 {
 	return m_wnd->HitTestTask(ptScreen.x, ptScreen.y, UIExtension::MapHitTestReason(nReason));
+}
+
+bool CDayViewUIExtensionBridgeWindow::ShowContextMenu(POINT ptScreen)
+{
+	return m_wnd->ShowContextMenu(ptScreen.x, ptScreen.y);
 }
 
 void CDayViewUIExtensionBridgeWindow::SetUITheme(const UITHEME* pTheme)

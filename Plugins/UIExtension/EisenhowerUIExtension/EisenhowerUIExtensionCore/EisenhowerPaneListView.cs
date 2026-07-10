@@ -86,10 +86,29 @@ namespace EisenhowerUIExtension
 			m_ColValueMaxCharWidth[XCol] = m_ColValueMaxCharWidth[YCol] = -1;
 		}
 
+		public new UIExtension.HitTestResult HitTest(Point screenPos)
+		{
+			if (PointInHeader(screenPos))
+				return UIExtension.HitTestResult.Nowhere;
+
+			Point ptClient = PointToClient(screenPos);
+
+			if (!ClientRectangle.Contains(ptClient))
+				return UIExtension.HitTestResult.Nowhere;
+
+			var lvHit = base.HitTest(ptClient);
+
+			if (lvHit.Item != null)
+				return UIExtension.HitTestResult.Task;
+
+			// else
+			return UIExtension.HitTestResult.Tasklist;
+		}
+
 		public uint HitTestTask(Point screenPos)
 		{
 			Point ptClient = PointToClient(screenPos);
-			var lvHit = HitTest(ptClient);
+			var lvHit = base.HitTest(ptClient);
 
 			if (lvHit.Item != null)
 				return GetTaskId(lvHit.Item.Index);

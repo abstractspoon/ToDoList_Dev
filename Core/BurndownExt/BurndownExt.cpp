@@ -36,7 +36,7 @@ DLL_DECLSPEC int GetInterfaceVersion()
 { 
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
-	return IUIEXTENSION_VERSION; 
+	return IUIEXTENSION_VERSION;
 }
 
 //////////////////////////////////////////////////////////////////////

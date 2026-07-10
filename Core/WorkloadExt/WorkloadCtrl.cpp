@@ -2808,7 +2808,7 @@ int CWorkloadCtrl::CompareTasks(DWORD dwTaskID1, DWORD dwTaskID2, const WORKLOAD
 	return (col.bAscending ? nCompare : -nCompare);
 }
 
-bool CWorkloadCtrl::PrepareNewTask(ITaskList* pTaskList) const
+BOOL CWorkloadCtrl::PrepareNewTask(ITaskList* pTaskList) const
 {
 	ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pTaskList, IID_TASKLISTBASE);
 

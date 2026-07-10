@@ -327,7 +327,21 @@ namespace EisenhowerUIExtension
 
 			// all else
 			return EisenhowerVariable.Supports(attribId);
-	}
+		}
+
+		public UIExtension.HitTestResult HitTest(Point screenPos)
+		{
+			foreach (var p in m_Panes)
+			{
+				var hitTest = p.HitTest(screenPos);
+
+				if (hitTest != UIExtension.HitTestResult.Nowhere)
+					return hitTest;
+			}
+
+			// else
+			return UIExtension.HitTestResult.Nowhere;
+		}
 
 		public uint HitTestTask(Point screenPos, bool icon)
 		{

@@ -549,8 +549,6 @@ IUI_HITTEST CCalendarWnd::HitTest(POINT ptScreen, IUI_HITTESTREASON nReason) con
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
 	// try header
-	// 6.9: disable header click because it changes the 
-	// tree/list columns not the calendar columns
 	if (m_BigCalendar.PtInHeader(ptScreen))
 		return IUI_NOWHERE;
 
@@ -610,6 +608,13 @@ DWORD CCalendarWnd::HitTestTask(POINT ptScreen, IUI_HITTESTREASON nReason) const
 	}
 
 	return dwTaskID;
+}
+
+bool CCalendarWnd::ShowContextMenu(POINT ptScreen)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	return (m_BigCalendar.ShowContextMenu(ptScreen) != FALSE);
 }
 
 bool CCalendarWnd::SelectTask(DWORD dwTaskID, bool /*bTaskLink*/)

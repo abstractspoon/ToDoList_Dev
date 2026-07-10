@@ -450,7 +450,7 @@ bool CGanttChartWnd::PrepareNewTask(ITaskList* pTask) const
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
-	return m_ctrlGantt.PrepareNewTask(pTask);
+	return (m_ctrlGantt.PrepareNewTask(pTask) != FALSE);
 }
 
 bool CGanttChartWnd::GetLabelEditRect(LPRECT pEdit)
@@ -480,7 +480,7 @@ IUI_HITTEST CGanttChartWnd::HitTest(POINT ptScreen, IUI_HITTESTREASON nReason) c
 		return IUI_TASK;
 
 	// else 
-	return IUI_NOWHERE;
+	return IUI_TASKLIST;
 }
 
 DWORD CGanttChartWnd::HitTestTask(POINT ptScreen, IUI_HITTESTREASON nReason) const

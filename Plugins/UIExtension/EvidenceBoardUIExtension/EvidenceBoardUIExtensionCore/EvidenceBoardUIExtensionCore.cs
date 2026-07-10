@@ -152,11 +152,6 @@ namespace EvidenceBoardUIExtension
             return m_Control.WantTaskUpdate(attrib);
         }
 
-        public bool WantSortUpdate(Task.Attribute attrib)
-        {
-            return false;
-        }
-
         public bool PrepareNewTask(ref Task task)
         {
             return true;

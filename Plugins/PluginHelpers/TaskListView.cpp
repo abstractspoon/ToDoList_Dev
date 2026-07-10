@@ -556,6 +556,14 @@ String^ TaskListView::Translate(String^ text, Translator::Type type)
 	return m_Trans->Translate(text, type);
 }
 
+bool TaskListView::PointInHeader(Drawing::Point ptScreen)
+{
+	CRect rHeader;
+	::GetWindowRect(Win32::GetHwnd(m_HeaderCtrl->Handle), rHeader);
+
+	return (rHeader.PtInRect({ ptScreen.X, ptScreen.Y }) != FALSE);
+}
+
 ITaskBase^ TaskListView::HitTestTask(Drawing::Point ptScreen, bool icon)
 {
 	auto pt = PointToClient(ptScreen);

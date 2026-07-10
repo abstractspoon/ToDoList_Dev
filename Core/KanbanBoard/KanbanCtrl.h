@@ -40,7 +40,7 @@ public:
 	BOOL Create(DWORD dwStyle, const RECT &rect, CWnd* pParentWnd, UINT nID);
 
 	void UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate);
-	bool PrepareNewTask(ITaskList* pTask) const;
+	BOOL PrepareNewTask(ITaskList* pTask) const;
 
 	int GetSelectedTaskIDs(CDWordArray& aTaskIDs) const;
 	BOOL SelectTasks(const CDWordArray& aTaskIDs);

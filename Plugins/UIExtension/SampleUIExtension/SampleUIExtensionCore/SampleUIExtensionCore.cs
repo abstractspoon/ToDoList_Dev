@@ -265,11 +265,6 @@ namespace SampleUIExtension
 			return true; // all updates
 	    }
 
-        public bool WantSortUpdate(Task.Attribute attrib)
-        {
-			return true; // all updates
-        }
-	   
         public bool PrepareNewTask(ref Task task)
 	    {
 		    return false;

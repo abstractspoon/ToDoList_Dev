@@ -40,7 +40,7 @@ const COLORREF DEF_DONECOLOR	= RGB(128, 128, 128);
 /////////////////////////////////////////////////////////////////////////////
 // CKanbanWnd
 
-CKanbanWnd::CKanbanWnd(CWnd* pParent /*=NULL*/)
+CKanbanWnd::CKanbanWnd(CWnd* pParent)
 	: 
 	CDialog(IDD_KANBANTREE_DIALOG, pParent), 
 	m_bReadOnly(FALSE),
@@ -60,8 +60,7 @@ CKanbanWnd::~CKanbanWnd()
 void CKanbanWnd::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CKanbanWnd)
-	//}}AFX_DATA_MAP
+
 	DDX_Control(pDX, IDC_OPTIONS, m_cbOptions);
 	DDX_Control(pDX, IDC_ATTRIBUTES, m_cbAttributes);
 	DDX_Control(pDX, IDC_GROUPBY, m_cbGroupBy);
@@ -71,7 +70,6 @@ void CKanbanWnd::DoDataExchange(CDataExchange* pDX)
 }
 
 BEGIN_MESSAGE_MAP(CKanbanWnd, CDialog)
-	//{{AFX_MSG_MAP(CKanbanWnd)
 	ON_WM_SIZE()
 	ON_WM_CTLCOLOR()
 	ON_WM_SETFOCUS()
@@ -81,7 +79,6 @@ BEGIN_MESSAGE_MAP(CKanbanWnd, CDialog)
 	ON_CBN_SELCHANGE(IDC_ATTRIBUTES, OnSelchangeTrackedAttribute)
 	ON_CBN_SELCHANGE(IDC_GROUPBY, OnSelchangeGroupBy)
 	ON_CBN_SELCHANGE(IDC_OPTIONS, OnSelchangeOptions)
-	//}}AFX_MSG_MAP
 	ON_COMMAND(ID_HELP, OnHelp)
 	ON_WM_HELPINFO()
 	ON_WM_ERASEBKGND()
@@ -101,7 +98,6 @@ BEGIN_MESSAGE_MAP(CKanbanWnd, CDialog)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
-// CKanbanWnd message handlers
 
 void CKanbanWnd::OnNcDestroy()
 {
@@ -187,8 +183,7 @@ BOOL CKanbanWnd::OnInitDialog()
 	ModifyStyleEx(0, WS_EX_CONTROLPARENT, 0);
 	Resize();
 
-	return FALSE;  // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX Property Pages should return FALSE
+	return FALSE;
 }
 
 void CKanbanWnd::SetReadOnly(bool bReadOnly)
@@ -483,7 +478,7 @@ bool CKanbanWnd::PrepareNewTask(ITaskList* pTask) const
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
-	return m_ctrlKanban.PrepareNewTask(pTask);
+	return (m_ctrlKanban.PrepareNewTask(pTask) != FALSE);
 }
 
 bool CKanbanWnd::GetLabelEditRect(LPRECT pEdit)

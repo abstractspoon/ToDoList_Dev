@@ -51,7 +51,6 @@ public:
 
    bool SelectTask(DWORD dwTaskID, bool bTaskLink);
    bool SelectTasks(const DWORD* pdwTaskIDs, int nTaskCount);
-   bool SupportsTaskSelection() const { return false; }
 
    void UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate);
    bool WantTaskUpdate(TDC_ATTRIBUTE nAttribID) const;
@@ -65,6 +64,7 @@ public:
    bool CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA* pData) const;
 
    bool GetLabelEditRect(LPRECT pEdit); // screen coordinates
+   bool ShowContextMenu(POINT ptScreen) { /*TODO*/ return false; }
    IUI_HITTEST HitTest(POINT ptScreen, IUI_HITTESTREASON nReason) const;
    DWORD HitTestTask(POINT ptScreen, IUI_HITTESTREASON nReason) const;
 

@@ -68,6 +68,7 @@ namespace DayViewUIExtension
 			UpdateMonthYearCombos(DateTime.Now);
 		}
 
+		// IUIExtension
 		public bool SelectTask(UInt32 taskId)
 		{
             if (taskId == m_SelectedTaskId)
@@ -118,11 +119,6 @@ namespace DayViewUIExtension
 			return false;
 		}
 
-		public bool WantSortUpdate(Task.Attribute attrib)
-		{
-			return false;
-		}
-	   
 		public bool PrepareNewTask(ref Task task)
 		{
 			return m_DayView.PrepareNewTask(ref task);
@@ -174,6 +170,7 @@ namespace DayViewUIExtension
 				break;
 			}
 
+			// all else
 			return false;
 		}
 
@@ -210,6 +207,81 @@ namespace DayViewUIExtension
 		public UInt32 HitTestTask(Int32 xScreen, Int32 yScreen, UIExtension.HitTestReason reason)
 		{
 			return m_DayView.HitTestTask(xScreen, yScreen, reason);
+		}
+
+		public bool ShowContextMenu(Int32 xScreen, Int32 yScreen)
+		{
+			var ptMenu = m_DayView.PointToClient(new Point(xScreen, yScreen));
+			var appt = m_DayView.SelectedAppointment;
+
+			if ((xScreen == -1) && (yScreen == -1))
+			{
+				Rectangle rect = Rectangle.Empty;
+				m_DayView.GetAppointmentRect(appt, ref rect);
+
+				if (rect.IsEmpty)
+				{
+					rect = m_DayView.DaySelectionRect;
+
+					if (rect.IsEmpty)
+						rect = ClientRectangle;
+				}
+
+				ptMenu = RectUtil.CentrePoint(rect);
+			}
+			else
+			{
+				appt = m_DayView.GetAppointmentAt(ptMenu.X, ptMenu.Y);
+			}
+
+			if ((appt == null) || m_DayView.AppointmentSupportsTaskContextMenu(appt))
+				return false;
+
+			var menu = new ContextMenuStrip();
+
+			if (appt is TaskCustomDateAttribute)
+			{
+				var item = AddMenuItem(menu, "Clear Custom Date", Keys.Delete, -1);
+				item.ShortcutKeyDisplayString = "Delete";
+				item.Click += (s, a) => { m_DayView.DeleteSelectedCustomDate(); };
+			}
+			else if (appt is TaskTimeBlock)
+			{
+				var item = AddMenuItem(menu, "New Time Block", Keys.None, 6);
+				item.Click += (s, a) => { CreateTimeBlock(); };
+
+				item = AddMenuItem(menu, "Delete Time Block", Keys.Delete, 7);
+				item.ShortcutKeyDisplayString = "Delete";
+				item.Click += (s, a) => { m_DayView.DeleteSelectedTimeBlock(); };
+
+				item = AddMenuItem(menu, "Duplicate Time Block", (Keys.Control | Keys.D), 8);
+				item.Click += (s, a) => { m_DayView.DuplicateSelectedTimeBlock(); };
+
+				menu.Items.Add(new ToolStripSeparator());
+
+				item = AddMenuItem(menu, "Edit Time Block Series", Keys.Control | Keys.F2, 9);
+				item.Click += (s, a) => { EditSelectedTimeBlockSeries(); };
+
+				item = AddMenuItem(menu, "Delete Time Block Series", (Keys.Control | Keys.Delete), 10);
+				item.Click += (s, a) => { m_DayView.DeleteSelectedTimeBlockSeries(); };
+			}
+			else
+			{
+				Debug.Assert(false);
+			}
+
+			if (menu.Items.Count > 0)
+			{
+				menu.Items.Add(new ToolStripSeparator());
+				menu.Items.Add("Cancel");
+
+				m_Trans.Translate(menu.Items, true);
+
+				menu.Renderer = m_ToolbarRenderer;
+				menu.Show(m_DayView, ptMenu);
+			}
+
+			return true; // handled
 		}
 
 		public void SetUITheme(UITheme theme)
@@ -322,6 +394,8 @@ namespace DayViewUIExtension
 			return (m_SelectedTaskId != 0);
 		}
 
+		// end IUIExtension
+
 		public new bool Focus()
         {
             if (Focused)
@@ -371,7 +445,6 @@ namespace DayViewUIExtension
 			m_DayView.WeekChange += new Calendar.WeekChangeEventHandler(OnDayViewWeekChanged);
 			m_DayView.MouseWheel += new MouseEventHandler(OnDayViewMouseWheel);
 			m_DayView.MouseDoubleClick += new MouseEventHandler(OnDayViewMouseDoubleClick);
-			m_DayView.ContextMenu += new TDLContextMenuEventHandler(OnDayViewContextMenu);
 
 			// Performing icon editing from a 'MouseUp' or 'MouseClick' event 
 			// causes the edit icon dialog to fail to correctly get focus but
@@ -401,60 +474,6 @@ namespace DayViewUIExtension
 
 			menu.Items.Add(item);
 			return item;
-		}
-
-		bool OnDayViewContextMenu(object sender, MouseEventArgs e)
-		{
-			var appt = m_DayView.GetAppointmentAt(e.X, e.Y);
-
-			if ((appt == null) || m_DayView.AppointmentSupportsTaskContextMenu(appt))
-				return false;
-
-			var menu = new ContextMenuStrip();
-
-			if (appt is TaskCustomDateAttribute)
-			{
-				var item = AddMenuItem(menu, "Clear Custom Date", Keys.Delete, -1);
-				item.ShortcutKeyDisplayString = "Delete";
-				item.Click += (s, a) => { m_DayView.DeleteSelectedCustomDate();	};
-			}
-			else if (appt is TaskTimeBlock)
-			{
-				var item = AddMenuItem(menu, "New Time Block", Keys.None, 6);
-				item.Click += (s, a) => { CreateTimeBlock(); };
-
-				item = AddMenuItem(menu, "Delete Time Block", Keys.Delete, 7);
-				item.ShortcutKeyDisplayString = "Delete";
-				item.Click += (s, a) => { m_DayView.DeleteSelectedTimeBlock(); };
-
-				item = AddMenuItem(menu, "Duplicate Time Block", (Keys.Control | Keys.D), 8);
-				item.Click += (s, a) =>	{ m_DayView.DuplicateSelectedTimeBlock(); };
-
-				menu.Items.Add(new ToolStripSeparator());
-
-				item = AddMenuItem(menu, "Edit Time Block Series", Keys.Control | Keys.F2, 9);
-				item.Click += (s, a) => { EditSelectedTimeBlockSeries(); };
-
-				item = AddMenuItem(menu, "Delete Time Block Series", (Keys.Control | Keys.Delete), 10);
-				item.Click += (s, a) =>	{ m_DayView.DeleteSelectedTimeBlockSeries(); };
-			}
-			else
-			{
-				Debug.Assert(false);
-			}
-
-			if (menu.Items.Count > 0)
-			{
-				menu.Items.Add(new ToolStripSeparator());
-				menu.Items.Add("Cancel");
-
-				m_Trans.Translate(menu.Items, true);
-
-				menu.Renderer = m_ToolbarRenderer;
-				menu.Show(m_DayView, e.Location);
-			}
-
-			return true; // handled
 		}
 
 		private void CreateWeekLabel()

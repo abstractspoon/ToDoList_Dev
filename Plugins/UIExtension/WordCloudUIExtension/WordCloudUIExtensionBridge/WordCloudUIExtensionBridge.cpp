@@ -320,6 +320,11 @@ DWORD CWordCloudUIExtensionBridgeWindow::HitTestTask(POINT ptScreen, IUI_HITTEST
 	return m_wnd->HitTestTask(ptScreen.x, ptScreen.y, UIExtension::MapHitTestReason(nReason));
 }
 
+bool CWordCloudUIExtensionBridgeWindow::ShowContextMenu(POINT ptScreen)
+{
+	return m_wnd->ShowContextMenu(ptScreen.x, ptScreen.y);
+}
+
 void CWordCloudUIExtensionBridgeWindow::SetUITheme(const UITHEME* pTheme)
 {
 	msclr::auto_gcroot<UITheme^> theme = gcnew UITheme(pTheme);

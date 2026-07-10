@@ -935,6 +935,7 @@ IUIExtensionWindow* CTabbedToDoCtrl::GetCreateExtensionWnd(FTC_VIEW nView)
 		VERIFY(task.NewTask(_T("Test Task"), NULL, 0, 0));
 
 		pVData->bCanPrepareNewTask = pExtWnd->PrepareNewTask(&task);
+		ASSERT(!pVData->bCanPrepareNewTask || pVData->pExtension->SupportsTaskSelection());
 	}
 	
 	PopulateExtensionViewAttributes(pExtWnd, pVData);
@@ -1760,6 +1761,9 @@ BOOL CTabbedToDoCtrl::CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const
 	if (!CToDoCtrl::CanEditTask(dwTaskID, nAttribID))
 		return FALSE;
 
+	if ((nAttribID == TDCA_NEWTASK) && !ViewSupportsNewTask(GetActiveTaskView()))
+		return FALSE;
+
 	if (GetUpdateControlsItem() == NULL)
 	{
 		// Disable task editing
@@ -1773,6 +1777,7 @@ BOOL CTabbedToDoCtrl::CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const
 		}
 	}
 
+	// All else
 	return TRUE;
 }
 
@@ -2595,13 +2600,6 @@ void CTabbedToDoCtrl::SetMaximizeState(TDC_MAXSTATE nState)
 			ASSERT(0);
 		}
 	}
-}
-
-BOOL CTabbedToDoCtrl::WantTaskContextMenu() const
-{
-	FTC_VIEW nView = GetActiveTaskView();
-
-	return (ViewSupportsNewTask(nView) || ViewHasTaskSelection(nView));
 }
 
 BOOL CTabbedToDoCtrl::GetSelectionBoundingRect(CRect& rSelection) const
@@ -4978,6 +4976,7 @@ TDC_HITTEST CTabbedToDoCtrl::HitTest(const CPoint& ptScreen, TDC_HITTESTREASON n
 
 	default:
 		ASSERT(0);
+		break;
 	}
 
 	// else
@@ -7353,7 +7352,46 @@ void CTabbedToDoCtrl::ResizeAttributeColumnsToFit()
 
 void CTabbedToDoCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 {
-	// We only handle this if it came from Linux
+	FTC_VIEW nView = GetActiveTaskView();
+
+	switch (nView)
+	{
+	case FTCV_TASKTREE:
+	case FTCV_UNSET:
+	case FTCV_TASKLIST:
+		// App handles
+		break;
+
+	case FTCV_UIEXTENSION1:
+	case FTCV_UIEXTENSION2:
+	case FTCV_UIEXTENSION3:
+	case FTCV_UIEXTENSION4:
+	case FTCV_UIEXTENSION5:
+	case FTCV_UIEXTENSION6:
+	case FTCV_UIEXTENSION7:
+	case FTCV_UIEXTENSION8:
+	case FTCV_UIEXTENSION9:
+	case FTCV_UIEXTENSION10:
+	case FTCV_UIEXTENSION11:
+	case FTCV_UIEXTENSION12:
+	case FTCV_UIEXTENSION13:
+	case FTCV_UIEXTENSION14:
+	case FTCV_UIEXTENSION15:
+	case FTCV_UIEXTENSION16:
+		{
+			// Try plugins first
+			IUIExtensionWindow* pExt = GetExtensionWnd(nView);
+
+			if (!pExt || pExt->ShowContextMenu(point))
+				return; // handled
+		}
+		break;
+
+	default:
+		ASSERT(0);
+	}
+
+	// Linux/Wine doesn't appear to forward to main window
 	if (COSVersion() == OSV_LINUX)
 	{
 		AfxGetMainWnd()->SendMessage(WM_CONTEXTMENU, (WPARAM)GetSafeHwnd(), MAKELPARAM(point.x, point.y)); 

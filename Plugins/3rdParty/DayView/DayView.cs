@@ -1657,6 +1657,8 @@ namespace Calendar
 
 		protected void DoPaint(PaintEventArgs e, Rectangle rect)
         {
+			DaySelectionRect = Rectangle.Empty; // recalc every time
+
             // resolve appointments on visible date range.
             ResolveAppointmentsEventArgs args = new ResolveAppointmentsEventArgs(StartDate, EndDate);
             OnResolveAppointments(args);
@@ -1840,21 +1842,28 @@ namespace Calendar
 
 		protected virtual bool WantDrawDaySelection { get { return Focused; } }
 
+		public Rectangle DaySelectionRect { get; private set; }
+
 		protected void DrawDaySelection(PaintEventArgs e, Rectangle rect, DateTime time)
 		{
-			if (WantDrawDaySelection && (selectionType == SelectionType.DateRange) && (time.Date == SelectedDates.Start.Date))
+			if ((selectionType == SelectionType.DateRange) && (time.Date == SelectedDates.Start.Date))
 			{
 				Rectangle selectionRectangle = GetHourRangeRectangle(SelectedDates.Start, SelectedDates.End, rect);
 
-				selectionRectangle.X += (dayGripWidth + 1);
-				selectionRectangle.Width -= (dayGripWidth + 1);
+				if (!selectionRectangle.IsEmpty)
+				{
+					selectionRectangle.X += (dayGripWidth + 1);
+					selectionRectangle.Width -= (dayGripWidth + 1);
 
-				// GDI+ off-by-one bug
-				selectionRectangle.Width--;
-				selectionRectangle.Height++;
+					// GDI+ off-by-one bug
+					selectionRectangle.Width--;
+					selectionRectangle.Height++;
 
-				if (selectionRectangle.Height > 1)
-					renderer.DrawHourRange(e.Graphics, selectionRectangle, false, true);
+					if (WantDrawDaySelection && (selectionRectangle.Height > 1))
+						renderer.DrawHourRange(e.Graphics, selectionRectangle, false, true);
+
+					DaySelectionRect = selectionRectangle;
+				}
 			}
 		}
 
@@ -1945,7 +1954,7 @@ namespace Calendar
             AppointmentView view = null;
 
 			// Short appointments
-			if (!appointmentViews.TryGetValue(appt, out view))
+			if ((appt != null) && !appointmentViews.TryGetValue(appt, out view))
 			{
 				// Long appointments
 				longAppointmentViews.TryGetValue(appt, out view);

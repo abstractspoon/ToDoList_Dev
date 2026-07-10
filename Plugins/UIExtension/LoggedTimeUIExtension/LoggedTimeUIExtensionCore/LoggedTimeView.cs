@@ -40,8 +40,6 @@ namespace LoggedTimeUIExtension
 		private FileSystemWatcher m_TaskLogFolderWatcher = new FileSystemWatcher();
 		private FileSystemWatcher m_TaskLogFileWatcher = new FileSystemWatcher();
 
-//		private DateSortedTasks m_DateSortedTasks;
-
 		private LabelTip m_LabelTip;
 		private Translator m_Trans;
 		private UIThemeToolbarRenderer m_ToolbarRenderer;
@@ -50,30 +48,29 @@ namespace LoggedTimeUIExtension
 
 		// ----------------------------------------------------------------
 
-		public new event TDLContextMenuEventHandler ContextMenu;
 		public event LogAccessStatusEventHandler LogAccessStatusChanged;
 
 		// ----------------------------------------------------------------
 
 		public LoggedTimeView(Translator trans, UIExtension.TaskIcon taskIcons, UIExtension.TaskRecurrences taskRecurrences, int minSlotHeight)
 		{
+			dayGripWidth = 1; // to match app styling
+			rightClickSelectionMinutes = 30;
+
 			minHourLabelWidth = DPIScaling.Scale(minHourLabelWidth);
 			hourLabelIndent = DPIScaling.Scale(hourLabelIndent);
 			minDayHeaderHeight = DPIScaling.Scale(minDayHeaderHeight);
 			longAppointmentSpacing = DPIScaling.Scale(longAppointmentSpacing);
-			dayGripWidth = 1; // to match app styling
-			rightClickSelectionMinutes = 30;
 
 			m_Trans = trans;
 			m_RenderHelper.TaskIcons = taskIcons;
-			m_ToolbarRenderer = new UIThemeToolbarRenderer();
 			m_UserMinSlotHeight = minSlotHeight;
-			m_LabelTip = new LabelTip(this);
 
 			m_TaskItems = new TaskItems();
 			m_LogUtil = new TaskTimeLogUtil(trans);
 			m_LogFiles = new LogFiles(m_LogUtil);
-//			m_DateSortedTasks = new DateSortedTasks(m_LogEntries);
+			m_LabelTip = new LabelTip(this) { Active = true }; // always
+			m_ToolbarRenderer = new UIThemeToolbarRenderer();
 
 			base.NotifyDayWidth += new Calendar.DayWidthEventHandler(OnNotifyDayWidth);
 
@@ -201,26 +198,7 @@ namespace LoggedTimeUIExtension
 			return tip;
 */
 		}
-
-		public uint IconHitTest(Point ptScreen)
-		{
-			return 0;
-/*
-			var pt = PointToClient(ptScreen);
-			Calendar.Appointment appt = GetAppointmentAt(pt.X, pt.Y);
-
-			if (appt == null)
-				return 0;
-
-			var apptView = (GetAppointmentView(appt) as TDLAppointmentView);
-
-			if ((apptView == null) || !apptView.IconRect.Contains(pt))
-				return 0;
-
-			return apptView.Appointment.Id;
-*/
-		}
-
+		
 		protected override void WndProc(ref Message m)
 		{
 			if (m_LabelTip != null)
@@ -257,12 +235,6 @@ namespace LoggedTimeUIExtension
 			SelectionChanged += new Calendar.AppointmentEventHandler(OnSelectionChanged);
 			WeekChange += new Calendar.WeekChangeEventHandler(OnWeekChanged);
  			AppointmentMove += new Calendar.AppointmentEventHandler(OnAppointmentChanged);
-		}
-
-		public bool ShowLabelTips
-		{
-			set { m_LabelTip.Active = value; }
-			get { return m_LabelTip.Active; }
 		}
 
 		public TaskItem SelectedLogEntryTaskItem
@@ -489,75 +461,23 @@ namespace LoggedTimeUIExtension
 		{
 			m_CachedLogEntry = null;
 		}
-		
-		public bool GetSelectedTaskDates(out DateTime from, out DateTime to)
-		{
-			from = to = Calendar.Appointment.NullDate;
 
-// 			uint selTaskID = SelectedTaskId;
+// 		public bool GetSelectedEntryDates(out DateTime from, out DateTime to)
+// 		{
+//  			var selItem = SelectedAppointment;
 // 
-// 			if (selTaskID == 0)
+// 			if (selItem == null)
+// 			{
+// 				from = to = Calendar.Appointment.NullDate;
 // 				return false;
 // 
-// 			LogEntry item = m_LogEntries.GetItem(selTaskID);
+// 			}
 // 
-// 			if ((item == null) || !item.HasValidDates())
-// 				return false;
+// 			from = selItem.StartDate;
+// 			to = selItem.EndDate;
 // 
-// 			from = item.StartDate;
-// 			to = item.EndDate;
-
-			return true;
-		}
-
-		public bool GetTask(UIExtension.GetTask getTask, ref uint taskID)
-		{
-/*
-			bool forwards = true, topLevel = false;
-
-			switch (getTask)
-			{
-			case UIExtension.GetTask.GetNextTask:
-			case UIExtension.GetTask.GetNextVisibleTask:
-				break;
-
-			case UIExtension.GetTask.GetPrevTask:
-			case UIExtension.GetTask.GetPrevVisibleTask:
-				forwards = false;
-				break;
-
-			case UIExtension.GetTask.GetNextTopLevelTask:
-				topLevel = true;
-				break;
-
-			case UIExtension.GetTask.GetPrevTopLevelTask:
-				forwards = false;
-				topLevel = true;
-				break;
-			}
-
-			var sortedTasks = m_DateSortedTasks.Items;
-			int item = sortedTasks.NextIndex(taskID, forwards);
-
-			while (item != -1)
-			{
-				var task = m_DateSortedTasks.Items[item];
-
-				if (IsItemDisplayable(task))
-				{
-					if (!topLevel || task.IsTopLevel)
-					{
-						taskID = task.Id;
-						return true;
-					}
-				}
-				item = sortedTasks.NextIndex(item, forwards);
-			}
-*/
-
-			// all else
-			return false;
-		}
+// 			return true;
+// 		}
 
 		public Calendar.Appointment FixupSelection(bool scrollToTask, bool allowNotify)
 		{
@@ -609,23 +529,6 @@ namespace LoggedTimeUIExtension
 
 			Invalidate();
         }
-
-		public bool AppointmentSupportsTaskContextMenu(Calendar.Appointment appt)
-		{
-			return ((appt != null) && (appt is LogEntry));
-		}
-
-		public UIExtension.HitTestResult HitTest(Int32 xScreen, Int32 yScreen, UIExtension.HitTestReason reason)
-		{
-			Point pt = PointToClient(new Point(xScreen, yScreen));
-			Calendar.Appointment appt = GetAppointmentAt(pt.X, pt.Y);
-
-			if ((appt != null) && GetTrueRectangle().Contains(pt))
-				return UIExtension.HitTestResult.Tasklist;
-
-			// else
-			return UIExtension.HitTestResult.Nowhere;
-		}
 
 		private bool IsTodayVisible
 		{
@@ -1031,14 +934,6 @@ namespace LoggedTimeUIExtension
 				CancelAppointmentResizing();
 		}
 
-		protected override void OnMouseClick(MouseEventArgs e)
-		{
-			if ((e.Button == MouseButtons.Right) && (ContextMenu?.Invoke(this, e) == true))
-				return; // handled
-						
-			base.OnMouseClick(e);
-		}
-
 		private Calendar.SelectionTool.Mode GetMode(Calendar.Appointment appt, Point mousePos)
 		{
 			if (!CanModifyLogEntry(appt.Id))
@@ -1111,14 +1006,6 @@ namespace LoggedTimeUIExtension
 
 			if (appt != null)
 			{
-				if (!ReadOnly && (IconHitTest(PointToScreen(e.Location)) > 0))
-				{
-					if (appt.IsLocked)
-						return UIExtension.AppCursor(UIExtension.AppCursorType.LockedTask);
-
-					return UIExtension.HandCursor();
-				}
-
 				var mode = GetMode(appt, e.Location);
 
 				if (CanModifyLogEntry(appt.Id))

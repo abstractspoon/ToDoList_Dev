@@ -158,11 +158,6 @@ namespace EisenhowerUIExtension
 			return m_EisenhowerCtrl.HasSelection;
 		}
 
-		public bool WantSortUpdate(Task.Attribute attrib)
-		{
-			return false;
-		}
-
 		public bool PrepareNewTask(ref Task task)
 		{
 			return m_EisenhowerCtrl.PrepareNewTask(ref task);
@@ -204,14 +199,7 @@ namespace EisenhowerUIExtension
 
 		public UIExtension.HitTestResult HitTest(Int32 xScreen, Int32 yScreen, UIExtension.HitTestReason reason)
 		{
-			if (HitTestTask(xScreen, yScreen, reason) != 0)
-				return UIExtension.HitTestResult.Task;
-			
-			// else
-			if (m_EisenhowerCtrl.RectangleToScreen(m_EisenhowerCtrl.ClientRectangle).Contains(xScreen, yScreen))
-				return UIExtension.HitTestResult.Tasklist;
-
-			return UIExtension.HitTestResult.Nowhere;
+			return m_EisenhowerCtrl.HitTest(new Point(xScreen, yScreen));
 		}
 
 		public UInt32 HitTestTask(Int32 xScreen, Int32 yScreen, UIExtension.HitTestReason reason)

@@ -41,7 +41,7 @@ public:
 	BOOL HandleEraseBkgnd(CDC* pDC);
 
 	void UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate);
-	bool PrepareNewTask(ITaskList* pTask) const;
+	BOOL PrepareNewTask(ITaskList* pTask) const;
 
 	BOOL SelectTask(DWORD dwTaskID);
 	BOOL SelectTasks(const CDWordArray& aTaskIDs);

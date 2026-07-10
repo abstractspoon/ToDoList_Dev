@@ -26,7 +26,7 @@
 
 //////////////////////////////////////////////////////////////////////
 
-const UINT IUIEXTENSION_VERSION = 2;
+const UINT IUIEXTENSION_VERSION = 3;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -371,6 +371,7 @@ public:
 	virtual bool GetLabelEditRect(LPRECT pEdit) = 0; // screen coordinates
 	virtual IUI_HITTEST HitTest(POINT ptScreen, IUI_HITTESTREASON nReason) const = 0;
 	virtual DWORD HitTestTask(POINT ptScreen, IUI_HITTESTREASON nReason) const = 0;
+	virtual bool ShowContextMenu(POINT ptScreen) = 0;
 
 	virtual void SetUITheme(const UITHEME* pTheme) = 0;
 	virtual void SetTaskFont(HFONT hFont) = 0;

@@ -5275,14 +5275,14 @@ int CGanttCtrl::FindColumn(int nScrollPos) const
 	return -1;
 }
 
-bool CGanttCtrl::PrepareNewTask(ITaskList* pTaskList) const
+BOOL CGanttCtrl::PrepareNewTask(ITaskList* pTaskList) const
 {
 	ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pTaskList, IID_TASKLISTBASE);
 
 	if (pTasks == NULL)
 	{
 		ASSERT(0);
-		return false;
+		return FALSE;
 	}
 
 	HTASKITEM hNewTask = pTasks->GetFirstTask();
@@ -5311,7 +5311,7 @@ bool CGanttCtrl::PrepareNewTask(ITaskList* pTaskList) const
 	pTasks->SetTaskStartDate64(hNewTask, tDate);
 	pTasks->SetTaskDueDate64(hNewTask, tDate); // end of same day
 
-	return true;
+	return TRUE;
 }
 
 DWORD CGanttCtrl::HitTestTask(const CPoint& ptScreen, IUI_HITTESTREASON nReason) const
