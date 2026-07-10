@@ -1452,23 +1452,20 @@ namespace DayViewUIExtension
 				return (Focused ? UIExtension.SelectionRect.Style.Selected : UIExtension.SelectionRect.Style.SelectedNotFocused);
 
 			// Check interrelatedness of types
-			if (Focused)
+			var realAppt = GetRealAppointment(appt);
+			var selAppt = GetAppointment(m_SelectedTaskID);
+			var selRealAppt = GetRealAppointment(selAppt);
+
+			if (selRealAppt == realAppt)
 			{
-				var realAppt = GetRealAppointment(appt);
-				var selAppt = GetAppointment(m_SelectedTaskID);
-				var selRealAppt = GetRealAppointment(selAppt);
+				// If this date's 'real' task is selected show the extension date as 'lightly' selected
+				if ((appt is TaskExtensionItem))
+					return UIExtension.SelectionRect.Style.DropHighlighted;
 
-				if (selRealAppt == realAppt)
-				{
-					// If this date's 'real' task is selected show the extension date as 'lightly' selected
-					if ((appt is TaskExtensionItem))
-						return UIExtension.SelectionRect.Style.DropHighlighted;
-
-					// If this is the real task for a selected custom date or time block, 
-					// show the real task as 'lightly' selected
-					if ((selAppt is TaskCustomDateAttribute) || (selAppt is TaskTimeBlock))
-						return UIExtension.SelectionRect.Style.DropHighlighted;
-				}
+				// If this is the real task for a selected custom date or time block, 
+				// show the real task as 'lightly' selected
+				if ((selAppt is TaskCustomDateAttribute) || (selAppt is TaskTimeBlock))
+					return UIExtension.SelectionRect.Style.DropHighlighted;
 			}
 
 			// else
