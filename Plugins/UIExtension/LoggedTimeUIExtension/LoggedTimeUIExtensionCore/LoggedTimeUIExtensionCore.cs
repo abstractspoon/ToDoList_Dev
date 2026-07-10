@@ -189,39 +189,38 @@ namespace LoggedTimeUIExtension
 		public bool ShowContextMenu(Int32 xScreen, Int32 yScreen)
 		{
 			Point ptMenu = m_TimeLog.PointToClient(new Point(xScreen, yScreen));
-			var appt = m_TimeLog.SelectedAppointment;
+			var entry = m_TimeLog.SelectedLogEntry;
 
 			if ((xScreen == -1) && (yScreen == -1))
 			{
 				Rectangle rect = Rectangle.Empty;
-				m_TimeLog.GetAppointmentRect(appt, ref rect);
 
-				if (rect.IsEmpty)
+				if (!m_TimeLog.GetAppointmentRect(entry, ref rect))
 				{
 					rect = m_TimeLog.DaySelectionRect;
 
 					if (rect.IsEmpty)
-						rect = ClientRectangle;
+						return true; // handled => no menu
 				}
 
 				ptMenu = RectUtil.CentrePoint(rect);
 			}
 			else if (m_TimeLog.GetTrueRectangle().Contains(ptMenu))
 			{
-				appt = m_TimeLog.GetAppointmentAt(ptMenu.X, ptMenu.Y);
+				var appt = m_TimeLog.GetAppointmentAt(ptMenu.X, ptMenu.Y);
 
-				if ((appt != null) && (appt != m_TimeLog.SelectedAppointment))
+				if ((appt != null) && (appt != entry))
 					m_TimeLog.SelectedAppointment = appt;
 			}
 			else
 			{
-				return true;
+				return true; // handled => no menu
 			}
 
 			var menu = new ContextMenuStrip();
 
 			var item = AddMenuItem(menu, "New Log Entry", Keys.None, 6);
-			item.Enabled = ((m_TimeLog.CanAddNewLogEntry || !m_TimeLog.HasTasklistPath) && (appt == null));
+			item.Enabled = ((m_TimeLog.CanAddNewLogEntry || !m_TimeLog.HasTasklistPath) && (entry == null));
 			item.Click += (s, a) => { OnCreateLogEntry(this, new EventArgs()); };
 
 			item = AddMenuItem(menu, "Edit Log Entry", (Keys.Control | Keys.F2), 7);
