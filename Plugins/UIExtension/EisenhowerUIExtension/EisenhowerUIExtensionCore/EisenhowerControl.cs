@@ -19,6 +19,26 @@ namespace EisenhowerUIExtension
 		HideParentTasks = 0x01,
 	}
 
+	// -------------------------------------------------------------------------
+
+	class IdleTasks
+	{
+		bool m_RedrawPanes = false;
+
+		public void RedrawPanes() { m_RedrawPanes = true; }
+
+		public bool Process(EisenhowerControl ctrl)
+		{
+			if (m_RedrawPanes)
+			{
+				m_RedrawPanes = false;
+				ctrl.RedrawPanes();
+			}
+
+			return false; // No more tasks
+		}
+	}
+
 	// --------------------------------------------
 
 	public class AttributeChangeEventArgs : EventArgs
@@ -50,6 +70,7 @@ namespace EisenhowerUIExtension
 		private List<EisenhowerPane> m_Panes;
 		private HashSet<Task.Attribute> m_ParentCalculatedValues;
 		private EisenhowerOption m_Options;
+		private IdleTasks m_IdleTasks = new IdleTasks();
 
 		private bool m_DraggingHorzSplitBar;
 		private bool m_DraggingVertSplitBar;
@@ -298,6 +319,11 @@ namespace EisenhowerUIExtension
 			// because the app always re-sets the selection
 			// after an update
 			m_SelectionEventsEnabled = true;
+
+			// For reasons I don't yet understand, invalidation after a 
+			// task update does NOT ALWAYS result in a subsequent repaint
+			// so we solve it with a delayed-redraw
+			m_IdleTasks.RedrawPanes();
 		}
 
 		public bool TaskColorIsBackground		{ set { m_Panes.ForEach(p => p.TaskColorIsBackground = value); } }
@@ -509,8 +535,7 @@ namespace EisenhowerUIExtension
 
 		public bool DoIdleProcessing()
 		{
-			// TODO
-			return false;
+			return m_IdleTasks.Process(this);
 		}
 
 		public void SetFont(String fontName, int fontSize)
@@ -1009,6 +1034,12 @@ namespace EisenhowerUIExtension
 
 			// else
 			return null;
+		}
+
+		// For idle redraw only ----------------------------------------
+		internal void RedrawPanes()
+		{
+			m_Panes.ForEach(p => p.RedrawList());
 		}
 	}
 }

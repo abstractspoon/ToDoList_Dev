@@ -22,7 +22,27 @@ using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
 namespace WordCloudUIExtension
 {
-	[System.ComponentModel.DesignerCategory("")]
+	// -------------------------------------------------------------------------
+
+	class IdleTasks
+	{
+		bool m_RedrawAll = false;
+
+		public void RedrawAll() { m_RedrawAll = true; }
+
+		public bool Process(WordCloudUIExtensionCore core)
+		{
+			if (m_RedrawAll)
+			{
+				m_RedrawAll = false;
+				core.RedrawAll();
+			}
+
+			return false; // No more tasks
+		}
+	}
+
+	// -------------------------------------------------------------------------
 
 	public class WordCloudUIExtensionCore : Panel, IUIExtension
 	{
@@ -53,8 +73,9 @@ namespace WordCloudUIExtension
 		private Dictionary<UInt32, CloudTaskItem> m_Items;
 		private TdlCloudControl m_WordCloud;
         private IBlacklist m_ExcludedWords;
+		private IdleTasks m_IdleTasks = new IdleTasks();
 
-        private StyleComboBox m_StylesCombo;
+		private StyleComboBox m_StylesCombo;
 		private Label m_StylesLabel;
 		private AttributeComboBox m_AttributeCombo;
         private Label m_AttributeLabel;
@@ -218,10 +239,11 @@ namespace WordCloudUIExtension
 					}
 				}
 			}
-			else if (tasks.IsAttributeAvailable(Task.Attribute.Color))
-			{
-				m_TaskMatchesList.Invalidate();
-			}
+
+			// For reasons I don't yet understand, invalidation after a 
+			// task update does NOT ALWAYS result in a subsequent repaint
+			// so we solve it with a delayed-redraw
+			m_IdleTasks.RedrawAll();
 		}
 
 		private void OnUpdateTimer(object sender, EventArgs e)
@@ -395,7 +417,7 @@ namespace WordCloudUIExtension
 
 		public bool DoIdleProcessing()
 		{
-			return false;
+			return m_IdleTasks.Process(this);
 		}
 
 		public bool GetLabelEditRect(ref Int32 left, ref Int32 top, ref Int32 right, ref Int32 bottom)
@@ -1237,5 +1259,13 @@ namespace WordCloudUIExtension
                 return 0;
             }
         }
+
+		// For idle redraw only ----------------------------------------
+		internal void RedrawAll()
+		{
+			m_WordCloud.Invalidate();
+			m_TaskMatchesList.Invalidate();
+		}
+
 	}
 }
