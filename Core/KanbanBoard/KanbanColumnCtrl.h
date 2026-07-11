@@ -128,6 +128,8 @@ protected:
 	BOOL m_bDropTarget;
 	BOOL m_bDrawTaskFlags, m_bDrawTaskFileLinks, m_bDrawTaskLocks;
 	BOOL m_bReadOnly;
+	
+	mutable BOOL m_bCheckingIsSorted;
 
 	CFontCache& m_fonts;
 	const CKanbanItemMap& m_data;

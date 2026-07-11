@@ -3243,8 +3243,9 @@ bool CTaskFile::GetTaskLastModified64(HTASKITEM hTask, time64_t& timeT) const
 {
 	COleDateTime date = GetTaskLastModifiedOle(hTask);
 
-	// Task should always have a modification date so we 
-	// let this assert to catch anything unexpected
+	if (!CDateHelper::IsDateSet(date))
+		return false;
+
 	return (CDateHelper::GetTimeT64(date, timeT) != FALSE);
 }
 

@@ -130,6 +130,7 @@ CKanbanColumnCtrl::CKanbanColumnCtrl(const CKanbanItemMap& data,
 	m_bDrawTaskFlags(FALSE),
 	m_bDrawTaskLocks(FALSE),
 	m_bDrawTaskFileLinks(FALSE),
+	m_bCheckingIsSorted(FALSE),
 	m_dwDisplay(0),
 	m_dwOptions(0),
 	m_crGroupHeaderBkgnd(CLR_NONE),
@@ -1649,7 +1650,7 @@ LRESULT CKanbanColumnCtrl::OnGetNextItem(WPARAM wp, LPARAM /*lp*/)
 {
 	HTREEITEM hti = (HTREEITEM)Default();
 
-	if (hti && IsGroupHeaderItem(hti))
+	if (!m_bCheckingIsSorted && hti && IsGroupHeaderItem(hti))
 	{
 		switch (wp)
 		{
@@ -1935,19 +1936,27 @@ BOOL CKanbanColumnCtrl::Sort(TDC_ATTRIBUTE nBy, BOOL bAscending)
 
 BOOL CKanbanColumnCtrl::IsSorted() const
 {
+	// Because we overload the handling of TVM_GETNEXTITEM 
+	// to skip header items (See OnGetNextItem) we have to 
+	// disable that overloading for the duration of our check 
+	// else we'll never see the header items
+	CAutoFlag af(m_bCheckingIsSorted, TRUE);
+
 	HTREEITEM hti = GetFirstItem();
 
 	while (hti)
 	{
-		HTREEITEM htiNext = GetNextItem(hti, TVGN_NEXT);
+		DWORD dwTaskID1 = GetTaskID(hti);
 
-		if (!htiNext)
+		hti = GetNextItem(hti, TVGN_NEXT);
+
+		if (!hti)
 			break;
 
-		if (CompareItems(GetTaskID(hti), GetTaskID(htiNext)) > 0)
-			return FALSE;
+		DWORD dwTaskID2 = GetTaskID(hti);
 
-		hti = htiNext;
+		if (CompareItems(dwTaskID1, dwTaskID2) > 0)
+			return FALSE;
 	}
 
 	return TRUE;
