@@ -30,33 +30,21 @@ namespace MindMapUIExtension
 
 	// -------------------------------------------------------------------------
 
-	class IdleTasks
+	class IdleTasks : UIExtension.IdleRedraw
 	{
-		private bool m_RedrawCtrl = false;
 		private bool m_ZoomEndUpdate = false;
 
-		public void RedrawControl() { m_RedrawCtrl = true; }
 		public void ZoomEndUpdate() { m_ZoomEndUpdate = true; }
 
 		public bool Process(TdlMindMapControl ctrl)
 		{
-			if (m_RedrawCtrl)
-			{
-				m_RedrawCtrl = false;
-				ctrl.Invalidate();
-			}
-			else if (m_ZoomEndUpdate)
+			if (m_ZoomEndUpdate)
 			{
 				m_ZoomEndUpdate = false;
 				ctrl.ZoomEndUpdate();
 			}
 
-			return HasTasks;
-		}
-
-		protected bool HasTasks
-		{
-			get { return (m_RedrawCtrl || m_ZoomEndUpdate); }
+			return base.Process(ctrl);
 		}
 	}
 
@@ -271,7 +259,7 @@ namespace MindMapUIExtension
 			// For reasons I don't yet understand, invalidation after a 
 			// task update does NOT ALWAYS result in a subsequent repaint
 			// so we solve it with a delayed-redraw
-			m_IdleTasks.RedrawControl();
+			m_IdleTasks.Redraw();
 		}
 
 		public MindMapOption Options

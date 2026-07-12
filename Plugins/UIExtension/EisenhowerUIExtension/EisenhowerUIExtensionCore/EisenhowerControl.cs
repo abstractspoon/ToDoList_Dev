@@ -19,26 +19,6 @@ namespace EisenhowerUIExtension
 		HideParentTasks = 0x01,
 	}
 
-	// -------------------------------------------------------------------------
-
-	class IdleTasks
-	{
-		bool m_RedrawPanes = false;
-
-		public void RedrawPanes() { m_RedrawPanes = true; }
-
-		public bool Process(EisenhowerControl ctrl)
-		{
-			if (m_RedrawPanes)
-			{
-				m_RedrawPanes = false;
-				ctrl.RedrawPanes();
-			}
-
-			return false; // No more tasks
-		}
-	}
-
 	// --------------------------------------------
 
 	public class AttributeChangeEventArgs : EventArgs
@@ -70,7 +50,7 @@ namespace EisenhowerUIExtension
 		private List<EisenhowerPane> m_Panes;
 		private HashSet<Task.Attribute> m_ParentCalculatedValues;
 		private EisenhowerOption m_Options;
-		private IdleTasks m_IdleTasks = new IdleTasks();
+		private UIExtension.IdleRedraw m_IdleTasks = new UIExtension.IdleRedraw();
 
 		private bool m_DraggingHorzSplitBar;
 		private bool m_DraggingVertSplitBar;
@@ -323,7 +303,7 @@ namespace EisenhowerUIExtension
 			// For reasons I don't yet understand, invalidation after a 
 			// task update does NOT ALWAYS result in a subsequent repaint
 			// so we solve it with a delayed-redraw
-			m_IdleTasks.RedrawPanes();
+			m_IdleTasks.Redraw();
 		}
 
 		public bool TaskColorIsBackground		{ set { m_Panes.ForEach(p => p.TaskColorIsBackground = value); } }
@@ -1034,12 +1014,6 @@ namespace EisenhowerUIExtension
 
 			// else
 			return null;
-		}
-
-		// For idle redraw only ----------------------------------------
-		internal void RedrawPanes()
-		{
-			m_Panes.ForEach(p => p.RedrawList());
 		}
 	}
 }

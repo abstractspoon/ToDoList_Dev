@@ -22,28 +22,6 @@ using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
 namespace WordCloudUIExtension
 {
-	// -------------------------------------------------------------------------
-
-	class IdleTasks
-	{
-		bool m_RedrawAll = false;
-
-		public void RedrawAll() { m_RedrawAll = true; }
-
-		public bool Process(WordCloudUIExtensionCore core)
-		{
-			if (m_RedrawAll)
-			{
-				m_RedrawAll = false;
-				core.RedrawAll();
-			}
-
-			return false; // No more tasks
-		}
-	}
-
-	// -------------------------------------------------------------------------
-
 	public class WordCloudUIExtensionCore : Panel, IUIExtension
 	{
         private const string FontName = "Tahoma";
@@ -73,7 +51,7 @@ namespace WordCloudUIExtension
 		private Dictionary<UInt32, CloudTaskItem> m_Items;
 		private TdlCloudControl m_WordCloud;
         private IBlacklist m_ExcludedWords;
-		private IdleTasks m_IdleTasks = new IdleTasks();
+		private UIExtension.IdleRedraw m_IdleTasks = new UIExtension.IdleRedraw();
 
 		private StyleComboBox m_StylesCombo;
 		private Label m_StylesLabel;
@@ -117,8 +95,7 @@ namespace WordCloudUIExtension
 			InitializeComponent();
 		}
 
-
-		// IUIExtension ------------------------------------------------------------------
+		// IUIExtension ----------------------------------------------------
 
 		public new bool Focused
         {
@@ -243,7 +220,7 @@ namespace WordCloudUIExtension
 			// For reasons I don't yet understand, invalidation after a 
 			// task update does NOT ALWAYS result in a subsequent repaint
 			// so we solve it with a delayed-redraw
-			m_IdleTasks.RedrawAll();
+			m_IdleTasks.Redraw();
 		}
 
 		private void OnUpdateTimer(object sender, EventArgs e)
@@ -1259,13 +1236,6 @@ namespace WordCloudUIExtension
                 return 0;
             }
         }
-
-		// For idle redraw only ----------------------------------------
-		internal void RedrawAll()
-		{
-			m_WordCloud.Invalidate();
-			m_TaskMatchesList.Invalidate();
-		}
 
 	}
 }

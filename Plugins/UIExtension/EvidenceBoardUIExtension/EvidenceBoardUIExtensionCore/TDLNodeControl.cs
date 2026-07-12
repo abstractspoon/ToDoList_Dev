@@ -16,6 +16,8 @@ using ImageHelper;
 using UIComponents;
 
 using BaseNode = RadialTree.TreeNode<uint>;
+	
+	// ------------------------------------------------------------
 
 namespace EvidenceBoardUIExtension
 {
@@ -94,26 +96,6 @@ namespace EvidenceBoardUIExtension
 		
 		// -------------------------------------------------------------------------
 
-		class IdleTasks
-		{
-			private bool m_RedrawCtrl = false;
-
-			public void RedrawControl() { m_RedrawCtrl = true; }
-
-			public bool Process(Control ctrl)
-			{
-				if (m_RedrawCtrl)
-				{
-					m_RedrawCtrl = false;
-					ctrl.Invalidate();
-				}
-
-				return false; // No more tasks
-			}
-		}
-
-		// -------------------------------------------------------------------------
-
 		const EvidenceBoardOption DefaultOptions = (EvidenceBoardOption.ShowRootNode |
 													EvidenceBoardOption.DrawLinksOnTop |
 													EvidenceBoardOption.DrawPins);
@@ -132,7 +114,6 @@ namespace EvidenceBoardUIExtension
 		private Translator m_Trans;
 		private UIExtension.TaskIcon m_TaskIcons;
 		private LabelTip m_LabelTip;
-		private IdleTasks m_IdleTasks = new IdleTasks();
 
 		private bool m_ShowParentAsFolder = false;
 		private bool m_TaskColorIsBkgnd = false;
@@ -282,11 +263,6 @@ namespace EvidenceBoardUIExtension
 				m_StrikeThruDone = strikeThruDone;
 				RebuildFonts();
 			}
-		}
-
-		public bool DoIdleProcessing()
-		{
-			return m_IdleTasks.Process(this);
 		}
 
 		public IList<LinkType> VisibleLinkTypes
@@ -522,11 +498,6 @@ namespace EvidenceBoardUIExtension
 			case UIExtension.UpdateType.Unknown:
 				return;
 			}
-
-			// For reasons I don't yet understand, invalidation after a 
-			// task update does NOT ALWAYS result in a subsequent repaint
-			// so we solve it with a delayed-redraw
-			m_IdleTasks.RedrawControl();
 		}
 
 		protected override void OnAfterRecalcLayout()

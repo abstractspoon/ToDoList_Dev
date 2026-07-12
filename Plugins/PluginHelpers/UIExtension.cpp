@@ -1303,3 +1303,15 @@ int UIExtension::DependencyArrows::Size(Drawing::Font^ font)
 	return ((font->Height / 4) + 1);
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool UIExtension::IdleRedraw::Process(Control^ control)
+{
+	if (m_Redraw)
+	{
+		m_Redraw = false;
+		control->Invalidate(true); // and children
+	}
+
+	return false; // No more tasks
+}

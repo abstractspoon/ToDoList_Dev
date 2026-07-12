@@ -377,6 +377,17 @@ namespace Abstractspoon
 				};
 
 				// -----------------------------------------------
+
+				ref class IdleRedraw
+				{
+				public:
+					void Redraw() { m_Redraw = true; }
+					bool Process(Windows::Forms::Control^ control); // Call from IUIExtension::DoIdleProcessing
+
+				private:
+					bool m_Redraw = false;
+				};
+
 			};
 
 			// -----------------------------------------------
