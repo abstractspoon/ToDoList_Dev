@@ -97,6 +97,8 @@ void CInputListCtrl::InitState()
 	m_nLastEditCol = m_nLastEditRow = -1;
 	m_bSingleClickEditing = FALSE;
 
+	m_editBox.EnableButtonPadding(FALSE);
+
 	// Hot tracker might have been initialised in PreSubclassWindow
 	if (GetSafeHwnd() && CThemed::AreControlsThemed() && !m_hotTrack.IsInitialized())
 		m_hotTrack.Initialize(this, FALSE);

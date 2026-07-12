@@ -1181,7 +1181,11 @@ void SEARCHPARAM::ClearValue()
 	sValue.Empty();
 	dValue = 0.0;
 	nValue = 0;
-	nTimeUnits = ((nAttribType == FT_TIMEPERIOD) ? TDCU_HOURS : TDCU_NULL);
+
+	// We need to very careful to only modify the union
+	// of extra values very specifically
+	if (nAttribType == FT_TIMEPERIOD)
+		nTimeUnits = TDCU_HOURS;
 }
 
 FIND_ATTRIBTYPE SEARCHPARAM::GetAttribType(TDC_ATTRIBUTE nAttribID, BOOL bRelativeDate)
