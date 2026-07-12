@@ -17,8 +17,6 @@ using UIComponents;
 
 using BaseNode = RadialTree.TreeNode<uint>;
 	
-	// ------------------------------------------------------------
-
 namespace EvidenceBoardUIExtension
 {
     public delegate bool EditTaskLabelEventHandler(object sender, uint taskId);
