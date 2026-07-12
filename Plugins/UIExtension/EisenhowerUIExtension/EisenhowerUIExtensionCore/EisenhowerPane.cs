@@ -570,12 +570,5 @@ namespace EisenhowerUIExtension
 								  task.GetAttributeDisplayValue(m_Matrix.XVariable),
 								  task.GetAttributeDisplayValue(m_Matrix.YVariable));
 		}
-
-		// For idle redraw only ----------------------------------------
-		internal void RedrawList()
-		{
-			m_List.Invalidate();
-		}
-
 	}
 }
