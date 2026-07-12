@@ -1310,7 +1310,9 @@ bool UIExtension::IdleRedraw::Process(Control^ control)
 	if (m_Redraw)
 	{
 		m_Redraw = false;
+		
 		control->Invalidate(true); // and children
+		control->Update();
 	}
 
 	return false; // No more tasks
