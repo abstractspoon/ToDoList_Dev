@@ -50,7 +50,6 @@ namespace EisenhowerUIExtension
 		private List<EisenhowerPane> m_Panes;
 		private HashSet<Task.Attribute> m_ParentCalculatedValues;
 		private EisenhowerOption m_Options;
-		private UIExtension.IdleRedraw m_IdleTasks = new UIExtension.IdleRedraw();
 
 		private bool m_DraggingHorzSplitBar;
 		private bool m_DraggingVertSplitBar;
@@ -299,11 +298,6 @@ namespace EisenhowerUIExtension
 			// because the app always re-sets the selection
 			// after an update
 			m_SelectionEventsEnabled = true;
-
-			// For reasons I don't yet understand, invalidation after a 
-			// task update does NOT ALWAYS result in a subsequent repaint
-			// so we solve it with a delayed-redraw
-			m_IdleTasks.Redraw();
 		}
 
 		public bool TaskColorIsBackground		{ set { m_Panes.ForEach(p => p.TaskColorIsBackground = value); } }
@@ -511,11 +505,6 @@ namespace EisenhowerUIExtension
 		{
 			// TODO
 			return null;
-		}
-
-		public bool DoIdleProcessing()
-		{
-			return m_IdleTasks.Process(this);
 		}
 
 		public void SetFont(String fontName, int fontSize)
