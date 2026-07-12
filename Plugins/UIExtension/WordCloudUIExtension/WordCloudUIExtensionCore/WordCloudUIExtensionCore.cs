@@ -22,6 +22,8 @@ using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
 namespace WordCloudUIExtension
 {
+	[System.ComponentModel.DesignerCategory("")]
+
 	public class WordCloudUIExtensionCore : Panel, IUIExtension
 	{
         private const string FontName = "Tahoma";
