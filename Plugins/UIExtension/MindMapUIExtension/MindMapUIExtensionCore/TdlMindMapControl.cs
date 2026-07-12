@@ -28,6 +28,26 @@ namespace MindMapUIExtension
 		StraightConnections	= 0x02,
 	}
 
+	// -------------------------------------------------------------------------
+
+	class IdleTasks : UIExtension.IdleRedraw
+	{
+		private bool m_ZoomEndUpdate = false;
+
+		public void ZoomEndUpdate() { m_ZoomEndUpdate = true; }
+
+		public bool Process(TdlMindMapControl ctrl)
+		{
+			if (m_ZoomEndUpdate)
+			{
+				m_ZoomEndUpdate = false;
+				ctrl.ZoomEndUpdate();
+			}
+
+			return base.Process(ctrl);
+		}
+	}
+
 	// ------------------------------------------------------------
 
 	[System.ComponentModel.DesignerCategory("")]
@@ -56,6 +76,7 @@ namespace MindMapUIExtension
 		private MindMapOption m_Options;
 		private DragImage m_DragImage;
 		private LabelTip m_LabelTip;
+		private IdleTasks m_IdleTasks = new IdleTasks();
 
 		private List<uint> m_PrevExpandedItems;
 		private int m_PrevZoomLevel = -1;
@@ -234,6 +255,11 @@ namespace MindMapUIExtension
 					}
 				}
 			}
+
+			// For reasons I don't yet understand, invalidation after a 
+			// task update does NOT ALWAYS result in a subsequent repaint
+			// so we solve it with a delayed-redraw
+			m_IdleTasks.Redraw();
 		}
 
 		public MindMapOption Options
@@ -580,7 +606,7 @@ namespace MindMapUIExtension
             return !IsEmpty();
         }
 
-		// Idle processing ----------------------------------------------------
+		// Mouse-wheel zooming ----------------------------------------------------
 
 		// Mouse-wheel zooming triggers a Begin/EndUpdate pair for each
 		// wheel-event which itself calls RecalculatePositions which can
@@ -591,39 +617,36 @@ namespace MindMapUIExtension
 		// at the first BeginUpdate and use that for painting until the 
 		// final EndUpdate.
 
-		bool WantIdleEndUpdate = false;
-		bool PerformingZoom = false;
-		Bitmap CachedSnapshot = null;
+		bool   m_MouseZooming = false;
+		Bitmap m_ZoomSnapshot = null;
 
 		protected override void OnMouseWheel(MouseEventArgs e)
 		{
 			if (ModifierKeys.HasFlag(Keys.Control))
 			{
 				Debug.WriteLine("OnMouseWheel(zoom)");
-				PerformingZoom = true;
+				m_MouseZooming = true;
 			}
 
 			base.OnMouseWheel(e);
 
-			PerformingZoom = false;
+			m_MouseZooming = false;
 		}
 
 		protected override void OnPaint(PaintEventArgs e)
 		{
-			if (CachedSnapshot != null)
-				e.Graphics.DrawImage(CachedSnapshot, new Point(0, 0));
+			if (m_ZoomSnapshot != null)
+				e.Graphics.DrawImage(m_ZoomSnapshot, new Point(0, 0));
 			else
 				base.OnPaint(e);
 		}
 
 		override protected void BeginUpdate()
 		{
-			Debug.WriteLine("BeginUpdate");
-
-			if (PerformingZoom && (CachedSnapshot == null))
+			if (m_MouseZooming && (m_ZoomSnapshot == null))
 			{
-				CachedSnapshot = new Bitmap(Width, Height);
-				DrawToBitmap(CachedSnapshot, new Rectangle(0, 0, Width, Height));
+				m_ZoomSnapshot = new Bitmap(Width, Height);
+				DrawToBitmap(m_ZoomSnapshot, new Rectangle(0, 0, Width, Height));
 			}
 
 			base.BeginUpdate();
@@ -631,25 +654,24 @@ namespace MindMapUIExtension
 
 		override protected void EndUpdate()
 		{
-			if (PerformingZoom)
-				WantIdleEndUpdate = true;
+			if (m_MouseZooming)
+				m_IdleTasks.ZoomEndUpdate();
 			else
 				base.EndUpdate();
 		}
 
 		public bool DoIdleProcessing()
 		{
-			if (WantIdleEndUpdate)
-			{
-				Debug.WriteLine("EndUpdate");
-				
-				WantIdleEndUpdate = false;
-				CachedSnapshot = null;
+			return m_IdleTasks.Process(this);
+		}
 
-				base.EndUpdate();
-			}
+		// For idle redraw only ----------------------------------------
+		internal void ZoomEndUpdate()
+		{
+			Debug.Assert(!m_MouseZooming);
+			m_ZoomSnapshot = null;
 
-			return false; // no more tasks
+			base.EndUpdate();
 		}
 
 		// Internal ------------------------------------------------------------

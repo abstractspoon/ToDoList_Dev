@@ -507,12 +507,6 @@ namespace EisenhowerUIExtension
 			return null;
 		}
 
-		public bool DoIdleProcessing()
-		{
-			// TODO
-			return false;
-		}
-
 		public void SetFont(String fontName, int fontSize)
 		{
 			Font font = new Font(fontName, fontSize);

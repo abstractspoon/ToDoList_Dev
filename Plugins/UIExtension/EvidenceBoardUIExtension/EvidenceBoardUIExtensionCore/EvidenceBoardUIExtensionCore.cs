@@ -29,6 +29,7 @@ namespace EvidenceBoardUIExtension
 
         private TDLNodeControl m_Control;
 		private EvidenceBoardPreferencesDlg m_PrefsDlg;
+		private UIExtension.IdleRedraw m_IdleTasks = new UIExtension.IdleRedraw();
 
 		private String m_LastBrowsedImageFolder;
 
@@ -145,6 +146,11 @@ namespace EvidenceBoardUIExtension
 					m_DateSlider.ResizeToFit(ClientRectangle.Right - m_DateSlider.Left - 10);
 				}
 			}
+
+			// For reasons I don't yet understand, invalidation after a 
+			// task update does NOT ALWAYS result in a subsequent repaint
+			// so we solve it with a delayed-redraw
+			m_IdleTasks.Redraw();
 		}
 
 		public bool WantTaskUpdate(Task.Attribute attrib)
@@ -197,7 +203,7 @@ namespace EvidenceBoardUIExtension
 
 		public bool DoIdleProcessing()
 		{
-			return false;
+			return m_IdleTasks.Process(this);
 		}
 
 		public bool GetLabelEditRect(ref Int32 left, ref Int32 top, ref Int32 right, ref Int32 bottom)

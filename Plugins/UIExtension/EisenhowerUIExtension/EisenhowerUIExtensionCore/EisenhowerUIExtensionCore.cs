@@ -29,6 +29,7 @@ namespace EisenhowerUIExtension
 		private UIExtension.TaskIcon m_TaskIcons;
 		private Font m_ControlsFont;
 		private UIThemeToolbarRenderer m_TBRenderer;
+		private UIExtension.IdleRedraw m_IdleTasks = new UIExtension.IdleRedraw();
 
 		private string m_PrevMatrices;
 		private string m_PrevSelMatrix;
@@ -120,6 +121,11 @@ namespace EisenhowerUIExtension
 
 			if (selTaskIds != null)
 				m_EisenhowerCtrl.SelectTasks(selTaskIds);
+
+			// For reasons I don't yet understand, invalidation after a 
+			// task update does NOT ALWAYS result in a subsequent repaint
+			// so we solve it with a delayed-redraw
+			m_IdleTasks.Redraw();
 		}
 
 		public bool WantTaskUpdate(Task.Attribute attrib)
@@ -177,7 +183,7 @@ namespace EisenhowerUIExtension
 
 		public bool DoIdleProcessing()
 		{
-			return m_EisenhowerCtrl.DoIdleProcessing();
+			return m_IdleTasks.Process(this);
 		}
 
 		public bool GetLabelEditRect(ref Int32 left, ref Int32 top, ref Int32 right, ref Int32 bottom)
