@@ -28,7 +28,7 @@ static char THIS_FILE[] = __FILE__;
 #define PSH_WIZARD97_EX 0x01000000
 
 /////////////////////////////////////////////////////////////////////////////
-// CWelcomeWizard
+// CTDLWebUpdatePromptDlg
 
 IMPLEMENT_DYNAMIC(CTDLWebUpdatePromptDlg, CPropertySheetEx)
 
@@ -59,12 +59,9 @@ CTDLWebUpdatePromptDlg::~CTDLWebUpdatePromptDlg()
 }
 
 BEGIN_MESSAGE_MAP(CTDLWebUpdatePromptDlg, CPropertySheetEx)
-//{{AFX_MSG_MAP(CWelcomeWizard)
-//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
-/////////////////////////////////////////////////////////////////////////////
-// CWelcomeWizard message handlers
+// ---------------------------------------------------------------
 
 TDL_WEBUPDATE_CHECK CTDLWebUpdatePromptDlg::CheckForUpdates()
 {
@@ -150,8 +147,7 @@ BOOL CTDLWebUpdatePromptDlg::OnInitDialog()
 		m_toolbar.MoveWindow(rToolbar, FALSE);
 	}
 	
-	return FALSE;  // return TRUE unless you set the focus to a control
-	// EXCEPTION: OCX Property Pages should return FALSE
+	return FALSE;
 }
 
 BOOL CTDLWebUpdatePromptDlg::OnCommand(WPARAM wParam, LPARAM lParam)
@@ -179,8 +175,6 @@ IMPLEMENT_DYNCREATE(CTDLWebUpdatePromptPage, CPropertyPageEx)
 CTDLWebUpdatePromptPage::CTDLWebUpdatePromptPage()
 	: CPropertyPageEx(IDD_WEBUPDATE_PROMPT_PAGE, 0)
 {
-	//{{AFX_DATA_INIT(CTDLWebUpdatePromptPage)
-	//}}AFX_DATA_INIT
 	m_psp.dwFlags &= ~(PSP_HASHELP);
 }
 
@@ -188,20 +182,16 @@ CTDLWebUpdatePromptPage::CTDLWebUpdatePromptPage()
 void CTDLWebUpdatePromptPage::DoDataExchange(CDataExchange* pDX)
 {
 	CPropertyPageEx::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CTDLWebUpdatePromptPage)
+
 	DDX_Text(pDX, IDC_CHANGES, m_sChanges);
-	//}}AFX_DATA_MAP
 }
 
 
 BEGIN_MESSAGE_MAP(CTDLWebUpdatePromptPage, CDialog)
-	//{{AFX_MSG_MAP(CTDLWebUpdatePromptPage)
 	ON_WM_CTLCOLOR()
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
-/////////////////////////////////////////////////////////////////////////////
-// CTDLWebUpdatePromptPage message handlers
+// ---------------------------------------------------------------
 
 void CTDLWebUpdatePromptPage::SetInfo(LPCTSTR szExeVer, const CStringArray& aChanges)
 {
