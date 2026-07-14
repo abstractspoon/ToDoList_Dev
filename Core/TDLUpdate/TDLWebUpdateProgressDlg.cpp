@@ -21,11 +21,16 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
-#define PSH_WIZARD97_EX 0x01000000
-
 #ifndef LVS_EX_DOUBLEBUFFER
 #	define LVS_EX_DOUBLEBUFFER  0x00010000
 #endif
+
+/////////////////////////////////////////////////////////////////////////////
+
+const int PSH_WIZARD97_EX = 0x01000000;
+const int IDC_TOPDIVIDERID = 0x3027;
+const int PROGRESS_INCREMENT = 10;
+const int PROGRESS_HEIGHT = GraphicsMisc::ScaleByDPIFactor(3);
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLWebUpdateProgressDlg dialog
@@ -72,6 +77,12 @@ void CTDLWebUpdateProgressDlg::OnCancel()
 
 void CTDLWebUpdateProgressDlg::SetProgressStatus(TDL_WEBUPDATE_PROGRESS nStatus, int nPercent)
 {
+	if (nStatus != m_page.GetProgressStatus())
+	{
+		m_wndProgress.OffsetPos(PROGRESS_INCREMENT);
+		Misc::ProcessMsgLoop();
+	}
+	
 	m_page.SetProgressStatus(nStatus, nPercent);
 
 	// extra handling
@@ -113,6 +124,16 @@ BOOL CTDLWebUpdateProgressDlg::OnInitDialog()
 	// hide back/next buttons
 	GetDlgItem(ID_WIZBACK)->ShowWindow(SW_HIDE);
 	GetDlgItem(ID_WIZNEXT)->ShowWindow(SW_HIDE);
+
+	// Create progress bar
+	CRect rProgress = CDialogHelper::GetCtrlRect(this, IDC_TOPDIVIDERID);
+
+	rProgress.top = rProgress.bottom;
+	rProgress.bottom += PROGRESS_HEIGHT;
+
+	VERIFY(m_wndProgress.Create(WS_CHILD | WS_VISIBLE, rProgress, this, IDC_PROGRESS));
+
+	m_wndProgress.SetRange(0, (PROGRESS_INCREMENT * TDLWP_NUMSTATES));
 
 	// focus cancel button
 	GetDlgItem(IDCANCEL)->SetFocus();

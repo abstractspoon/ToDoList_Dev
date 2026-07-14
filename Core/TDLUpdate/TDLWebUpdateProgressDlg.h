@@ -63,7 +63,6 @@ protected:
 
 class CTDLWebUpdateProgressDlg : public CPropertySheetEx
 {
-// Construction
 public:
 	CTDLWebUpdateProgressDlg(const CPoint& ptPos);
 	virtual ~CTDLWebUpdateProgressDlg();
@@ -75,12 +74,15 @@ public:
 
 protected:
 	CTDLWebUpdateProgressPage m_page;
+	CProgressCtrl m_wndProgress;
+
 	HFONT m_hFont;
 	BOOL m_bCancelled;
 	CPoint m_ptInitialPos;
 	CWindowIcons m_icons;
 	HBITMAP m_hbmHeader;
 
+protected:
 	virtual BOOL OnInitDialog();
 
 protected:
