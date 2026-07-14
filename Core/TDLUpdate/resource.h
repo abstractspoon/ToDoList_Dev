@@ -18,6 +18,7 @@
 #define IDS_WEBUPDATE_PROGRESSHEADER    58392
 #define IDS_WEBUPDATE_PROGRESS          58393
 #define IDS_WEBUPDATE_CANCEL            58394
+#define IDS_WEBUPDATE_TITLE             58395
 
 // Next default values for new objects
 // 

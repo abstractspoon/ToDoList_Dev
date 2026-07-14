@@ -21,9 +21,13 @@ protected:
 	explicit CTDLWizard(UINT nIDCaption);
 	explicit CTDLWizard(LPCTSTR pszCaption);
 
-	void EnableProgressBar(BOOL bEnable = TRUE, int nNumSteps = -1);
+	void EnableProgressBar(BOOL bEnable = TRUE); // Handled internally
+	void EnableProgressBar(BOOL bEnable, int nNumSteps); // Caller in/decrements steps
 
-protected:
+	void IncrementProgress();
+	void DecrementProgress();
+
+private:
 	CProgressCtrl m_wndProgress;
 	CFont m_font;
 

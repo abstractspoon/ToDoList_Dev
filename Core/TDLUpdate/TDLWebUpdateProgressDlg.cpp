@@ -26,33 +26,19 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
-
-const int PSH_WIZARD97_EX = 0x01000000;
-const int IDC_TOPDIVIDERID = 0x3027;
-const int PROGRESS_INCREMENT = 10;
-const int PROGRESS_HEIGHT = GraphicsMisc::ScaleByDPIFactor(3);
-
-/////////////////////////////////////////////////////////////////////////////
 // CTDLWebUpdateProgressDlg dialog
 
 CTDLWebUpdateProgressDlg::CTDLWebUpdateProgressDlg(const CPoint& ptPos)
 	: 
-	CPropertySheetEx(_T("")),
+	CTDLWizard(IDS_WEBUPDATE_TITLE),
 	m_ptInitialPos(ptPos)
 {
-	m_hFont = GraphicsMisc::CreateFont(_T("Tahoma"));
-	
-	m_page.AttachFont(m_hFont);
 	AddPage(&m_page);
 	
-	m_psh.dwFlags |= PSH_WIZARD97_EX | PSH_HEADER | PSH_USEICONID | PSH_USEHBMHEADER;
-	m_psh.dwFlags &= ~(PSH_HASHELP);
-	
-	m_psh.hInstance = AfxGetInstanceHandle(); 
 	m_psh.pszIcon = MAKEINTRESOURCE(IDR_MAINFRAME);
 	m_psh.hbmHeader = m_hbmHeader = GraphicsMisc::MakeWizardImage(CIcon(IDR_MAINFRAME, 48, FALSE));
 
-	SetWizardMode();
+	EnableProgressBar(TRUE, TDLWP_NUMSTATES);
 }
 
 CTDLWebUpdateProgressDlg::~CTDLWebUpdateProgressDlg()
@@ -60,7 +46,7 @@ CTDLWebUpdateProgressDlg::~CTDLWebUpdateProgressDlg()
 	GraphicsMisc::VerifyDeleteObject(m_hbmHeader);
 }
 
-BEGIN_MESSAGE_MAP(CTDLWebUpdateProgressDlg, CPropertySheetEx)
+BEGIN_MESSAGE_MAP(CTDLWebUpdateProgressDlg, CTDLWizard)
 	ON_WM_CLOSE()
 	ON_COMMAND(IDCANCEL, OnCancel)
 END_MESSAGE_MAP()
@@ -79,7 +65,7 @@ void CTDLWebUpdateProgressDlg::SetProgressStatus(TDL_WEBUPDATE_PROGRESS nStatus,
 {
 	if (nStatus != m_page.GetProgressStatus())
 	{
-		m_wndProgress.OffsetPos(PROGRESS_INCREMENT);
+		IncrementProgress();
 		Misc::ProcessMsgLoop();
 	}
 	
@@ -109,31 +95,19 @@ TDL_WEBUPDATE_PROGRESS CTDLWebUpdateProgressDlg::GetProgressStatus() const
 
 BOOL CTDLWebUpdateProgressDlg::OnInitDialog() 
 {
-	CDialogHelper::SetFont(this, m_hFont);
-
 	// set taskbar icon
 	m_icons.Initialise(*this, IDR_MAINFRAME);
 
 	// set dialog icon
 	SetIcon(m_icons.GetSmallIcon(), FALSE);
 	
-	CPropertySheetEx::OnInitDialog();
+	CTDLWizard::OnInitDialog();
 
 	SetWizardButtons(0);
 	
 	// hide back/next buttons
 	GetDlgItem(ID_WIZBACK)->ShowWindow(SW_HIDE);
 	GetDlgItem(ID_WIZNEXT)->ShowWindow(SW_HIDE);
-
-	// Create progress bar
-	CRect rProgress = CDialogHelper::GetCtrlRect(this, IDC_TOPDIVIDERID);
-
-	rProgress.top = rProgress.bottom;
-	rProgress.bottom += PROGRESS_HEIGHT;
-
-	VERIFY(m_wndProgress.Create(WS_CHILD | WS_VISIBLE, rProgress, this, IDC_PROGRESS));
-
-	m_wndProgress.SetRange(0, (PROGRESS_INCREMENT * TDLWP_NUMSTATES));
 
 	// focus cancel button
 	GetDlgItem(IDCANCEL)->SetFocus();
@@ -226,11 +200,9 @@ BOOL CTDLWebUpdateProgressPage::OnInitDialog()
 
 	m_nStatus = TDLWP_NONE;
 
-	CDialogHelper::SetFont(this, m_hFont);
-
 	// Calculate longest column strings
 	CClientDC dc(&m_lcProgress);
-	HGDIOBJ hOldFont = dc.SelectObject(m_hFont);
+	HGDIOBJ hOldFont = dc.SelectObject(GetFont());
 
 	CString sMaxItem = _T("10."), sMaxDesc;
 

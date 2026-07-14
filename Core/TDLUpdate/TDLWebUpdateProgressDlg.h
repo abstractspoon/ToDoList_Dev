@@ -7,6 +7,8 @@
 // WebUpdateProgressDlg.h : header file
 //
 
+#include "..\ToDoList\TDLWizard.h"
+
 #include "..\shared\WindowIcons.h"
 
 //////////////////////////////////////////////////////////////////////
@@ -35,8 +37,6 @@ class CTDLWebUpdateProgressPage : public CPropertyPageEx
 public:
 	CTDLWebUpdateProgressPage();
 	
-	void AttachFont(HFONT hFont) { m_hFont = hFont; }
-	
 	void SetProgressStatus(TDL_WEBUPDATE_PROGRESS nStatus, int nPercent = 0);
 	TDL_WEBUPDATE_PROGRESS GetProgressStatus() const { return m_nStatus; }
 	
@@ -45,7 +45,7 @@ protected:
 	CListCtrl m_lcProgress;
 	CStringArray m_aProgressDescriptions;
 	CString m_sDone;
-	HFONT m_hFont;
+
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX); 
 	virtual BOOL OnInitDialog();
@@ -61,7 +61,7 @@ protected:
 /////////////////////////////////////////////////////////////////////////////
 // CTDLWebUpdateProgressDlg dialog
 
-class CTDLWebUpdateProgressDlg : public CPropertySheetEx
+class CTDLWebUpdateProgressDlg : public CTDLWizard
 {
 public:
 	CTDLWebUpdateProgressDlg(const CPoint& ptPos);
@@ -74,9 +74,7 @@ public:
 
 protected:
 	CTDLWebUpdateProgressPage m_page;
-	CProgressCtrl m_wndProgress;
 
-	HFONT m_hFont;
 	BOOL m_bCancelled;
 	CPoint m_ptInitialPos;
 	CWindowIcons m_icons;

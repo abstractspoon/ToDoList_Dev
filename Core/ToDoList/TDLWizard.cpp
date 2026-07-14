@@ -55,11 +55,10 @@ void CTDLWizard::InitSheet(LPCTSTR szTitle)
 	m_bAutoAdvance = TRUE;
 	m_nNumSteps = -1;
 
+	m_strCaption = szTitle;
+
 	m_psh.dwFlags |= PSH_WIZARD97_EX | PSH_HEADER | PSH_USEICONID | PSH_USEHBMHEADER;
 	m_psh.dwFlags &= ~(PSH_HASHELP);
-
-	if (!Misc::IsEmpty(szTitle))
-		SetTitle(szTitle, PSH_PROPTITLE);
 
 	m_psh.hInstance = AfxGetInstanceHandle();
 }
@@ -83,7 +82,9 @@ BOOL CTDLWizard::OnInitDialog()
 
 		if (m_bAutoAdvance)
 		{
-			m_wndProgress.SetRange(0, (PROGRESS_INCREMENT * GetPageCount()));
+			m_nNumSteps = GetPageCount();
+
+			m_wndProgress.SetRange(0, (PROGRESS_INCREMENT * m_nNumSteps));
 			m_wndProgress.SetPos(PROGRESS_INCREMENT);
 		}
 		else
@@ -92,18 +93,29 @@ BOOL CTDLWizard::OnInitDialog()
 		}
 	}
 
-	SetWindowText(m_strCaption);
+	if (!m_strCaption.IsEmpty())
+		SetWindowText(m_strCaption);
 
 	return TRUE;
+}
+
+void CTDLWizard::EnableProgressBar(BOOL bEnable)
+{
+	ASSERT(!GetSafeHwnd());
+
+	m_bProgressEnabled = bEnable;
+	m_bAutoAdvance = bEnable;
+	m_nNumSteps = -1; // Initialised in OnInitDialog
 }
 
 void CTDLWizard::EnableProgressBar(BOOL bEnable, int nNumSteps)
 {
 	ASSERT(!GetSafeHwnd());
+	ASSERT(!bEnable || (nNumSteps >= 1));
 
-	m_bProgressEnabled = bEnable;
-	m_bAutoAdvance = (bEnable && (nNumSteps == -1));
-	m_nNumSteps = (bEnable ? nNumSteps : 0);
+	m_bProgressEnabled = TRUE;
+	m_bAutoAdvance = FALSE;
+	m_nNumSteps = nNumSteps;
 }
 
 BOOL CTDLWizard::OnCommand(WPARAM wParam, LPARAM lParam)
@@ -117,13 +129,13 @@ BOOL CTDLWizard::OnCommand(WPARAM wParam, LPARAM lParam)
 		switch (LOWORD(wParam))
 		{
 		case ID_WIZBACK:
-			// The progress control doesn't animate for backwards
-			// moves so we must do it ourselves
-			SetTimer(TIMERID_ANIMATEBACK, (400 / PROGRESS_INCREMENT), NULL);
+			if (m_bAutoAdvance)
+				DecrementProgress();
 			break;
 
 		case ID_WIZNEXT:
-			m_wndProgress.OffsetPos(PROGRESS_INCREMENT);
+			if (m_bAutoAdvance)
+				IncrementProgress();
 			break;
 
 		case ID_WIZFINISH:
@@ -136,6 +148,28 @@ BOOL CTDLWizard::OnCommand(WPARAM wParam, LPARAM lParam)
 	return bRes;
 }
 
+void CTDLWizard::IncrementProgress()
+{
+	if (m_nCurStep >= (m_nNumSteps - 1))
+		return;
+
+	m_nCurStep++;
+
+	m_wndProgress.OffsetPos(PROGRESS_INCREMENT);
+}
+
+void CTDLWizard::DecrementProgress()
+{
+	if (m_nCurStep == 0)
+		return;
+
+	m_nCurStep--;
+
+	// The progress control doesn't animate for backwards
+	// moves so we must do it ourselves
+	SetTimer(TIMERID_ANIMATEBACK, (400 / PROGRESS_INCREMENT), NULL);
+}
+
 void CTDLWizard::OnTimer(UINT_PTR nIDEvent)
 {
 	if (nIDEvent == TIMERID_ANIMATEBACK)
@@ -145,7 +179,7 @@ void CTDLWizard::OnTimer(UINT_PTR nIDEvent)
 		m_wndProgress.SetPos(nPos);
 		m_wndProgress.UpdateWindow();
 
-		if (nPos == ((GetActiveIndex() + 1) * PROGRESS_INCREMENT))
+		if (nPos == ((m_nCurStep + 1) * PROGRESS_INCREMENT))
 			KillTimer(nIDEvent);
 	}
 	else
