@@ -30,27 +30,19 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CTDLWebUpdatePromptDlg
 
-IMPLEMENT_DYNAMIC(CTDLWebUpdatePromptDlg, CPropertySheetEx)
+IMPLEMENT_DYNAMIC(CTDLWebUpdatePromptDlg, CTDLWizard)
 
 CTDLWebUpdatePromptDlg::CTDLWebUpdatePromptDlg(LPCTSTR szExeVer, const CStringArray& aChanges) 
 	: 
-	CPropertySheetEx(_T(""), NULL, 0)
+	CTDLWizard(IDS_WEBUPDATE_TITLE)
 {
-	m_hFont = GraphicsMisc::CreateFont(_T("Tahoma"));
-	
-	m_page.AttachFont(m_hFont);
 	m_page.SetInfo(szExeVer, aChanges);
-	
 	AddPage(&m_page);
 
-	m_psh.dwFlags |= PSH_WIZARD97_EX | PSH_HEADER | PSH_USEICONID | PSH_USEHBMHEADER;
-	m_psh.dwFlags &= ~(PSH_HASHELP);
-	
-	m_psh.hInstance = AfxGetInstanceHandle(); 
 	m_psh.pszIcon = MAKEINTRESOURCE(IDI_TDLUPDATE);
 	m_psh.hbmHeader = m_hbmHeader = GraphicsMisc::MakeWizardImage(CIcon(IDR_MAINFRAME, 48, FALSE));
 
-	SetWizardMode();
+	EnableProgressBar(FALSE);
 }
 
 CTDLWebUpdatePromptDlg::~CTDLWebUpdatePromptDlg()
@@ -58,7 +50,7 @@ CTDLWebUpdatePromptDlg::~CTDLWebUpdatePromptDlg()
 	GraphicsMisc::VerifyDeleteObject(m_hbmHeader);
 }
 
-BEGIN_MESSAGE_MAP(CTDLWebUpdatePromptDlg, CPropertySheetEx)
+BEGIN_MESSAGE_MAP(CTDLWebUpdatePromptDlg, CTDLWizard)
 END_MESSAGE_MAP()
 
 // ---------------------------------------------------------------
@@ -117,10 +109,8 @@ void CTDLWebUpdatePromptDlg::ShowDialog()
 
 BOOL CTDLWebUpdatePromptDlg::OnInitDialog() 
 {
-	CPropertySheetEx::OnInitDialog();
+	CTDLWizard::OnInitDialog();
 	
-	CDialogHelper::SetFont(this, m_hFont);
-
 	SetWizardButtons(PSWIZB_FINISH);
 
 	// hide back button
@@ -164,7 +154,7 @@ BOOL CTDLWebUpdatePromptDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 	}
 	
 	// else
-	return CPropertySheetEx::OnCommand(wParam, lParam);
+	return CTDLWizard::OnCommand(wParam, lParam);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -186,7 +176,6 @@ void CTDLWebUpdatePromptPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_CHANGES, m_sChanges);
 }
 
-
 BEGIN_MESSAGE_MAP(CTDLWebUpdatePromptPage, CDialog)
 	ON_WM_CTLCOLOR()
 END_MESSAGE_MAP()
@@ -206,8 +195,6 @@ void CTDLWebUpdatePromptPage::SetInfo(LPCTSTR szExeVer, const CStringArray& aCha
 
 BOOL CTDLWebUpdatePromptPage::OnInitDialog() 
 {
-	CDialogHelper::SetFont(this, m_hFont);
-
 	CPropertyPageEx::OnInitDialog();
 
 	GetDlgItem(IDC_LABEL)->SetFocus();

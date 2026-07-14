@@ -8,6 +8,7 @@
 //
 
 #include "tdcenum.h"
+#include "TDLWizard.h"
 
 #include "..\Shared\entoolbar.h"
 #include "..\Shared\toolbarhelper.h"
@@ -22,13 +23,11 @@ class CTDLWebUpdatePromptPage : public CPropertyPageEx
 public:
 	CTDLWebUpdatePromptPage();
 
-	void AttachFont(HFONT hFont) { m_hFont = hFont; }
 	void SetInfo(LPCTSTR szExeVer, const CStringArray& aChanges);
 
 protected:
 	CString	m_sPrompt;
 	CString	m_sChanges;
-	HFONT m_hFont;
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);
@@ -42,9 +41,9 @@ protected:
 
 
 /////////////////////////////////////////////////////////////////////////////
-// CWelcomeWizard
+// CTDLWebUpdatePromptDlg
 
-class CTDLWebUpdatePromptDlg : public CPropertySheetEx
+class CTDLWebUpdatePromptDlg : public CTDLWizard
 {
 	DECLARE_DYNAMIC(CTDLWebUpdatePromptDlg)
 		
@@ -62,7 +61,6 @@ protected:
 	// Attributes
 protected:
 	CTDLWebUpdatePromptPage m_page;
-	HFONT m_hFont;
 	CEnToolBar m_toolbar;
 	CToolbarHelper m_tbHelper;
 	HBITMAP m_hbmHeader;

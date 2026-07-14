@@ -2601,6 +2601,7 @@
 #define IDS_CUSTATTRIB_REMAININGCOUNT   51688
 #define IDS_IMPORTDLGFROMPAGE_TITLE     51689
 #define IDS_IMPORTDLGTOPAGE_TITLE       51690
+#define IDS_WEBUPDATE_TITLE             51691
 
 // Next default values for new objects
 // 
