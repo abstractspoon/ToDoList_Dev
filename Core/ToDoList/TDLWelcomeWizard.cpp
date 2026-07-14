@@ -87,6 +87,7 @@ BOOL CTDLWelcomeWizard::OnInitDialog()
 
 	VERIFY (m_btnHelp.Create(IDC_HELPBUTTON, this));
 
+	// Create progress bar
 	CRect rProgress = CDialogHelper::GetCtrlRect(this, IDC_TOPDIVIDERID);
 
 	rProgress.top = rProgress.bottom;
@@ -113,7 +114,7 @@ BOOL CTDLWelcomeWizard::OnCommand(WPARAM wParam, LPARAM lParam)
 			break;
 
 		case ID_WIZNEXT:
-			m_wndProgress.SetPos(m_wndProgress.GetPos() + PROGRESS_INCREMENT);
+			m_wndProgress.OffsetPos(PROGRESS_INCREMENT);
 			break;
 
 		case ID_WIZFINISH:
