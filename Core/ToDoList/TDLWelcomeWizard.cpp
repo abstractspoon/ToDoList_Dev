@@ -45,6 +45,19 @@ CTDLWelcomeWizard::CTDLWelcomeWizard(LPCTSTR szAppVer)
 	InitSheet();
 }
 
+CTDLWelcomeWizard::~CTDLWelcomeWizard()
+{
+	GraphicsMisc::VerifyDeleteObject(m_hbmHeader);
+}
+
+BEGIN_MESSAGE_MAP(CTDLWelcomeWizard, CPropertySheetEx)
+	ON_WM_HELPINFO()
+	ON_WM_TIMER()
+	ON_WM_ERASEBKGND()
+END_MESSAGE_MAP()
+
+// ---------------------------------------------------------------------
+
 void CTDLWelcomeWizard::InitSheet()
 {
 	m_hFont = GraphicsMisc::CreateFont(_T("Tahoma"));
@@ -59,22 +72,11 @@ void CTDLWelcomeWizard::InitSheet()
 
 	m_psh.dwFlags |= PSH_WIZARD97_EX | PSH_HEADER | PSH_USEICONID | PSH_USEHBMHEADER;
 	m_psh.dwFlags &= ~(PSH_HASHELP);
-	
-	m_psh.hInstance = AfxGetInstanceHandle(); 
+
+	m_psh.hInstance = AfxGetInstanceHandle();
 	m_psh.pszIcon = MAKEINTRESOURCE(IDR_MAINFRAME);
 	m_psh.hbmHeader = m_hbmHeader = GraphicsMisc::MakeWizardImage(CIcon(IDR_MAINFRAME, 48, FALSE));
 }
-
-CTDLWelcomeWizard::~CTDLWelcomeWizard()
-{
-	GraphicsMisc::VerifyDeleteObject(m_hbmHeader);
-}
-
-BEGIN_MESSAGE_MAP(CTDLWelcomeWizard, CPropertySheetEx)
-	ON_WM_HELPINFO()
-	ON_WM_TIMER()
-	ON_WM_ERASEBKGND()
-END_MESSAGE_MAP()
 
 BOOL CTDLWelcomeWizard::OnInitDialog() 
 {
@@ -199,6 +201,8 @@ void CTDLWelcomePage1::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(CTDLWelcomePage1, CPropertyPageEx)
 END_MESSAGE_MAP()
+
+// ---------------------------------------------------------------------
 
 BOOL CTDLWelcomePage1::OnInitDialog() 
 {

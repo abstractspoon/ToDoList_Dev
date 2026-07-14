@@ -56,14 +56,11 @@ CTDLWebUpdateProgressDlg::~CTDLWebUpdateProgressDlg()
 }
 
 BEGIN_MESSAGE_MAP(CTDLWebUpdateProgressDlg, CPropertySheetEx)
-	//{{AFX_MSG_MAP(CTDLWebUpdateProgressDlg)
-	//}}AFX_MSG_MAP
 	ON_WM_CLOSE()
 	ON_COMMAND(IDCANCEL, OnCancel)
 END_MESSAGE_MAP()
 
-/////////////////////////////////////////////////////////////////////////////
-// CTDLWebUpdateProgressDlg message handlers
+// ---------------------------------------------------------------------
 
 void CTDLWebUpdateProgressDlg::OnCancel() 
 { 
@@ -161,7 +158,7 @@ enum // list columns
 	STATUS_COL
 };
 
-/////////////////////////////////////////////////////////////////////////////
+// --------------------------------------------------------------
 
 IMPLEMENT_DYNCREATE(CTDLWebUpdateProgressPage, CPropertyPageEx)
 
@@ -170,8 +167,6 @@ CTDLWebUpdateProgressPage::CTDLWebUpdateProgressPage()
 	CPropertyPageEx(IDD_WEBUPDATE_PROGRESS_PAGE, 0),
 	m_nStatus(TDLWP_NONE)
 {
-	//{{AFX_DATA_INIT(CTDLWebUpdateProgressPage)
-	//}}AFX_DATA_INIT
 	m_psp.dwFlags &= ~(PSP_HASHELP);
 	
 	m_strHeaderTitle.Format(CEnString(IDS_WEBUPDATE_PROGRESSHEADER), Misc::GetUserName());
@@ -193,20 +188,16 @@ CTDLWebUpdateProgressPage::CTDLWebUpdateProgressPage()
 void CTDLWebUpdateProgressPage::DoDataExchange(CDataExchange* pDX)
 {
 	CPropertyPageEx::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CTDLWebUpdateProgressPage)
+
 	DDX_Control(pDX, IDC_PROGRESS, m_lcProgress);
-	//}}AFX_DATA_MAP
 }
 
 
 BEGIN_MESSAGE_MAP(CTDLWebUpdateProgressPage, CPropertyPageEx)
-//{{AFX_MSG_MAP(CTDLWebUpdateProgressPage)
-//}}AFX_MSG_MAP
 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_PROGRESS, OnProgressCustomDraw)
 END_MESSAGE_MAP()
 
-/////////////////////////////////////////////////////////////////////////////
-// CTDLWebUpdateProgressPage message handlers
+// ---------------------------------------------------------------------
 
 BOOL CTDLWebUpdateProgressPage::OnInitDialog() 
 {

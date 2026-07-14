@@ -32,9 +32,8 @@ class CTDLWebUpdateProgressPage : public CPropertyPageEx
 {
 	DECLARE_DYNCREATE(CTDLWebUpdateProgressPage)
 		
-		// Construction
 public:
-	CTDLWebUpdateProgressPage();   // standard constructor
+	CTDLWebUpdateProgressPage();
 	
 	void AttachFont(HFONT hFont) { m_hFont = hFont; }
 	
@@ -47,30 +46,17 @@ protected:
 	CStringArray m_aProgressDescriptions;
 	CString m_sDone;
 	HFONT m_hFont;
-
-	// Dialog Data
-	//{{AFX_DATA(CTDLWebUpdatePromptDlg)
-	//}}AFX_DATA
-
-	// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CTDLWebUpdatePromptDlg)
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-	//}}AFX_VIRTUAL
+	virtual void DoDataExchange(CDataExchange* pDX); 
 	virtual BOOL OnInitDialog();
 	virtual BOOL OnSetActive();
 	
-	// Implementation
 protected:
-	// Generated message map functions
-	//{{AFX_MSG(CTDLWebUpdatePromptDlg)
-	//}}AFX_MSG
 	void OnProgressCustomDraw(NMHDR* pNMHDR, LRESULT* pResult);
+	
 	DECLARE_MESSAGE_MAP()
 
 };
-
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLWebUpdateProgressDlg dialog
@@ -88,9 +74,6 @@ public:
 	BOOL IsCancelled() const;
 
 protected:
-// Dialog Data
-	//{{AFX_DATA(CTDLWebUpdateProgressDlg)
-	//}}AFX_DATA
 	CTDLWebUpdateProgressPage m_page;
 	HFONT m_hFont;
 	BOOL m_bCancelled;
@@ -98,23 +81,12 @@ protected:
 	CWindowIcons m_icons;
 	HBITMAP m_hbmHeader;
 
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CTDLWebUpdateProgressDlg)
-	//}}AFX_VIRTUAL
 	virtual BOOL OnInitDialog();
 
-// Implementation
 protected:
-	// Generated message map functions
-	//{{AFX_MSG(CTDLWebUpdateProgressDlg)
-	//}}AFX_MSG
 	afx_msg void OnClose();
 	afx_msg void OnCancel();
 	DECLARE_MESSAGE_MAP()
 };
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
 #endif // !defined(AFX_WEBUPDATEPROGRESSDLG_H__63C954EF_E75B_4EF3_A042_1A5DAF62F89D__INCLUDED_)
