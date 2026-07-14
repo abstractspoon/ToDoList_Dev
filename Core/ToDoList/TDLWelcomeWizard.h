@@ -131,17 +131,21 @@ protected:
 	CTDLWelcomePage1 m_page1;
 	CTDLWelcomePage2 m_page2;
 	CTDLWelcomePage3 m_page3;
-	HFONT m_hFont;
 	CWinHelpButton m_btnHelp;
+	CProgressCtrl m_wndProgress;
+
+	HFONT m_hFont;
 	CString m_sTitle;
 	HBITMAP m_hbmHeader;
 
 protected:
 	virtual BOOL OnInitDialog();
+	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
 
 protected:
-	afx_msg void OnWizFinish();
 	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
+	afx_msg void OnTimer(UINT_PTR nIDEvent);
+	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	DECLARE_MESSAGE_MAP()
 
 protected:

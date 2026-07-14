@@ -24,7 +24,11 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
-#define PSH_WIZARD97_EX 0x01000000
+const int PSH_WIZARD97_EX		= 0x01000000;
+const int IDC_TOPDIVIDERID		= 0x3027;
+const int PROGRESS_INCREMENT	= 10;
+const int PROGRESS_HEIGHT		= GraphicsMisc::ScaleByDPIFactor(3);
+const int TIMERID_ANIMATEBACK	= 1;
 
 /////////////////////////////////////////////////////////////////////////////
 // CWelcomeWizard
@@ -67,8 +71,9 @@ CTDLWelcomeWizard::~CTDLWelcomeWizard()
 }
 
 BEGIN_MESSAGE_MAP(CTDLWelcomeWizard, CPropertySheetEx)
-	ON_COMMAND(ID_WIZFINISH, OnWizFinish)
 	ON_WM_HELPINFO()
+	ON_WM_TIMER()
+	ON_WM_ERASEBKGND()
 END_MESSAGE_MAP()
 
 BOOL CTDLWelcomeWizard::OnInitDialog() 
@@ -80,16 +85,70 @@ BOOL CTDLWelcomeWizard::OnInitDialog()
 
 	VERIFY (m_btnHelp.Create(IDC_HELPBUTTON, this));
 
+	CRect rProgress = CDialogHelper::GetCtrlRect(this, IDC_TOPDIVIDERID);
+
+	rProgress.top = rProgress.bottom;
+	rProgress.bottom += PROGRESS_HEIGHT;
+
+	VERIFY(m_wndProgress.Create(WS_CHILD | WS_VISIBLE, rProgress, this, IDC_PROGRESS));
+
+	m_wndProgress.SetRange(0, (PROGRESS_INCREMENT * GetPageCount()));
+	m_wndProgress.SetPos(PROGRESS_INCREMENT);
+
 	return TRUE;
 }
 
-void CTDLWelcomeWizard::OnWizFinish()
-{	
-	m_page1.UpdateData();
-	m_page2.UpdateData();
-	m_page3.UpdateData();
+BOOL CTDLWelcomeWizard::OnCommand(WPARAM wParam, LPARAM lParam)
+{
+	if (HIWORD(wParam) == BN_CLICKED)
+	{
+		switch (LOWORD(wParam))
+		{
+		case ID_WIZBACK:
+			// The progress control doesn't animate for backwards
+			// moves so we must do it ourselves
+			SetTimer(TIMERID_ANIMATEBACK, (400 / PROGRESS_INCREMENT), NULL);
+			break;
 
-	EndDialog(ID_WIZFINISH);
+		case ID_WIZNEXT:
+			m_wndProgress.SetPos(m_wndProgress.GetPos() + PROGRESS_INCREMENT);
+			break;
+
+		case ID_WIZFINISH:
+			m_page1.UpdateData();
+			m_page2.UpdateData();
+			m_page3.UpdateData();
+			break;
+		}
+	}
+
+	return  CPropertySheetEx::OnCommand(wParam, lParam);
+}
+
+void CTDLWelcomeWizard::OnTimer(UINT_PTR nIDEvent)
+{
+	if (nIDEvent == TIMERID_ANIMATEBACK)
+	{
+		int nPos = m_wndProgress.GetPos() - 1;
+
+		m_wndProgress.SetPos(nPos);
+		m_wndProgress.UpdateWindow();
+
+		if (nPos == ((GetActiveIndex() + 1) * PROGRESS_INCREMENT))
+			KillTimer(nIDEvent);
+	}
+	else
+	{
+		CPropertySheetEx::OnTimer(nIDEvent);
+	}
+}
+
+BOOL CTDLWelcomeWizard::OnEraseBkgnd(CDC* pDC)
+{
+	// Reduce flicker when navigating
+	CDialogHelper::ExcludeCtrls(this, pDC);
+
+	return CPropertySheetEx::OnEraseBkgnd(pDC);
 }
 
 BOOL CTDLWelcomeWizard::OnHelpInfo(HELPINFO* /*lpHelpInfo*/)
