@@ -33,16 +33,19 @@ const int TIMERID_ANIMATEBACK	= 1;
 /////////////////////////////////////////////////////////////////////////////
 // CWelcomeWizard
 
-IMPLEMENT_DYNAMIC(CTDLWelcomeWizard, CPropertySheetEx)
+IMPLEMENT_DYNAMIC(CTDLWelcomeWizard, CTDLWizard)
 
 CTDLWelcomeWizard::CTDLWelcomeWizard(LPCTSTR szAppVer) 
 	: 
-	CPropertySheetEx(_T(""), NULL, 0),
+	CTDLWizard(Misc::Format(_T("%s - %s"), CEnString(IDS_SETUP_TITLE), szAppVer)),
 	m_btnHelp(IDD_WELCOME_PAGE1)
 {
-	m_sTitle.Format(_T("%s - %s"), CEnString(IDS_SETUP_TITLE), szAppVer);
+	AddPage(&m_page1);
+	AddPage(&m_page2);
+	AddPage(&m_page3);
 
-	InitSheet();
+	m_psh.pszIcon = MAKEINTRESOURCE(IDR_MAINFRAME);
+	m_psh.hbmHeader = m_hbmHeader = GraphicsMisc::MakeWizardImage(CIcon(IDR_MAINFRAME, 48, FALSE));
 }
 
 CTDLWelcomeWizard::~CTDLWelcomeWizard()
@@ -50,108 +53,19 @@ CTDLWelcomeWizard::~CTDLWelcomeWizard()
 	GraphicsMisc::VerifyDeleteObject(m_hbmHeader);
 }
 
-BEGIN_MESSAGE_MAP(CTDLWelcomeWizard, CPropertySheetEx)
+BEGIN_MESSAGE_MAP(CTDLWelcomeWizard, CTDLWizard)
 	ON_WM_HELPINFO()
-	ON_WM_TIMER()
-	ON_WM_ERASEBKGND()
 END_MESSAGE_MAP()
 
 // ---------------------------------------------------------------------
 
-void CTDLWelcomeWizard::InitSheet()
-{
-	m_hFont = GraphicsMisc::CreateFont(_T("Tahoma"));
-
-	m_page1.AttachFont(m_hFont);
-	m_page2.AttachFont(m_hFont);
-	m_page3.AttachFont(m_hFont);
-
-	AddPage(&m_page1);
-	AddPage(&m_page2);
-	AddPage(&m_page3);
-
-	m_psh.dwFlags |= PSH_WIZARD97_EX | PSH_HEADER | PSH_USEICONID | PSH_USEHBMHEADER;
-	m_psh.dwFlags &= ~(PSH_HASHELP);
-
-	m_psh.hInstance = AfxGetInstanceHandle();
-	m_psh.pszIcon = MAKEINTRESOURCE(IDR_MAINFRAME);
-	m_psh.hbmHeader = m_hbmHeader = GraphicsMisc::MakeWizardImage(CIcon(IDR_MAINFRAME, 48, FALSE));
-}
-
 BOOL CTDLWelcomeWizard::OnInitDialog() 
 {
-	CPropertySheetEx::OnInitDialog();
-
-	CDialogHelper::SetFont(this, m_hFont);
-	SetWindowText(m_sTitle);
+	CTDLWizard::OnInitDialog();
 
 	VERIFY (m_btnHelp.Create(IDC_HELPBUTTON, this));
 
-	// Create progress bar
-	CRect rProgress = CDialogHelper::GetCtrlRect(this, IDC_TOPDIVIDERID);
-
-	rProgress.top = rProgress.bottom;
-	rProgress.bottom += PROGRESS_HEIGHT;
-
-	VERIFY(m_wndProgress.Create(WS_CHILD | WS_VISIBLE, rProgress, this, IDC_PROGRESS));
-
-	m_wndProgress.SetRange(0, (PROGRESS_INCREMENT * GetPageCount()));
-	m_wndProgress.SetPos(PROGRESS_INCREMENT);
-
 	return TRUE;
-}
-
-BOOL CTDLWelcomeWizard::OnCommand(WPARAM wParam, LPARAM lParam)
-{
-	if (HIWORD(wParam) == BN_CLICKED)
-	{
-		switch (LOWORD(wParam))
-		{
-		case ID_WIZBACK:
-			// The progress control doesn't animate for backwards
-			// moves so we must do it ourselves
-			SetTimer(TIMERID_ANIMATEBACK, (400 / PROGRESS_INCREMENT), NULL);
-			break;
-
-		case ID_WIZNEXT:
-			m_wndProgress.OffsetPos(PROGRESS_INCREMENT);
-			break;
-
-		case ID_WIZFINISH:
-			m_page1.UpdateData();
-			m_page2.UpdateData();
-			m_page3.UpdateData();
-			break;
-		}
-	}
-
-	return  CPropertySheetEx::OnCommand(wParam, lParam);
-}
-
-void CTDLWelcomeWizard::OnTimer(UINT_PTR nIDEvent)
-{
-	if (nIDEvent == TIMERID_ANIMATEBACK)
-	{
-		int nPos = m_wndProgress.GetPos() - 1;
-
-		m_wndProgress.SetPos(nPos);
-		m_wndProgress.UpdateWindow();
-
-		if (nPos == ((GetActiveIndex() + 1) * PROGRESS_INCREMENT))
-			KillTimer(nIDEvent);
-	}
-	else
-	{
-		CPropertySheetEx::OnTimer(nIDEvent);
-	}
-}
-
-BOOL CTDLWelcomeWizard::OnEraseBkgnd(CDC* pDC)
-{
-	// Reduce flicker when navigating
-	CDialogHelper::ExcludeCtrls(this, pDC);
-
-	return CPropertySheetEx::OnEraseBkgnd(pDC);
 }
 
 BOOL CTDLWelcomeWizard::OnHelpInfo(HELPINFO* /*lpHelpInfo*/)
@@ -179,8 +93,7 @@ CTDLWelcomePage1::CTDLWelcomePage1()
 	: 
 	CPropertyPageEx(IDD_WELCOME_PAGE1, 0),
 	m_bUseIniFile(1),
-	m_bShareTasklists(0),
-	m_hFont(NULL)
+	m_bShareTasklists(0)
 {
 	m_psp.dwFlags &= ~(PSP_HASHELP);
 	
@@ -207,8 +120,6 @@ END_MESSAGE_MAP()
 
 BOOL CTDLWelcomePage1::OnInitDialog() 
 {
-	CDialogHelper::SetFont(this, m_hFont);
-	
 	CPropertyPageEx::OnInitDialog();
 
 	GetDlgItem(IDC_REGISTRY)->EnableWindow(COSVersion() != OSV_LINUX);
@@ -231,8 +142,7 @@ IMPLEMENT_DYNCREATE(CTDLWelcomePage2, CPropertyPageEx)
 
 CTDLWelcomePage2::CTDLWelcomePage2() 
 	: 
-	CPropertyPageEx(IDD_WELCOME_PAGE2, 0),
-	m_hFont(NULL)
+	CPropertyPageEx(IDD_WELCOME_PAGE2, 0)
 {
 	m_psp.dwFlags &= ~(PSP_HASHELP);		
 	
@@ -256,8 +166,6 @@ END_MESSAGE_MAP()
 
 BOOL CTDLWelcomePage2::OnInitDialog() 
 {
-	CDialogHelper::SetFont(this, m_hFont);
-
 	return CPropertyPageEx::OnInitDialog();
 }
 
@@ -290,8 +198,7 @@ IMPLEMENT_DYNCREATE(CTDLWelcomePage3, CPropertyPageEx)
 CTDLWelcomePage3::CTDLWelcomePage3() 
 	: 
 	CPropertyPageEx(IDD_WELCOME_PAGE3, 0),
-	m_eSampleTasklist(FES_RELATIVEPATHS), 
-	m_hFont(NULL)
+	m_eSampleTasklist(FES_RELATIVEPATHS)
 {
 	m_bHideAttrib = 1;
 	m_bViewSample = 1;
@@ -327,7 +234,6 @@ END_MESSAGE_MAP()
 
 BOOL CTDLWelcomePage3::OnInitDialog() 
 {
-	CDialogHelper::SetFont(this, m_hFont);
 	CPropertyPageEx::OnInitDialog();
 	
 	m_eSampleTasklist.SetButtonWidthDLU(1, 14);

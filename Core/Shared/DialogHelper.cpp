@@ -638,7 +638,7 @@ void CDialogHelper::SetFont(CWnd* pWnd, HFONT hFont, BOOL bRedraw)
 
 	while (pChild)
 	{
-		SetFont(pChild, hFont, bRedraw);
+		SetFont(pChild, hFont, bRedraw); // RECURSIVE CALL
 		pChild = pChild->GetNextWindow(GW_HWNDNEXT);
 	}
 }

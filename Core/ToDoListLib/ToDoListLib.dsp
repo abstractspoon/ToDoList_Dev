@@ -705,6 +705,10 @@ SOURCE=..\ToDoList\TDLWelcomeWizard.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\ToDoList\TDLWizard.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\ToDoList\ToDoCtrl.cpp
 # End Source File
 # Begin Source File
@@ -1402,6 +1406,10 @@ SOURCE=..\ToDoList\TDLWebUpdatePromptDlg.h
 # Begin Source File
 
 SOURCE=..\ToDoList\TDLWelcomeWizard.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ToDoList\TDLWizard.h
 # End Source File
 # Begin Source File
 

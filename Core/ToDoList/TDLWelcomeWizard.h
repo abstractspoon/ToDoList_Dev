@@ -7,6 +7,7 @@
 // WelcomeWizard.h : header file
 //
 
+#include "TDLWizard.h"
 #include "TDLColumnListBox.h"
 
 #include "..\shared\fileedit.h"
@@ -28,14 +29,12 @@ public:
 	CTDLWelcomePage1();
 	~CTDLWelcomePage1();
 
-	void AttachFont(HFONT hFont) { m_hFont = hFont; }
 	BOOL GetUseIniFile() const { return m_bUseIniFile; }
 	BOOL GetShareTasklists() const { return m_bShareTasklists; }
 
 protected:
 	int		m_bShareTasklists;
 	int		m_bUseIniFile;
-	HFONT m_hFont;
 
 protected:
 	virtual BOOL OnSetActive();
@@ -57,12 +56,10 @@ public:
 	CTDLWelcomePage2();
 	~CTDLWelcomePage2();
 
-	void AttachFont(HFONT hFont) { m_hFont = hFont; }
 	void GetColumnVisibility(TDCCOLEDITFILTERVISIBILITY& vis) const;
 
 protected:
 	CTDLColumnListBox	m_lbColumns;
-	HFONT m_hFont;
 
 protected:
 	virtual BOOL OnSetActive();
@@ -84,7 +81,6 @@ public:
 	CTDLWelcomePage3();
 	~CTDLWelcomePage3();
 
-	void AttachFont(HFONT hFont) { m_hFont = hFont; }
 	BOOL GetHideAttributes() const { return m_bHideAttrib; }
 	CString GetSampleFilePath() const;
 
@@ -93,7 +89,6 @@ protected:
 	CString	m_sSampleTaskList;
 	int		m_bHideAttrib;
 	int		m_bViewSample;
-	HFONT m_hFont;
 	CIcon m_iconTDL;
 
 protected:
@@ -112,7 +107,7 @@ protected:
 /////////////////////////////////////////////////////////////////////////////
 // CWelcomeWizard
 
-class CTDLWelcomeWizard : public CPropertySheetEx
+class CTDLWelcomeWizard : public CTDLWizard
 {
 	DECLARE_DYNAMIC(CTDLWelcomeWizard)
 
@@ -132,24 +127,16 @@ protected:
 	CTDLWelcomePage2 m_page2;
 	CTDLWelcomePage3 m_page3;
 	CWinHelpButton m_btnHelp;
-	CProgressCtrl m_wndProgress;
 
-	HFONT m_hFont;
-	CString m_sTitle;
 	HBITMAP m_hbmHeader;
 
 protected:
 	virtual BOOL OnInitDialog();
-	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
 
 protected:
 	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
-	afx_msg void OnTimer(UINT_PTR nIDEvent);
-	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	DECLARE_MESSAGE_MAP()
 
-protected:
-	void InitSheet();
 };
 
 /////////////////////////////////////////////////////////////////////////////

@@ -37,7 +37,7 @@ const int PROGRESS_HEIGHT = GraphicsMisc::ScaleByDPIFactor(3);
 
 CTDLWebUpdateProgressDlg::CTDLWebUpdateProgressDlg(const CPoint& ptPos)
 	: 
-	CPropertySheetEx(_T(""), NULL, 0),
+	CPropertySheetEx(_T("")),
 	m_ptInitialPos(ptPos)
 {
 	m_hFont = GraphicsMisc::CreateFont(_T("Tahoma"));
