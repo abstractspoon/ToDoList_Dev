@@ -59,29 +59,20 @@ void CTDLWebUpdateProgressDlg::OnCancel()
 
 void CTDLWebUpdateProgressDlg::SetProgressStatus(TDL_WEBUPDATE_PROGRESS nStatus, int nPercent)
 {
-	if (nStatus != m_page.GetProgressStatus())
-	{
-		IncrementProgress();
-		Misc::ProcessMsgLoop();
-	}
-	
+	TDL_WEBUPDATE_PROGRESS nCurStatus = m_page.GetProgressStatus();
 	m_page.SetProgressStatus(nStatus, nPercent);
 
-	// extra handling
-	switch (nStatus)
+	if (nStatus != nCurStatus)
 	{
-	case TDLWP_COPY:
-		GetDlgItem(IDCANCEL)->EnableWindow(FALSE);
-		break;
+		IncrementProgress();
+		Misc::ProcessMsgLoop(1000); // allow animation to finish
 
-	case TDLWP_COMPLETE:
-		// Pause for a moment
-		Sleep(1000);
-		break;
+		// Hide 'Cancel' button from 'Copy' stage onwards
+		GetDlgItem(IDCANCEL)->EnableWindow(nStatus < TDLWP_COPY);
+
+		// Prevent the 'Next' button from repeatedly reappearing
+		GetDlgItem(ID_WIZNEXT)->ShowWindow(SW_HIDE);
 	}
-
-	// for some reason the 'Next' button keeps reappearing
-	GetDlgItem(ID_WIZNEXT)->ShowWindow(SW_HIDE);
 }
 
 TDL_WEBUPDATE_PROGRESS CTDLWebUpdateProgressDlg::GetProgressStatus() const
@@ -198,7 +189,7 @@ BOOL CTDLWebUpdateProgressPage::OnInitDialog()
 
 	// Calculate longest column strings
 	CClientDC dc(&m_lcProgress);
-	HGDIOBJ hOldFont = dc.SelectObject(GetFont());
+	HFONT hOldFont = GraphicsMisc::PrepareDCFont(&dc, m_lcProgress);
 
 	CString sMaxItem = _T("10."), sMaxDesc;
 

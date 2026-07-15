@@ -56,6 +56,7 @@ void CTDLWizard::InitSheet(LPCTSTR szTitle, UINT nIconID)
 	m_bProgressEnabled = TRUE;
 	m_bAutoAdvance = TRUE;
 	m_nNumSteps = -1;
+	m_nCurStep = 0;
 
 	m_strCaption = szTitle;
 
@@ -90,18 +91,15 @@ BOOL CTDLWizard::OnInitDialog()
 		rProgress.bottom += PROGRESS_HEIGHT;
 
 		VERIFY(m_wndProgress.Create(WS_CHILD | WS_VISIBLE, rProgress, this, IDC_STATIC));
+		m_nCurStep = 0;
 
 		if (m_bAutoAdvance)
-		{
 			m_nNumSteps = GetPageCount();
 
-			m_wndProgress.SetRange(0, (PROGRESS_INCREMENT * m_nNumSteps));
-			m_wndProgress.SetPos(PROGRESS_INCREMENT);
-		}
-		else
-		{
-			m_wndProgress.SetRange(0, (PROGRESS_INCREMENT * m_nNumSteps));
-		}
+		m_wndProgress.SetRange(0, (PROGRESS_INCREMENT * m_nNumSteps));
+		
+		if (m_bAutoAdvance)
+			IncrementProgress();
 	}
 
 	if (!m_strCaption.IsEmpty())
@@ -161,7 +159,7 @@ BOOL CTDLWizard::OnCommand(WPARAM wParam, LPARAM lParam)
 
 void CTDLWizard::IncrementProgress()
 {
-	if (m_nCurStep >= (m_nNumSteps - 1))
+	if (m_nCurStep > (m_nNumSteps - 1))
 		return;
 
 	m_nCurStep++;

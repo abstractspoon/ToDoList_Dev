@@ -62,8 +62,10 @@ BOOL CTDLUpdateApp::InitInstance()
 	ParseCommandLine(cmdInfo);
 
 	// must have App ID
+#ifndef _DEBUG
 	if (cmdInfo.GetOption(SWITCH_APPID) != TDLAPPID)
 		return FALSE;
+#endif
 
 	// Inherited commandline options
 	if (cmdInfo.HasOption(SWITCH_DARKMODE))
