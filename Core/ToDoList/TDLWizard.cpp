@@ -92,7 +92,7 @@ BOOL CTDLWizard::OnInitDialog()
 		rProgress.bottom += PROGRESS_HEIGHT;
 
 		VERIFY(m_wndProgress.Create(WS_CHILD | WS_VISIBLE, rProgress, this, IDC_STATIC));
-		m_nCurStep = 0;
+		m_nCurStep = -1;
 
 		if (m_bAutoAdvance)
 			m_nNumSteps = GetPageCount();
