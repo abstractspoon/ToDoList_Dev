@@ -45,10 +45,25 @@ protected:
 protected:
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
+	afx_msg LRESULT OnGetFont(WPARAM /*wp*/, LPARAM /*lp*/) { return (LRESULT)m_font.GetSafeHandle(); }
 	DECLARE_MESSAGE_MAP()
 
 protected:
 	void InitSheet(LPCTSTR szTitle, UINT nIconID);
 };
+
+/////////////////////////////////////////////////////////////////////////////
+// CWizardPage dialog
+
+class CTDLWizardPage : public CPropertyPageEx
+{
+public:
+	CTDLWizardPage(UINT nIDTemplate);
+
+protected:
+	virtual BOOL OnSetActive();
+};
+
+/////////////////////////////////////////////////////////////////////////////
 
 #endif // !defined(AFX_TDLWIZARD_H__A8A46BFB_E2CA_4BBF_A76D_C363065DEFA7__INCLUDED_)

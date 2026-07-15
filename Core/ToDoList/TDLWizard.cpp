@@ -47,6 +47,7 @@ CTDLWizard::CTDLWizard(LPCTSTR pszCaption, UINT nIconID) : CPropertySheetEx()
 BEGIN_MESSAGE_MAP(CTDLWizard, CPropertySheetEx)
 	ON_WM_TIMER()
 	ON_WM_ERASEBKGND()
+	ON_MESSAGE(WM_GETFONT, OnGetFont)
 END_MESSAGE_MAP()
 
 // --------------------------------------------------------------------------
@@ -57,9 +58,10 @@ void CTDLWizard::InitSheet(LPCTSTR szTitle, UINT nIconID)
 	m_bAutoAdvance = TRUE;
 	m_nNumSteps = -1;
 	m_nCurStep = 0;
-
 	m_strCaption = szTitle;
 
+	VERIFY(GraphicsMisc::CreateFont(m_font, _T("Tahoma")));
+	
 	VERIFY(m_bmHeader.Attach(GraphicsMisc::MakeWizardImage(CIcon(IDR_MAINFRAME, 48, FALSE))));
 	m_psh.hbmHeader = m_bmHeader;
 
@@ -79,8 +81,7 @@ BOOL CTDLWizard::OnInitDialog()
 {
 	CPropertySheetEx::OnInitDialog();
 
-	VERIFY(GraphicsMisc::CreateFont(m_font, _T("Tahoma")));
-	CDialogHelper::SetFont(this, m_font);
+	SetFont(&m_font);
 
 	// Create progress bar
 	if (m_bProgressEnabled)
@@ -203,4 +204,17 @@ BOOL CTDLWizard::OnEraseBkgnd(CDC* pDC)
 	CDialogHelper::ExcludeCtrls(this, pDC);
 
 	return CPropertySheetEx::OnEraseBkgnd(pDC);
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
+CTDLWizardPage::CTDLWizardPage(UINT nIDTemplate) : CPropertyPageEx(nIDTemplate)
+{
+}
+
+BOOL CTDLWizardPage::OnSetActive()
+{
+	CDialogHelper::SetFont(this, GraphicsMisc::GetFont(::GetParent(*this)));
+
+	return CPropertyPageEx::OnSetActive();
 }

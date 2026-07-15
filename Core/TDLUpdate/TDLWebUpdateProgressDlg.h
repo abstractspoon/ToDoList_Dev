@@ -30,7 +30,7 @@ enum TDL_WEBUPDATE_PROGRESS
 /////////////////////////////////////////////////////////////////////////////
 // CTDLWebUpdateProgressPage dialog
 
-class CTDLWebUpdateProgressPage : public CPropertyPageEx
+class CTDLWebUpdateProgressPage : public CTDLWizardPage
 {
 	DECLARE_DYNCREATE(CTDLWebUpdateProgressPage)
 		
@@ -78,7 +78,6 @@ protected:
 	BOOL m_bCancelled;
 	CPoint m_ptInitialPos;
 	CWindowIcons m_icons;
-// 	HBITMAP m_hbmHeader;
 
 protected:
 	virtual BOOL OnInitDialog();

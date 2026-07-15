@@ -142,11 +142,11 @@ enum // list columns
 
 // --------------------------------------------------------------
 
-IMPLEMENT_DYNCREATE(CTDLWebUpdateProgressPage, CPropertyPageEx)
+IMPLEMENT_DYNCREATE(CTDLWebUpdateProgressPage, CTDLWizardPage)
 
 CTDLWebUpdateProgressPage::CTDLWebUpdateProgressPage()
 	: 
-	CPropertyPageEx(IDD_WEBUPDATE_PROGRESS_PAGE, 0),
+	CTDLWizardPage(IDD_WEBUPDATE_PROGRESS_PAGE),
 	m_nStatus(TDLWP_NONE)
 {
 	m_psp.dwFlags &= ~(PSP_HASHELP);
@@ -169,13 +169,13 @@ CTDLWebUpdateProgressPage::CTDLWebUpdateProgressPage()
 
 void CTDLWebUpdateProgressPage::DoDataExchange(CDataExchange* pDX)
 {
-	CPropertyPageEx::DoDataExchange(pDX);
+	CTDLWizardPage::DoDataExchange(pDX);
 
 	DDX_Control(pDX, IDC_PROGRESS, m_lcProgress);
 }
 
 
-BEGIN_MESSAGE_MAP(CTDLWebUpdateProgressPage, CPropertyPageEx)
+BEGIN_MESSAGE_MAP(CTDLWebUpdateProgressPage, CTDLWizardPage)
 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_PROGRESS, OnProgressCustomDraw)
 END_MESSAGE_MAP()
 
@@ -183,61 +183,65 @@ END_MESSAGE_MAP()
 
 BOOL CTDLWebUpdateProgressPage::OnInitDialog() 
 {
-	CPropertyPageEx::OnInitDialog();
+	CTDLWizardPage::OnInitDialog();
 
 	m_nStatus = TDLWP_NONE;
-
-	// Calculate longest column strings
-	CClientDC dc(&m_lcProgress);
-	HFONT hOldFont = GraphicsMisc::PrepareDCFont(&dc, m_lcProgress);
-
-	CString sMaxItem = _T("10."), sMaxDesc;
-
-	// progress descriptions
-	int nItem = m_aProgressDescriptions.GetSize(), nMaxDescLen = 0;
-
-	while (nItem--)
-	{
-		int nItemLen = dc.GetTextExtent(m_aProgressDescriptions[nItem]).cx;
-
-		if (nItemLen > nMaxDescLen)
-		{
-			nMaxDescLen = nItemLen;
-			sMaxDesc = m_aProgressDescriptions[nItem];
-		}
-	}
-
-	// Progress status
-	CString sMaxStatus = _T("100%");
-
-	if (dc.GetTextExtent(sMaxStatus).cx < dc.GetTextExtent(m_sDone).cx)
-		sMaxStatus = m_sDone;
-	
-	dc.SelectObject(hOldFont);
-
-	// Create progress columns
-	m_lcProgress.InsertColumn(ITEM_COL, sMaxItem);
-	m_lcProgress.InsertColumn(DESCRIPTION_COL, sMaxDesc);
-	m_lcProgress.InsertColumn(STATUS_COL, sMaxStatus);
-
-	// Use auto-sizing must come after creation of all columns
-	m_lcProgress.SetColumnWidth(ITEM_COL, LVSCW_AUTOSIZE_USEHEADER);
-	m_lcProgress.SetColumnWidth(DESCRIPTION_COL, LVSCW_AUTOSIZE_USEHEADER);
-	m_lcProgress.SetColumnWidth(STATUS_COL, LVSCW_AUTOSIZE_USEHEADER);
-
-	// Reduce flicker during % updates
-	ListView_SetExtendedListViewStyleEx(m_lcProgress, LVS_EX_DOUBLEBUFFER, LVS_EX_DOUBLEBUFFER);
 
 	return TRUE;
 }
 
 BOOL CTDLWebUpdateProgressPage::OnSetActive() 
 {
-	CPropertyPageEx::OnSetActive();
+	CTDLWizardPage::OnSetActive();
 	
-	// set tabstops
-	UINT nTabStop = 16;
-	GetDlgItem(IDC_PROGRESS)->SendMessage(EM_SETTABSTOPS, 1, (LPARAM)&nTabStop);
+	// one-time initialisation
+	if (m_lcProgress.GetItemCount() == 0)
+	{
+		// Calculate longest column strings
+		CClientDC dc(&m_lcProgress);
+		HFONT hOldFont = GraphicsMisc::PrepareDCFont(&dc, m_lcProgress);
+
+		CString sMaxItem = _T("10."), sMaxDesc;
+
+		// progress descriptions
+		int nItem = m_aProgressDescriptions.GetSize(), nMaxDescLen = 0;
+
+		while (nItem--)
+		{
+			int nItemLen = dc.GetTextExtent(m_aProgressDescriptions[nItem]).cx;
+
+			if (nItemLen > nMaxDescLen)
+			{
+				nMaxDescLen = nItemLen;
+				sMaxDesc = m_aProgressDescriptions[nItem];
+			}
+		}
+
+		// Progress status
+		CString sMaxStatus = _T("100%");
+
+		if (dc.GetTextExtent(sMaxStatus).cx < dc.GetTextExtent(m_sDone).cx)
+			sMaxStatus = m_sDone;
+
+		dc.SelectObject(hOldFont);
+
+		// Create progress columns
+		m_lcProgress.InsertColumn(ITEM_COL, sMaxItem);
+		m_lcProgress.InsertColumn(DESCRIPTION_COL, sMaxDesc);
+		m_lcProgress.InsertColumn(STATUS_COL, sMaxStatus);
+
+		// Use auto-sizing must come after creation of all columns
+		m_lcProgress.SetColumnWidth(ITEM_COL, LVSCW_AUTOSIZE_USEHEADER);
+		m_lcProgress.SetColumnWidth(DESCRIPTION_COL, LVSCW_AUTOSIZE_USEHEADER);
+		m_lcProgress.SetColumnWidth(STATUS_COL, LVSCW_AUTOSIZE_USEHEADER);
+
+		// Reduce flicker during % updates
+		ListView_SetExtendedListViewStyleEx(m_lcProgress, LVS_EX_DOUBLEBUFFER, LVS_EX_DOUBLEBUFFER);
+
+		// set tabstops
+		UINT nTabStop = 16;
+		GetDlgItem(IDC_PROGRESS)->SendMessage(EM_SETTABSTOPS, 1, (LPARAM)&nTabStop);
+	}
 	
 	return TRUE;
 }
