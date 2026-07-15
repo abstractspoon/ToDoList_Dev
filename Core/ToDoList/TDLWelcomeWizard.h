@@ -59,7 +59,7 @@ public:
 	void GetColumnVisibility(TDCCOLEDITFILTERVISIBILITY& vis) const;
 
 protected:
-	CTDLColumnListBox	m_lbColumns;
+	CTDLColumnListBox m_lbColumns;
 
 protected:
 	virtual BOOL OnSetActive();
@@ -127,8 +127,6 @@ protected:
 	CTDLWelcomePage2 m_page2;
 	CTDLWelcomePage3 m_page3;
 	CWinHelpButton m_btnHelp;
-
-	HBITMAP m_hbmHeader;
 
 protected:
 	virtual BOOL OnInitDialog();

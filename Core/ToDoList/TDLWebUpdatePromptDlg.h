@@ -63,7 +63,6 @@ protected:
 	CTDLWebUpdatePromptPage m_page;
 	CEnToolBar m_toolbar;
 	CToolbarHelper m_tbHelper;
-	HBITMAP m_hbmHeader;
 
 protected:
 	virtual BOOL OnInitDialog();

@@ -2,11 +2,13 @@
 //
 
 #include "stdafx.h"
+#include "resource.h"
 #include "TDLWizard.h"
 
 #include "..\shared\GraphicsMisc.h"
 #include "..\shared\DialogHelper.h"
 #include "..\shared\Misc.h"
+#include "..\shared\Icon.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -29,17 +31,17 @@ IMPLEMENT_DYNAMIC(CTDLWizard, CPropertySheetEx)
 
 CTDLWizard::CTDLWizard()
 {
-	InitSheet(NULL);
+	InitSheet(NULL, 0); 
 }
 
-CTDLWizard::CTDLWizard(UINT nIDCaption) : CPropertySheetEx()
+CTDLWizard::CTDLWizard(UINT nIDCaption, UINT nIconID) : CPropertySheetEx()
 {
-	InitSheet(CEnString(nIDCaption));
+	InitSheet(CEnString(nIDCaption), nIconID);
 }
 
-CTDLWizard::CTDLWizard(LPCTSTR pszCaption) : CPropertySheetEx()
+CTDLWizard::CTDLWizard(LPCTSTR pszCaption, UINT nIconID) : CPropertySheetEx()
 {
-	InitSheet(pszCaption);
+	InitSheet(pszCaption, nIconID);
 }
 
 BEGIN_MESSAGE_MAP(CTDLWizard, CPropertySheetEx)
@@ -49,7 +51,7 @@ END_MESSAGE_MAP()
 
 // --------------------------------------------------------------------------
 
-void CTDLWizard::InitSheet(LPCTSTR szTitle)
+void CTDLWizard::InitSheet(LPCTSTR szTitle, UINT nIconID)
 {
 	m_bProgressEnabled = TRUE;
 	m_bAutoAdvance = TRUE;
@@ -57,8 +59,17 @@ void CTDLWizard::InitSheet(LPCTSTR szTitle)
 
 	m_strCaption = szTitle;
 
-	m_psh.dwFlags |= PSH_WIZARD97_EX | PSH_HEADER | PSH_USEICONID | PSH_USEHBMHEADER;
+	VERIFY(m_bmHeader.Attach(GraphicsMisc::MakeWizardImage(CIcon(IDR_MAINFRAME, 48, FALSE))));
+	m_psh.hbmHeader = m_bmHeader;
+
+	m_psh.dwFlags |= PSH_WIZARD97_EX | PSH_HEADER | PSH_USEHBMHEADER;
 	m_psh.dwFlags &= ~(PSH_HASHELP);
+
+	if (nIconID)
+	{
+		m_psh.pszIcon = MAKEINTRESOURCE(nIconID);
+		m_psh.dwFlags |= PSH_USEICONID;
+	}
 
 	m_psh.hInstance = AfxGetInstanceHandle();
 }

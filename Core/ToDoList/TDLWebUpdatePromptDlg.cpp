@@ -34,20 +34,16 @@ IMPLEMENT_DYNAMIC(CTDLWebUpdatePromptDlg, CTDLWizard)
 
 CTDLWebUpdatePromptDlg::CTDLWebUpdatePromptDlg(LPCTSTR szExeVer, const CStringArray& aChanges) 
 	: 
-	CTDLWizard(IDS_WEBUPDATE_TITLE)
+	CTDLWizard(IDS_WEBUPDATE_TITLE, IDI_TDLUPDATE)
 {
 	m_page.SetInfo(szExeVer, aChanges);
 	AddPage(&m_page);
-
-	m_psh.pszIcon = MAKEINTRESOURCE(IDI_TDLUPDATE);
-	m_psh.hbmHeader = m_hbmHeader = GraphicsMisc::MakeWizardImage(CIcon(IDR_MAINFRAME, 48, FALSE));
 
 	EnableProgressBar(FALSE);
 }
 
 CTDLWebUpdatePromptDlg::~CTDLWebUpdatePromptDlg()
 {
-	GraphicsMisc::VerifyDeleteObject(m_hbmHeader);
 }
 
 BEGIN_MESSAGE_MAP(CTDLWebUpdatePromptDlg, CTDLWizard)

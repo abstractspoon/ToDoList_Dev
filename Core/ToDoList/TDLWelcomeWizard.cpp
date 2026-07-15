@@ -37,20 +37,16 @@ IMPLEMENT_DYNAMIC(CTDLWelcomeWizard, CTDLWizard)
 
 CTDLWelcomeWizard::CTDLWelcomeWizard(LPCTSTR szAppVer) 
 	: 
-	CTDLWizard(Misc::Format(_T("%s - %s"), CEnString(IDS_SETUP_TITLE), szAppVer)),
+	CTDLWizard(Misc::Format(_T("%s - %s"), CEnString(IDS_SETUP_TITLE), szAppVer), IDR_MAINFRAME),
 	m_btnHelp(IDD_WELCOME_PAGE1)
 {
 	AddPage(&m_page1);
 	AddPage(&m_page2);
 	AddPage(&m_page3);
-
-	m_psh.pszIcon = MAKEINTRESOURCE(IDR_MAINFRAME);
-	m_psh.hbmHeader = m_hbmHeader = GraphicsMisc::MakeWizardImage(CIcon(IDR_MAINFRAME, 48, FALSE));
 }
 
 CTDLWelcomeWizard::~CTDLWelcomeWizard()
 {
-	GraphicsMisc::VerifyDeleteObject(m_hbmHeader);
 }
 
 BEGIN_MESSAGE_MAP(CTDLWelcomeWizard, CTDLWizard)

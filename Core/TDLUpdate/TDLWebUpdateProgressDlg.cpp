@@ -30,20 +30,16 @@ static char THIS_FILE[] = __FILE__;
 
 CTDLWebUpdateProgressDlg::CTDLWebUpdateProgressDlg(const CPoint& ptPos)
 	: 
-	CTDLWizard(IDS_WEBUPDATE_TITLE),
+	CTDLWizard(IDS_WEBUPDATE_TITLE, IDR_MAINFRAME),
 	m_ptInitialPos(ptPos)
 {
 	AddPage(&m_page);
-	
-	m_psh.pszIcon = MAKEINTRESOURCE(IDR_MAINFRAME);
-	m_psh.hbmHeader = m_hbmHeader = GraphicsMisc::MakeWizardImage(CIcon(IDR_MAINFRAME, 48, FALSE));
 
 	EnableProgressBar(TRUE, TDLWP_NUMSTATES);
 }
 
 CTDLWebUpdateProgressDlg::~CTDLWebUpdateProgressDlg()
 {
-	GraphicsMisc::VerifyDeleteObject(m_hbmHeader);
 }
 
 BEGIN_MESSAGE_MAP(CTDLWebUpdateProgressDlg, CTDLWizard)

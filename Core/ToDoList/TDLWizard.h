@@ -18,8 +18,8 @@ class CTDLWizard : public CPropertySheetEx
 
 protected:
 	CTDLWizard();
-	explicit CTDLWizard(UINT nIDCaption);
-	explicit CTDLWizard(LPCTSTR pszCaption);
+	explicit CTDLWizard(UINT nIDCaption, UINT nIconID = 0);
+	explicit CTDLWizard(LPCTSTR pszCaption, UINT nIconID = 0);
 
 	void EnableProgressBar(BOOL bEnable = TRUE); // Handled internally
 	void EnableProgressBar(BOOL bEnable, int nNumSteps); // Caller in/decrements steps
@@ -27,9 +27,10 @@ protected:
 	void IncrementProgress();
 	void DecrementProgress();
 
-private:
+protected:
 	CProgressCtrl m_wndProgress;
 	CFont m_font;
+	CBitmap m_bmHeader;
 
 	int m_nNumSteps;
 	int m_nCurStep;
@@ -47,7 +48,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	void InitSheet(LPCTSTR szTitle);
+	void InitSheet(LPCTSTR szTitle, UINT nIconID);
 };
 
 #endif // !defined(AFX_TDLWIZARD_H__A8A46BFB_E2CA_4BBF_A76D_C363065DEFA7__INCLUDED_)

@@ -78,7 +78,7 @@ protected:
 	BOOL m_bCancelled;
 	CPoint m_ptInitialPos;
 	CWindowIcons m_icons;
-	HBITMAP m_hbmHeader;
+// 	HBITMAP m_hbmHeader;
 
 protected:
 	virtual BOOL OnInitDialog();
