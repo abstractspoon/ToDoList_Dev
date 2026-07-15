@@ -218,3 +218,8 @@ BOOL CTDLWizardPage::OnSetActive()
 
 	return CPropertyPageEx::OnSetActive();
 }
+
+void CTDLWizardPage::SetWizardButtons(DWORD dwBtns)
+{
+	GetParent()->PostMessage(PSM_SETWIZBUTTONS, 0, dwBtns);
+}

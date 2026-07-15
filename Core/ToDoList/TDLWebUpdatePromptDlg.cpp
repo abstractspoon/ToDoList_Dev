@@ -156,18 +156,18 @@ BOOL CTDLWebUpdatePromptDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 /////////////////////////////////////////////////////////////////////////////
 // CTDLWebUpdatePromptPage dialog
 
-IMPLEMENT_DYNCREATE(CTDLWebUpdatePromptPage, CPropertyPageEx)
+IMPLEMENT_DYNCREATE(CTDLWebUpdatePromptPage, CTDLWizardPage)
 
 CTDLWebUpdatePromptPage::CTDLWebUpdatePromptPage()
-	: CPropertyPageEx(IDD_WEBUPDATE_PROMPT_PAGE, 0)
+	: 
+	CTDLWizardPage(IDD_WEBUPDATE_PROMPT_PAGE)
 {
 	m_psp.dwFlags &= ~(PSP_HASHELP);
 }
 
-
 void CTDLWebUpdatePromptPage::DoDataExchange(CDataExchange* pDX)
 {
-	CPropertyPageEx::DoDataExchange(pDX);
+	CTDLWizardPage::DoDataExchange(pDX);
 
 	DDX_Text(pDX, IDC_CHANGES, m_sChanges);
 }
@@ -191,7 +191,7 @@ void CTDLWebUpdatePromptPage::SetInfo(LPCTSTR szExeVer, const CStringArray& aCha
 
 BOOL CTDLWebUpdatePromptPage::OnInitDialog() 
 {
-	CPropertyPageEx::OnInitDialog();
+	CTDLWizardPage::OnInitDialog();
 
 	GetDlgItem(IDC_LABEL)->SetFocus();
 	return FALSE;
@@ -199,7 +199,7 @@ BOOL CTDLWebUpdatePromptPage::OnInitDialog()
 
 HBRUSH CTDLWebUpdatePromptPage::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor) 
 {
-	HBRUSH hBr =  CPropertyPageEx::OnCtlColor(pDC, pWnd, nCtlColor);
+	HBRUSH hBr =  CTDLWizardPage::OnCtlColor(pDC, pWnd, nCtlColor);
 	
 	if (pWnd->GetDlgCtrlID() == IDC_CHANGES)
 	{
@@ -212,7 +212,7 @@ HBRUSH CTDLWebUpdatePromptPage::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 
 BOOL CTDLWebUpdatePromptPage::OnSetActive() 
 {
-	CPropertyPageEx::OnSetActive();
+	CTDLWizardPage::OnSetActive();
 
 	UINT nTabStop = 16;
 	GetDlgItem(IDC_CHANGES)->SendMessage(EM_SETTABSTOPS, 1, (LPARAM)&nTabStop);

@@ -83,11 +83,11 @@ void CTDLWelcomeWizard::GetColumnVisibility(TDCCOLEDITFILTERVISIBILITY& vis) con
 /////////////////////////////////////////////////////////////////////////////
 // CWelcomePage1 property page
 
-IMPLEMENT_DYNCREATE(CTDLWelcomePage1, CPropertyPageEx)
+IMPLEMENT_DYNCREATE(CTDLWelcomePage1, CTDLWizardPage)
 
 CTDLWelcomePage1::CTDLWelcomePage1() 
 	: 
-	CPropertyPageEx(IDD_WELCOME_PAGE1, 0),
+	CTDLWizardPage(IDD_WELCOME_PAGE1),
 	m_bUseIniFile(1),
 	m_bShareTasklists(0)
 {
@@ -103,20 +103,20 @@ CTDLWelcomePage1::~CTDLWelcomePage1()
 
 void CTDLWelcomePage1::DoDataExchange(CDataExchange* pDX)
 {
-	CPropertyPageEx::DoDataExchange(pDX);
+	CTDLWizardPage::DoDataExchange(pDX);
 
 	DDX_Radio(pDX, IDC_NOSHARE, m_bShareTasklists);
 	DDX_Radio(pDX, IDC_REGISTRY, m_bUseIniFile);
 }
 
-BEGIN_MESSAGE_MAP(CTDLWelcomePage1, CPropertyPageEx)
+BEGIN_MESSAGE_MAP(CTDLWelcomePage1, CTDLWizardPage)
 END_MESSAGE_MAP()
 
 // ---------------------------------------------------------------------
 
 BOOL CTDLWelcomePage1::OnInitDialog() 
 {
-	CPropertyPageEx::OnInitDialog();
+	CTDLWizardPage::OnInitDialog();
 
 	GetDlgItem(IDC_REGISTRY)->EnableWindow(COSVersion() != OSV_LINUX);
 
@@ -126,19 +126,19 @@ BOOL CTDLWelcomePage1::OnInitDialog()
 BOOL CTDLWelcomePage1::OnSetActive() 
 {
 	// disable back button
-	((CPropertySheet*)GetParent())->SetWizardButtons(PSWIZB_NEXT);
+	SetWizardButtons(PSWIZB_NEXT);
 	
-	return CPropertyPageEx::OnSetActive();
+	return CTDLWizardPage::OnSetActive();
 }
 
 ////////////////////////////////////////////////////////////////////////////
 // CWelcomePage2 property page
 
-IMPLEMENT_DYNCREATE(CTDLWelcomePage2, CPropertyPageEx)
+IMPLEMENT_DYNCREATE(CTDLWelcomePage2, CTDLWizardPage)
 
 CTDLWelcomePage2::CTDLWelcomePage2() 
 	: 
-	CPropertyPageEx(IDD_WELCOME_PAGE2, 0)
+	CTDLWizardPage(IDD_WELCOME_PAGE2)
 {
 	m_psp.dwFlags &= ~(PSP_HASHELP);		
 	
@@ -152,24 +152,24 @@ CTDLWelcomePage2::~CTDLWelcomePage2()
 
 void CTDLWelcomePage2::DoDataExchange(CDataExchange* pDX)
 {
-	CPropertyPageEx::DoDataExchange(pDX);
+	CTDLWizardPage::DoDataExchange(pDX);
 
 	DDX_Control(pDX, IDC_COLUMNLIST, m_lbColumns);
 }
 
-BEGIN_MESSAGE_MAP(CTDLWelcomePage2, CPropertyPageEx)
+BEGIN_MESSAGE_MAP(CTDLWelcomePage2, CTDLWizardPage)
 END_MESSAGE_MAP()
 
 BOOL CTDLWelcomePage2::OnInitDialog() 
 {
-	return CPropertyPageEx::OnInitDialog();
+	return CTDLWizardPage::OnInitDialog();
 }
 
 BOOL CTDLWelcomePage2::OnSetActive() 
 {
-	((CPropertySheet*)GetParent())->SetWizardButtons(PSWIZB_BACK | PSWIZB_NEXT);
+	SetWizardButtons(PSWIZB_BACK | PSWIZB_NEXT);
 	
-	return CPropertyPageEx::OnSetActive();
+	return CTDLWizardPage::OnSetActive();
 }
 
 void CTDLWelcomePage2::GetColumnVisibility(TDCCOLEDITFILTERVISIBILITY& vis) const 
@@ -189,11 +189,11 @@ void CTDLWelcomePage2::GetColumnVisibility(TDCCOLEDITFILTERVISIBILITY& vis) cons
 /////////////////////////////////////////////////////////////////////////////
 // CWelcomePage3 property page
 
-IMPLEMENT_DYNCREATE(CTDLWelcomePage3, CPropertyPageEx)
+IMPLEMENT_DYNCREATE(CTDLWelcomePage3, CTDLWizardPage)
 
 CTDLWelcomePage3::CTDLWelcomePage3() 
 	: 
-	CPropertyPageEx(IDD_WELCOME_PAGE3, 0),
+	CTDLWizardPage(IDD_WELCOME_PAGE3),
 	m_eSampleTasklist(FES_RELATIVEPATHS)
 {
 	m_bHideAttrib = 1;
@@ -214,7 +214,7 @@ CTDLWelcomePage3::~CTDLWelcomePage3()
 
 void CTDLWelcomePage3::DoDataExchange(CDataExchange* pDX)
 {
-	CPropertyPageEx::DoDataExchange(pDX);
+	CTDLWizardPage::DoDataExchange(pDX);
 
 	DDX_Control(pDX, IDC_SAMPLETASKLIST, m_eSampleTasklist);
 	DDX_Text(pDX, IDC_SAMPLETASKLIST, m_sSampleTaskList);
@@ -222,7 +222,7 @@ void CTDLWelcomePage3::DoDataExchange(CDataExchange* pDX)
 	DDX_Radio(pDX, IDC_NOSAMPLE, m_bViewSample);
 }
 
-BEGIN_MESSAGE_MAP(CTDLWelcomePage3, CPropertyPageEx)
+BEGIN_MESSAGE_MAP(CTDLWelcomePage3, CTDLWizardPage)
 	ON_BN_CLICKED(IDC_NOSAMPLE, OnNosample)
 	ON_BN_CLICKED(IDC_SAMPLE, OnSample)
 	ON_REGISTERED_MESSAGE(WM_FE_GETFILEICON, OnGetFileIcon)
@@ -230,7 +230,7 @@ END_MESSAGE_MAP()
 
 BOOL CTDLWelcomePage3::OnInitDialog() 
 {
-	CPropertyPageEx::OnInitDialog();
+	CTDLWizardPage::OnInitDialog();
 	
 	m_eSampleTasklist.SetButtonWidthDLU(1, 14);
 	m_eSampleTasklist.EnableWindow(m_bViewSample);
@@ -260,9 +260,9 @@ void CTDLWelcomePage3::OnSample()
 
 BOOL CTDLWelcomePage3::OnSetActive() 
 {
-	((CPropertySheetEx*)GetParent())->SetWizardButtons(PSWIZB_BACK | PSWIZB_FINISH);
+	SetWizardButtons(PSWIZB_BACK | PSWIZB_FINISH);
 	
-	return CPropertyPageEx::OnSetActive();
+	return CTDLWizardPage::OnSetActive();
 }
 
 LRESULT CTDLWelcomePage3::OnGetFileIcon(WPARAM /*wParam*/, LPARAM lParam)

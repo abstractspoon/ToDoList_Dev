@@ -21,7 +21,7 @@ struct TDCCOLEDITFILTERVISIBILITY;
 /////////////////////////////////////////////////////////////////////////////
 // CWelcomePage1 dialog
 
-class CTDLWelcomePage1 : public CPropertyPageEx
+class CTDLWelcomePage1 : public CTDLWizardPage
 {
 	DECLARE_DYNCREATE(CTDLWelcomePage1)
 
@@ -48,7 +48,7 @@ protected:
 /////////////////////////////////////////////////////////////////////////////
 // CWelcomePage2 dialog
 
-class CTDLWelcomePage2 : public CPropertyPageEx
+class CTDLWelcomePage2 : public CTDLWizardPage
 {
 	DECLARE_DYNCREATE(CTDLWelcomePage2)
 
@@ -73,7 +73,7 @@ protected:
 /////////////////////////////////////////////////////////////////////////////
 // CWelcomePage3 dialog
 
-class CTDLWelcomePage3 : public CPropertyPageEx
+class CTDLWelcomePage3 : public CTDLWizardPage
 {
 	DECLARE_DYNCREATE(CTDLWelcomePage3)
 

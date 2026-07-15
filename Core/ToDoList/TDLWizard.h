@@ -62,6 +62,9 @@ public:
 
 protected:
 	virtual BOOL OnSetActive();
+
+protected:
+	void SetWizardButtons(DWORD dwBtns);
 };
 
 /////////////////////////////////////////////////////////////////////////////

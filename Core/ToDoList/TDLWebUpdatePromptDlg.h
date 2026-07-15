@@ -16,7 +16,7 @@
 /////////////////////////////////////////////////////////////////////////////
 // CTDLWebUpdatePromptDlg dialog
 
-class CTDLWebUpdatePromptPage : public CPropertyPageEx
+class CTDLWebUpdatePromptPage : public CTDLWizardPage
 {
 	DECLARE_DYNCREATE(CTDLWebUpdatePromptPage)
 
