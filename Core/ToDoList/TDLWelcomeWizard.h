@@ -11,7 +11,6 @@
 #include "TDLColumnListBox.h"
 
 #include "..\shared\fileedit.h"
-#include "..\shared\winhelpbutton.h"
 #include "..\shared\icon.h"
 
 /////////////////////////////////////////////////////////////////////////////
@@ -33,8 +32,8 @@ public:
 	BOOL GetShareTasklists() const { return m_bShareTasklists; }
 
 protected:
-	int		m_bShareTasklists;
-	int		m_bUseIniFile;
+	int	m_bShareTasklists;
+	int	m_bUseIniFile;
 
 protected:
 	virtual BOOL OnSetActive();
@@ -85,10 +84,10 @@ public:
 	CString GetSampleFilePath() const;
 
 protected:
-	CFileEdit	m_eSampleTasklist;
+	CFileEdit m_eSampleTasklist;
 	CString	m_sSampleTaskList;
-	int		m_bHideAttrib;
-	int		m_bViewSample;
+	int	m_bHideAttrib;
+	int	m_bViewSample;
 	CIcon m_iconTDL;
 
 protected:
@@ -100,8 +99,8 @@ protected:
 	afx_msg void OnNosample();
 	afx_msg void OnSample();
 	afx_msg LRESULT OnGetFileIcon(WPARAM wParam, LPARAM lParam);
-	DECLARE_MESSAGE_MAP()
 
+	DECLARE_MESSAGE_MAP()
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -126,13 +125,8 @@ protected:
 	CTDLWelcomePage1 m_page1;
 	CTDLWelcomePage2 m_page2;
 	CTDLWelcomePage3 m_page3;
-	CWinHelpButton m_btnHelp;
 
 protected:
-	virtual BOOL OnInitDialog();
-
-protected:
-	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
 	DECLARE_MESSAGE_MAP()
 
 };

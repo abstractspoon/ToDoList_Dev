@@ -7,6 +7,8 @@
 // WizardDlg.h : header file
 //
 
+#include "..\shared\WinHelpButton.h"
+
 #include <afxdlgs.h>
 
 /////////////////////////////////////////////////////////////////////////////
@@ -18,8 +20,8 @@ class CTDLWizard : public CPropertySheetEx
 
 protected:
 	CTDLWizard();
-	explicit CTDLWizard(UINT nIDCaption, UINT nIconID = 0);
-	explicit CTDLWizard(LPCTSTR pszCaption, UINT nIconID = 0);
+	explicit CTDLWizard(UINT nIDCaption, UINT nIconID = 0, UINT nHelpID = 0);
+	explicit CTDLWizard(LPCTSTR pszCaption, UINT nIconID = 0, UINT nHelpID = 0);
 
 	void EnableProgressBar(BOOL bEnable = TRUE); // Handled internally
 	void EnableProgressBar(BOOL bEnable, int nNumSteps); // Caller in/decrements steps
@@ -31,6 +33,7 @@ protected:
 	CProgressCtrl m_wndProgress;
 	CFont m_font;
 	CBitmap m_bmHeader;
+	CWinHelpButton m_btnHelp;
 
 	int m_nNumSteps;
 	int m_nCurStep;
@@ -46,10 +49,12 @@ protected:
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg LRESULT OnGetFont(WPARAM /*wp*/, LPARAM /*lp*/) { return (LRESULT)m_font.GetSafeHandle(); }
+	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
+
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	void InitSheet(LPCTSTR szTitle, UINT nIconID);
+	void InitSheet(LPCTSTR szTitle, UINT nIconID, UINT nHelpID);
 };
 
 /////////////////////////////////////////////////////////////////////////////

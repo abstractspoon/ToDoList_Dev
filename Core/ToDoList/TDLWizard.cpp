@@ -31,34 +31,37 @@ IMPLEMENT_DYNAMIC(CTDLWizard, CPropertySheetEx)
 
 CTDLWizard::CTDLWizard()
 {
-	InitSheet(NULL, 0); 
+	InitSheet(NULL, 0, 0); 
 }
 
-CTDLWizard::CTDLWizard(UINT nIDCaption, UINT nIconID)
+CTDLWizard::CTDLWizard(UINT nIDCaption, UINT nIconID, UINT nHelpID)
 {
-	InitSheet(CEnString(nIDCaption), nIconID);
+	InitSheet(CEnString(nIDCaption), nIconID, nHelpID);
 }
 
-CTDLWizard::CTDLWizard(LPCTSTR pszCaption, UINT nIconID)
+CTDLWizard::CTDLWizard(LPCTSTR pszCaption, UINT nIconID, UINT nHelpID)
 {
-	InitSheet(pszCaption, nIconID);
+	InitSheet(pszCaption, nIconID, nHelpID);
 }
 
 BEGIN_MESSAGE_MAP(CTDLWizard, CPropertySheetEx)
 	ON_WM_TIMER()
 	ON_WM_ERASEBKGND()
 	ON_MESSAGE(WM_GETFONT, OnGetFont)
+	ON_WM_HELPINFO()
 END_MESSAGE_MAP()
 
 // --------------------------------------------------------------------------
 
-void CTDLWizard::InitSheet(LPCTSTR szTitle, UINT nIconID)
+void CTDLWizard::InitSheet(LPCTSTR szTitle, UINT nIconID, UINT nHelpID)
 {
 	m_bProgressEnabled = TRUE;
 	m_bAutoAdvance = TRUE;
 	m_nNumSteps = -1;
 	m_nCurStep = 0;
 	m_strCaption = szTitle;
+
+	m_btnHelp.SetHelpID(nHelpID);
 
 	VERIFY(GraphicsMisc::CreateFont(m_font, _T("Tahoma")));
 	
@@ -82,6 +85,8 @@ BOOL CTDLWizard::OnInitDialog()
 	CPropertySheetEx::OnInitDialog();
 
 	SetFont(&m_font);
+
+	VERIFY(!m_btnHelp.GetHelpID() || m_btnHelp.Create(IDC_HELPBUTTON, this));
 
 	// Create progress bar
 	if (m_bProgressEnabled)
@@ -204,6 +209,12 @@ BOOL CTDLWizard::OnEraseBkgnd(CDC* pDC)
 	CDialogHelper::ExcludeCtrls(this, pDC);
 
 	return CPropertySheetEx::OnEraseBkgnd(pDC);
+}
+
+BOOL CTDLWizard::OnHelpInfo(HELPINFO* /*lpHelpInfo*/)
+{
+	AfxGetApp()->WinHelp(m_btnHelp.GetHelpID());
+	return TRUE;
 }
 
 /////////////////////////////////////////////////////////////////////////////

@@ -37,8 +37,9 @@ IMPLEMENT_DYNAMIC(CTDLWelcomeWizard, CTDLWizard)
 
 CTDLWelcomeWizard::CTDLWelcomeWizard(LPCTSTR szAppVer) 
 	: 
-	CTDLWizard(Misc::Format(_T("%s - %s"), CEnString(IDS_SETUP_TITLE), szAppVer), IDR_MAINFRAME),
-	m_btnHelp(IDD_WELCOME_PAGE1)
+	CTDLWizard(Misc::Format(_T("%s - %s"), CEnString(IDS_SETUP_TITLE), szAppVer), 
+			   IDR_MAINFRAME,
+			   IDD_WELCOME_PAGE1)
 {
 	AddPage(&m_page1);
 	AddPage(&m_page2);
@@ -50,25 +51,9 @@ CTDLWelcomeWizard::~CTDLWelcomeWizard()
 }
 
 BEGIN_MESSAGE_MAP(CTDLWelcomeWizard, CTDLWizard)
-	ON_WM_HELPINFO()
 END_MESSAGE_MAP()
 
 // ---------------------------------------------------------------------
-
-BOOL CTDLWelcomeWizard::OnInitDialog() 
-{
-	CTDLWizard::OnInitDialog();
-
-	VERIFY (m_btnHelp.Create(IDC_HELPBUTTON, this));
-
-	return TRUE;
-}
-
-BOOL CTDLWelcomeWizard::OnHelpInfo(HELPINFO* /*lpHelpInfo*/)
-{
-	AfxGetApp()->WinHelp(m_btnHelp.GetHelpID());
-	return TRUE;
-}
 
 void CTDLWelcomeWizard::GetColumnVisibility(TDCCOLEDITFILTERVISIBILITY& vis) const 
 { 
@@ -247,14 +232,15 @@ CString CTDLWelcomePage3::GetSampleFilePath() const
 { 
 	if (m_bViewSample)
 		return FileMisc::GetFullPath(m_sSampleTaskList, FileMisc::GetAppFolder());
-	else
-		return _T("");
+	
+	// else
+	return _T("");
 }
 
 void CTDLWelcomePage3::OnSample() 
 {
 	UpdateData();
-	m_eSampleTasklist.EnableWindow(m_bViewSample);
+	m_eSampleTasklist.EnableWindow(m_bViewSample); 
 }
 
 BOOL CTDLWelcomePage3::OnSetActive() 

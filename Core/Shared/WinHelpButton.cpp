@@ -26,8 +26,6 @@ CWinHelpButton::CWinHelpButton(UINT nHelpID, BOOL bAutoHandleClick)
 	m_bAutoHandleClick(bAutoHandleClick),
 	m_bAutoPosition(TRUE)
 {
-	ASSERT(m_nHelpID);
-	
 	if (s_hDefIcon)
 		CIconButton::SetIcon(s_hDefIcon, FALSE);
 }
@@ -37,13 +35,10 @@ CWinHelpButton::~CWinHelpButton()
 }
 
 BEGIN_MESSAGE_MAP(CWinHelpButton, CIconButton)
-	//{{AFX_MSG_MAP(CWinHelpButton)
-	//}}AFX_MSG_MAP
 	ON_WM_CREATE()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
-// CWinHelpButton message handlers
 
 BOOL CWinHelpButton::Create(UINT nID, CWnd* pParent, const CRect& rPos)
 {
@@ -134,6 +129,8 @@ BOOL CWinHelpButton::DoAction()
 {
 	if (m_bAutoHandleClick)
 	{
+		ASSERT(m_nHelpID);
+
 		AfxGetApp()->WinHelp(m_nHelpID);
 		return TRUE;
 	}
