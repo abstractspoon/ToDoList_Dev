@@ -6,6 +6,7 @@
 #define IDD_TDLUPDATE_DIALOG            102
 #define IDR_MAINFRAME                   128
 #define IDD_WEBUPDATE_PROGRESS_PAGE     272
+#define IDI_HELP_BUTTON                 293
 #define IDC_PROGRESS                    1427
 #define IDS_WEBUPDATE_SUCCESS           58383
 #define IDS_WEBUPDATE_FAILURE           58384

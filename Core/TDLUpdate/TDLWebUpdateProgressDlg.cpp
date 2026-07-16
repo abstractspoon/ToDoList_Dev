@@ -30,7 +30,7 @@ static char THIS_FILE[] = __FILE__;
 
 CTDLWebUpdateProgressDlg::CTDLWebUpdateProgressDlg(const CPoint& ptPos)
 	: 
-	CTDLWizard(IDS_WEBUPDATE_TITLE, IDR_MAINFRAME),
+	CTDLWizard(IDS_WEBUPDATE_TITLE, IDR_MAINFRAME, IDD_WEBUPDATE_PROGRESS_PAGE),
 	m_ptInitialPos(ptPos)
 {
 	AddPage(&m_page);

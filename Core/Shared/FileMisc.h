@@ -251,6 +251,7 @@ namespace FileMisc
 	CString GetAppFilePath();
 	CString GetAppFolder(LPCTSTR szSubFolder = NULL);
 	CString GetAppResourceFolder(LPCTSTR szResFolder = _T("Resources"));
+	CString GetAppFilePath(LPCTSTR szSubFolder, LPCTSTR szFilename);
 
 	// returns the exe and all the dlls, etc, in use by the app
 	int GetAppModuleFilePaths(CStringArray& aFileNames, FB_MODULE_SORT nSort = FBM_UNSORTED);

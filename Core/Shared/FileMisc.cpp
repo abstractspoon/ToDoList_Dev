@@ -2103,6 +2103,16 @@ CString FileMisc::GetAppResourceFolder(LPCTSTR szResFolder)
 	return GetAppFolder(szResFolder);
 }
 
+CString FileMisc::GetAppFilePath(LPCTSTR szSubFolder, LPCTSTR szFilename)
+{
+	ASSERT(!Misc::IsEmpty(szFilename));
+
+	CString sFilePath(GetAppFolder(szSubFolder));
+	TerminatePath(sFilePath);
+
+	return (sFilePath + szFilename);
+}
+
 int FileMisc::GetAppModuleFilePaths(CStringArray& aFileNames, FB_MODULE_SORT nSort)
 {
 	aFileNames.RemoveAll();
