@@ -114,7 +114,6 @@
 #define IDI_ICON_SELECT                 288
 #define IDI_DEPENDS_LINK                289
 #define IDI_NULL                        290
-#define IDI_HELPBUTTON                  293
 #define IDI_HELP_BUTTON                 293
 #define IDD_TIMETRACKER_DIALOG          294
 #define IDD_TIMETRACK_DIALOG            294
