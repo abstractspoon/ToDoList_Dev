@@ -34,12 +34,12 @@ CTDLWizard::CTDLWizard()
 	InitSheet(NULL, 0); 
 }
 
-CTDLWizard::CTDLWizard(UINT nIDCaption, UINT nIconID) : CPropertySheetEx()
+CTDLWizard::CTDLWizard(UINT nIDCaption, UINT nIconID)
 {
 	InitSheet(CEnString(nIDCaption), nIconID);
 }
 
-CTDLWizard::CTDLWizard(LPCTSTR pszCaption, UINT nIconID) : CPropertySheetEx()
+CTDLWizard::CTDLWizard(LPCTSTR pszCaption, UINT nIconID)
 {
 	InitSheet(pszCaption, nIconID);
 }
@@ -210,6 +210,7 @@ BOOL CTDLWizard::OnEraseBkgnd(CDC* pDC)
 
 CTDLWizardPage::CTDLWizardPage(UINT nIDTemplate) : CPropertyPageEx(nIDTemplate)
 {
+	m_psp.dwFlags &= ~(PSP_HASHELP);
 }
 
 BOOL CTDLWizardPage::OnSetActive()

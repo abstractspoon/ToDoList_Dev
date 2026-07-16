@@ -162,7 +162,6 @@ CTDLWebUpdatePromptPage::CTDLWebUpdatePromptPage()
 	: 
 	CTDLWizardPage(IDD_WEBUPDATE_PROMPT_PAGE)
 {
-	m_psp.dwFlags &= ~(PSP_HASHELP);
 }
 
 void CTDLWebUpdatePromptPage::DoDataExchange(CDataExchange* pDX)

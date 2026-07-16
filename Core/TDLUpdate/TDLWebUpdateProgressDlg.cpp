@@ -149,8 +149,6 @@ CTDLWebUpdateProgressPage::CTDLWebUpdateProgressPage()
 	CTDLWizardPage(IDD_WEBUPDATE_PROGRESS_PAGE),
 	m_nStatus(TDLWP_NONE)
 {
-	m_psp.dwFlags &= ~(PSP_HASHELP);
-	
 	m_strHeaderTitle.Format(CEnString(IDS_WEBUPDATE_PROGRESSHEADER), Misc::GetUserName());
 	m_strHeaderSubTitle = "\n" + CEnString(IDS_WEBUPDATE_PROGRESS);
 
@@ -173,7 +171,6 @@ void CTDLWebUpdateProgressPage::DoDataExchange(CDataExchange* pDX)
 
 	DDX_Control(pDX, IDC_PROGRESS, m_lcProgress);
 }
-
 
 BEGIN_MESSAGE_MAP(CTDLWebUpdateProgressPage, CTDLWizardPage)
 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_PROGRESS, OnProgressCustomDraw)

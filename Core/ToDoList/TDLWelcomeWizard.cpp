@@ -91,8 +91,6 @@ CTDLWelcomePage1::CTDLWelcomePage1()
 	m_bUseIniFile(1),
 	m_bShareTasklists(0)
 {
-	m_psp.dwFlags &= ~(PSP_HASHELP);
-	
 	m_strHeaderTitle = CEnString(IDS_WIZ_INTRO_HEADER);
 	m_strHeaderSubTitle = "\n" + CEnString(IDS_WIZ_INTRO_SUBHEADER);
 }
@@ -140,8 +138,6 @@ CTDLWelcomePage2::CTDLWelcomePage2()
 	: 
 	CTDLWizardPage(IDD_WELCOME_PAGE2)
 {
-	m_psp.dwFlags &= ~(PSP_HASHELP);		
-	
 	m_strHeaderTitle = CEnString(IDS_WIZ_INTRO_HEADER);
 	m_strHeaderSubTitle = "\n" + CEnString(IDS_WIZ_INTRO_SUBHEADER);
 }
@@ -159,6 +155,8 @@ void CTDLWelcomePage2::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(CTDLWelcomePage2, CTDLWizardPage)
 END_MESSAGE_MAP()
+
+// ---------------------------------------------------------------------
 
 BOOL CTDLWelcomePage2::OnInitDialog() 
 {
@@ -198,7 +196,6 @@ CTDLWelcomePage3::CTDLWelcomePage3()
 {
 	m_bHideAttrib = 1;
 	m_bViewSample = 1;
-	m_psp.dwFlags &= ~(PSP_HASHELP);		
 
 	m_eSampleTasklist.SetFilter(CEnString(IDS_TDLFILEFILTER));
 	m_eSampleTasklist.SetCurrentFolder(FileMisc::GetAppFolder());
@@ -227,6 +224,8 @@ BEGIN_MESSAGE_MAP(CTDLWelcomePage3, CTDLWizardPage)
 	ON_BN_CLICKED(IDC_SAMPLE, OnSample)
 	ON_REGISTERED_MESSAGE(WM_FE_GETFILEICON, OnGetFileIcon)
 END_MESSAGE_MAP()
+
+// ---------------------------------------------------------------------
 
 BOOL CTDLWelcomePage3::OnInitDialog() 
 {
