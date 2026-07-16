@@ -57,6 +57,8 @@ protected:
 
 class CTDLWizardPage : public CPropertyPageEx
 {
+	DECLARE_DYNAMIC(CTDLWizardPage)
+		
 public:
 	CTDLWizardPage(UINT nIDTemplate);
 

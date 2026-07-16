@@ -208,6 +208,8 @@ BOOL CTDLWizard::OnEraseBkgnd(CDC* pDC)
 
 /////////////////////////////////////////////////////////////////////////////
 
+IMPLEMENT_DYNAMIC(CTDLWizardPage, CPropertyPageEx)
+
 CTDLWizardPage::CTDLWizardPage(UINT nIDTemplate) : CPropertyPageEx(nIDTemplate)
 {
 	m_psp.dwFlags &= ~(PSP_HASHELP);
