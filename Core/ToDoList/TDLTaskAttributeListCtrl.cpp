@@ -1452,11 +1452,19 @@ else bValueVaries = TRUE; }
 
 // -----------------------------------------------------------------------------------------
 
-#define GETMULTIVALUE_DATETIME(DT)								\
-{ COleDateTime value;											\
+#define GETMULTIVALUE_DATE(DT)									\
+{ COleDateTime value(CDateHelper::NullDate());					\
 if (m_multitasker.GetTasksDate(m_aSelectedTaskIDs, DT, value))	\
 { if (CDateHelper::IsDateSet(value))							\
 sValue = Misc::Format(value.m_dt); }							\
+else { sValue = DATETIME_VARIES; bValueVaries = TRUE; } }
+
+// -----------------------------------------------------------------------------------------
+
+#define GETMULTIVALUE_TIME(TM)									\
+{ COleDateTime value(CDateHelper::NullDate());					\
+if (m_multitasker.GetTasksDate(m_aSelectedTaskIDs, TM, value))	\
+{ if (value.m_dt != 0.0) sValue = Misc::Format(value.m_dt); }	\
 else { sValue = DATETIME_VARIES; bValueVaries = TRUE; } }
 
 // -----------------------------------------------------------------------------------------
@@ -1602,15 +1610,15 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTasksValue(int nRow)
 			}
 			break;
 
-		case TDCA_DONEDATE:			GETMULTIVALUE_DATETIME(TDCD_DONEDATE);			break;
-		case TDCA_DUEDATE:			GETMULTIVALUE_DATETIME(TDCD_DUEDATE);			break;
-		case TDCA_STARTDATE:		GETMULTIVALUE_DATETIME(TDCD_STARTDATE);			break;
-		case TDCA_LASTMODDATE:		GETMULTIVALUE_DATETIME(TDCD_LASTMOD);			break;
-		case TDCA_CREATIONDATE:		GETMULTIVALUE_DATETIME(TDCD_CREATE);			break;
+		case TDCA_DONEDATE:			GETMULTIVALUE_DATE(TDCD_DONEDATE);				break;
+		case TDCA_DUEDATE:			GETMULTIVALUE_DATE(TDCD_DUEDATE);				break;
+		case TDCA_STARTDATE:		GETMULTIVALUE_DATE(TDCD_STARTDATE);				break;
+		case TDCA_LASTMODDATE:		GETMULTIVALUE_DATE(TDCD_LASTMOD);				break;
+		case TDCA_CREATIONDATE:		GETMULTIVALUE_DATE(TDCD_CREATE);				break;
 
-		case TDCA_DONETIME:			GETMULTIVALUE_DATETIME(TDCD_DONETIME);			break;
-		case TDCA_DUETIME:			GETMULTIVALUE_DATETIME(TDCD_DUETIME);			break;
-		case TDCA_STARTTIME:		GETMULTIVALUE_DATETIME(TDCD_STARTTIME);			break;
+		case TDCA_DONETIME:			GETMULTIVALUE_TIME(TDCD_DONETIME);				break;
+		case TDCA_DUETIME:			GETMULTIVALUE_TIME(TDCD_DUETIME);				break;
+		case TDCA_STARTTIME:		GETMULTIVALUE_TIME(TDCD_STARTTIME);				break;
 
 		case TDCA_POSITION:			GETUNIQUEVALUE(m_formatter.GetTaskPosition);	break;
 		case TDCA_ID:				GETUNIQUEVALUE(Misc::Format);					break;
