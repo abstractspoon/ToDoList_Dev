@@ -65,13 +65,25 @@ void CTDLWebUpdateProgressDlg::SetProgressStatus(TDL_WEBUPDATE_PROGRESS nStatus,
 	if (nStatus != nCurStatus)
 	{
 		IncrementProgress();
-		Misc::ProcessMsgLoop(1000); // allow animation to finish
 
-		// Hide 'Cancel' button from 'Copy' stage onwards
-		GetDlgItem(IDCANCEL)->EnableWindow(nStatus < TDLWP_COPY);
+		switch (nStatus)
+		{
+		case TDLWP_DOWNLOAD:
+		case TDLWP_UNZIP:
+			// Get the animation going but without delaying
+			// the actual work being done too much
+			Misc::ProcessMsgLoop(400);
+			break;
 
-		// Prevent the 'Next' button from repeatedly reappearing
-		GetDlgItem(ID_WIZNEXT)->ShowWindow(SW_HIDE);
+		case TDLWP_COPY:
+			GetDlgItem(IDCANCEL)->EnableWindow(FALSE);
+			// fall thru
+
+		default:
+			// Complete the animation fully before proceeding
+			Misc::ProcessMsgLoop(800);
+			break;
+		}
 	}
 }
 
@@ -90,11 +102,12 @@ BOOL CTDLWebUpdateProgressDlg::OnInitDialog()
 	
 	CTDLWizard::OnInitDialog();
 
+	// Hide and destroy back/next buttons to stop the 
+	// propertysheet from ever reshowing them
 	SetWizardButtons(0);
 	
-	// hide back/next buttons
-	GetDlgItem(ID_WIZBACK)->ShowWindow(SW_HIDE);
-	GetDlgItem(ID_WIZNEXT)->ShowWindow(SW_HIDE);
+	GetDlgItem(ID_WIZBACK)->DestroyWindow();
+	GetDlgItem(ID_WIZNEXT)->DestroyWindow();
 
 	// focus cancel button
 	GetDlgItem(IDCANCEL)->SetFocus();

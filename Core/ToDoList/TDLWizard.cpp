@@ -17,15 +17,18 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
-// CWizardDlg dialog
 
-const int PSH_WIZARD97_EX = 0x01000000;
+#define PSH_WIZARD_EX (PSH_WIZARD | 0x01000000)
+
+/////////////////////////////////////////////////////////////////////////////
+
 const int IDC_TOPDIVIDERID = 0x3027;
 const int PROGRESS_INCREMENT = 10;
 const int PROGRESS_HEIGHT = GraphicsMisc::ScaleByDPIFactor(3);
 const int TIMERID_ANIMATEBACK = 1;
 
 /////////////////////////////////////////////////////////////////////////////
+// CWizardDlg dialog
 
 IMPLEMENT_DYNAMIC(CTDLWizard, CPropertySheetEx)
 
@@ -68,7 +71,7 @@ void CTDLWizard::InitSheet(LPCTSTR szTitle, UINT nIconID, UINT nHelpID)
 	VERIFY(m_bmHeader.Attach(GraphicsMisc::MakeWizardImage(CIcon(IDR_MAINFRAME, 48, FALSE))));
 	m_psh.hbmHeader = m_bmHeader;
 
-	m_psh.dwFlags |= PSH_WIZARD97_EX | PSH_HEADER | PSH_USEHBMHEADER;
+	m_psh.dwFlags |= (PSH_WIZARD_EX | PSH_HEADER | PSH_USEHBMHEADER);
 	m_psh.dwFlags &= ~(PSH_HASHELP);
 
 	if (nIconID)
