@@ -1480,6 +1480,10 @@ CString SEARCHPARAM::ValueAsString() const
 	switch (GetAttribType())
 	{
 	case FT_DATE:
+		if (dValue != 0)
+			return Misc::Format(dValue, 3);
+		break;
+
 	case FT_DOUBLE:
 	case FT_TIMEPERIOD:
 		return Misc::Format(dValue, 3);
@@ -1571,7 +1575,9 @@ COleDateTime SEARCHPARAM::ValueAsDate() const
 	switch (GetAttribType())
 	{
 	case FT_DATE:
-		return dValue;
+		if (dValue != 0.0)
+			return dValue;
+		break;
 
 	case FT_DATERELATIVE:
 		{
@@ -1585,10 +1591,13 @@ COleDateTime SEARCHPARAM::ValueAsDate() const
 			return date;
 		}
 		break;
+
+	default:
+		ASSERT(0);
+		break;
 	}
 
 	// all else
-	ASSERT(0);
 	return CDateHelper::NullDate();
 }
 

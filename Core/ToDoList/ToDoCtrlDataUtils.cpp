@@ -903,8 +903,10 @@ BOOL CTDCTaskMatcher::ValueMatches(const COleDateTime& dtTask, const SEARCHPARAM
 									BOOL bIncludeTime, TDC_DATE nDate, CString& sWhatMatched) const
 {
 	COleDateTime dtTaskDate = dtTask, dtSearch = rule.ValueAsDate();
-	BOOL bMatch = FALSE;
 
+	BOOL bTaskDateSet = CDateHelper::IsDateSet(dtTask);
+	BOOL bSearchDateSet = CDateHelper::IsDateSet(dtSearch);
+	
 	// Special case: Rule is a relative date (except for 'Now')
 	// which means that it will have no associated time
 	if (bIncludeTime && rule.IsRelativeDate() && !rule.IsNowRelativeDate())
@@ -913,13 +915,16 @@ BOOL CTDCTaskMatcher::ValueMatches(const COleDateTime& dtTask, const SEARCHPARAM
 	if (!bIncludeTime)
 	{
 		// Truncate to start of day
-		dtTaskDate = CDateHelper::GetDateOnly(dtTaskDate);
-		dtSearch = CDateHelper::GetDateOnly(dtSearch);
+		if (bTaskDateSet)
+			dtTaskDate = CDateHelper::GetDateOnly(dtTaskDate);
+
+		if (bSearchDateSet)
+			dtSearch = CDateHelper::GetDateOnly(dtSearch);
 	}
 	else
 	{
 		// Handle those tasks having no (ie. Default) times
-		if (CDateHelper::IsDateSet(dtTask) && !CDateHelper::DateHasTime(dtTask))
+		if (bTaskDateSet && !CDateHelper::DateHasTime(dtTask))
 		{
 			switch (nDate)
 			{
@@ -946,8 +951,8 @@ BOOL CTDCTaskMatcher::ValueMatches(const COleDateTime& dtTask, const SEARCHPARAM
 		}
 	}
 
-	BOOL bTaskDateSet = CDateHelper::IsDateSet(dtTaskDate);
-	
+	BOOL bMatch = FALSE;
+
 	switch (rule.GetOperator())
 	{
 	case FOP_EQUALS:
@@ -955,7 +960,7 @@ BOOL CTDCTaskMatcher::ValueMatches(const COleDateTime& dtTask, const SEARCHPARAM
 		break;
 		
 	case FOP_NOT_EQUALS:
-		bMatch = (dtTaskDate != dtSearch);
+		bMatch = (bSearchDateSet && (dtTaskDate != dtSearch));
 		break;
 		
 	case FOP_ON_OR_AFTER:
