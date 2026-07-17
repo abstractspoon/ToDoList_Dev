@@ -89,7 +89,6 @@ const LPCTSTR DONATE_URL		= _T("https://www.paypal.com/donate/?hosted_button_id=
 CToDoListApp theApp;
 
 /////////////////////////////////////////////////////////////////////////////
-// CToDoListApp construction
 
 CToDoListApp::CToDoListApp() : CWinApp()
 {
@@ -104,8 +103,6 @@ CToDoListApp::~CToDoListApp()
 }
 
 BEGIN_MESSAGE_MAP(CToDoListApp, CWinApp)
-	//{{AFX_MSG_MAP(CToDoListApp)
-	//}}AFX_MSG_MAP
 	ON_COMMAND(ID_TOOLS_EXPORTPREFS, OnExportPrefs)
 	ON_COMMAND(ID_HELP_FORUM, OnHelpForum)
 	ON_COMMAND(ID_HELP_LICENSE, OnHelpLicense)
@@ -187,7 +184,7 @@ BOOL CToDoListApp::InitInstance()
 	if (m_iconBrowse.Load(IDI_FILEEDIT_BROWSE, 16, FALSE) && m_iconGo.Load(IDI_FILEEDIT_GO, 16, FALSE))
 		CFileEdit::SetDefaultButtonImages(m_iconBrowse, m_iconGo);
 	
-	if (m_iconHelp.Load(IDI_HELPBUTTON))
+	if (m_iconHelp.Load(IDI_HELP_BUTTON))
 		CWinHelpButton::SetDefaultIcon(m_iconHelp);
 
 	// Process commandline switches
@@ -840,18 +837,12 @@ void CToDoListApp::DoHelp(UINT nHelpID)
 		}
 	}
 
-	CString sHelpPage;
+	// Load the Help.ini file to find the URL for this topic
+	CIni ini(FileMisc::GetAppFilePath(_T("Resources\\Misc"), _T("Help.ini")));
+	CString sHelpPage = ini.GetString(_T("Help IDs"), sHelpID);
 
-	if (!sHelpID.IsEmpty())
-	{
-		// Load the Help.ini file to find the URL for this topic
-		CIni ini(GetResourcePath(_T("Misc"), _T("Help.ini")));
-		sHelpPage = ini.GetString(_T("Help IDs"), sHelpID);
-	}
-	else
-	{
+	if (sHelpID.IsEmpty())
 		TRACE(_T("CToDoListApp::DoHelp(%d = no help ID)\n"), nHelpID);
-	}
 
 #ifdef _DEBUG
 	CString sHelpMsg;
@@ -2015,27 +2006,6 @@ BOOL CToDoListApp::CommandRequiresUI(UINT nCmdID)
 	// all else
 	ASSERT(0);
 	return FALSE;
-}
-
-CString CToDoListApp::GetResourcePath(LPCTSTR szSubFolder, LPCTSTR szFile)
-{
-	CString sResource(_T("Resources"));
-
-	if (!Misc::IsEmpty(szSubFolder))
-	{
-		sResource += '\\';
-		sResource += szSubFolder;
-	}
-
-	sResource = FileMisc::GetAppResourceFolder(sResource);
-
-	if (!Misc::IsEmpty(szFile))
-	{
-		sResource += '\\';
-		sResource += szFile;
-	}
-
-	return sResource;
 }
 
 void CToDoListApp::CleanupAppFolder(LPCTSTR szPrevVer)

@@ -24,79 +24,36 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
-#define PSH_WIZARD97_EX 0x01000000
+const int PSH_WIZARD97_EX		= 0x01000000;
+const int IDC_TOPDIVIDERID		= 0x3027;
+const int PROGRESS_INCREMENT	= 10;
+const int PROGRESS_HEIGHT		= GraphicsMisc::ScaleByDPIFactor(3);
+const int TIMERID_ANIMATEBACK	= 1;
 
 /////////////////////////////////////////////////////////////////////////////
 // CWelcomeWizard
 
-IMPLEMENT_DYNAMIC(CTDLWelcomeWizard, CPropertySheetEx)
+IMPLEMENT_DYNAMIC(CTDLWelcomeWizard, CTDLWizard)
 
 CTDLWelcomeWizard::CTDLWelcomeWizard(LPCTSTR szAppVer) 
 	: 
-	CPropertySheetEx(_T(""), NULL, 0),
-	m_btnHelp(IDD_WELCOME_PAGE1)
+	CTDLWizard(Misc::Format(_T("%s - %s"), CEnString(IDS_SETUP_TITLE), szAppVer), 
+			   IDR_MAINFRAME,
+			   IDD_WELCOME_PAGE1)
 {
-	m_sTitle.Format(_T("%s - %s"), CEnString(IDS_SETUP_TITLE), szAppVer);
-
-	InitSheet();
-}
-
-void CTDLWelcomeWizard::InitSheet()
-{
-	m_hFont = GraphicsMisc::CreateFont(_T("Tahoma"));
-
-	m_page1.AttachFont(m_hFont);
-	m_page2.AttachFont(m_hFont);
-	m_page3.AttachFont(m_hFont);
-
 	AddPage(&m_page1);
 	AddPage(&m_page2);
 	AddPage(&m_page3);
-
-	m_psh.dwFlags |= PSH_WIZARD97_EX | PSH_HEADER | PSH_USEICONID | PSH_USEHBMHEADER;
-	m_psh.dwFlags &= ~(PSH_HASHELP);
-	
-	m_psh.hInstance = AfxGetInstanceHandle(); 
-	m_psh.pszIcon = MAKEINTRESOURCE(IDR_MAINFRAME);
-	m_psh.hbmHeader = m_hbmHeader = GraphicsMisc::MakeWizardImage(CIcon(IDR_MAINFRAME, 48, FALSE));
 }
 
 CTDLWelcomeWizard::~CTDLWelcomeWizard()
 {
-	GraphicsMisc::VerifyDeleteObject(m_hbmHeader);
 }
 
-BEGIN_MESSAGE_MAP(CTDLWelcomeWizard, CPropertySheetEx)
-	ON_COMMAND(ID_WIZFINISH, OnWizFinish)
-	ON_WM_HELPINFO()
+BEGIN_MESSAGE_MAP(CTDLWelcomeWizard, CTDLWizard)
 END_MESSAGE_MAP()
 
-BOOL CTDLWelcomeWizard::OnInitDialog() 
-{
-	CPropertySheetEx::OnInitDialog();
-
-	CDialogHelper::SetFont(this, m_hFont);
-	SetWindowText(m_sTitle);
-
-	VERIFY (m_btnHelp.Create(IDC_HELPBUTTON, this));
-
-	return TRUE;
-}
-
-void CTDLWelcomeWizard::OnWizFinish()
-{	
-	m_page1.UpdateData();
-	m_page2.UpdateData();
-	m_page3.UpdateData();
-
-	EndDialog(ID_WIZFINISH);
-}
-
-BOOL CTDLWelcomeWizard::OnHelpInfo(HELPINFO* /*lpHelpInfo*/)
-{
-	AfxGetApp()->WinHelp(m_btnHelp.GetHelpID());
-	return TRUE;
-}
+// ---------------------------------------------------------------------
 
 void CTDLWelcomeWizard::GetColumnVisibility(TDCCOLEDITFILTERVISIBILITY& vis) const 
 { 
@@ -111,17 +68,14 @@ void CTDLWelcomeWizard::GetColumnVisibility(TDCCOLEDITFILTERVISIBILITY& vis) con
 /////////////////////////////////////////////////////////////////////////////
 // CWelcomePage1 property page
 
-IMPLEMENT_DYNCREATE(CTDLWelcomePage1, CPropertyPageEx)
+IMPLEMENT_DYNCREATE(CTDLWelcomePage1, CTDLWizardPage)
 
 CTDLWelcomePage1::CTDLWelcomePage1() 
 	: 
-	CPropertyPageEx(IDD_WELCOME_PAGE1, 0),
+	CTDLWizardPage(IDD_WELCOME_PAGE1),
 	m_bUseIniFile(1),
-	m_bShareTasklists(0),
-	m_hFont(NULL)
+	m_bShareTasklists(0)
 {
-	m_psp.dwFlags &= ~(PSP_HASHELP);
-	
 	m_strHeaderTitle = CEnString(IDS_WIZ_INTRO_HEADER);
 	m_strHeaderSubTitle = "\n" + CEnString(IDS_WIZ_INTRO_SUBHEADER);
 }
@@ -132,20 +86,20 @@ CTDLWelcomePage1::~CTDLWelcomePage1()
 
 void CTDLWelcomePage1::DoDataExchange(CDataExchange* pDX)
 {
-	CPropertyPageEx::DoDataExchange(pDX);
+	CTDLWizardPage::DoDataExchange(pDX);
 
 	DDX_Radio(pDX, IDC_NOSHARE, m_bShareTasklists);
 	DDX_Radio(pDX, IDC_REGISTRY, m_bUseIniFile);
 }
 
-BEGIN_MESSAGE_MAP(CTDLWelcomePage1, CPropertyPageEx)
+BEGIN_MESSAGE_MAP(CTDLWelcomePage1, CTDLWizardPage)
 END_MESSAGE_MAP()
+
+// ---------------------------------------------------------------------
 
 BOOL CTDLWelcomePage1::OnInitDialog() 
 {
-	CDialogHelper::SetFont(this, m_hFont);
-	
-	CPropertyPageEx::OnInitDialog();
+	CTDLWizardPage::OnInitDialog();
 
 	GetDlgItem(IDC_REGISTRY)->EnableWindow(COSVersion() != OSV_LINUX);
 
@@ -155,23 +109,20 @@ BOOL CTDLWelcomePage1::OnInitDialog()
 BOOL CTDLWelcomePage1::OnSetActive() 
 {
 	// disable back button
-	((CPropertySheet*)GetParent())->SetWizardButtons(PSWIZB_NEXT);
+	SetWizardButtons(PSWIZB_NEXT);
 	
-	return CPropertyPageEx::OnSetActive();
+	return CTDLWizardPage::OnSetActive();
 }
 
 ////////////////////////////////////////////////////////////////////////////
 // CWelcomePage2 property page
 
-IMPLEMENT_DYNCREATE(CTDLWelcomePage2, CPropertyPageEx)
+IMPLEMENT_DYNCREATE(CTDLWelcomePage2, CTDLWizardPage)
 
 CTDLWelcomePage2::CTDLWelcomePage2() 
 	: 
-	CPropertyPageEx(IDD_WELCOME_PAGE2, 0),
-	m_hFont(NULL)
+	CTDLWizardPage(IDD_WELCOME_PAGE2)
 {
-	m_psp.dwFlags &= ~(PSP_HASHELP);		
-	
 	m_strHeaderTitle = CEnString(IDS_WIZ_INTRO_HEADER);
 	m_strHeaderSubTitle = "\n" + CEnString(IDS_WIZ_INTRO_SUBHEADER);
 }
@@ -182,26 +133,26 @@ CTDLWelcomePage2::~CTDLWelcomePage2()
 
 void CTDLWelcomePage2::DoDataExchange(CDataExchange* pDX)
 {
-	CPropertyPageEx::DoDataExchange(pDX);
+	CTDLWizardPage::DoDataExchange(pDX);
 
 	DDX_Control(pDX, IDC_COLUMNLIST, m_lbColumns);
 }
 
-BEGIN_MESSAGE_MAP(CTDLWelcomePage2, CPropertyPageEx)
+BEGIN_MESSAGE_MAP(CTDLWelcomePage2, CTDLWizardPage)
 END_MESSAGE_MAP()
+
+// ---------------------------------------------------------------------
 
 BOOL CTDLWelcomePage2::OnInitDialog() 
 {
-	CDialogHelper::SetFont(this, m_hFont);
-
-	return CPropertyPageEx::OnInitDialog();
+	return CTDLWizardPage::OnInitDialog();
 }
 
 BOOL CTDLWelcomePage2::OnSetActive() 
 {
-	((CPropertySheet*)GetParent())->SetWizardButtons(PSWIZB_BACK | PSWIZB_NEXT);
+	SetWizardButtons(PSWIZB_BACK | PSWIZB_NEXT);
 	
-	return CPropertyPageEx::OnSetActive();
+	return CTDLWizardPage::OnSetActive();
 }
 
 void CTDLWelcomePage2::GetColumnVisibility(TDCCOLEDITFILTERVISIBILITY& vis) const 
@@ -221,17 +172,15 @@ void CTDLWelcomePage2::GetColumnVisibility(TDCCOLEDITFILTERVISIBILITY& vis) cons
 /////////////////////////////////////////////////////////////////////////////
 // CWelcomePage3 property page
 
-IMPLEMENT_DYNCREATE(CTDLWelcomePage3, CPropertyPageEx)
+IMPLEMENT_DYNCREATE(CTDLWelcomePage3, CTDLWizardPage)
 
 CTDLWelcomePage3::CTDLWelcomePage3() 
 	: 
-	CPropertyPageEx(IDD_WELCOME_PAGE3, 0),
-	m_eSampleTasklist(FES_RELATIVEPATHS), 
-	m_hFont(NULL)
+	CTDLWizardPage(IDD_WELCOME_PAGE3),
+	m_eSampleTasklist(FES_RELATIVEPATHS)
 {
 	m_bHideAttrib = 1;
 	m_bViewSample = 1;
-	m_psp.dwFlags &= ~(PSP_HASHELP);		
 
 	m_eSampleTasklist.SetFilter(CEnString(IDS_TDLFILEFILTER));
 	m_eSampleTasklist.SetCurrentFolder(FileMisc::GetAppFolder());
@@ -247,7 +196,7 @@ CTDLWelcomePage3::~CTDLWelcomePage3()
 
 void CTDLWelcomePage3::DoDataExchange(CDataExchange* pDX)
 {
-	CPropertyPageEx::DoDataExchange(pDX);
+	CTDLWizardPage::DoDataExchange(pDX);
 
 	DDX_Control(pDX, IDC_SAMPLETASKLIST, m_eSampleTasklist);
 	DDX_Text(pDX, IDC_SAMPLETASKLIST, m_sSampleTaskList);
@@ -255,16 +204,17 @@ void CTDLWelcomePage3::DoDataExchange(CDataExchange* pDX)
 	DDX_Radio(pDX, IDC_NOSAMPLE, m_bViewSample);
 }
 
-BEGIN_MESSAGE_MAP(CTDLWelcomePage3, CPropertyPageEx)
+BEGIN_MESSAGE_MAP(CTDLWelcomePage3, CTDLWizardPage)
 	ON_BN_CLICKED(IDC_NOSAMPLE, OnNosample)
 	ON_BN_CLICKED(IDC_SAMPLE, OnSample)
 	ON_REGISTERED_MESSAGE(WM_FE_GETFILEICON, OnGetFileIcon)
 END_MESSAGE_MAP()
 
+// ---------------------------------------------------------------------
+
 BOOL CTDLWelcomePage3::OnInitDialog() 
 {
-	CDialogHelper::SetFont(this, m_hFont);
-	CPropertyPageEx::OnInitDialog();
+	CTDLWizardPage::OnInitDialog();
 	
 	m_eSampleTasklist.SetButtonWidthDLU(1, 14);
 	m_eSampleTasklist.EnableWindow(m_bViewSample);
@@ -282,21 +232,22 @@ CString CTDLWelcomePage3::GetSampleFilePath() const
 { 
 	if (m_bViewSample)
 		return FileMisc::GetFullPath(m_sSampleTaskList, FileMisc::GetAppFolder());
-	else
-		return _T("");
+	
+	// else
+	return _T("");
 }
 
 void CTDLWelcomePage3::OnSample() 
 {
 	UpdateData();
-	m_eSampleTasklist.EnableWindow(m_bViewSample);
+	m_eSampleTasklist.EnableWindow(m_bViewSample); 
 }
 
 BOOL CTDLWelcomePage3::OnSetActive() 
 {
-	((CPropertySheetEx*)GetParent())->SetWizardButtons(PSWIZB_BACK | PSWIZB_FINISH);
+	SetWizardButtons(PSWIZB_BACK | PSWIZB_FINISH);
 	
-	return CPropertyPageEx::OnSetActive();
+	return CTDLWizardPage::OnSetActive();
 }
 
 LRESULT CTDLWelcomePage3::OnGetFileIcon(WPARAM /*wParam*/, LPARAM lParam)

@@ -49,7 +49,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo
+# ADD LIB32 /nologo /ignore:4006
 
 !ELSEIF  "$(CFG)" == "ToDoListLib - Win32 Unicode Release"
 
@@ -702,6 +702,10 @@ SOURCE=..\ToDoList\TDLWebUpdatePromptDlg.cpp
 # Begin Source File
 
 SOURCE=..\ToDoList\TDLWelcomeWizard.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\ToDoList\TDLWizard.cpp
 # End Source File
 # Begin Source File
 
@@ -1402,6 +1406,10 @@ SOURCE=..\ToDoList\TDLWebUpdatePromptDlg.h
 # Begin Source File
 
 SOURCE=..\ToDoList\TDLWelcomeWizard.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ToDoList\TDLWizard.h
 # End Source File
 # Begin Source File
 

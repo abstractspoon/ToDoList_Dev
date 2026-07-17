@@ -1755,8 +1755,7 @@ BEGIN
 END
 
 IDD_WEBUPDATE_PROMPT_PAGE DIALOG DISCARDABLE  0, 0, 276, 107
-STYLE WS_CHILD | WS_CAPTION
-CAPTION "ToDoList Web Update (c) AbstractSpoon"
+STYLE WS_CHILD | WS_BORDER
 FONT 8, "Tahoma"
 BEGIN
     LTEXT           "&What's New",IDC_LABEL,0,0,42,8
@@ -6173,6 +6172,7 @@ BEGIN
     IDS_CUSTATTRIB_REMAININGCOUNT "%d/%d attributes remaining"
     IDS_IMPORTDLGFROMPAGE_TITLE "Import From"
     IDS_IMPORTDLGTOPAGE_TITLE "Import To"
+    IDS_WEBUPDATE_TITLE     "ToDoList Web Update (c) AbstractSpoon"
 END
 
 #endif    // English (Australia) resources

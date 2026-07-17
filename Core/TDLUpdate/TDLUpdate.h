@@ -14,6 +14,8 @@
 
 #include "resource.h"		// main symbols
 
+#include "..\shared\Icon.h"
+
 /////////////////////////////////////////////////////////////////////////////
 // CTDLUpdateApp:
 // See TDLUpdate.cpp for the implementation of this class
@@ -25,8 +27,12 @@ public:
 	CTDLUpdateApp();
 
 protected:
+	CIcon m_iconHelp;
+
+protected:
 	virtual BOOL InitInstance();
 	virtual int DoMessageBox(LPCTSTR lpszPrompt, UINT nType, UINT nIDPrompt);
+	virtual void WinHelp(DWORD dwData, UINT nCmd = HELP_CONTEXT);
 
 protected:
 	static void DoUpdate(const CString& sAppFolder, const CString& sPrevCmdLine, const CPoint& ptPos,

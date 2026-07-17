@@ -20,9 +20,7 @@
 #include "..\shared\Icon.h"
 
 /////////////////////////////////////////////////////////////////////////////
-// CToDoListApp:
-// See ToDoList.cpp for the implementation of this class
-//
+// CToDoList Application class
 
 class CEnCommandLineInfo;
 class CPreferences;
@@ -36,9 +34,6 @@ public:
 	CToDoListApp();
 	~CToDoListApp();
 	
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CToDoListApp)
 protected:
 	virtual BOOL InitInstance();
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
@@ -46,17 +41,12 @@ protected:
 	virtual int DoMessageBox(LPCTSTR lpszPrompt, UINT nType, UINT nIDPrompt = 0);
 	virtual int ExitInstance();
 	virtual BOOL OnIdle(LONG lCount);
-	//}}AFX_VIRTUAL
 
 protected:
 	CString m_sLanguageFile;
 	CIcon m_iconBrowse, m_iconGo, m_iconHelp;
 
 protected:
-// Implementation
-
-	//{{AFX_MSG(CToDoListApp)
-	//}}AFX_MSG
 	afx_msg void OnExportPrefs();
 	afx_msg void OnHelpForum();
 	afx_msg void OnHelpLicense();
@@ -121,15 +111,10 @@ protected:
 	static BOOL WaitForInstanceToClose(DWORD dwProcessID);
 	static BOOL CommandRequiresUI(UINT nCmdID);
 
-	static CString GetResourcePath(LPCTSTR szSubFolder = NULL, LPCTSTR szFile = NULL);
 	static CString GetHelperAppPath(const CString& sAppName, BOOL bTestDownload = FALSE);
 	static DWORD RunHelperApp(LPCTSTR szAppName, const CEnCommandLineInfo& params, UINT nIDGenErrorMsg, UINT nIDSmartScreenErrorMsg, LPCTSTR szVerb);
 };
 
-
 /////////////////////////////////////////////////////////////////////////////
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
 #endif // !defined(AFX_TODOLIST_H__CA63D273_DB5E_4DBF_8915_1885E1987A65__INCLUDED_)

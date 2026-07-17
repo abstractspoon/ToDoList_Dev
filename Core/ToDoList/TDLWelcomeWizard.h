@@ -7,10 +7,10 @@
 // WelcomeWizard.h : header file
 //
 
+#include "TDLWizard.h"
 #include "TDLColumnListBox.h"
 
 #include "..\shared\fileedit.h"
-#include "..\shared\winhelpbutton.h"
 #include "..\shared\icon.h"
 
 /////////////////////////////////////////////////////////////////////////////
@@ -20,7 +20,7 @@ struct TDCCOLEDITFILTERVISIBILITY;
 /////////////////////////////////////////////////////////////////////////////
 // CWelcomePage1 dialog
 
-class CTDLWelcomePage1 : public CPropertyPageEx
+class CTDLWelcomePage1 : public CTDLWizardPage
 {
 	DECLARE_DYNCREATE(CTDLWelcomePage1)
 
@@ -28,14 +28,12 @@ public:
 	CTDLWelcomePage1();
 	~CTDLWelcomePage1();
 
-	void AttachFont(HFONT hFont) { m_hFont = hFont; }
 	BOOL GetUseIniFile() const { return m_bUseIniFile; }
 	BOOL GetShareTasklists() const { return m_bShareTasklists; }
 
 protected:
-	int		m_bShareTasklists;
-	int		m_bUseIniFile;
-	HFONT m_hFont;
+	int	m_bShareTasklists;
+	int	m_bUseIniFile;
 
 protected:
 	virtual BOOL OnSetActive();
@@ -49,7 +47,7 @@ protected:
 /////////////////////////////////////////////////////////////////////////////
 // CWelcomePage2 dialog
 
-class CTDLWelcomePage2 : public CPropertyPageEx
+class CTDLWelcomePage2 : public CTDLWizardPage
 {
 	DECLARE_DYNCREATE(CTDLWelcomePage2)
 
@@ -57,12 +55,10 @@ public:
 	CTDLWelcomePage2();
 	~CTDLWelcomePage2();
 
-	void AttachFont(HFONT hFont) { m_hFont = hFont; }
 	void GetColumnVisibility(TDCCOLEDITFILTERVISIBILITY& vis) const;
 
 protected:
-	CTDLColumnListBox	m_lbColumns;
-	HFONT m_hFont;
+	CTDLColumnListBox m_lbColumns;
 
 protected:
 	virtual BOOL OnSetActive();
@@ -76,7 +72,7 @@ protected:
 /////////////////////////////////////////////////////////////////////////////
 // CWelcomePage3 dialog
 
-class CTDLWelcomePage3 : public CPropertyPageEx
+class CTDLWelcomePage3 : public CTDLWizardPage
 {
 	DECLARE_DYNCREATE(CTDLWelcomePage3)
 
@@ -84,16 +80,14 @@ public:
 	CTDLWelcomePage3();
 	~CTDLWelcomePage3();
 
-	void AttachFont(HFONT hFont) { m_hFont = hFont; }
 	BOOL GetHideAttributes() const { return m_bHideAttrib; }
 	CString GetSampleFilePath() const;
 
 protected:
-	CFileEdit	m_eSampleTasklist;
+	CFileEdit m_eSampleTasklist;
 	CString	m_sSampleTaskList;
-	int		m_bHideAttrib;
-	int		m_bViewSample;
-	HFONT m_hFont;
+	int	m_bHideAttrib;
+	int	m_bViewSample;
 	CIcon m_iconTDL;
 
 protected:
@@ -105,14 +99,14 @@ protected:
 	afx_msg void OnNosample();
 	afx_msg void OnSample();
 	afx_msg LRESULT OnGetFileIcon(WPARAM wParam, LPARAM lParam);
-	DECLARE_MESSAGE_MAP()
 
+	DECLARE_MESSAGE_MAP()
 };
 
 /////////////////////////////////////////////////////////////////////////////
 // CWelcomeWizard
 
-class CTDLWelcomeWizard : public CPropertySheetEx
+class CTDLWelcomeWizard : public CTDLWizard
 {
 	DECLARE_DYNAMIC(CTDLWelcomeWizard)
 
@@ -131,21 +125,10 @@ protected:
 	CTDLWelcomePage1 m_page1;
 	CTDLWelcomePage2 m_page2;
 	CTDLWelcomePage3 m_page3;
-	HFONT m_hFont;
-	CWinHelpButton m_btnHelp;
-	CString m_sTitle;
-	HBITMAP m_hbmHeader;
 
 protected:
-	virtual BOOL OnInitDialog();
-
-protected:
-	afx_msg void OnWizFinish();
-	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
 	DECLARE_MESSAGE_MAP()
 
-protected:
-	void InitSheet();
 };
 
 /////////////////////////////////////////////////////////////////////////////

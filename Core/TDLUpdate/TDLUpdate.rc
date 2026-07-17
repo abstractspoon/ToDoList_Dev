@@ -130,8 +130,7 @@ IDR_MANIFEST            24      DISCARDABLE     "res\\tdlupdate.exe.manifest"
 //
 
 IDD_WEBUPDATE_PROGRESS_PAGE DIALOG DISCARDABLE  0, 0, 276, 107
-STYLE DS_CENTER | WS_CHILD | WS_VISIBLE | WS_CAPTION
-CAPTION "ToDoList Web Update (c) AbstractSpoon"
+STYLE DS_CENTER | WS_CHILD | WS_VISIBLE | WS_BORDER
 FONT 8, "Tahoma"
 BEGIN
     LTEXT           "&Progress",IDC_STATIC,0,0,275,8
@@ -149,6 +148,7 @@ END
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
 IDR_MAINFRAME           ICON    DISCARDABLE     "RES\\TDLUpdate.ico"
+IDI_HELP_BUTTON         ICON    DISCARDABLE     "res\\help_button.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -173,11 +173,7 @@ BEGIN
     IDS_WEBUPDATE_PROGRESSHEADER "Hi %s, ToDoList is being updated"
     IDS_WEBUPDATE_PROGRESS  "Please wait"
     IDS_WEBUPDATE_CANCEL    "The update was cancelled, and your previous installation has been restored.\n\nPlease wait while ToDoList is restarted..."
-END
-
-STRINGTABLE DISCARDABLE 
-BEGIN
-    AFX_IDS_APP_TITLE       "ToDoList Web Updater"
+    IDS_WEBUPDATE_TITLE     "ToDoList Web Update (c) AbstractSpoon"
 END
 
 #endif    // English (Australia) resources

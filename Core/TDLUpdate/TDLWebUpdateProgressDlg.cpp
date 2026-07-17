@@ -21,8 +21,6 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
-#define PSH_WIZARD97_EX 0x01000000
-
 #ifndef LVS_EX_DOUBLEBUFFER
 #	define LVS_EX_DOUBLEBUFFER  0x00010000
 #endif
@@ -32,38 +30,24 @@ static char THIS_FILE[] = __FILE__;
 
 CTDLWebUpdateProgressDlg::CTDLWebUpdateProgressDlg(const CPoint& ptPos)
 	: 
-	CPropertySheetEx(_T(""), NULL, 0),
+	CTDLWizard(IDS_WEBUPDATE_TITLE, IDR_MAINFRAME, IDD_WEBUPDATE_PROGRESS_PAGE),
 	m_ptInitialPos(ptPos)
 {
-	m_hFont = GraphicsMisc::CreateFont(_T("Tahoma"));
-	
-	m_page.AttachFont(m_hFont);
 	AddPage(&m_page);
-	
-	m_psh.dwFlags |= PSH_WIZARD97_EX | PSH_HEADER | PSH_USEICONID | PSH_USEHBMHEADER;
-	m_psh.dwFlags &= ~(PSH_HASHELP);
-	
-	m_psh.hInstance = AfxGetInstanceHandle(); 
-	m_psh.pszIcon = MAKEINTRESOURCE(IDR_MAINFRAME);
-	m_psh.hbmHeader = m_hbmHeader = GraphicsMisc::MakeWizardImage(CIcon(IDR_MAINFRAME, 48, FALSE));
 
-	SetWizardMode();
+	EnableProgressBar(TRUE, TDLWP_NUMSTATES);
 }
 
 CTDLWebUpdateProgressDlg::~CTDLWebUpdateProgressDlg()
 {
-	GraphicsMisc::VerifyDeleteObject(m_hbmHeader);
 }
 
-BEGIN_MESSAGE_MAP(CTDLWebUpdateProgressDlg, CPropertySheetEx)
-	//{{AFX_MSG_MAP(CTDLWebUpdateProgressDlg)
-	//}}AFX_MSG_MAP
+BEGIN_MESSAGE_MAP(CTDLWebUpdateProgressDlg, CTDLWizard)
 	ON_WM_CLOSE()
 	ON_COMMAND(IDCANCEL, OnCancel)
 END_MESSAGE_MAP()
 
-/////////////////////////////////////////////////////////////////////////////
-// CTDLWebUpdateProgressDlg message handlers
+// ---------------------------------------------------------------------
 
 void CTDLWebUpdateProgressDlg::OnCancel() 
 { 
@@ -75,23 +59,32 @@ void CTDLWebUpdateProgressDlg::OnCancel()
 
 void CTDLWebUpdateProgressDlg::SetProgressStatus(TDL_WEBUPDATE_PROGRESS nStatus, int nPercent)
 {
+	TDL_WEBUPDATE_PROGRESS nCurStatus = m_page.GetProgressStatus();
 	m_page.SetProgressStatus(nStatus, nPercent);
 
-	// extra handling
-	switch (nStatus)
+	if (nStatus != nCurStatus)
 	{
-	case TDLWP_COPY:
-		GetDlgItem(IDCANCEL)->EnableWindow(FALSE);
-		break;
+		IncrementProgress();
 
-	case TDLWP_COMPLETE:
-		// Pause for a moment
-		Sleep(1000);
-		break;
+		switch (nStatus)
+		{
+		case TDLWP_DOWNLOAD:
+		case TDLWP_UNZIP:
+			// Get the animation going but without delaying
+			// the actual work being done too much
+			Misc::ProcessMsgLoop(400);
+			break;
+
+		case TDLWP_COPY:
+			GetDlgItem(IDCANCEL)->EnableWindow(FALSE);
+			// fall thru
+
+		default:
+			// Complete the animation fully before proceeding
+			Misc::ProcessMsgLoop(800);
+			break;
+		}
 	}
-
-	// for some reason the 'Next' button keeps reappearing
-	GetDlgItem(ID_WIZNEXT)->ShowWindow(SW_HIDE);
 }
 
 TDL_WEBUPDATE_PROGRESS CTDLWebUpdateProgressDlg::GetProgressStatus() const
@@ -101,21 +94,20 @@ TDL_WEBUPDATE_PROGRESS CTDLWebUpdateProgressDlg::GetProgressStatus() const
 
 BOOL CTDLWebUpdateProgressDlg::OnInitDialog() 
 {
-	CDialogHelper::SetFont(this, m_hFont);
-
 	// set taskbar icon
 	m_icons.Initialise(*this, IDR_MAINFRAME);
 
 	// set dialog icon
 	SetIcon(m_icons.GetSmallIcon(), FALSE);
 	
-	CPropertySheetEx::OnInitDialog();
+	CTDLWizard::OnInitDialog();
 
+	// Hide and destroy back/next buttons to stop the 
+	// propertysheet from ever reshowing them
 	SetWizardButtons(0);
 	
-	// hide back/next buttons
-	GetDlgItem(ID_WIZBACK)->ShowWindow(SW_HIDE);
-	GetDlgItem(ID_WIZNEXT)->ShowWindow(SW_HIDE);
+	GetDlgItem(ID_WIZBACK)->DestroyWindow();
+	GetDlgItem(ID_WIZNEXT)->DestroyWindow();
 
 	// focus cancel button
 	GetDlgItem(IDCANCEL)->SetFocus();
@@ -161,19 +153,15 @@ enum // list columns
 	STATUS_COL
 };
 
-/////////////////////////////////////////////////////////////////////////////
+// --------------------------------------------------------------
 
-IMPLEMENT_DYNCREATE(CTDLWebUpdateProgressPage, CPropertyPageEx)
+IMPLEMENT_DYNCREATE(CTDLWebUpdateProgressPage, CTDLWizardPage)
 
 CTDLWebUpdateProgressPage::CTDLWebUpdateProgressPage()
 	: 
-	CPropertyPageEx(IDD_WEBUPDATE_PROGRESS_PAGE, 0),
+	CTDLWizardPage(IDD_WEBUPDATE_PROGRESS_PAGE),
 	m_nStatus(TDLWP_NONE)
 {
-	//{{AFX_DATA_INIT(CTDLWebUpdateProgressPage)
-	//}}AFX_DATA_INIT
-	m_psp.dwFlags &= ~(PSP_HASHELP);
-	
 	m_strHeaderTitle.Format(CEnString(IDS_WEBUPDATE_PROGRESSHEADER), Misc::GetUserName());
 	m_strHeaderSubTitle = "\n" + CEnString(IDS_WEBUPDATE_PROGRESS);
 
@@ -192,81 +180,78 @@ CTDLWebUpdateProgressPage::CTDLWebUpdateProgressPage()
 
 void CTDLWebUpdateProgressPage::DoDataExchange(CDataExchange* pDX)
 {
-	CPropertyPageEx::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CTDLWebUpdateProgressPage)
+	CTDLWizardPage::DoDataExchange(pDX);
+
 	DDX_Control(pDX, IDC_PROGRESS, m_lcProgress);
-	//}}AFX_DATA_MAP
 }
 
-
-BEGIN_MESSAGE_MAP(CTDLWebUpdateProgressPage, CPropertyPageEx)
-//{{AFX_MSG_MAP(CTDLWebUpdateProgressPage)
-//}}AFX_MSG_MAP
+BEGIN_MESSAGE_MAP(CTDLWebUpdateProgressPage, CTDLWizardPage)
 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_PROGRESS, OnProgressCustomDraw)
 END_MESSAGE_MAP()
 
-/////////////////////////////////////////////////////////////////////////////
-// CTDLWebUpdateProgressPage message handlers
+// ---------------------------------------------------------------------
 
 BOOL CTDLWebUpdateProgressPage::OnInitDialog() 
 {
-	CPropertyPageEx::OnInitDialog();
+	CTDLWizardPage::OnInitDialog();
 
 	m_nStatus = TDLWP_NONE;
-
-	CDialogHelper::SetFont(this, m_hFont);
-
-	// Calculate longest column strings
-	CClientDC dc(&m_lcProgress);
-	HGDIOBJ hOldFont = dc.SelectObject(m_hFont);
-
-	CString sMaxItem = _T("10."), sMaxDesc;
-
-	// progress descriptions
-	int nItem = m_aProgressDescriptions.GetSize(), nMaxDescLen = 0;
-
-	while (nItem--)
-	{
-		int nItemLen = dc.GetTextExtent(m_aProgressDescriptions[nItem]).cx;
-
-		if (nItemLen > nMaxDescLen)
-		{
-			nMaxDescLen = nItemLen;
-			sMaxDesc = m_aProgressDescriptions[nItem];
-		}
-	}
-
-	// Progress status
-	CString sMaxStatus = _T("100%");
-
-	if (dc.GetTextExtent(sMaxStatus).cx < dc.GetTextExtent(m_sDone).cx)
-		sMaxStatus = m_sDone;
-	
-	dc.SelectObject(hOldFont);
-
-	// Create progress columns
-	m_lcProgress.InsertColumn(ITEM_COL, sMaxItem);
-	m_lcProgress.InsertColumn(DESCRIPTION_COL, sMaxDesc);
-	m_lcProgress.InsertColumn(STATUS_COL, sMaxStatus);
-
-	// Use auto-sizing must come after creation of all columns
-	m_lcProgress.SetColumnWidth(ITEM_COL, LVSCW_AUTOSIZE_USEHEADER);
-	m_lcProgress.SetColumnWidth(DESCRIPTION_COL, LVSCW_AUTOSIZE_USEHEADER);
-	m_lcProgress.SetColumnWidth(STATUS_COL, LVSCW_AUTOSIZE_USEHEADER);
-
-	// Reduce flicker during % updates
-	ListView_SetExtendedListViewStyleEx(m_lcProgress, LVS_EX_DOUBLEBUFFER, LVS_EX_DOUBLEBUFFER);
 
 	return TRUE;
 }
 
 BOOL CTDLWebUpdateProgressPage::OnSetActive() 
 {
-	CPropertyPageEx::OnSetActive();
+	CTDLWizardPage::OnSetActive();
 	
-	// set tabstops
-	UINT nTabStop = 16;
-	GetDlgItem(IDC_PROGRESS)->SendMessage(EM_SETTABSTOPS, 1, (LPARAM)&nTabStop);
+	// one-time initialisation
+	if (m_lcProgress.GetItemCount() == 0)
+	{
+		// Calculate longest column strings
+		CClientDC dc(&m_lcProgress);
+		HFONT hOldFont = GraphicsMisc::PrepareDCFont(&dc, m_lcProgress);
+
+		CString sMaxItem = _T("10."), sMaxDesc;
+
+		// progress descriptions
+		int nItem = m_aProgressDescriptions.GetSize(), nMaxDescLen = 0;
+
+		while (nItem--)
+		{
+			int nItemLen = dc.GetTextExtent(m_aProgressDescriptions[nItem]).cx;
+
+			if (nItemLen > nMaxDescLen)
+			{
+				nMaxDescLen = nItemLen;
+				sMaxDesc = m_aProgressDescriptions[nItem];
+			}
+		}
+
+		// Progress status
+		CString sMaxStatus = _T("100%");
+
+		if (dc.GetTextExtent(sMaxStatus).cx < dc.GetTextExtent(m_sDone).cx)
+			sMaxStatus = m_sDone;
+
+		dc.SelectObject(hOldFont);
+
+		// Create progress columns
+		m_lcProgress.InsertColumn(ITEM_COL, sMaxItem);
+		m_lcProgress.InsertColumn(DESCRIPTION_COL, sMaxDesc);
+		m_lcProgress.InsertColumn(STATUS_COL, sMaxStatus);
+
+		// Use auto-sizing must come after creation of all columns
+		m_lcProgress.SetColumnWidth(ITEM_COL, LVSCW_AUTOSIZE_USEHEADER);
+		m_lcProgress.SetColumnWidth(DESCRIPTION_COL, LVSCW_AUTOSIZE_USEHEADER);
+		m_lcProgress.SetColumnWidth(STATUS_COL, LVSCW_AUTOSIZE_USEHEADER);
+
+		// Reduce flicker during % updates
+		ListView_SetExtendedListViewStyleEx(m_lcProgress, LVS_EX_DOUBLEBUFFER, LVS_EX_DOUBLEBUFFER);
+
+		// set tabstops
+		UINT nTabStop = 16;
+		GetDlgItem(IDC_PROGRESS)->SendMessage(EM_SETTABSTOPS, 1, (LPARAM)&nTabStop);
+	}
 	
 	return TRUE;
 }
