@@ -1152,6 +1152,7 @@ void SEARCHPARAM::ClearValue()
 	sValue.Empty();
 	dValue = 0.0;
 	nValue = 0;
+	dtValue = CDateHelper::NullDate();
 
 	// We need to very careful to only modify the union
 	// of extra values very specifically
