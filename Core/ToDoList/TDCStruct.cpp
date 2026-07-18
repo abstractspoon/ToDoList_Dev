@@ -884,6 +884,7 @@ SEARCHPARAM::SEARCHPARAM(TDC_ATTRIBUTE nAttribID, FIND_OPERATOR nOp)
 	nOperator(nOp),
 	dValue(0),
 	nValue(0),
+	dtValue(CDateHelper::NullDate()),
 	dwFlags(0),
 	bAnd(TRUE),
 	nAttribType(FT_NONE)
@@ -891,12 +892,13 @@ SEARCHPARAM::SEARCHPARAM(TDC_ATTRIBUTE nAttribID, FIND_OPERATOR nOp)
 	SetAttribute(nAttribID);
 }
 
-SEARCHPARAM::SEARCHPARAM(TDC_ATTRIBUTE nAttribID, FIND_OPERATOR nOp, CString sVal, BOOL and, FIND_ATTRIBTYPE nType)
+SEARCHPARAM::SEARCHPARAM(TDC_ATTRIBUTE nAttribID, FIND_OPERATOR nOp, const CString& sVal, BOOL and, FIND_ATTRIBTYPE nType)
 	:
 	nAttributeID(TDCA_NONE),
 	nOperator(nOp),
 	dValue(0),
 	nValue(0),
+	dtValue(CDateHelper::NullDate()),
 	dwFlags(0),
 	bAnd(and),
 	nAttribType(nType)
@@ -907,24 +909,46 @@ SEARCHPARAM::SEARCHPARAM(TDC_ATTRIBUTE nAttribID, FIND_OPERATOR nOp, CString sVa
 		SetValue(sVal);
 }
 
+SEARCHPARAM::SEARCHPARAM(TDC_ATTRIBUTE nAttribID, FIND_OPERATOR nOp, const COleDateTime& dtVal, BOOL and, FIND_ATTRIBTYPE nType)
+	:
+	nAttributeID(TDCA_NONE),
+	nOperator(nOp),
+	dValue(0),
+	nValue(0),
+	dtValue(CDateHelper::NullDate()),
+	dwFlags(0),
+	bAnd(and),
+	nAttribType(nType)
+{
+	SetAttribute(nAttribID);
+
+	switch (GetAttribType())
+	{
+	case FT_DATE:
+		dtValue = dtVal;
+		break;
+
+	default:
+		ASSERT(0);
+	}
+}
+
 SEARCHPARAM::SEARCHPARAM(TDC_ATTRIBUTE nAttribID, FIND_OPERATOR nOp, double dVal, BOOL and)
 	:
 	nAttributeID(TDCA_NONE),
 	nOperator(nOp),
 	dValue(0),
 	nValue(0),
+	dtValue(CDateHelper::NullDate()),
 	dwFlags(0),
 	bAnd(and),
 	nAttribType(FT_NONE)
 {
 	SetAttribute(nAttribID);
 
-	nAttribType = GetAttribType();
-
-	switch (nAttribType)
+	switch (GetAttribType())
 	{
 	case FT_DOUBLE:
-	case FT_DATE:
 		dValue = dVal;
 		break;
 
@@ -939,15 +963,14 @@ SEARCHPARAM::SEARCHPARAM(TDC_ATTRIBUTE nAttribID, FIND_OPERATOR nOp, int nVal, B
 	nOperator(nOp),
 	dValue(0),
 	nValue(0),
+	dtValue(CDateHelper::NullDate()),
 	dwFlags(0),
 	bAnd(and),
 	nAttribType(FT_NONE)
 {
 	SetAttribute(nAttribID);
 
-	nAttribType = GetAttribType();
-
-	switch (nAttribType)
+	switch (GetAttribType())
 	{
 	case FT_INTEGER:
 	case FT_BOOL:
@@ -997,6 +1020,8 @@ BOOL SEARCHPARAM::operator==(const SEARCHPARAM& rule) const
 			return TRUE; // handled by operator
 
 		case FT_DATE:
+			return (dtValue == rule.dtValue);
+
 		case FT_DOUBLE:
 		case FT_TIMEPERIOD:
 			return (dValue == rule.dValue);
@@ -1406,6 +1431,12 @@ void SEARCHPARAM::SetValue(const CString& sVal)
 		break;
 
 	case FT_DATE:
+		if (sVal.IsEmpty())
+			dtValue = CDateHelper::NullDate();
+		else
+			dtValue = _ttof(sVal);
+		break;
+
 	case FT_DOUBLE:
 	case FT_TIMEPERIOD:
 		dValue = _ttof(sVal);
@@ -1432,7 +1463,6 @@ void SEARCHPARAM::SetValue(double dVal)
 {
 	switch (GetAttribType())
 	{
-	case FT_DATE:
 	case FT_DOUBLE:
 	case FT_TIMEPERIOD:
 		dValue = dVal;
@@ -1480,8 +1510,8 @@ CString SEARCHPARAM::ValueAsString() const
 	switch (GetAttribType())
 	{
 	case FT_DATE:
-		if (dValue != 0)
-			return Misc::Format(dValue, 3);
+		if (CDateHelper::IsDateSet(dtValue))
+			return Misc::Format(dtValue.m_dt, 3);
 		break;
 
 	case FT_DOUBLE:
@@ -1526,7 +1556,6 @@ double SEARCHPARAM::ValueAsDouble() const
 {
 	switch (GetAttribType())
 	{
-	case FT_DATE:
 	case FT_TIMEPERIOD:
 	case FT_DOUBLE:
 		return dValue;
@@ -1550,7 +1579,6 @@ int SEARCHPARAM::ValueAsInteger() const
 {
 	switch (GetAttribType())
 	{
-	case FT_DATE:
 	case FT_TIMEPERIOD:
 	case FT_DOUBLE:
 		return (int)dValue;
@@ -1575,9 +1603,7 @@ COleDateTime SEARCHPARAM::ValueAsDate() const
 	switch (GetAttribType())
 	{
 	case FT_DATE:
-		if (dValue != 0.0)
-			return dValue;
-		break;
+		return dtValue;
 
 	case FT_DATERELATIVE:
 		{

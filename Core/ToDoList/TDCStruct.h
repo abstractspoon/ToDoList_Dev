@@ -361,7 +361,8 @@ struct SEARCHPARAM
 	friend struct SEARCHPARAMS;
 
 	SEARCHPARAM(TDC_ATTRIBUTE nAttribID = TDCA_NONE, FIND_OPERATOR nOp = FOP_NONE);
-	SEARCHPARAM(TDC_ATTRIBUTE nAttribID, FIND_OPERATOR nOp, CString sVal, BOOL and = TRUE, FIND_ATTRIBTYPE nType = FT_NONE);
+	SEARCHPARAM(TDC_ATTRIBUTE nAttribID, FIND_OPERATOR nOp, const CString& sVal, BOOL and = TRUE, FIND_ATTRIBTYPE nType = FT_NONE);
+	SEARCHPARAM(TDC_ATTRIBUTE nAttribID, FIND_OPERATOR nOp, const COleDateTime& dtVal, BOOL and = TRUE, FIND_ATTRIBTYPE nType = FT_NONE);
 	SEARCHPARAM(TDC_ATTRIBUTE nAttribID, FIND_OPERATOR nOp, double dVal, BOOL and = TRUE);
 	SEARCHPARAM(TDC_ATTRIBUTE nAttribID, FIND_OPERATOR nOp, int nVal, BOOL and = TRUE);
 
@@ -380,9 +381,9 @@ struct SEARCHPARAM
 	void SetRelativeDate(BOOL bRelative);
 
 	void SetValue(const CString& sVal);
+	void SetValue(const COleDateTime& dtVal);
 	void SetValue(double dVal);
 	void SetValue(int nVal);
-	void SetValue(const COleDateTime& dtVal);
 	void ClearValue();
 
 	CString GetCustomAttributeID() const;
@@ -423,10 +424,15 @@ protected:
 	TDC_ATTRIBUTE nAttributeID;
 	CString sCustAttribID;
 	FIND_OPERATOR nOperator;
-	CString sValue;
-	int nValue;
-	double dValue;
 	BOOL bAnd;
+
+	// union
+	// {
+		CString sValue;
+		COleDateTime dtValue;
+		int nValue;
+		double dValue;
+	// }
 
 	union
 	{
