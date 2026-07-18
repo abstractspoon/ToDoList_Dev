@@ -1379,21 +1379,43 @@ void SEARCHPARAM::SetValue(const CString& sVal)
 
 	case FT_DATE:
 		if (sVal.IsEmpty())
+		{
 			dtValue = CDateHelper::NullDate();
-		else
+		}
+		else if (Misc::IsNumber(sVal))
+		{
 			dtValue = _ttof(sVal);
+		}
+		else
+		{
+			ASSERT(0);
+		}
 		break;
 
 	case FT_DOUBLE:
 	case FT_TIMEPERIOD:
-		dValue = _ttof(sVal);
+		if (Misc::IsNumber(sVal))
+		{
+			dValue = _ttof(sVal);
+		}
+		else
+		{
+			ASSERT(0);
+		}
 		break;
 
 	case FT_INTEGER:
 	case FT_BOOL:
 	case FT_RECURRENCE:
 	case FT_COLOR:
-		nValue = _ttoi(sVal);
+		if (Misc::IsNumber(sVal))
+		{
+			nValue = _ttoi(sVal);
+		}
+		else
+		{
+			ASSERT(0);
+		}
 		break;
 
 	case FT_GROUP:
@@ -1430,6 +1452,11 @@ void SEARCHPARAM::SetValue(int nVal)
 	case FT_RECURRENCE:
 	case FT_COLOR:
 		nValue = nVal;
+		break;
+
+	case FT_DOUBLE:
+	case FT_TIMEPERIOD:
+		dValue = nVal;
 		break;
 
 	default:
