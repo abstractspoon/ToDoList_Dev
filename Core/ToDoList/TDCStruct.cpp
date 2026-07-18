@@ -880,41 +880,41 @@ int CTDCCustomControlArray::Find(const CString& sAttribID) const
 
 SEARCHPARAM::SEARCHPARAM(TDC_ATTRIBUTE nAttribID, FIND_OPERATOR nOp)
 {
-	InitRule(nAttribID, nOp, TRUE, FT_NONE, *this);
+	ConstructRule(nAttribID, nOp, TRUE, *this);
 }
 
-SEARCHPARAM::SEARCHPARAM(TDC_ATTRIBUTE nAttribID, FIND_OPERATOR nOp, const CString& sVal, BOOL bAnd, FIND_ATTRIBTYPE nType)
+SEARCHPARAM::SEARCHPARAM(TDC_ATTRIBUTE nAttribID, FIND_OPERATOR nOp, const CString& sVal, BOOL bAnd/*, FIND_ATTRIBTYPE nType*/)
 {
-	InitRule(nAttribID, nOp, bAnd, nType, *this);
+	ConstructRule(nAttribID, nOp, bAnd, *this);
 
 	SetValue(sVal);
 }
 
-SEARCHPARAM::SEARCHPARAM(TDC_ATTRIBUTE nAttribID, FIND_OPERATOR nOp, const COleDateTime& dtVal, BOOL bAnd, FIND_ATTRIBTYPE nType)
+SEARCHPARAM::SEARCHPARAM(TDC_ATTRIBUTE nAttribID, FIND_OPERATOR nOp, const COleDateTime& dtVal, BOOL bAnd/*, FIND_ATTRIBTYPE nType*/)
 {
-	InitRule(nAttribID, nOp, bAnd, nType, *this);
+	ConstructRule(nAttribID, nOp, bAnd, *this);
 
 	SetValue(dtVal);
 }
 
 SEARCHPARAM::SEARCHPARAM(TDC_ATTRIBUTE nAttribID, FIND_OPERATOR nOp, double dVal, BOOL bAnd)
 {
-	InitRule(nAttribID, nOp, bAnd, FT_NONE, *this);
+	ConstructRule(nAttribID, nOp, bAnd, *this);
 
 	SetValue(dVal);
 }
 
 SEARCHPARAM::SEARCHPARAM(TDC_ATTRIBUTE nAttribID, FIND_OPERATOR nOp, int nVal, BOOL bAnd)
 {
-	InitRule(nAttribID, nOp, bAnd, FT_NONE, *this);
+	ConstructRule(nAttribID, nOp, bAnd, *this);
 
 	SetValue(nVal);
 }
 
-void SEARCHPARAM::InitRule(TDC_ATTRIBUTE nAttribID, FIND_OPERATOR nOp, BOOL bAnd, FIND_ATTRIBTYPE nType, SEARCHPARAM& rule)
+void SEARCHPARAM::ConstructRule(TDC_ATTRIBUTE nAttribID, FIND_OPERATOR nOp, BOOL bAnd, SEARCHPARAM& rule)
 {
 	// Attribute ID handled at end
-	rule.nAttribType = nType;
+	rule.nAttribType = FT_NONE;
 	rule.nOperator = nOp;
 	rule.bAnd = bAnd;
 

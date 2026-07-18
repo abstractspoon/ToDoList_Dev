@@ -361,20 +361,20 @@ struct SEARCHPARAM
 	friend struct SEARCHPARAMS;
 
 	SEARCHPARAM(TDC_ATTRIBUTE nAttribID = TDCA_NONE, FIND_OPERATOR nOp = FOP_NONE);
-	SEARCHPARAM(TDC_ATTRIBUTE nAttribID, FIND_OPERATOR nOp, const CString& sVal, BOOL and = TRUE, FIND_ATTRIBTYPE nType = FT_NONE);
-	SEARCHPARAM(TDC_ATTRIBUTE nAttribID, FIND_OPERATOR nOp, const COleDateTime& dtVal, BOOL and = TRUE, FIND_ATTRIBTYPE nType = FT_NONE);
-	SEARCHPARAM(TDC_ATTRIBUTE nAttribID, FIND_OPERATOR nOp, double dVal, BOOL and = TRUE);
-	SEARCHPARAM(TDC_ATTRIBUTE nAttribID, FIND_OPERATOR nOp, int nVal, BOOL and = TRUE);
+	SEARCHPARAM(TDC_ATTRIBUTE nAttribID, FIND_OPERATOR nOp, const CString& sVal, BOOL bAnd = TRUE);
+	SEARCHPARAM(TDC_ATTRIBUTE nAttribID, FIND_OPERATOR nOp, const COleDateTime& dtVal, BOOL bAnd = TRUE);
+	SEARCHPARAM(TDC_ATTRIBUTE nAttribID, FIND_OPERATOR nOp, double dVal, BOOL bAnd = TRUE);
+	SEARCHPARAM(TDC_ATTRIBUTE nAttribID, FIND_OPERATOR nOp, int nVal, BOOL bAnd = TRUE);
 
 	BOOL operator==(const SEARCHPARAM& rule) const;
 	BOOL operator!=(const SEARCHPARAM& rule) const;
 
-	BOOL Set(TDC_ATTRIBUTE nAttribID, FIND_OPERATOR nOp, CString sVal, BOOL and = TRUE, FIND_ATTRIBTYPE nType = FT_NONE);
-	BOOL Set(TDC_ATTRIBUTE nAttribID, const CString& sID, FIND_ATTRIBTYPE nType, FIND_OPERATOR nOp, CString sVal, BOOL and = TRUE);
+	BOOL Set(TDC_ATTRIBUTE nAttribID, FIND_OPERATOR nOp, CString sVal, BOOL bAnd = TRUE, FIND_ATTRIBTYPE nType = FT_NONE);
+	BOOL Set(TDC_ATTRIBUTE nAttribID, const CString& sID, FIND_ATTRIBTYPE nType, FIND_OPERATOR nOp, CString sVal, BOOL bAnd = TRUE);
 	BOOL SetAttribute(TDC_ATTRIBUTE nAttribID, FIND_ATTRIBTYPE nType = FT_NONE);
 	BOOL SetCustomAttribute(TDC_ATTRIBUTE nAttribID, const CString& sID, FIND_ATTRIBTYPE nType);
 
-	void SetAnd(BOOL and = TRUE);
+	void SetAnd(BOOL bAnd = TRUE);
 	void SetTimeUnits(TDC_UNITS nUnits);
 	void SetMatchWholeWord(BOOL bMatchWhole);
 	void SetFlags(DWORD flags);
@@ -444,7 +444,7 @@ protected:
 	
 	mutable FIND_ATTRIBTYPE nAttribType;
 
-	static void InitRule(TDC_ATTRIBUTE nAttribID, FIND_OPERATOR nOp, BOOL and, FIND_ATTRIBTYPE nType, SEARCHPARAM& rule);
+	static void ConstructRule(TDC_ATTRIBUTE nAttribID, FIND_OPERATOR nOp, BOOL bAnd, SEARCHPARAM& rule);
 };
 
 // ------------------------------------------------------------------------
