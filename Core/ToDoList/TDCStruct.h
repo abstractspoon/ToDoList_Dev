@@ -443,6 +443,8 @@ protected:
 	};
 	
 	mutable FIND_ATTRIBTYPE nAttribType;
+
+	static void InitRule(TDC_ATTRIBUTE nAttribID, FIND_OPERATOR nOp, BOOL and, FIND_ATTRIBTYPE nType, SEARCHPARAM& rule);
 };
 
 // ------------------------------------------------------------------------
