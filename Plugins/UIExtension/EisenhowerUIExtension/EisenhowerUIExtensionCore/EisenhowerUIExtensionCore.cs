@@ -439,7 +439,7 @@ namespace EisenhowerUIExtension
 			var notify = new UIExtension.ParentNotify(m_HwndParent);
 
 			return notify.NotifyMod(Task.Attribute.DoneDate,
-									(task.IsDone ? DateTime.Now : DateTime.MinValue));
+									(task.IsDone ? DateTime.MinValue : DateTime.Now));
 		}
 
 		private bool OnEisenhowerCtrlEditTaskIcon(object sender, ITaskBase task)

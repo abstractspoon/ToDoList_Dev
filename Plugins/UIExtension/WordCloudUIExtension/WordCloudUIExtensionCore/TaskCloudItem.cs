@@ -48,7 +48,7 @@ namespace WordCloudUIExtension
 		public List<String> AllocTo;
 		public List<String> Category;
 		public List<String> Tags;
-        public bool HasSomeSubtasksDone;
+        public bool IsPartlyDone;
 
         public bool SetDone(bool done)
         {
@@ -74,7 +74,7 @@ namespace WordCloudUIExtension
 		{
             IsParent = task.IsParent();
             IsLocked = task.IsLocked(true);
-            HasSomeSubtasksDone = task.HasSomeSubtasksDone();
+            IsPartlyDone = task.IsPartlyDone();
 			Position = task.GetPositionString();
 
 			if (newTask)

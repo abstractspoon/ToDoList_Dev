@@ -1175,7 +1175,7 @@ void CKanbanColumnCtrl::DrawItemCheckbox(CDC* pDC, const KANBANITEM* pKI, CRect&
 		{
 			iImage = KLCC_CHECKED;
 		}
-		else if (pKI->bSomeSubtaskDone && HasOption(KBCF_SHOWMIXEDCOMPLETIONSTATE))
+		else if (pKI->bPartlyDone && HasOption(KBCF_SHOWMIXEDCOMPLETIONSTATE))
 		{
 			iImage = KLCC_MIXED;
 		}

@@ -106,7 +106,7 @@ struct KANBANITEM
 	BOOL operator==(const KANBANITEM& ki) const;
 
 	DWORD dwTaskID, dwParentID;
-	BOOL bDone, bGoodAsDone, bSomeSubtaskDone;
+	BOOL bDone, bGoodAsDone, bPartlyDone;
 	BOOL bParent, bFlagged, bPinned;
 	int nPercent, nLevel, nPosition;
 	BOOL bLocked, bHasIcon;

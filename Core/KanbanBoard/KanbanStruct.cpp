@@ -385,7 +385,7 @@ KANBANITEM::KANBANITEM(DWORD dwID)
 	dwParentID(0),
 	nLevel(0),
 	bLocked(FALSE),
-	bSomeSubtaskDone(FALSE),
+	bPartlyDone(FALSE),
 	nPosition(-1)
 {
 	CDateHelper::ClearDate(dtCreate);
@@ -416,7 +416,7 @@ KANBANITEM& KANBANITEM::operator=(const KANBANITEM& ki)
 	nLevel = ki.nLevel;
 	bLocked = ki.bLocked;
 	bHasIcon = ki.bHasIcon;
-	bSomeSubtaskDone = ki.bSomeSubtaskDone;
+	bPartlyDone = ki.bPartlyDone;
 	nPosition = ki.nPosition;
 	sFullPosition = ki.sFullPosition;
 
@@ -440,7 +440,7 @@ BOOL KANBANITEM::operator==(const KANBANITEM& ki) const
 			(nLevel == ki.nLevel) &&
 			(bLocked == ki.bLocked) &&
 			(bHasIcon == ki.bHasIcon) &&
-			(bSomeSubtaskDone == ki.bSomeSubtaskDone) &&
+			(bPartlyDone == ki.bPartlyDone) &&
 			(dwParentID == ki.dwParentID) &&
 			(nPosition == ki.nPosition) &&
 			(sFullPosition == ki.sFullPosition) &&

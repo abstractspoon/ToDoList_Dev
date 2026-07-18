@@ -19,8 +19,7 @@ namespace MindMapUIExtension
 		private bool m_IsFlagged;
 		private bool m_IsParent;
         private bool m_IsDone;
-        private bool m_IsGoodAsDone;
-        private bool m_SomeSubtasksDone;
+        private bool m_IsPartlyDone;
 		private bool m_IsLocked;
 
 		// -----------------------------------------------------------------
@@ -35,8 +34,7 @@ namespace MindMapUIExtension
 			m_IsFlagged = false;
 			m_IsParent = false;
 			m_IsDone = false;
-            m_IsGoodAsDone = false;
-            m_SomeSubtasksDone = false;
+            m_IsPartlyDone = false;
 			m_IsLocked = false;
 			m_ReferenceId = 0;
 			m_LocalDepends = null;
@@ -52,8 +50,7 @@ namespace MindMapUIExtension
 			m_IsFlagged = task.IsFlagged(false);
 			m_IsParent = task.IsParent();
             m_IsDone = task.IsDone();
-            m_IsGoodAsDone = task.IsGoodAsDone();
-            m_SomeSubtasksDone = task.HasSomeSubtasksDone();
+            m_IsPartlyDone = task.IsPartlyDone();
 			m_IsLocked = task.IsLocked(true);
 			m_ReferenceId = task.GetReferenceID();
 			m_LocalDepends = task.GetLocalDependency();
@@ -119,18 +116,9 @@ namespace MindMapUIExtension
 		public bool IsReference { get { return (m_ReferenceId != 0); } }
 		public bool IsTask { get { return (m_TaskID != 0); } }
 		public bool IsDone { get { return m_IsDone; } }
-        public bool HasSomeSubtasksDone { get { return m_SomeSubtasksDone; } }
+		public bool IsPartlyDone { get { return m_IsPartlyDone; } }
 		public bool HasLocalDependencies {  get { return (m_LocalDepends != null) && (m_LocalDepends.Count > 0); } }
 		public List<UInt32> LocalDependencies { get { return m_LocalDepends; } }
-
-		public bool SetDone(bool done = true)
-		{
-			if (m_IsDone == done)
-				return false;
-
-			m_IsDone = done;
-			return true;
-		}
 
 		public bool ProcessTaskUpdate(Task task)
 		{
@@ -149,9 +137,6 @@ namespace MindMapUIExtension
 			if (task.IsAttributeAvailable(Task.Attribute.Color))
 				m_TextColor = task.GetTextDrawingColor();
 
-            if (task.IsAttributeAvailable(Task.Attribute.SubtaskDone))
-                m_SomeSubtasksDone = task.HasSomeSubtasksDone();
-
             if (task.IsAttributeAvailable(Task.Attribute.DoneDate))
                 m_IsDone = task.IsDone();
 
@@ -160,7 +145,7 @@ namespace MindMapUIExtension
 
 			m_IsParent = task.IsParent();
 			m_IsLocked = task.IsLocked(true);
-            m_IsGoodAsDone = task.IsGoodAsDone();
+			m_IsPartlyDone = task.IsPartlyDone();
 			m_ReferenceId = task.GetReferenceID();
 
 			return true;

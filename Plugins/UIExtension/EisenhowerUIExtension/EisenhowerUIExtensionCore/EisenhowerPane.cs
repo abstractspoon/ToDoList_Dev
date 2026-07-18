@@ -24,7 +24,6 @@ namespace EisenhowerUIExtension
 		private Translator m_Trans;
 		private UITheme m_Theme = new UITheme();
 
-		private bool m_ShowMixedCompletionState;
 		private bool m_DropHighlight;
 		private bool m_ReadOnly;
 
@@ -186,14 +185,7 @@ namespace EisenhowerUIExtension
 
 		public bool ShowMixedCompletionState
 		{
-			set
-			{
-				if (m_ShowMixedCompletionState != value)
-				{
-					m_ShowMixedCompletionState = value;
-					Invalidate();
-				}
-			}
+			set	{ m_List.ShowMixedCompletionState = value; }
 		}
 
 		public bool SelectTask(String text, UIExtension.SelectTask selectTask, bool caseSensitive, bool wholeWord, bool findReplace)

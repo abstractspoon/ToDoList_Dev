@@ -350,7 +350,6 @@ namespace MindMapUIExtension
                 case Task.Attribute.Color:
                 case Task.Attribute.DoneDate:
 			    case Task.Attribute.Position:
-			    case Task.Attribute.SubtaskDone:
 				case Task.Attribute.ProjectName:
 				case Task.Attribute.Dependency:
 					return true;
@@ -690,11 +689,9 @@ namespace MindMapUIExtension
 
 			if (taskItem.IsTask) // else non-task root item
             {
-				bool isDone = taskItem.IsDone;
-
                 if (taskItem.ParentID == 0)
                 {
-                    if (m_StrikeThruDone && isDone)
+                    if (m_StrikeThruDone && taskItem.IsDone)
 					{
 						// Create on demand
 						if (m_BoldDoneLabelFont == null)
@@ -711,7 +708,7 @@ namespace MindMapUIExtension
 						newFont = m_BoldLabelFont;
 					}
 				}
-				else if (isDone)
+				else if (taskItem.IsDone)
                 {
 					// Create on demand
 					if (m_StrikeThruDone && (m_DoneLabelFont == null))
@@ -1200,7 +1197,7 @@ namespace MindMapUIExtension
             if (taskItem.IsDone)
                 return CheckBoxState.CheckedNormal;
 
-            if (taskItem.HasSomeSubtasksDone && ShowMixedCompletionState)
+            if (taskItem.IsPartlyDone && ShowMixedCompletionState)
                 return CheckBoxState.MixedNormal;
 
             // else

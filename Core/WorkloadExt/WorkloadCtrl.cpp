@@ -569,7 +569,6 @@ BOOL CWorkloadCtrl::WantEditUpdate(TDC_ATTRIBUTE nAttribID)
 	case TDCA_NONE:
 	case TDCA_PERCENT:
 	case TDCA_STARTDATE:
-	case TDCA_SUBTASKDONE:
 	case TDCA_TASKNAME:
 	case TDCA_TIMEESTIMATE:
 		return TRUE;
@@ -739,15 +738,10 @@ BOOL CWorkloadCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI
 		if (pTasks->IsAttributeAvailable(TDCA_DONEDATE))
 			pWI->bDone = pTasks->IsTaskDone(hTask);
 
-		if (pTasks->IsAttributeAvailable(TDCA_SUBTASKDONE))
-		{
-			LPCWSTR szSubTaskDone = pTasks->GetTaskSubtaskCompletion(hTask);
-			pWI->bSomeSubtaskDone = (!Misc::IsEmpty(szSubTaskDone) && (szSubTaskDone[0] != '0'));
-		}
-
 		// Always update these
 		pWI->bLocked = pTasks->IsTaskLocked(hTask, true);
 		pWI->bGoodAsDone = pTasks->IsTaskGoodAsDone(hTask);
+		pWI->bPartlyDone = pTasks->IsTaskPartlyDone(hTask);
 		pWI->bParent = pTasks->IsTaskParent(hTask);
 	}
 
@@ -971,18 +965,16 @@ void CWorkloadCtrl::BuildTreeItem(const ITASKLISTBASE* pTasks, HTASKITEM hTask,
 	if (pWI->dwRefID == 0)
 	{
 		pWI->sTitle = pTasks->GetTaskTitle(hTask);
-		pWI->bDone = pTasks->IsTaskDone(hTask);
-		pWI->bGoodAsDone = pTasks->IsTaskGoodAsDone(hTask);
 		pWI->bParent = pTasks->IsTaskParent(hTask);
 		pWI->nPercent = pTasks->GetTaskPercentDone(hTask, TRUE);
 		pWI->bLocked = pTasks->IsTaskLocked(hTask, true);
 		pWI->bHasIcon = !Misc::IsEmpty(pTasks->GetTaskIcon(hTask));
+		pWI->bDone = pTasks->IsTaskDone(hTask);
+		pWI->bGoodAsDone = pTasks->IsTaskGoodAsDone(hTask);
+		pWI->bPartlyDone = pTasks->IsTaskPartlyDone(hTask);
 
 		GetTaskAllocTo(pTasks, hTask, pWI->aAllocTo);
 		Misc::AppendItems(pWI->aAllocTo, m_aAllocTo, TRUE);
-		
-		LPCWSTR szSubTaskDone = pTasks->GetTaskSubtaskCompletion(hTask);
-		pWI->bSomeSubtaskDone = (!Misc::IsEmpty(szSubTaskDone) && (szSubTaskDone[0] != '0'));
 
 		time64_t tDate = 0;
 
@@ -1696,7 +1688,7 @@ void CWorkloadCtrl::OnTreeGetDispInfo(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 		{
 			pDispInfo->item.state = TCHC_CHECKED;
 		}
-		else if (pWI->bSomeSubtaskDone && HasOption(WLCF_SHOWMIXEDCOMPLETIONSTATE))
+		else if (pWI->bPartlyDone && HasOption(WLCF_SHOWMIXEDCOMPLETIONSTATE))
 		{
 			pDispInfo->item.state = TCHC_MIXED;
 		}

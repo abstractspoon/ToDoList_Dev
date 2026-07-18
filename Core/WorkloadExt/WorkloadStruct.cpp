@@ -446,7 +446,7 @@ WORKLOADITEM::WORKLOADITEM(DWORD dwID, LPCTSTR szTitle)
 	bDone(FALSE),
 	nPosition(-1),
 	bLocked(FALSE),
-	bSomeSubtaskDone(FALSE),
+	bPartlyDone(FALSE),
 	dTimeEst(0.0)
 {
 }
@@ -471,7 +471,7 @@ WORKLOADITEM& WORKLOADITEM::operator=(const WORKLOADITEM& wi)
 	nPosition = wi.nPosition;
 	bLocked = wi.bLocked;
 	bHasIcon = wi.bHasIcon;
-	bSomeSubtaskDone = wi.bSomeSubtaskDone;
+	bPartlyDone = wi.bPartlyDone;
 	dTimeEst = wi.dTimeEst;
 	
 	aAllocTo.Copy(wi.aAllocTo);
@@ -500,7 +500,7 @@ BOOL WORKLOADITEM::operator==(const WORKLOADITEM& wi) const
 			(bDone == wi.bDone) &&
 			(bLocked == wi.bLocked) &&
 			(bHasIcon == wi.bHasIcon) &&
-			(bSomeSubtaskDone == wi.bSomeSubtaskDone) &&
+			(bPartlyDone == wi.bPartlyDone) &&
 			(dTimeEst == wi.dTimeEst) &&
 			Misc::MatchAll(aAllocTo, wi.aAllocTo) &&
 			mapAllocatedDays.MatchAll(wi.mapAllocatedDays));

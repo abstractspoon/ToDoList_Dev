@@ -224,7 +224,7 @@ GANTTITEM::GANTTITEM()
 	bGoodAsDone(FALSE),
 	nPosition(-1),
 	bLocked(FALSE),
-	bSomeSubtaskDone(FALSE),
+	bPartlyDone(FALSE),
 	nPercent(0),
 	dtDone(CDateHelper::NullDate())
 {
@@ -251,7 +251,7 @@ GANTTITEM& GANTTITEM::operator=(const GANTTITEM& gi)
 	nPosition = gi.nPosition;
 	bLocked = gi.bLocked;
 	bHasIcon = gi.bHasIcon;
-	bSomeSubtaskDone = gi.bSomeSubtaskDone;
+	bPartlyDone = gi.bPartlyDone;
 	
 	aTags.Copy(gi.aTags);
 	aDependIDs.Copy(gi.aDependIDs);
@@ -280,7 +280,7 @@ BOOL GANTTITEM::operator==(const GANTTITEM& gi) const
 			(bGoodAsDone == gi.bGoodAsDone) &&
 			(bLocked == gi.bLocked) &&
 			(bHasIcon == gi.bHasIcon) &&
-			(bSomeSubtaskDone == gi.bSomeSubtaskDone) &&
+			(bPartlyDone == gi.bPartlyDone) &&
 			Misc::MatchAll(aTags, gi.aTags) &&
 			Misc::MatchAll(aDependIDs, gi.aDependIDs));
 }

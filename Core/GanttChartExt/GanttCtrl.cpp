@@ -505,7 +505,6 @@ BOOL CGanttCtrl::WantEditUpdate(TDC_ATTRIBUTE nAttribID)
 	case TDCA_NONE:
 	case TDCA_PERCENT:
 	case TDCA_STARTDATE:
-	case TDCA_SUBTASKDONE:
 	case TDCA_TAGS:
 	case TDCA_TASKNAME:
 		return TRUE;
@@ -692,12 +691,6 @@ BOOL CGanttCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_UP
 			else
 				pGI->ClearDoneDate();
 		}
-	
-		if (pTasks->IsAttributeAvailable(TDCA_SUBTASKDONE))
-		{
-			LPCWSTR szSubTaskDone = pTasks->GetTaskSubtaskCompletion(hTask);
-			pGI->bSomeSubtaskDone = (!Misc::IsEmpty(szSubTaskDone) && (szSubTaskDone[0] != '0'));
-		}
 
 		if (pTasks->IsAttributeAvailable(TDCA_TAGS))
 		{
@@ -726,7 +719,7 @@ BOOL CGanttCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_UP
 		// Always update these
 		pGI->bLocked = pTasks->IsTaskLocked(hTask, true);
 		pGI->bGoodAsDone = pTasks->IsTaskGoodAsDone(hTask);
-		pGI->bParent = pTasks->IsTaskParent(hTask);
+		pGI->bPartlyDone = pTasks->IsTaskPartlyDone(hTask);
 	}
 
 	// detect update
@@ -909,15 +902,13 @@ void CGanttCtrl::BuildTreeItem(const ITASKLISTBASE* pTasks, HTASKITEM hTask,
 	if (pGI->dwRefID == 0)
 	{
 		pGI->sTitle = pTasks->GetTaskTitle(hTask);
-		pGI->bGoodAsDone = pTasks->IsTaskGoodAsDone(hTask);
 		pGI->sAllocTo = GetTaskAllocTo(pTasks, hTask);
 		pGI->bParent = pTasks->IsTaskParent(hTask);
 		pGI->nPercent = pTasks->GetTaskPercentDone(hTask, TRUE);
 		pGI->bLocked = pTasks->IsTaskLocked(hTask, true);
 		pGI->bHasIcon = !Misc::IsEmpty(pTasks->GetTaskIcon(hTask));
-
-		LPCWSTR szSubTaskDone = pTasks->GetTaskSubtaskCompletion(hTask);
-		pGI->bSomeSubtaskDone = (!Misc::IsEmpty(szSubTaskDone) && (szSubTaskDone[0] != '0'));
+		pGI->bGoodAsDone = pTasks->IsTaskGoodAsDone(hTask);
+		pGI->bPartlyDone = pTasks->IsTaskPartlyDone(hTask);
 
 		time64_t tDate = 0;
 
@@ -1585,7 +1576,7 @@ void CGanttCtrl::OnTreeGetDispInfo(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 		{
 			pDispInfo->item.state = TCHC_CHECKED;
 		}
-		else if (pGI->bSomeSubtaskDone && HasOption(GTLCF_SHOWMIXEDCOMPLETIONSTATE))
+		else if (pGI->bPartlyDone && HasOption(GTLCF_SHOWMIXEDCOMPLETIONSTATE))
 		{
 			pDispInfo->item.state = TCHC_MIXED;
 		}

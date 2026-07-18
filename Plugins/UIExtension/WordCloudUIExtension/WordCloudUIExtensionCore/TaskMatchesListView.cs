@@ -100,7 +100,7 @@ namespace WordCloudUIExtension
 			{
 				var item = (task as CloudTaskItem);
 
-				if ((item != null) && item.HasSomeSubtasksDone)
+				if ((item != null) && item.IsPartlyDone)
 					return CheckBoxState.MixedNormal;
 			}
 
