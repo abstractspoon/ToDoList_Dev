@@ -1496,7 +1496,7 @@ void SEARCHPARAM::SetValue(const COleDateTime& dtVal)
 	switch (GetAttribType())
 	{
 	case FT_DATE:
-		dValue = dtVal;
+		dtValue = dtVal;
 		break;
 
 	default:
@@ -1554,14 +1554,13 @@ CString SEARCHPARAM::ValueAsString() const
 
 double SEARCHPARAM::ValueAsDouble() const
 {
+	// Note: Dates are excluded because they can be
+	// null which is not representable as a number
 	switch (GetAttribType())
 	{
 	case FT_TIMEPERIOD:
 	case FT_DOUBLE:
 		return dValue;
-
-	case FT_DATERELATIVE:
-		return ValueAsDate().m_dt;
 
 	case FT_INTEGER:
 	case FT_BOOL:
@@ -1577,14 +1576,13 @@ double SEARCHPARAM::ValueAsDouble() const
 
 int SEARCHPARAM::ValueAsInteger() const
 {
+	// Note: Dates are excluded because they can be
+	// null which is not representable as a number
 	switch (GetAttribType())
 	{
 	case FT_TIMEPERIOD:
 	case FT_DOUBLE:
 		return (int)dValue;
-
-	case FT_DATERELATIVE:
-		return (int)ValueAsDouble();
 
 	case FT_INTEGER:
 	case FT_BOOL:
