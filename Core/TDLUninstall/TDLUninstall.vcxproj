@@ -188,6 +188,7 @@ copy unicode_debug\TDLUninstall.exe ..\todolist\unicode_debug /y
   <ItemGroup>
     <None Include="res\TDLUninstall.ico" />
     <None Include="res\TDLUninstall.rc2" />
+    <None Include="TDLUninstall.dsp" />
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="res\tdluninstall.exe.manifest" />

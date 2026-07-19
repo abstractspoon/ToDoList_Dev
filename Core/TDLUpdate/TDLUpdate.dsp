@@ -152,6 +152,10 @@ SOURCE=.\TDLWebUpdater.h
 # PROP Default_Filter "ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
 # Begin Source File
 
+SOURCE=.\res\help_button.ico
+# End Source File
+# Begin Source File
+
 SOURCE=.\res\tdlupdate.exe.manifest
 
 !IF  "$(CFG)" == "TDLUpdate - Win32 Unicode Release"

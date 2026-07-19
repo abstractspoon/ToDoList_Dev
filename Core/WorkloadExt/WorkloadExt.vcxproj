@@ -220,6 +220,7 @@ copy unicode_release\WorkloadExt.dll ..\todolist\unicode_release /y</Command>
   </ItemGroup>
   <ItemGroup>
     <None Include="res\workload.ico" />
+    <None Include="WorkloadExt.dsp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

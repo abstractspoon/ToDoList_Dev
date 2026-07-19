@@ -158,6 +158,9 @@
     <None Include="res\datetime_toolbar_std.bmp">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="ToDoList.dsp" />
+    <None Include="..\ToDoList_Core.dsw" />
+    <None Include="..\ToDoList_Only.dsw" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">

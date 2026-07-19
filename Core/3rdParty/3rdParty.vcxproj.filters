@@ -327,6 +327,12 @@
     <ClInclude Include="OSVersion.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="msproject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LimitSingleInstance.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">
@@ -349,5 +355,9 @@
     <None Include="Msxml\msxml3.tli">
       <Filter>Header Files</Filter>
     </None>
+    <None Include="3rdParty.dsp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="Zlib\zlibstat.lib" />
   </ItemGroup>
 </Project>

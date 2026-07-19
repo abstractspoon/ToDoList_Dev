@@ -54,5 +54,11 @@
     <None Include="res\GPExport.rc2">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="GPExport.dsp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\ganttproject_16.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

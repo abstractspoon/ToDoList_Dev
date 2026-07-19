@@ -112,5 +112,6 @@
     <None Include="res\workload.ico">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="WorkloadExt.dsp" />
   </ItemGroup>
 </Project>

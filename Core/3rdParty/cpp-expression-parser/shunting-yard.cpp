@@ -1,7 +1,6 @@
 // Source: http://www.daniweb.com/software-development/cpp/code/427500/calculator-using-shunting-yard-algorithm#
 // Author: Jesse Brown
 // Modifications: Brandon Amos, redpois0n
-#include "StdAfx.h"
 
 #include <cstdlib>
 #include <iostream>

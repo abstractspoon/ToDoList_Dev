@@ -189,6 +189,7 @@ copy unicode_debug\transtext.pdb ..\..\Plugins\debug /y
   </ItemGroup>
   <ItemGroup>
     <None Include="res\TransText.rc2" />
+    <None Include="TransText.dsp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="TransText.rc">

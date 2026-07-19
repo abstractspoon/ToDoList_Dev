@@ -88,5 +88,6 @@
     <None Include="..\3rdParty\myspell\license.readme">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="MySpellCheck.dsp" />
   </ItemGroup>
 </Project>

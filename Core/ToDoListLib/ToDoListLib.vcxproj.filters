@@ -1047,4 +1047,7 @@
     <CustomBuild Include="ToDoListLib.vcxproj" />
     <CustomBuild Include="ToDoListLib.vcxproj.filters" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="ToDoListLib.dsp" />
+  </ItemGroup>
 </Project>

@@ -121,7 +121,7 @@
   <ItemGroup>
     <ClCompile Include="ConvertRTFToHTML.cpp" />
     <ClCompile Include="ConvertRTFToHTMLDlg.cpp" />
-    <ClCompile Include="StdAfx.cpp" >
+    <ClCompile Include="StdAfx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
@@ -130,6 +130,7 @@
     <ResourceCompile Include="ConvertRTFToHTML.rc" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="ConvertRTFToHTML.dsp" />
     <None Include="res\ConvertRTFToHTML.rc2" />
     <None Include="res\fileedit_browse.ico" />
   </ItemGroup>
@@ -149,6 +150,9 @@
     <ProjectReference Include="..\ToDoListLib\ToDoListLib.vcxproj">
       <Project>{940be78e-1486-7f9b-02b3-6f0113741a6a}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Manifest Include="res\todolist.exe.manifest" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
