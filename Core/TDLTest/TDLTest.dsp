@@ -121,6 +121,10 @@ SOURCE=.\RemapMenuIDsTest.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\SEARCHPARAMSTest.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\StdAfx.cpp
 # ADD BASE CPP /Yc"stdafx.h"
 # ADD CPP /Yc"stdafx.h"
@@ -224,6 +228,10 @@ SOURCE=.\RemapMenuIDsTest.h
 # Begin Source File
 
 SOURCE=.\Resource.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\SEARCHPARAMSTest.h
 # End Source File
 # Begin Source File
 

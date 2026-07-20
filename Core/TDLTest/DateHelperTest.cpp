@@ -171,7 +171,7 @@ void CDateHelperTest::TestDecodeRelativeDate()
 		ExpectTrue(dh.DecodeRelativeDate(_T("W"), date));
 		ExpectEQ(date, ENDTHISWEEK);
 
-		ExpectFalse(dh.DecodeRelativeDate(_T("w"), date));
+		ExpectFalse(dh.DecodeRelativeDate(_T("m"), date));
 		ExpectTrue(dh.DecodeRelativeDate(_T("M"), date));
 		ExpectEQ(date, ENDTHISMONTH);
 

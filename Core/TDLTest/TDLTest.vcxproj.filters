@@ -70,6 +70,9 @@
     <ClCompile Include="TDCFileBackupTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="SEARCHPARAMSTest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ImportExportMgrTest.h">
@@ -145,6 +148,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TDCFileBackupTest.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SEARCHPARAMSTest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

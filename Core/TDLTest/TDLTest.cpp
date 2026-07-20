@@ -10,6 +10,7 @@
 #include "MiscTest.h"
 #include "PreferencesTest.h"
 #include "RemapMenuIDsTest.h"
+#include "SEARCHPARAMSTest.h"
 #include "TaskFileTest.h"
 #include "TDCCustomAttributeCalculationTest.h"
 #include "TDCDependencyTest.h"
@@ -92,6 +93,7 @@ void DoTests(const CTestUtils& utils)
 	res += DOTEST(CMiscTest);
 	res += DOTEST(CPreferencesTest);
 	res += DOTEST(CRemapMenuIDsTest);
+	res += DOTEST(CSEARCHPARAMSTest);
 	res += DOTEST(CTaskFileTest);
 	res += DOTEST(CTDCCUSTOMATTRIBUTECALCULATIONTest);
 	res += DOTEST(CTDCDEPENDENCYTest);
