@@ -242,13 +242,13 @@ void CSEARCHPARAMSTest::TestTextParam(TDC_ATTRIBUTE nAttribID, FIND_ATTRIBTYPE n
 	ExpectEQ(rule.ValueAsString(), _T(""));
 	ExpectEQ(rule.GetMatchWholeWord(), FALSE);
 
-	rule.SetValue(_T("Success"));
+	ExpectTrue(rule.SetValue(_T("Success")));
 	ExpectEQ(rule.ValueAsString(), _T("Success"));
 
 	rule.ClearValue();
 	ExpectEQ(rule.ValueAsString(), _T(""));
 	
-	rule.SetValue(_T("Success"));
+	ExpectTrue(rule.SetValue(_T("Success")));
 	ExpectEQ(rule.ValueAsString(), _T("Success"));
 
 #ifndef _DEBUG
@@ -257,14 +257,13 @@ void CSEARCHPARAMSTest::TestTextParam(TDC_ATTRIBUTE nAttribID, FIND_ATTRIBTYPE n
 	ExpectEQ(rule.ValueAsDouble(), 0.0);
 	ExpectEQ(rule.ValueAsDate(), CDateHelper::NullDate());
 
-
-	rule.SetValue(5);
+	ExpectFalse(rule.SetValue(5));
 	ExpectEQ(rule.ValueAsString(), _T("Success"));
 
-	rule.SetValue(7.0);
+	ExpectFalse(rule.SetValue(7.0));
 	ExpectEQ(rule.ValueAsString(), _T("Success"));
 
-	rule.SetValue(COleDateTime::GetCurrentTime());
+	ExpectFalse(rule.SetValue(COleDateTime::GetCurrentTime()));
 	ExpectEQ(rule.ValueAsString(), _T("Success"));
 #endif
 }
@@ -282,7 +281,7 @@ void CSEARCHPARAMSTest::TestIntegerParam(TDC_ATTRIBUTE nAttribID, FIND_ATTRIBTYP
 	ExpectEQ(rule.ValueAsInteger(), 0);
 	ExpectEQ(rule.ValueAsDouble(), 0.0);
 
-	rule.SetValue(5);
+	ExpectTrue(rule.SetValue(5));
 	ExpectEQ(rule.ValueAsString(), _T("5"));
 	ExpectEQ(rule.ValueAsInteger(), 5);
 	ExpectEQ(rule.ValueAsDouble(), 5.0);
@@ -292,7 +291,7 @@ void CSEARCHPARAMSTest::TestIntegerParam(TDC_ATTRIBUTE nAttribID, FIND_ATTRIBTYP
 	ExpectEQ(rule.ValueAsInteger(), 0);
 	ExpectEQ(rule.ValueAsDouble(), 0.0);
 
-	rule.SetValue(_T("-5"));
+	ExpectTrue(rule.SetValue(_T("-5")));
 	ExpectEQ(rule.ValueAsInteger(), -5);
 	ExpectEQ(rule.ValueAsDouble(), -5.0);
 
@@ -300,22 +299,22 @@ void CSEARCHPARAMSTest::TestIntegerParam(TDC_ATTRIBUTE nAttribID, FIND_ATTRIBTYP
 	// These checks will assert
 	ExpectEQ(rule.ValueAsDate(), CDateHelper::NullDate());
 
-	rule.SetValue(_T("Fail"));
+	ExpectFalse(rule.SetValue(_T("Fail")));
 	ExpectEQ(rule.ValueAsString(), _T("-5"));
 	ExpectEQ(rule.ValueAsInteger(), -5);
 	ExpectEQ(rule.ValueAsDouble(), -5.0);
 
-	rule.SetValue(10.6);
+	ExpectFalse(rule.SetValue(10.6));
 	ExpectEQ(rule.ValueAsString(), _T("-5"));
 	ExpectEQ(rule.ValueAsInteger(), -5);
 	ExpectEQ(rule.ValueAsDouble(), -5.0);
 
-	rule.SetValue(COleDateTime::GetCurrentTime());
+	ExpectFalse(rule.SetValue(COleDateTime::GetCurrentTime()));
 	ExpectEQ(rule.ValueAsString(), _T("-5"));
 	ExpectEQ(rule.ValueAsInteger(), -5);
 	ExpectEQ(rule.ValueAsDouble(), -5.0);
 
-	rule.SetMatchWholeWord(TRUE);
+	ExpectFalse(rule.SetMatchWholeWord(TRUE));
 	ExpectEQ(rule.GetMatchWholeWord(), FALSE);
 #endif
 }
@@ -332,7 +331,7 @@ void CSEARCHPARAMSTest::TestDecimalParam(TDC_ATTRIBUTE nAttribID, FIND_ATTRIBTYP
 	ExpectEQ(rule.ValueAsInteger(), 0);
 	ExpectEQ(rule.ValueAsDouble(), 0.0);
 
-	rule.SetValue(5.3);
+	ExpectTrue(rule.SetValue(5.3));
 	ExpectEQ(rule.ValueAsString(), _T("5.300"));
 	ExpectEQ(rule.ValueAsInteger(), 5);
 	ExpectEQ(rule.ValueAsDouble(), 5.3);
@@ -342,7 +341,7 @@ void CSEARCHPARAMSTest::TestDecimalParam(TDC_ATTRIBUTE nAttribID, FIND_ATTRIBTYP
 	ExpectEQ(rule.ValueAsInteger(), 0);
 	ExpectEQ(rule.ValueAsDouble(), 0.0);
 
-	rule.SetValue(_T("-5.7"));
+	ExpectTrue(rule.SetValue(_T("-5.7")));
 	ExpectEQ(rule.ValueAsString(), _T("-5.700"));
 	ExpectEQ(rule.ValueAsInteger(), -5);
 	ExpectEQ(rule.ValueAsDouble(), -5.7);
@@ -351,13 +350,13 @@ void CSEARCHPARAMSTest::TestDecimalParam(TDC_ATTRIBUTE nAttribID, FIND_ATTRIBTYP
 	// These tests will assert
 	ExpectEQ(rule.ValueAsDate(), CDateHelper::NullDate());
 
-	rule.SetValue(_T("Fail"));
+	ExpectFalse(rule.SetValue(_T("Fail")));
 	ExpectEQ(rule.ValueAsString(), _T("-5.700"));
 
-	rule.SetValue(COleDateTime::GetCurrentTime());
+	ExpectFalse(rule.SetValue(COleDateTime::GetCurrentTime()));
 	ExpectEQ(rule.ValueAsString(), _T("-5.700"));
 
-	rule.SetMatchWholeWord(TRUE);
+	ExpectFalse(rule.SetMatchWholeWord(TRUE));
 	ExpectEQ(rule.GetMatchWholeWord(), FALSE);
 #endif
 }
@@ -376,7 +375,7 @@ void CSEARCHPARAMSTest::TestDateParam(TDC_ATTRIBUTE nAttribID, FIND_ATTRIBTYPE n
 
 	if (rule.IsRelativeDate(FALSE))
 	{
-		rule.SetValue(_T("t"));
+		ExpectTrue(rule.SetValue(_T("t")));
 		ExpectEQ(rule.ValueAsString(), _T("t"));
 		ExpectEQ(rule.ValueAsDate(), CDateHelper::GetDate(DHD_TODAY));
 
@@ -384,36 +383,36 @@ void CSEARCHPARAMSTest::TestDateParam(TDC_ATTRIBUTE nAttribID, FIND_ATTRIBTYPE n
 		ExpectEQ(rule.ValueAsString(), _T(""));
 		ExpectEQ(rule.ValueAsDate(), CDateHelper::NullDate());
 
-		rule.SetValue(_T("M+10D"));
+		ExpectTrue(rule.SetValue(_T("M+10D")));
 		ExpectEQ(rule.ValueAsString(), _T("M+10D"));
 		ExpectEQ(rule.ValueAsDate(), (CDateHelper::GetDate(DHD_ENDTHISMONTH) + COleDateTimeSpan(10)));
 
 #ifndef _DEBUG
 		// These checks will assert
-		rule.SetValue(_T("Success"));
+		ExpectTrue(rule.SetValue(_T("Success")));
 		ExpectEQ(rule.ValueAsString(), _T("Success"));
 		ExpectEQ(rule.ValueAsDate(), CDateHelper::NullDate());
 		ExpectEQ(rule.ValueAsInteger(), 0);
 		ExpectEQ(rule.ValueAsDouble(), 0.0);
 		ExpectEQ(rule.GetTimeUnits(), TDCU_NULL);
 
-		rule.SetValue(_T("-5.7"));
+		ExpectTrue(rule.SetValue(_T("-5.7")));
 		ExpectEQ(rule.ValueAsString(), _T("-5.7"));
 		ExpectEQ(rule.ValueAsDate(), CDateHelper::NullDate());
 		ExpectEQ(rule.ValueAsInteger(), 0);
 		ExpectEQ(rule.ValueAsDouble(), 0.0);
 		ExpectEQ(rule.GetTimeUnits(), TDCU_NULL);
 
-		rule.SetTimeUnits(TDCU_DAYS);
+		ExpectFalse(rule.SetTimeUnits(TDCU_DAYS));
 		ExpectEQ(rule.GetTimeUnits(), TDCU_NULL);
 
-		rule.SetMatchWholeWord(TRUE);
+		ExpectFalse(rule.SetMatchWholeWord(TRUE));
 		ExpectEQ(rule.GetMatchWholeWord(), FALSE);
 #endif
 	}
 	else
 	{
-		rule.SetValue(_T("45678.123"));
+		ExpectTrue(rule.SetValue(_T("45678.123")));
 		ExpectEQ(rule.ValueAsString(), _T("45678.123"));
 		ExpectEQ(rule.ValueAsDate(), COleDateTime(45678.123));
 
@@ -421,34 +420,34 @@ void CSEARCHPARAMSTest::TestDateParam(TDC_ATTRIBUTE nAttribID, FIND_ATTRIBTYPE n
 		ExpectEQ(rule.ValueAsString(), _T(""));
 		ExpectEQ(rule.ValueAsDate(), CDateHelper::NullDate());
 
-		rule.SetValue(_T("-45678.123"));
+		ExpectTrue(rule.SetValue(_T("-45678.123")));
 		ExpectEQ(rule.ValueAsString(), _T("-45678.123"));
 		ExpectEQ(rule.ValueAsDate(), COleDateTime(-45678.123));
 
 #ifndef _DEBUG
 		// These checks will assert
-		rule.SetValue(_T("Fail"));
+		ExpectFalse(rule.SetValue(_T("Fail")));
 		ExpectEQ(rule.ValueAsString(), _T("-45678.123"));
 		ExpectEQ(rule.ValueAsInteger(), 0);
 		ExpectEQ(rule.ValueAsDouble(), 0.0);
 		ExpectEQ(rule.GetTimeUnits(), TDCU_NULL);
 
-		rule.SetValue(-5.7);
+		ExpectFalse(rule.SetValue(-5.7));
 		ExpectEQ(rule.ValueAsString(), _T("-45678.123"));
 		ExpectEQ(rule.ValueAsInteger(), 0);
 		ExpectEQ(rule.ValueAsDouble(), 0.0);
 		ExpectEQ(rule.GetTimeUnits(), TDCU_NULL);
 
-		rule.SetValue(5);
+		ExpectFalse(rule.SetValue(5));
 		ExpectEQ(rule.ValueAsString(), _T("-45678.123"));
 		ExpectEQ(rule.ValueAsInteger(), 0);
 		ExpectEQ(rule.ValueAsDouble(), 0.0);
 		ExpectEQ(rule.GetTimeUnits(), TDCU_NULL);
 
-		rule.SetTimeUnits(TDCU_DAYS);
+		ExpectFalse(rule.SetTimeUnits(TDCU_DAYS));
 		ExpectEQ(rule.GetTimeUnits(), TDCU_NULL);
 
-		rule.SetMatchWholeWord(TRUE);
+		ExpectFalse(rule.SetMatchWholeWord(TRUE));
 		ExpectEQ(rule.GetMatchWholeWord(), FALSE);
 #endif
 	}
@@ -461,10 +460,9 @@ void CSEARCHPARAMSTest::TestTimePeriodParam(TDC_ATTRIBUTE nAttribID)
 
 	// Extra tests
 	SEARCHPARAM rule(nAttribID);
-
 	ExpectEQ(rule.GetTimeUnits(), TDCU_HOURS);
 
-	rule.SetTimeUnits(TDCU_DAYS);
+	ExpectTrue(rule.SetTimeUnits(TDCU_DAYS));
 	ExpectEQ(rule.GetTimeUnits(), TDCU_DAYS);
 
 	rule.ClearValue();
@@ -484,22 +482,22 @@ void CSEARCHPARAMSTest::TestGroupParam(TDC_ATTRIBUTE nAttribID)
 	// These checks will assert
 	ExpectEQ(rule.ValueAsDate(), CDateHelper::NullDate());
 
-	rule.SetValue(_T("Fail"));
+	ExpectFalse(rule.SetValue(_T("Fail")));
 	ExpectEQ(rule.ValueAsString(), _T(""));
 	ExpectEQ(rule.ValueAsInteger(), 0);
 	ExpectEQ(rule.ValueAsDouble(), 0.0);
 
-	rule.SetValue(10.6);
+	ExpectFalse(rule.SetValue(10.6));
 	ExpectEQ(rule.ValueAsString(), _T(""));
 	ExpectEQ(rule.ValueAsInteger(), 0);
 	ExpectEQ(rule.ValueAsDouble(), 0.0);
 
-	rule.SetValue(COleDateTime::GetCurrentTime());
+	ExpectFalse(rule.SetValue(COleDateTime::GetCurrentTime()));
 	ExpectEQ(rule.ValueAsString(), _T(""));
 	ExpectEQ(rule.ValueAsInteger(), 0);
 	ExpectEQ(rule.ValueAsDouble(), 0.0);
 
-	rule.SetMatchWholeWord(TRUE);
+	ExpectFalse(rule.SetMatchWholeWord(TRUE));
 	ExpectEQ(rule.GetMatchWholeWord(), FALSE);
 #endif
 }

@@ -369,21 +369,21 @@ struct SEARCHPARAM
 	BOOL operator==(const SEARCHPARAM& rule) const;
 	BOOL operator!=(const SEARCHPARAM& rule) const;
 
-	BOOL Set(TDC_ATTRIBUTE nAttribID, FIND_OPERATOR nOp, CString sVal, BOOL bAnd = TRUE, FIND_ATTRIBTYPE nType = FT_NONE);
+	BOOL Set(TDC_ATTRIBUTE nAttribID, FIND_OPERATOR nOp, CString sVal, BOOL bAnd = TRUE, FIND_ATTRIBTYPE nHint = FT_NONE);
 	BOOL Set(TDC_ATTRIBUTE nAttribID, const CString& sID, FIND_ATTRIBTYPE nType, FIND_OPERATOR nOp, CString sVal, BOOL bAnd = TRUE);
-	BOOL SetAttribute(TDC_ATTRIBUTE nAttribID, FIND_ATTRIBTYPE nType = FT_NONE);
+	BOOL SetAttribute(TDC_ATTRIBUTE nAttribID, FIND_ATTRIBTYPE nHint = FT_NONE);
 	BOOL SetCustomAttribute(TDC_ATTRIBUTE nAttribID, const CString& sID, FIND_ATTRIBTYPE nType);
 
 	void SetAnd(BOOL bAnd = TRUE);
-	void SetTimeUnits(TDC_UNITS nUnits);
-	void SetMatchWholeWord(BOOL bMatchWhole);
-	void SetFlags(DWORD flags);
-	void SetRelativeDate(BOOL bRelative);
+	BOOL SetTimeUnits(TDC_UNITS nUnits);
+	BOOL SetMatchWholeWord(BOOL bMatchWhole);
+	BOOL SetFlags(DWORD flags);
+	BOOL SetRelativeDate(BOOL bRelative);
 
-	void SetValue(const CString& sVal);
-	void SetValue(const COleDateTime& dtVal);
-	void SetValue(double dVal);
-	void SetValue(int nVal);
+	BOOL SetValue(const CString& sVal);
+	BOOL SetValue(const COleDateTime& dtVal);
+	BOOL SetValue(double dVal);
+	BOOL SetValue(int nVal);
 	void ClearValue();
 
 	CString GetCustomAttributeID() const;
@@ -445,6 +445,7 @@ protected:
 	mutable FIND_ATTRIBTYPE nAttribType;
 
 	static void ConstructRule(TDC_ATTRIBUTE nAttribID, FIND_OPERATOR nOp, BOOL bAnd, SEARCHPARAM& rule);
+	static BOOL IsValidTypeHint(TDC_ATTRIBUTE nAttribID, FIND_ATTRIBTYPE nHint);
 };
 
 // ------------------------------------------------------------------------
