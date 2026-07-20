@@ -54,8 +54,8 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 /nologo /subsystem:windows /machine:I386
-# ADD LINK32 ..\3rdParty\Detours\lib.x86\detours.lib ..\ToDoListLib\Unicode_Release\ToDoListLib.lib /nologo /entry:"wWinMainCRTStartup" /subsystem:windows /debug /machine:I386 /nodefaultlib:"libc" /OPT:REF
-# SUBTRACT LINK32 /pdb:none /map
+# ADD LINK32 ..\3rdParty\Detours\lib.x86\detours.lib ..\ToDoListLib\Unicode_Release\ToDoListLib.lib /nologo /entry:"wWinMainCRTStartup" /subsystem:windows /map /debug /machine:I386 /nodefaultlib:"libc" /OPT:REF /ignore:4006
+# SUBTRACT LINK32 /pdb:none
 # Begin Special Build Tool
 SOURCE="$(InputPath)"
 PostBuild_Cmds=mkdir ..\ToDoList	mkdir ..\ToDoList\unicode_release	copy unicode_release\TDLUpdate.exe ..\todolist\unicode_release /y	copy unicode_release\TDLUpdate.pdb ..\todolist\unicode_release /y
