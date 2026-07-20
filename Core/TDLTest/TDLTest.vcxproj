@@ -236,6 +236,9 @@ copy unicode_debug\TDLTest.exe ..\todolist\unicode_debug /y
   <ItemGroup>
     <Image Include="..\ToDoList\RES\app_std.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="TDLTest.dsp" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

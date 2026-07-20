@@ -80,6 +80,7 @@
     <None Include="RES\toolbar_std.bmp">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="CalendarExt.dsp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">

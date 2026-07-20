@@ -57,5 +57,11 @@
     <None Include="res\FMindImportExport.rc2">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="FMindImportExport.dsp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\freemind_16.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

@@ -61,6 +61,7 @@
     <None Include="res\TDLUpdate.rc2">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="TDLUpdate.dsp" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="..\3rdParty\Zlib\ZLIBSTAT.LIB">
@@ -71,5 +72,10 @@
     <Manifest Include="res\tdlupdate.exe.manifest">
       <Filter>Resource Files</Filter>
     </Manifest>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\help_button.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

@@ -187,6 +187,7 @@ copy unicode_debug\myspellcheck.dll ..\todolist\unicode_debug /y
   </ItemGroup>
   <ItemGroup>
     <None Include="..\3rdParty\myspell\license.readme" />
+    <None Include="MySpellCheck.dsp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Interfaces\Interfaces.vcxproj">

@@ -960,4 +960,7 @@
   <ItemGroup>
     <Text Include="msgs.txt" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Shared.dsp" />
+  </ItemGroup>
 </Project>

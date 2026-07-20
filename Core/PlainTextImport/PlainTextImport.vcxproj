@@ -189,6 +189,7 @@ copy unicode_release\plaintextimport.dll ..\todolist\unicode_release /y
     <ClInclude Include="StdAfx.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="PlainTextImport.dsp" />
     <None Include="res\PlainTextImport.rc2" />
   </ItemGroup>
   <ItemGroup>

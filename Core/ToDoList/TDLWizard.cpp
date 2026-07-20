@@ -22,10 +22,11 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
-const int IDC_TOPDIVIDERID = 0x3027;
-const int PROGRESS_INCREMENT = 10;
-const int PROGRESS_HEIGHT = GraphicsMisc::ScaleByDPIFactor(3);
+const int IDC_WIZDIVIDER = 0x3026;
 const int TIMERID_ANIMATEBACK = 1;
+
+const int PROGRESS_INCREMENT = 10;
+const int PROGRESS_HEIGHT = GraphicsMisc::ScaleByDPIFactor(2);
 
 /////////////////////////////////////////////////////////////////////////////
 // CWizardDlg dialog
@@ -91,13 +92,11 @@ BOOL CTDLWizard::OnInitDialog()
 
 	VERIFY(!m_btnHelp.GetHelpID() || m_btnHelp.Create(IDC_HELPBUTTON, this));
 
-	// Create progress bar
+	// Create progress bar on top of the lower dividing line
 	if (m_bProgressEnabled)
 	{
-		CRect rProgress = CDialogHelper::GetCtrlRect(this, IDC_TOPDIVIDERID);
-
-		rProgress.top = rProgress.bottom;
-		rProgress.bottom += PROGRESS_HEIGHT;
+		CRect rProgress = CDialogHelper::GetCtrlRect(this, IDC_WIZDIVIDER);
+		rProgress.bottom = (rProgress.top + PROGRESS_HEIGHT);
 
 		VERIFY(m_wndProgress.Create(WS_CHILD | WS_VISIBLE, rProgress, this, IDC_STATIC));
 		m_nCurStep = -1;

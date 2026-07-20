@@ -29,6 +29,7 @@
     <None Include="res\FtpStorage.rc2">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="FtpStorage.dsp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="FtpStorage.rc">

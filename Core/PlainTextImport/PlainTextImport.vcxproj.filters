@@ -60,5 +60,6 @@
     <None Include="res\PlainTextImport.rc2">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="PlainTextImport.dsp" />
   </ItemGroup>
 </Project>

@@ -188,6 +188,7 @@ copy unicode_debug\mloimport.dll ..\todolist\unicode_debug /y
     <ClInclude Include="StdAfx.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="MLOImport.dsp" />
     <None Include="res\MLOImport.rc2" />
   </ItemGroup>
   <ItemGroup>
@@ -199,6 +200,9 @@ copy unicode_debug\mloimport.dll ..\todolist\unicode_debug /y
       <Project>{95605899-9c90-40d8-8774-d1da1fce7464}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\mylifeorganised_16.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

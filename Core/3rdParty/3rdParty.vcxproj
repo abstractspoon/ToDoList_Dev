@@ -190,6 +190,8 @@
     <ClInclude Include="Html2Rtf.h" />
     <ClInclude Include="Ini.h" />
     <ClInclude Include="JalaliCalendar.h" />
+    <ClInclude Include="LimitSingleInstance.h" />
+    <ClInclude Include="msproject.h" />
     <ClInclude Include="OSVersion.h" />
     <ClInclude Include="Quantize.h" />
     <ClInclude Include="RangeSlider.h" />
@@ -230,8 +232,12 @@
     <ClInclude Include="Zlib\ZLIB.H" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="3rdParty.dsp" />
     <None Include="Msxml\msxml3.tlh" />
     <None Include="Msxml\msxml3.tli" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="Zlib\zlibstat.lib" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
