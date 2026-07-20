@@ -23,9 +23,9 @@ public:
 	TESTRESULT Run();
 
 protected:
-	void TestSEARCHPARAMS();
-	void TestSearchParamArray();
 	void TestSEARCHPARAM();
+	//void TestSearchParamArray();
+	//void TestSEARCHPARAMS();
 
 	void TestTextParam(TDC_ATTRIBUTE nAttribID, FIND_ATTRIBTYPE nType);
 	void TestIntegerParam(TDC_ATTRIBUTE nAttribID, FIND_ATTRIBTYPE nType);

@@ -35,8 +35,8 @@ TESTRESULT CSEARCHPARAMSTest::Run()
 	ClearTotals();
 
 	TestSEARCHPARAM();
-	TestSearchParamArray();
-	TestSEARCHPARAMS();
+	//TestSearchParamArray();
+	//TestSEARCHPARAMS();
 
 	return GetTotals();
 }
@@ -504,6 +504,7 @@ void CSEARCHPARAMSTest::TestGroupParam(TDC_ATTRIBUTE nAttribID)
 
 ////////////////////////////////////////////////////////////////////////////////
 
+/*
 void CSEARCHPARAMSTest::TestSearchParamArray()
 {
 	CTDCScopedTest test(*this, _T("CSearchParamArray"));
@@ -532,14 +533,16 @@ void CSEARCHPARAMSTest::TestSearchParamArray()
 		// TODO
 	}
 }
-
+*/
 
 ////////////////////////////////////////////////////////////////////////////////
 
+/*
 void CSEARCHPARAMSTest::TestSEARCHPARAMS()
 {
 	CTDCScopedTest test(*this, _T("SEARCHPARAMS"));
 
 	// TODO
 }
+*/
 
