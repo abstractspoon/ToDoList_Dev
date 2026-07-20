@@ -47,6 +47,8 @@ void CSEARCHPARAMSTest::TestSEARCHPARAM()
 
 	// FT_NONE
 	{
+		CTDCScopedSubTest subTest(*this, _T("FT_NONE"));
+
 		SEARCHPARAM rule;
 
 		ExpectEQ(rule.GetAttribute(), TDCA_NONE);
@@ -85,6 +87,8 @@ void CSEARCHPARAMSTest::TestSEARCHPARAM()
 	{
 		// FT_STRING
 		{
+			CTDCScopedSubTest subTest(*this, _T("FT_STRING"));
+
 			const TDC_ATTRIBUTE ATTRIBIDS[] =
 			{
 				TDCA_TASKNAME,
@@ -119,16 +123,26 @@ void CSEARCHPARAMSTest::TestSEARCHPARAM()
 		}
 
 		// FT_ICON
-		TestTextParam(TDCA_ICON, FT_ICON);
+		{
+			CTDCScopedSubTest subTest(*this, _T("FT_ICON"));
+
+			TestTextParam(TDCA_ICON, FT_ICON);
+		}
 
 		// FT_DEPENDENCY:
-		TestTextParam(TDCA_DEPENDENCY, FT_DEPENDENCY);
+		{
+			CTDCScopedSubTest subTest(*this, _T("FT_DEPENDENCY"));
+
+			TestTextParam(TDCA_DEPENDENCY, FT_DEPENDENCY);
+		}
 	}
 
 	// Integer types
 	{
 		// FT_INTEGER
 		{
+			CTDCScopedSubTest subTest(*this, _T("FT_INTEGER"));
+
 			const TDC_ATTRIBUTE ATTRIBIDS[] =
 			{
 				TDCA_PRIORITY,
@@ -146,6 +160,8 @@ void CSEARCHPARAMSTest::TestSEARCHPARAM()
 
 		// FT_BOOL
 		{
+			CTDCScopedSubTest subTest(*this, _T("FT_BOOL"));
+
 			const TDC_ATTRIBUTE ATTRIBIDS[] =
 			{
 				TDCA_FLAG,
@@ -160,15 +176,24 @@ void CSEARCHPARAMSTest::TestSEARCHPARAM()
 		}
 
 		// FT_RECURRENCE
-		TestIntegerParam(TDCA_RECURRENCE, FT_RECURRENCE);
+		{
+			CTDCScopedSubTest subTest(*this, _T("FT_RECURRENCE"));
 
+			TestIntegerParam(TDCA_RECURRENCE, FT_RECURRENCE);
+		}
 
 		// FT_COLOR
-		TestIntegerParam(TDCA_COLOR, FT_COLOR);
+		{
+			CTDCScopedSubTest subTest(*this, _T("FT_COLOR"));
+
+			TestIntegerParam(TDCA_COLOR, FT_COLOR);
+		}
 	}
 
 	// FT_DOUBLE
 	{
+		CTDCScopedSubTest subTest(*this, _T("FT_DOUBLE"));
+
 		const TDC_ATTRIBUTE ATTRIBIDS[] =
 		{
 			TDCA_COST,
@@ -183,6 +208,8 @@ void CSEARCHPARAMSTest::TestSEARCHPARAM()
 	
 	// FT_TIMEPERIOD
 	{
+		CTDCScopedSubTest subTest(*this, _T("FT_TIMEPERIOD"));
+
 		const TDC_ATTRIBUTE ATTRIBIDS[] =
 		{
 			TDCA_TIMEESTIMATE,
@@ -196,6 +223,8 @@ void CSEARCHPARAMSTest::TestSEARCHPARAM()
 
 	// Dates
 	{
+		CTDCScopedSubTest subTest(*this, _T(""));
+
 		const TDC_ATTRIBUTE ATTRIBIDS[] =
 		{
 			TDCA_STARTDATE,
@@ -208,15 +237,27 @@ void CSEARCHPARAMSTest::TestSEARCHPARAM()
 		};
 		const int NUM_IDS = (sizeof(ATTRIBIDS) / sizeof(ATTRIBIDS[0]));
 
-		for (int i = 0; i < NUM_IDS; i++)
+		// FT_DATE
 		{
-			TestDateParam(ATTRIBIDS[i], FT_DATE);
-			TestDateParam(ATTRIBIDS[i], FT_DATERELATIVE);
+			CTDCScopedSubTest subTest(*this, _T("FT_DATE"));
+
+			for (int i = 0; i < NUM_IDS; i++)
+				TestDateParam(ATTRIBIDS[i], FT_DATE);
+		}
+
+		// FT_DATERELATIVE
+		{
+			CTDCScopedSubTest subTest(*this, _T("FT_DATERELATIVE"));
+
+			for (int i = 0; i < NUM_IDS; i++)
+				TestDateParam(ATTRIBIDS[i], FT_DATERELATIVE);
 		}
 	}
 
 	// FT_GROUP
 	{
+		CTDCScopedSubTest subTest(*this, _T("FT_GROUP"));
+
 		const TDC_ATTRIBUTE ATTRIBIDS[] =
 		{
 			TDCA_MATCHGROUPSTART,
