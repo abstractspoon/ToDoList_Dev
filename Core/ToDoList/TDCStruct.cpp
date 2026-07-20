@@ -883,14 +883,14 @@ SEARCHPARAM::SEARCHPARAM(TDC_ATTRIBUTE nAttribID, FIND_OPERATOR nOp)
 	ConstructRule(nAttribID, nOp, TRUE, *this);
 }
 
-SEARCHPARAM::SEARCHPARAM(TDC_ATTRIBUTE nAttribID, FIND_OPERATOR nOp, const CString& sVal, BOOL bAnd/*, FIND_ATTRIBTYPE nType*/)
+SEARCHPARAM::SEARCHPARAM(TDC_ATTRIBUTE nAttribID, FIND_OPERATOR nOp, const CString& sVal, BOOL bAnd)
 {
 	ConstructRule(nAttribID, nOp, bAnd, *this);
 
 	SetValue(sVal);
 }
 
-SEARCHPARAM::SEARCHPARAM(TDC_ATTRIBUTE nAttribID, FIND_OPERATOR nOp, const COleDateTime& dtVal, BOOL bAnd/*, FIND_ATTRIBTYPE nType*/)
+SEARCHPARAM::SEARCHPARAM(TDC_ATTRIBUTE nAttribID, FIND_OPERATOR nOp, const COleDateTime& dtVal, BOOL bAnd)
 {
 	ConstructRule(nAttribID, nOp, bAnd, *this);
 
