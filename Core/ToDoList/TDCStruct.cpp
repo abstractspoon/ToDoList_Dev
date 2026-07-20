@@ -1221,6 +1221,7 @@ FIND_ATTRIBTYPE SEARCHPARAM::GetAttribType(TDC_ATTRIBUTE nAttribID, BOOL bRelati
 	case TDCA_STARTTIME:
 	case TDCA_CREATIONDATE:
 	case TDCA_DONEDATE:
+	case TDCA_DONETIME:
 	case TDCA_DUEDATE:
 	case TDCA_DUETIME:
 	case TDCA_LASTMODDATE:
@@ -1316,16 +1317,18 @@ void SEARCHPARAM::SetAnd(BOOL and)
 
 void SEARCHPARAM::SetTimeUnits(TDC_UNITS nUnits)
 {
-	ASSERT(TypeIs(FT_TIMEPERIOD));
-
-	nTimeUnits = nUnits;
+	if (TypeIs(FT_TIMEPERIOD) && IsValidUnits(nUnits))
+		nTimeUnits = nUnits;
+	else
+		ASSERT(0);
 }
 
 void SEARCHPARAM::SetMatchWholeWord(BOOL bMatchWhole)
 {
-	ASSERT(TypeIs(FT_STRING));
-
-	bMatchWholeWord = bMatchWhole;
+	if (TypeIs(FT_STRING))
+		bMatchWholeWord = bMatchWhole;
+	else
+		ASSERT(0);
 }
 
 void SEARCHPARAM::SetFlags(DWORD flags)
@@ -1335,9 +1338,10 @@ void SEARCHPARAM::SetFlags(DWORD flags)
 
 void SEARCHPARAM::SetRelativeDate(BOOL bRelative)
 {
-	ASSERT(TypeIs(FT_DATE) || TypeIs(FT_DATERELATIVE));
-
-	bRelativeDate = bRelative;
+	if (TypeIs(FT_DATE) || TypeIs(FT_DATERELATIVE))
+		bRelativeDate = bRelative;
+	else
+		ASSERT(0);
 }
 
 DWORD SEARCHPARAM::GetFlags() const
@@ -1347,23 +1351,32 @@ DWORD SEARCHPARAM::GetFlags() const
 
 TDC_UNITS SEARCHPARAM::GetTimeUnits() const
 {
-	ASSERT(TypeIs(FT_TIMEPERIOD));
+	if (TypeIs(FT_TIMEPERIOD))
+		return (nTimeUnits ? nTimeUnits : TDCU_HOURS);
 
-	return nTimeUnits;
+	// else
+	ASSERT(0);
+	return TDCU_NULL;
 }
 
 BOOL SEARCHPARAM::GetMatchWholeWord() const
 {
-	ASSERT(TypeIs(FT_STRING) || TypeIs(FT_DEPENDENCY) || TypeIs(FT_ICON));
+	if (TypeIs(FT_STRING) || TypeIs(FT_DEPENDENCY) || TypeIs(FT_ICON))
+		return bMatchWholeWord;
 
-	return bMatchWholeWord;
+	// else
+	ASSERT(0);
+	return FALSE;
 }
 
 BOOL SEARCHPARAM::GetRelativeDate() const
 {
-	ASSERT(TypeIs(FT_DATE) || TypeIs(FT_DATERELATIVE));
+	if (TypeIs(FT_DATE) || TypeIs(FT_DATERELATIVE))
+		return bRelativeDate;
 
-	return bRelativeDate;
+	// else
+	ASSERT(0);
+	return FALSE;
 }
 
 void SEARCHPARAM::SetValue(const CString& sVal)
