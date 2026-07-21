@@ -1,7 +1,8 @@
 vssver.scc
 CopyResToBuildFolders.bat
 CopyResToBuildFolders_Exclude.txt
-Translations\backup
+backup
+img
 .gitattributes
 .gitignore
 README.md
