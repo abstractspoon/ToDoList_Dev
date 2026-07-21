@@ -223,8 +223,6 @@ void CSEARCHPARAMSTest::TestSEARCHPARAM()
 
 	// Dates
 	{
-		CTDCScopedSubTest subTest(*this, _T(""));
-
 		const TDC_ATTRIBUTE ATTRIBIDS[] =
 		{
 			TDCA_STARTDATE,
