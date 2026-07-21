@@ -557,7 +557,8 @@ BOOL CTreeListCtrl::SelectItem(HTREEITEM hti)
 
 	if (bSelChange)
 	{
-		SyncListSelectionToTree();
+		if (CanResync())
+			SyncListSelectionToTree();
 
 		NMTREEVIEW nmtv = { *this, GetDlgCtrlID(), TVN_SELCHANGED, 0 };
 
