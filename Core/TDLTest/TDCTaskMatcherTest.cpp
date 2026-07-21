@@ -36,11 +36,11 @@ const double BASE_COST = 20.0;
 const double BASE_TIMEEST = 30.0;
 const double BASE_TIMESPENT = 40.0;
 
-const double BASE_CREATION = 45000.0;
-const double BASE_START = 45001.0;
-const double BASE_DUE = 45002.0;
-//const double BASE_DONE = 45003.0;
-const double BASE_LASTMOD = 45004.0;
+const COleDateTime BASE_CREATION(45000.0);
+const COleDateTime BASE_START(45001.0);
+const COleDateTime BASE_DUE(45002.0);
+//const COleDateTime BASE_DONE(45003.0);
+const COleDateTime BASE_LASTMOD(45004.0);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -441,7 +441,7 @@ void CTDCTaskMatcherTest::TestTimePeriodAttributeRules(const CToDoCtrlData& data
 	TestSimpleNumberMatching(data, rule, dBase);
 }
 
-void CTDCTaskMatcherTest::TestDateAttributeRules(const CToDoCtrlData& data, TDC_ATTRIBUTE nAttibID, double dBase)
+void CTDCTaskMatcherTest::TestDateAttributeRules(const CToDoCtrlData& data, TDC_ATTRIBUTE nAttibID, const COleDateTime& dtBase)
 {
 	CTDCTaskMatcher matcher(data, reminders, contentMgr);
 	CDWordArray aTaskIDs; // get overwritten by each test
@@ -453,7 +453,7 @@ void CTDCTaskMatcherTest::TestDateAttributeRules(const CToDoCtrlData& data, TDC_
 		rule.SetOperator(FOP_EQUALS);
 
 		{
-			rule.SetValue(dBase + 3);
+			rule.SetValue(dtBase + COleDateTimeSpan(3));
 
 			ExpectEQ(1, matcher.FindTasks(rule, FALSE, aTaskIDs));
 			ExpectTrue(ContainsOneTaskID(aTaskIDs, 3));
@@ -465,14 +465,14 @@ void CTDCTaskMatcherTest::TestDateAttributeRules(const CToDoCtrlData& data, TDC_
 		rule.SetOperator(FOP_NOT_EQUALS);
 
 		{
-			rule.SetValue(dBase + 5);
+			rule.SetValue(dtBase + COleDateTimeSpan(5));
 
 			ExpectEQ(5, matcher.FindTasks(rule, FALSE, aTaskIDs));
 			ExpectTrue(ContainsAllTaskIDsButOne(aTaskIDs, 5));
 		}
 
 		{
-			rule.SetValue(dBase + 10);
+			rule.SetValue(dtBase + COleDateTimeSpan(10));
 
 			ExpectEQ(6, matcher.FindTasks(rule, FALSE, aTaskIDs));
 			ExpectTrue(ContainsAllTaskIDs(aTaskIDs));
@@ -484,21 +484,21 @@ void CTDCTaskMatcherTest::TestDateAttributeRules(const CToDoCtrlData& data, TDC_
 		rule.SetOperator(FOP_AFTER);
 
 		{
-			rule.SetValue(dBase);
+			rule.SetValue(dtBase);
 
 			ExpectEQ(6, matcher.FindTasks(rule, FALSE, aTaskIDs));
 			ExpectTrue(ContainsAllTaskIDs(aTaskIDs));
 		}
 
 		{
-			rule.SetValue(dBase + 1);
+			rule.SetValue(dtBase + COleDateTimeSpan(1));
 
 			ExpectEQ(5, matcher.FindTasks(rule, FALSE, aTaskIDs));
 			ExpectTrue(ContainsAllTaskIDsButOne(aTaskIDs, 1));
 		}
 
 		{
-			rule.SetValue(dBase + 5);
+			rule.SetValue(dtBase + COleDateTimeSpan(5));
 
 			ExpectEQ(1, matcher.FindTasks(rule, FALSE, aTaskIDs));
 			ExpectTrue(ContainsOneTaskID(aTaskIDs, 6));
@@ -510,21 +510,21 @@ void CTDCTaskMatcherTest::TestDateAttributeRules(const CToDoCtrlData& data, TDC_
 		rule.SetOperator(FOP_ON_OR_AFTER);
 
 		{
-			rule.SetValue(dBase + 6);
+			rule.SetValue(dtBase + COleDateTimeSpan(6));
 
 			ExpectEQ(1, matcher.FindTasks(rule, FALSE, aTaskIDs));
 			ExpectTrue(ContainsOneTaskID(aTaskIDs, 6));
 		}
 
 		{
-			rule.SetValue(dBase + 1);
+			rule.SetValue(dtBase + COleDateTimeSpan(1));
 
 			ExpectEQ(6, matcher.FindTasks(rule, FALSE, aTaskIDs));
 			ExpectTrue(ContainsAllTaskIDs(aTaskIDs));
 		}
 
 		{
-			rule.SetValue(dBase + 2);
+			rule.SetValue(dtBase + COleDateTimeSpan(2));
 
 			ExpectEQ(5, matcher.FindTasks(rule, FALSE, aTaskIDs));
 			ExpectTrue(ContainsAllTaskIDsButOne(aTaskIDs, 1));
@@ -536,28 +536,28 @@ void CTDCTaskMatcherTest::TestDateAttributeRules(const CToDoCtrlData& data, TDC_
 		rule.SetOperator(FOP_BEFORE);
 
 		{
-			rule.SetValue(dBase);
+			rule.SetValue(dtBase);
 
 			ExpectEQ(0, matcher.FindTasks(rule, FALSE, aTaskIDs));
 			ExpectTrue(ContainsNoTaskIDs(aTaskIDs));
 		}
 
 		{
-			rule.SetValue(dBase + 10);
+			rule.SetValue(dtBase + COleDateTimeSpan(10));
 
 			ExpectEQ(6, matcher.FindTasks(rule, FALSE, aTaskIDs));
 			ExpectTrue(ContainsAllTaskIDs(aTaskIDs));
 		}
 
 		{
-			rule.SetValue(dBase + 6);
+			rule.SetValue(dtBase + COleDateTimeSpan(6));
 
 			ExpectEQ(5, matcher.FindTasks(rule, FALSE, aTaskIDs));
 			ExpectTrue(ContainsAllTaskIDsButOne(aTaskIDs, 6));
 		}
 
 		{
-			rule.SetValue(dBase + 2);
+			rule.SetValue(dtBase + COleDateTimeSpan(2));
 
 			ExpectEQ(1, matcher.FindTasks(rule, FALSE, aTaskIDs));
 			ExpectTrue(ContainsOneTaskID(aTaskIDs, 1));
@@ -569,35 +569,35 @@ void CTDCTaskMatcherTest::TestDateAttributeRules(const CToDoCtrlData& data, TDC_
 		rule.SetOperator(FOP_ON_OR_BEFORE);
 
 		{
-			rule.SetValue(dBase);
+			rule.SetValue(dtBase);
 
 			ExpectEQ(0, matcher.FindTasks(rule, FALSE, aTaskIDs));
 			ExpectTrue(ContainsNoTaskIDs(aTaskIDs));
 		}
 
 		{
-			rule.SetValue(dBase + 10);
+			rule.SetValue(dtBase + COleDateTimeSpan(10));
 
 			ExpectEQ(6, matcher.FindTasks(rule, FALSE, aTaskIDs));
 			ExpectTrue(ContainsAllTaskIDs(aTaskIDs));
 		}
 
 		{
-			rule.SetValue(dBase + 6);
+			rule.SetValue(dtBase + COleDateTimeSpan(6));
 
 			ExpectEQ(6, matcher.FindTasks(rule, FALSE, aTaskIDs));
 			ExpectTrue(ContainsAllTaskIDs(aTaskIDs));
 		}
 
 		{
-			rule.SetValue(dBase + 5);
+			rule.SetValue(dtBase + COleDateTimeSpan(5));
 
 			ExpectEQ(5, matcher.FindTasks(rule, FALSE, aTaskIDs));
 			ExpectTrue(ContainsAllTaskIDsButOne(aTaskIDs, 6));
 		}
 
 		{
-			rule.SetValue(dBase + 1);
+			rule.SetValue(dtBase + COleDateTimeSpan(1));
 
 			ExpectEQ(1, matcher.FindTasks(rule, FALSE, aTaskIDs));
 			ExpectTrue(ContainsOneTaskID(aTaskIDs, 1));
@@ -764,11 +764,11 @@ tasks.func(hTasks[i], aValues); }
 		POPULATE_ARRAY(_T("AllocTo"), SetTaskAllocatedTo);
 		POPULATE_ARRAY(_T("File"), SetTaskFileLinks);
 
-		tasks.SetTaskCreationDate(hTasks[i], COleDateTime(BASE_CREATION + v));
-		tasks.SetTaskStartDate(hTasks[i], COleDateTime(BASE_START + v));
-		tasks.SetTaskDueDate(hTasks[i], COleDateTime(BASE_DUE + v));
-//		tasks.SetTaskDoneDate(hTasks[i], COleDateTime(BASE_DONE + v));
-		tasks.SetTaskLastModified(hTasks[i], COleDateTime(BASE_LASTMOD + v), Misc::Format(_T("User%d"), v));
+		tasks.SetTaskCreationDate(hTasks[i], (BASE_CREATION + COleDateTimeSpan(v)));
+		tasks.SetTaskStartDate(hTasks[i], (BASE_START + COleDateTimeSpan(v)));
+		tasks.SetTaskDueDate(hTasks[i], (BASE_DUE + COleDateTimeSpan(v)));
+//		tasks.SetTaskDoneDate(hTasks[i], (BASE_DONE + COleDateTimeSpan(v)));
+		tasks.SetTaskLastModified(hTasks[i], (BASE_LASTMOD + COleDateTimeSpan(v)), Misc::Format(_T("User%d"), v));
 
 		tasks.SetTaskPriority(hTasks[i], (BASE_PRIORITY + v));
 		tasks.SetTaskRisk(hTasks[i], (BASE_RISK + v));

@@ -45,6 +45,7 @@
     <None Include="res\TDLUninstall.rc2">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="TDLUninstall.dsp" />
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="res\tdluninstall.exe.manifest">

@@ -22,7 +22,7 @@
     <PlatformToolset>v140</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'" Label="Configuration">
-    <ConfigurationType>Makefile</ConfigurationType>
+    <ConfigurationType>Utility</ConfigurationType>
     <PlatformToolset>v140</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
@@ -54,8 +54,9 @@
   <ItemDefinitionGroup>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <None Include="Detours.bsc" />
     <CustomBuild Include="Makefile" />
+    <None Include="Detours.dsp" />
+    <None Include="lib.X86\detours.pdb" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="creatwth.cpp" />
@@ -75,6 +76,9 @@
     <ClInclude Include="detours.h" />
     <ClInclude Include="detver.h" />
     <ClInclude Include="strsafe.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="lib.X86\detours.lib" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

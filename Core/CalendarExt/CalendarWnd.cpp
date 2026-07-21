@@ -547,8 +547,19 @@ bool CCalendarWnd::GetLabelEditRect(LPRECT pEdit)
 bool CCalendarWnd::HitTest(POINT ptScreen, IUIHITTESTRESULT& htRes) const
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	
+	// try header
+	if (m_BigCalendar.PtInHeader(ptScreen))
+		return IUI_NOWHERE;
 
 	return (m_BigCalendar.HitTest(ptScreen, htRes) != FALSE);
+}
+
+bool CCalendarWnd::ShowContextMenu(POINT ptScreen)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	return (m_BigCalendar.ShowContextMenu(ptScreen) != FALSE);
 }
 
 bool CCalendarWnd::ShowContextMenu(POINT ptScreen)

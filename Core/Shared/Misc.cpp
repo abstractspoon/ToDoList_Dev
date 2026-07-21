@@ -318,22 +318,27 @@ void Misc::NullGuid(GUID& guid)
    ZeroMemory(&guid, sizeof(guid));
 }
 
-void Misc::ProcessMsgLoop()
+void Misc::ProcessMsgLoop(DWORD dwDuration)
 {
-	MSG msg;
-
-	while (::PeekMessage((LPMSG) &msg, NULL, 0, 0, PM_REMOVE))
+	DWORD dwTickEnd = (GetTickCount() + dwDuration);
+	MSG msg = { 0 };
+	
+	do // runs at least once
 	{
-		if (::IsDialogMessage(msg.hwnd, (LPMSG)&msg))
+		while (::PeekMessage((LPMSG) &msg, NULL, 0, 0, PM_REMOVE))
 		{
-			// do nothing - its already been done
-		}
-		else
-		{
-			::TranslateMessage(&msg);
-			::DispatchMessage(&msg);
+			if (::IsDialogMessage(msg.hwnd, (LPMSG)&msg))
+			{
+				// do nothing - its already been done
+			}
+			else
+			{
+				::TranslateMessage(&msg);
+				::DispatchMessage(&msg);
+			}
 		}
 	}
+	while (GetTickCount() < dwTickEnd);
 }
 
 DWORD Misc::GetLastUserInputTick()

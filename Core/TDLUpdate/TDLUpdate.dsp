@@ -23,6 +23,8 @@ CFG=TDLUpdate - Win32 Unicode Release
 
 # Begin Project
 # PROP AllowPerConfigDependencies 0
+# PROP Scc_ProjName ""
+# PROP Scc_LocalPath ""
 CPP=cl.exe
 MTL=midl.exe
 RSC=rc.exe
@@ -52,8 +54,8 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 /nologo /subsystem:windows /machine:I386
-# ADD LINK32 ..\3rdParty\Detours\lib.x86\detours.lib /nologo /entry:"wWinMainCRTStartup" /subsystem:windows /debug /machine:I386 /nodefaultlib:"libc" /OPT:REF
-# SUBTRACT LINK32 /pdb:none /map
+# ADD LINK32 ..\3rdParty\Detours\lib.x86\detours.lib ..\ToDoListLib\Unicode_Release\ToDoListLib.lib /nologo /entry:"wWinMainCRTStartup" /subsystem:windows /map /debug /machine:I386 /nodefaultlib:"libc" /OPT:REF /ignore:4006
+# SUBTRACT LINK32 /pdb:none
 # Begin Special Build Tool
 SOURCE="$(InputPath)"
 PostBuild_Cmds=mkdir ..\ToDoList	mkdir ..\ToDoList\unicode_release	copy unicode_release\TDLUpdate.exe ..\todolist\unicode_release /y	copy unicode_release\TDLUpdate.pdb ..\todolist\unicode_release /y
@@ -83,7 +85,8 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 ..\3rdParty\Detours\lib.x86\detours.lib /nologo /entry:"wWinMainCRTStartup" /subsystem:windows /debug /machine:I386 /nodefaultlib:"libc" /pdbtype:sept
+# ADD LINK32 ..\3rdParty\Detours\lib.x86\detours.lib ..\ToDoListLib\Unicode_Debug\ToDoListLib.lib /nologo /entry:"wWinMainCRTStartup" /subsystem:windows /debug /machine:I386 /nodefaultlib:"libc" /pdbtype:sept /ignore:4006
+# SUBTRACT LINK32 /pdb:none
 # Begin Special Build Tool
 SOURCE="$(InputPath)"
 PostBuild_Cmds=mkdir ..\ToDoList	mkdir ..\ToDoList\unicode_debug	copy unicode_debug\TDLUpdate.exe ..\todolist\unicode_debug /y
@@ -147,6 +150,10 @@ SOURCE=.\TDLWebUpdater.h
 # Begin Group "Resource Files"
 
 # PROP Default_Filter "ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
+# Begin Source File
+
+SOURCE=.\res\help_button.ico
+# End Source File
 # Begin Source File
 
 SOURCE=.\res\tdlupdate.exe.manifest

@@ -205,6 +205,8 @@ unicode_release\TDLTest.exe
   </ItemGroup>
   <ItemGroup>
     <None Include="..\TDLUpdate\RES\TDLUpdate.ico" />
+    <None Include="..\ToDoList_Core.dsw" />
+    <None Include="..\ToDoList_Only.dsw" />
     <None Include="res\abstractspoon.ico" />
     <None Include="res\app_extra_std.bmp" />
     <None Include="res\app_std.ico" />
@@ -250,6 +252,7 @@ unicode_release\TDLTest.exe
     <None Include="res\udtprefs_toolbar_std.bmp" />
     <None Include="res\update_filter.ico" />
     <None Include="RES\XPcheckboxes.bmp" />
+    <None Include="ToDoList.dsp" />
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="RES\todolist.exe.manifest" />

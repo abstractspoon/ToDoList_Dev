@@ -389,7 +389,6 @@ public:
 	
 	virtual DWORD GetTaskReferenceID(HTASKITEM hTask) const = 0;
 	virtual bool IsTaskReference(HTASKITEM hTask) const = 0;
-
 };
 
 class ITaskList16 : public ITaskList15
@@ -440,8 +439,8 @@ public:
 	virtual bool AddTaskDependency(HTASKITEM hTask, unsigned long dwID, int nDaysLeanIn = 0) = 0;
 	virtual LPCWSTR GetTaskDependency(HTASKITEM hTask, int nIndex, int* pDaysLeanIn = NULL) const = 0;
 
+	virtual bool IsTaskPartlyDone(HTASKITEM hTask) const = 0;
 	virtual double GetTaskTimeRemaining(HTASKITEM hTask, TDC_UNITS& cUnits) const = 0;
-
 	virtual unsigned long GetCustomAttributeFeatures(int nIndex) const = 0;
 	virtual unsigned long GetCustomAttributeCalculationResultType(int nIndex) const = 0;
 };

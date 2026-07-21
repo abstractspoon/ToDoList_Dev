@@ -97,7 +97,7 @@ struct GANTTITEM
 	CDWordArray aDependIDs;
 	CStringArray aTags;
 	int nPercent;
-	BOOL bGoodAsDone, bSomeSubtaskDone;
+	BOOL bGoodAsDone, bPartlyDone;
 	int nPosition;
 	BOOL bLocked, bHasIcon;
 	

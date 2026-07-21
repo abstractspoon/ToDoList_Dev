@@ -65,6 +65,7 @@
     <None Include="res\burndown.ico">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="BurndownExt.dsp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="BurndownExt.rc">

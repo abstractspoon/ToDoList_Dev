@@ -84,6 +84,9 @@
     <ClInclude Include="KanbanGroupByComboBox.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="KanbanStatic.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="res\KanbanBoard.rc2">
@@ -101,6 +104,7 @@
     <None Include="res\XPcheckboxes.bmp">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="KanbanBoard.dsp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">

@@ -54,10 +54,16 @@
     <None Include="res\fileedit_browse.ico">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="ConvertRTFToHTML.dsp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\ConvertRTFToHTML.ico">
       <Filter>Resource Files</Filter>
     </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <Manifest Include="res\todolist.exe.manifest">
+      <Filter>Resource Files</Filter>
+    </Manifest>
   </ItemGroup>
 </Project>

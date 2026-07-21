@@ -267,6 +267,7 @@
     <ClCompile Include="..\ToDoList\TDLViewTabControl.cpp" />
     <ClCompile Include="..\ToDoList\TDLWebUpdatePromptDlg.cpp" />
     <ClCompile Include="..\ToDoList\TDLWelcomeWizard.cpp" />
+    <ClCompile Include="..\ToDoList\TDLWizard.cpp" />
     <ClCompile Include="..\ToDoList\ToDoCtrl.cpp" />
     <ClCompile Include="..\ToDoList\ToDoCtrlData.cpp" />
     <ClCompile Include="..\ToDoList\ToDoCtrlDataUtils.cpp" />
@@ -443,6 +444,7 @@
     <ClInclude Include="..\ToDoList\TDLViewTabControl.h" />
     <ClInclude Include="..\ToDoList\TDLWebUpdatePromptDlg.h" />
     <ClInclude Include="..\ToDoList\TDLWelcomeWizard.h" />
+    <ClInclude Include="..\ToDoList\TDLWizard.h" />
     <ClInclude Include="..\ToDoList\ToDoCtrl.h" />
     <ClInclude Include="..\ToDoList\ToDoCtrlData.h" />
     <ClInclude Include="..\ToDoList\ToDoCtrlDataDefines.h" />
@@ -463,6 +465,9 @@
     <CustomBuild Include="ToDoListLib.vcxproj.filters">
       <FileType>Document</FileType>
     </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ToDoListLib.dsp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

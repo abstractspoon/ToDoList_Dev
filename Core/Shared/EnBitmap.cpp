@@ -309,26 +309,28 @@ HICON CEnBitmap::LoadImageFileAsIcon(LPCTSTR szImagePath, COLORREF crMask, int c
 
 			if (gdBitmap.IsValid())
 			{
-				HICON hicoGdip = NULL;
+				HICON hIcon = NULL;
 				
-				if (CGdiPlus::CreateHICONFromBitmap(gdBitmap, &hicoGdip))
+				if (CGdiPlus::CreateHICONFromBitmap(gdBitmap, &hIcon))
 				{
 					if (cx && cy)
 					{
-						CSize size = GraphicsMisc::GetIconSize(hicoGdip);
+						CSize size = GraphicsMisc::GetIconSize(hIcon);
 
 						if ((cx != size.cx) || (cy != size.cy))
 						{
 							CImageList ilTemp;
 
-							if (ilTemp.Create(cx, cy, ILC_COLOR32, 1, 1) && (ilTemp.Add(hicoGdip) == 0))
+							if (ilTemp.Create(cx, cy, ILC_COLOR32, 1, 1) && (ilTemp.Add(hIcon) == 0))
 							{
-								::DestroyIcon(hicoGdip);
-								return ilTemp.ExtractIcon(0);
+								::DestroyIcon(hIcon);
+								hIcon = ilTemp.ExtractIcon(0);
 							}
 						}
 					}
 				}
+
+				return hIcon;
 			}
 		}
 		break;

@@ -70,6 +70,9 @@
     <ClCompile Include="TDCFileBackupTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="SEARCHPARAMSTest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ImportExportMgrTest.h">
@@ -147,6 +150,9 @@
     <ClInclude Include="TDCFileBackupTest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="SEARCHPARAMSTest.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">
@@ -171,5 +177,8 @@
     <Image Include="..\ToDoList\RES\app_std.ico">
       <Filter>Resource Files</Filter>
     </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="TDLTest.dsp" />
   </ItemGroup>
 </Project>

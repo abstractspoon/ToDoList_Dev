@@ -433,6 +433,9 @@
   <ItemGroup>
     <Text Include="msgs.txt" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Shared.dsp" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

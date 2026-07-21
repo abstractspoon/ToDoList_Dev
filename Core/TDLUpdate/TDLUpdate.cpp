@@ -2,6 +2,7 @@
 //
 
 #include "stdafx.h"
+#include "resource.h"
 #include "TDLUpdate.h"
 #include "tdlwebupdater.h"
 #include "tdlwebupdateprogressdlg.h"
@@ -17,9 +18,11 @@
 #include "..\shared\rtlInputmgr.h"
 #include "..\shared\DarkMode.h"
 #include "..\shared\MessageBox.h"
+#include "..\shared\Icon.h"
 
 #include "..\3rdParty\OSVersion.h"
 #include "..\3rdparty\base64coder.h"
+#include "..\3rdparty\Ini.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -28,13 +31,13 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
+
+const LPCTSTR WIKI_URL = _T("https://www.abstractspoon.com/wiki/doku.php?id=");
+
+/////////////////////////////////////////////////////////////////////////////
 // CTDLUpdateApp
 
 BEGIN_MESSAGE_MAP(CTDLUpdateApp, CWinApp)
-	//{{AFX_MSG_MAP(CTDLUpdateApp)
-		// NOTE - the ClassWizard will add and remove mapping macros here.
-		//    DO NOT EDIT what you see in these blocks of generated code!
-	//}}AFX_MSG
 	ON_COMMAND(ID_HELP, CWinApp::OnHelp)
 END_MESSAGE_MAP()
 
@@ -58,12 +61,18 @@ BOOL CTDLUpdateApp::InitInstance()
 	if (!WebMisc::IsOnline())
 		return FALSE;
 
+	// Set up icons that might be required during startup
+	if (m_iconHelp.Load(IDI_HELP_BUTTON))
+		CWinHelpButton::SetDefaultIcon(m_iconHelp);
+
 	CEnCommandLineInfo cmdInfo;
 	ParseCommandLine(cmdInfo);
 
 	// must have App ID
+#ifndef _DEBUG
 	if (cmdInfo.GetOption(SWITCH_APPID) != TDLAPPID)
 		return FALSE;
+#endif
 
 	// Inherited commandline options
 	if (cmdInfo.HasOption(SWITCH_DARKMODE))
@@ -243,4 +252,37 @@ void CTDLUpdateApp::DoUpdate(const CString& sAppFolder, const CString& sPrevCmdL
 int CTDLUpdateApp::DoMessageBox(LPCTSTR lpszPrompt, UINT nType, UINT /*nIDPrompt*/)
 {
 	return CMessageBox::AfxShow(lpszPrompt, nType);
+}
+
+void CTDLUpdateApp::WinHelp(DWORD nHelpID, UINT /*nCmd*/)
+{
+	CString sHelpID;
+
+#define CASE(id) case id: sHelpID = #id; break;
+
+	switch (nHelpID)
+	{
+		CASE(IDD_WEBUPDATE_PROGRESS_PAGE)
+
+		default:
+			ASSERT(0);
+			break;
+	}
+
+	// Load the Help.ini file to find the URL for this topic
+	CIni ini(FileMisc::GetAppFilePath(_T("Resources\\Misc"), _T("Help.ini")));
+	CString sHelpPage = ini.GetString(_T("Help IDs"), sHelpID);
+
+	if (sHelpID.IsEmpty())
+		TRACE(_T("CTDLUpdateApp::DoHelp(%d = no help ID)\n"), nHelpID);
+
+#ifdef _DEBUG
+	CString sHelpMsg;
+	sHelpMsg.Format(_T("DoHelp(%s = %s)   Do you want to go here?"), sHelpID, sHelpPage);
+
+	if (AfxMessageBox(sHelpMsg, MB_YESNO) != IDYES)
+		return;
+#endif
+
+	FileMisc::Run(NULL, (WIKI_URL + sHelpPage), NULL, SW_SHOWNORMAL);
 }

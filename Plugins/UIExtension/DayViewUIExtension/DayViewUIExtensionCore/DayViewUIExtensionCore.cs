@@ -279,6 +279,81 @@ namespace DayViewUIExtension
 			return true; // handled
 		}
 
+		public bool ShowContextMenu(Int32 xScreen, Int32 yScreen)
+		{
+			var ptMenu = m_DayView.PointToClient(new Point(xScreen, yScreen));
+			var appt = m_DayView.SelectedAppointment;
+
+			if ((xScreen == -1) && (yScreen == -1))
+			{
+				Rectangle rect = Rectangle.Empty;
+				m_DayView.GetAppointmentRect(appt, ref rect);
+
+				if (rect.IsEmpty)
+				{
+					rect = m_DayView.DaySelectionRect;
+
+					if (rect.IsEmpty)
+						rect = ClientRectangle;
+				}
+
+				ptMenu = RectUtil.CentrePoint(rect);
+			}
+			else
+			{
+				appt = m_DayView.GetAppointmentAt(ptMenu.X, ptMenu.Y);
+			}
+
+			if ((appt == null) || m_DayView.AppointmentSupportsTaskContextMenu(appt))
+				return false;
+
+			var menu = new ContextMenuStrip();
+
+			if (appt is TaskCustomDateAttribute)
+			{
+				var item = AddMenuItem(menu, "Clear Custom Date", Keys.Delete, -1);
+				item.ShortcutKeyDisplayString = "Delete";
+				item.Click += (s, a) => { m_DayView.DeleteSelectedCustomDate(); };
+			}
+			else if (appt is TaskTimeBlock)
+			{
+				var item = AddMenuItem(menu, "New Time Block", Keys.None, 6);
+				item.Click += (s, a) => { CreateTimeBlock(); };
+
+				item = AddMenuItem(menu, "Delete Time Block", Keys.Delete, 7);
+				item.ShortcutKeyDisplayString = "Delete";
+				item.Click += (s, a) => { m_DayView.DeleteSelectedTimeBlock(); };
+
+				item = AddMenuItem(menu, "Duplicate Time Block", (Keys.Control | Keys.D), 8);
+				item.Click += (s, a) => { m_DayView.DuplicateSelectedTimeBlock(); };
+
+				menu.Items.Add(new ToolStripSeparator());
+
+				item = AddMenuItem(menu, "Edit Time Block Series", Keys.Control | Keys.F2, 9);
+				item.Click += (s, a) => { EditSelectedTimeBlockSeries(); };
+
+				item = AddMenuItem(menu, "Delete Time Block Series", (Keys.Control | Keys.Delete), 10);
+				item.Click += (s, a) => { m_DayView.DeleteSelectedTimeBlockSeries(); };
+			}
+			else
+			{
+				Debug.Assert(false);
+			}
+
+			if (menu.Items.Count > 0)
+			{
+				menu.Items.Add(new ToolStripSeparator());
+				menu.Items.Add("Cancel");
+
+				m_Trans.Translate(menu.Items, true);
+
+				menu.Renderer = m_ToolbarRenderer;
+				menu.Show(m_DayView, ptMenu);
+			}
+
+			return true; // handled
+		}
+
 		public void SetUITheme(UITheme theme)
 		{
 			BackColor = m_Toolbar.BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight);

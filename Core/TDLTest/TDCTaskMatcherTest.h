@@ -43,7 +43,7 @@ protected:
 	void TestIntegerAttributeRules(const CToDoCtrlData& data, TDC_ATTRIBUTE nAttibID, int nBase);
 	void TestDoubleAttributeRules(const CToDoCtrlData& data, TDC_ATTRIBUTE nAttibID, double dBase);
 	void TestTimePeriodAttributeRules(const CToDoCtrlData& data, TDC_ATTRIBUTE nAttibID, double dBase);
-	void TestDateAttributeRules(const CToDoCtrlData& data, TDC_ATTRIBUTE nAttibID, double dBase);
+	void TestDateAttributeRules(const CToDoCtrlData& data, TDC_ATTRIBUTE nAttibID, const COleDateTime& dtBase);
 
 	void PopulateDataModel(CToDoCtrlData& data) const;
 	void InitialiseStyles();

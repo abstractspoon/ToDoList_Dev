@@ -23,6 +23,8 @@ CFG=TDLTest - Win32 Unicode Debug
 
 # Begin Project
 # PROP AllowPerConfigDependencies 0
+# PROP Scc_ProjName ""
+# PROP Scc_LocalPath ""
 CPP=cl.exe
 RSC=rc.exe
 
@@ -48,7 +50,8 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 ..\3rdParty\Detours\lib.x86\detours.lib /nologo /subsystem:console /debug /machine:I386 /pdbtype:sept
+# ADD LINK32 ..\3rdParty\Detours\lib.x86\detours.lib /nologo /subsystem:console /debug /machine:I386 /pdbtype:sept /ignore:4006
+# SUBTRACT LINK32 /pdb:none
 # Begin Special Build Tool
 SOURCE="$(InputPath)"
 PostBuild_Cmds=mkdir ..\ToDoList	mkdir ..\ToDoList\unicode_debug	copy unicode_debug\TDLTest.exe ..\todolist\unicode_debug /y
@@ -76,7 +79,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /machine:I386
-# ADD LINK32 ..\3rdParty\Detours\lib.x86\detours.lib /nologo /subsystem:console /map /debug /machine:I386 /OPT:REF
+# ADD LINK32 ..\3rdParty\Detours\lib.x86\detours.lib /nologo /subsystem:console /map /debug /machine:I386 /OPT:REF /ignore:4006
 # SUBTRACT LINK32 /pdb:none
 # Begin Special Build Tool
 SOURCE="$(InputPath)"
@@ -115,6 +118,10 @@ SOURCE=.\PreferencesTest.cpp
 # Begin Source File
 
 SOURCE=.\RemapMenuIDsTest.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\SEARCHPARAMSTest.cpp
 # End Source File
 # Begin Source File
 
@@ -221,6 +228,10 @@ SOURCE=.\RemapMenuIDsTest.h
 # Begin Source File
 
 SOURCE=.\Resource.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\SEARCHPARAMSTest.h
 # End Source File
 # Begin Source File
 

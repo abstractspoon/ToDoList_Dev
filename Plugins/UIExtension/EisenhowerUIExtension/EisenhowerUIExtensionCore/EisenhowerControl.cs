@@ -327,7 +327,21 @@ namespace EisenhowerUIExtension
 
 			// all else
 			return EisenhowerVariable.Supports(attribId);
-	}
+		}
+
+		public UIExtension.HitTestResult HitTest(Point screenPos)
+		{
+			foreach (var p in m_Panes)
+			{
+				var hitTest = p.HitTest(screenPos);
+
+				if (hitTest != UIExtension.HitTestResult.Nowhere)
+					return hitTest;
+			}
+
+			// else
+			return UIExtension.HitTestResult.Nowhere;
+		}
 
 		public bool HitTest(Point screenPos, UIExtension.HitTestResult result)
 		{
@@ -489,12 +503,6 @@ namespace EisenhowerUIExtension
 		{
 			// TODO
 			return null;
-		}
-
-		public bool DoIdleProcessing()
-		{
-			// TODO
-			return false;
 		}
 
 		public void SetFont(String fontName, int fontSize)

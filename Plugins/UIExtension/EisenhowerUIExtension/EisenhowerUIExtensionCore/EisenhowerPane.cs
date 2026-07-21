@@ -24,7 +24,6 @@ namespace EisenhowerUIExtension
 		private Translator m_Trans;
 		private UITheme m_Theme = new UITheme();
 
-		private bool m_ShowMixedCompletionState;
 		private bool m_DropHighlight;
 		private bool m_ReadOnly;
 
@@ -186,14 +185,7 @@ namespace EisenhowerUIExtension
 
 		public bool ShowMixedCompletionState
 		{
-			set
-			{
-				if (m_ShowMixedCompletionState != value)
-				{
-					m_ShowMixedCompletionState = value;
-					Invalidate();
-				}
-			}
+			set	{ m_List.ShowMixedCompletionState = value; }
 		}
 
 		public bool SelectTask(String text, UIExtension.SelectTask selectTask, bool caseSensitive, bool wholeWord, bool findReplace)
@@ -232,6 +224,11 @@ namespace EisenhowerUIExtension
 		public bool HitTest(Point screenPos, UIExtension.HitTestResult result)
 		{
 			return m_List.HitTest(screenPos, result);
+		}
+
+		public UIExtension.HitTestResult HitTest(Point screenPos)
+		{
+			return m_List.HitTest(screenPos);
 		}
 
 		public uint GetTaskId(UIExtension.GetTask getTask)
@@ -424,8 +421,9 @@ namespace EisenhowerUIExtension
 			if (m_List.IsBoundSelecting)
 				return;
 
-			// 2. If NOT bounds selecting and nothing is selected
-			if (m_List.SelectionCount == 0)
+			// 2. Nothing is selected and the control key is NOT pressed
+			//    ie. It's not a deliberate deselection
+			if ((m_List.SelectionCount == 0) && !ModifierKeys.HasFlag(Keys.Control))
 				return;
 
 			// 3. During keyboard navigation

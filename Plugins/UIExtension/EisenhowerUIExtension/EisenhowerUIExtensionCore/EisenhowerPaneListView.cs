@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Windows.Forms;
+using System.Windows.Forms.VisualStyles;
 using System.Drawing;
 
 using Abstractspoon.Tdl.PluginHelpers;
@@ -19,6 +20,7 @@ namespace EisenhowerUIExtension
 		// --------------------------------------------------------
 
 		private bool m_Selected;
+		private bool m_ShowMixedCompletionState;
 
 		private int[] m_ColHeaderWidth			= new int[3] { -1, -1, -1 };
 		private int[] m_ColValueMaxCharWidth	= new int[3] { -1, -1, -1 };
@@ -198,10 +200,36 @@ namespace EisenhowerUIExtension
 			ResizeTaskColumnToFit();
 		}
 
+		public bool ShowMixedCompletionState
+		{
+			get { return m_ShowMixedCompletionState; }
+
+			set
+			{
+				if (m_ShowMixedCompletionState != value)
+				{
+					m_ShowMixedCompletionState = value;
+					Invalidate();
+				}
+			}
+		}
+
 		// --------------------------------------------------------
 		// Message handlers
 
 		private int HeaderPadding { get { return (6 * LabelPadding); } }
+
+		protected override CheckBoxState GetTaskCheckboxState(ITaskBase task)
+		{
+			if (m_ShowMixedCompletionState)
+			{
+				if ((bool)(task as TaskItem)?.IsPartlyDone)
+					return CheckBoxState.MixedNormal;
+			}
+
+			// all else
+			return base.GetTaskCheckboxState(task);
+		}
 
 		private void RefreshVariableColumnWidth(int col, Graphics g)
 		{

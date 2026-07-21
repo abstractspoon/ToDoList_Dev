@@ -6,6 +6,7 @@
 #define IDD_TDLUPDATE_DIALOG            102
 #define IDR_MAINFRAME                   128
 #define IDD_WEBUPDATE_PROGRESS_PAGE     272
+#define IDI_HELP_BUTTON                 293
 #define IDC_PROGRESS                    1427
 #define IDS_WEBUPDATE_SUCCESS           58383
 #define IDS_WEBUPDATE_FAILURE           58384
@@ -18,6 +19,7 @@
 #define IDS_WEBUPDATE_PROGRESSHEADER    58392
 #define IDS_WEBUPDATE_PROGRESS          58393
 #define IDS_WEBUPDATE_CANCEL            58394
+#define IDS_WEBUPDATE_TITLE             58395
 
 // Next default values for new objects
 // 

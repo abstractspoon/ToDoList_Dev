@@ -175,7 +175,7 @@ namespace Abstractspoon
 				bool IsDone();
 				bool IsDue();
 				bool IsGoodAsDone();
-				bool HasSomeSubtasksDone();
+				bool IsPartlyDone();
 				bool IsFlagged(bool calculated);
 				bool IsParent();
 				bool IsLocked(bool calculated);

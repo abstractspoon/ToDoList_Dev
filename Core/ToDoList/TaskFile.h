@@ -217,7 +217,8 @@ public:
 	BOOL SetTaskHighestRisk(HTASKITEM hTask, int nRisk);
 	BOOL SetTaskCalcCost(HTASKITEM hTask, double dCost);
 	BOOL SetTaskSubtaskCompletion(HTASKITEM hTask, const CString& sSubtaskDone);
-	BOOL SetTaskGoodAsDone(HTASKITEM hTask, BOOL bHasIncomplete);
+	BOOL SetTaskGoodAsDone(HTASKITEM hTask, BOOL bDone);
+	BOOL SetTaskPartlyDone(HTASKITEM hTask, BOOL bPartly);
 	BOOL SetTaskPath(HTASKITEM hTask, const CString& sPath);
 	BOOL SetTaskFlag(HTASKITEM hTask, BOOL bFlag, BOOL bCalc);
 	BOOL SetTaskLock(HTASKITEM hTask, BOOL bLock, BOOL bCalc);
@@ -258,8 +259,8 @@ public:
 	bool AddTaskDependency(HTASKITEM hTask, unsigned long dwID, int nDaysLeadIn);
 	LPCTSTR GetTaskDependency(HTASKITEM hTask, int nIndex, int* pDaysLeadIn) const;
 
+	bool IsTaskPartlyDone(HTASKITEM hTask) const;
 	double GetTaskTimeRemaining(HTASKITEM hTask, TDC_UNITS& cUnits) const;
-
 	unsigned long GetCustomAttributeFeatures(int nIndex) const;
 	unsigned long GetCustomAttributeCalculationResultType(int nIndex) const;
 

@@ -164,6 +164,9 @@
     <CustomBuild Include="Interfaces.vcxproj" />
     <CustomBuild Include="Interfaces.vcxproj.filters" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Interfaces.dsp" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

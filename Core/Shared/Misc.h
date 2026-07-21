@@ -254,7 +254,7 @@ namespace Misc
 	BOOL ShutdownBlockReasonCreate(HWND hWnd, LPCTSTR szReason);
 	BOOL ShutdownBlockReasonDestroy(HWND hWnd);
 
-	void ProcessMsgLoop();
+	void ProcessMsgLoop(DWORD dwDuration = 0L); // in ms
 	DWORD GetLastUserInputTick();
 	DWORD GetTicksSinceLastUserInput();
 

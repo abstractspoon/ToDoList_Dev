@@ -128,6 +128,8 @@ protected:
 	BOOL m_bDropTarget;
 	BOOL m_bDrawTaskFlags, m_bDrawTaskFileLinks, m_bDrawTaskLocks;
 	BOOL m_bReadOnly;
+	
+	mutable BOOL m_bCheckingIsSorted;
 
 	CFontCache& m_fonts;
 	const CKanbanItemMap& m_data;
@@ -222,6 +224,7 @@ protected:
 	int CompareAttributeValues(const KANBANITEM* pKI1, const KANBANITEM* pKI2, TDC_ATTRIBUTE nBy, BOOL bAscending) const;
 	int BuildSortedSelection(CHTIList& lstHTI) const;
 	BOOL IsSorting() const { return (m_nSortBy != TDCA_NONE); }
+	BOOL IsSorted() const;
 
 	BOOL GetItemLabelTextRect(HTREEITEM hti, CRect& rItem, BOOL bEdit = FALSE) const;
 	BOOL GetItemTooltipRect(HTREEITEM hti, CRect& rItem) const;

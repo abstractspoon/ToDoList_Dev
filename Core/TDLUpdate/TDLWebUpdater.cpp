@@ -460,7 +460,8 @@ BOOL CTDLWebUpdater::DoProgressDialog(const CString& sPrevCmdLine, BOOL bRestart
 
 	if (bRestartElevated)
 		sParams += CEnCommandLineInfo::FormatSwitch(SWITCH_RESTARTELEVATED);
-	
+
+#ifndef _DEBUG
 	if (bRestartElevated || !FileMisc::RunFromExplorer(m_sAppPath, sParams))
 	{
 		if (FileMisc::Run(NULL, m_sAppPath, sParams) < SE_ERR_SUCCESS)
@@ -469,11 +470,15 @@ BOOL CTDLWebUpdater::DoProgressDialog(const CString& sPrevCmdLine, BOOL bRestart
 			return FALSE;
 		}
 	}
+#endif
 	
 	FileMisc::LogText(_T("The updated application '%s' was successfully restarted."), m_sAppPath);
 	
 	// success
 	m_dlgProgress.SetProgressStatus(TDLWP_COMPLETE);
+
+	// Pause for effect
+	Sleep(1000);
 
 	ASSERT(m_nResUpdate == TDLWUR_SUCCESS);
 	return TRUE;

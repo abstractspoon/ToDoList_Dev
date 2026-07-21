@@ -146,7 +146,7 @@ struct WORKLOADITEM
 	BOOL bDone;
 	bool bParent; // 'bool' to match ITaskList
 	BOOL bLocked, bHasIcon;
-	BOOL bGoodAsDone, bSomeSubtaskDone;
+	BOOL bGoodAsDone, bPartlyDone;
 
 };
 

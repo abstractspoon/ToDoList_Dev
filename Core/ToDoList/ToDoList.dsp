@@ -23,6 +23,8 @@ CFG=ToDoList - Win32 Unicode Debug
 
 # Begin Project
 # PROP AllowPerConfigDependencies 0
+# PROP Scc_ProjName ""
+# PROP Scc_LocalPath ""
 CPP=cl.exe
 MTL=midl.exe
 RSC=rc.exe
@@ -53,7 +55,8 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 Msimg32.lib msimg32.lib Winmm.lib /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 ..\3rdParty\Detours\lib.x86\detours.lib /nologo /entry:"wWinMainCRTStartup" /subsystem:windows /debug /machine:I386 /nodefaultlib:"libc" /pdbtype:sept
+# ADD LINK32 ..\3rdParty\Detours\lib.x86\detours.lib /nologo /entry:"wWinMainCRTStartup" /subsystem:windows /debug /machine:I386 /nodefaultlib:"libc" /pdbtype:sept /ignore:4006
+# SUBTRACT LINK32 /pdb:none
 # Begin Special Build Tool
 SOURCE="$(InputPath)"
 PostBuild_Cmds=mkdir ..\..\Plugins	mkdir ..\..\Plugins\Debug	copy unicode_debug\ToDoList.exe ..\..\Plugins\debug /y	copy unicode_debug\ToDoList.pdb ..\..\Plugins\debug /y
@@ -86,8 +89,8 @@ BSC32=bscmake.exe
 LINK32=link.exe
 # ADD BASE LINK32 Msimg32.lib msimg32.lib Winmm.lib /nologo /subsystem:windows /pdb:"ToDoList.pdb" /map /machine:I386 /pdbtype:con /MAPINFO:LINES /MAPINFO:EXPORTS
 # SUBTRACT BASE LINK32 /pdb:none /debug
-# ADD LINK32 ..\3rdParty\Detours\lib.x86\detours.lib /nologo /entry:"wWinMainCRTStartup" /subsystem:windows /debug /machine:I386 /nodefaultlib:"libc" /MAPINFO:LINES /MAPINFO:EXPORTS /OPT:REF
-# SUBTRACT LINK32 /pdb:none /map /nodefaultlib
+# ADD LINK32 ..\3rdParty\Detours\lib.x86\detours.lib /nologo /entry:"wWinMainCRTStartup" /subsystem:windows /debug /machine:I386 /nodefaultlib:"libc" /MAPINFO:LINES /MAPINFO:EXPORTS /OPT:REF /ignore:4006
+# SUBTRACT LINK32 /pdb:none
 # Begin Special Build Tool
 SOURCE="$(InputPath)"
 PostBuild_Cmds=mkdir ..\..\Plugins	mkdir ..\..\Plugins\Release	copy unicode_release\ToDoList.exe ..\..\Plugins\release /y
@@ -450,12 +453,12 @@ SOURCE=..\ToDoList_Core.sln
 # End Source File
 # End Target
 # End Project
-# Section ToDoList : {8856F961-340A-11D0-A96B-00C04FD705A2}
-# 	2:21:DefaultSinkHeaderFile:webbrowserctrl.h
-# 	2:16:DefaultSinkClass:CWebBrowserCtrl
-# End Section
 # Section ToDoList : {D30C1661-CDAF-11D0-8A3E-00C04FC9E26E}
 # 	2:5:Class:CWebBrowserCtrl
 # 	2:10:HeaderFile:webbrowserctrl.h
 # 	2:8:ImplFile:webbrowserctrl.cpp
+# End Section
+# Section ToDoList : {8856F961-340A-11D0-A96B-00C04FD705A2}
+# 	2:21:DefaultSinkHeaderFile:webbrowserctrl.h
+# 	2:16:DefaultSinkClass:CWebBrowserCtrl
 # End Section

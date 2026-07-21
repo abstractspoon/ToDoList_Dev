@@ -1326,7 +1326,12 @@ void CTDLFindTaskExpressionListCtrl::UpdateValueColumnText(int nRow)
 				break;
 
 			case FT_DATE:
-				sValue = CDateHelper::FormatDate(rule.ValueAsDate(), m_bIsoDateFormat ? DHFD_ISO : 0);
+				{
+					COleDateTime date = rule.ValueAsDate();
+
+					if (CDateHelper::IsDateSet(date))
+						sValue = CDateHelper::FormatDate(date, m_bIsoDateFormat ? DHFD_ISO : 0);
+				}
 				break;
 
 			case FT_TIMEPERIOD:

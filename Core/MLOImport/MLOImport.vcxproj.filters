@@ -57,5 +57,11 @@
     <None Include="res\MLOImport.rc2">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="MLOImport.dsp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\mylifeorganised_16.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

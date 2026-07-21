@@ -183,6 +183,7 @@ copy unicode_debug\burndownext.dll ..\todolist\unicode_debug /y
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="BurndownExt.dsp" />
     <None Include="res\help_button.ico" />
     <None Include="res\burndown.ico" />
     <None Include="res\BurndownExt.rc2" />

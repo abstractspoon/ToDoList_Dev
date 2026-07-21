@@ -21,7 +21,7 @@ namespace EvidenceBoardUIExtension
 		public bool IsFlagged { get; private set; }
 		public bool IsParent { get; private set; }
 		public bool IsTopLevel { get; private set; }
-		public bool SomeSubtasksDone { get; private set; }
+		public bool IsPartlyDone { get; private set; }
 		public bool IsLocked { get; private set; }
 		public bool IsDone { get; private set; }
 
@@ -107,7 +107,7 @@ namespace EvidenceBoardUIExtension
 			IsParent = task.IsParent();
 			IsTopLevel = (task.GetParentID() == 0);
 			IsDone = task.IsDone();
-			SomeSubtasksDone = task.HasSomeSubtasksDone();
+			IsPartlyDone = task.IsPartlyDone();
 			IsLocked = task.IsLocked(true);
 
 			StartDate = task.GetStartDate(true);
@@ -390,9 +390,6 @@ namespace EvidenceBoardUIExtension
 			if (task.IsAttributeAvailable(Task.Attribute.Color))
 				TextColor = task.GetTextDrawingColor();
 
-			if (task.IsAttributeAvailable(Task.Attribute.SubtaskDone))
-				SomeSubtasksDone = task.HasSomeSubtasksDone();
-
 			if (task.HasAttribute(Task.Attribute.StartDate))
 				StartDate = task.GetStartDate(true);
 
@@ -416,6 +413,7 @@ namespace EvidenceBoardUIExtension
 
 			IsParent = task.IsParent();
 			IsLocked = task.IsLocked(true);
+			IsPartlyDone = task.IsPartlyDone();
 
 			Debug.Assert(task.GetParentID() == ParentId);
 			IsTopLevel = (task.GetParentID() == 0);

@@ -2812,6 +2812,11 @@ bool CTaskFile::IsTaskGoodAsDone(HTASKITEM hTask) const
 	return IsTaskDone(hTask);
 }
 
+bool CTaskFile::IsTaskPartlyDone(HTASKITEM hTask) const
+{
+	return (GetTaskUChar(hTask, TDL_TASKPARTLYDONE) != 0);
+}
+
 bool CTaskFile::IsTaskParent(HTASKITEM hTask) const
 {
 	if (GetTaskUChar(hTask, TDL_TASKISPARENT) != 0)
@@ -3243,8 +3248,9 @@ bool CTaskFile::GetTaskLastModified64(HTASKITEM hTask, time64_t& timeT) const
 {
 	COleDateTime date = GetTaskLastModifiedOle(hTask);
 
-	// Task should always have a modification date so we 
-	// let this assert to catch anything unexpected
+	if (!CDateHelper::IsDateSet(date))
+		return false;
+
 	return (CDateHelper::GetTimeT64(date, timeT) != FALSE);
 }
 
@@ -4169,16 +4175,22 @@ BOOL CTaskFile::SetTaskSubtaskCompletion(HTASKITEM hTask, const CString& sSubtas
 	return SetTaskString(hTask, TDL_TASKSUBTASKDONE, sSubtaskDone);
 }
 
-BOOL CTaskFile::SetTaskGoodAsDone(HTASKITEM hTask, BOOL bDone)
+BOOL CTaskFile::SetTaskPartlyDone(HTASKITEM hTask, BOOL bPartly)
 {
-	if (!bDone)
-	{
-		DeleteTaskAttribute(hTask, TDL_TASKGOODASDONE);
-		return TRUE;
-	}
+	if (bPartly)
+		return SetTaskUChar(hTask, TDL_TASKPARTLYDONE, 1);
 
 	// else
-	return SetTaskUChar(hTask, TDL_TASKGOODASDONE, 1);
+	return DeleteTaskAttribute(hTask, TDL_TASKPARTLYDONE);
+}
+
+BOOL CTaskFile::SetTaskGoodAsDone(HTASKITEM hTask, BOOL bDone)
+{
+	if (bDone)
+		return SetTaskUChar(hTask, TDL_TASKGOODASDONE, 1);
+
+	// else
+	return DeleteTaskAttribute(hTask, TDL_TASKGOODASDONE);
 }
 
 BOOL CTaskFile::SetTaskPriorityColor(HTASKITEM hTask, COLORREF color)

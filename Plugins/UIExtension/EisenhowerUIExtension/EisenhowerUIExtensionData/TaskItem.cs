@@ -21,7 +21,7 @@ namespace EisenhowerUIExtension
 
 		// Local
 		public bool IsFlagged { get; private set; }
-		public bool SomeSubtasksDone { get; private set; }
+		public bool IsPartlyDone { get; private set; }
 
 		// -----------------------------------------------------------------
 
@@ -34,7 +34,7 @@ namespace EisenhowerUIExtension
 			HasIcon = false;
 			IsFlagged = false;
 			IsParent = false;
-            SomeSubtasksDone = false;
+            IsPartlyDone = false;
 			IsLocked = false;
 		}
 
@@ -54,6 +54,7 @@ namespace EisenhowerUIExtension
 
 			IsParent = task.IsParent();
 			IsLocked = task.IsLocked(true); // Explicitly AND implicitly
+			IsPartlyDone = task.IsPartlyDone();
 
 			if (task.IsAttributeAvailable(Task.Attribute.Title))
 				Title = task.GetTitle();
@@ -72,9 +73,6 @@ namespace EisenhowerUIExtension
 
 			if (task.IsAttributeAvailable(Task.Attribute.DoneDate))
                 IsDone = (task.IsDone() || task.IsGoodAsDone());
-
-			if (task.IsAttributeAvailable(Task.Attribute.SubtaskDone))
-                SomeSubtasksDone = task.HasSomeSubtasksDone();
 
 			return true;
 		}

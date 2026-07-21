@@ -509,7 +509,7 @@ BOOL CTaskCalendarCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask,
 			HTASKITEM hSubtask = pTasks->GetFirstTask(hTask);
 
 			if (hSubtask)
-				bChange |= UpdateTask(pTasks, hSubtask, nUpdate, TRUE);
+				bChange |= UpdateTask(pTasks, hSubtask, nUpdate, TRUE); // RECURSIVE CALL
 		}
 		else // must be new task
 		{
@@ -1244,21 +1244,18 @@ GM_ITEMSTATE CTaskCalendarCtrl::GetTaskSelectedState(const TASKCALITEM* pTCI, BO
 	}
 
 	// Interrelatedness between types
-	if (bFocused)
+	DWORD dwRealID = GetRealTaskID(dwTaskID);
+	DWORD dwSelRealID = GetRealTaskID(m_dwSelectedTaskID);
+
+	if (dwSelRealID == dwRealID)
 	{
-		DWORD dwRealID = GetRealTaskID(dwTaskID);
-		DWORD dwSelRealID = GetRealTaskID(m_dwSelectedTaskID);
+		// If this date's 'real' task is selected show the extension date as 'lightly' selected
+		if (ISEXTENSIONITEM(pTCI))
+			return GMIS_DROPHILITED;
 
-		if (dwSelRealID == dwRealID)
-		{
-			// If this date's 'real' task is selected show the extension date as 'lightly' selected
-			if (ISEXTENSIONITEM(pTCI))
-				return GMIS_DROPHILITED;
-
-			// If this is the real task for a selected custom date, show the real task as 'lightly' selected
-			if (IsCustomDate(m_dwSelectedTaskID))
-				return GMIS_DROPHILITED;
-		}
+		// If this is the real task for a selected custom date, show the real task as 'lightly' selected
+		if (IsCustomDate(m_dwSelectedTaskID))
+			return GMIS_DROPHILITED;
 	}
 
 	// all else
@@ -3518,7 +3515,8 @@ BOOL CTaskCalendarCtrl::ShowContextMenu(const CPoint& ptScreen)
 	CPoint ptClient(ptMenu);
 	ScreenToClient(&ptClient);
 
-	ASSERT(HitTestTask(ptClient, FALSE) == m_dwSelectedTaskID);
+	BOOL bCustomDate = FALSE;
+	ASSERT((HitTestTask(ptClient, bCustomDate) == m_dwSelectedTaskID) && bCustomDate);
 #endif
 
 	CMenu menu;

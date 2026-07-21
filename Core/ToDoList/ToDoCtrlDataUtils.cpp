@@ -903,8 +903,10 @@ BOOL CTDCTaskMatcher::ValueMatches(const COleDateTime& dtTask, const SEARCHPARAM
 									BOOL bIncludeTime, TDC_DATE nDate, CString& sWhatMatched) const
 {
 	COleDateTime dtTaskDate = dtTask, dtSearch = rule.ValueAsDate();
-	BOOL bMatch = FALSE;
 
+	BOOL bTaskDateSet = CDateHelper::IsDateSet(dtTask);
+	BOOL bSearchDateSet = CDateHelper::IsDateSet(dtSearch);
+	
 	// Special case: Rule is a relative date (except for 'Now')
 	// which means that it will have no associated time
 	if (bIncludeTime && rule.IsRelativeDate() && !rule.IsNowRelativeDate())
@@ -913,13 +915,16 @@ BOOL CTDCTaskMatcher::ValueMatches(const COleDateTime& dtTask, const SEARCHPARAM
 	if (!bIncludeTime)
 	{
 		// Truncate to start of day
-		dtTaskDate = CDateHelper::GetDateOnly(dtTaskDate);
-		dtSearch = CDateHelper::GetDateOnly(dtSearch);
+		if (bTaskDateSet)
+			dtTaskDate = CDateHelper::GetDateOnly(dtTaskDate);
+
+		if (bSearchDateSet)
+			dtSearch = CDateHelper::GetDateOnly(dtSearch);
 	}
 	else
 	{
 		// Handle those tasks having no (ie. Default) times
-		if (CDateHelper::IsDateSet(dtTask) && !CDateHelper::DateHasTime(dtTask))
+		if (bTaskDateSet && !CDateHelper::DateHasTime(dtTask))
 		{
 			switch (nDate)
 			{
@@ -946,8 +951,8 @@ BOOL CTDCTaskMatcher::ValueMatches(const COleDateTime& dtTask, const SEARCHPARAM
 		}
 	}
 
-	BOOL bTaskDateSet = CDateHelper::IsDateSet(dtTaskDate);
-	
+	BOOL bMatch = FALSE;
+
 	switch (rule.GetOperator())
 	{
 	case FOP_EQUALS:
@@ -955,7 +960,7 @@ BOOL CTDCTaskMatcher::ValueMatches(const COleDateTime& dtTask, const SEARCHPARAM
 		break;
 		
 	case FOP_NOT_EQUALS:
-		bMatch = (dtTaskDate != dtSearch);
+		bMatch = (bSearchDateSet && (dtTaskDate != dtSearch));
 		break;
 		
 	case FOP_ON_OR_AFTER:
@@ -5097,13 +5102,10 @@ BOOL CTDCTaskExporter::ExportAllTaskAttributes(const TODOITEM* pTDI, const TODOS
 	// priority color
 	tasks.SetTaskPriorityColor(hTask, GetPriorityColor(nHighestPriority));
 
-	// 'good as done'
-	if (m_calculator.IsTaskDone(pTDI, pTDS))
-		tasks.SetTaskGoodAsDone(hTask, TRUE);
-
-	// subtask completion
-	if (pTDS->HasSubTasks())
-		tasks.SetTaskSubtaskCompletion(hTask, m_formatter.GetTaskSubtaskCompletion(pTDI, pTDS));
+	// subtask related
+	tasks.SetTaskGoodAsDone(hTask, m_calculator.IsTaskDone(pTDI, pTDS));
+	tasks.SetTaskPartlyDone(hTask, m_data.TaskHasCompletedSubtasks(pTDS));
+	tasks.SetTaskSubtaskCompletion(hTask, m_formatter.GetTaskSubtaskCompletion(pTDI, pTDS));
 
 	// Calculated Custom attributes
 	ExportAllCalculatedTaskCustomAttributes(pTDI, pTDS, tasks, hTask);
@@ -5363,6 +5365,7 @@ BOOL CTDCTaskExporter::ExportMatchingTaskAttributes(const TODOITEM* pTDI, const 
 			tasks.SetTaskDoneDate(hTask, pTDI->dateDone);
 
 		tasks.SetTaskGoodAsDone(hTask, (bDone || m_calculator.IsTaskDone(pTDI, pTDS)));
+		tasks.SetTaskPartlyDone(hTask, m_data.TaskHasCompletedSubtasks(pTDS));
 
 		// add due date if we're filtering by due date
 		if (CDateHelper::IsDateSet(filter.dateDueBy) || filter.WantAttribute(TDCA_DUEDATE))
@@ -5449,9 +5452,10 @@ BOOL CTDCTaskExporter::ExportMatchingTaskAttributes(const TODOITEM* pTDI, const 
 		tasks.SetTaskDoneDate(hTask, pTDI->dateDone);
 		tasks.SetTaskGoodAsDone(hTask, TRUE);
 	}
-	else if (m_calculator.IsTaskDone(pTDI, pTDS))
+	else
 	{
-		tasks.SetTaskGoodAsDone(hTask, TRUE);
+		tasks.SetTaskGoodAsDone(hTask, m_calculator.IsTaskDone(pTDI, pTDS));
+		tasks.SetTaskPartlyDone(hTask, m_data.TaskHasCompletedSubtasks(pTDS));
 	}
 
 	// assigned task color
@@ -6146,17 +6150,23 @@ int CTDCMultiTasker::CanEditAnyTask(const CDWordArray& aTaskIDs, TDC_ATTRIBUTE n
 {
 	for (int nID = 0; nID < aTaskIDs.GetSize(); nID++)
 	{
-		if (CanEditTask(aTaskIDs[nID], nAttribID))
+		switch (CanEditTask(aTaskIDs[nID], nAttribID))
 		{
+		case -1:
+			// If we don't recognise the task attribute then
+			// that will be the case for all tasks
+			return -1;
+
+		case FALSE:
+			break;
+
+		default:
 			// special handling
 			switch (nAttribID)
 			{
-			case TDCA_COMMENTS:
-				// All must have the same format
+			case TDCA_COMMENTS:	// All MUST have the same format
 				return GetTasksCommentsFormat(aTaskIDs, CString());
 			}
-
-			// else
 			return TRUE;
 		}
 	}

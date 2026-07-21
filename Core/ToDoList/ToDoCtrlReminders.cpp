@@ -836,7 +836,7 @@ void CToDoCtrlReminders::DoSnoozeReminder(const TDCREMINDER& rem)
 			// in case the user didn't handle the notification immediately 
 			// we soak up any additional elapsed time in the 'snooze'
 			COleDateTime dtRem;
-			VERIFY(remExist.GetReminderDate(dtRem));
+			VERIFY(remExist.GetReminderDate(dtRem, FALSE)); // exclude current snooze
 
 			remExist.dDaysSnooze = (dNow - dtRem.m_dt);
 						

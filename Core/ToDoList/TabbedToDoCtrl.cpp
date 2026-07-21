@@ -937,6 +937,7 @@ IUIExtensionWindow* CTabbedToDoCtrl::GetCreateExtensionWnd(FTC_VIEW nView)
 		VERIFY(task.NewTask(_T("Test Task"), NULL, 0, 0));
 
 		pVData->bCanPrepareNewTask = pExtWnd->PrepareNewTask(&task);
+		ASSERT(!pVData->bCanPrepareNewTask || pVData->pExtension->SupportsTaskSelection());
 	}
 	
 	PopulateExtensionViewAttributes(pExtWnd, pVData);
@@ -1762,6 +1763,9 @@ BOOL CTabbedToDoCtrl::CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const
 	if (!CToDoCtrl::CanEditTask(dwTaskID, nAttribID))
 		return FALSE;
 
+	if ((nAttribID == TDCA_NEWTASK) && !ViewSupportsNewTask(GetActiveTaskView()))
+		return FALSE;
+
 	if (GetUpdateControlsItem() == NULL)
 	{
 		// Disable task editing
@@ -1775,6 +1779,7 @@ BOOL CTabbedToDoCtrl::CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const
 		}
 	}
 
+	// All else
 	return TRUE;
 }
 
@@ -7300,7 +7305,7 @@ void CTabbedToDoCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 		ASSERT(0);
 	}
 
-	// Linux doesn't forward to main window
+	// Linux/Wine doesn't appear to forward to main window
 	if (COSVersion() == OSV_LINUX)
 	{
 		AfxGetMainWnd()->SendMessage(WM_CONTEXTMENU, (WPARAM)GetSafeHwnd(), MAKELPARAM(point.x, point.y)); 
