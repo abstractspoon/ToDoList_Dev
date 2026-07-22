@@ -495,11 +495,11 @@ bool CKanbanWnd::GetLabelEditRect(LPRECT pEdit)
 	return false;
 }
 
-bool CKanbanWnd::HitTest(POINT ptScreen, IUIHITTESTRESULT& htRes) const
+bool CKanbanWnd::HitTest(POINT ptScreen, IUIHITTEST& hitTest) const
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	return (m_ctrlKanban.HitTest(ptScreen, htRes) != FALSE);
+	return (m_ctrlKanban.HitTest(ptScreen, hitTest) != FALSE);
 }
 
 bool CKanbanWnd::SelectTask(DWORD dwTaskID, bool /*bTaskLink*/)

@@ -609,7 +609,7 @@ namespace EvidenceBoardUIExtension
 			return false;
 		}
 
-		public bool HitTest(Point ptScreen, UIExtension.HitTestResult result)
+		public bool HitTest(Point ptScreen, UIExtension.HitTest hitTest)
 		{
 			var ptClient = PointToClient(ptScreen);
 
@@ -620,30 +620,30 @@ namespace EvidenceBoardUIExtension
 
 			if (node == null)
 			{
-				result.result = UIExtension.HitTest.Tasklist;
+				hitTest.result = UIExtension.HitTestResult.Tasklist;
 			}
 			else
 			{
 				var labelRect = GetNodeClientRect(node);
 				var task = GetTaskItem(node.Data);
 
-				result.taskId = task.TaskId;
-				result.result = UIExtension.HitTest.Task;
+				hitTest.taskId = task.TaskId;
+				hitTest.result = UIExtension.HitTestResult.Task;
 
 				if (CalcIconRect(labelRect).Contains(ptClient))
 				{
-					result.result = UIExtension.HitTest.TaskIcon;
+					hitTest.result = UIExtension.HitTestResult.TaskIcon;
 				}
 				else if (!task.HasImage)
 				{
-					result.result = UIExtension.HitTest.TaskTitle;
+					hitTest.result = UIExtension.HitTestResult.TaskTitle;
 				}
 				else if (!CalcImageRect(task, labelRect, false).Contains(ptClient))
 				{
 					// Check we are to the right of the icon to avoid 
 					// the expansion button and the spaces in between
 					if (ptClient.X > (labelRect.Left + (int)(UIExtension.TaskIcon.IconSize * ZoomFactor)))
-						result.result = UIExtension.HitTest.TaskTitle;
+						hitTest.result = UIExtension.HitTestResult.TaskTitle;
 				}
 			}
 			

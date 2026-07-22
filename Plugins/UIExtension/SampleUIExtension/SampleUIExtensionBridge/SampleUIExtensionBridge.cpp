@@ -210,7 +210,7 @@ bool CSampleUIExtensionBridgeWindow::GetLabelEditRect(LPRECT pEdit)
 	return m_wnd->GetLabelEditRect((Int32&)pEdit->left, (Int32&)pEdit->top, (Int32&)pEdit->right, (Int32&)pEdit->bottom);
 }
 
-bool CSampleUIExtensionBridgeWindow::HitTest(POINT ptScreen, IUIHITTESTRESULT& htRes) const
+bool CSampleUIExtensionBridgeWindow::HitTest(POINT ptScreen, IUIHITTEST& hitTest) const
 {
 	return false;
 }

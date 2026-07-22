@@ -467,9 +467,9 @@ BOOL CTabbedToDoCtrl::PreTranslateMessage(MSG* pMsg)
 				CPoint ptScreen(pMsg->lParam);
 				::ClientToScreen(pMsg->hwnd, &ptScreen);
 
-				IUIHITTESTRESULT htRes = { IUI_NOWHERE, 0L };
+				IUIHITTEST hitTest = { IUI_NOWHERE, 0L };
 
-				if (pExtWnd->HitTest(ptScreen, htRes) && (htRes.nResult != IUI_NOWHERE))
+				if (pExtWnd->HitTest(ptScreen, hitTest) && (hitTest.nResult != IUI_NOWHERE))
 				{
 					SendMessage(WM_CONTEXTMENU, pMsg->wParam, MAKELPARAM(ptScreen.x, ptScreen.y));
 					return TRUE;
@@ -2410,7 +2410,6 @@ LRESULT CTabbedToDoCtrl::OnUIExtMoveSelectedTask(WPARAM /*wParam*/, LPARAM lPara
 
 void CTabbedToDoCtrl::OnCustomAttributesChanged()
 {
-	// Must remove any deleted attribute columns before resizing/redrawing
 	m_taskList.OnCustomAttributesChange();
 
 	CToDoCtrl::OnCustomAttributesChanged();
@@ -4871,7 +4870,7 @@ void CTabbedToDoCtrl::OnListClick(NMHDR* pNMHDR, LRESULT* pResult)
 	*pResult = 0;
 }
 
-BOOL CTabbedToDoCtrl::HitTest(const CPoint& ptScreen, TDCHITTESTRESULT& htRes) const
+BOOL CTabbedToDoCtrl::HitTest(const CPoint& ptScreen, TDCHITTESTRESULT& hitTest) const
 {
 	FTC_VIEW nView = GetActiveTaskView();
 
@@ -4879,10 +4878,10 @@ BOOL CTabbedToDoCtrl::HitTest(const CPoint& ptScreen, TDCHITTESTRESULT& htRes) c
 	{
 	case FTCV_TASKTREE:
 	case FTCV_UNSET:
-		return CToDoCtrl::HitTest(ptScreen, htRes);
+		return CToDoCtrl::HitTest(ptScreen, hitTest);
 
 	case FTCV_TASKLIST:
-		return m_taskList.HitTest(ptScreen, htRes);
+		return m_taskList.HitTest(ptScreen, hitTest);
 
 	case FTCV_UIEXTENSION1:
 	case FTCV_UIEXTENSION2:
@@ -4904,11 +4903,11 @@ BOOL CTabbedToDoCtrl::HitTest(const CPoint& ptScreen, TDCHITTESTRESULT& htRes) c
 			IUIExtensionWindow* pExt = GetExtensionWnd(nView);
 			ASSERT(pExt);
 
-			IUIHITTESTRESULT iuiRes = {	IUI_NOWHERE, 0 };
+			IUIHITTEST iuiRes = {	IUI_NOWHERE, 0 };
 
 			if (pExt && pExt->HitTest(ptScreen, iuiRes))
 			{
-				switch (htRes.nResult)
+				switch (hitTest.nResult)
 				{
 				case IUI_TASK:
 				case IUI_TASKICON:
@@ -4919,7 +4918,7 @@ BOOL CTabbedToDoCtrl::HitTest(const CPoint& ptScreen, TDCHITTESTRESULT& htRes) c
 					break;
 				}
 
-				return TDC::MapIUIHitTestResultToHitTestResult(iuiRes, htRes);
+				return TDC::MapIUIHitTestResultToHitTestResult(iuiRes, hitTest);
 			}
 		}
 		break;

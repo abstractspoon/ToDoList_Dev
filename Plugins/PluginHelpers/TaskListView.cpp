@@ -564,7 +564,7 @@ String^ TaskListView::Translate(String^ text, Translator::Type type)
 	return m_Trans->Translate(text, type);
 }
 
-bool TaskListView::HitTest(Drawing::Point ptScreen, UIExtension::HitTestResult^ result)
+bool TaskListView::HitTest(Drawing::Point ptScreen, UIExtension::HitTest^ hitTest)
 {
 	if (m_HeaderCtrl->PointInHeader(ptScreen))
 		return false;
@@ -581,22 +581,22 @@ bool TaskListView::HitTest(Drawing::Point ptScreen, UIExtension::HitTestResult^ 
 
 	if (htInfo->Item == nullptr)
 	{
-		result->result = UIExtension::HitTest::Tasklist;
+		hitTest->result = UIExtension::HitTestResult::Tasklist;
 	}
 	else
 	{
-		result->result = UIExtension::HitTest::Task;
-		result->taskId = ASTYPE(htInfo->Item->Tag, ITaskBase)->Id;
+		hitTest->result = UIExtension::HitTestResult::Task;
+		hitTest->taskId = ASTYPE(htInfo->Item->Tag, ITaskBase)->Id;
 
  		if (htInfo->Location == ListViewHitTestLocations::Label)
 		{
 			if (CalcLabelRect(htInfo->Item, LabelExtents::TitleColumn).Contains(ptClient))
 			{
-				result->result = UIExtension::HitTest::TaskTitle;
+				hitTest->result = UIExtension::HitTestResult::TaskTitle;
 			}
 			else if (CalcIconRect(htInfo->SubItem->Bounds).Contains(ptClient))
 			{
-				result->result = UIExtension::HitTest::TaskIcon;
+				hitTest->result = UIExtension::HitTestResult::TaskIcon;
 			}
 		}
 	}

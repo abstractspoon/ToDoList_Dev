@@ -537,14 +537,14 @@ CKanbanColumnCtrl* CKanbanColumnCtrlArray::HitTest(const CPoint& ptScreen, HTREE
 	return NULL;
 }
 
-BOOL CKanbanColumnCtrlArray::HitTest(const CPoint& ptScreen, IUIHITTESTRESULT& htRes) const
+BOOL CKanbanColumnCtrlArray::HitTest(const CPoint& ptScreen, IUIHITTEST& hitTest) const
 {
 	CKanbanColumnCtrl* pCol = HitTest(ptScreen);
 
 	if (pCol == NULL)
 		return FALSE;
 
-	return pCol->HitTest(ptScreen, htRes);
+	return pCol->HitTest(ptScreen, hitTest);
 }
 
 void CKanbanColumnCtrlArray::FilterToolTipMessage(MSG* pMsg)

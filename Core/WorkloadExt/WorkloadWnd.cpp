@@ -439,11 +439,11 @@ bool CWorkloadWnd::GetLabelEditRect(LPRECT pEdit)
 	return false;
 }
 
-bool CWorkloadWnd::HitTest(POINT ptScreen, IUIHITTESTRESULT& htRes) const
+bool CWorkloadWnd::HitTest(POINT ptScreen, IUIHITTEST& hitTest) const
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
-	return (m_ctrlWorkload.HitTest(ptScreen, htRes) != FALSE);
+	return (m_ctrlWorkload.HitTest(ptScreen, hitTest) != FALSE);
 }
 
 bool CWorkloadWnd::SelectTask(DWORD dwTaskID, bool /*bTaskLink*/)

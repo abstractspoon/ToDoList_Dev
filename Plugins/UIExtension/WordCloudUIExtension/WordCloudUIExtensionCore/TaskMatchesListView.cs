@@ -195,25 +195,6 @@ namespace WordCloudUIExtension
 			return someUpdated;
 		}
 
-		public new UIExtension.HitTestResult HitTest(Point screenPos)
-		{
-			if (PointInHeader(screenPos))
-				return UIExtension.HitTestResult.Nowhere;
-
-			Point ptClient = PointToClient(screenPos);
-
-			if (!ClientRectangle.Contains(ptClient))
-				return UIExtension.HitTestResult.Nowhere;
-
-			var lvHit = base.HitTest(ptClient);
-
-			if (lvHit.Item != null)
-				return UIExtension.HitTestResult.Task;
-
-			// else
-			return UIExtension.HitTestResult.Tasklist;
-		}
-
 		protected override bool TaskMatches(ITaskBase task, String phrase, bool caseSensitive, bool wholeWord, bool findReplace)
 		{
 			var item = (task as CloudTaskItem);

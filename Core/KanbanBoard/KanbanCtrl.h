@@ -49,7 +49,7 @@ public:
 	BOOL SelectAllInSelectedColumn();
 
 	DWORD GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const;
-	BOOL HitTest(const CPoint& ptScreen, IUIHITTESTRESULT& htRes) const;
+	BOOL HitTest(const CPoint& ptScreen, IUIHITTEST& hitTest) const;
 	void ScrollToSelectedTask();
 
 	BOOL IsTaskLocked(DWORD dwTaskID) const { return m_data.IsLocked(dwTaskID); }

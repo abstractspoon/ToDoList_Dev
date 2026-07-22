@@ -3174,9 +3174,9 @@ BOOL CKanbanCtrl::PrepareNewTask(ITaskList* pTask) const
 	return TRUE;
 }
 
-BOOL CKanbanCtrl::HitTest(const CPoint& ptScreen, IUIHITTESTRESULT& htRes) const
+BOOL CKanbanCtrl::HitTest(const CPoint& ptScreen, IUIHITTEST& hitTest) const
 {
-	return m_aColumns.HitTest(ptScreen, htRes);
+	return m_aColumns.HitTest(ptScreen, hitTest);
 }
 
 DWORD CKanbanCtrl::GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const
@@ -3616,11 +3616,11 @@ void CKanbanCtrl::OnBeginDragColumnItem(NMHDR* pNMHDR, LRESULT* pResult)
 
 BOOL CKanbanCtrl::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 {
-	IUIHITTESTRESULT htRes = { IUI_NOWHERE, 0L };
+	IUIHITTEST hitTest = { IUI_NOWHERE, 0L };
 
-	if (HitTest(GetMessagePos(), htRes) && htRes.dwTaskID)
+	if (HitTest(GetMessagePos(), hitTest) && hitTest.dwTaskID)
 	{
-		if (!m_data.IsLocked(htRes.dwTaskID) && !CanDragTask(htRes.dwTaskID))
+		if (!m_data.IsLocked(hitTest.dwTaskID) && !CanDragTask(hitTest.dwTaskID))
 			return GraphicsMisc::SetAppCursor(_T("NoDrag"), _T("Resources\\Cursors"));
 	}
 

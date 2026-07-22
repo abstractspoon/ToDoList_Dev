@@ -2826,7 +2826,7 @@ BOOL CWorkloadCtrl::PrepareNewTask(ITaskList* pTaskList) const
 	return true;
 }
 
-BOOL CWorkloadCtrl::HitTest(const CPoint& ptScreen, IUIHITTESTRESULT& htRes) const
+BOOL CWorkloadCtrl::HitTest(const CPoint& ptScreen, IUIHITTEST& hitTest) const
 {
 	if (PointInHeader(ptScreen))
 		return FALSE;
@@ -2838,29 +2838,29 @@ BOOL CWorkloadCtrl::HitTest(const CPoint& ptScreen, IUIHITTESTRESULT& htRes) con
 
 	if (htiHit)
 	{
-		htRes.dwTaskID = GetTaskID(htiHit);
-		htRes.nResult = IUI_TASK;
+		hitTest.dwTaskID = GetTaskID(htiHit);
+		hitTest.nResult = IUI_TASK;
 
 		if (nCol == WLCC_TITLE)
 		{
 			if (nFlags & TVHT_ONITEMICON)
 			{
-				htRes.nResult = IUI_TASKICON;
+				hitTest.nResult = IUI_TASKICON;
 			}
 			else if (nFlags & (TVHT_ONITEMLABEL | TVHT_ONITEMRIGHT))
 			{
-				htRes.nResult = IUI_TASKTITLE;
+				hitTest.nResult = IUI_TASKTITLE;
 			}
 		}
 	}
 	else
 	{
-		htRes.dwTaskID = GetTaskID(ListHitTestItem(ptScreen, TRUE));
+		hitTest.dwTaskID = GetTaskID(ListHitTestItem(ptScreen, TRUE));
 
-		if (htRes.dwTaskID)
-			htRes.nResult = IUI_TASK;
+		if (hitTest.dwTaskID)
+			hitTest.nResult = IUI_TASK;
 		else
-			htRes.nResult = IUI_TASKLIST;
+			hitTest.nResult = IUI_TASKLIST;
 	}
 
 	return TRUE;

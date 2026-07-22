@@ -128,9 +128,9 @@ namespace MindMapUIExtension
             return true;
         }
 
-        public bool HitTest(Int32 xScreen, Int32 yScreen, UIExtension.HitTestResult result)
+        public bool HitTest(Int32 xScreen, Int32 yScreen, UIExtension.HitTest hitTest)
         {
-			return m_MindMap.HitTest(new Point(xScreen, yScreen), result);
+			return m_MindMap.HitTest(new Point(xScreen, yScreen), hitTest);
         }
 
         public void SetUITheme(UITheme theme)

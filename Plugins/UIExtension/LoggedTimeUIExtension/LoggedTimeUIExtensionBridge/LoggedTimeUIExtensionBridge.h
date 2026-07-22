@@ -75,7 +75,7 @@ public:
    bool SelectTasks(const DWORD* /*pdwTaskIDs*/, int /*nTaskCount*/) { return false; }
    bool PrepareNewTask(ITaskList* /*pTask*/) const { return false; }
    bool GetLabelEditRect(LPRECT /*pEdit*/) { return false; }
-   bool HitTest(POINT /*ptScreen*/, IUIHITTESTRESULT& /*htRes*/) const { return false; }
+   bool HitTest(POINT /*ptScreen*/, IUIHITTEST& /*hitTest*/) const { return false; }
    void FilterToolTipMessage(MSG* /*pMsg*/) { }
 
 protected:

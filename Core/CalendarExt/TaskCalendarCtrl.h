@@ -52,7 +52,7 @@ public:
 	BOOL SelectTask(const IUISELECTTASK& select, IUI_APPCOMMAND nCmd);
 
 	BOOL ShowContextMenu(const CPoint& ptScreen);
-	BOOL HitTest(const CPoint& ptScreen, IUIHITTESTRESULT& htRes) const;
+	BOOL HitTest(const CPoint& ptScreen, IUIHITTEST& hitTest) const;
 	DWORD GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const;
 	BOOL CanGetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const;
 

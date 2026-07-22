@@ -467,11 +467,11 @@ bool CGanttChartWnd::GetLabelEditRect(LPRECT pEdit)
 	return false;
 }
 
-bool CGanttChartWnd::HitTest(POINT ptScreen, IUIHITTESTRESULT& htRes) const
+bool CGanttChartWnd::HitTest(POINT ptScreen, IUIHITTEST& hitTest) const
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	return (m_ctrlGantt.HitTest(ptScreen, htRes) != FALSE);
+	return (m_ctrlGantt.HitTest(ptScreen, hitTest) != FALSE);
 }
 
 bool CGanttChartWnd::SelectTask(DWORD dwTaskID, bool /*bTaskLink*/)

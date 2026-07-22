@@ -1923,7 +1923,7 @@ void CTaskCalendarCtrl::AddTasksToCell(const CTaskCalItemMap& mapTasks, const CO
 	}
 }
 
-BOOL CTaskCalendarCtrl::HitTest(const CPoint& ptScreen, IUIHITTESTRESULT& htRes) const
+BOOL CTaskCalendarCtrl::HitTest(const CPoint& ptScreen, IUIHITTEST& hitTest) const
 {
 	CPoint ptClient(ptScreen);
 	ScreenToClient(&ptClient);
@@ -1938,17 +1938,17 @@ BOOL CTaskCalendarCtrl::HitTest(const CPoint& ptScreen, IUIHITTESTRESULT& htRes)
 
 	TCC_HITTEST nHit = TCCHT_NOWHERE;
 
-	htRes.dwTaskID = GetRealTaskID(HitTestTask(ptClient, nHit));
-	htRes.nResult = IUI_TASKTITLE;
+	hitTest.dwTaskID = GetRealTaskID(HitTestTask(ptClient, nHit));
+	hitTest.nResult = IUI_TASKTITLE;
 
 	switch (nHit)
 	{
 	case TCCHT_NOWHERE:
-		htRes.nResult = IUI_TASKLIST;
+		hitTest.nResult = IUI_TASKLIST;
 		break;
 
 	case TCCHT_ICON:
-		htRes.nResult = IUI_TASKICON;
+		hitTest.nResult = IUI_TASKICON;
 		break;
 	}
 

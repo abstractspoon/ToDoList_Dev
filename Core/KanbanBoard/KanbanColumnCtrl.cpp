@@ -1691,7 +1691,7 @@ LRESULT CKanbanColumnCtrl::OnGetNextItem(WPARAM wp, LPARAM /*lp*/)
 	return (LRESULT)hti;
 }
 
-BOOL CKanbanColumnCtrl::HitTest(const CPoint& ptScreen, IUIHITTESTRESULT& htRes) const
+BOOL CKanbanColumnCtrl::HitTest(const CPoint& ptScreen, IUIHITTEST& hitTest) const
 {
 	CPoint ptClient(ptScreen);
 	ScreenToClient(&ptClient);
@@ -1706,23 +1706,23 @@ BOOL CKanbanColumnCtrl::HitTest(const CPoint& ptScreen, IUIHITTESTRESULT& htRes)
 
 	if (!htiHit)
 	{
-		htRes.nResult = IUI_TASKLIST;
+		hitTest.nResult = IUI_TASKLIST;
 	}
 	else
 	{
-		htRes.dwTaskID = GetTaskID(htiHit);
-		htRes.nResult = IUI_TASK;
+		hitTest.dwTaskID = GetTaskID(htiHit);
+		hitTest.nResult = IUI_TASK;
 
 		if (!HitTestCheckbox(htiHit, ptClient))
 		{
 			switch (HitTestImage(htiHit, ptClient))
 			{
 			case KBCI_ICON:
-				htRes.nResult = IUI_TASKICON;
+				hitTest.nResult = IUI_TASKICON;
 				break;
 
 			case KBCI_NONE:
-				htRes.nResult = IUI_TASKTITLE;
+				hitTest.nResult = IUI_TASKTITLE;
 				break;
 			}
 		}

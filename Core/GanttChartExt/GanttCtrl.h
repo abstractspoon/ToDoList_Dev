@@ -39,7 +39,7 @@ public:
 	void UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate);
 	BOOL PrepareNewTask(ITaskList* pTask) const;
 	BOOL CancelOperation();
-	BOOL HitTest(const CPoint& ptScreen, IUIHITTESTRESULT& htRes) const;
+	BOOL HitTest(const CPoint& ptScreen, IUIHITTEST& hitTest) const;
 
 	BOOL SelectTask(DWORD dwTaskID);
 	BOOL SelectTasks(const CDWordArray& aTaskIDs);

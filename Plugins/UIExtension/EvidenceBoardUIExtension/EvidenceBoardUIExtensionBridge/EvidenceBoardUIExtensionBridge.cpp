@@ -362,15 +362,15 @@ bool CEvidenceBoardUIExtensionBridgeWindow::GetLabelEditRect(LPRECT pEdit)
 	return m_wnd->GetLabelEditRect((Int32&)pEdit->left, (Int32&)pEdit->top, (Int32&)pEdit->right, (Int32&)pEdit->bottom);
 }
 
-bool CEvidenceBoardUIExtensionBridgeWindow::HitTest(POINT ptScreen, IUIHITTESTRESULT& htRes) const
+bool CEvidenceBoardUIExtensionBridgeWindow::HitTest(POINT ptScreen, IUIHITTEST& hitTest) const
 {
-	auto uiRes = gcnew UIExtension::HitTestResult();
+	auto ht = gcnew UIExtension::HitTest();
 
-	if (!m_wnd->HitTest(ptScreen.x, ptScreen.y, uiRes))
+	if (!m_wnd->HitTest(ptScreen.x, ptScreen.y, ht))
 		return false;
 
-	htRes.dwTaskID = uiRes->taskId;
-	htRes.nResult = UIExtension::MapHitTestResult(uiRes->result);
+	hitTest.dwTaskID = ht->taskId;
+	hitTest.nResult = UIExtension::MapHitTestResult(ht->result);
 
 	return true;
 }

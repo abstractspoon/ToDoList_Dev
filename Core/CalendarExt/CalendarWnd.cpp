@@ -544,22 +544,11 @@ bool CCalendarWnd::GetLabelEditRect(LPRECT pEdit)
 	return false;
 }
 
-bool CCalendarWnd::HitTest(POINT ptScreen, IUIHITTESTRESULT& htRes) const
+bool CCalendarWnd::HitTest(POINT ptScreen, IUIHITTEST& hitTest) const
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
-	// try header
-	if (m_BigCalendar.PtInHeader(ptScreen))
-		return IUI_NOWHERE;
-
-	return (m_BigCalendar.HitTest(ptScreen, htRes) != FALSE);
-}
-
-bool CCalendarWnd::ShowContextMenu(POINT ptScreen)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-
-	return (m_BigCalendar.ShowContextMenu(ptScreen) != FALSE);
+	return (m_BigCalendar.HitTest(ptScreen, hitTest) != FALSE);
 }
 
 bool CCalendarWnd::ShowContextMenu(POINT ptScreen)
@@ -753,14 +742,14 @@ void CCalendarWnd::OnBigCalendarNotifyDblClk(NMHDR* /*pNMHDR*/, LRESULT* pResult
 {
 	SyncMiniCalendar(FALSE);
 
-	IUIHITTESTRESULT htRes = { IUI_NOWHERE, 0L };
+	IUIHITTEST hitTest = { IUI_NOWHERE, 0L };
 
-	if (m_BigCalendar.HitTest(GetMessagePos(), htRes))
+	if (m_BigCalendar.HitTest(GetMessagePos(), hitTest))
 	{
-		if (htRes.dwTaskID && (htRes.nResult == IUI_TASKTITLE))
+		if (hitTest.dwTaskID && (hitTest.nResult == IUI_TASKTITLE))
 		{
-			ASSERT(htRes.dwTaskID == m_BigCalendar.GetSelectedTaskID());
-			GetParent()->SendMessage(WM_IUI_EDITSELECTEDTASKTITLE, htRes.dwTaskID);
+			ASSERT(hitTest.dwTaskID == m_BigCalendar.GetSelectedTaskID());
+			GetParent()->SendMessage(WM_IUI_EDITSELECTEDTASKTITLE, hitTest.dwTaskID);
 		}
 	}
 	

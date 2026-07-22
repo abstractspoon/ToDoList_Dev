@@ -67,7 +67,7 @@ public:
    bool CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA* pData) const;
 
    bool GetLabelEditRect(LPRECT pEdit); // screen coordinates
-   bool HitTest(POINT ptScreen, IUIHITTESTRESULT& htRes) const;
+   bool HitTest(POINT ptScreen, IUIHITTEST& hitTest) const;
 
    void SetUITheme(const UITHEME* pTheme);
    void SetReadOnly(bool bReadOnly);

@@ -63,7 +63,7 @@ public:
 
 	BOOL CanMoveSelectedTask(const IUITASKMOVE& move) const;
 	BOOL MoveSelectedTask(const IUITASKMOVE& move);
-	BOOL HitTest(const CPoint& ptScreen, IUIHITTESTRESULT& htRes) const;
+	BOOL HitTest(const CPoint& ptScreen, IUIHITTEST& hitTest) const;
 
 	void SetSortByAllocTo(LPCTSTR szAllocTo);
 	void Sort(WLC_COLUMNID nBy, BOOL bAscending);

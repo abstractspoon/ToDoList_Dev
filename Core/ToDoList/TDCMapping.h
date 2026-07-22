@@ -624,40 +624,40 @@ namespace TDC
 		return IUI_EDIT;
 	}
 
-	static BOOL MapIUIHitTestResultToHitTestResult(const IUIHITTESTRESULT& iuiRes, TDCHITTESTRESULT& htRes)
+	static BOOL MapIUIHitTestResultToHitTestResult(const IUIHITTEST& iuiRes, TDCHITTESTRESULT& hitTest)
 	{
-		htRes.nResult = TDCHT_NOWHERE;
+		hitTest.nResult = TDCHT_NOWHERE;
 
 		switch (iuiRes.nResult)
 		{
 		case IUI_TASK:		
 			if (iuiRes.dwTaskID)
 			{
-				htRes.nResult = TDCHT_TASK;
-				htRes.dwTaskID = iuiRes.dwTaskID;
+				hitTest.nResult = TDCHT_TASK;
+				hitTest.dwTaskID = iuiRes.dwTaskID;
 			}
 			break;
 
 		case IUI_TASKTITLE:
 			if (iuiRes.dwTaskID)
 			{
-				htRes.nResult = TDCHT_TASK;
-				htRes.nColumnID = TDCC_CLIENT;
-				htRes.dwTaskID = iuiRes.dwTaskID;
+				hitTest.nResult = TDCHT_TASK;
+				hitTest.nColumnID = TDCC_CLIENT;
+				hitTest.dwTaskID = iuiRes.dwTaskID;
 			}
 			break;
 
 		case IUI_TASKICON:
 			if (iuiRes.dwTaskID)
 			{
-				htRes.nResult = TDCHT_TASK;
-				htRes.nColumnID = TDCC_ICON;
-				htRes.dwTaskID = iuiRes.dwTaskID;
+				hitTest.nResult = TDCHT_TASK;
+				hitTest.nColumnID = TDCC_ICON;
+				hitTest.dwTaskID = iuiRes.dwTaskID;
 			}
 			break;
 
 		case IUI_TASKLIST:	
-			htRes.nResult = TDCHT_TASKLIST;
+			hitTest.nResult = TDCHT_TASKLIST;
 			break;
 
 		case IUI_NOWHERE:	
@@ -668,7 +668,7 @@ namespace TDC
 			break;
 		}
 
-		return (htRes.nResult != TDCHT_NOWHERE);
+		return (hitTest.nResult != TDCHT_NOWHERE);
 	}
 
 	static IUI_UPDATETYPE MapAttributesToIUIUpdateType(const CTDCAttributeMap& mapAttribIDs)

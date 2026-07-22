@@ -47,7 +47,7 @@ public:
 	void SetTaskFont(HFONT hFont);
 
 	bool GetLabelEditRect(LPRECT pEdit);
-	bool HitTest(POINT ptScreen, IUIHITTESTRESULT& htRes) const;
+	bool HitTest(POINT ptScreen, IUIHITTEST& hitTest) const;
 	bool ShowContextMenu(POINT ptScreen);
 
 	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool bAppOnly);

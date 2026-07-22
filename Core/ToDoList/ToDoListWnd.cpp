@@ -4064,11 +4064,11 @@ void CToDoListWnd::OnContextMenu(CWnd* pWnd, CPoint point)
 			}
 		}
 
-		TDCHITTESTRESULT htRes;
+		TDCHITTESTRESULT hitTest;
 		
-		if (tdc.HitTest(point, htRes))
+		if (tdc.HitTest(point, hitTest))
 		{
-			switch (htRes.nResult)
+			switch (hitTest.nResult)
 			{
 			case TDCHT_NOWHERE:
 				break;
@@ -4081,7 +4081,7 @@ void CToDoListWnd::OnContextMenu(CWnd* pWnd, CPoint point)
 				else
 				{
 					nMenuID = MM_TASKCONTEXT;
-					nColID = htRes.nColumnID;
+					nColID = hitTest.nColumnID;
 				}
 				break;
 
@@ -4090,13 +4090,13 @@ void CToDoListWnd::OnContextMenu(CWnd* pWnd, CPoint point)
 					ASSERT(tdc.GetSelectedTaskCount());
 
 					nMenuID = MM_TASKCONTEXT;
-					nColID = htRes.nColumnID;
+					nColID = hitTest.nColumnID;
 				}
 				break;
 
 			case TDCHT_COLUMNHEADER:
 				nMenuID = MM_HEADERCONTEXT;
-				nColID = htRes.nColumnID;
+				nColID = hitTest.nColumnID;
 				break;
 			}
 		}

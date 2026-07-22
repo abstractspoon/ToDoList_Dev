@@ -63,9 +63,7 @@ public:
 	void SetReadOnly(bool /*bReadOnly*/) {}
 	bool GetLabelEditRect(LPRECT /*pEdit*/) { return false; }
 	bool PrepareNewTask(ITaskList* /*pTask*/) const { return false; }
-	bool HitTest(POINT /*ptScreen*/, IUIHITTESTRESULT& /*htRes*/) const { return false; }
-	IUI_HITTEST HitTest(POINT /*ptScreen*/, IUI_HITTESTREASON /*nReason*/) const { return IUI_NOWHERE; }
-	DWORD HitTestTask(POINT /*ptScreen*/, IUI_HITTESTREASON /*nReason*/) const { return 0L; }
+	bool HitTest(POINT /*ptScreen*/, IUIHITTEST& /*hitTest*/) const { return false; }
 	bool SelectTask(DWORD /*dwTaskID*/, bool /*bTaskLink*/) { return false; }
 	bool SelectTasks(const DWORD* /*pdwTaskIDs*/, int /*nTaskCount*/) { return false; }
 	bool ShowContextMenu(POINT /*ptScreen*/) { return false; }

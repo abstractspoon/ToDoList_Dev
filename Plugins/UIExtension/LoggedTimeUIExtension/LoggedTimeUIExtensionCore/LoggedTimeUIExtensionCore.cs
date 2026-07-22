@@ -247,7 +247,7 @@ namespace LoggedTimeUIExtension
 		public bool SelectTasks(UInt32[] pdwTaskIDs) { return false; }
 		public bool PrepareNewTask(ref Task task) { return false; }
 		public bool GetLabelEditRect(ref Int32 left, ref Int32 top, ref Int32 right, ref Int32 bottom) { return false; }
-		public bool HitTest(Int32 xScreen, Int32 yScreen, UIExtension.HitTestResult result) { return false; }
+		public bool HitTest(Int32 xScreen, Int32 yScreen, UIExtension.HitTest hitTest) { return false; }
 		public bool GetTask(UIExtension.GetTask getTask, ref UInt32 taskID) { return false; }
 		public bool SelectTask(String text, UIExtension.SelectTask selectTask, bool caseSensitive, bool wholeWord, bool findReplace) { return false; }
 		public bool ScrollToSelectedTask() { return false; }

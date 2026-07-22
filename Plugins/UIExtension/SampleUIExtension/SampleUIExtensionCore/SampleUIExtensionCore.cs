@@ -285,7 +285,7 @@ namespace SampleUIExtension
 			return false;
 	    }
 
-        public bool HitTest(Int32 xPos, Int32 yPos, UIExtension.HitTestResult result)
+        public bool HitTest(Int32 xPos, Int32 yPos, UIExtension.HitTest hitTest)
 	    {
             return false;
 		}

@@ -177,7 +177,7 @@ enum IUI_APPCOMMAND
 
 };
 
-enum IUI_HITTEST
+enum IUI_HITTESTRESULT
 {
 	// NEVER CHANGE THE ORDER OF THIS LIST
 	IUI_NOWHERE		= 0,
@@ -191,9 +191,9 @@ enum IUI_HITTEST
 
 //////////////////////////////////////////////////////////////////////
 
-struct IUIHITTESTRESULT
+struct IUIHITTEST
 {
-	IUI_HITTEST nResult;
+	IUI_HITTESTRESULT nResult;
 	DWORD dwTaskID;
 };
 
@@ -367,7 +367,7 @@ public:
 	virtual bool CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA* pData = NULL) const = 0;
 
 	virtual bool GetLabelEditRect(LPRECT pEdit) = 0; // screen coordinates
-	virtual bool HitTest(POINT ptScreen, IUIHITTESTRESULT& htRes) const = 0;
+	virtual bool HitTest(POINT ptScreen, IUIHITTEST& hitTest) const = 0;
 	virtual bool ShowContextMenu(POINT ptScreen) = 0;
 
 	virtual void SetUITheme(const UITHEME* pTheme) = 0;

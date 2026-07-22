@@ -373,29 +373,29 @@ namespace MindMapUIExtension
             return false;
         }
         		
-		public bool HitTest(Point screenPos, UIExtension.HitTestResult result)
+		public bool HitTest(Point screenPos, UIExtension.HitTest hitTest)
 		{
 			var clientPos = PointToClient(screenPos);
 
 			if (!ClientRectangle.Contains(clientPos))
 				return false;
 
-			result.result = UIExtension.HitTest.Tasklist;
+			hitTest.result = UIExtension.HitTestResult.Tasklist;
 
 			var node = HitTestPositions(clientPos);
 
 			if (node != null)
 			{
-				result.taskId = UniqueID(node);
-				result.result = UIExtension.HitTest.Task;
+				hitTest.taskId = UniqueID(node);
+				hitTest.result = UIExtension.HitTestResult.Task;
 
 				if (GetItemLabelRect(node).Contains(clientPos))
 				{
-					result.result = UIExtension.HitTest.TaskTitle;
+					hitTest.result = UIExtension.HitTestResult.TaskTitle;
 				}
 				else if (CalcIconRect(base.GetItemLabelRect(node)).Contains(clientPos))
 				{
-					result.result = UIExtension.HitTest.TaskIcon;
+					hitTest.result = UIExtension.HitTestResult.TaskIcon;
 				}
 			}
 

@@ -98,7 +98,7 @@ public:
 
 	BOOL GetLabelEditRect(LPRECT pEdit);
 	BOOL GetItemBounds(HTREEITEM hti, LPRECT lpRect) const;
-	BOOL HitTest(const CPoint& ptScreen, IUIHITTESTRESULT& htRes) const;
+	BOOL HitTest(const CPoint& ptScreen, IUIHITTEST& hitTest) const;
 	HTREEITEM HitTest(const CPoint& point, UINT* pFlags = NULL) const { return CTreeCtrl::HitTest(point, pFlags); }
 
 	void ClearSelection();

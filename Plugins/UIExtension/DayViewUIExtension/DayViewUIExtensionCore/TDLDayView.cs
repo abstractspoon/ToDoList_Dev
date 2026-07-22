@@ -777,9 +777,9 @@ namespace DayViewUIExtension
 			return ((appt != null) && ((appt is TaskItem) || (appt is TaskFutureOccurrence)));
 		}
 
-		public bool HitTest(Int32 xScreen, Int32 yScreen, UIExtension.HitTestResult result)
+		public bool HitTest(Point ptScreen, UIExtension.HitTest hitTest)
 		{
-			Point ptClient = PointToClient(new Point(xScreen, yScreen));
+			Point ptClient = PointToClient(ptScreen);
 			Calendar.Appointment appt = GetAppointmentAt(ptClient.X, ptClient.Y);
 
 			if (appt != null)
@@ -789,24 +789,24 @@ namespace DayViewUIExtension
 				if (apptView == null)
 					return false;
 
-				result.result = UIExtension.HitTest.Task;
-				result.taskId = m_TaskItems.GetRealTaskId(appt);
+				hitTest.result = UIExtension.HitTestResult.Task;
+				hitTest.taskId = m_TaskItems.GetRealTaskId(appt);
 
 				if (apptView.IconRect.Contains(ptClient))
 				{
-					result.result = UIExtension.HitTest.TaskIcon;
+					hitTest.result = UIExtension.HitTestResult.TaskIcon;
 				}
 				else if (GetItemLabelRect(appt).Contains(ptClient))
 				{
-					result.result = UIExtension.HitTest.TaskTitle;
+					hitTest.result = UIExtension.HitTestResult.TaskTitle;
 				}
 			}
 			else if (GetTrueRectangle().Contains(ptClient))
 			{
-				result.result = UIExtension.HitTest.Tasklist;
+				hitTest.result = UIExtension.HitTestResult.Tasklist;
 			}
 
-			return (result.result != UIExtension.HitTest.Nowhere);
+			return (hitTest.result != UIExtension.HitTestResult.Nowhere);
 		}
 
 		public Calendar.Appointment GetRealAppointmentAt(int x, int y)
