@@ -149,7 +149,7 @@ public:
 	BOOL MoveItem(const TLCITEMMOVE& move);
 	BOOL IsMovingItem() const { return m_bMovingItem; }
 
-	BOOL PointInHeader(const CPoint& ptScreen) const;
+	BOOL PointInHeaders(const CPoint& point, BOOL bScreenCoords) const;
 	void GetWindowRect(CRect& rWindow, BOOL bWithHeader = TRUE) const;
 
 	void ExpandAll(BOOL bExpand = TRUE);

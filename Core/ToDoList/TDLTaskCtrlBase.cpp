@@ -1638,7 +1638,7 @@ int CTDLTaskCtrlBase::HitTestFileLinkColumn(const CPoint& ptScreen) const
 BOOL CTDLTaskCtrlBase::HitTest(const CPoint& ptScreen, TDCHITTESTRESULT& htRes) const
 {
 	// Tasks header
-	if (PtInClientRect(ptScreen, m_hdrTasks, TRUE))
+	if (CDialogHelper::PointInRect(ptScreen, m_hdrTasks, TRUE))
 	{
 		htRes.nResult = TDCHT_COLUMNHEADER;
 		htRes.nColumnID = TDCC_CLIENT;
@@ -1647,7 +1647,7 @@ BOOL CTDLTaskCtrlBase::HitTest(const CPoint& ptScreen, TDCHITTESTRESULT& htRes) 
 	}
 
 	// Columns header
-	if (PtInClientRect(ptScreen, m_hdrColumns, TRUE)) // column header
+	if (CDialogHelper::PointInRect(ptScreen, m_hdrColumns, TRUE)) // column header
 	{
 		CPoint ptHeader(ptScreen);
 		m_hdrColumns.ScreenToClient(&ptHeader);
@@ -1664,7 +1664,7 @@ BOOL CTDLTaskCtrlBase::HitTest(const CPoint& ptScreen, TDCHITTESTRESULT& htRes) 
 	}
 
 	// Columns
-	if (PtInClientRect(ptScreen, m_lcColumns, TRUE))
+	if (CDialogHelper::PointInRect(ptScreen, m_lcColumns, TRUE))
 	{
 		TDC_COLUMN nColID = TDCC_NONE;
 		DWORD dwTaskID = 0;
@@ -1685,20 +1685,6 @@ BOOL CTDLTaskCtrlBase::HitTest(const CPoint& ptScreen, TDCHITTESTRESULT& htRes) 
 
 	// Derived classes responsible for 'Tasks' hit-testing
 	return FALSE;
-}
-
-BOOL CTDLTaskCtrlBase::PtInClientRect(POINT point, HWND hWnd, BOOL bScreenCoords)
-{
-	CRect rect;
-	::GetClientRect(hWnd, rect);
-	
-	if (bScreenCoords)
-	{
-		::ClientToScreen(hWnd, &rect.TopLeft());
-		::ClientToScreen(hWnd, &rect.BottomRight());
-	}
-	
-	return rect.PtInRect(point);
 }
 
 void CTDLTaskCtrlBase::Release() 
@@ -2398,7 +2384,7 @@ BOOL CTDLTaskCtrlBase::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 	{
 		CPoint ptScreen(::GetMessagePos());
 		
-		if (PtInClientRect(ptScreen, m_lcColumns, TRUE))
+		if (CDialogHelper::PointInRect(ptScreen, m_lcColumns, TRUE))
 		{
 			TDC_COLUMN nColID = TDCC_NONE;
 			CPoint ptCursor(::GetMessagePos());

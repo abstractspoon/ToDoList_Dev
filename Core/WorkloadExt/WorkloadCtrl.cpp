@@ -2828,7 +2828,11 @@ BOOL CWorkloadCtrl::PrepareNewTask(ITaskList* pTaskList) const
 
 BOOL CWorkloadCtrl::HitTest(const CPoint& ptScreen, IUIHITTEST& hitTest) const
 {
-	if (PointInHeader(ptScreen))
+	if (!CDialogHelper::PointInRect(ptScreen, m_tree, TRUE) &&
+		!CDialogHelper::PointInRect(ptScreen, m_list, TRUE))
+		return FALSE;
+
+	if (PointInHeaders(ptScreen, TRUE))
 		return FALSE;
 
 	UINT nFlags = 0;

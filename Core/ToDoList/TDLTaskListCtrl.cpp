@@ -224,38 +224,36 @@ BOOL CTDLTaskListCtrl::HitTest(const CPoint& ptScreen, TDCHITTESTRESULT& htRes) 
 		return TRUE;
 
 	// Hit test the 'Tasks'
-	if (PtInClientRect(ptScreen, m_lcTasks, TRUE))
+	if (!CDialogHelper::PointInRect(ptScreen, m_lcTasks, TRUE))
+		return FALSE;
+
+	CPoint ptClient(ptScreen);
+	m_lcTasks.ScreenToClient(&ptClient);
+
+	UINT nFlags = 0;
+	int nItem = m_lcTasks.HitTest(ptClient, &nFlags);
+
+	if (nItem == -1)
 	{
-		CPoint ptClient(ptScreen);
-		m_lcTasks.ScreenToClient(&ptClient);
+		htRes.nResult = TDCHT_TASKLIST;
+		htRes.nColumnID = TDCC_CLIENT;
+	}
+	else
+	{
+		htRes.nResult = TDCHT_TASK;
+		htRes.dwTaskID = GetTaskID(nItem);
 
-		UINT nFlags = 0;
-		int nItem = m_lcTasks.HitTest(ptClient, &nFlags);
-
-		if (nItem == -1)
+		if (nFlags & LVHT_ONITEMICON)
 		{
-			htRes.nResult = TDCHT_TASKLIST;
+			htRes.nColumnID = TDCC_ICON;
+		}
+		else if (nFlags & LVHT_ONITEMLABEL)
+		{
 			htRes.nColumnID = TDCC_CLIENT;
 		}
-		else
-		{
-			htRes.nResult = TDCHT_TASK;
-			htRes.dwTaskID = GetTaskID(nItem);
-
-			if (nFlags & LVHT_ONITEMICON)
-			{
-				htRes.nColumnID = TDCC_ICON;
-			}
-			else if (nFlags & LVHT_ONITEMLABEL)
-			{
-				htRes.nColumnID = TDCC_CLIENT;
-			}
-		}
-
-		return TRUE;
 	}
 
-	return FALSE;
+	return TRUE;
 }
 
 void CTDLTaskListCtrl::Release() 

@@ -285,6 +285,7 @@ public:
 
 	static BOOL TrackMouseLeave(HWND hWnd, BOOL bEnable = TRUE, BOOL bIncludeNonClient = TRUE);
 	static BOOL IsMouseDownInWindow(HWND hWnd);
+	static BOOL PointInRect(POINT point, HWND hWnd, BOOL bScreenCoords, BOOL bClientRect = TRUE);
 
 	// helpers for updating only a single item
 	static BOOL UpdateDataEx(CWnd* pWnd, int nIDC, BYTE& value, BOOL bSaveAndValidate = TRUE);

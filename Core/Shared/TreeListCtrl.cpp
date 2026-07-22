@@ -2478,20 +2478,10 @@ CString CTreeListCtrl::GetItemLabelTip(CPoint ptScreen) const
 	return _T("");
 }
 
-BOOL CTreeListCtrl::PointInHeader(const CPoint& ptScreen) const
+BOOL CTreeListCtrl::PointInHeaders(const CPoint& point, BOOL bScreenCoords) const
 {
-	CRect rHeader;
-
-	// try tree
-	m_treeHeader.GetWindowRect(rHeader);
-
-	if (rHeader.PtInRect(ptScreen))
-		return TRUE;
-
-	// then list
-	m_listHeader.GetWindowRect(rHeader);
-
-	return rHeader.PtInRect(ptScreen);
+	return (CDialogHelper::PointInRect(point, m_treeHeader, bScreenCoords) ||
+			CDialogHelper::PointInRect(point, m_listHeader, bScreenCoords));
 }
 
 void CTreeListCtrl::GetWindowRect(CRect& rWindow, BOOL bWithHeader) const
