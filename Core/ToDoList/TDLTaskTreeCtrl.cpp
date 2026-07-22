@@ -186,9 +186,9 @@ BOOL CTDLTaskTreeCtrl::BuildColumns()
 	return CTDLTaskCtrlBase::BuildColumns();
 }
 
-BOOL CTDLTaskTreeCtrl::HitTest(const CPoint& ptScreen, TDCHITTESTRESULT& htRes) const
+BOOL CTDLTaskTreeCtrl::HitTest(const CPoint& ptScreen, TDCHITTEST& hitTest) const
 {
-	if (CTDLTaskCtrlBase::HitTest(ptScreen, htRes))
+	if (CTDLTaskCtrlBase::HitTest(ptScreen, hitTest))
 		return TRUE;
 
 	// Hit test the 'Tasks'
@@ -203,21 +203,21 @@ BOOL CTDLTaskTreeCtrl::HitTest(const CPoint& ptScreen, TDCHITTESTRESULT& htRes) 
 
 	if (hti == NULL)
 	{
-		htRes.nResult = TDCHT_TASKLIST;
-		htRes.nColumnID = TDCC_CLIENT;
+		hitTest.nResult = TDCHT_TASKLIST;
+		hitTest.nColumnID = TDCC_CLIENT;
 	}
 	else
 	{
-		htRes.nResult = TDCHT_TASK;
-		htRes.dwTaskID = GetTaskID(hti);
+		hitTest.nResult = TDCHT_TASK;
+		hitTest.dwTaskID = GetTaskID(hti);
 
 		if (nFlags & TVHT_ONITEMICON)
 		{
-			htRes.nColumnID = TDCC_ICON;
+			hitTest.nColumnID = TDCC_ICON;
 		}
 		else if (nFlags & (TVHT_ONITEMLABEL | TVHT_ONITEMRIGHT))
 		{
-			htRes.nColumnID = TDCC_CLIENT;
+			hitTest.nColumnID = TDCC_CLIENT;
 		}
 	}
 

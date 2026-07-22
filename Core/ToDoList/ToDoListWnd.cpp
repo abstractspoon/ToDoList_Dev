@@ -4064,7 +4064,7 @@ void CToDoListWnd::OnContextMenu(CWnd* pWnd, CPoint point)
 			}
 		}
 
-		TDCHITTESTRESULT hitTest;
+		TDCHITTEST hitTest;
 		
 		if (tdc.HitTest(point, hitTest))
 		{

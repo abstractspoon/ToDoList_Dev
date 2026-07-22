@@ -3929,19 +3929,19 @@ int CToDoCtrl::OnToolHitTest(CPoint point, TOOLINFO * pTI) const
 	if (nMaxState == TDCMS_MAXCOMMENTS)
 		return 0;
 
-	TDCHITTESTRESULT htRes;
+	TDCHITTEST hitTest;
 	CWnd::ClientToScreen(&point);
 
-	if (!HitTest(point, htRes) || (htRes.dwTaskID == 0))
+	if (!HitTest(point, hitTest) || (hitTest.dwTaskID == 0))
 		return 0;
 
 	CString sTip;
 
-	if (HasStyle(TDCS_SHOWIMAGETIPS) && (htRes.nColumnID == TDCC_ICON))
+	if (HasStyle(TDCS_SHOWIMAGETIPS) && (hitTest.nColumnID == TDCC_ICON))
 	{
 		TDCIMAGEINFO info;
 		
-		if (!m_ilTaskIcons.GetImageInfo(m_data.GetTaskIcon(htRes.dwTaskID), info))
+		if (!m_ilTaskIcons.GetImageInfo(m_data.GetTaskIcon(hitTest.dwTaskID), info))
 			return 0;
 
 		if (info.sFilePath.IsEmpty())
@@ -3951,9 +3951,9 @@ int CToDoCtrl::OnToolHitTest(CPoint point, TOOLINFO * pTI) const
 			return 0;
 		
 		sTip = info.sFilePath;
-		htRes.dwTaskID += m_dwNextUniqueID; // so it's distinguishable from a text infotip of the same task
+		hitTest.dwTaskID += m_dwNextUniqueID; // so it's distinguishable from a text infotip of the same task
 	}
-	else if (HasStyle(TDCS_SHOWINFOTIPS) && (htRes.nColumnID == TDCC_CLIENT))
+	else if (HasStyle(TDCS_SHOWINFOTIPS) && (hitTest.nColumnID == TDCC_CLIENT))
 	{
 		CTDCAttributeMap mapAttrib;
 		TDC::MapColumnsToAttributes(m_visColEdit.GetVisibleColumns(), mapAttrib);
@@ -3964,7 +3964,7 @@ int CToDoCtrl::OnToolHitTest(CPoint point, TOOLINFO * pTI) const
 		if (nMaxState == TDCMS_NORMAL)
 			mapAttrib.Add(TDCA_COMMENTS);
 
-		sTip = m_infoTip.FormatTip(htRes.dwTaskID,
+		sTip = m_infoTip.FormatTip(hitTest.dwTaskID,
 								   mapAttrib,
 								   m_nMaxInfotipCommentsLength,
 								   m_sCompletionStatus);
@@ -3976,7 +3976,7 @@ int CToDoCtrl::OnToolHitTest(CPoint point, TOOLINFO * pTI) const
 	HWND hwndHit = CDialogHelper::GetWindowFromPoint(GetSafeHwnd(), point);
 	ASSERT(hwndHit);
 
-	return CToolTipCtrlEx::SetToolInfo(*pTI, hwndHit, sTip, htRes.dwTaskID);
+	return CToolTipCtrlEx::SetToolInfo(*pTI, hwndHit, sTip, hitTest.dwTaskID);
 }
 
 void CToDoCtrl::SetReadonly(BOOL bReadOnly)
@@ -6157,9 +6157,9 @@ void CToDoCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 	CRuntimeDlg::OnContextMenu(pWnd, point);
 }
 
-BOOL CToDoCtrl::HitTest(const CPoint& ptScreen, TDCHITTESTRESULT& htRes) const
+BOOL CToDoCtrl::HitTest(const CPoint& ptScreen, TDCHITTEST& hitTest) const
 {
-	return m_taskTree.HitTest(ptScreen, htRes);
+	return m_taskTree.HitTest(ptScreen, hitTest);
 }
 
 LRESULT CToDoCtrl::OnTDCNotifyAutoComboAddDelete(WPARAM wp, LPARAM /*lp*/)

@@ -17,13 +17,12 @@
 
 //////////////////////////////////////////////////////////////////////
 
-struct TDCHITTESTRESULT
+struct TDCHITTEST
 {
-	TDCHITTESTRESULT() : nResult(TDCHT_NOWHERE), dwTaskID(0), nColumnID(TDCC_NONE) {}
+	TDCHITTEST() : nResult(TDCHT_NOWHERE), dwTaskID(0), nColumnID(TDCC_NONE) {}
 
-	TDC_HITTEST nResult;
+	TDC_HITTESTRESULT nResult;
 	DWORD dwTaskID;
-	//CString sFileLinkPath;
 	TDC_COLUMN nColumnID;
 };
 

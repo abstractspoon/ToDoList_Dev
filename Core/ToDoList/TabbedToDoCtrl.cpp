@@ -4870,7 +4870,7 @@ void CTabbedToDoCtrl::OnListClick(NMHDR* pNMHDR, LRESULT* pResult)
 	*pResult = 0;
 }
 
-BOOL CTabbedToDoCtrl::HitTest(const CPoint& ptScreen, TDCHITTESTRESULT& hitTest) const
+BOOL CTabbedToDoCtrl::HitTest(const CPoint& ptScreen, TDCHITTEST& hitTest) const
 {
 	FTC_VIEW nView = GetActiveTaskView();
 

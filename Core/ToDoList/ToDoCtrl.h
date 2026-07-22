@@ -445,7 +445,7 @@ public:
 	virtual void NotifyBeginPreferencesUpdate() { /* do nothing */ }
 	virtual void NotifyEndPreferencesUpdate();
 	virtual void UpdateVisibleColumns(const CTDCColumnIDMap& mapChanges);
-	virtual BOOL HitTest(const CPoint& ptScreen, TDCHITTESTRESULT& htRes) const;
+	virtual BOOL HitTest(const CPoint& ptScreen, TDCHITTEST& hitTest) const;
 
 	static BOOL IsReservedShortcut(DWORD dwShortcut);
 	static void EnableExtendedKeyboardSelection(BOOL bCtrl, BOOL bShift);

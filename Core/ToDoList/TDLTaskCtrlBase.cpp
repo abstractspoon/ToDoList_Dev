@@ -1635,13 +1635,13 @@ int CTDLTaskCtrlBase::HitTestFileLinkColumn(const CPoint& ptScreen) const
 	return -1;
 }
 
-BOOL CTDLTaskCtrlBase::HitTest(const CPoint& ptScreen, TDCHITTESTRESULT& htRes) const
+BOOL CTDLTaskCtrlBase::HitTest(const CPoint& ptScreen, TDCHITTEST& hitTest) const
 {
 	// Tasks header
 	if (CDialogHelper::PointInRect(ptScreen, m_hdrTasks, TRUE))
 	{
-		htRes.nResult = TDCHT_COLUMNHEADER;
-		htRes.nColumnID = TDCC_CLIENT;
+		hitTest.nResult = TDCHT_COLUMNHEADER;
+		hitTest.nColumnID = TDCC_CLIENT;
 
 		return TRUE;
 	}
@@ -1657,8 +1657,8 @@ BOOL CTDLTaskCtrlBase::HitTest(const CPoint& ptScreen, TDCHITTESTRESULT& htRes) 
 		if (nCol < 0)
 			return FALSE;
 
-		htRes.nResult = TDCHT_COLUMNHEADER;
-		htRes.nColumnID = GetColumnID(nCol);
+		hitTest.nResult = TDCHT_COLUMNHEADER;
+		hitTest.nColumnID = GetColumnID(nCol);
 
 		return TRUE;
 	}
@@ -1671,13 +1671,13 @@ BOOL CTDLTaskCtrlBase::HitTest(const CPoint& ptScreen, TDCHITTESTRESULT& htRes) 
 
 		if (HitTestColumnsItem(ptScreen, FALSE, nColID, &dwTaskID) != -1)
 		{
-			htRes.nResult = TDCHT_TASK;
-			htRes.dwTaskID = dwTaskID;
-			htRes.nColumnID = nColID;
+			hitTest.nResult = TDCHT_TASK;
+			hitTest.dwTaskID = dwTaskID;
+			hitTest.nColumnID = nColID;
 		}
 		else
 		{
-			htRes.nResult = TDCHT_TASKLIST;
+			hitTest.nResult = TDCHT_TASKLIST;
 		}
 
 		return TRUE;

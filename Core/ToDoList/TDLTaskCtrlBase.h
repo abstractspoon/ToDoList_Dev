@@ -175,7 +175,7 @@ public:
 	int GetTaskIconIndex(DWORD dwTaskID) const;
 	int GetTaskIconIndex(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 
-	BOOL HitTest(const CPoint& ptScreen, TDCHITTESTRESULT& htRes) const;
+	BOOL HitTest(const CPoint& ptScreen, TDCHITTEST& hitTest) const;
 
 	void GetWindowRect(CRect& rWindow) const { CWnd::GetWindowRect(rWindow); }
 	virtual void GetBoundingRect(CRect& rect) const { CWnd::GetClientRect(rect); }

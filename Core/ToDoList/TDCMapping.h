@@ -624,7 +624,7 @@ namespace TDC
 		return IUI_EDIT;
 	}
 
-	static BOOL MapIUIHitTestResultToHitTestResult(const IUIHITTEST& iuiRes, TDCHITTESTRESULT& hitTest)
+	static BOOL MapIUIHitTestResultToHitTestResult(const IUIHITTEST& iuiRes, TDCHITTEST& hitTest)
 	{
 		hitTest.nResult = TDCHT_NOWHERE;
 

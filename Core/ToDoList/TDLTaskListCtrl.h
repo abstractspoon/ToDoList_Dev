@@ -119,7 +119,7 @@ public:
 	void OnBuildComplete();
 	void Resort(BOOL bAllowToggle = FALSE);
 	BOOL ModsNeedResort(const CTDCAttributeMap& attribIDs) const;
-	BOOL HitTest(const CPoint& ptScreen, TDCHITTESTRESULT& htRes) const;
+	BOOL HitTest(const CPoint& ptScreen, TDCHITTEST& hitTest) const;
 
 protected:
 	CListCtrl m_lcTasks;

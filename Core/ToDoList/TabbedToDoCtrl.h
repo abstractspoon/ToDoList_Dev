@@ -98,7 +98,7 @@ public:
 	virtual BOOL IsMultiSorting() const;
 	virtual BOOL CanMultiSort() const;
 
-	virtual BOOL HitTest(const CPoint& ptScreen, TDCHITTESTRESULT& htRes) const;
+	virtual BOOL HitTest(const CPoint& ptScreen, TDCHITTEST& hitTest) const;
 	virtual HTREEITEM GetUpdateControlsItem() const;
 	virtual CString FormatSelectedTaskTitles(BOOL bFullPath, TCHAR cSep = 0, int nMaxTasks = -1) const;
 	virtual CString GetControlDescription(const CWnd* pCtrl) const;

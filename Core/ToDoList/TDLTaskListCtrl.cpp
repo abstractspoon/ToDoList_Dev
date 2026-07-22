@@ -218,9 +218,9 @@ BOOL CTDLTaskListCtrl::BuildColumns()
 	return TRUE;
 }
 
-BOOL CTDLTaskListCtrl::HitTest(const CPoint& ptScreen, TDCHITTESTRESULT& htRes) const
+BOOL CTDLTaskListCtrl::HitTest(const CPoint& ptScreen, TDCHITTEST& hitTest) const
 {
-	if (CTDLTaskCtrlBase::HitTest(ptScreen, htRes))
+	if (CTDLTaskCtrlBase::HitTest(ptScreen, hitTest))
 		return TRUE;
 
 	// Hit test the 'Tasks'
@@ -235,21 +235,21 @@ BOOL CTDLTaskListCtrl::HitTest(const CPoint& ptScreen, TDCHITTESTRESULT& htRes) 
 
 	if (nItem == -1)
 	{
-		htRes.nResult = TDCHT_TASKLIST;
-		htRes.nColumnID = TDCC_CLIENT;
+		hitTest.nResult = TDCHT_TASKLIST;
+		hitTest.nColumnID = TDCC_CLIENT;
 	}
 	else
 	{
-		htRes.nResult = TDCHT_TASK;
-		htRes.dwTaskID = GetTaskID(nItem);
+		hitTest.nResult = TDCHT_TASK;
+		hitTest.dwTaskID = GetTaskID(nItem);
 
 		if (nFlags & LVHT_ONITEMICON)
 		{
-			htRes.nColumnID = TDCC_ICON;
+			hitTest.nColumnID = TDCC_ICON;
 		}
 		else if (nFlags & LVHT_ONITEMLABEL)
 		{
-			htRes.nColumnID = TDCC_CLIENT;
+			hitTest.nColumnID = TDCC_CLIENT;
 		}
 	}
 
