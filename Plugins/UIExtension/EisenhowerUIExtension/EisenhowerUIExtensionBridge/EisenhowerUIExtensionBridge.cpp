@@ -334,6 +334,11 @@ bool CEisenhowerUIExtensionBridgeWindow::HitTest(POINT ptScreen, IUIHITTEST& hit
 	return true;
 }
 
+bool CEisenhowerUIExtensionBridgeWindow::ShowContextMenu(POINT ptScreen)
+{
+	return m_wnd->ShowContextMenu(ptScreen.x, ptScreen.y);
+}
+
 void CEisenhowerUIExtensionBridgeWindow::SetUITheme(const UITHEME* pTheme)
 {
 	msclr::auto_gcroot<UITheme^> theme = gcnew UITheme(pTheme);

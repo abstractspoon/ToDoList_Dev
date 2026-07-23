@@ -68,6 +68,7 @@ public:
 
    bool GetLabelEditRect(LPRECT pEdit); // screen coordinates
    bool HitTest(POINT ptScreen, IUIHITTEST& hitTest) const;
+   bool ShowContextMenu(POINT ptScreen);
 
    void SetUITheme(const UITHEME* pTheme);
    void SetReadOnly(bool bReadOnly);
@@ -76,9 +77,6 @@ public:
 
    void SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const;
    void LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey, bool bAppOnly = FALSE);
-
-   // Not required
-   bool ShowContextMenu(POINT /*ptScreen*/) { return false; }
 
 protected:
    gcroot<EisenhowerUIExtensionCore^> m_wnd;

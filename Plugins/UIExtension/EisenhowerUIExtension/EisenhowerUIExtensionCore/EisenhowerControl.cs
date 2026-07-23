@@ -341,6 +341,30 @@ namespace EisenhowerUIExtension
 			return false;
 		}
 
+		public bool ShowContextMenu(Point screenPos)
+		{
+			// We never show a custom menu ourselves but this
+			// allows us to prepare the target pane and selected
+			// task(s) to mimic the behaviour of the 'Kanban' view
+			var hitPane = HitTestPane(screenPos);
+
+			if ((hitPane != null) && !hitPane.Selected && !hitPane.HasSelection)
+			{
+				// Select the pane and select the first task
+				SelectedPane = hitPane; // Visual cue for user
+
+				var taskIds = new List<uint>();
+
+				if (hitPane.FirstTaskId != 0)
+					taskIds.Add(hitPane.FirstTaskId);
+
+				hitPane.SelectTasks(taskIds);
+				SelectionChange?.Invoke(this, taskIds);
+			}
+
+			return false; // always
+		}
+
 		public uint GetTaskId(UIExtension.GetTask getTask)
 		{
 			var pane = SelectedPane;

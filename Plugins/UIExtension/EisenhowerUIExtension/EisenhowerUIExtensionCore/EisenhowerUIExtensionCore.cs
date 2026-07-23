@@ -205,7 +205,12 @@ namespace EisenhowerUIExtension
 
 		public bool HitTest(Int32 xScreen, Int32 yScreen, UIExtension.HitTest hitTest)
 		{
-			return (m_EisenhowerCtrl.HitTest(new Point(xScreen, yScreen), hitTest));
+			return m_EisenhowerCtrl.HitTest(new Point(xScreen, yScreen), hitTest);
+		}
+
+		public bool ShowContextMenu(Int32 xScreen, Int32 yScreen)
+		{
+			return m_EisenhowerCtrl.ShowContextMenu(new Point(xScreen, yScreen));
 		}
 
 		public void SetUITheme(UITheme theme)
