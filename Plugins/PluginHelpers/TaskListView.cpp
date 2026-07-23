@@ -1106,6 +1106,8 @@ void TaskListView::WndProc(Message% m)
 
 			if (HitTest(pos)->Item == nullptr)
 			{
+				Focus();
+
 				// and forward as context menu msg to parent
 				pos = PointToScreen(pos);
 

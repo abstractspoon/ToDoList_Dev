@@ -422,15 +422,27 @@ namespace WordCloudUIExtension
 
 		public bool HitTest(Int32 xScreen, Int32 yScreen, UIExtension.HitTest hitTest)
 		{
-			return m_TaskMatchesList.HitTest(new Point(xScreen, yScreen), hitTest);
+			if (!m_TaskMatchesList.HitTest(new Point(xScreen, yScreen), hitTest))
+				return false;
+
+			// Prevent the default mini task context menu
+			// in the event of no selection or empty list
+			if (!m_TaskMatchesList.HasSelection)
+			{
+				hitTest.result = UIExtension.HitTestResult.Nowhere;
+				return false;
+			}
+
+			// else
+			return true;
 		}
 
 		public bool ShowContextMenu(Int32 xScreen, Int32 yScreen)
 		{
-			bool keyboardMenu = ((xScreen == -1) && (yScreen == -1));
-
-			if (keyboardMenu && !m_WordCloud.Focused)
+			if (!m_WordCloud.Focused)
 				return false;
+
+			bool keyboardMenu = ((xScreen == -1) && (yScreen == -1));
 
 			var ptScreen = new Point(xScreen, yScreen);
 			var ptMenu = m_WordCloud.PointToClient(ptScreen);
@@ -443,6 +455,7 @@ namespace WordCloudUIExtension
 
 			if (keyboardMenu)
 			{
+				// Use selected word
 				var selItem = m_WordCloud.SelectedItem;
 
 				if (selItem == null)
@@ -454,10 +467,18 @@ namespace WordCloudUIExtension
 			{
 				var word = m_WordCloud.HitTestWord(ptScreen);
 
-				if (word == null)
-					return true; // handled
+				if (string.IsNullOrWhiteSpace(word))
+				{
+					// Use selected word
+					var selItem = m_WordCloud.SelectedItem;
 
-				m_WordCloud.SelectedWord = word;
+					if (selItem == null)
+						return true; // handled
+				}
+				else
+				{
+					m_WordCloud.SelectedWord = word;
+				}
 			}
 
 			var menu = new ContextMenuStrip();
@@ -513,6 +534,7 @@ namespace WordCloudUIExtension
 
 		public void SetReadOnly(bool bReadOnly)
 		{
+			m_TaskMatchesList.ReadOnly = bReadOnly;
 		}
 
 		public void SavePreferences(Preferences prefs, String key)

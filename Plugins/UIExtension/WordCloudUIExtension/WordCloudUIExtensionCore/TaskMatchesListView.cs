@@ -125,7 +125,7 @@ namespace WordCloudUIExtension
 					Items[0].Selected = true;
 					EnsureSelectionVisible();
 
-					taskId = GetTaskId(0);
+					taskId = base.GetTaskId(0);
 				}
 			}
 
