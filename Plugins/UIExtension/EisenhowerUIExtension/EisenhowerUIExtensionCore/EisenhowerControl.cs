@@ -210,12 +210,78 @@ namespace EisenhowerUIExtension
 
 			if (pane.Matrix != null)
 			{
-				// TODO
-				task.SetPriority((byte)pane.Matrix.XVariable.Cutoff);
-				task.SetRisk((byte)pane.Matrix.XVariable.Cutoff);
+				InitNewTaskAttribute(task, pane.Matrix.XVariable);
+				InitNewTaskAttribute(task, pane.Matrix.YVariable);
 			}
 
 			return true;
+		}
+
+		private static void InitNewTaskAttribute(Task task, EisenhowerPaneMatrixVariable var)
+		{
+			double value = var.RangeValueMidPoint;
+
+			switch (var.Attribute.AttributeId)
+			{
+			case Task.Attribute.Priority:
+				task.SetPriority((byte)value);
+				break;
+
+			case Task.Attribute.Risk:
+				task.SetRisk((byte)value);
+				break;
+
+			case Task.Attribute.DueDate:
+				task.SetDueDate(DateTime.FromOADate(value));
+				break;
+
+			case Task.Attribute.StartDate:
+				task.SetStartDate(DateTime.FromOADate(value));
+				break;
+
+			case Task.Attribute.Percent:
+				task.SetPercentDone((byte)value);
+				break;
+
+			case Task.Attribute.Flag:
+				task.SetFlag(value != 0.0);
+				break;
+
+			case Task.Attribute.TimeEstimate:
+				task.SetTimeEstimate(value, Task.TimeUnits.Days);
+				break;
+
+			case Task.Attribute.TimeSpent:
+				task.SetTimeSpent(value, Task.TimeUnits.Days);
+				break;
+
+			case Task.Attribute.Cost:
+				task.SetCost(value, false);
+				break;
+
+			case Task.Attribute.CustomAttribute:
+				switch (var.Type)
+				{
+				case EisenhowerVariable.ValueType.Integer:
+					task.SetCustomAttributeValue(var.Attribute.CustomAttributeId, ((int)value).ToString());
+					break;
+
+				case EisenhowerVariable.ValueType.Decimal:
+				case EisenhowerVariable.ValueType.Date:
+					task.SetCustomAttributeValue(var.Attribute.CustomAttributeId, value.ToString());
+					break;
+
+				case EisenhowerVariable.ValueType.Boolean:
+					task.SetCustomAttributeValue(var.Attribute.CustomAttributeId, ((value == 0.0) ? "0" : "1"));
+					break;
+
+				case EisenhowerVariable.ValueType.TimePeriod:
+					// TODO
+					task.SetCustomAttributeValue(var.Attribute.CustomAttributeId, value.ToString());
+					break;
+				}
+				break;
+			}
 		}
 
 		public bool SelectTask(uint taskID)

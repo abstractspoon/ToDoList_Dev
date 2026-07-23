@@ -217,6 +217,32 @@ namespace EisenhowerUIExtension
 		public bool RangeIsHigh { get { return (Range == ValueRange.High); } }
 		public bool RangeIsLow { get { return !RangeIsHigh; } }
 
+		public double RangeValueMidPoint
+		{
+			get
+			{
+				var max = (RangeIsHigh ? MaxValue : Cutoff);
+				var min = (RangeIsHigh ? Cutoff : MinValue);
+
+				var mid = ((max + min) / 2);
+
+				switch (Type)
+				{
+				case ValueType.Integer:
+				case ValueType.Boolean:
+				case ValueType.Date:
+					mid = Math.Round(mid);
+					break;
+
+				case ValueType.TimePeriod:
+				case ValueType.Decimal:
+					break;
+				}
+
+				return mid;
+			}
+		}
+
 		public string ToString(Translator trans)
 		{
 			if (IsNull)
