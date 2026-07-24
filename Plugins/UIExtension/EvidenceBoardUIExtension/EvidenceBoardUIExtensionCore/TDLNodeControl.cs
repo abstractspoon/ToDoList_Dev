@@ -2847,13 +2847,11 @@ namespace EvidenceBoardUIExtension
 			base.OnQueryContinueDrag(e);
 		}
 
-		// ILabelTipHandler implementation
+		// ILabelTipHandler implementation -----------------------------------
 		public Control GetOwner()
 		{
 			return this;
 		}
-
-		const uint NoTip = 0xffffffff;
 
 		enum TipId
 		{
@@ -2885,16 +2883,16 @@ namespace EvidenceBoardUIExtension
 			var taskItem = GetTaskItem(node);
 			var nodeRect = GetNodeClientRect(node);
 
+			if (CalcExpansionButtonRect(nodeRect).Contains(clientPos))
+				return null;
+
 			var tip = new LabelTipInfo();
 
+			// Expository (non-label) tooltips
 			if (Rectangle.Inflate(GetCreateLinkPinRect(node), 1, 1).Contains(clientPos))
 			{
 				tip.Text = m_Trans.Translate("New Connection", Translator.Type.ToolTip);
 				tip.Id = TooltipId(taskItem, TipId.CreateLinkPin);
-			}
-			else if (CalcExpansionButtonRect(nodeRect).Contains(clientPos))
-			{
-				tip.Id = NoTip;
 			}
 			else if (taskItem.HasImage)
 			{
@@ -2934,16 +2932,13 @@ namespace EvidenceBoardUIExtension
 
 			if (tip.Id != 0)
 			{
-				if (tip.Id != NoTip)
-				{
-					// These are really tooltips not label tips so offset them
-					clientPos.Offset(0, ToolStripEx.GetActualCursorHeight(Cursor));
+				// These are really tooltips not label tips so offset them
+				clientPos.Offset(0, ToolStripEx.GetActualCursorHeight(Cursor));
 
-					tip.Rect.Location = clientPos;
-					tip.InitialDelay = 500;
-					tip.MultiLine = false;
-					tip.Font = Font;
-				}
+				tip.Rect.Location = clientPos;
+				tip.InitialDelay = 500;
+				tip.MultiLine = false;
+				tip.Font = Font;
 			}
 			else // check for title tip
 			{
@@ -2981,6 +2976,7 @@ namespace EvidenceBoardUIExtension
 			return tip;
 		}
 
+		// ----------------------------------------------------------------
 
 		public bool SetBackgroundImage(string filePath)
 		{
