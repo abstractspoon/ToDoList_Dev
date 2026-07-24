@@ -136,36 +136,54 @@ namespace DayViewUIExtension
 			if (tdlView == null)
 				return null;
 
+			// Exclude the icon and gripper from the tip rect
 			var appt = GetRealAppointment(tdlView.Appointment);
+			int xOffset = 0;
+
+			TaskItem item = (appt as TaskItem);
+			bool hasIcon = TaskHasIcon(item);
+			bool isLongAppt = IsLongAppt(appt);
+
+			if (isLongAppt)
+			{
+				if (DisplayLongTasksContinuous)
+				{
+					xOffset = (tdlView.GripRect.Right - tipRect.Left);
+
+					if (hasIcon)
+						xOffset += (m_RenderHelper.ImageSize + (2 * m_RenderHelper.TextPadding));
+				}
+				else
+				{
+					bool startPortion = (tipRect.Right < tdlView.Rectangle.Right);
+
+					if (startPortion)
+						xOffset = tdlView.TextHorzOffset;
+				}
+			}
+			else // short appointment
+			{
+				if (hasIcon)
+					xOffset = (m_RenderHelper.ImageSize + (2 * m_RenderHelper.TextPadding));
+				else
+					xOffset = (tdlView.GripRect.Right - tipRect.Left);
+			}
+
+			tipRect.Offset(xOffset, m_RenderHelper.TextOffset);
+			tipRect.Width -= xOffset;
+
+			// Recheck that the mouse if over the title text
+			// unless the tip rect is too narrow to be hit
+			if ((tipRect.Width > (m_RenderHelper.TextPadding * 2)) && !tipRect.Contains(pt))
+				return null;
 
 			var tip = new LabelTipInfo()
 			{
 				Font = m_RenderHelper.GetFont(GetTaskFontStyle(tdlView.Appointment)),
 				Id = appt.Id,
 				MultiLine = false, // always
+				Rect = tipRect,
 			};
-
-			// Tip position
-			int xOffset = 0;
-
-			if (!IsLongAppt(appt) || DisplayLongTasksContinuous)
-			{
-				TaskItem item = (appt as TaskItem);
-
-				if (TaskHasIcon(item))
-					xOffset += (m_RenderHelper.ImageSize + (2 * m_RenderHelper.TextPadding));
-			}
-			else
-			{
-				bool startPortion = (tipRect.Right < tdlView.Rectangle.Right);
-
-				if (startPortion)
-					xOffset += tdlView.TextHorzOffset;
-			}
-
-			tipRect.Offset(xOffset, m_RenderHelper.TextOffset);
-			tipRect.Width -= xOffset;
-			tip.Rect = tipRect;
 
 			// Tip text and size
 			if (appt is TaskExtensionItem)
@@ -192,7 +210,7 @@ namespace DayViewUIExtension
 				}
 
 				var pos = PointToClient(MousePosition);
-				pos.Offset(0, ToolStripEx.GetActualCursorHeight(Cursor));
+				pos.Offset(0, ToolStripEx.GetActualCursorHeight(Cursor)); // like regular tooltip
 
 				tip.Rect.Location = pos;
 				tip.InitialDelay = 500;
@@ -201,7 +219,7 @@ namespace DayViewUIExtension
 			{
 				tip.Text = appt.Title;
 
-				if (IsLongAppt(appt))
+				if (isLongAppt)
 				{
 					// single line tooltips
 					Size tipSize = m_LabelTip.CalcTipSize(tip.Text, tip.Font, tip.Rect.Width);
