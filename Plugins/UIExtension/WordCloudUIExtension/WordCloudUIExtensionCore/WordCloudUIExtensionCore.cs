@@ -1103,10 +1103,10 @@ namespace WordCloudUIExtension
             var notify = new UIExtension.ParentNotify(m_HwndParent);
 
             return notify.NotifyMod(Task.Attribute.DoneDate,
-                                    (task.IsDone ? DateTime.Now : DateTime.MinValue));
-        }
+									(task.IsDone ? DateTime.MinValue : DateTime.Now));
+		}
 
-        private bool OnTaskMatchesEditTaskIcon(object sender, ITaskBase task)
+		private bool OnTaskMatchesEditTaskIcon(object sender, ITaskBase task)
         {
             var notify = new UIExtension.ParentNotify(m_HwndParent);
 
