@@ -616,37 +616,47 @@ namespace EvidenceBoardUIExtension
 			if (!ClientRectangle.Contains(ptClient))
 				return false;
 
+			hitTest.result = UIExtension.HitTestResult.Tasklist;
+
 			var node = HitTestNode(ptClient, true); // exclude root node
 
-			if (node == null)
+			if (node != null)
 			{
-				hitTest.result = UIExtension.HitTestResult.Tasklist;
-			}
-			else
-			{
-				var labelRect = GetNodeClientRect(node);
 				var task = GetTaskItem(node.Data);
+
+				var labelRect = GetNodeClientRect(node);
+				var iconRect = CalcIconRect(labelRect);
+
+				// Exclude icon and/or image expansion button
+				// from the label rect
+				if (task.HasIcon || task.HasImage)
+				{
+					labelRect.X = iconRect.Right;
+					labelRect.Width -= iconRect.Width;
+				}
+				else
+				{
+					iconRect = Rectangle.Empty;
+				}
 
 				hitTest.taskId = task.TaskId;
 				hitTest.result = UIExtension.HitTestResult.Task;
 
-				if (CalcIconRect(labelRect).Contains(ptClient))
+				if (iconRect.Contains(ptClient))
 				{
 					hitTest.result = UIExtension.HitTestResult.TaskIcon;
 				}
-				else if (!task.HasImage)
+				else if (labelRect.Contains(ptClient))
 				{
-					hitTest.result = UIExtension.HitTestResult.TaskTitle;
-				}
-				else if (!CalcImageRect(task, labelRect, false).Contains(ptClient))
-				{
-					// Check we are to the right of the icon to avoid 
-					// the expansion button and the spaces in between
-					if (ptClient.X > (labelRect.Left + (int)(UIExtension.TaskIcon.IconSize * ZoomFactor)))
+					if ((!task.HasImage || !CalcImageRect(task, labelRect, false).Contains(ptClient)) &&
+						!HitTestExpansionButton(node, ptClient) && 
+						!HitTestHotNodeCreateLink(ptClient))
+					{
 						hitTest.result = UIExtension.HitTestResult.TaskTitle;
+					}
 				}
 			}
-			
+
 			return true;
 		}
 
@@ -2427,6 +2437,11 @@ namespace EvidenceBoardUIExtension
 			var taskItem = GetTaskItem(node.Data);
 
 			if (taskItem == null)
+				return null;
+
+			// The icon rect not clickable if the task has 
+			// neither an icon nor an image (expansion button)
+			if (!taskItem.HasIcon && !taskItem.HasImage)
 				return null;
 
 			if (!CalcIconRect(GetNodeClientRect(node)).Contains(ptClient))
