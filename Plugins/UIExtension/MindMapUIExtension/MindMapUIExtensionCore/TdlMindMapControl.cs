@@ -195,10 +195,10 @@ namespace MindMapUIExtension
 
 			var labelRect = GetItemLabelRect(hit);
 
-			if (!labelRect.Contains(pt))
+			if (ClientRectangle.Contains(labelRect))
 				return null;
 
-			if (ClientRectangle.Contains(labelRect))
+			if (!labelRect.Contains(pt) || HitTestExpansionButton(hit, pt))
 				return null;
 
 			labelRect.Offset(-1, -1);
@@ -384,7 +384,7 @@ namespace MindMapUIExtension
 
 			var node = HitTestPositions(clientPos);
 
-			if (node != null)
+			if ((node != null) && !HitTestExpansionButton(node, clientPos))
 			{
 				hitTest.taskId = UniqueID(node);
 				hitTest.result = UIExtension.HitTestResult.Task;
