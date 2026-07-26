@@ -18,6 +18,8 @@
 #include "..\shared\monthcheckcombobox.h"
 #include "..\Shared\DayOfWeekCheckListBox.h"
 
+/////////////////////////////////////////////////////////////////////////////
+
 class CTDLRecurringTaskEdit : public CEnEdit  
 {
 public:
@@ -49,28 +51,19 @@ protected:
 	virtual void OnBtnClick(UINT nID);
 	virtual void PreSubclassWindow();
 
-// Implementation
 protected:
-	// Generated message map functions
-	//{{AFX_MSG(CRecurringTaskEdit)
-		// NOTE: the ClassWizard will add member functions here
-	//}}AFX_MSG
 	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
 	afx_msg HBRUSH CtlColor(CDC* pDC, UINT nCtlColor);
 	afx_msg LRESULT OnSetReadOnly(WPARAM wp, LPARAM lp);
 	afx_msg void OnStyleChanging(int nStyleType, LPSTYLESTRUCT lpStyleStruct);
 	DECLARE_MESSAGE_MAP()
-
 };
-
-#endif 
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLRecurringTaskOnceOptionPage dialog
 
 class CTDLRecurringTaskOnceOptionPage : public CPropertyPage
 {
-// Construction
 public:
 	CTDLRecurringTaskOnceOptionPage();
 	~CTDLRecurringTaskOnceOptionPage() {}
@@ -89,30 +82,17 @@ public:
 	void GetRecurrenceOptions(TDCRECURRENCE& tr) const;
 
 protected:
-// Dialog Data
-	//{{AFX_DATA(CTDLRecurringTaskDailyOptionPage)
 	int		m_nEveryNumDays;
 	int		m_nEveryNumWeekdays;
 	int		m_nDailyOption;
-	//}}AFX_DATA
 
-// Overrides
-	// ClassWizard generate virtual function overrides
-	//{{AFX_VIRTUAL(CTDLRecurringTaskDailyOptionPage)
-	protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-	virtual BOOL OnInitDialog();
-	//}}AFX_VIRTUAL
-
-// Implementation
 protected:
-	// Generated message map functions
-	//{{AFX_MSG(CTDLRecurringTaskDailyOptionPage)
-		// NOTE: the ClassWizard will add member functions here
-	//}}AFX_MSG
+	virtual void DoDataExchange(CDataExchange* pDX);
+	virtual BOOL OnInitDialog();
+
+protected:
 	afx_msg void OnChangeDailyValues();
 	DECLARE_MESSAGE_MAP()
-
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -128,32 +108,19 @@ public:
 	void GetRecurrenceOptions(TDCRECURRENCE& tr) const;
 
 protected:
-// Dialog Data
-	//{{AFX_DATA(CTDLRecurringTaskWeeklyOptionPage)
 	int		m_nWeeklyOption;
 	int		m_nEveryNumWeeks;
 	int		m_nRecreateAfterNumWeeks;
-	//}}AFX_DATA
  	DWORD m_dwWeekdays;
 	CDayOfWeekCheckListBox m_lbWeekdays;
 
-// Overrides
-	// ClassWizard generate virtual function overrides
-	//{{AFX_VIRTUAL(CTDLRecurringTaskWeeklyOptionPage)
-	protected:
+protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	virtual BOOL OnInitDialog();
-	//}}AFX_VIRTUAL
 
-// Implementation
 protected:
-	// Generated message map functions
-	//{{AFX_MSG(CTDLRecurringTaskWeeklyOptionPage)
-		// NOTE: the ClassWizard will add member functions here
-	//}}AFX_MSG
 	afx_msg void OnChangeWeeklyValues();
 	DECLARE_MESSAGE_MAP()
-
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -169,8 +136,6 @@ public:
 	void GetRecurrenceOptions(TDCRECURRENCE& tr) const;
 
 protected:
-// Dialog Data
-	//{{AFX_DATA(CTDLRecurringTaskMonthlyOptionPage)
 	int		m_nEveryDayOfMonth;
 	int		m_nEveryNumMonthsDay;
 	int		m_nSpecificNumber;
@@ -178,26 +143,17 @@ protected:
 	int		m_nSpecificNumMonths;
 	int		m_nEveryNumMonths;
 	int		m_nMonthlyOption;
-	//}}AFX_DATA
+
 	CDayOfWeekComboBox	m_cbDaysOfWeek;
 	CComboBox			m_cbSpecificWeek;
 	CStringArray		m_aSpecificWeek;
 	BOOL				m_bFirstLastWeekday;
 
-// Overrides
-	// ClassWizard generate virtual function overrides
-	//{{AFX_VIRTUAL(CTDLRecurringTaskMonthlyOptionPage)
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	virtual void DoDataExchange(CDataExchange* pDX);
 	virtual BOOL OnInitDialog();
-	//}}AFX_VIRTUAL
 
-// Implementation
 protected:
-	// Generated message map functions
-	//{{AFX_MSG(CTDLRecurringTaskMonthlyOptionPage)
-		// NOTE: the ClassWizard will add member functions here
-	//}}AFX_MSG
 	afx_msg void OnChangeMonthlyValues();
 	afx_msg void OnChangeSpecificWeek();
 	afx_msg void OnChangeWeekday();
@@ -206,7 +162,6 @@ protected:
 protected:
 	void FixupWeekdayCombo(int iWeek, int iPrevWeek);
 	void FixupSpecificWeekCombo(int iWeekday, int iPrevWeekday);
-
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -214,7 +169,6 @@ protected:
 
 class CTDLRecurringTaskYearlyOptionPage : public CCmdNotifyPropertyPage
 {
-// Construction
 public:
 	CTDLRecurringTaskYearlyOptionPage(const TDCRECURRENCE& tr, const COleDateTime& dtDefault);
 	~CTDLRecurringTaskYearlyOptionPage();
@@ -222,8 +176,6 @@ public:
 	void GetRecurrenceOptions(TDCRECURRENCE& tr) const;
 
 protected:
-// Dialog Data
-	//{{AFX_DATA(CTDLRecurringTaskYearlyOptionPage)
 	int		m_nYearlyOption;
 	int		m_nEveryDayOfMonth;
 	int		m_nSpecificNumber;
@@ -232,28 +184,17 @@ protected:
 	int		m_nSpecificDayOfWeek;
 	DWORD	m_dwEveryMonths;
 
-	//}}AFX_DATA
 	CMonthCheckComboBox	m_cbSpecificMonthList;
 	CMonthCheckComboBox	m_cbEveryMonthList;
 	CDayOfWeekComboBox	m_cbDaysOfWeek;
 
-// Overrides
-	// ClassWizard generate virtual function overrides
-	//{{AFX_VIRTUAL(CTDLRecurringTaskYearlyOptionPage)
-	protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-	virtual BOOL OnInitDialog();
-	//}}AFX_VIRTUAL
-
-// Implementation
 protected:
-	// Generated message map functions
-	//{{AFX_MSG(CTDLRecurringTaskYearlyOptionPage)
-		// NOTE: the ClassWizard will add member functions here
-	//}}AFX_MSG
+	virtual void DoDataExchange(CDataExchange* pDX);
+	virtual BOOL OnInitDialog();
+
+protected:
 	afx_msg void OnChangeYearlyValues();
 	DECLARE_MESSAGE_MAP()
-
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -268,11 +209,8 @@ public:
 	TDC_REGULARITY GetRecurrenceOptions(TDCRECURRENCE& tr) const;
 
 protected:
-// Dialog Data
-	//{{AFX_DATA(CRecurringTaskOptionDlg)
 	int		m_nRecalcFrom;
 	int		m_nReuse;
-	//}}AFX_DATA
 	int		m_nNumRecur;
 	BOOL	m_bEndAfterNumRecur;
 	BOOL	m_bPreserveComments;
@@ -285,23 +223,15 @@ protected:
 	CPropertyPageHost m_ppHost;
 	TDC_REGULARITY m_nFrequency;
 
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CRecurringTaskOptionDlg)
-	protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+protected:
+	virtual void DoDataExchange(CDataExchange* pDX);
 	virtual void OnOK();
-	//}}AFX_VIRTUAL
 	virtual BOOL OnInitDialog();
 
-// Implementation
 protected:
-	// Generated message map functions
-	//{{AFX_MSG(CRecurringTaskOptionDlg)
-	//}}AFX_MSG
 	afx_msg void OnChangeFrequency();
 	afx_msg void OnEndAfterNumRecur();
 	DECLARE_MESSAGE_MAP()
-
 };
 
+#endif // AFX_RECURRENCEEDIT_H__4EE655E3_F4B1_44EA_8AAA_39DD459AD8A8__INCLUDED_

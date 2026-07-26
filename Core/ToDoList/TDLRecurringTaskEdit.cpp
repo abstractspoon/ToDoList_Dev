@@ -431,8 +431,8 @@ CTDLRecurringTaskDailyOptionPage::CTDLRecurringTaskDailyOptionPage(const TDCRECU
 	case TDIR_DAY_EVERY_WEEKDAY:
 		m_nDailyOption = 2;
 		break;
-
-	default:
+		
+	case TDIR_DEPRECATED_1: // DAY_RECREATEAFTERNDAYS
 		ASSERT(0);
 		break;
 	}
@@ -543,7 +543,7 @@ CTDLRecurringTaskWeeklyOptionPage::CTDLRecurringTaskWeeklyOptionPage(const TDCRE
 		m_dwWeekdays = dwSpecific2;
 		break;
 
-	default:
+	case TDIR_DEPRECATED_2: // WEEK_RECREATEAFTERNWEEKS
 		ASSERT(0);
 		break;
 	}
@@ -681,7 +681,7 @@ CTDLRecurringTaskMonthlyOptionPage::CTDLRecurringTaskMonthlyOptionPage(const TDC
 		m_nSpecificNumMonths = dwSpecific2;
 		break;
 
-	default:
+	case TDIR_DEPRECATED_3: // MONTH_RECREATEAFTERNMONTHS
 		ASSERT(0);
 		break;
 	}
@@ -901,7 +901,7 @@ CTDLRecurringTaskYearlyOptionPage::CTDLRecurringTaskYearlyOptionPage(const TDCRE
 		m_dwSpecificMonths = dwSpecific2;
 		break;
 
-	default:
+	case TDIR_DEPRECATED_4: // YEAR_RECREATEAFTERNYEARS
 		ASSERT(0);
 		break;
 	}
