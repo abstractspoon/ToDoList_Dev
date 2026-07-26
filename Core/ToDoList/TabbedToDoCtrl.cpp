@@ -4907,16 +4907,6 @@ BOOL CTabbedToDoCtrl::HitTest(const CPoint& ptScreen, TDCHITTEST& hitTest) const
 
 			if (pExt && pExt->HitTest(ptScreen, iuiRes))
 			{
-				switch (hitTest.nResult)
-				{
-				case IUI_TASK:
-				case IUI_TASKICON:
-				case IUI_TASKTITLE:
-				case IUI_TASKLIST:
-					if (!ViewSupportsNewTask(nView) && !ViewHasTaskSelection(nView))
-						return FALSE;
-					break;
-				}
 
 				return TDC::MapIUIHitTestResultToHitTestResult(iuiRes, hitTest);
 			}
