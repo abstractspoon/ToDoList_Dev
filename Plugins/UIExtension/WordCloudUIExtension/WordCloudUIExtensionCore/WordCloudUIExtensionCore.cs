@@ -422,19 +422,7 @@ namespace WordCloudUIExtension
 
 		public bool HitTest(Int32 xScreen, Int32 yScreen, UIExtension.HitTest hitTest)
 		{
-			if (!m_TaskMatchesList.HitTest(new Point(xScreen, yScreen), hitTest))
-				return false;
-
-			// Prevent the default mini task context menu
-			// in the event of no selection or empty list
-			if (!m_TaskMatchesList.HasSelection)
-			{
-				hitTest.result = UIExtension.HitTestResult.Nowhere;
-				return false;
-			}
-
-			// else
-			return true;
+			return m_TaskMatchesList.HitTest(new Point(xScreen, yScreen), hitTest);
 		}
 
 		public bool ShowContextMenu(Int32 xScreen, Int32 yScreen)
