@@ -220,6 +220,7 @@ BOOL CTDLTaskTreeCtrl::HitTest(const CPoint& ptScreen, TDCHITTEST& hitTest) cons
 			hitTest.nColumnID = TDCC_CLIENT;
 		}
 	}
+	ASSERT(hitTest.IsValid());
 
 	return TRUE;
 }

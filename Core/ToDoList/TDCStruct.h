@@ -19,7 +19,9 @@
 
 struct TDCHITTEST
 {
-	TDCHITTEST() : nResult(TDCHT_NOWHERE), dwTaskID(0), nColumnID(TDCC_NONE) {}
+	TDCHITTEST();
+
+	BOOL IsValid() const;
 
 	TDC_HITTESTRESULT nResult;
 	DWORD dwTaskID;

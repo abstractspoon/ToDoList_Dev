@@ -4903,12 +4903,15 @@ BOOL CTabbedToDoCtrl::HitTest(const CPoint& ptScreen, TDCHITTEST& hitTest) const
 			IUIExtensionWindow* pExt = GetExtensionWnd(nView);
 			ASSERT(pExt);
 
-			IUIHITTEST iuiRes = {	IUI_NOWHERE, 0 };
+			IUIHITTEST iuiRes = { IUI_NOWHERE, 0 };
 
-			if (pExt && pExt->HitTest(ptScreen, iuiRes))
+			if (pExt)
 			{
-
-				return TDC::MapIUIHitTestResultToHitTestResult(iuiRes, hitTest);
+				CRect rWindow;
+				::GetWindowRect(pExt->GetHwnd(), rWindow);
+				
+				if (rWindow.PtInRect(ptScreen) && pExt->HitTest(ptScreen, iuiRes))
+					return TDC::MapIUIHitTestResultToHitTestResult(iuiRes, hitTest);
 			}
 		}
 		break;
