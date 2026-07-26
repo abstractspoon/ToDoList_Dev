@@ -63,12 +63,8 @@ namespace DayViewUIExtension
 		private Translator m_Trans;
 		private UIThemeToolbarRenderer m_ToolbarRenderer;
 
-		private int LabelTipBorder
-		{
-			get { return DPIScaling.Scale(4); }
-		}
-
-		public bool ReadOnly { get; set; }
+		private int LabelTipBorder = DPIScaling.Scale(4);
+		private int MinHitTestWidth = DPIScaling.Scale(8);
 
 		// ----------------------------------------------------------------
 
@@ -119,10 +115,6 @@ namespace DayViewUIExtension
 			return this;
 		}
 
-		public bool ForceShowSelection;
-
-		protected override bool WantDrawDaySelection { get { return base.WantDrawDaySelection || ForceShowSelection; } }
-
 		public LabelTipInfo ToolHitTest(Point ptScreen)
 		{
 			if (IsResizingAppointment())
@@ -136,11 +128,11 @@ namespace DayViewUIExtension
 			if (apptView == null)
 				return null;
 
-			var tipRect = CalcTextRect(apptView, apptRect);
+			var textRect = CalcTextRect(apptView, apptRect);
 
 			// Recheck that the mouse if over the title text
 			// unless the tip rect is too narrow to be hit
-			if ((tipRect.Width > (m_RenderHelper.TextPadding * 2)) && !tipRect.Contains(pt))
+			if ((textRect.Width > MinHitTestWidth) && !textRect.Contains(pt))
 				return null;
 
 			var appt = apptView.Appointment;
@@ -150,7 +142,7 @@ namespace DayViewUIExtension
 				Font = m_RenderHelper.GetFont(GetTaskFontStyle(appt)),
 				Id = appt.Id,
 				MultiLine = false, // always
-				Rect = tipRect,
+				Rect = textRect,
 			};
 
 			// Tip text and size
@@ -223,6 +215,11 @@ namespace DayViewUIExtension
 
 			return tip;
 		}
+
+		public bool ForceShowSelection;
+		public bool ReadOnly;
+
+		protected override bool WantDrawDaySelection { get { return base.WantDrawDaySelection || ForceShowSelection; } }
 
 		private void OnDayViewAppointmentChanged(object sender, Calendar.AppointmentEventArgs args)
 		{
@@ -819,7 +816,7 @@ namespace DayViewUIExtension
 				{
 					hitTest.result = UIExtension.HitTestResult.TaskIcon;
 				}
-				else if (textRect.Contains(ptClient))
+				else if ((textRect.Width < MinHitTestWidth) || textRect.Contains(ptClient))
 				{
 					hitTest.result = UIExtension.HitTestResult.TaskTitle;
 				}
