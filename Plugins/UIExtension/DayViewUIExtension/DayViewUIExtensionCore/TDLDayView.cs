@@ -129,57 +129,25 @@ namespace DayViewUIExtension
 				return null;
 
 			var pt = PointToClient(ptScreen);
+			var apptRect = Rectangle.Empty;
 
-			var tipRect = Rectangle.Empty;
-			var tdlView = (GetAppointmentViewAt(pt.X, pt.Y, out tipRect) as TDLAppointmentView);
+			var apptView = GetAppointmentViewAt(pt.X, pt.Y, out apptRect);
 
-			if (tdlView == null)
+			if (apptView == null)
 				return null;
 
-			// Exclude the icon and gripper from the tip rect
-			var appt = GetRealAppointment(tdlView.Appointment);
-			int xOffset = 0;
-
-			TaskItem item = (appt as TaskItem);
-			bool hasIcon = TaskHasIcon(item);
-			bool isLongAppt = IsLongAppt(appt);
-
-			if (isLongAppt)
-			{
-				if (DisplayLongTasksContinuous)
-				{
-					xOffset = (tdlView.GripRect.Right - tipRect.Left);
-
-					if (hasIcon)
-						xOffset += (m_RenderHelper.ImageSize + (2 * m_RenderHelper.TextPadding));
-				}
-				else
-				{
-					bool startPortion = (tipRect.Right < tdlView.Rectangle.Right);
-
-					if (startPortion)
-						xOffset = tdlView.TextHorzOffset;
-				}
-			}
-			else // short appointment
-			{
-				if (hasIcon)
-					xOffset = (m_RenderHelper.ImageSize + (2 * m_RenderHelper.TextPadding));
-				else
-					xOffset = (tdlView.GripRect.Right - tipRect.Left);
-			}
-
-			tipRect.Offset(xOffset, m_RenderHelper.TextOffset);
-			tipRect.Width -= xOffset;
+			var tipRect = CalcTextRect(apptView, apptRect);
 
 			// Recheck that the mouse if over the title text
 			// unless the tip rect is too narrow to be hit
 			if ((tipRect.Width > (m_RenderHelper.TextPadding * 2)) && !tipRect.Contains(pt))
 				return null;
 
+			var appt = apptView.Appointment;
+
 			var tip = new LabelTipInfo()
 			{
-				Font = m_RenderHelper.GetFont(GetTaskFontStyle(tdlView.Appointment)),
+				Font = m_RenderHelper.GetFont(GetTaskFontStyle(appt)),
 				Id = appt.Id,
 				MultiLine = false, // always
 				Rect = tipRect,
@@ -219,7 +187,7 @@ namespace DayViewUIExtension
 			{
 				tip.Text = appt.Title;
 
-				if (isLongAppt)
+				if (IsLongAppt(appt))
 				{
 					// single line tooltips
 					Size tipSize = m_LabelTip.CalcTipSize(tip.Text, tip.Font, tip.Rect.Width);
@@ -795,26 +763,63 @@ namespace DayViewUIExtension
 			return ((appt != null) && ((appt is TaskItem) || (appt is TaskFutureOccurrence)));
 		}
 
+		private Rectangle CalcTextRect(Calendar.AppointmentView apptView, Rectangle apptRect)
+		{
+			var tdlView = (apptView as TDLAppointmentView);
+
+			if (tdlView == null)
+				return Rectangle.Empty;
+
+			// Exclude the icon and gripper from the rect
+			TaskItem item = (GetRealAppointment(apptView.Appointment) as TaskItem);
+
+			var textRect = apptRect;
+			int xOffset = 0;
+
+			if (IsLongAppt(item) && !DisplayLongTasksContinuous)
+			{
+				bool startPortion = (textRect.Right < tdlView.Rectangle.Right);
+
+				if (startPortion)
+					xOffset = tdlView.TextHorzOffset;
+			}
+			else
+			{
+				if (TaskHasIcon(item))
+					xOffset = (tdlView.IconRect.Right - textRect.Left);
+				else
+					xOffset = (tdlView.GripRect.Right - textRect.Left);
+			}
+
+			textRect.Offset(xOffset, m_RenderHelper.TextOffset);
+			textRect.Width -= xOffset;
+
+			return textRect;
+		}
+
 		public bool HitTest(Point ptScreen, UIExtension.HitTest hitTest)
 		{
 			Point ptClient = PointToClient(ptScreen);
-			Calendar.Appointment appt = GetAppointmentAt(ptClient.X, ptClient.Y);
 
-			if (appt != null)
+			var apptRect = Rectangle.Empty;
+			var apptView = GetAppointmentViewAt(ptClient.X, ptClient.Y, out apptRect);
+
+			if (apptView != null)
 			{
-				var apptView = (GetAppointmentView(appt) as TDLAppointmentView);
+				var textRect = CalcTextRect(apptView, apptRect);
+				var tdlView = (apptView as TDLAppointmentView);
 
-				if (apptView == null)
+				if (tdlView == null)
 					return false;
 
 				hitTest.result = UIExtension.HitTestResult.Task;
-				hitTest.taskId = m_TaskItems.GetRealTaskId(appt);
+				hitTest.taskId = m_TaskItems.GetRealTaskId(apptView.Appointment);
 
-				if (apptView.IconRect.Contains(ptClient))
+				if (tdlView.IconRect.Contains(ptClient))
 				{
 					hitTest.result = UIExtension.HitTestResult.TaskIcon;
 				}
-				else if (GetItemLabelRect(appt).Contains(ptClient))
+				else if (textRect.Contains(ptClient))
 				{
 					hitTest.result = UIExtension.HitTestResult.TaskTitle;
 				}
@@ -844,10 +849,14 @@ namespace DayViewUIExtension
 				{
 					apptRect.Width = (tdlView.EndOfStart - apptRect.X);
 				}
-				else
+				else if (x > tdlView.StartOfEnd)
 				{
 					apptRect.Width = (apptRect.Right - tdlView.StartOfEnd);
 					apptRect.X = tdlView.StartOfEnd;
+				}
+				else // must be 'today'
+				{
+					// TODO
 				}
 			}
 
