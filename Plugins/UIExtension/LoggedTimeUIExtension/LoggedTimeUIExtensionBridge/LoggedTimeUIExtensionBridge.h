@@ -62,7 +62,6 @@ public:
    bool DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData);
    bool CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA* pData) const;
 
-
    void SetUITheme(const UITHEME* pTheme);
    void SetReadOnly(bool bReadOnly);
    HWND GetHwnd() const;
@@ -76,9 +75,8 @@ public:
    bool SelectTasks(const DWORD* /*pdwTaskIDs*/, int /*nTaskCount*/) { return false; }
    bool PrepareNewTask(ITaskList* /*pTask*/) const { return false; }
    bool GetLabelEditRect(LPRECT /*pEdit*/) { return false; }
+   bool HitTest(POINT /*ptScreen*/, IUIHITTEST& /*hitTest*/) const { return false; }
    void FilterToolTipMessage(MSG* /*pMsg*/) { }
-   IUI_HITTEST HitTest(POINT /*ptScreen*/, IUI_HITTESTREASON /*nReason*/) const {return IUI_NOWHERE; }
-   DWORD HitTestTask(POINT /*ptScreen*/, IUI_HITTESTREASON /*nReason*/) const { return 0L; }
 
 protected:
    gcroot<LoggedTimeUIExtensionCore^> m_wnd;

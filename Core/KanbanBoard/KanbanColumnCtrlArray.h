@@ -43,7 +43,7 @@ public:
 	void SetReadOnly(BOOL bReadOnly);
 	int GetVisibleTaskCount() const;
 	float GetAverageCharWidth();
-	DWORD HitTestTask(const CPoint& ptScreen, BOOL bIcon) const;
+	BOOL HitTest(const CPoint& ptScreen, IUIHITTEST& hitTest) const;
 	void SetAttributeLabelVisibility(KBC_ATTRIBLABELS nLabelVis);
 	void FilterToolTipMessage(MSG* pMsg);
 	void SetFullColumnColor(COLORREF crFull);

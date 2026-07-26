@@ -1691,21 +1691,44 @@ LRESULT CKanbanColumnCtrl::OnGetNextItem(WPARAM wp, LPARAM /*lp*/)
 	return (LRESULT)hti;
 }
 
-HTREEITEM CKanbanColumnCtrl::HitTestItem(const CPoint& ptScreen, BOOL bIcon) const
+BOOL CKanbanColumnCtrl::HitTest(const CPoint& ptScreen, IUIHITTEST& hitTest) const
 {
 	CPoint ptClient(ptScreen);
 	ScreenToClient(&ptClient);
 
-	UINT nFlags = 0;
-	HTREEITEM hti = CTreeCtrl::HitTest(ptClient, &nFlags);
+	CRect rClient;
+	GetClientRect(rClient);
 
-	if (hti)
+	if (!rClient.PtInRect(ptClient))
+		return FALSE;
+
+	HTREEITEM htiHit = CTreeCtrl::HitTest(ptClient);
+
+	if (!htiHit)
 	{
-		if (bIcon && (HitTestImage(hti, ptClient) != KBCI_ICON))
-			hti = NULL;
+		hitTest.nResult = IUI_TASKLIST;
 	}
+	else
+	{
+		hitTest.dwTaskID = GetTaskID(htiHit);
+		hitTest.nResult = IUI_TASK;
 
-	return hti;
+		if (!HitTestCheckbox(htiHit, ptClient))
+		{
+			switch (HitTestImage(htiHit, ptClient))
+			{
+			case KBCI_ICON:
+				hitTest.nResult = IUI_TASKICON;
+				break;
+
+			case KBCI_NONE:
+				hitTest.nResult = IUI_TASKTITLE;
+				break;
+			}
+		}
+	}
+	
+	return TRUE;
 }
 
 HTREEITEM CKanbanColumnCtrl::FindItem(const IUISELECTTASK& select, BOOL bNext, HTREEITEM htiStart) const

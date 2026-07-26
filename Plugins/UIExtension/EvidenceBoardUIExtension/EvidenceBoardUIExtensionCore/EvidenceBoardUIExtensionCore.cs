@@ -223,22 +223,10 @@ namespace EvidenceBoardUIExtension
             return true;
         }
 
-        public UIExtension.HitTestResult HitTest(Int32 xScreen, Int32 yScreen, UIExtension.HitTestReason reason)
+        public bool HitTest(Int32 xScreen, Int32 yScreen, UIExtension.HitTest hitTest)
         {
-			if (HitTestTask(xScreen, yScreen, reason) != 0)
-				return UIExtension.HitTestResult.Task;
-
-			// else
-			if (m_Control.RectangleToScreen(m_Control.ClientRectangle).Contains(xScreen, yScreen))
-				return UIExtension.HitTestResult.Tasklist;
-
-			return UIExtension.HitTestResult.Nowhere;
+			return m_Control.HitTest(new Point(xScreen, yScreen), hitTest);
 		}
-
-		public UInt32 HitTestTask(Int32 xScreen, Int32 yScreen, UIExtension.HitTestReason reason)
-        {
-			return m_Control.HitTestTaskId(new Point(xScreen, yScreen), (reason == UIExtension.HitTestReason.ImageTip));
-        }
 
         public void SetUITheme(UITheme theme)
         {

@@ -395,32 +395,40 @@ namespace EisenhowerUIExtension
 			return EisenhowerVariable.Supports(attribId);
 		}
 
-		public UIExtension.HitTestResult HitTest(Point screenPos)
+		public bool HitTest(Point screenPos, UIExtension.HitTest hitTest)
 		{
 			foreach (var p in m_Panes)
 			{
-				var hitTest = p.HitTest(screenPos);
-
-				if (hitTest != UIExtension.HitTestResult.Nowhere)
-					return hitTest;
+				if (p.HitTest(screenPos, hitTest))
+					return true;
 			}
 
 			// else
-			return UIExtension.HitTestResult.Nowhere;
+			return false;
 		}
 
-		public uint HitTestTask(Point screenPos, bool icon)
+		public bool ShowContextMenu(Point screenPos)
 		{
-			foreach (var p in m_Panes)
-			{
-				uint taskId = p.HitTestTask(screenPos, icon);
+			// We never show a custom menu ourselves but this
+			// allows us to prepare the target pane and selected
+			// task(s) to mimic the behaviour of the 'Kanban' view
+			var hitPane = HitTestPane(screenPos);
 
-				if (taskId != 0)
-					return taskId;
+			if ((hitPane != null) && !hitPane.Selected && !hitPane.HasSelection)
+			{
+				// Select the pane and select the first task
+				SelectedPane = hitPane; // Visual cue for user
+
+				var taskIds = new List<uint>();
+
+				if (hitPane.FirstTaskId != 0)
+					taskIds.Add(hitPane.FirstTaskId);
+
+				hitPane.SelectTasks(taskIds);
+				SelectionChange?.Invoke(this, taskIds);
 			}
 
-			// else
-			return 0;
+			return false; // always
 		}
 
 		public uint GetTaskId(UIExtension.GetTask getTask)

@@ -73,7 +73,6 @@ CCalendarCtrl::~CCalendarCtrl()
 }
 
 BEGIN_MESSAGE_MAP(CCalendarCtrl, CWnd)
-	//{{AFX_MSG_MAP(CCalendarCtrl)
 	ON_WM_PAINT()
 	ON_WM_LBUTTONDOWN()
 	ON_WM_LBUTTONUP()
@@ -81,7 +80,6 @@ BEGIN_MESSAGE_MAP(CCalendarCtrl, CWnd)
 	ON_WM_VSCROLL()
 	ON_WM_MOUSEWHEEL()
 	ON_WM_LBUTTONDBLCLK()
-	//}}AFX_MSG_MAP
 	ON_WM_KEYDOWN()
 	ON_WM_RBUTTONDOWN()
 	ON_WM_GETDLGCODE()
@@ -305,18 +303,6 @@ BOOL CCalendarCtrl::GetGridCell(const COleDateTime& date, int &nRow, int &nCol) 
 	nCol = (nCell % CALENDAR_NUM_COLUMNS);
 
 	return true;
-}
-
-BOOL CCalendarCtrl::PtInHeader(const CPoint& ptScreen) const
-{
-	CPoint ptHeader(ptScreen);
-	ScreenToClient(&ptHeader);
-
-	CRect rHeader;
-	GetClientRect(rHeader);
-	rHeader.bottom = rHeader.top + m_nHeaderHeight;
-
-	return rHeader.PtInRect(ptHeader);
 }
 
 int CCalendarCtrl::GetDayOfWeek(int nCol) const

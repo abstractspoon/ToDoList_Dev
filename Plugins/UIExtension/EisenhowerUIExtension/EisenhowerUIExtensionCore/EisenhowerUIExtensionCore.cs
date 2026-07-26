@@ -203,14 +203,14 @@ namespace EisenhowerUIExtension
 			return true;
 		}
 
-		public UIExtension.HitTestResult HitTest(Int32 xScreen, Int32 yScreen, UIExtension.HitTestReason reason)
+		public bool HitTest(Int32 xScreen, Int32 yScreen, UIExtension.HitTest hitTest)
 		{
-			return m_EisenhowerCtrl.HitTest(new Point(xScreen, yScreen));
+			return m_EisenhowerCtrl.HitTest(new Point(xScreen, yScreen), hitTest);
 		}
 
-		public UInt32 HitTestTask(Int32 xScreen, Int32 yScreen, UIExtension.HitTestReason reason)
+		public bool ShowContextMenu(Int32 xScreen, Int32 yScreen)
 		{
-			return m_EisenhowerCtrl.HitTestTask(new Point(xScreen, yScreen), (reason == UIExtension.HitTestReason.ImageTip));
+			return m_EisenhowerCtrl.ShowContextMenu(new Point(xScreen, yScreen));
 		}
 
 		public void SetUITheme(UITheme theme)

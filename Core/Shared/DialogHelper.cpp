@@ -2245,3 +2245,25 @@ BOOL CDialogHelper::SelectText(const CWnd* pParent, UINT nCtrlID, LPCTSTR szText
 {
 	return SelectText(pParent->GetDlgItem(nCtrlID), szText, nSearchStart, nSearchLen);
 }
+
+BOOL CDialogHelper::PointInRect(POINT point, HWND hWnd, BOOL bScreenCoords, BOOL bClientRect)
+{
+	CRect rect;
+
+	if (bClientRect)
+	{
+		::GetClientRect(hWnd, rect);
+
+		if (bScreenCoords)
+			::ScreenToClient(hWnd, &point);
+	}
+	else
+	{
+		::GetWindowRect(hWnd, rect);
+
+		if (!bScreenCoords)
+			::ClientToScreen(hWnd, &point);
+	}
+
+	return rect.PtInRect(point);
+}

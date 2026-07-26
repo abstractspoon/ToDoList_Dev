@@ -171,12 +171,17 @@ namespace WordCloudUIExtension
 			}
 		}
 
-		protected override void OnMouseClick(MouseEventArgs e)
+		protected override void OnMouseDown(MouseEventArgs e)
 		{
-			bool focused = Focus();
+			Focus();
 
 			m_ToolTip.SetToolTip(this, "");
 
+			base.OnMouseDown(e);
+		}
+
+		protected override void OnMouseClick(MouseEventArgs e)
+		{
 			if (base.m_ItemUnderMouse != null)
 			{
 				if ((m_SelectedWord == null) || !m_SelectedWord.Equals(base.m_ItemUnderMouse.Word.Text))

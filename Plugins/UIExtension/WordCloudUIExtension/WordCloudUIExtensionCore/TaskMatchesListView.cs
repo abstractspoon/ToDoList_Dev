@@ -43,6 +43,10 @@ namespace WordCloudUIExtension
 				Columns.Add(Translate("ID", Translator.Type.Header));
 
 				Columns[1].Width = -2; // Header width
+
+				// Hack to prevent base class showing a 'no-drag' cursor
+				// until we can work out a better fix
+				IsTaskDraggable += (s, e) => { return true; };
 			}
 
             return true;
@@ -121,7 +125,7 @@ namespace WordCloudUIExtension
 					Items[0].Selected = true;
 					EnsureSelectionVisible();
 
-					taskId = GetTaskId(0);
+					taskId = base.GetTaskId(0);
 				}
 			}
 
@@ -189,25 +193,6 @@ namespace WordCloudUIExtension
             Invalidate();
 
 			return someUpdated;
-		}
-
-		public new UIExtension.HitTestResult HitTest(Point screenPos)
-		{
-			if (PointInHeader(screenPos))
-				return UIExtension.HitTestResult.Nowhere;
-
-			Point ptClient = PointToClient(screenPos);
-
-			if (!ClientRectangle.Contains(ptClient))
-				return UIExtension.HitTestResult.Nowhere;
-
-			var lvHit = base.HitTest(ptClient);
-
-			if (lvHit.Item != null)
-				return UIExtension.HitTestResult.Task;
-
-			// else
-			return UIExtension.HitTestResult.Tasklist;
 		}
 
 		protected override bool TaskMatches(ITaskBase task, String phrase, bool caseSensitive, bool wholeWord, bool findReplace)

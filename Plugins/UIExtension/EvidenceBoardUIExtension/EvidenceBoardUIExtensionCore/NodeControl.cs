@@ -1353,14 +1353,19 @@ namespace EvidenceBoardUIExtension
 		{
 			foreach (var node in HitTestableNodes)
 			{
-				var btnRect = CalcExpansionButtonRect(GetNodeClientRect(node));
-				btnRect.Inflate(ExpansionBtnBorder, ExpansionBtnBorder);
-
-				if (btnRect.Contains(ptClient))
+				if (HitTestExpansionButton(node, ptClient))
 					return node;
 			}
 
 			return null;
+		}
+
+		protected bool HitTestExpansionButton(BaseNode node, Point ptClient)
+		{
+			var btnRect = CalcExpansionButtonRect(GetNodeClientRect(node));
+			btnRect.Inflate(ExpansionBtnBorder, ExpansionBtnBorder);
+
+			return btnRect.Contains(ptClient);
 		}
 
 		protected override void OnMouseDown(MouseEventArgs e)

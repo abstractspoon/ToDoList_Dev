@@ -321,14 +321,22 @@ bool CEisenhowerUIExtensionBridgeWindow::GetLabelEditRect(LPRECT pEdit)
 	return m_wnd->GetLabelEditRect((Int32&)pEdit->left, (Int32&)pEdit->top, (Int32&)pEdit->right, (Int32&)pEdit->bottom);
 }
 
-IUI_HITTEST CEisenhowerUIExtensionBridgeWindow::HitTest(POINT ptScreen, IUI_HITTESTREASON nReason) const
+bool CEisenhowerUIExtensionBridgeWindow::HitTest(POINT ptScreen, IUIHITTEST& hitTest) const
 {
-	return UIExtension::MapHitTestResult(m_wnd->HitTest(ptScreen.x, ptScreen.y, UIExtension::MapHitTestReason(nReason)));
+	auto ht = gcnew UIExtension::HitTest();
+
+	if (!m_wnd->HitTest(ptScreen.x, ptScreen.y, ht))
+		return false;
+
+	hitTest.dwTaskID = ht->taskId;
+	hitTest.nResult = UIExtension::MapHitTestResult(ht->result);
+
+	return true;
 }
 
-DWORD CEisenhowerUIExtensionBridgeWindow::HitTestTask(POINT ptScreen, IUI_HITTESTREASON nReason) const
+bool CEisenhowerUIExtensionBridgeWindow::ShowContextMenu(POINT ptScreen)
 {
-	return m_wnd->HitTestTask(ptScreen.x, ptScreen.y, UIExtension::MapHitTestReason(nReason));
+	return m_wnd->ShowContextMenu(ptScreen.x, ptScreen.y);
 }
 
 void CEisenhowerUIExtensionBridgeWindow::SetUITheme(const UITHEME* pTheme)

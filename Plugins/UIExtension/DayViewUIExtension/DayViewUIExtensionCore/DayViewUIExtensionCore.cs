@@ -199,14 +199,9 @@ namespace DayViewUIExtension
             return false;
 		}
 
-		public UIExtension.HitTestResult HitTest(Int32 xScreen, Int32 yScreen, UIExtension.HitTestReason reason)
+		public bool HitTest(int xScreen, int yScreen, UIExtension.HitTest hitTest)
 		{
-			return m_DayView.HitTest(xScreen, yScreen, reason);
-		}
-
-		public UInt32 HitTestTask(Int32 xScreen, Int32 yScreen, UIExtension.HitTestReason reason)
-		{
-			return m_DayView.HitTestTask(xScreen, yScreen, reason);
+			return m_DayView.HitTest(new Point(xScreen, yScreen), hitTest);
 		}
 
 		public bool ShowContextMenu(Int32 xScreen, Int32 yScreen)

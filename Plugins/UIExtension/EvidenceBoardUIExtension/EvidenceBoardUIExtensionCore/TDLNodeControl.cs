@@ -609,12 +609,55 @@ namespace EvidenceBoardUIExtension
 			return false;
 		}
 
-		public uint HitTestTaskId(Point ptScreen, bool icon)
+		public bool HitTest(Point ptScreen, UIExtension.HitTest hitTest)
 		{
 			var ptClient = PointToClient(ptScreen);
-			var task = (icon ? HitTestTaskIcon(ptClient) : HitTestTask(ptClient));
 
-			return task?.TaskId ?? 0;
+			if (!ClientRectangle.Contains(ptClient))
+				return false;
+
+			hitTest.result = UIExtension.HitTestResult.Tasklist;
+
+			var node = HitTestNode(ptClient, true); // exclude root node
+
+			if (node != null)
+			{
+				var task = GetTaskItem(node.Data);
+
+				var labelRect = GetNodeClientRect(node);
+				var iconRect = CalcIconRect(labelRect);
+
+				// Exclude icon and/or image expansion button
+				// from the label rect
+				if (task.HasIcon || task.HasImage)
+				{
+					labelRect.X = iconRect.Right;
+					labelRect.Width -= iconRect.Width;
+				}
+				else
+				{
+					iconRect = Rectangle.Empty;
+				}
+
+				hitTest.taskId = task.TaskId;
+				hitTest.result = UIExtension.HitTestResult.Task;
+
+				if (iconRect.Contains(ptClient))
+				{
+					hitTest.result = UIExtension.HitTestResult.TaskIcon;
+				}
+				else if (labelRect.Contains(ptClient))
+				{
+					if ((!task.HasImage || !CalcImageRect(task, labelRect, false).Contains(ptClient)) &&
+						!HitTestExpansionButton(node, ptClient) && 
+						!HitTestHotNodeCreateLink(ptClient))
+					{
+						hitTest.result = UIExtension.HitTestResult.TaskTitle;
+					}
+				}
+			}
+
+			return true;
 		}
 
 		Rectangle CalcTaskLabelRect(TaskItem taskItem, Rectangle rect, bool multiLine)
@@ -2396,6 +2439,11 @@ namespace EvidenceBoardUIExtension
 			if (taskItem == null)
 				return null;
 
+			// The icon rect not clickable if the task has 
+			// neither an icon nor an image (expansion button)
+			if (!taskItem.HasIcon && !taskItem.HasImage)
+				return null;
+
 			if (!CalcIconRect(GetNodeClientRect(node)).Contains(ptClient))
 				return null;
 
@@ -2814,13 +2862,11 @@ namespace EvidenceBoardUIExtension
 			base.OnQueryContinueDrag(e);
 		}
 
-		// ILabelTipHandler implementation
+		// ILabelTipHandler implementation -----------------------------------
 		public Control GetOwner()
 		{
 			return this;
 		}
-
-		const uint NoTip = 0xffffffff;
 
 		enum TipId
 		{
@@ -2852,16 +2898,16 @@ namespace EvidenceBoardUIExtension
 			var taskItem = GetTaskItem(node);
 			var nodeRect = GetNodeClientRect(node);
 
+			if (CalcExpansionButtonRect(nodeRect).Contains(clientPos))
+				return null;
+
 			var tip = new LabelTipInfo();
 
+			// Expository (non-label) tooltips
 			if (Rectangle.Inflate(GetCreateLinkPinRect(node), 1, 1).Contains(clientPos))
 			{
 				tip.Text = m_Trans.Translate("New Connection", Translator.Type.ToolTip);
 				tip.Id = TooltipId(taskItem, TipId.CreateLinkPin);
-			}
-			else if (CalcExpansionButtonRect(nodeRect).Contains(clientPos))
-			{
-				tip.Id = NoTip;
 			}
 			else if (taskItem.HasImage)
 			{
@@ -2901,16 +2947,13 @@ namespace EvidenceBoardUIExtension
 
 			if (tip.Id != 0)
 			{
-				if (tip.Id != NoTip)
-				{
-					// These are really tooltips not label tips so offset them
-					clientPos.Offset(0, ToolStripEx.GetActualCursorHeight(Cursor));
+				// These are really tooltips not label tips so offset them
+				clientPos.Offset(0, ToolStripEx.GetActualCursorHeight(Cursor));
 
-					tip.Rect.Location = clientPos;
-					tip.InitialDelay = 500;
-					tip.MultiLine = false;
-					tip.Font = Font;
-				}
+				tip.Rect.Location = clientPos;
+				tip.InitialDelay = 500;
+				tip.MultiLine = false;
+				tip.Font = Font;
 			}
 			else // check for title tip
 			{
@@ -2948,6 +2991,7 @@ namespace EvidenceBoardUIExtension
 			return tip;
 		}
 
+		// ----------------------------------------------------------------
 
 		public bool SetBackgroundImage(string filePath)
 		{

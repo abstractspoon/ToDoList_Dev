@@ -6,7 +6,6 @@
 #endif // _MSC_VER > 1000
 // KanbanListCtrl.h : header file
 //
-
 /////////////////////////////////////////////////////////////////////////////
 
 #include "Kanbanstruct.h"
@@ -32,7 +31,7 @@ const UINT WM_KLCN_SHOWFILELINK		= (WM_APP+7); // WPARAM = HWND, LPARAM = LPCTST
 const UINT WM_KLCN_EDITTASKLOCK		= (WM_APP+8); // WPARAM = HWND, LPARAM = TRUE/FALSE
 
 /////////////////////////////////////////////////////////////////////////////
-// CKanbanListCtrlEx window
+// CKanbanColumnCtrl window
 
 class CKanbanColumnCtrl : public CTreeCtrl, protected CDragDropData
 {
@@ -99,7 +98,8 @@ public:
 
 	BOOL GetLabelEditRect(LPRECT pEdit);
 	BOOL GetItemBounds(HTREEITEM hti, LPRECT lpRect) const;
-	HTREEITEM HitTestItem(const CPoint& ptScreen, BOOL bIcon) const;
+	BOOL HitTest(const CPoint& ptScreen, IUIHITTEST& hitTest) const;
+	HTREEITEM HitTest(const CPoint& point, UINT* pFlags = NULL) const { return CTreeCtrl::HitTest(point, pFlags); }
 
 	void ClearSelection();
 	void SetSelected(BOOL bSelected);

@@ -171,6 +171,11 @@ namespace MindMapUIExtension
 			m_DoneLabelFont = null;
 		}
 
+		private bool IsDragging
+		{
+			get { return (bool)m_DragImage?.IsValid(); }
+		}
+
 		// ILabelTipHandler implementation
 		public Control GetOwner()
 		{
@@ -179,6 +184,9 @@ namespace MindMapUIExtension
 
 		public LabelTipInfo ToolHitTest(Point ptScreen)
 		{
+			if (IsDragging)
+				return null;
+
 			var pt = PointToClient(ptScreen);
 			var hit = HitTestPositions(pt);
 
@@ -187,10 +195,10 @@ namespace MindMapUIExtension
 
 			var labelRect = GetItemLabelRect(hit);
 
-			if (!labelRect.Contains(pt))
+			if (ClientRectangle.Contains(labelRect))
 				return null;
 
-			if (ClientRectangle.Contains(labelRect))
+			if (!labelRect.Contains(pt) || HitTestExpansionButton(hit, pt))
 				return null;
 
 			labelRect.Offset(-1, -1);
@@ -203,6 +211,12 @@ namespace MindMapUIExtension
 				Rect = labelRect,
 				Font = GetNodeTooltipFont(hit),
 			};
+		}
+
+		public bool ShowLabelTips
+		{
+			set { m_LabelTip.Active = value; }
+			get { return m_LabelTip.Active; }
 		}
 
 		protected override void WndProc(ref Message m)
@@ -359,16 +373,33 @@ namespace MindMapUIExtension
             return false;
         }
         		
-		public UInt32 HitTestTask(Point screenPos, bool icon)
+		public bool HitTest(Point screenPos, UIExtension.HitTest hitTest)
 		{
 			var clientPos = PointToClient(screenPos);
+
+			if (!ClientRectangle.Contains(clientPos))
+				return false;
+
+			hitTest.result = UIExtension.HitTestResult.Tasklist;
+
 			var node = HitTestPositions(clientPos);
 
-			if ((node != null) && (!icon || HitTestIcon(node, clientPos)))
-				return UniqueID(node);
-			
-			// else
-			return 0;
+			if ((node != null) && !HitTestExpansionButton(node, clientPos))
+			{
+				hitTest.taskId = UniqueID(node);
+				hitTest.result = UIExtension.HitTestResult.Task;
+
+				if (GetItemLabelRect(node).Contains(clientPos))
+				{
+					hitTest.result = UIExtension.HitTestResult.TaskTitle;
+				}
+				else if (CalcIconRect(base.GetItemLabelRect(node)).Contains(clientPos))
+				{
+					hitTest.result = UIExtension.HitTestResult.TaskIcon;
+				}
+			}
+
+			return true;
 		}
 
 		public new Rectangle GetSelectedItemLabelRect()

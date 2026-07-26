@@ -34,8 +34,6 @@ typedef HRESULT (CALLBACK FAR * LPFN_CALENDAR_DATA_CALLBACK)(CWnd*,const COleDat
 const UINT WM_CALENDAR_VISIBLEWEEKCHANGE = ::RegisterWindowMessage(_T("WM_CALENDAR_VISIBLEWEEKCHANGE"));
 
 /////////////////////////////////////////////////////////////////////////////
-// class CCalendarCell --   
-/////////////////////////////////////////////////////////////////////////////
 
 struct CCalendarCell
 {
@@ -49,8 +47,7 @@ struct CCalendarCell
 };
 
 /////////////////////////////////////////////////////////////////////////////
-// class CCalendarCtrl --   
-/////////////////////////////////////////////////////////////////////////////
+// class CCalendarCtrl 
 
 class CCalendarCtrl : public CWnd
 {
@@ -61,6 +58,7 @@ public:
 
 	BOOL Create(DWORD dwStyle, const CRect &wndRect, CWnd *pParent, UINT nID, LPFN_CALENDAR_DATA_CALLBACK pfnDataCallback = NULL);
 	void Reset();
+	void UpdateCells();
 
 	void Goto(const COleDateTime& dtDate, bool bSelect = false);
 	void GotoToday(bool bSelect = false);
@@ -85,13 +83,6 @@ public:
 	void SetThemeColour(COLORREF crTheme);
 	void SetHeaderHeight(int nHeight);
 	void SetDayHeaderHeight(int nHeight);
-	
-	void UpdateCells();
-	BOOL PtInHeader(const CPoint& ptScreen) const;
-
-	//{{AFX_VIRTUAL(CCalendarCtrl)
-	public:
-	//}}AFX_VIRTUAL
 
 protected:	
 	virtual void DrawHeader(CDC* pDC);
@@ -136,7 +127,7 @@ protected:
 
 	static COleDateTime WholeDays(const COleDateTime& date) { return (double)(int)date.m_dt; }
 
-	//{{AFX_MSG(CCalendarCtrl)
+protected:
 	afx_msg void OnPaint();
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
@@ -144,10 +135,10 @@ protected:
 	afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
 	afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);
-	//}}AFX_MSG
 	afx_msg void OnRButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 	afx_msg UINT OnGetDlgCode();
+
 	DECLARE_MESSAGE_MAP()
 
 	virtual void OnVisibleDateRangeChanged() {} // for derived classes
@@ -173,6 +164,5 @@ protected:
 
 	LPFN_CALENDAR_DATA_CALLBACK	m_pfnDataCallback;
 };
-
 
 #endif // _PERF_CALENDARCTRL_H___INCLUDED

@@ -128,6 +128,16 @@ namespace DayViewUIExtension
 			m_BoldFont?.Dispose();
 		}
 
+		public Font GetFont(FontStyle fontStyle)
+		{
+			var font = BaseFont;
+
+			if (fontStyle != FontStyle.Regular)
+				font = new Font(font, fontStyle);
+
+			return font;
+		}
+
 		public int CalculateMinimumDayWidthForImage(Graphics g)
 		{
 			return (int)Math.Ceiling(g.MeasureString("31/12", BaseFont).Width);
@@ -1168,10 +1178,8 @@ namespace DayViewUIExtension
 			tdlView.IconRect = iconRect;
 		}
 
-		void DrawTaskText(Graphics g, Calendar.AppointmentView apptView, Rectangle rect, Color textColor)
+		FontStyle GetTaskFontStyle(Calendar.Appointment appt)
 		{
-			var appt = apptView.Appointment;
-
 			TaskItem taskItem = GetTaskItem(appt);
 			var fontStyle = FontStyle.Regular;
 
@@ -1180,6 +1188,14 @@ namespace DayViewUIExtension
 
 			if (taskItem.IsTopLevel() && !(appt is TaskFutureOccurrence))
 				fontStyle |= FontStyle.Bold;
+
+			return fontStyle;
+		}
+
+		void DrawTaskText(Graphics g, Calendar.AppointmentView apptView, Rectangle rect, Color textColor)
+		{
+			var appt = apptView.Appointment;
+			var fontStyle = GetTaskFontStyle(appt);
 
 			m_RenderHelper.DrawItemText(g, appt.Title, rect, textColor, fontStyle, apptView.IsLong);
 		}

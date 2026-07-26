@@ -467,7 +467,9 @@ BOOL CTabbedToDoCtrl::PreTranslateMessage(MSG* pMsg)
 				CPoint ptScreen(pMsg->lParam);
 				::ClientToScreen(pMsg->hwnd, &ptScreen);
 
-				if (pExtWnd->HitTest(ptScreen, IUI_CONTEXTMENU) != IUI_NOWHERE)
+				IUIHITTEST hitTest = { IUI_NOWHERE, 0L };
+
+				if (pExtWnd->HitTest(ptScreen, hitTest) && (hitTest.nResult != IUI_NOWHERE))
 				{
 					SendMessage(WM_CONTEXTMENU, pMsg->wParam, MAKELPARAM(ptScreen.x, ptScreen.y));
 					return TRUE;
@@ -2408,7 +2410,6 @@ LRESULT CTabbedToDoCtrl::OnUIExtMoveSelectedTask(WPARAM /*wParam*/, LPARAM lPara
 
 void CTabbedToDoCtrl::OnCustomAttributesChanged()
 {
-	// Must remove any deleted attribute columns before resizing/redrawing
 	m_taskList.OnCustomAttributesChange();
 
 	CToDoCtrl::OnCustomAttributesChanged();
@@ -2891,59 +2892,6 @@ void CTabbedToDoCtrl::SetEditTitleTaskID(DWORD dwTaskID)
 	CToDoCtrl::SetEditTitleTaskID(dwTaskID);
 	
 	m_taskList.SetEditTitleTaskID(dwTaskID);
-}
-
-DWORD CTabbedToDoCtrl::HitTestTask(const CPoint& ptScreen, TDC_HITTESTREASON nReason) const
-{
-	FTC_VIEW nView = GetActiveTaskView();
-
-	switch (nView)
-	{
-	case FTCV_TASKTREE:
-	case FTCV_UNSET:
-		return CToDoCtrl::HitTestTask(ptScreen, nReason);
-
-	case FTCV_TASKLIST:
-		return m_taskList.HitTestTask(ptScreen, nReason);
-
-	case FTCV_UIEXTENSION1:
-	case FTCV_UIEXTENSION2:
-	case FTCV_UIEXTENSION3:
-	case FTCV_UIEXTENSION4:
-	case FTCV_UIEXTENSION5:
-	case FTCV_UIEXTENSION6:
-	case FTCV_UIEXTENSION7:
-	case FTCV_UIEXTENSION8:
-	case FTCV_UIEXTENSION9:
-	case FTCV_UIEXTENSION10:
-	case FTCV_UIEXTENSION11:
-	case FTCV_UIEXTENSION12:
-	case FTCV_UIEXTENSION13:
-	case FTCV_UIEXTENSION14:
-	case FTCV_UIEXTENSION15:
-	case FTCV_UIEXTENSION16:
-		{
-			const IUIExtensionWindow* pExtWnd = GetExtensionWnd(nView);
-
-			if (pExtWnd)
-			{
-				CRect rExtWnd;
-				::GetWindowRect(pExtWnd->GetHwnd(), rExtWnd);
-
-				if (rExtWnd.PtInRect(ptScreen))
-				{
-					IUI_HITTESTREASON nIUIReason = TDC::MapHitTestReasonToIUIReason(nReason);
-					return pExtWnd->HitTestTask(ptScreen, nIUIReason);
-				}
-			}
-		}
-		break;
-
-	default:
-		ASSERT(0);
-	}
-
-	return 0;
 }
 
 DWORD CTabbedToDoCtrl::SetStyle(TDC_STYLE nStyle, BOOL bEnable)
@@ -4922,7 +4870,7 @@ void CTabbedToDoCtrl::OnListClick(NMHDR* pNMHDR, LRESULT* pResult)
 	*pResult = 0;
 }
 
-TDC_HITTEST CTabbedToDoCtrl::HitTest(const CPoint& ptScreen, TDC_HITTESTREASON nReason) const
+BOOL CTabbedToDoCtrl::HitTest(const CPoint& ptScreen, TDCHITTEST& hitTest) const
 {
 	FTC_VIEW nView = GetActiveTaskView();
 
@@ -4930,10 +4878,10 @@ TDC_HITTEST CTabbedToDoCtrl::HitTest(const CPoint& ptScreen, TDC_HITTESTREASON n
 	{
 	case FTCV_TASKTREE:
 	case FTCV_UNSET:
-		return CToDoCtrl::HitTest(ptScreen, nReason);
+		return CToDoCtrl::HitTest(ptScreen, hitTest);
 
 	case FTCV_TASKLIST:
-		return m_taskList.HitTest(ptScreen);
+		return m_taskList.HitTest(ptScreen, hitTest);
 
 	case FTCV_UIEXTENSION1:
 	case FTCV_UIEXTENSION2:
@@ -4955,21 +4903,15 @@ TDC_HITTEST CTabbedToDoCtrl::HitTest(const CPoint& ptScreen, TDC_HITTESTREASON n
 			IUIExtensionWindow* pExt = GetExtensionWnd(nView);
 			ASSERT(pExt);
 
+			IUIHITTEST iuiRes = { IUI_NOWHERE, 0 };
+
 			if (pExt)
 			{
-				IUI_HITTESTREASON nIUIReason = TDC::MapHitTestReasonToIUIReason(nReason);
-				IUI_HITTEST nHit = pExt->HitTest(ptScreen, nIUIReason);
-
-				switch (nHit)
-				{
-				case IUI_TASKLIST:		return TDCHT_TASKLIST;
-				case IUI_COLUMNHEADER:	return TDCHT_COLUMNHEADER;
-				case IUI_TASK:			return TDCHT_TASK;
-
-				case IUI_NOWHERE:
-				default: // fall thru
-					break;
-				}
+				CRect rWindow;
+				::GetWindowRect(pExt->GetHwnd(), rWindow);
+				
+				if (rWindow.PtInRect(ptScreen) && pExt->HitTest(ptScreen, iuiRes))
+					return TDC::MapIUIHitTestResultToHitTestResult(iuiRes, hitTest);
 			}
 		}
 		break;
@@ -4980,44 +4922,7 @@ TDC_HITTEST CTabbedToDoCtrl::HitTest(const CPoint& ptScreen, TDC_HITTESTREASON n
 	}
 
 	// else
-	return TDCHT_NOWHERE;
-}
-
-TDC_COLUMN CTabbedToDoCtrl::HitTestColumn(const CPoint& ptScreen) const
-{
-	FTC_VIEW nView = GetActiveTaskView();
-	
-	switch (nView)
-	{
-	case FTCV_TASKTREE:
-	case FTCV_UNSET:
-		return CToDoCtrl::HitTestColumn(ptScreen);
-
-	case FTCV_TASKLIST:
-		return m_taskList.HitTestColumn(ptScreen);
-
-	case FTCV_UIEXTENSION1:
-	case FTCV_UIEXTENSION2:
-	case FTCV_UIEXTENSION3:
-	case FTCV_UIEXTENSION4:
-	case FTCV_UIEXTENSION5:
-	case FTCV_UIEXTENSION6:
-	case FTCV_UIEXTENSION7:
-	case FTCV_UIEXTENSION8:
-	case FTCV_UIEXTENSION9:
-	case FTCV_UIEXTENSION10:
-	case FTCV_UIEXTENSION11:
-	case FTCV_UIEXTENSION12:
-	case FTCV_UIEXTENSION13:
-	case FTCV_UIEXTENSION14:
-	case FTCV_UIEXTENSION15:
-	case FTCV_UIEXTENSION16:
-		break;
-		
-	default:
-		ASSERT(0);
-	}
-	return TDCC_NONE;
+	return FALSE;
 }
 
 int CTabbedToDoCtrl::GetSortableColumns(CTDCColumnIDMap& mapColIDs) const
@@ -7379,10 +7284,11 @@ void CTabbedToDoCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 	case FTCV_UIEXTENSION15:
 	case FTCV_UIEXTENSION16:
 		{
-			// Try plugins first
+			// Let plugins go first
 			IUIExtensionWindow* pExt = GetExtensionWnd(nView);
+			ASSERT(pExt);
 
-			if (!pExt || pExt->ShowContextMenu(point))
+			if (pExt && pExt->ShowContextMenu(point))
 				return; // handled
 		}
 		break;

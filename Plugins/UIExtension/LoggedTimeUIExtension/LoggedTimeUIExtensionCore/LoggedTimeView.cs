@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading;
 
+using IIControls;
 using Abstractspoon.Tdl.PluginHelpers;
 
 namespace LoggedTimeUIExtension
@@ -91,7 +92,7 @@ namespace LoggedTimeUIExtension
 		public bool HasTasklistPath { get { return !string.IsNullOrWhiteSpace(m_TasklistPath); } }
 
 		public TaskItem GetTask(uint taskId) { return m_TaskItems.GetItem(taskId); }
-		public Control GetOwner() { return this; } // ILabelTipHandler implementation
+		public Control GetOwner() { return this; } // ILabelTipHandler
 		
 		public bool ReadOnly;
 		public bool ForceShowSelection;
@@ -99,104 +100,52 @@ namespace LoggedTimeUIExtension
 
 		protected override bool WantDrawDaySelection { get { return base.WantDrawDaySelection || ForceShowSelection; } }
 
+		// ILabelTipHandler
 		public LabelTipInfo ToolHitTest(Point ptScreen)
 		{
-			return null;
-/*
 			if (IsResizingAppointment())
 				return null;
+
+			var pt = PointToClient(ptScreen);
+			var tipRect = Rectangle.Empty;
+
+			var apptView = GetAppointmentViewAt(pt.X, pt.Y, out tipRect);
+
+			if (apptView == null)
+				return null;
+
+			var entry = (apptView.Appointment as LogEntry);
+
+			var text = new List<string>()
+			{
+				FormatTimeSpent(entry, m_Trans),
+				FormatDuration(entry, m_Trans)
+			};
+
+			if (entry.HasComment)
+				text.Insert(0, entry.Comment);
+
+			if (entry.HasTitle)
+				text.Insert(0, entry.Title);
+
+			// Display as regular tooltip
+			pt.Offset(m_RenderHelper.TextPadding, ToolStripEx.GetActualCursorHeight(Cursor));
+			tipRect.Location = pt;
+
+			// Inflate the rect now we've done all our calculations
+			tipRect.Inflate(m_RenderHelper.TextPadding, m_RenderHelper.TextPadding);
 
 			var tip = new LabelTipInfo()
 			{
 				Font = BaseFont(),
+				Rect = tipRect,
+				Id = entry.Id,
+				MultiLine = true, // always
+				Text = string.Join("\n", text),
+				InitialDelay = 500,
 			};
-
-			var pt = PointToClient(ptScreen);
-			var tdlView = (GetAppointmentViewAt(pt.X, pt.Y, out tip.Rect) as TDLAppointmentView);
-
-			if (tdlView == null)
-				return null;
-
-			bool startPortion = (tip.Rect.Right < tdlView.Rectangle.Right);
-
-			tip.Rect.Offset(startPortion ? tdlView.TextHorzOffset : 0, TextOffset);
-
-			var appt = tdlView.Appointment;
-			tip.Id = appt.Id;
-
-			if (appt is TaskExtensionItem)
-			{
-				// NOTE: - Must match 'Calendar' View in 'Core' project
-				if (appt is TaskFutureOccurrence)
-				{
-					tip.Text = m_Trans.Translate("Future Occurrence", Translator.Type.ToolTip);
-				}
-				else if (appt is TaskCustomDateAttribute)
-				{
-					var apptDate = (appt as TaskCustomDateAttribute);
-					var custAttrib = m_CustomDateDefs.Find(x => (x.Id == apptDate.AttributeId));
-
-					tip.Text = string.Format(m_Trans.Translate("{0} (Custom)", Translator.Type.ToolTip), custAttrib.Label);
-				}
-				else if (appt is TaskTimeBlock)
-				{
-					tip.Text = m_Trans.Translate("Time Block", Translator.Type.ToolTip);
-				}
-				else
-				{
-					Debug.Assert(false);
-				}
-
-				var pos = PointToClient(MousePosition);
-				pos.Offset(0, ToolStripEx.GetActualCursorHeight(Cursor));
-
-				tip.Rect.Location = pos;
-				tip.InitialDelay = 500;
-			}
-			else // 'Real' task
-			{
-				tip.Text = appt.Title;
-
-				if (IsLongAppt(appt))
-				{
-					// single line tooltips
-					Size tipSize = m_LabelTip.CalcTipSize(tip.Text, tip.Font, tip.Rect.Width);
-
-					if ((tipSize.Width <= tip.Rect.Width) && (tipSize.Height <= tip.Rect.Height))
-						return null;
-
-					tip.MultiLine = false; // always
-				}
-				else
-				{
-					var availRect = GetTrueRectangle();
-
-					if (tip.Rect.Top < availRect.Top)
-					{
-						// If the top of the text rectangle is hidden we always 
-						// need a label tip so we just clip to the avail space
-						tip.Rect.Intersect(availRect);
-					}
-					else
-					{
-						// Determine if text will fit in what's visible of the task
-						tip.Rect.Intersect(availRect);
-
-						Size tipSize = m_LabelTip.CalcTipSize(tip.Text, tip.Font, tip.Rect.Width);
-
-						if ((tipSize.Width <= tip.Rect.Width) && (tipSize.Height <= tip.Rect.Height))
-							return null;
-					}
-
-					tip.MultiLine = true; // always
-				}
-			}
-
-			// Inflate the rect now we've done all our calculations
-			tip.Rect.Inflate(TextPadding, TextPadding);
-
+			
 			return tip;
-*/
 		}
 		
 		protected override void WndProc(ref Message m)

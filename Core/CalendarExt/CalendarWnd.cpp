@@ -544,70 +544,11 @@ bool CCalendarWnd::GetLabelEditRect(LPRECT pEdit)
 	return false;
 }
 
-IUI_HITTEST CCalendarWnd::HitTest(POINT ptScreen, IUI_HITTESTREASON nReason) const
+bool CCalendarWnd::HitTest(POINT ptScreen, IUIHITTEST& hitTest) const
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
-	// try header
-	if (m_BigCalendar.PtInHeader(ptScreen))
-		return IUI_NOWHERE;
-
-	// then specific task
-	CPoint ptBigCal(ptScreen);
-	m_BigCalendar.ScreenToClient(&ptBigCal);
-
-	BOOL bCustomDate = FALSE;
-
-	if (m_BigCalendar.HitTestTask(ptBigCal, bCustomDate))
-	{
-		if (bCustomDate && (nReason == IUI_CONTEXTMENU))
-			return IUI_NOWHERE;
-
-		// else
-		return IUI_TASK;
-	}
-
-	// else try rest of big cal
-	CRect rCal;
-	m_BigCalendar.GetClientRect(rCal);
-
-	return (rCal.PtInRect(ptBigCal) ? IUI_TASKLIST : IUI_NOWHERE);
-}
-
-DWORD CCalendarWnd::HitTestTask(POINT ptScreen, IUI_HITTESTREASON nReason) const
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	
-	CPoint ptBigCal(ptScreen);
-	m_BigCalendar.ScreenToClient(&ptBigCal);
-
-	DWORD dwTaskID = 0;
-
-	switch (nReason)
-	{
-	case IUI_IMAGETIP:
-		dwTaskID = m_BigCalendar.HitTestTaskIcon(ptBigCal);
-		break;
-
-	case IUI_CONTEXTMENU:
-		{
-			BOOL bCustomDate = FALSE;
-			dwTaskID = m_BigCalendar.HitTestTask(ptBigCal, bCustomDate);
-
-			if (bCustomDate)
-				dwTaskID = 0;
-		}
-		break;
-
-	default:
-		{
-			BOOL bUnused = FALSE;
-			dwTaskID = m_BigCalendar.HitTestTask(ptBigCal, bUnused);
-		}
-		break;
-	}
-
-	return dwTaskID;
+	return (m_BigCalendar.HitTest(ptScreen, hitTest) != FALSE);
 }
 
 bool CCalendarWnd::ShowContextMenu(POINT ptScreen)
@@ -801,14 +742,16 @@ void CCalendarWnd::OnBigCalendarNotifyDblClk(NMHDR* /*pNMHDR*/, LRESULT* pResult
 {
 	SyncMiniCalendar(FALSE);
 
-	CPoint ptBigCal(GetMessagePos());
-	m_BigCalendar.ScreenToClient(&ptBigCal);
+	IUIHITTEST hitTest = { IUI_NOWHERE, 0L };
 
-	BOOL bUnused = FALSE;
-	DWORD dwTaskID = m_BigCalendar.HitTestTask(ptBigCal, bUnused);
-
-	if (dwTaskID)
-		GetParent()->SendMessage(WM_IUI_EDITSELECTEDTASKTITLE, dwTaskID);
+	if (m_BigCalendar.HitTest(GetMessagePos(), hitTest))
+	{
+		if (hitTest.dwTaskID && (hitTest.nResult == IUI_TASKTITLE))
+		{
+			ASSERT(hitTest.dwTaskID == m_BigCalendar.GetSelectedTaskID());
+			GetParent()->SendMessage(WM_IUI_EDITSELECTEDTASKTITLE, hitTest.dwTaskID);
+		}
+	}
 	
 	*pResult = 0;
 }

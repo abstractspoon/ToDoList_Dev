@@ -1923,33 +1923,45 @@ void CTaskCalendarCtrl::AddTasksToCell(const CTaskCalItemMap& mapTasks, const CO
 	}
 }
 
-// External method
-DWORD CTaskCalendarCtrl::HitTestTask(const CPoint& ptClient, BOOL& bCustomDate) const
+BOOL CTaskCalendarCtrl::HitTest(const CPoint& ptScreen, IUIHITTEST& hitTest) const
 {
-	return HitTestTask(ptClient, TRUE, bCustomDate);
-}
+	CPoint ptClient(ptScreen);
+	ScreenToClient(&ptClient);
 
-DWORD CTaskCalendarCtrl::HitTestTaskIcon(const CPoint& ptClient) const
-{
+	CRect rClient;
+	GetClientRect(rClient);
+
+	rClient.top = m_nHeaderHeight;
+	
+	if (!rClient.PtInRect(ptClient))
+		return FALSE;
+
 	TCC_HITTEST nHit = TCCHT_NOWHERE;
-	DWORD dwTaskID = HitTestTask(ptClient, nHit);
 
-	if (nHit == TCCHT_ICON)
-		return GetRealTaskID(dwTaskID);
+	hitTest.dwTaskID = GetRealTaskID(HitTestTask(ptClient, nHit));
+	hitTest.nResult = IUI_TASKTITLE;
 
-	return 0;
+	switch (nHit)
+	{
+	case TCCHT_NOWHERE:
+		hitTest.nResult = IUI_TASKLIST;
+		break;
+
+	case TCCHT_ICON:
+		hitTest.nResult = IUI_TASKICON;
+		break;
+	}
+
+	return TRUE;
 }
 
-// Internal method
-DWORD CTaskCalendarCtrl::HitTestTask(const CPoint& ptClient, BOOL bRealTaskID, BOOL& bCustomDate) const
+DWORD CTaskCalendarCtrl::HitTestTask(const CPoint& ptClient, BOOL bRealTaskID) const
 {
 	TCC_HITTEST nHit = TCCHT_NOWHERE;
 	DWORD dwTaskID = HitTestTask(ptClient, nHit);
 
 	if (nHit == TCCHT_NOWHERE)
 		return 0;
-
-	bCustomDate = IsCustomDate(dwTaskID);
 
 	if (bRealTaskID)
 		dwTaskID = GetRealTaskID(dwTaskID);
@@ -2366,7 +2378,7 @@ BOOL CTaskCalendarCtrl::GetTaskLabelRect(DWORD dwTaskID, CRect& rLabel) const
 	}
 
 	if (pTCI->HasIcon(HasOption(TCCO_SHOWPARENTTASKSASFOLDER)))
-		rLabel.left += (IMAGE_SIZE + TIP_PADDING);
+		rLabel.left += (IMAGE_SIZE + TEXT_PADDING);
 
 	return TRUE;
 }
@@ -2723,8 +2735,7 @@ DWORD CTaskCalendarCtrl::GetSelectedTaskID() const
 
 void CTaskCalendarCtrl::OnLButtonDown(UINT nFlags, CPoint point) 
 {
-	BOOL bCustomDate = FALSE;
-	DWORD dwHitID = HitTestTask(point, FALSE, bCustomDate);
+	DWORD dwHitID = HitTestTask(point, FALSE);
 	
 	if (dwHitID)
 	{
@@ -3573,8 +3584,7 @@ void CTaskCalendarCtrl::CancelDrag(BOOL bReleaseCapture)
 
 void CTaskCalendarCtrl::OnRButtonDown(UINT nFlags, CPoint point) 
 {
-	BOOL bUnused;
-	DWORD dwTaskID = HitTestTask(point, FALSE, bUnused);
+	DWORD dwTaskID = HitTestTask(point, FALSE);
 
 	// If we didn't hit any task, and the currently selected 
 	// task is a custom date, select its 'real' task so that the
@@ -3680,8 +3690,8 @@ int CTaskCalendarCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 	}
 
 	TCC_HITTEST nHit;
-	CRect rHit;
-	DWORD dwTaskID = HitTestTask(point, nHit, rHit);
+	CRect rLabel;
+	DWORD dwTaskID = HitTestTask(point, nHit, rLabel);
 
 	// Don't show tooltip when hovering over 'ends'
 	if (dwTaskID && (nHit == TCCHT_MIDDLE))
@@ -3726,10 +3736,13 @@ int CTaskCalendarCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 				}
 				else
 				{
+					if (pTCI->HasIcon(HasOption(TCCO_SHOWPARENTTASKSASFOLDER)))
+						rLabel.left += (IMAGE_SIZE + TEXT_PADDING);
+
 					CFontCache& fonts = const_cast<CFontCache&>(m_fonts);
 
 					int nTextLen = GraphicsMisc::GetTextWidth(pTCI->GetName(), m_tooltip, fonts.GetHFont(pTCI->bTopLevel ? GMFS_BOLD : 0));
-					bWantTooltip = (nTextLen > rHit.Width());
+					bWantTooltip = (nTextLen > rLabel.Width());
 				}
 			}
 
@@ -3738,7 +3751,7 @@ int CTaskCalendarCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 		}
 
 		if (!sTooltip.IsEmpty())
-			return CToolTipCtrlEx::SetToolInfo(*pTI, this, sTooltip, dwTaskID, rHit);
+			return CToolTipCtrlEx::SetToolInfo(*pTI, this, sTooltip, dwTaskID, rLabel);
 	}
 
 	// else
@@ -3796,6 +3809,9 @@ void CTaskCalendarCtrl::OnShowTooltip(NMHDR* pNMHDR, LRESULT* pResult)
 
 			TCC_HITTEST nUnused;
 			VERIFY(HitTestTask(ptTip, nUnused, rLabel));
+
+			if (pTCI->HasIcon(HasOption(TCCO_SHOWPARENTTASKSASFOLDER)))
+				rLabel.left += (IMAGE_SIZE + TEXT_PADDING);
 		}
 
 		ClientToScreen(rLabel);

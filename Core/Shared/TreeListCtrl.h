@@ -149,7 +149,7 @@ public:
 	BOOL MoveItem(const TLCITEMMOVE& move);
 	BOOL IsMovingItem() const { return m_bMovingItem; }
 
-	BOOL PointInHeader(const CPoint& ptScreen) const;
+	BOOL PointInHeaders(const CPoint& point, BOOL bScreenCoords) const;
 	void GetWindowRect(CRect& rWindow, BOOL bWithHeader = TRUE) const;
 
 	void ExpandAll(BOOL bExpand = TRUE);
@@ -335,7 +335,7 @@ protected:
 	int CalcTreeWidthFromSplitPos(int nSplitPos = -1) const;
 	int CalcSplitPosFromTreeWidth(int nTreeWidth = -1) const;
 
-	HTREEITEM HitTestItem(const CPoint& ptScreen, UINT* pFlags = NULL) const;
+	HTREEITEM HitTestItem(const CPoint& point, BOOL bScreen, UINT* pFlags = NULL) const;
 	HTREEITEM TreeHitTestItem(const CPoint& point, BOOL bScreen, UINT* pFlags = NULL) const;
 	HTREEITEM TreeHitTestItem(const CPoint& point, BOOL bScreen, int& nCol, UINT* pFlags = NULL) const;
 	int ListHitTestItem(const CPoint& point, BOOL bScreen) const;

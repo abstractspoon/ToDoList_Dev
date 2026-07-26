@@ -2826,47 +2826,48 @@ BOOL CWorkloadCtrl::PrepareNewTask(ITaskList* pTaskList) const
 	return true;
 }
 
-DWORD CWorkloadCtrl::HitTestTask(const CPoint& ptScreen, IUI_HITTESTREASON nReason) const
+BOOL CWorkloadCtrl::HitTest(const CPoint& ptScreen, IUIHITTEST& hitTest) const
 {
-	DWORD dwTaskID = TreeHitTestTask(ptScreen, TRUE, nReason);
+	if (!CDialogHelper::PointInRect(ptScreen, m_tree, TRUE) &&
+		!CDialogHelper::PointInRect(ptScreen, m_list, TRUE))
+		return FALSE;
 
-	if (!dwTaskID)
+	if (PointInHeaders(ptScreen, TRUE))
+		return FALSE;
+
+	UINT nFlags = 0;
+	int nCol = 0;
+
+	HTREEITEM htiHit = TreeHitTestItem(ptScreen, TRUE, nCol, &nFlags);
+
+	if (htiHit)
 	{
-		switch (nReason)
+		hitTest.dwTaskID = GetTaskID(htiHit);
+		hitTest.nResult = IUI_TASK;
+
+		if (nCol == WLCC_TITLE)
 		{
-		case IUI_CONTEXTMENU:
-		case IUI_NONE:
-			dwTaskID = GetTaskID(ListHitTestItem(ptScreen, TRUE));
-			break;
+			if (nFlags & TVHT_ONITEMICON)
+			{
+				hitTest.nResult = IUI_TASKICON;
+			}
+			else if (nFlags & (TVHT_ONITEMLABEL | TVHT_ONITEMRIGHT))
+			{
+				hitTest.nResult = IUI_TASKTITLE;
+			}
 		}
 	}
-
-	return dwTaskID;
-}
-
-DWORD CWorkloadCtrl::TreeHitTestTask(const CPoint& point, BOOL bScreen, IUI_HITTESTREASON nReason) const
-{
-	UINT nFlags = 0;
-	HTREEITEM htiHit = TreeHitTestItem(point, bScreen, &nFlags);
-
-	switch (nReason)
+	else
 	{
-	case IUI_INFOTIP:
-		if (htiHit && !(nFlags & TVHT_ONITEMLABEL))
-			htiHit = NULL;
-		break;
+		hitTest.dwTaskID = GetTaskID(ListHitTestItem(ptScreen, TRUE));
 
-	case IUI_IMAGETIP:
-		if (htiHit && !(nFlags & TVHT_ONITEMICON))
-			htiHit = NULL;
-		break;
-
-	case IUI_CONTEXTMENU:
-	case IUI_NONE:
-		break;
+		if (hitTest.dwTaskID)
+			hitTest.nResult = IUI_TASK;
+		else
+			hitTest.nResult = IUI_TASKLIST;
 	}
 
-	return (htiHit ? GetTaskID(htiHit) : 0L);
+	return TRUE;
 }
 
 DWORD CWorkloadCtrl::GetTaskID(HTREEITEM htiFrom) const

@@ -3174,30 +3174,9 @@ BOOL CKanbanCtrl::PrepareNewTask(ITaskList* pTask) const
 	return TRUE;
 }
 
-DWORD CKanbanCtrl::HitTestTask(const CPoint& ptScreen, BOOL bIcon) const
+BOOL CKanbanCtrl::HitTest(const CPoint& ptScreen, IUIHITTEST& hitTest) const
 {
-	return m_aColumns.HitTestTask(ptScreen, bIcon);
-}
-
-int CKanbanCtrl::HitTestColumn(const CPoint& ptScreen, BOOL& bHeader) const
-{
-	CKanbanColumnCtrl* pCol = m_aColumns.HitTest(ptScreen);
-	int nCol = m_aColumns.Find(pCol);
-
-	if (nCol != -1)
-	{
-		bHeader = FALSE;
-	}
-	else
-	{
-		CPoint ptHeader(ptScreen);
-		m_header.ScreenToClient(&ptHeader);
-
-		nCol = m_header.HitTest(ptHeader);
-		bHeader = (nCol != -1);
-	}
-	
-	return nCol;
+	return m_aColumns.HitTest(ptScreen, hitTest);
 }
 
 DWORD CKanbanCtrl::GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const
@@ -3637,12 +3616,11 @@ void CKanbanCtrl::OnBeginDragColumnItem(NMHDR* pNMHDR, LRESULT* pResult)
 
 BOOL CKanbanCtrl::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 {
-	CPoint ptCursor(GetMessagePos());
-	DWORD dwTaskID = HitTestTask(ptCursor, FALSE);
+	IUIHITTEST hitTest = { IUI_NOWHERE, 0L };
 
-	if (dwTaskID)
+	if (HitTest(GetMessagePos(), hitTest) && hitTest.dwTaskID)
 	{
-		if (!m_data.IsLocked(dwTaskID) && !CanDragTask(dwTaskID))
+		if (!m_data.IsLocked(hitTest.dwTaskID) && !CanDragTask(hitTest.dwTaskID))
 			return GraphicsMisc::SetAppCursor(_T("NoDrag"), _T("Resources\\Cursors"));
 	}
 

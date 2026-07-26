@@ -14,6 +14,47 @@
 
 //////////////////////////////////////////////////////////////////////
 
+TDCHITTEST::TDCHITTEST()
+	:
+	nResult(TDCHT_NOWHERE),
+	dwTaskID(0),
+	nColumnID(TDCC_NONE)
+{
+}
+
+BOOL TDCHITTEST::IsValid() const
+{
+	switch (nResult)
+	{
+	case TDCHT_NOWHERE:
+		ASSERT(dwTaskID == 0);
+		ASSERT(nColumnID == TDCC_NONE);
+		break;
+
+	case TDCHT_COLUMNHEADER:
+		ASSERT(dwTaskID == 0);
+		ASSERT(nColumnID != TDCC_NONE);
+		return TRUE;
+
+	case TDCHT_TASKLIST:
+		ASSERT(dwTaskID == 0);
+		return TRUE;
+
+	case TDCHT_TASK:
+		ASSERT(dwTaskID != 0);
+		ASSERT(nColumnID != TDCC_NONE);
+		return TRUE;
+
+	default:
+		ASSERT(0);
+		break;
+	}
+
+	return FALSE;
+}
+
+//////////////////////////////////////////////////////////////////////
+
 TDCDATEOFFSET::TDCDATEOFFSET(int amount, TDC_UNITS units)
 	: 
 	nAmount(amount), 

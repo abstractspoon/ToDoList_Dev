@@ -81,22 +81,13 @@ namespace Abstractspoon
 
 				// -----------------------------------------------
 
-				enum class HitTestReason
-				{
-					None,
-					InfoTip,
-					ContextMenu,
-					ImageTip,
-				};
-
-				// -----------------------------------------------
-
 				enum class HitTestResult
 				{
 					Nowhere,
 					Tasklist,
-					ColumnHeader,
 					Task,
+					TaskTitle,
+					TaskIcon,
 				};
 
 				// -----------------------------------------------
@@ -120,8 +111,7 @@ namespace Abstractspoon
 				// -----------------------------------------------
 
 				static UpdateType MapUpdateType(IUI_UPDATETYPE type);
-				static IUI_HITTEST MapHitTestResult(HitTestResult result);
-				static HitTestReason MapHitTestReason(IUI_HITTESTREASON reason);
+				static IUI_HITTESTRESULT MapHitTestResult(HitTestResult result);
 
 				static bool MapGetTaskCmd(IUI_APPCOMMAND nCmd, GetTask% getTask);
 				static bool MapSelectTaskCmd(IUI_APPCOMMAND nCmd, SelectTask% selectTask);
@@ -373,7 +363,15 @@ namespace Abstractspoon
 				public:
 					static void Draw(Drawing::Graphics^ graphics, int x, int y, Drawing::Font^ font, Direction dir);
 					static int Size(Drawing::Font^ font);
+				};
 
+				// -----------------------------------------------
+
+				ref class HitTest
+				{
+				public:
+					HitTestResult result = HitTestResult::Nowhere;
+					UInt32 taskId = 0;
 				};
 
 				// -----------------------------------------------
@@ -387,7 +385,6 @@ namespace Abstractspoon
 				private:
 					bool m_Redraw = false;
 				};
-
 			};
 
 			// -----------------------------------------------
@@ -405,10 +402,9 @@ namespace Abstractspoon
 
 				bool ProcessMessage(IntPtr hwnd, UInt32 message, UInt32 wParam, UInt32 lParam, UInt32 time, Int32 xPos, Int32 yPos);
 				bool DoIdleProcessing();
-				bool GetLabelEditRect(Int32% left, Int32% top, Int32% right, Int32% bottom); // screen coordinates
 
-				UIExtension::HitTestResult HitTest(Int32 xPos, Int32 yPos, UIExtension::HitTestReason reason);
-				UInt32 HitTestTask(Int32 xPos, Int32 yPos, UIExtension::HitTestReason reason);
+				bool GetLabelEditRect(Int32% left, Int32% top, Int32% right, Int32% bottom); // screen coordinates
+				bool HitTest(Int32 xPos, Int32 yPos, UIExtension::HitTest^ hitTest); // screen coordinates
 
 				void SetUITheme(UITheme^ theme);
 				void SetReadOnly(bool bReadOnly);

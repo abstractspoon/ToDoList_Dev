@@ -71,6 +71,14 @@ namespace Abstractspoon
 					list->ColumnWidthChanging += gcnew ColumnWidthChangingEventHandler(this, &HeaderControl::OnColumnWidthChanging);
 				}
 
+				bool PointInHeader(Point ptScreen)
+				{
+					CRect rWindow;
+					::GetWindowRect(Win32::GetHwnd(Handle), rWindow);
+
+					return (rWindow.PtInRect({ptScreen.X, ptScreen.Y}) != FALSE);
+				}
+
 			public:
 				property bool EnableTracking;
 
@@ -556,26 +564,44 @@ String^ TaskListView::Translate(String^ text, Translator::Type type)
 	return m_Trans->Translate(text, type);
 }
 
-bool TaskListView::PointInHeader(Drawing::Point ptScreen)
+bool TaskListView::HitTest(Drawing::Point ptScreen, UIExtension::HitTest^ hitTest)
 {
-	CRect rHeader;
-	::GetWindowRect(Win32::GetHwnd(m_HeaderCtrl->Handle), rHeader);
+	if (m_HeaderCtrl->PointInHeader(ptScreen))
+		return false;
 
-	return (rHeader.PtInRect({ ptScreen.X, ptScreen.Y }) != FALSE);
-}
+	auto ptClient = PointToClient(ptScreen);
 
-ITaskBase^ TaskListView::HitTestTask(Drawing::Point ptScreen, bool icon)
-{
-	auto pt = PointToClient(ptScreen);
-	auto lvHit = HitTest(pt)->Item;
+	if (!ClientRectangle.Contains(ptClient))
+		return false;
 
-	if (lvHit == nullptr)
-		return nullptr;
+	auto htInfo = HitTest(ptClient);
 
-	if (icon && !CalcIconRect(lvHit->Bounds).Contains(pt))
-		return nullptr;
+	if (htInfo == nullptr)
+		return false;
 
-	return ASTYPE(lvHit->Tag, ITaskBase);
+	if (htInfo->Item == nullptr)
+	{
+		hitTest->result = UIExtension::HitTestResult::Tasklist;
+	}
+	else
+	{
+		hitTest->result = UIExtension::HitTestResult::Task;
+		hitTest->taskId = ASTYPE(htInfo->Item->Tag, ITaskBase)->Id;
+
+ 		if (htInfo->Location == ListViewHitTestLocations::Label)
+		{
+			if (CalcLabelRect(htInfo->Item, LabelExtents::TitleColumn).Contains(ptClient))
+			{
+				hitTest->result = UIExtension::HitTestResult::TaskTitle;
+			}
+			else if (CalcIconRect(htInfo->SubItem->Bounds).Contains(ptClient))
+			{
+				hitTest->result = UIExtension::HitTestResult::TaskIcon;
+			}
+		}
+	}
+	
+	return true;
 }
 
 Windows::Forms::Control^ TaskListView::GetOwner()
@@ -996,41 +1022,45 @@ void TaskListView::WndProc(Message% m)
 					m_BoundSelectionTimer->Start();
 
 					// then default handling
-					break;
 				}
-
-				// else
-				Focus();
-				return;
-			}
-
-			auto task = ASTYPE(lvHit->Tag, ITaskBase);
-
-			if (IsTaskEditable(task))
-			{
-				if (CalcCheckboxRect(lvHit->Bounds).Contains(pos))
+				else
 				{
-					if (!lvHit->Selected)
-						ListView::WndProc(m); // Default handling to select task
-
-					EditTaskDone(this, task);
-					return;
-				}
-				else if (CalcIconRect(lvHit->Bounds).Contains(pos))
-				{
-					if (!lvHit->Selected)
-						ListView::WndProc(m); // Default handling to select task
-
-					EditTaskIcon(this, task);
-					return;
-				}
-				// If the item is selected but we're not focused, 
-				// prevent the base class from starting a label edit
-				else if (lvHit->Selected && !Focused)
-				{
+					// else
 					Focus();
 					return;
 				}
+			}
+			else
+			{
+				auto task = ASTYPE(lvHit->Tag, ITaskBase);
+
+				if (IsTaskEditable(task))
+				{
+					if (CalcCheckboxRect(lvHit->Bounds).Contains(pos))
+					{
+						if (!lvHit->Selected)
+							ListView::WndProc(m); // Default handling to select task
+
+						EditTaskDone(this, task);
+						return;
+					}
+					else if (CalcIconRect(lvHit->Bounds).Contains(pos))
+					{
+						if (!lvHit->Selected)
+							ListView::WndProc(m); // Default handling to select task
+
+						EditTaskIcon(this, task);
+						return;
+					}
+					// If the item is selected but we're not focused, 
+					// prevent the base class from starting a label edit
+					else if (lvHit->Selected && !Focused)
+					{
+						Focus();
+						return;
+					}
+				}
+				// else default handling
 			}
 		}
 		break;
@@ -1040,18 +1070,19 @@ void TaskListView::WndProc(Message% m)
 			Point pos = Win32::GetPoint(m.LParam);
 			auto lvHit = HitTest(pos)->Item;
 
-			if (lvHit == nullptr)
-				break;
+			if (lvHit != nullptr)
+			{
+				Debug::Assert(lvHit->Selected);
 
-			Debug::Assert(lvHit->Selected);
+				auto task = ASTYPE(lvHit->Tag, ITaskBase);
 
-			auto task = ASTYPE(lvHit->Tag, ITaskBase);
+				if (IsTaskEditable(task) && GetTaskLabelRect(task->Id).Contains(pos))
+					EditTaskLabel(this, task);
 
-			if (IsTaskEditable(task) && GetTaskLabelRect(task->Id).Contains(pos))
-				EditTaskLabel(this, task);
-
+				return; // always
+			}
 		}
-		return; // always
+		break;
 
 	case WM_LBUTTONUP:
 		{
@@ -1075,6 +1106,8 @@ void TaskListView::WndProc(Message% m)
 
 			if (HitTest(pos)->Item == nullptr)
 			{
+				Focus();
+
 				// and forward as context menu msg to parent
 				pos = PointToScreen(pos);
 

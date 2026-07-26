@@ -4064,30 +4064,41 @@ void CToDoListWnd::OnContextMenu(CWnd* pWnd, CPoint point)
 			}
 		}
 
-		TDC_HITTEST nHit = tdc.HitTest(point, TDCHTR_CONTEXTMENU);
-
-		switch (nHit)
+		TDCHITTEST hitTest;
+		
+		if (tdc.HitTest(point, hitTest))
 		{
-		case TDCHT_NOWHERE:
-			break;
-
-		case TDCHT_TASKLIST:
-		case TDCHT_TASK:
-			if (tdc.GetSelectedTaskCount())
+			switch (hitTest.nResult)
 			{
-				nMenuID = MM_TASKCONTEXT;
-				nColID = tdc.HitTestColumn(point);
-			}
-			else if (tdc.CanEditSelectedTask(TDCA_NEWTASK))
-			{
-				nMenuID = MM_TASKCONTEXTNOSEL;
-			}
-			break;
+			case TDCHT_NOWHERE:
+				break;
 
-		case TDCHT_COLUMNHEADER:
-			nMenuID = MM_HEADERCONTEXT;
-			nColID = tdc.HitTestColumn(point);
-			break;
+			case TDCHT_TASKLIST:
+				if (!tdc.GetSelectedTaskCount())
+				{
+					nMenuID = MM_TASKCONTEXTNOSEL;
+				}
+				else
+				{
+					nMenuID = MM_TASKCONTEXT;
+					nColID = hitTest.nColumnID;
+				}
+				break;
+
+			case TDCHT_TASK:
+				{
+					ASSERT(tdc.GetSelectedTaskCount());
+
+					nMenuID = MM_TASKCONTEXT;
+					nColID = hitTest.nColumnID;
+				}
+				break;
+
+			case TDCHT_COLUMNHEADER:
+				nMenuID = MM_HEADERCONTEXT;
+				nColID = hitTest.nColumnID;
+				break;
+			}
 		}
 	}
 	

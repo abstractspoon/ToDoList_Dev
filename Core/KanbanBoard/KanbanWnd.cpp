@@ -495,28 +495,11 @@ bool CKanbanWnd::GetLabelEditRect(LPRECT pEdit)
 	return false;
 }
 
-IUI_HITTEST CKanbanWnd::HitTest(POINT ptScreen, IUI_HITTESTREASON nReason) const
+bool CKanbanWnd::HitTest(POINT ptScreen, IUIHITTEST& hitTest) const
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	
-	// specific task
-	if (m_ctrlKanban.HitTestTask(ptScreen, (nReason == IUI_IMAGETIP)))
-		return IUI_TASK;
 
-	// else check elsewhere in ctrl client
-	BOOL bHeader;
-	int nCol = m_ctrlKanban.HitTestColumn(ptScreen, bHeader);
-
-	if ((nCol != -1) && !bHeader)
-		return IUI_TASKLIST;
-
-	// else 
-	return IUI_NOWHERE;
-}
-
-DWORD CKanbanWnd::HitTestTask(POINT ptScreen, IUI_HITTESTREASON nReason) const
-{
-	return m_ctrlKanban.HitTestTask(ptScreen, (nReason == IUI_IMAGETIP));
+	return (m_ctrlKanban.HitTest(ptScreen, hitTest) != FALSE);
 }
 
 bool CKanbanWnd::SelectTask(DWORD dwTaskID, bool /*bTaskLink*/)

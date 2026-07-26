@@ -14,6 +14,7 @@
 #include "tdcenumcontainers.h"
 #include "tdcswitch.h"
 #include "tdcsort.h"
+#include "tdcstruct.h"
 #include "tdcimportexportmgr.h"
 
 #include "..\Interfaces\IEnums.h"
@@ -623,18 +624,51 @@ namespace TDC
 		return IUI_EDIT;
 	}
 
-	static IUI_HITTESTREASON MapHitTestReasonToIUIReason(TDC_HITTESTREASON nReason)
+	static BOOL MapIUIHitTestResultToHitTestResult(const IUIHITTEST& iuiRes, TDCHITTEST& hitTest)
 	{
-		switch (nReason)
+		hitTest.nResult = TDCHT_NOWHERE;
+
+		switch (iuiRes.nResult)
 		{
-		case TDCHTR_NONE:			return IUI_NONE;
-		case TDCHTR_INFOTIP:		return IUI_INFOTIP;
-		case TDCHTR_CONTEXTMENU:	return IUI_CONTEXTMENU;
-		case TDCHTR_IMAGETIP:		return IUI_IMAGETIP;
+		case IUI_TASK:		
+			if (iuiRes.dwTaskID)
+			{
+				hitTest.nResult = TDCHT_TASK;
+				hitTest.dwTaskID = iuiRes.dwTaskID;
+			}
+			break;
+
+		case IUI_TASKTITLE:
+			if (iuiRes.dwTaskID)
+			{
+				hitTest.nResult = TDCHT_TASK;
+				hitTest.nColumnID = TDCC_CLIENT;
+				hitTest.dwTaskID = iuiRes.dwTaskID;
+			}
+			break;
+
+		case IUI_TASKICON:
+			if (iuiRes.dwTaskID)
+			{
+				hitTest.nResult = TDCHT_TASK;
+				hitTest.nColumnID = TDCC_ICON;
+				hitTest.dwTaskID = iuiRes.dwTaskID;
+			}
+			break;
+
+		case IUI_TASKLIST:	
+			hitTest.nResult = TDCHT_TASKLIST;
+			break;
+
+		case IUI_NOWHERE:	
+			break;
+
+		default:
+			ASSERT(0);
+			break;
 		}
 
-		ASSERT(0);
-		return IUI_NONE;
+		return (hitTest.nResult != TDCHT_NOWHERE);
 	}
 
 	static IUI_UPDATETYPE MapAttributesToIUIUpdateType(const CTDCAttributeMap& mapAttribIDs)

@@ -221,14 +221,9 @@ namespace EisenhowerUIExtension
 			return m_List.SelectTasks(taskIDs);
 		}
 
-		public uint HitTestTask(Point screenPos, bool icon)
+		public bool HitTest(Point screenPos, UIExtension.HitTest hitTest)
 		{
-			return m_List.HitTestTask(screenPos, icon)?.Id ?? 0;
-		}
-
-		public UIExtension.HitTestResult HitTest(Point screenPos)
-		{
-			return m_List.HitTest(screenPos);
+			return m_List.HitTest(screenPos, hitTest);
 		}
 
 		public uint GetTaskId(UIExtension.GetTask getTask)

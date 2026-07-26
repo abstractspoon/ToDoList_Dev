@@ -218,22 +218,43 @@ BOOL CTDLTaskListCtrl::BuildColumns()
 	return TRUE;
 }
 
-DWORD CTDLTaskListCtrl::HitTestTasksTask(const CPoint& ptScreen, TDC_HITTESTREASON nReason) const
+BOOL CTDLTaskListCtrl::HitTest(const CPoint& ptScreen, TDCHITTEST& hitTest) const
 {
+	if (CTDLTaskCtrlBase::HitTest(ptScreen, hitTest))
+		return TRUE;
+
+	// Hit test the 'Tasks'
+	if (!CDialogHelper::PointInRect(ptScreen, m_lcTasks, TRUE))
+		return FALSE;
+
 	CPoint ptClient(ptScreen);
 	m_lcTasks.ScreenToClient(&ptClient);
-	
+
 	UINT nFlags = 0;
-	int nItem = HitTestItem(ptClient, &nFlags);
+	int nItem = m_lcTasks.HitTest(ptClient, &nFlags);
 
 	if (nItem == -1)
-		return 0;
+	{
+		hitTest.nResult = TDCHT_TASKLIST;
+		hitTest.nColumnID = TDCC_CLIENT;
+	}
+	else
+	{
+		hitTest.nResult = TDCHT_TASK;
+		hitTest.dwTaskID = GetTaskID(nItem);
 
-	if ((nReason == TDCHTR_IMAGETIP) && !(nFlags & LVHT_ONITEMICON))
-		return 0;
+		if (nFlags & LVHT_ONITEMICON)
+		{
+			hitTest.nColumnID = TDCC_ICON;
+		}
+		else if (nFlags & LVHT_ONITEMLABEL)
+		{
+			hitTest.nColumnID = TDCC_CLIENT;
+		}
+	}
+	ASSERT(hitTest.IsValid());
 
-	// all else
-	return GetTaskID(nItem);
+	return TRUE;
 }
 
 void CTDLTaskListCtrl::Release() 
@@ -1579,18 +1600,24 @@ void CTDLTaskListCtrl::OnListSelectionChange(NMLISTVIEW* /*pNMLV*/)
 	
 	// Don't notify de-selections EXCEPT in the very
 	// specific case where the CTRL key is down, we are 
-	// over an item and no mouse button is down
+	// over an item and NO mouse button is down
 	// ie. the user has explicitly deselected an item
 	if (!GetSelectedCount())
 	{
-		BOOL bManualDeslection = (Misc::IsKeyPressed(VK_CONTROL) && 
-								  HitTestTask(GetMessagePos()) && 
-								  !Misc::IsKeyPressed(VK_LBUTTON));
+		if (!Misc::IsKeyPressed(VK_CONTROL))
+			return;
+		
+		if (Misc::IsKeyPressed(VK_LBUTTON))
+			return;
 
-		if (!bManualDeslection)
+		CPoint ptClient(GetMessagePos());
+		m_lcTasks.ScreenToClient(&ptClient);
+
+		if (-1 == m_lcTasks.HitTest(ptClient))
 			return;
 	}
 
+	// all else
 	NotifyParentSelChange();
 }
 

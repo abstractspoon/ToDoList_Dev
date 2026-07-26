@@ -63,12 +63,8 @@ namespace DayViewUIExtension
 		private Translator m_Trans;
 		private UIThemeToolbarRenderer m_ToolbarRenderer;
 
-		private int LabelTipBorder
-		{
-			get { return DPIScaling.Scale(4); }
-		}
-
-		public bool ReadOnly { get; set; }
+		private int LabelTipBorder = DPIScaling.Scale(4);
+		private int MinHitTestWidth = DPIScaling.Scale(8);
 
 		// ----------------------------------------------------------------
 
@@ -119,33 +115,37 @@ namespace DayViewUIExtension
 			return this;
 		}
 
-		public bool ForceShowSelection;
-
-		protected override bool WantDrawDaySelection { get { return base.WantDrawDaySelection || ForceShowSelection; } }
-
 		public LabelTipInfo ToolHitTest(Point ptScreen)
 		{
 			if (IsResizingAppointment())
 				return null;
 
-			var tip = new LabelTipInfo()
-			{
-				Font = BaseFont(),
-			};
-
 			var pt = PointToClient(ptScreen);
-			var tdlView = (GetAppointmentViewAt(pt.X, pt.Y, out tip.Rect) as TDLAppointmentView);
+			var apptRect = Rectangle.Empty;
 
-			if (tdlView == null)
+			var apptView = GetAppointmentViewAt(pt.X, pt.Y, out apptRect);
+
+			if (apptView == null)
 				return null;
 
-			bool startPortion = (tip.Rect.Right < tdlView.Rectangle.Right);
+			var textRect = CalcTextRect(apptView, apptRect);
 
-			tip.Rect.Offset(startPortion ? tdlView.TextHorzOffset : 0, m_RenderHelper.TextOffset);
+			// Recheck that the mouse if over the title text
+			// unless the tip rect is too narrow to be hit
+			if ((textRect.Width > MinHitTestWidth) && !textRect.Contains(pt))
+				return null;
 
-			var appt = tdlView.Appointment;
-			tip.Id = appt.Id;
+			var appt = apptView.Appointment;
 
+			var tip = new LabelTipInfo()
+			{
+				Font = m_RenderHelper.GetFont(GetTaskFontStyle(appt)),
+				Id = appt.Id,
+				MultiLine = false, // always
+				Rect = textRect,
+			};
+
+			// Tip text and size
 			if (appt is TaskExtensionItem)
 			{
 				// NOTE: - Must match 'Calendar' View in 'Core' project
@@ -170,7 +170,7 @@ namespace DayViewUIExtension
 				}
 
 				var pos = PointToClient(MousePosition);
-				pos.Offset(0, ToolStripEx.GetActualCursorHeight(Cursor));
+				pos.Offset(0, ToolStripEx.GetActualCursorHeight(Cursor)); // like regular tooltip
 
 				tip.Rect.Location = pos;
 				tip.InitialDelay = 500;
@@ -186,8 +186,6 @@ namespace DayViewUIExtension
 
 					if ((tipSize.Width <= tip.Rect.Width) && (tipSize.Height <= tip.Rect.Height))
 						return null;
-
-					tip.MultiLine = false; // always
 				}
 				else
 				{
@@ -209,8 +207,6 @@ namespace DayViewUIExtension
 						if ((tipSize.Width <= tip.Rect.Width) && (tipSize.Height <= tip.Rect.Height))
 							return null;
 					}
-
-					tip.MultiLine = true; // always
 				}
 			}
 
@@ -219,6 +215,11 @@ namespace DayViewUIExtension
 
 			return tip;
 		}
+
+		public bool ForceShowSelection;
+		public bool ReadOnly;
+
+		protected override bool WantDrawDaySelection { get { return base.WantDrawDaySelection || ForceShowSelection; } }
 
 		private void OnDayViewAppointmentChanged(object sender, Calendar.AppointmentEventArgs args)
 		{
@@ -759,53 +760,73 @@ namespace DayViewUIExtension
 			return ((appt != null) && ((appt is TaskItem) || (appt is TaskFutureOccurrence)));
 		}
 
-		public UIExtension.HitTestResult HitTest(Int32 xScreen, Int32 yScreen, UIExtension.HitTestReason reason)
+		private Rectangle CalcTextRect(Calendar.AppointmentView apptView, Rectangle apptRect)
 		{
-			if (HitTestTask(xScreen, yScreen, reason) != 0)
-				return UIExtension.HitTestResult.Task;
+			var tdlView = (apptView as TDLAppointmentView);
 
-			Point ptClient = PointToClient(new Point(xScreen, yScreen));
+			if (tdlView == null)
+				return Rectangle.Empty;
 
-			if (GetTrueRectangle().Contains(ptClient))
-				return UIExtension.HitTestResult.Tasklist;
+			// Exclude the icon and gripper from the rect
+			TaskItem item = (GetRealAppointment(apptView.Appointment) as TaskItem);
 
-			// else
-			return UIExtension.HitTestResult.Nowhere;
-		}
+			var textRect = apptRect;
+			int xOffset = 0;
 
-		public uint HitTestTask(Int32 xScreen, Int32 yScreen, UIExtension.HitTestReason reason)
-		{
-			Point ptClient = PointToClient(new Point(xScreen, yScreen));
-			Calendar.Appointment appt = GetAppointmentAt(ptClient.X, ptClient.Y);
-
-			if (appt == null)
-				return 0;
-
-			switch (reason)
+			if (IsLongAppt(item) && !DisplayLongTasksContinuous)
 			{
-			case UIExtension.HitTestReason.ContextMenu:
-				if (!AppointmentSupportsTaskContextMenu(appt))
-					return 0;
-				break;
+				bool startPortion = (textRect.Right < tdlView.Rectangle.Right);
 
-			case UIExtension.HitTestReason.ImageTip:
-				{
-					var apptView = (GetAppointmentView(appt) as TDLAppointmentView);
-
-					if ((apptView == null) || !apptView.IconRect.Contains(ptClient))
-						return 0;
-				}
-				break;
-
-			case UIExtension.HitTestReason.InfoTip:
-			case UIExtension.HitTestReason.None:
-				break;
+				if (startPortion)
+					xOffset = tdlView.TextHorzOffset;
+			}
+			else
+			{
+				if (TaskHasIcon(item))
+					xOffset = (tdlView.IconRect.Right - textRect.Left);
+				else
+					xOffset = (tdlView.GripRect.Right - textRect.Left);
 			}
 
-			if (appt is TaskExtensionItem)
-				return (appt as TaskExtensionItem).RealTaskId;
+			textRect.Offset(xOffset, m_RenderHelper.TextOffset);
+			textRect.Width -= xOffset;
 
-			return appt.Id;
+			return textRect;
+		}
+
+		public bool HitTest(Point ptScreen, UIExtension.HitTest hitTest)
+		{
+			Point ptClient = PointToClient(ptScreen);
+
+			var apptRect = Rectangle.Empty;
+			var apptView = GetAppointmentViewAt(ptClient.X, ptClient.Y, out apptRect);
+
+			if (apptView != null)
+			{
+				var textRect = CalcTextRect(apptView, apptRect);
+				var tdlView = (apptView as TDLAppointmentView);
+
+				if (tdlView == null)
+					return false;
+
+				hitTest.result = UIExtension.HitTestResult.Task;
+				hitTest.taskId = m_TaskItems.GetRealTaskId(apptView.Appointment);
+
+				if (tdlView.IconRect.Contains(ptClient))
+				{
+					hitTest.result = UIExtension.HitTestResult.TaskIcon;
+				}
+				else if ((textRect.Width < MinHitTestWidth) || textRect.Contains(ptClient))
+				{
+					hitTest.result = UIExtension.HitTestResult.TaskTitle;
+				}
+			}
+			else if (GetTrueRectangle().Contains(ptClient))
+			{
+				hitTest.result = UIExtension.HitTestResult.Tasklist;
+			}
+
+			return (hitTest.result != UIExtension.HitTestResult.Nowhere);
 		}
 
 		public Calendar.Appointment GetRealAppointmentAt(int x, int y)
@@ -825,10 +846,14 @@ namespace DayViewUIExtension
 				{
 					apptRect.Width = (tdlView.EndOfStart - apptRect.X);
 				}
-				else
+				else if (x > tdlView.StartOfEnd)
 				{
 					apptRect.Width = (apptRect.Right - tdlView.StartOfEnd);
 					apptRect.X = tdlView.StartOfEnd;
+				}
+				else // must be 'today'
+				{
+					// TODO
 				}
 			}
 
@@ -885,47 +910,51 @@ namespace DayViewUIExtension
 			EnsureVisible(appt, false);
 			Update(); // make sure draw rects are updated
 
+			rect = GetItemLabelRect(appt);
+			return !rect.IsEmpty;
+		}
+
+		private Rectangle GetItemLabelRect(Calendar.Appointment appt)
+		{
+			Rectangle rect = Rectangle.Empty;
+
 			if (GetAppointmentRect(appt, ref rect))
 			{
 				TaskItem item = (appt as TaskItem);
+
 				bool hasIcon = TaskHasIcon(item);
+				int xOffset = 0;
+
+				if (hasIcon)
+					xOffset += (m_RenderHelper.ImageSize + (2 * m_RenderHelper.TextPadding));
 
 				if (IsLongAppt(appt))
 				{
 					// Gripper
 					if (appt.StartDate >= StartDate)
-						rect.X += 8;
+						xOffset += 8;
 					else
-						rect.X -= 3;
+						xOffset -= 3;
 
-					if (hasIcon)
-						rect.X += 16;
-
-					rect.X += 1;
+					xOffset += 1;
 					rect.Height += 1;
 				}
 				else
 				{
-					if (hasIcon)
-					{
-						rect.X += 18;
-					}
-					else
-					{
-						// Gripper
-						rect.X += 8;
-					}
+					if (!hasIcon)
+						xOffset += 8; // Gripper
 
-					rect.X += 1;
+					xOffset += 1;
 					rect.Y += 1;
 
-					rect.Height = (m_RenderHelper.FontHeight + 4); // 4 = border
+					rect.Height = (m_RenderHelper.FontHeight + (2 * m_RenderHelper.TextPadding));
 				}
 
-				return true;
+				rect.X += xOffset;
+				rect.Width -= xOffset;
 			}
 
-			return false;
+			return rect;
 		}
 
 		private bool IsTodayVisible

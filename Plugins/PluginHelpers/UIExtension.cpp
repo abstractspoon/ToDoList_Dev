@@ -47,31 +47,17 @@ UIExtension::UpdateType UIExtension::MapUpdateType(IUI_UPDATETYPE type)
 	return UIExtension::UpdateType::Unknown;
 }
 
-IUI_HITTEST UIExtension::MapHitTestResult(UIExtension::HitTestResult result)
+IUI_HITTESTRESULT UIExtension::MapHitTestResult(UIExtension::HitTestResult result)
 {
 	switch (result)
 	{
-	case UIExtension::HitTestResult::Nowhere:		return IUI_NOWHERE;
 	case UIExtension::HitTestResult::Tasklist:		return IUI_TASKLIST;
-	case UIExtension::HitTestResult::ColumnHeader:	return IUI_COLUMNHEADER;
 	case UIExtension::HitTestResult::Task:			return IUI_TASK;
+	case UIExtension::HitTestResult::TaskTitle:		return IUI_TASKTITLE;
+	case UIExtension::HitTestResult::TaskIcon:		return IUI_TASKICON;
 	}
 
 	return IUI_NOWHERE;
-}
-
-UIExtension::HitTestReason UIExtension::MapHitTestReason(IUI_HITTESTREASON reason)
-{
-	switch (reason)
-	{
-	case IUI_NONE:			return UIExtension::HitTestReason::None;
-	case IUI_INFOTIP:		return UIExtension::HitTestReason::InfoTip;
-	case IUI_CONTEXTMENU:	return UIExtension::HitTestReason::ContextMenu;
-	case IUI_IMAGETIP:		return UIExtension::HitTestReason::ImageTip;
-	}
-
-	ASSERT(0);
-	return UIExtension::HitTestReason::None;
 }
 
 bool UIExtension::MapGetTaskCmd(IUI_APPCOMMAND nCmd, UIExtension::GetTask% getTask)

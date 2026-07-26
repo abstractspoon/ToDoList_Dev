@@ -1560,40 +1560,6 @@ int CTDLTaskCtrlBase::CompareTasks(LPARAM lParam1,
 									flags.WantIncludeTime(sort.nColumnID));
 }
 
-DWORD CTDLTaskCtrlBase::HitTestTask(const CPoint& ptScreen, TDC_HITTESTREASON nReason) const
-{
-	DWORD dwTaskID = HitTestTasksTask(ptScreen, nReason); // Title column only;
-
-	if (dwTaskID == 0)
-	{
-		switch (nReason)
-		{
-		case TDCHTR_INFOTIP:
-			break;
-
-		case TDCHTR_IMAGETIP:
-			if (IsColumnShowing(TDCC_ICON))
-			{
-				TDC_COLUMN nColID = TDCC_NONE;
-
-				if (HitTestColumnsItem(ptScreen, FALSE, nColID, &dwTaskID) != -1)
-				{
-					if (nColID != TDCC_ICON)
-						dwTaskID = 0;
-				}
-			}
-			break;
-
-		case TDCHTR_NONE:
-		case TDCHTR_CONTEXTMENU:
-			dwTaskID = HitTestColumnsTask(ptScreen);
-			break;
-		}
-	}
-	
-	return dwTaskID;
-}
-
 int CTDLTaskCtrlBase::HitTestColumnsItem(const CPoint& pt, BOOL bClient, TDC_COLUMN& nColID, DWORD* pTaskID, LPRECT pRect) const
 {
 	LVHITTESTINFO lvHit = { 0 };
@@ -1617,9 +1583,7 @@ int CTDLTaskCtrlBase::HitTestColumnsItem(const CPoint& pt, BOOL bClient, TDC_COL
 	}
 
 	if (pRect)
-	{
 		ListView_GetSubItemRect(m_lcColumns, lvHit.iItem, lvHit.iSubItem, LVIR_BOUNDS, pRect);
-	}
 		
 	return lvHit.iItem;
 }
@@ -1671,80 +1635,48 @@ int CTDLTaskCtrlBase::HitTestFileLinkColumn(const CPoint& ptScreen) const
 	return -1;
 }
 
-TDC_HITTEST CTDLTaskCtrlBase::HitTest(const CPoint& ptScreen) const
+BOOL CTDLTaskCtrlBase::HitTest(const CPoint& ptScreen, TDCHITTEST& hitTest) const
 {
-	// Tasks header
-	if (PtInClientRect(ptScreen, m_hdrTasks, TRUE))
-		return TDCHT_COLUMNHEADER;
-
-	// Columns header
-	if (PtInClientRect(ptScreen, m_hdrColumns, TRUE)) // column header
-		return TDCHT_COLUMNHEADER;
-
-	// Rest of this control
-	if (PtInClientRect(ptScreen, *this, TRUE))
-		return (HitTestTask(ptScreen, TDCHTR_NONE) ? TDCHT_TASK : TDCHT_TASKLIST);
-	
-	// all else
-	return TDCHT_NOWHERE;
-}
-
-DWORD CTDLTaskCtrlBase::HitTestColumnsTask(const CPoint& ptScreen) const
-{
-	// see if we hit a task in the list
-	CPoint ptClient(ptScreen);
-	m_lcColumns.ScreenToClient(&ptClient);
-	
-	int nItem = m_lcColumns.HitTest(ptClient);
-
-	if (nItem != -1)
-		return GetColumnItemTaskID(nItem);
-
-	// all else
-	return 0;
-}
-
-TDC_COLUMN CTDLTaskCtrlBase::HitTestColumn(const CPoint& ptScreen) const
-{
-	if (PtInClientRect(ptScreen, m_hdrTasks, TRUE) || // tree header
-		PtInClientRect(ptScreen, Tasks(), TRUE)) // tree
+	if (CDialogHelper::PointInRect(ptScreen, m_hdrTasks, TRUE))
 	{
-		return TDCC_CLIENT;
+		// Tasks Column header
+		hitTest.nResult = TDCHT_COLUMNHEADER;
+		hitTest.nColumnID = TDCC_CLIENT;
 	}
-	else if (PtInClientRect(ptScreen, m_hdrColumns, TRUE))	// column header
+	else if (CDialogHelper::PointInRect(ptScreen, m_hdrColumns, TRUE))
 	{
+		// Attribute Columns header
 		CPoint ptHeader(ptScreen);
 		m_hdrColumns.ScreenToClient(&ptHeader);
-		
+
 		int nCol = m_hdrColumns.HitTest(ptHeader);
-		
-		if (nCol >= 0)
-			return GetColumnID(nCol);
+
+		if (nCol < 0)
+			return FALSE;
+
+		hitTest.nResult = TDCHT_COLUMNHEADER;
+		hitTest.nColumnID = GetColumnID(nCol);
 	}
-	else if (PtInClientRect(ptScreen, m_lcColumns, TRUE)) // columns
+	else if (CDialogHelper::PointInRect(ptScreen, m_lcColumns, TRUE))
 	{
+		// Attribute Columns
 		TDC_COLUMN nColID = TDCC_NONE;
-		
-		if (HitTestColumnsItem(ptScreen, FALSE, nColID) != -1)
-			return nColID;
+		DWORD dwTaskID = 0;
+
+		if (HitTestColumnsItem(ptScreen, FALSE, nColID, &dwTaskID) != -1)
+		{
+			hitTest.nResult = TDCHT_TASK;
+			hitTest.dwTaskID = dwTaskID;
+			hitTest.nColumnID = nColID;
+		}
+		else
+		{
+			hitTest.nResult = TDCHT_TASKLIST;
+		}
 	}
 
-	// else
-	return TDCC_NONE;
-}
-
-BOOL CTDLTaskCtrlBase::PtInClientRect(POINT point, HWND hWnd, BOOL bScreenCoords)
-{
-	CRect rect;
-	::GetClientRect(hWnd, rect);
-	
-	if (bScreenCoords)
-	{
-		::ClientToScreen(hWnd, &rect.TopLeft());
-		::ClientToScreen(hWnd, &rect.BottomRight());
-	}
-	
-	return rect.PtInRect(point);
+	// Derived classes responsible for 'Tasks Column' hit-testing
+	return hitTest.IsValid();
 }
 
 void CTDLTaskCtrlBase::Release() 
@@ -2444,7 +2376,7 @@ BOOL CTDLTaskCtrlBase::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 	{
 		CPoint ptScreen(::GetMessagePos());
 		
-		if (PtInClientRect(ptScreen, m_lcColumns, TRUE))
+		if (CDialogHelper::PointInRect(ptScreen, m_lcColumns, TRUE))
 		{
 			TDC_COLUMN nColID = TDCC_NONE;
 			CPoint ptCursor(::GetMessagePos());

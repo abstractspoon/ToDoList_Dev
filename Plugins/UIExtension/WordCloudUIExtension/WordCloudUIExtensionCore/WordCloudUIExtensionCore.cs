@@ -420,24 +420,17 @@ namespace WordCloudUIExtension
 			return false;
 		}
 
-		public UIExtension.HitTestResult HitTest(Int32 xScreen, Int32 yScreen, UIExtension.HitTestReason reason)
+		public bool HitTest(Int32 xScreen, Int32 yScreen, UIExtension.HitTest hitTest)
 		{
-			return m_TaskMatchesList.HitTest(new Point(xScreen, yScreen));
-		}
-
-		public UInt32 HitTestTask(Int32 xScreen, Int32 yScreen, UIExtension.HitTestReason reason)
-		{
-			var task = m_TaskMatchesList.HitTestTask(new Point(xScreen, yScreen), (reason == UIExtension.HitTestReason.ImageTip));
-
-			return task?.Id ?? 0;
+			return m_TaskMatchesList.HitTest(new Point(xScreen, yScreen), hitTest);
 		}
 
 		public bool ShowContextMenu(Int32 xScreen, Int32 yScreen)
 		{
-			bool keyboardMenu = ((xScreen == -1) && (yScreen == -1));
-
-			if (keyboardMenu && !m_WordCloud.Focused)
+			if (!m_WordCloud.Focused)
 				return false;
+
+			bool keyboardMenu = ((xScreen == -1) && (yScreen == -1));
 
 			var ptScreen = new Point(xScreen, yScreen);
 			var ptMenu = m_WordCloud.PointToClient(ptScreen);
@@ -450,6 +443,7 @@ namespace WordCloudUIExtension
 
 			if (keyboardMenu)
 			{
+				// Use selected word
 				var selItem = m_WordCloud.SelectedItem;
 
 				if (selItem == null)
@@ -461,10 +455,18 @@ namespace WordCloudUIExtension
 			{
 				var word = m_WordCloud.HitTestWord(ptScreen);
 
-				if (string.IsNullOrEmpty(word))
-					return true; // handled
+				if (string.IsNullOrWhiteSpace(word))
+				{
+					// Use selected word
+					var selItem = m_WordCloud.SelectedItem;
 
-				m_WordCloud.SelectedWord = word;
+					if (selItem == null)
+						return true; // handled
+				}
+				else
+				{
+					m_WordCloud.SelectedWord = word;
+				}
 			}
 
 			var menu = new ContextMenuStrip();
@@ -520,6 +522,7 @@ namespace WordCloudUIExtension
 
 		public void SetReadOnly(bool bReadOnly)
 		{
+			m_TaskMatchesList.ReadOnly = bReadOnly;
 		}
 
 		public void SavePreferences(Preferences prefs, String key)
@@ -1088,10 +1091,10 @@ namespace WordCloudUIExtension
             var notify = new UIExtension.ParentNotify(m_HwndParent);
 
             return notify.NotifyMod(Task.Attribute.DoneDate,
-                                    (task.IsDone ? DateTime.Now : DateTime.MinValue));
-        }
+									(task.IsDone ? DateTime.MinValue : DateTime.Now));
+		}
 
-        private bool OnTaskMatchesEditTaskIcon(object sender, ITaskBase task)
+		private bool OnTaskMatchesEditTaskIcon(object sender, ITaskBase task)
         {
             var notify = new UIExtension.ParentNotify(m_HwndParent);
 

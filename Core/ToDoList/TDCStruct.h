@@ -17,6 +17,19 @@
 
 //////////////////////////////////////////////////////////////////////
 
+struct TDCHITTEST
+{
+	TDCHITTEST();
+
+	BOOL IsValid() const;
+
+	TDC_HITTESTRESULT nResult;
+	DWORD dwTaskID;
+	TDC_COLUMN nColumnID;
+};
+
+//////////////////////////////////////////////////////////////////////
+
 struct TDCDATEOFFSET
 {
 	TDCDATEOFFSET(int amount = 0, TDC_UNITS units = TDCU_NULL);
