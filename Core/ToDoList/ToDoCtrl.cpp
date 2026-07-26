@@ -2052,7 +2052,9 @@ BOOL CToDoCtrl::CheckWantTaskSubtasksCompleted(const CDWordArray& aTaskIDs) cons
 		if (m_data.IsTaskDone(aTaskIDs[nTask]))
 			continue;
 
-		if (m_data.TaskHasIncompleteSubtasks(dwTaskID, TRUE))
+		// Don't take a parent's subtask completion into account
+		// We're interested in the task's explicit completion state
+		if (m_data.TaskHasIncompleteSubtasks(dwTaskID, TRUE, FALSE))
 		{
 			bNeedAsk = (!m_data.IsTaskReusableRecurring(dwTaskID) ||
 						m_data.TaskHasRecurringSubtasks(dwTaskID));

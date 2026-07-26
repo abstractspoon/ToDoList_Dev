@@ -3825,12 +3825,12 @@ BOOL CToDoCtrlData::TaskHasCompletedSubtasks(const TODOSTRUCTURE* pTDS) const
 	return FALSE;
 }
 
-BOOL CToDoCtrlData::TaskHasIncompleteSubtasks(DWORD dwTaskID, BOOL bExcludeRecurring) const
+BOOL CToDoCtrlData::TaskHasIncompleteSubtasks(DWORD dwTaskID, BOOL bExcludeRecurring, BOOL bIncludeGoodAsDone) const
 {
-	return TaskHasIncompleteSubtasks(LocateTask(dwTaskID), bExcludeRecurring);
+	return TaskHasIncompleteSubtasks(LocateTask(dwTaskID), bExcludeRecurring, bIncludeGoodAsDone);
 }
 
-BOOL CToDoCtrlData::TaskHasIncompleteSubtasks(const TODOSTRUCTURE* pTDS, BOOL bExcludeRecurring) const
+BOOL CToDoCtrlData::TaskHasIncompleteSubtasks(const TODOSTRUCTURE* pTDS, BOOL bExcludeRecurring, BOOL bIncludeGoodAsDone) const
 {
 	if (!pTDS)
 	{
@@ -3868,13 +3868,16 @@ BOOL CToDoCtrlData::TaskHasIncompleteSubtasks(const TODOSTRUCTURE* pTDS, BOOL bE
 		if (pTDIChild->IsDone())
 			continue;
 
-		// test for leaf-tasks or parents that do not depend
-		// on their children's completed state
-		if (!pTDSChild->HasSubTasks() || !HasStyle(TDCS_TREATSUBCOMPLETEDASDONE))
+		// Leaf-tasks or 
+		if (!pTDSChild->HasSubTasks())
+			return TRUE;
+
+		// Parents where we're not interested in 'Good as done'
+		if (!bIncludeGoodAsDone || !HasStyle(TDCS_TREATSUBCOMPLETEDASDONE))
 			return TRUE;
 		
 		// test its subtasks
-		if (TaskHasIncompleteSubtasks(pTDSChild, bExcludeRecurring)) // RECURSIVE call
+		if (TaskHasIncompleteSubtasks(pTDSChild, bExcludeRecurring, bIncludeGoodAsDone)) // RECURSIVE call
 			return TRUE;
 	}
 

@@ -169,13 +169,13 @@ public:
 	BOOL TaskHasLocalCircularDependencies(DWORD dwTaskID) const;
 	BOOL IsTaskLocallyDependentOn(DWORD dwTaskID, DWORD dwOtherID, BOOL bImmediateOnly) const;
 
-	BOOL TaskHasIncompleteSubtasks(DWORD dwTaskID, BOOL bExcludeRecurring) const;
+	BOOL TaskHasIncompleteSubtasks(DWORD dwTaskID, BOOL bExcludeRecurring, BOOL bIncludeGoodAsDone = TRUE) const;
 	BOOL TaskHasCompletedSubtasks(DWORD dwTaskID) const;
 	BOOL TaskHasSubtasks(DWORD dwTaskID) const;
 	BOOL TaskHasFileLink(DWORD dwTaskID) const;
 	BOOL TaskHasRecurringSubtasks(DWORD dwTaskID) const;
 
-	BOOL TaskHasIncompleteSubtasks(const TODOSTRUCTURE* pTDS, BOOL bExcludeRecurring) const;
+	BOOL TaskHasIncompleteSubtasks(const TODOSTRUCTURE* pTDS, BOOL bExcludeRecurring, BOOL bIncludeGoodAsDone = TRUE) const;
 	BOOL TaskHasCompletedSubtasks(const TODOSTRUCTURE* pTDS) const;
 	BOOL TaskHasRecurringSubtasks(const TODOSTRUCTURE* pTDS) const;
 
