@@ -42,7 +42,6 @@ BOOL TDCHITTEST::IsValid() const
 
 	case TDCHT_TASK:
 		ASSERT(dwTaskID != 0);
-		ASSERT(nColumnID != TDCC_NONE);
 		return TRUE;
 
 	default:
