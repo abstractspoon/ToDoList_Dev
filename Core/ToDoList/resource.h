@@ -149,6 +149,7 @@
 #define IDI_REMINDER                    333
 #define IDD_SELECTTASK_DIALOG           337
 #define IDB_SIMPLETEXT_MENU             338
+#define IDB_TABCLOSE_BTN                339
 #define IDC_TB_FRAME                    1001
 #define IDC_DAYS                        1003
 #define IDC_WEEKS                       1004
@@ -2606,7 +2607,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        339
+#define _APS_NEXT_RESOURCE_VALUE        340
 #define _APS_NEXT_COMMAND_VALUE         34789
 #define _APS_NEXT_CONTROL_VALUE         1602
 #define _APS_NEXT_SYMED_VALUE           108

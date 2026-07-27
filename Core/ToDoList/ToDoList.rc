@@ -626,7 +626,7 @@ BEGIN
                     BS_TOP | WS_TABSTOP,7,505,381,10
     CONTROL         "In&clude web link when pasting browser content",
                     IDC_INCLUDEWEBLINKINCOMMENTSPASTE,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,519,387,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,520,387,10
     LTEXT           "Tasklist Tab Bar",IDC_TABBARGROUP,7,540,381,8
     CONTROL         "&Hide tab bar when only one tasklist is open",
                     IDC_AUTOHIDETABBAR,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
@@ -2843,6 +2843,7 @@ IDB_YOURLANG_FLAG       BITMAP  MOVEABLE PURE   "res\\yourlang_flag.bmp"
 IDR_ATTRIBCTRL_TOOLBAR  BITMAP  MOVEABLE PURE   "res\\taskattrib_toolbar.bmp"
 IDB_ATTRIBCTRL_TOOLBAR  BITMAP  MOVEABLE PURE   "res\\taskattrib_toolbar_std.bmp"
 IDB_SIMPLETEXT_MENU     BITMAP  DISCARDABLE     "res\\simpletext_menu.bmp"
+IDB_TABCLOSE_BTN        BITMAP  DISCARDABLE     "res\\tab_close_btn.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //

@@ -38,7 +38,7 @@ public:
 	virtual ~CTDCMainMenu();
 
 	BOOL LoadMenu();
-	BOOL LoadMenu(const CPreferencesDlg& prefs);
+	BOOL ShowTabCloseButton(BOOL bShow = TRUE);
 
 	BOOL HandlePostTranslateMenu(HMENU hMenu) const;
 	BOOL HandleInitMenuPopup(CMenu* pPopupMenu, 
@@ -78,12 +78,11 @@ public:
 protected:
 	UITHEME m_theme;
 	CEnBitmap m_bmUILang, m_bmTabClose;
+	BOOL m_bShowingTabCloseBtn;
 
 protected:
-	void LoadMenuCommon();
 	void TranslateDynamicMenuItems();
 	void AddLanguageButton();
-	void AddTabCloseButton(const CPreferencesDlg& prefs);
 
 	static void PrepareFileMenu(CMenu* pMenu, const CPreferencesDlg& prefs);
 	static void PrepareEditMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, const CPreferencesDlg& prefs);
@@ -97,6 +96,8 @@ protected:
 
 	static void AddFiltersToMenu(CMenu* pMenu, UINT nStart, UINT nEnd, const CStringArray& aFilters, UINT nPlaceholderStrID);
 	static BOOL IsInRange(UINT nItem, UINT nStart, UINT nEnd);
+	static BOOL CreateMenuBitmap(CEnBitmap& bmp, UINT nBitmapID);
+	static BOOL OSSupportsBitmapButtons();
 };
 
 #endif // !defined(AFX_TDCMAINMENU_H__5AB11CC8_CCF5_4D52_ADC7_27FDC151F3FE__INCLUDED_)

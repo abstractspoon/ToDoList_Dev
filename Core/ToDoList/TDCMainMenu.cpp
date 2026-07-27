@@ -42,10 +42,8 @@ static char THIS_FILE[]=__FILE__;
 #endif
 
 //////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 
-CTDCMainMenu::CTDCMainMenu()
+CTDCMainMenu::CTDCMainMenu() : m_bShowingTabCloseBtn(FALSE)
 {
 
 }
@@ -54,7 +52,7 @@ CTDCMainMenu::~CTDCMainMenu()
 {
 }
 
-BOOL CTDCMainMenu::LoadMenu(const CPreferencesDlg& prefs)
+BOOL CTDCMainMenu::LoadMenu()
 {
 	CWnd* pMainWnd = AfxGetMainWnd();
 
@@ -67,24 +65,47 @@ BOOL CTDCMainMenu::LoadMenu(const CPreferencesDlg& prefs)
 	if (!CEnMenu::LoadMenu(IDR_MAINFRAME, *pMainWnd, TRUE, FALSE))
 		return FALSE;
 
-	LoadMenuCommon();
+	m_bShowingTabCloseBtn = FALSE;
+
+	// Delete 'Record Bug Report' if below W7
+	if (COSVersion() < OSV_WIN7)
+	{
+		CMenu* pSubMenu = GetSubMenu(AM_HELP);
+		ASSERT(pSubMenu);
+
+		int nPos = CEnMenu::FindMenuItem(*pSubMenu, ID_HELP_RECORDBUGREPORT);
+		ASSERT(nPos != -1);
+
+		pSubMenu->DeleteMenu(nPos, MF_BYPOSITION);
+
+		// and the following separator
+		if (pSubMenu->GetMenuItemID(nPos) == 0)
+			pSubMenu->DeleteMenu(nPos, MF_BYPOSITION);
+	}
 
 	AddLanguageButton();
-	AddTabCloseButton(prefs);
 
-	// Right-align 'Debug' menu and don't translate
+	// Debug menu
 #ifdef _DEBUG
+	// Right-align and don't translate
 	ModifyMenu(AM_DEBUG, MF_BYPOSITION | MFT_RIGHTJUSTIFY, 0, _T("&Debug"));
 	CLocalizer::EnableTranslation(::GetSubMenu(GetSafeHmenu(), AM_DEBUG), FALSE);
+#else
+	// Exclude the debug menu in release builds
+	DeleteMenu(AM_DEBUG, MF_BYPOSITION);
 #endif
 
 	return TRUE;
 }
 
+BOOL CTDCMainMenu::OSSupportsBitmapButtons()
+{
+	return (CThemed::IsNonClientThemed() && (COSVersion() >= OSV_VISTA));
+}
+
 void CTDCMainMenu::AddLanguageButton()
 {
-	// Avoid non-supportive setups
-	if (!CThemed::IsNonClientThemed() || (COSVersion() < OSV_VISTA))
+	if (!OSSupportsBitmapButtons())
 		return;
 
 	// Only have to prepare the bitmap once per session 
@@ -93,50 +114,67 @@ void CTDCMainMenu::AddLanguageButton()
 	if (m_bmUILang.GetSafeHandle() == NULL)
 	{
 		CString sUILang = CLocalizer::GetDictionaryPath();
-		CEnBitmap bmp;
 		
 		if (sUILang.IsEmpty())
 		{
-			VERIFY(bmp.LoadBitmap(IDB_UK_FLAG));
+			VERIFY(CreateMenuBitmap(m_bmUILang, IDB_UK_FLAG));
 		}
 		else 
 		{
 			CString sIconPath(sUILang);
 			FileMisc::ReplaceExtension(sIconPath, _T("png"));
 			
-			if (!bmp.LoadImage(sIconPath))
-				VERIFY(bmp.LoadBitmap(IDB_YOURLANG_FLAG));
+			if (!m_bmUILang.LoadImage(sIconPath))
+				VERIFY(m_bmUILang.LoadBitmap(IDB_YOURLANG_FLAG));
+
+			VERIFY(CreateMenuBitmap(m_bmUILang, 0));
 		}
-
-		int nReqSize = GraphicsMisc::ScaleByDPIFactor(16);
-		bmp.ResizeImage(nReqSize, nReqSize, colorMagenta);
-
-		bmp.ConvertToPARGB32(colorMagenta);
-		m_bmUILang.Attach(bmp.Detach());
 	}
 
 	VERIFY(AppendMenu((MFT_RIGHTJUSTIFY | MFT_BITMAP), ID_PREFERENCES_EDITUILANGUAGE, &m_bmUILang));
 }
 
-void CTDCMainMenu::AddTabCloseButton(const CPreferencesDlg& prefs)
+BOOL CTDCMainMenu::CreateMenuBitmap(CEnBitmap& bmp, UINT nBitmapID)
 {
-	if (!prefs.GetShowTabCloseButtons())
-	{
-		if (!m_bmTabClose.GetSafeHandle())
-			m_bmTabClose.Attach(HBMMENU_MBAR_CLOSE);
+	ASSERT(OSSupportsBitmapButtons());
 
-		VERIFY(AppendMenu((MFT_RIGHTJUSTIFY | MFT_BITMAP), ID_CLOSE, &m_bmTabClose));
-	}
-}
+	if (nBitmapID)
+		bmp.LoadBitmap(nBitmapID);
 
-BOOL CTDCMainMenu::LoadMenu()
-{
-	if (!CEnMenu::LoadMenu(IDR_MAINFRAME, NULL, TRUE, TRUE))
+	if (!bmp.GetSafeHandle())
 		return FALSE;
 
-	LoadMenuCommon();
-	TranslateDynamicMenuItems();
+	int nReqSize = GraphicsMisc::ScaleByDPIFactor(16);
+	bmp.ResizeImage(nReqSize, nReqSize, colorMagenta);
 
+	return bmp.ConvertToPARGB32(colorMagenta);
+}
+
+BOOL CTDCMainMenu::ShowTabCloseButton(BOOL bShow)
+{
+	if (!Misc::StatesDiffer(bShow, m_bShowingTabCloseBtn))
+		return TRUE; // no change
+	
+	if (!OSSupportsBitmapButtons())
+		return FALSE;
+
+	m_bShowingTabCloseBtn = bShow;
+
+	if (bShow)
+	{
+		if (!m_bmTabClose.GetSafeHandle() && !CreateMenuBitmap(m_bmTabClose, IDB_TABCLOSE_BTN))
+			return FALSE;
+
+		if (!AppendMenu((MFT_RIGHTJUSTIFY | MFT_BITMAP), ID_CLOSE, &m_bmTabClose))
+			return FALSE;
+	}
+	else 
+	{
+		if (!DeleteMenu(ID_CLOSE, MF_BYCOMMAND))
+			return FALSE;
+	}
+
+	AfxGetMainWnd()->DrawMenuBar();
 	return TRUE;
 }
 
@@ -286,32 +324,6 @@ CString CTDCMainMenu::GetDynamicItemTooltip(UINT nMenuID,
 		sTipText.Replace('\t', ' ');
 
 	return sTipText;
-}
-
-void CTDCMainMenu::LoadMenuCommon()
-{
-	ASSERT(GetSafeHmenu());
-
-#ifndef _DEBUG
-	// Exclude the debug menu in release builds
-	DeleteMenu(AM_DEBUG, MF_BYPOSITION);
-#endif
-
-	// delete 'Record Bug Report' if below W7
-	if (COSVersion() < OSV_WIN7)
-	{
-		CMenu* pSubMenu = GetSubMenu(AM_HELP);
-		ASSERT(pSubMenu);
-
-		int nPos = CEnMenu::FindMenuItem(*pSubMenu, ID_HELP_RECORDBUGREPORT);
-		ASSERT(nPos != -1);
-
-		pSubMenu->DeleteMenu(nPos, MF_BYPOSITION);
-
-		// and the following separator
-		if (pSubMenu->GetMenuItemID(nPos) == 0)
-			pSubMenu->DeleteMenu(nPos, MF_BYPOSITION);
-	}
 }
 
 // test for top-level menus

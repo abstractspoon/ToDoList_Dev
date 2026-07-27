@@ -86,9 +86,10 @@ void CTDCMenuIconMgr::Populate(const CPreferencesDlg& prefs)
 	aCmdIDs.Add(ID_TOOLS_IMPORT);
 	aCmdIDs.Add(ID_TOOLS_EXPORT);
 	aCmdIDs.Add(ID_TOOLS_ANONYMIZE_TASKLIST);
+	aCmdIDs.Add(ID_CLOSE);
 
 	AddImages(aCmdIDs, IDB_APP_EXTRA_STD, colorMagenta);
-	AddImage(ID_TOOLS_ANONYMIZE_TASKTIMELOG, ID_TOOLS_ANONYMIZE_TASKLIST); // copy
+	AddImage(ID_TOOLS_ANONYMIZE_TASKTIMELOG, ID_TOOLS_ANONYMIZE_TASKLIST); // copy image
 
 	// social images ---------------------------------------
 	aCmdIDs.RemoveAll();
@@ -108,8 +109,8 @@ void CTDCMenuIconMgr::Populate(const CPreferencesDlg& prefs)
 	AddImages(aCmdIDs, IDB_DATETIME_TOOLBAR_STD, colorMagenta);
 
 	// Tray icon -------------------------------------------
-	AddImage(ID_TRAYICON_CREATETASK, GetNewTaskCmdID(prefs));
-	AddImage(ID_TRAYICON_CLOSE, ID_EXIT);
+	AddImage(ID_TRAYICON_CREATETASK, GetNewTaskCmdID(prefs)); // copy image
+	AddImage(ID_TRAYICON_CLOSE, ID_EXIT); // copy image
 
 	// Displaying logged time ------------------------------
 	AddImage(ID_SHOWTIMELOGFILE, CFileIcons::ExtractIcon(_T(".csv")));

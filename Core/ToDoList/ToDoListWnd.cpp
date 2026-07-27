@@ -204,7 +204,8 @@ CToDoListWnd::IDLETASKS::IDLETASKS(CToDoListWnd& tdl)
 	m_bRefreshPauseTimeTracking(FALSE),
 	m_nUpdateAutoListDataAttribID(TDCA_NONE),
 	m_bUpdateFocusedControl(FALSE),
-	m_bHandleThemeChange(FALSE)
+	m_bHandleThemeChange(FALSE),
+	m_bUpdateMenubarCloseBtn(FALSE)
 {
 }
 
@@ -307,6 +308,11 @@ BOOL CToDoListWnd::IDLETASKS::Process()
 
 			m_bHandleThemeChange = FALSE;
 		}
+		else if (m_bUpdateMenubarCloseBtn)
+		{
+			m_tdl.UpdateMenubarTabCloseBtnVisibility();
+			m_bUpdateMenubarCloseBtn = FALSE;
+		}
 	}
 
 	return HasTasks();
@@ -319,6 +325,7 @@ BOOL CToDoListWnd::IDLETASKS::HasTasks() const
 			m_bUpdateMenuSSCStatus ||
 			m_bRefreshPauseTimeTracking ||
 			m_bRefreshTabOrder ||
+			m_bUpdateMenubarCloseBtn ||
 			(m_nUpdateAutoListDataAttribID != TDCA_NONE) ||
 			(m_bUpdateTimeTrackAllTasks != -1) ||
 			!m_mapStatusBarAttrib.IsEmpty());
@@ -5441,13 +5448,22 @@ BOOL CToDoListWnd::CheckPromptLanguageRestart(LPCTSTR szOldLangFile, LPCTSTR szN
 	return (nMsgID && CMessageBox::AfxShow(nMsgID, MB_YESNO) == IDYES);
 }
 
+void CToDoListWnd::UpdateMenubarTabCloseBtnVisibility()
+{
+	BOOL bShowTabCloseBtn = (!Prefs().GetShowTabCloseButtons() || !m_tabCtrl.IsWindowVisible());
+
+	VERIFY(m_menubar.ShowTabCloseButton(bShowTabCloseBtn));
+}
+
 BOOL CToDoListWnd::InitMenubar()
 {
-	if (!m_menubar.LoadMenu(Prefs()))
+	if (!m_menubar.LoadMenu())
 		return FALSE;
 
 	SetMenu(&m_menubar);
 	m_hMenuDefault = m_menubar;
+
+	m_idleTasks.UpdateMenubarTabCloseBtnVisibility();
 
 	return TRUE;
 }
@@ -6966,6 +6982,8 @@ int CToDoListWnd::AddToDoCtrl(CFilteredToDoCtrl* pTDC, TSM_TASKLISTINFO* pInfo)
 	// Show the tab-bar as required
 	if (WantTasklistTabbarVisible() && !m_tabCtrl.IsWindowVisible())
 		Resize();
+
+	m_idleTasks.UpdateMenubarTabCloseBtnVisibility();
 
 	return nSel;
 }
@@ -8721,6 +8739,8 @@ BOOL CToDoListWnd::CloseToDoCtrl(int nIndex)
 			m_idleTasks.UpdateFocusedControl();
 		}
 	}
+	
+	m_idleTasks.UpdateMenubarTabCloseBtnVisibility();
 	
 	return TRUE;
 }

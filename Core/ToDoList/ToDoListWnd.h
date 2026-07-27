@@ -80,6 +80,7 @@ private:
 		void UpdateMenuSourceControlStatus() { m_bUpdateMenuSSCStatus = TRUE; }
 		void UpdateAutoListData(TDC_ATTRIBUTE nAttribID = TDCA_ALL) { m_nUpdateAutoListDataAttribID = nAttribID; }
 		void UpdateFocusedControl() { m_bUpdateFocusedControl = TRUE; }
+		void UpdateMenubarTabCloseBtnVisibility() { m_bUpdateMenubarCloseBtn = TRUE; }
 
 		void RefreshTimeTrackingStatus() { m_bRefreshTimeTrackStatus = TRUE; }
 		void RefreshPauseTimeTracking() { m_bRefreshPauseTimeTracking = TRUE; }
@@ -99,6 +100,7 @@ private:
 		BOOL m_bRefreshTabOrder;
 		BOOL m_bUpdateFocusedControl;
 		BOOL m_bHandleThemeChange;
+		BOOL m_bUpdateMenubarCloseBtn;
 
 		TDC_ATTRIBUTE m_nUpdateAutoListDataAttribID;
 
@@ -778,6 +780,7 @@ protected:
 	void UpdateTimeTrackerTasks(BOOL bAllTasks, const CTDCAttributeMap& mapAttrib);
 	void UpdateTaskTreeAndCommentsFonts();
 	void UpdateFindTasksAndRemindersFonts();
+	void UpdateMenubarTabCloseBtnVisibility();
 
 	void RefreshFilterBarControls(TDC_ATTRIBUTE nAttribID = TDCA_ALL, BOOL bClearCheckboxHistory = FALSE);
 	void RefreshFilterBarAdvancedFilters();
