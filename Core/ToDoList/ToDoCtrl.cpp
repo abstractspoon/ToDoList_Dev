@@ -3941,19 +3941,22 @@ int CToDoCtrl::OnToolHitTest(CPoint point, TOOLINFO * pTI) const
 
 	if (HasStyle(TDCS_SHOWIMAGETIPS) && (hitTest.nColumnID == TDCC_ICON))
 	{
+		// We show an image-tip for any file-based icon greater in size than 16x16
 		TDCIMAGEINFO info;
 		
-		if (!m_ilTaskIcons.GetImageInfo(m_data.GetTaskIcon(hitTest.dwTaskID), info))
-			return 0;
+		if (m_ilTaskIcons.GetImageInfo(m_data.GetTaskIcon(hitTest.dwTaskID), info) &&
+			!info.sFilePath.IsEmpty() &&
+			((info.sizeImage.cx > 16) || (info.sizeImage.cy > 16)))
+		{
+			sTip = info.sFilePath;
+		}
+		else
+		{
+			// Or we show an regular tooltip for any icon with a custom name
+			sTip = CTDLTaskIconDlg::GetUserIconName(m_data.GetTaskIcon(hitTest.dwTaskID));
+		}
 
-		if (info.sFilePath.IsEmpty())
-			return 0;
-
-		if ((info.sizeImage.cx == 16) || (info.sizeImage.cy == 16))
-			return 0;
-		
-		sTip = info.sFilePath;
-		hitTest.dwTaskID += m_dwNextUniqueID; // so it's distinguishable from a text infotip of the same task
+		hitTest.dwTaskID += m_dwNextUniqueID; // so it's distinguishable from an info-tip of the same task
 	}
 	else if (HasStyle(TDCS_SHOWINFOTIPS) && (hitTest.nColumnID == TDCC_CLIENT))
 	{
