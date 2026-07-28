@@ -373,7 +373,6 @@ namespace EvidenceBoardUIExtension
 
 			m_Control.EditTaskLabel += new EditTaskLabelEventHandler(OnEvidenceBoardEditTaskLabel);
             m_Control.EditTaskIcon += new EditTaskIconEventHandler(OnEvidenceBoardEditTaskIcon);
-            m_Control.EditTaskDone += new EditTaskCompletionEventHandler(OnEvidenceBoardEditTaskCompletion);
 
 			m_Control.ZoomChange += (s, e) => { UpdateToolbarButtonStates(); };
 			m_Control.ExtentsChange += (s, e) => { UpdateToolbarButtonStates(); };
@@ -526,22 +525,12 @@ namespace EvidenceBoardUIExtension
 		bool OnEvidenceBoardEditTaskLabel(object sender, UInt32 taskId)
 		{
 			var notify = new UIExtension.ParentNotify(m_HwndParent);
-
 			return notify.NotifyEditLabel();
 		}
-
-        bool OnEvidenceBoardEditTaskCompletion(object sender, UInt32 taskId, bool completed)
-        {
-            var notify = new UIExtension.ParentNotify(m_HwndParent);
-
-            return notify.NotifyMod(Task.Attribute.DoneDate, 
-                                    (completed ? DateTime.Now : DateTime.MinValue));
-        }
 
         bool OnEvidenceBoardEditTaskIcon(object sender, UInt32 taskId)
         {
             var notify = new UIExtension.ParentNotify(m_HwndParent);
-
             return notify.NotifyEditIcon();
         }
 
@@ -569,7 +558,6 @@ namespace EvidenceBoardUIExtension
 		bool OnEvidenceBoardImageDropped(object sender, uint taskId, string[] imagePaths)
 		{
 			var notify = new UIExtension.ParentNotify(m_HwndParent);
-
 			return notify.NotifyMod(Task.Attribute.FileLink, string.Join("\n", imagePaths), true);
 		}
 

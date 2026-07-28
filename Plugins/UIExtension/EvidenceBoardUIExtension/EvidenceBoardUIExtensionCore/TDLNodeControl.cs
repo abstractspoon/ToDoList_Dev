@@ -65,7 +65,6 @@ namespace EvidenceBoardUIExtension
 	{
 		public event EditTaskLabelEventHandler EditTaskLabel;
 		public event EditTaskIconEventHandler EditTaskIcon;
-		public event EditTaskCompletionEventHandler EditTaskDone;
 
 		public event TaskModifiedEventHandler TaskModified;
 		public event ImageDroppedEventHandler ImageDropped;
