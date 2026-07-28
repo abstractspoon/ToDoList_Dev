@@ -2391,8 +2391,7 @@ void CKanbanColumnCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 
 		if (nSetMsgID)
 		{
-			// Post message to give mouse-click time to complete
-			GetParent()->PostMessage(nSetMsgID, (WPARAM)GetSafeHwnd(), bSet);
+			GetParent()->SendMessage(nSetMsgID, (WPARAM)GetSafeHwnd(), bSet);
 			Invalidate(FALSE);
 
 			bHandled = TRUE;
