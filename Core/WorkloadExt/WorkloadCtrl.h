@@ -138,8 +138,8 @@ protected:
 	BOOL OnDragDropItem(const TLCITEMMOVE& move);
 	UINT OnDragOverItem(const TLCITEMMOVE& move, UINT nCursor);
 
-	BOOL OnTreeLButtonUp(UINT nFlags, CPoint point);
-	BOOL OnTreeCheckChange(HTREEITEM hti);
+	BOOL OnTreeCheckboxClick(HTREEITEM hti);
+	BOOL OnTreeIconClick(HTREEITEM hti);
 	BOOL OnListLButtonDblClk(UINT nFlags, CPoint point);
 	void OnListHeaderClick(NMHEADER* HDN);
 	void OnResize(int cx, int cy);

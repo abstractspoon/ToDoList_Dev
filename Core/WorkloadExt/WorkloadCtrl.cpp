@@ -1699,26 +1699,6 @@ void CWorkloadCtrl::OnTreeGetDispInfo(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 	}
 }
 
-BOOL CWorkloadCtrl::OnTreeLButtonUp(UINT nFlags, CPoint point)
-{
-	if (CTreeListCtrl::OnTreeLButtonUp(nFlags, point))
-		return TRUE;
-
-	// else
-	if (!m_bReadOnly)
-	{
-		HTREEITEM hti = m_tree.HitTest(point, &nFlags);
-
-		if (nFlags & TVHT_ONITEMICON)
-			GetParent()->SendMessage(WM_WLC_EDITTASKICON, (WPARAM)m_tree.GetSafeHwnd());
-
-		return TRUE; // eat
-	}
-
-	// not handled
-	return FALSE;
-}
-
 BOOL CWorkloadCtrl::OnDragBeginItem(const TLCITEMMOVE& move, BOOL bLeftDrag)
 {
 	if (!CTreeListCtrl::OnDragBeginItem(move, bLeftDrag))
@@ -1986,16 +1966,22 @@ void CWorkloadCtrl::OnListHeaderClick(NMHEADER* pHDN)
 	}
 }
 
-BOOL CWorkloadCtrl::OnTreeCheckChange(HTREEITEM hti)
+BOOL CWorkloadCtrl::OnTreeCheckboxClick(HTREEITEM hti)
 {
-	if (!m_bReadOnly)
-	{
-		DWORD dwTaskID = GetTaskID(hti);
-		BOOL bSetDone = !m_data.ItemIsDone(dwTaskID, FALSE);
-	
-		GetParent()->SendMessage(WM_WLCN_COMPLETIONCHANGE, (WPARAM)(HWND)m_tree, bSetDone);
-	}
+	ASSERT(!m_bReadOnly);
 
+	DWORD dwTaskID = GetTaskID(hti);
+	BOOL bSetDone = !m_data.ItemIsDone(dwTaskID, FALSE);
+
+	GetParent()->SendMessage(WM_WLCN_COMPLETIONCHANGE, (WPARAM)(HWND)m_tree, bSetDone);
+	return TRUE; // always
+}
+
+BOOL CWorkloadCtrl::OnTreeIconClick(HTREEITEM /*hti*/)
+{
+	ASSERT(!m_bReadOnly);
+
+	GetParent()->SendMessage(WM_WLC_EDITTASKICON, (WPARAM)(HWND)m_tree);
 	return TRUE; // always
 }
 
