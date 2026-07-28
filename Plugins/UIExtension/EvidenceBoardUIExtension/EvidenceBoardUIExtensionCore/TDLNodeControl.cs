@@ -2134,9 +2134,7 @@ namespace EvidenceBoardUIExtension
 				if ((link != null) && !from)
 				{
 					DoUserLinkDragDrop(link);
-
-					// Prevent base class handling
-					return;
+					return; // We handled it
 				}
 
 				link = HitTestUserLink(e.Location);
@@ -2145,9 +2143,7 @@ namespace EvidenceBoardUIExtension
 				{
 					// Cache the link to be checked in OnMouseClick
 					m_SelectedUserLink = link;
-
-					// Prevent base class handling
-					return;
+					return; // We handled it
 				}
 				else if (HasSelectedUserLink)
 				{
@@ -2157,9 +2153,7 @@ namespace EvidenceBoardUIExtension
 				if (HitTestHotNodeCreateLink(e.Location))
 				{
 					DoUserLinkDragDrop(new UserLink(node.Data, NullId, UserLinkAttributes.Defaults));
-
-					// Prevent base class handling
-					return;
+					return; // We handled it
 				}
 
 				// Check for icon click
@@ -2170,7 +2164,7 @@ namespace EvidenceBoardUIExtension
 					SelectNode(taskItem.TaskId, true, false);
 					EditTaskIcon?.Invoke(this, taskItem.TaskId);
 
-					return;
+					return; // We handled it
 				}
 
 				// Check for image cycling
@@ -2191,8 +2185,8 @@ namespace EvidenceBoardUIExtension
 						RecalcExtents(false);
 						TaskModified?.Invoke(this, new List<uint>() { taskItem.TaskId });
 					}
-
-					return;
+					
+					return; // We handled it
 				}
 			}
 
@@ -2214,8 +2208,7 @@ namespace EvidenceBoardUIExtension
 					RecalcExtents(false);
 
 					ImageExpansionChange?.Invoke(this, null);
-
-					return;
+					return; // We handled it
 				}
 			}
 
@@ -2440,7 +2433,7 @@ namespace EvidenceBoardUIExtension
 
 			// The icon rect not clickable if the task has 
 			// neither an icon nor an image (expansion button)
-			if (!taskItem.HasIcon && !taskItem.HasImage)
+			if (!TaskHasIcon(taskItem) && !taskItem.HasImage)
 				return null;
 
 			if (!CalcIconRect(GetNodeClientRect(node)).Contains(ptClient))
