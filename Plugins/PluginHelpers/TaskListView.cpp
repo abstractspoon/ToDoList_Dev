@@ -1100,18 +1100,19 @@ void TaskListView::WndProc(Message% m)
 
 	case WM_RBUTTONDOWN:
 		{
-			// Eat this if clicking in whitespace to prevent
-			// loss of selection
 			Point pos = Win32::GetPoint(m.LParam);
 
+			// When clicking on whitespace...
 			if (HitTest(pos)->Item == nullptr)
 			{
 				Focus();
 
-				// and forward as context menu msg to parent
+				// Forward as context menu msg to parent
 				pos = PointToScreen(pos);
 
 				Win32::SendMessage(m.HWnd, WM_CONTEXTMENU, (UIntPtr)Win32::GetHwnd(m.HWnd), (IntPtr)Win32::MakeLParam(pos.X, pos.Y));
+
+				// And eat to prevent loss of selection
 				return;
 			}
 		}
