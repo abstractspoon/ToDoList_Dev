@@ -1536,19 +1536,29 @@ BOOL CTreeListCtrl::OnTreeLButtonDown(UINT nFlags, CPoint point)
 
 	ProcessSelectionChange(bSelChange);
 
-	// Handle checkbox clicking
+	// Handle checkbox/icon clicking
 	if (0 == (nFlags & (MK_CONTROL | MK_SHIFT)))
 	{
 		UINT nHitFlags = 0;
 		HTREEITEM htiHit = m_tree.HitTest(point, &nHitFlags);
 
-		BOOL bHitCheck = (nHitFlags & TVHT_ONITEMSTATEICON);
-
-		if (bHitCheck)
+		if (nHitFlags & TVHT_ONITEMSTATEICON)
 		{
+			// Cancel any drag drop operation
+			m_treeDragDrop.CancelDrag();
+
 			// Derived class gets first refusal
-			if (!OnTreeCheckChange(htiHit))
-				GetParent()->SendMessage(WM_TLC_ITEMCHECKCHANGE, GetDlgCtrlID(), (LPARAM)htiHit);
+			if (!OnTreeCheckboxClick(htiHit))
+				GetParent()->SendMessage(WM_TLC_ITEMCHECKBOXCLICK, GetDlgCtrlID(), (LPARAM)htiHit);
+		}
+		else if (nHitFlags & TVHT_ONITEMICON)
+		{
+			// Cancel any drag drop operation
+			m_treeDragDrop.CancelDrag();
+
+			// Derived class gets first refusal
+			if (!OnTreeIconClick(htiHit))
+				GetParent()->SendMessage(WM_TLC_ITEMICONCLICK, GetDlgCtrlID(), (LPARAM)htiHit);
 		}
 	}
 

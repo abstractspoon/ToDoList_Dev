@@ -2091,36 +2091,22 @@ BOOL CGanttCtrl::OnTreeLButtonDown(UINT nFlags, CPoint point)
 	return CTreeListCtrl::OnTreeLButtonDown(nFlags, point);
 }
 
-BOOL CGanttCtrl::OnTreeLButtonUp(UINT nFlags, CPoint point)
+BOOL CGanttCtrl::OnTreeCheckboxClick(HTREEITEM hti)
 {
-	if (CTreeListCtrl::OnTreeLButtonUp(nFlags, point))
-		return TRUE;
-
-	// Handle icon editing
-	if (!m_bReadOnly && (0 == (nFlags & (MK_CONTROL | MK_SHIFT))))
-	{
-		HTREEITEM hti = m_tree.HitTest(point, &nFlags);
-
-		if (nFlags & TVHT_ONITEMICON)
-			GetParent()->SendMessage(WM_GTLC_EDITTASKICON, (WPARAM)m_tree.GetSafeHwnd());
-		
-		return TRUE; // eat
-	}
-
-	// not handled
-	return FALSE;
-}
-
-BOOL CGanttCtrl::OnTreeCheckChange(HTREEITEM hti)
-{
-	if (m_bReadOnly)
-		return FALSE;
+	ASSERT(!m_bReadOnly);
 
 	DWORD dwTaskID = GetTaskID(hti);
 	BOOL bSetDone = !m_data.ItemIsDone(dwTaskID, FALSE);
 
 	GetParent()->SendMessage(WM_GTLC_COMPLETIONCHANGE, (WPARAM)(HWND)m_tree, bSetDone);
+	return TRUE; // always
+}
 
+BOOL CGanttCtrl::OnTreeIconClick(HTREEITEM /*hti*/)
+{
+	ASSERT(!m_bReadOnly);
+
+	GetParent()->SendMessage(WM_GTLC_EDITTASKICON, (WPARAM)(HWND)m_tree);
 	return TRUE; // always
 }
 
