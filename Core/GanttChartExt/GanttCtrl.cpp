@@ -2093,20 +2093,24 @@ BOOL CGanttCtrl::OnTreeLButtonDown(UINT nFlags, CPoint point)
 
 BOOL CGanttCtrl::OnTreeCheckboxClick(HTREEITEM hti)
 {
-	ASSERT(!m_bReadOnly);
-
 	DWORD dwTaskID = GetTaskID(hti);
-	BOOL bSetDone = !m_data.ItemIsDone(dwTaskID, FALSE);
 
-	GetParent()->SendMessage(WM_GTLC_COMPLETIONCHANGE, (WPARAM)(HWND)m_tree, bSetDone);
+	if (!m_bReadOnly && !m_data.ItemIsLocked(dwTaskID, FALSE))
+	{
+		BOOL bSetDone = !m_data.ItemIsDone(dwTaskID, FALSE);
+		GetParent()->SendMessage(WM_GTLC_COMPLETIONCHANGE, (WPARAM)(HWND)m_tree, bSetDone);
+	}
+
 	return TRUE; // always
 }
 
-BOOL CGanttCtrl::OnTreeIconClick(HTREEITEM /*hti*/)
+BOOL CGanttCtrl::OnTreeIconClick(HTREEITEM hti)
 {
-	ASSERT(!m_bReadOnly);
+	DWORD dwTaskID = GetTaskID(hti);
 
-	GetParent()->SendMessage(WM_GTLC_EDITTASKICON, (WPARAM)(HWND)m_tree);
+	if (!m_bReadOnly && !m_data.ItemIsLocked(dwTaskID, FALSE))
+		GetParent()->SendMessage(WM_GTLC_EDITTASKICON, (WPARAM)(HWND)m_tree);
+
 	return TRUE; // always
 }
 

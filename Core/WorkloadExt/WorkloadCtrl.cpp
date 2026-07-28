@@ -1968,20 +1968,24 @@ void CWorkloadCtrl::OnListHeaderClick(NMHEADER* pHDN)
 
 BOOL CWorkloadCtrl::OnTreeCheckboxClick(HTREEITEM hti)
 {
-	ASSERT(!m_bReadOnly);
-
 	DWORD dwTaskID = GetTaskID(hti);
-	BOOL bSetDone = !m_data.ItemIsDone(dwTaskID, FALSE);
 
-	GetParent()->SendMessage(WM_WLCN_COMPLETIONCHANGE, (WPARAM)(HWND)m_tree, bSetDone);
+	if (!m_bReadOnly && !m_data.ItemIsLocked(dwTaskID, FALSE))
+	{
+		BOOL bSetDone = !m_data.ItemIsDone(dwTaskID, FALSE);
+		GetParent()->SendMessage(WM_WLCN_COMPLETIONCHANGE, (WPARAM)(HWND)m_tree, bSetDone);
+	}
+
 	return TRUE; // always
 }
 
-BOOL CWorkloadCtrl::OnTreeIconClick(HTREEITEM /*hti*/)
+BOOL CWorkloadCtrl::OnTreeIconClick(HTREEITEM hti)
 {
-	ASSERT(!m_bReadOnly);
+	DWORD dwTaskID = GetTaskID(hti);
 
-	GetParent()->SendMessage(WM_WLC_EDITTASKICON, (WPARAM)(HWND)m_tree);
+	if (!m_bReadOnly && !m_data.ItemIsLocked(dwTaskID, FALSE))
+		GetParent()->SendMessage(WM_WLC_EDITTASKICON, (WPARAM)(HWND)m_tree);
+
 	return TRUE; // always
 }
 
