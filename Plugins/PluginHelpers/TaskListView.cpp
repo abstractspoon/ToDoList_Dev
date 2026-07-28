@@ -1025,41 +1025,44 @@ void TaskListView::WndProc(Message% m)
 				}
 				else
 				{
-					// else
 					Focus();
-					return;
+					return; // We handled it
 				}
 			}
 			else
 			{
 				auto task = ASTYPE(lvHit->Tag, ITaskBase);
 
-				if (IsTaskEditable(task))
+				if (CalcCheckboxRect(lvHit->Bounds).Contains(pos))
 				{
-					if (CalcCheckboxRect(lvHit->Bounds).Contains(pos))
-					{
-						if (!lvHit->Selected)
-							ListView::WndProc(m); // Default handling to select task
+					if (!lvHit->Selected)
+						SelectTask(task->Id);
 
+					if (IsTaskEditable(task))
 						EditTaskDone(this, task);
-						return;
-					}
-					else if (CalcIconRect(lvHit->Bounds).Contains(pos))
-					{
-						if (!lvHit->Selected)
-							ListView::WndProc(m); // Default handling to select task
 
+					return; // We handled it
+				}
+
+				if (CalcIconRect(lvHit->Bounds).Contains(pos))
+				{
+					if (!lvHit->Selected)
+						SelectTask(task->Id);
+
+					if (IsTaskEditable(task))
 						EditTaskIcon(this, task);
-						return;
-					}
+
+					return; // We handled it
+				}
+
+				if (lvHit->Selected && !Focused)
+				{
 					// If the item is selected but we're not focused, 
 					// prevent the base class from starting a label edit
-					else if (lvHit->Selected && !Focused)
-					{
-						Focus();
-						return;
-					}
+					Focus();
+					return; // We handled it
 				}
+
 				// else default handling
 			}
 		}
@@ -1079,7 +1082,7 @@ void TaskListView::WndProc(Message% m)
 				if (IsTaskEditable(task) && GetTaskLabelRect(task->Id).Contains(pos))
 					EditTaskLabel(this, task);
 
-				return; // always
+				return; // We handled it
 			}
 		}
 		break;
