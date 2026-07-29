@@ -1574,6 +1574,8 @@ namespace MindMapUIExtension
 
 		protected override void OnMouseDoubleClick(MouseEventArgs e)
 		{
+			m_EditTimer.Stop();
+
 			if (base.HandleMouseDoubleClick(e) || (EditTaskLabel == null))
 				return;
 
