@@ -1112,7 +1112,6 @@ void TaskListView::WndProc(Message% m)
 
 				// Forward as context menu msg to parent
 				pos = PointToScreen(pos);
-
 				Win32::SendMessage(m.HWnd, WM_CONTEXTMENU, (UIntPtr)Win32::GetHwnd(m.HWnd), (IntPtr)Win32::MakeLParam(pos.X, pos.Y));
 
 				// And eat to prevent loss of selection
