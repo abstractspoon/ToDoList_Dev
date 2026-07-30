@@ -758,7 +758,7 @@ protected:
 	BOOL CanSetSelectedTasksDone(const CTDCTaskCompletionArray& aTasks, BOOL& bAndSubtasks) /*const*/;
 	BOOL TaskHasIncompleteDependencies(DWORD dwTaskID) const;
 	int GetTaskIncompleteDependencies(DWORD dwTaskID, CDWordArray& aLocalTaskIDs, CStringArray& aNonLocalTaskLinks) const;
-	BOOL CheckWantTaskSubtasksCompleted(const CDWordArray& aTaskIDs) const;
+	UINT CheckWantTaskSubtasksCompleted(const CDWordArray& aTaskIDs) const;
 
 	void LoadGlobals(const CTaskFile& tasks);
 	void SaveCustomAttributeDefinitions(CTaskFile& tasks, const TDCGETTASKS& filter = TDCGETTASKS()) const;

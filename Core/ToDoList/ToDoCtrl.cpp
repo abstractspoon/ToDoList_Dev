@@ -1987,8 +1987,24 @@ BOOL CToDoCtrl::CanSetSelectedTasksDone(const CTDCTaskCompletionArray& aTasks, B
 		return FALSE;
 	}
 
-	bAndSubtasks = (!m_data.WantUpdateInheritedAttibute(TDCA_DONEDATE) &&
-					CheckWantTaskSubtasksCompleted(aTaskIDs));
+	if (!m_data.WantUpdateInheritedAttibute(TDCA_DONEDATE))
+	{
+		switch (CheckWantTaskSubtasksCompleted(aTaskIDs))
+		{
+		case IDYES:		
+			bAndSubtasks = TRUE;	
+			return TRUE;
+
+		case IDNO:		
+			bAndSubtasks = FALSE;
+			return TRUE;
+
+		case IDCANCEL:
+		default:
+			return FALSE;
+		}
+	}
+	
 	return TRUE;
 }
 
@@ -2036,7 +2052,7 @@ int CToDoCtrl::GetTaskIncompleteDependencies(DWORD dwTaskID, CDWordArray& aLocal
 	return (aLocalDependIDs.GetSize() + aNonLocalDependLinks.GetSize());
 }
 
-BOOL CToDoCtrl::CheckWantTaskSubtasksCompleted(const CDWordArray& aTaskIDs) const
+UINT CToDoCtrl::CheckWantTaskSubtasksCompleted(const CDWordArray& aTaskIDs) const
 {
 	// If the specified tasks are both recurring AND reusable
 	// AND none of the specified task's subtasks are recurring
@@ -2062,7 +2078,7 @@ BOOL CToDoCtrl::CheckWantTaskSubtasksCompleted(const CDWordArray& aTaskIDs) cons
 	}
 
 	if (!bNeedAsk)
-		return 0;
+		return IDNO;
 
 	// Do the asking
 	CEnString sMessage(IDS_TASKCOMPLETION);
@@ -2073,7 +2089,7 @@ BOOL CToDoCtrl::CheckWantTaskSubtasksCompleted(const CDWordArray& aTaskIDs) cons
 	else
 		sMessage += CEnString(IDS_TDC_TASKHASINCOMPLETE);
 
-	return (IDYES == AfxMessageBox(sMessage, MB_YESNO | MB_ICONQUESTION));
+	return AfxMessageBox(sMessage, MB_YESNOCANCEL | MB_ICONQUESTION);
 }
 
 BOOL CToDoCtrl::SetSelectedTaskCompletion(TDC_TASKCOMPLETION nCompletion)
