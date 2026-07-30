@@ -4249,8 +4249,8 @@ LRESULT CTDLTaskCtrlBase::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 			{
 				switch (wp)
 				{
-				case 0x2A:
-				case 0x2B:
+				case ID_EDITLABELTIMER1:
+				case ID_EDITLABELTIMER2:
 					// These are timers internal to the list view associated
 					// with editing labels and which cause unwanted selection
 					// changes. Given that we have disabled label editing for 

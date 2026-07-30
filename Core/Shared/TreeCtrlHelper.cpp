@@ -1372,4 +1372,11 @@ void CTreeCtrlHelper::AddItemData(HTREEITEM hti, CDWordArray& aItemData, BOOL bI
 	}
 }
 
+void CTreeCtrlHelper::EndLabelEdit(BOOL bCancel) 
+{ 
+	m_tree.KillTimer(ID_EDITLABELTIMER1);
+	m_tree.KillTimer(ID_EDITLABELTIMER2);
+
+	SendMessage(m_tree, TVM_ENDEDITLABELNOW, bCancel, 0);
+}
 

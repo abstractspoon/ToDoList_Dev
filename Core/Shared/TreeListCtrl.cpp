@@ -1179,8 +1179,8 @@ LRESULT CTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 		case WM_TIMER:
 			switch (wp)
 			{
-			case 0x2A:
-			case 0x2B:
+			case ID_EDITLABELTIMER1:
+			case ID_EDITLABELTIMER2:
 				// These are timers internal to the list view associated
 				// with editing labels and which cause unwanted selection
 				// changes. Given that we have disabled label editing for 
@@ -1577,24 +1577,21 @@ BOOL CTreeListCtrl::OnTreeLButtonDblClk(UINT nFlags, CPoint point)
 	if ((nFlags & (TVHT_ONITEMLABEL | TVHT_ONITEMRIGHT)) == 0)
 		return FALSE;
 	
-	if (!TCH().TreeCtrl().ItemHasChildren(hti))
+	if (TCH().TreeCtrl().ItemHasChildren(hti))
 	{
-		int nCol = -1;
-		VERIFY(TreeHitTestItem(point, FALSE, nCol) == hti);
-
-		if (nCol == 0)
-		{
-			m_tree.EditLabel(hti);
-			return TRUE;
-		}
-	}
-	else
-	{
-		// Kill any built-in timers for label editing
-		m_tree.KillTimer(0x2A);
-		m_tree.KillTimer(0x2B);
-
+		TCH().EndLabelEdit(TRUE);
 		ExpandItem(hti, !TCH().IsItemExpanded(hti), TRUE);
+
+		return TRUE;
+	}
+
+	// else
+	int nCol = -1;
+	VERIFY(TreeHitTestItem(point, FALSE, nCol) == hti);
+
+	if (nCol == 0)
+	{
+		m_tree.EditLabel(hti);
 		return TRUE;
 	}
 

@@ -736,7 +736,23 @@ BOOL CTDLTaskTreeCtrl::HandleClientColumnClick(const CPoint& pt, BOOL bDblClk)
 			DWORD dwTaskID = GetTaskID(htiHit);
 			TDC_COLUMN nClickCol = TDCC_NONE;
 
-			if (!bDblClk)
+			if (bDblClk)
+			{
+				if (m_tcTasks.ItemHasChildren(htiHit))
+				{
+					TCH().EndLabelEdit(TRUE);
+					ExpandItem(htiHit, !TCH().IsItemExpanded(htiHit), TRUE);
+
+					return TRUE;
+				}
+
+				// else
+				if (nHitFlags & (TVHT_ONITEMLABEL | TVHT_ONITEMRIGHT))
+				{
+					nClickCol = TDCC_CLIENT;
+				}
+			}
+			else // single click
 			{
 				if (nHitFlags & TVHT_ONITEMSTATEICON)
 				{
@@ -745,18 +761,6 @@ BOOL CTDLTaskTreeCtrl::HandleClientColumnClick(const CPoint& pt, BOOL bDblClk)
 				else if (nHitFlags & TVHT_ONITEMICON)
 				{
 					nClickCol = TDCC_ICON;
-				}
-			}
-			else // double click
-			{
-				if (m_tcTasks.ItemHasChildren(htiHit))
-				{
-					ExpandItem(htiHit, !TCH().IsItemExpanded(htiHit), TRUE);
-					return TRUE;
-				}
-				else if (nHitFlags & (TVHT_ONITEMLABEL | TVHT_ONITEMRIGHT))
-				{
-					nClickCol = TDCC_CLIENT;
 				}
 			}
 

@@ -50,6 +50,13 @@ enum TCH_WHERE
 	TCHW_BELOW
 };
 
+// Used internally by both TreeView and ListView
+enum 
+{
+	ID_EDITLABELTIMER1 = 0x2A,
+	ID_EDITLABELTIMER2 = 0x2B
+};
+
 //////////////////////////////////////////////////////////////////////
 
 typedef CMap<HTREEITEM, HTREEITEM, int, int&> CMapIndices;
@@ -128,7 +135,7 @@ public:
 
 	BOOL SelectItem(HTREEITEM hti); // won't auto edit if item already selected
 	BOOL IsSelectedItem(HTREEITEM hti) const;
-	inline void EndLabelEdit(BOOL bCancel) { SendMessage(m_tree, TVM_ENDEDITLABELNOW, bCancel, 0); }
+	void EndLabelEdit(BOOL bCancel);
 
 	BOOL InvalidateItem(HTREEITEM hti, BOOL bChildren = TRUE);
 	void GetClientRect(LPRECT lpRect, HTREEITEM htiFrom);
