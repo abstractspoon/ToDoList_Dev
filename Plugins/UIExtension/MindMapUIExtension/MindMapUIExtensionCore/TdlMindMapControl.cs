@@ -65,11 +65,9 @@ namespace MindMapUIExtension
 		private bool m_ShowParentAsFolder;
 		private bool m_TaskColorIsBkgnd;
 		private bool m_ShowMixedCompletionState;
-		private bool m_IgnoreMouseClick;
         private bool m_ShowCompletionCheckboxes;
 		private bool m_StrikeThruDone;
 
-		private TreeNode m_PreviouslySelectedNode;
 		private Timer m_EditTimer;
         private Font m_BoldLabelFont, m_DoneLabelFont, m_BoldDoneLabelFont;
         private Size m_CheckboxSize;
@@ -93,7 +91,6 @@ namespace MindMapUIExtension
 			m_LabelTip = new LabelTip(this);
 
 			m_TaskColorIsBkgnd = false;
-			m_IgnoreMouseClick = false;
 			m_ShowParentAsFolder = false;
             m_ShowCompletionCheckboxes = true;
 			m_StrikeThruDone = true;
@@ -288,11 +285,6 @@ namespace MindMapUIExtension
 					Invalidate();
 				}
 			}
-		}
-
-		public bool SelectNodeWasPreviouslySelected
-		{
-			get { return (SelectedNode == m_PreviouslySelectedNode); }
 		}
 
 		public bool TaskColorIsBackground
@@ -1582,57 +1574,13 @@ namespace MindMapUIExtension
 
 		protected override void OnMouseDoubleClick(MouseEventArgs e)
 		{
+			m_EditTimer.Stop();
+
 			if (base.HandleMouseDoubleClick(e) || (EditTaskLabel == null))
 				return;
 
 			if (HitTestPositions(e.Location) != null)
 				EditTaskLabel(this, UniqueID(SelectedNode));
-		}
-
-		protected override void OnMouseClick(MouseEventArgs e)
-		{
-			base.OnMouseClick(e);
-
-			if (e.Button != MouseButtons.Left)
-				return;
-
-			if (m_IgnoreMouseClick)
-			{
-				m_IgnoreMouseClick = false;
-				return;
-			}
-
-			TreeNode node = HitTestPositions(e.Location);
-
-			if ((node == null) || (node != SelectedNode) || !NodeIsTask(node))
-				return;
-
-			if (HitTestExpansionButton(node, e.Location))
-				return;
-
-            var taskItem = RealTaskItem(node);
-
-            if (!ReadOnly && !taskItem.IsLocked)
-            {
-                if (HitTestCheckbox(node, e.Location))
-                {
-					if (EditTaskDone != null)
-						EditTaskDone(this, taskItem.ID, !taskItem.IsDone);
-				}
-                else if (HitTestIcon(node, e.Location))
-                {
-                    // Performing icon editing from a 'MouseUp' or 'MouseClick' event 
-                    // causes the edit icon dialog to fail to correctly get focus but
-                    // counter-intuitively it works from 'MouseDown'
-                    //if (EditTaskIcon != null)
-                    //    EditTaskIcon(this, UniqueID(SelectedNode));
-                }
-                else if (SelectNodeWasPreviouslySelected)
-			    {
-			        if (EditTaskLabel != null)
-				        m_EditTimer.Start();
-                }
-            }
 		}
 
 		private bool HitTestCheckbox(TreeNode node, Point point)
@@ -1660,42 +1608,57 @@ namespace MindMapUIExtension
 
 			switch (e.Button)
 			{
-				case MouseButtons.Left:
+			case MouseButtons.Left:
+				{
+					// Cache the previous selected item for label editing
+					// but only if we are currently focused
+					var prevSelNode = (Focused ? SelectedNode : null);
+
+					TreeNode node = HitTestPositions(e.Location);
+
+					if ((node == null) || !NodeIsTask(node))
+						return;
+
+					if (!HitTestExpansionButton(node, e.Location))
 					{
-						// Cache the previous selected item for label editing
-						// but only if we are currently focused
-						m_PreviouslySelectedNode = Focused ? SelectedNode : null;
-                        m_IgnoreMouseClick = false;
+						if (node != SelectedNode)
+							SelectedNode = node;
 
-						TreeNode hit = HitTestPositions(e.Location);
+						var taskItem = RealTaskItem(node);
 
-                        if (hit != null)
-                        {
-                            m_IgnoreMouseClick = HitTestExpansionButton(hit, e.Location);
+						if (!ReadOnly && !taskItem.IsLocked)
+						{
+							if (HitTestCheckbox(node, e.Location))
+							{
+								if (EditTaskDone != null)
+									EditTaskDone?.Invoke(this, taskItem.ID, !taskItem.IsDone);
 
-                            // Performing icon editing from a 'MouseUp' or 'MouseClick' event 
-                            // causes the edit icon dialog to fail to correctly get focus but
-                            // counter-intuitively it works from 'MouseDown'
-                            if (!m_IgnoreMouseClick && !ReadOnly && HitTestIcon(hit, e.Location))
-                            {
-								// Ensure the node is selected
-								SelectedNode = hit;
+								return; // handled
+							}
+							else if (HitTestIcon(node, e.Location))
+							{
+								EditTaskIcon?.Invoke(this, UniqueID(SelectedNode));
 
-                                if (EditTaskIcon != null)
-                                    EditTaskIcon(this, UniqueID(SelectedNode));
-                            }
-                        }
+								return; // handled
+							}
+							else if (SelectedNode == prevSelNode)
+							{
+								if (EditTaskLabel != null)
+									m_EditTimer.Start();
+							}
+						}
 					}
-					break;
+				}
+				break;
 
-				case MouseButtons.Right:
-					{
-						TreeNode hit = HitTestPositions(e.Location);
+			case MouseButtons.Right:
+				{
+					TreeNode hit = HitTestPositions(e.Location);
 
-						if (hit != null)
-							SelectedNode = hit;
-					}
-					break;
+					if (hit != null)
+						SelectedNode = hit;
+				}
+				break;
 			}
 
 			base.OnMouseDown(e);
@@ -1756,6 +1719,8 @@ namespace MindMapUIExtension
 
 		protected override void OnDragEnter(DragEventArgs e)
 		{
+			m_EditTimer.Stop();
+
 			base.OnDragEnter(e);
 
 			m_DragImage.Begin(Handle, this,	SelectedNode);

@@ -6770,6 +6770,9 @@ void CToDoCtrl::OnTreeClick(NMHDR* pNMHDR, LRESULT* pResult)
 
 LRESULT CToDoCtrl::OnTDCNotifyColumnEditClick(WPARAM wParam, LPARAM lParam)
 {
+	// Cancel any drag drop operation
+	m_treeDragDrop.CancelDrag();
+
 	TDC_COLUMN nColID = (TDC_COLUMN)wParam;
 	ASSERT(nColID != TDCC_NONE);
 

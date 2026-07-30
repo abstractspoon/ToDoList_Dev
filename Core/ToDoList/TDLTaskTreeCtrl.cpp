@@ -1083,24 +1083,11 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 				
 				ProcessSelectionChange(bSelChange, SC_BYMOUSE);
 
-				// Handle icon and checkbox clicking
-				if (0 == (wp & (MK_CONTROL | MK_SHIFT)))
-				{
-					UINT nHitFlags = 0;
-					HTREEITEM htiHit = m_tcTasks.HitTest(lp, &nHitFlags);
-
-					BOOL bHitIcon = (nHitFlags & (TVHT_ONITEMICON | TVHT_ONITEMSTATEICON));
-
-					if (bHitIcon && HandleClientColumnClick(lp, FALSE))
-					{
-						return 0L; // we handled it
-					}
-				}
+				if (HandleClientColumnClick(lp, FALSE))
+					return 0L; // we handled it
 
 				if (bSelChange)
-				{
 					return 0L; // we handled it
-				}
 			}
 			break;
 		

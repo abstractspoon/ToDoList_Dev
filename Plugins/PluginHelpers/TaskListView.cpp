@@ -1025,41 +1025,44 @@ void TaskListView::WndProc(Message% m)
 				}
 				else
 				{
-					// else
 					Focus();
-					return;
+					return; // We handled it
 				}
 			}
 			else
 			{
 				auto task = ASTYPE(lvHit->Tag, ITaskBase);
 
-				if (IsTaskEditable(task))
+				if (CalcCheckboxRect(lvHit->Bounds).Contains(pos))
 				{
-					if (CalcCheckboxRect(lvHit->Bounds).Contains(pos))
-					{
-						if (!lvHit->Selected)
-							ListView::WndProc(m); // Default handling to select task
+					if (!lvHit->Selected)
+						SelectTask(task->Id);
 
+					if (IsTaskEditable(task))
 						EditTaskDone(this, task);
-						return;
-					}
-					else if (CalcIconRect(lvHit->Bounds).Contains(pos))
-					{
-						if (!lvHit->Selected)
-							ListView::WndProc(m); // Default handling to select task
 
+					return; // We handled it
+				}
+
+				if (CalcIconRect(lvHit->Bounds).Contains(pos))
+				{
+					if (!lvHit->Selected)
+						SelectTask(task->Id);
+
+					if (IsTaskEditable(task))
 						EditTaskIcon(this, task);
-						return;
-					}
+
+					return; // We handled it
+				}
+
+				if (lvHit->Selected && !Focused)
+				{
 					// If the item is selected but we're not focused, 
 					// prevent the base class from starting a label edit
-					else if (lvHit->Selected && !Focused)
-					{
-						Focus();
-						return;
-					}
+					Focus();
+					return; // We handled it
 				}
+
 				// else default handling
 			}
 		}
@@ -1079,7 +1082,7 @@ void TaskListView::WndProc(Message% m)
 				if (IsTaskEditable(task) && GetTaskLabelRect(task->Id).Contains(pos))
 					EditTaskLabel(this, task);
 
-				return; // always
+				return; // We handled it
 			}
 		}
 		break;
@@ -1100,18 +1103,18 @@ void TaskListView::WndProc(Message% m)
 
 	case WM_RBUTTONDOWN:
 		{
-			// Eat this if clicking in whitespace to prevent
-			// loss of selection
 			Point pos = Win32::GetPoint(m.LParam);
 
+			// When clicking on whitespace...
 			if (HitTest(pos)->Item == nullptr)
 			{
 				Focus();
 
-				// and forward as context menu msg to parent
+				// Forward as context menu msg to parent
 				pos = PointToScreen(pos);
-
 				Win32::SendMessage(m.HWnd, WM_CONTEXTMENU, (UIntPtr)Win32::GetHwnd(m.HWnd), (IntPtr)Win32::MakeLParam(pos.X, pos.Y));
+
+				// And eat to prevent loss of selection
 				return;
 			}
 		}

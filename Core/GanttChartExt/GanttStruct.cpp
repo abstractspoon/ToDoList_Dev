@@ -464,7 +464,9 @@ BOOL GANTTITEM::GetStartEndDates(BOOL bCalcParentDates, BOOL bCalcMissingStart, 
 			}
 			else // take later of start date and today
 			{
-				dtDue = CDateHelper::GetDateOnly(dtStart);
+				if (CDateHelper::IsDateSet(dtStart))
+					dtDue = CDateHelper::GetDateOnly(dtStart);
+
 				CDateHelper::Max(dtDue, CDateHelper::GetDate(DHD_TODAY));
 	
 				// and move to end of the day

@@ -40,7 +40,10 @@ const UINT WM_TLC_MOVEITEM			= ::RegisterWindowMessage(_T("WM_TLC_MOVEITEM"));
 const UINT WM_TLC_ITEMSELCHANGE		= ::RegisterWindowMessage(_T("WM_TLC_ITEMSELCHANGE"));
 
 // WPARAM = GetDlgCtrlID, LPARAM = HTREEITEM
-const UINT WM_TLC_ITEMCHECKCHANGE	= ::RegisterWindowMessage(_T("WM_TLC_ITEMCHECKCHANGE"));
+const UINT WM_TLC_ITEMCHECKBOXCLICK	= ::RegisterWindowMessage(_T("WM_TLC_ITEMCHECKBOXCLICK"));
+
+// WPARAM = GetDlgCtrlID, LPARAM = HTREEITEM
+const UINT WM_TLC_ITEMICONCLICK		= ::RegisterWindowMessage(_T("WM_TLC_ITEMICONCLICK"));
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -260,7 +263,8 @@ protected:
 	virtual BOOL OnHeaderItemWidthChanging(NMHEADER* pHDN, int nMinWidth);
 	virtual BOOL OnHeaderDblClkDivider(NMHEADER* pHDN);
 
-	virtual BOOL OnTreeCheckChange(HTREEITEM /*hti*/) { return FALSE; }
+	virtual BOOL OnTreeCheckboxClick(HTREEITEM /*hti*/) { return FALSE; }
+	virtual BOOL OnTreeIconClick(HTREEITEM /*hti*/) { return FALSE; }
 	virtual void OnListHeaderClick(NMHEADER* /*HDN*/) {}
 
 	virtual BOOL OnTreeLButtonUp(UINT /*nFlags*/, CPoint /*point*/) { return FALSE; }

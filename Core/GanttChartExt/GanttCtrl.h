@@ -145,19 +145,21 @@ protected:
 	virtual void OnGetDragItemRect(CDC& dc, HTREEITEM hti, CRect& rItem);
 	virtual void OnDrawDragItem(CDC& dc, HTREEITEM hti, const CRect& rItem);
 
-	void OnTreeSelectionChange(NMTREEVIEW* pNMTV);
 	BOOL OnDragDropItem(const TLCITEMMOVE& move);
 	BOOL OnDragBeginItem(const TLCITEMMOVE& move, BOOL bLeftDrag);
 	UINT OnDragOverItem(const TLCITEMMOVE& move, UINT nCursor);
-	BOOL OnTreeCheckChange(HTREEITEM hti);
 
+	void OnTreeSelectionChange(NMTREEVIEW* pNMTV);
+	BOOL OnTreeCheckboxClick(HTREEITEM hti);
+	BOOL OnTreeIconClick(HTREEITEM hti);
 	BOOL OnTreeLButtonDown(UINT nFlags, CPoint point);
-	BOOL OnTreeLButtonUp(UINT nFlags, CPoint point);
 	BOOL OnTreeMouseMove(UINT nFlags, CPoint point);
+
 	BOOL OnListLButtonDown(UINT nFlags, CPoint point);
 	BOOL OnListLButtonUp(UINT nFlags, CPoint point);
 	BOOL OnListLButtonDblClk(UINT nFlags, CPoint point);
 	BOOL OnListMouseMove(UINT nFlags, CPoint point);
+
 	BOOL OnHeaderDblClkDivider(NMHEADER* pHDN);
 
 	COLORREF GetTreeItemBackColor(HTREEITEM hti, DWORD dwItemData, BOOL bSelected) const;
