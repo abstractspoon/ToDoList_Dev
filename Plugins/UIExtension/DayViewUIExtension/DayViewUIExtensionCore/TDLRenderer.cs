@@ -629,43 +629,27 @@ namespace DayViewUIExtension
 			if (rect.Width <= 0)
 				return;
 
-			using (StringFormat format = new StringFormat())
+			var flags = TextFormatFlags.PreserveGraphicsClipping;
+
+			if (isLong)
 			{
-				format.Alignment = StringAlignment.Near;
-				format.LineAlignment = (isLong ? StringAlignment.Center : StringAlignment.Near);
+				flags |= (TextFormatFlags.SingleLine | TextFormatFlags.VerticalCenter);
+			}
+			else
+			{
+				rect.Inflate(0, -TextOffset);
+				flags |= TextFormatFlags.WordBreak;
+			}
 
-				if (isLong)
-					format.FormatFlags |= (StringFormatFlags.NoClip | StringFormatFlags.NoWrap);
-
-				if (isLong)
-				{
-					rect.Height = BaseFont.Height;
-					rect.Y += TextPadding;
-				}
-				else
-				{
-					rect.Height -= TextOffset;
-					rect.Y += TextOffset;
-				}
-
-				g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
-
-				using (SolidBrush brush = new SolidBrush(textColor))
-				{
-					if (fontStyle != FontStyle.Regular)
-					{
-						using (Font font = new Font(BaseFont, fontStyle))
-						{
-							g.DrawString(text, font, brush, rect, format);
-						}
-					}
-					else
-					{
-						g.DrawString(text, BaseFont, brush, rect, format);
-					}
-				}
-
-				g.TextRenderingHint = TextRenderingHint.SystemDefault;
+			// We use 'TextRenderer' for consistency with the core app
+			if (fontStyle != FontStyle.Regular)
+			{
+				using (Font font = new Font(BaseFont, fontStyle))
+					TextRenderer.DrawText(g, text, font, rect, textColor, flags);
+			}
+			else
+			{
+				TextRenderer.DrawText(g, text, BaseFont, rect, textColor, flags);
 			}
 		}
 

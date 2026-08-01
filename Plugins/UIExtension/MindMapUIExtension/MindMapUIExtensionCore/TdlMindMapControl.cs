@@ -1198,10 +1198,18 @@ namespace MindMapUIExtension
 			if (DebugMode())
                graphics.DrawRectangle(new Pen(Color.Green), rect);
 
-			// Text
-			var format = DefaultLabelFormat(nodePos, isSelected);
-
-            graphics.DrawString(taskItem.Title, nodeFont, new SolidBrush(textColor), rect, format);
+			// Text, using 'TextRenderer' for consistency with the core app.
+			// EXCEPT for the drag image text because there's a bug in the 'DragImage'
+			// which results in the text appearing to be rendered twice.
+			if (isDragImage)
+			{
+				graphics.DrawString(taskItem.Title, nodeFont, new SolidBrush(textColor), rect);
+			}
+			else
+			{
+				var flags = (TextFormatFlags.SingleLine | TextFormatFlags.VerticalCenter | TextFormatFlags.NoClipping);
+				TextRenderer.DrawText(graphics, taskItem.Title, nodeFont, rect, textColor, flags);
+			}
 
 			// Draw Windows shortcut icon if task is a reference
 			if (taskItem.IsReference)

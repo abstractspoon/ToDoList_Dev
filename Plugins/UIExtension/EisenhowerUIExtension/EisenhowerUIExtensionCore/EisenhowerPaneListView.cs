@@ -115,12 +115,6 @@ namespace EisenhowerUIExtension
 
 		public void DrawDragImage(Graphics graphics, Size size)
 		{
-			var format = new StringFormat(StringFormatFlags.NoClip | StringFormatFlags.FitBlackBox | StringFormatFlags.NoWrap);
-
-			format.LineAlignment = StringAlignment.Center;
-			format.Trimming = StringTrimming.None;
-			format.Alignment = StringAlignment.Near;
-
 			var labelRect = Rectangle.Empty;
 			labelRect.Height = Items[0].Bounds.Height;
 
@@ -137,7 +131,7 @@ namespace EisenhowerUIExtension
 					if (ItemsHaveIcons)
 					{
 						if (task.HasIcon && m_TaskIcons.Get(task.Id))
-							m_TaskIcons.Draw(graphics, labelRect.Left, labelRect.Top);
+							m_TaskIcons.Draw(graphics, labelRect.Left, (labelRect.Top + ((labelRect.Height - UIExtension.TaskIcon.IconSize) / 2)));
 
 						labelRect.X += TextIconOffset;
 						labelRect.Width -= TextIconOffset;
@@ -151,12 +145,11 @@ namespace EisenhowerUIExtension
 													 labelRect.Width,
 													 labelRect.Height,
 													 false); // opaque
-					// text
-					graphics.DrawString(task.Title, 
-										GetFont(task, true), 
-										SystemBrushes.WindowText, 
-										labelRect, 
-										format);
+
+					// Must use Graphics.DrawString here because there's a bug 
+					// in PluginHelpers.DragImage which results in the text 
+					// appearing to be rendered twice.
+					graphics.DrawString(task.Title, GetFont(task, true), SystemBrushes.WindowText, labelRect);
 
 					// Next item
 					labelRect.Y = labelRect.Bottom;

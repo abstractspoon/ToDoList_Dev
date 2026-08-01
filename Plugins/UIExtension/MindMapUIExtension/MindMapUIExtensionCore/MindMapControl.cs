@@ -1806,7 +1806,7 @@ namespace MindMapUIExtension
 			// Always calculate the width of the text because the tree 
 			// doesn't seem to return the same widths as the Graphics object
 			// which is what we will be using to render the text
-			int nodeWidth = Size.Ceiling(graphics.MeasureString(node.Text, GetNodeTitleFont(node))).Width;
+			int nodeWidth = TextRenderer.MeasureText(graphics, node.Text, GetNodeTitleFont(node)).Width;
 			int horzOffset = (nodeWidth + ZoomedItemHorzSeparation + GetExtraWidth(node));
 
             if (!IsRoot(node))
@@ -2074,7 +2074,7 @@ namespace MindMapUIExtension
             // Always calculate the width of the text because the tree 
             // doesn't seem to return the same widths as the Graphics object
             // which is what we will be using to render the text
-            itemBounds.Width = Size.Ceiling(graphics.MeasureString(node.Text, GetNodeTitleFont(node))).Width;
+            itemBounds.Width = TextRenderer.MeasureText(graphics, node.Text, GetNodeTitleFont(node)).Width;
 
 			if (!IsRoot(node) && (IsParent(node) || AnyChildHasChildren(node.Parent)))
                 itemBounds.Width += (ExpansionButtonSize + ExpansionButtonSeparation);
@@ -2202,43 +2202,18 @@ namespace MindMapUIExtension
 			}
 		}
 
-		static protected StringFormat DefaultLabelFormat(NodeDrawPos nodePos, bool isSelected)
-		{
-			var format = new StringFormat(StringFormatFlags.NoClip | StringFormatFlags.FitBlackBox | StringFormatFlags.NoWrap);
-
-			format.LineAlignment = StringAlignment.Center;
-			format.Trimming = StringTrimming.None;
-
-			switch (nodePos)
-			{
-			case NodeDrawPos.Root:
-				format.Alignment = StringAlignment.Center;
-				break;
-
-			case NodeDrawPos.Right:
-				format.Alignment = StringAlignment.Near;
-				break;
-
-			case NodeDrawPos.Left:
-				format.Alignment = StringAlignment.Far;
-				break;
-			}
-
-			return format;
-		}
-
 		virtual protected void DrawNodeLabel(Graphics graphics, String label, Rectangle rect,
 											 NodeDrawState nodeState, NodeDrawPos nodePos, 
                                              Font nodeFont, Object itemData)
 		{
-			Brush textColor = SystemBrushes.WindowText;
+			Color textColor = SystemColors.WindowText;
             graphics.FillRectangle(SystemBrushes.Window, rect);
 
 			switch (nodeState)
 			{
 			case NodeDrawState.Selected:
 				graphics.FillRectangle(SystemBrushes.Highlight, rect);
-				textColor = SystemBrushes.HighlightText;
+				textColor = SystemColors.HighlightText;
 				break;
 
 			case NodeDrawState.DropTarget:
@@ -2252,9 +2227,8 @@ namespace MindMapUIExtension
 
 			}
 
-			var format = DefaultLabelFormat(nodePos, (nodeState != NodeDrawState.None));
-
-			graphics.DrawString(label, nodeFont, textColor, rect, format);
+			var flags = (TextFormatFlags.SingleLine | TextFormatFlags.VerticalCenter | TextFormatFlags.NoClipping);
+			TextRenderer.DrawText(graphics, label, nodeFont, rect, textColor, flags);
 		}
 
         protected Font GetNodeTitleFont(TreeNode node)
