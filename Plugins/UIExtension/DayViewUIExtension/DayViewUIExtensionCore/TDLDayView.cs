@@ -182,9 +182,9 @@ namespace DayViewUIExtension
 				if (IsLongAppt(appt))
 				{
 					// single line tooltips
-					Size tipSize = m_LabelTip.CalcTipSize(tip.Text, tip.Font, tip.Rect.Width);
+					Size textSize = TextRenderer.MeasureText(tip.Text, tip.Font);
 
-					if ((tipSize.Width <= tip.Rect.Width) && (tipSize.Height <= tip.Rect.Height))
+					if (textSize.Width <= tip.Rect.Width)
 						return null;
 				}
 				else
@@ -202,9 +202,9 @@ namespace DayViewUIExtension
 						// Determine if text will fit in what's visible of the task
 						tip.Rect.Intersect(availRect);
 
-						Size tipSize = m_LabelTip.CalcTipSize(tip.Text, tip.Font, tip.Rect.Width);
+						Size textSize = TextRenderer.MeasureText(tip.Text, tip.Font, new Size(tip.Rect.Width, 0), TextFormatFlags.WordBreak);
 
-						if ((tipSize.Width <= tip.Rect.Width) && (tipSize.Height <= tip.Rect.Height))
+						if ((textSize.Width <= tip.Rect.Width) && (textSize.Height <= tip.Rect.Height))
 							return null;
 					}
 				}
