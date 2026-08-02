@@ -507,18 +507,17 @@ namespace Calendar
             get { return selectedAppointment; }
 			set
 			{
+				if (value == selectedAppointment)
+					return;
+
 				if (value == null)
 				{
 					selectedAppointment = value;
 				}
-				else if (value != selectedAppointment)
+				else // Validate against visible items
 				{
-					// Validate against visible items
-					if (ResolveAppointments == null)
-						return;
-
-					ResolveAppointmentsEventArgs args = new ResolveAppointmentsEventArgs(StartDate, EndDate);
-					ResolveAppointments(this, args);
+					var args = new ResolveAppointmentsEventArgs(StartDate, EndDate);
+					ResolveAppointments?.Invoke(this, args);
 
 					foreach (Appointment appt in args.Appointments)
 					{
