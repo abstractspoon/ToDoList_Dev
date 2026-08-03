@@ -2030,20 +2030,21 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 	case TDCA_DUETIME:
 	case TDCA_DONETIME:
 		{
-			CString sDate(FormatTime(_ttof(sText), FALSE));
-			CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, sDate, crText, nDrawTextFlags);
+			CString sTime(FormatTime(_ttof(sText), FALSE));
+			CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, sTime, crText, nDrawTextFlags);
 		}
 		return;
 
 	case TDCA_LASTMODDATE:
 	case TDCA_CREATIONDATE:
+		if (!sText.IsEmpty())
 		{
-			CString sDate(FormatDate(_ttof(sText), TRUE));
+			CString sDateAndTime(FormatDate(_ttof(sText), TRUE));
 
 			if (CDateHelper::WantRTLDates())
 				nDrawTextFlags |= DT_RTLREADING;
 
-			CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, sDate, crText, nDrawTextFlags);
+			CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, sDateAndTime, crText, nDrawTextFlags);
 		}
 		return;
 
