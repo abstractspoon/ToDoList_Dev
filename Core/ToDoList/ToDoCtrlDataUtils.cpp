@@ -353,7 +353,6 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 		ASSERT(0);
 		return FALSE;
 	}
-	
 
 	CString sWhatMatched;
 	TDC_ATTRIBUTE nWhatMatched = rule.GetAttribute(); // default
@@ -559,6 +558,8 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 
 	case TDCA_TIMEESTIMATE:
 		{
+			// 'ValueMatches' will convert the search value to hours
+			// so that's what we must provide
 			double dTime = m_calculator.GetTaskTimeEstimate(pTDI, pTDS, TDCU_HOURS);
 			bMatch = ValueMatches(dTime, rule, sWhatMatched);
 		}
@@ -566,8 +567,25 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 
 	case TDCA_TIMESPENT:
 		{
+			// 'ValueMatches' will convert the search value to hours
+			// so that's what we must provide
 			double dTime = m_calculator.GetTaskTimeSpent(pTDI, pTDS, TDCU_HOURS);
 			bMatch = ValueMatches(dTime, rule, sWhatMatched);
+		}
+		break;
+
+	case TDCA_TIMEREMAINING:
+		{
+			TDC_UNITS nUnits = TDCU_HOURS;
+			double dTime = m_calculator.GetTaskTimeRemaining(pTDI, pTDS, nUnits);
+
+			if (dTime != 0.0)
+			{
+				// 'ValueMatches' will convert the search value to hours
+				// so that's what we must provide
+				dTime = CTimeHelper().Convert(dTime, TDC::MapUnitsToTHUnits(nUnits), THU_HOURS);
+				bMatch = ValueMatches(dTime, rule, sWhatMatched);
+			}
 		}
 		break;
 
