@@ -1252,6 +1252,7 @@ FIND_ATTRIBTYPE SEARCHPARAM::GetAttributeType(TDC_ATTRIBUTE nAttribID, BOOL bRel
 
 	case TDCA_TIMEESTIMATE:
 	case TDCA_TIMESPENT:
+	case TDCA_TIMEREMAINING:
 		return FT_TIMEPERIOD;
 
 	case TDCA_COST:
@@ -1447,7 +1448,7 @@ void SEARCHPARAM::SetAnd(BOOL and)
 
 BOOL SEARCHPARAM::SetTimeUnits(TDC_UNITS nUnits)
 {
-	if (TypeIs(FT_TIMEPERIOD) && IsValidUnits(nUnits))
+	if (TypeIs(FT_TIMEPERIOD) && (IsValidUnits(nUnits) || (nUnits == TDCU_NULL)))
 	{
 		nTimeUnits = nUnits;
 		return TRUE;

@@ -178,7 +178,7 @@ BOOL CTDLFindTasksDlg::OnInitDialog()
 	m_mgrPrompts.SetComboEditPrompt(m_cbSearches, IDS_FT_SAVESEARCHPROMPT);
 
 	// always add a default search
-	m_lcFindSetup.SetSearchParams(DEFAULTSEARCH);
+	m_lcFindSetup.SetRules(DEFAULTSEARCH);
 
 	// toolbar
 	VERIFY (InitializeToolbar());
@@ -755,7 +755,7 @@ int CTDLFindTasksDlg::GetSearchParams(SEARCHPARAMS& params)
 	if (!m_bInitializing && GetSafeHwnd())
 		UpdateData();
 	
-	m_lcFindSetup.GetSearchParams(params.aRules); 
+	params.aRules.Copy(m_lcFindSetup.Rules()); 
 
 	params.bIgnoreOverDue = FALSE;
 	params.bIgnoreDone = !IncludeOptionIsChecked(FI_COMPLETED);
@@ -1424,8 +1424,7 @@ void CTDLFindTasksDlg::OnItemchangedRulelist(NMHDR* pNMHDR, LRESULT* pResult)
 
 void CTDLFindTasksDlg::EnableApplyAsFilterButton()
 {
-	SEARCHPARAMS params;
-	GetDlgItem(IDC_APPLYASFILTER)->EnableWindow(GetSearchParams(params));
+	GetDlgItem(IDC_APPLYASFILTER)->EnableWindow(m_lcFindSetup.Rules().GetSize());
 }
 
 int CTDLFindTasksDlg::GetSavedSearches(CStringArray& aNames) const
@@ -1485,12 +1484,12 @@ void CTDLFindTasksDlg::OnSaveSearch(BOOL bNotifyParent)
 
 BOOL CTDLFindTasksDlg::LoadSearch(LPCTSTR szName)
 {
-	CSearchParamArray params;
+	CSearchParamArray aRules;
 	BOOL bDone, bParents, bFilteredOut;
 
-	if (LoadSearch(szName, params, bDone, bParents, bFilteredOut))
+	if (LoadSearch(szName, aRules, bDone, bParents, bFilteredOut))
 	{
-		m_lcFindSetup.SetSearchParams(params);
+		m_lcFindSetup.SetRules(aRules);
 
 		CheckIncludeOption(FI_COMPLETED, bDone);
 		CheckIncludeOption(FI_PARENT, bParents);
@@ -1502,9 +1501,9 @@ BOOL CTDLFindTasksDlg::LoadSearch(LPCTSTR szName)
 	return FALSE;
 }
 
-BOOL CTDLFindTasksDlg::LoadSearch(LPCTSTR szName, CSearchParamArray& params, BOOL& bDone, BOOL& bParents, BOOL& bFilteredOut) const
+BOOL CTDLFindTasksDlg::LoadSearch(LPCTSTR szName, CSearchParamArray& aRules, BOOL& bDone, BOOL& bParents, BOOL& bFilteredOut) const
 {
-	params.RemoveAll();
+	aRules.RemoveAll();
 
 	if (Misc::IsEmpty(szName))
 		return FALSE;
@@ -1533,7 +1532,7 @@ BOOL CTDLFindTasksDlg::LoadSearch(LPCTSTR szName, CSearchParamArray& params, BOO
 			CTDCSearchParamHelper::LoadRule(prefs, sRule, m_aAllTDCAttribDefs, rule);
 		}
 		
-		params.Add(rule);
+		aRules.Add(rule);
 	}
 
 	// load include settings
@@ -1541,7 +1540,7 @@ BOOL CTDLFindTasksDlg::LoadSearch(LPCTSTR szName, CSearchParamArray& params, BOO
 	bParents = prefs.GetProfileInt(sKey, _T("IncludeParentTasks"), IncludeOptionIsChecked(FI_PARENT));
 	bFilteredOut = prefs.GetProfileInt(sKey, _T("IncludeFilteredOutTasks"), IncludeOptionIsChecked(FI_FILTEREDOUT));
 
-	return (params.GetSize() > 0);
+	return (aRules.GetSize() > 0);
 }
 
 BOOL CTDLFindTasksDlg::SaveSearch(LPCTSTR szName)
@@ -1553,12 +1552,12 @@ BOOL CTDLFindTasksDlg::SaveSearch(LPCTSTR szName)
 	prefs.DeleteProfileSection(sKey, TRUE);
 
 	// save rules
-	CSearchParamArray params;
-	int nNumRules = m_lcFindSetup.GetSearchParams(params), nRule;
+	const CSearchParamArray& aParams = m_lcFindSetup.Rules();
+	int nNumRules = aParams.GetSize(), nRule = 0;
 
-	for (nRule = 0; nRule < nNumRules; nRule++)
+	for (; nRule < nNumRules; nRule++)
 	{
-		const SEARCHPARAM& rule = params[nRule];
+		const SEARCHPARAM& rule = aParams[nRule];
 		CString sRule = Misc::MakeKey(_T("\\Rule%d"), nRule, sKey);
 
 		if (!CTDCSearchParamHelper::SaveRule(prefs, sRule, rule))
@@ -1723,8 +1722,6 @@ void CTDLFindTasksDlg::OnDeleteSearch()
 	{
 		CString sNextSearch;
 		m_cbSearches.GetLBText(nSearch, sNextSearch);
-
-		CSearchParamArray params;
 
 		if (LoadSearch(sNextSearch))
 		{
