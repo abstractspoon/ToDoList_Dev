@@ -2603,6 +2603,7 @@
 #define IDS_IMPORTDLGTOPAGE_TITLE       51690
 #define IDS_WEBUPDATE_TITLE             51691
 #define IDS_FP_REQUIRED                 51692
+#define IDS_FP_EMPTY                    51693
 
 // Next default values for new objects
 // 

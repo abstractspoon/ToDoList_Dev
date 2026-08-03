@@ -1284,6 +1284,54 @@ FIND_ATTRIBTYPE SEARCHPARAM::GetAttributeType(TDC_ATTRIBUTE nAttribID, BOOL bRel
 	return FT_NONE;
 }
 
+BOOL SEARCHPARAM::RequiresOperator() const
+{
+	switch (GetAttributeType())
+	{
+	case FT_GROUP:
+		return FALSE;
+
+	case FT_NONE:
+		ASSERT(0);
+		break;
+	}
+
+	return TRUE;
+}
+
+BOOL SEARCHPARAM::RequiresValue() const
+{
+	if (OperatorIs(FOP_SET) || OperatorIs(FOP_NOT_SET))
+		return FALSE;
+
+	switch (GetAttributeType())
+	{
+	case FT_GROUP:
+	case FT_BOOL:
+		return FALSE;
+
+	case FT_STRING:
+	case FT_ICON:
+	case FT_DEPENDENCY:
+		return (OperatorIs(FOP_INCLUDES) || OperatorIs(FOP_NOT_INCLUDES));
+
+	case FT_NONE:
+		ASSERT(0);
+		break;
+
+	case FT_DATE:
+	case FT_DATERELATIVE:
+	case FT_DOUBLE:
+	case FT_TIMEPERIOD:
+	case FT_INTEGER:
+	case FT_COLOR: // integer
+	case FT_RECURRENCE: // integer
+		break;
+	}
+
+	return TRUE;
+}
+
 BOOL SEARCHPARAM::IsValidTypeHint(TDC_ATTRIBUTE nAttribID, FIND_ATTRIBTYPE nHint)
 {
 	if ((nHint == FT_NONE) || TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))

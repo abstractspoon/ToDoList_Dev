@@ -419,6 +419,8 @@ struct SEARCHPARAM
 	BOOL HasValidOperator() const;
 	BOOL HasString() const;
 	BOOL HasIcon() const;
+	BOOL RequiresOperator() const;
+	BOOL RequiresValue() const;
 
 	void ValidateOperator();
 	BOOL OperatorIs(FIND_OPERATOR nOp) const;

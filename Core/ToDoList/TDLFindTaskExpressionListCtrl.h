@@ -138,7 +138,7 @@ protected:
 	void UpdateOperatorColumnText(int nRow);
 	void AddOperatorToCombo(FIND_OPERATOR op);
 	void MoveSelectedRule(BOOL bUp);
-	BOOL CellRequiresValue(int nRow, int nCol) const;
+	BOOL GetCellPrompt(int nRow, int nCol, const CString& sCellText, CString& sPrompt) const;
 
 	static CString GetOpName(FIND_OPERATOR op);
 };
