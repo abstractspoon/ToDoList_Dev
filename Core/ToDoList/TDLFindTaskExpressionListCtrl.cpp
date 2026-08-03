@@ -129,7 +129,7 @@ void CTDLFindTaskExpressionListCtrl::PreSubclassWindow()
 	m_header.EnableTracking(FALSE);
 	ShowGrid(TRUE, TRUE);
 
-	AddCol(CEnString(IDS_FT_ATTRIB), 120);
+	AddCol(CEnString(IDS_FT_ATTRIB), 120, ILCT_COMBO);
 	AddCol(CEnString(IDS_FT_MATCHES), 160, ILCT_COMBO);
 	AddCol(CEnString(IDS_FT_VALUE), 130, ILCT_TEXT); // overridden in GetCellType()
 	AddCol(CEnString(IDS_FT_ANDOR), 60, ILCT_COMBO);
@@ -375,7 +375,7 @@ void CTDLFindTaskExpressionListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClic
 		return;
 
 	// handle new rules
-	if (nItem == GetRuleCount() && nCol == ATTRIB_COL)
+	if (IsPrompt(nItem) && (nCol == ATTRIB_COL))
 		AddRule();
 
 	CWnd* pEdit = GetEditControl(nItem, nCol);
@@ -487,97 +487,78 @@ void CTDLFindTaskExpressionListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClic
 
 IL_COLUMNTYPE CTDLFindTaskExpressionListCtrl::GetCellType(int nRow, int nCol) const
 {
-	if (nRow < 0 || nRow >= GetRuleCount() || nCol > ANDOR_COL)
+	if (!IsPrompt(nRow))
 	{
-		return CInputListCtrl::GetCellType(nRow, nCol);
-	}
+		const SEARCHPARAM& rule = m_aRules[nRow];
 
-	const SEARCHPARAM& rule = m_aRules[nRow];
-
-	switch (nCol)
-	{
-	case ATTRIB_COL:
-		return ILCT_COMBO;
-
-	case OPERATOR_COL:
-		if (!rule.AttributeIs(TDCA_NONE))
+		switch (nCol)
 		{
-			return ILCT_COMBO;
-		}
-		break;
-
-	case VALUE_COL:
-		if (rule.OperatorIs(FOP_SET) || rule.OperatorIs(FOP_NOT_SET))
-		{
-			// handled by operator
-		}
-		else
-		{
-			TDC_ATTRIBUTE nAttribID = rule.GetAttribute();
-
-			switch (rule.GetAttributeType())
+		case VALUE_COL:
+			if (!rule.OperatorIs(FOP_SET) && !rule.OperatorIs(FOP_NOT_SET))
 			{
-			case FT_DATE:
-				return ILCT_DATE;
+				TDC_ATTRIBUTE nAttribID = rule.GetAttribute();
 
-			case FT_DATERELATIVE:
-			case FT_TIMEPERIOD:
-				return ILCT_POPUPMENU;
-
-			case FT_ICON:
-				if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID) && m_aCustAttribDefs.GetSize())
+				switch (rule.GetAttributeType())
 				{
-					const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
-					GET_CUSTDEF_RET(m_aCustAttribDefs, nAttribID, pDef, ILCT_BROWSE);
+				case FT_DATE:
+					return ILCT_DATE;
 
-					if (pDef->IsList())
-						return ILCT_COMBO;
-				}
-				return ILCT_BROWSE;
+				case FT_DATERELATIVE:
+				case FT_TIMEPERIOD:
+					return ILCT_POPUPMENU;
 
-			case FT_BOOL:
-			case FT_DEPENDENCY:
-			case FT_NONE:
-				// Nothing or default edit control
-				break;
-
-			case FT_RECURRENCE:
-				return ILCT_COMBO;
-
-			case FT_COLOR:
-				return ILCT_BROWSE;
-
-			default:
-				switch (nAttribID)
-				{
-				case TDCA_ALLOCTO:
-				case TDCA_ALLOCBY:
-				case TDCA_STATUS:
-				case TDCA_CATEGORY:
-				case TDCA_VERSION:
-				case TDCA_TAGS:
-				case TDCA_PRIORITY:
-				case TDCA_RISK:
-				case TDCA_COMMENTSFORMAT:
-					return ILCT_COMBO;
-
-				default:
+				case FT_ICON:
 					if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID) && m_aCustAttribDefs.GetSize())
 					{
 						const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
-						GET_CUSTDEF_ALT(m_aCustAttribDefs, nAttribID, pDef, break);
+						GET_CUSTDEF_RET(m_aCustAttribDefs, nAttribID, pDef, ILCT_BROWSE);
 
 						if (pDef->IsList())
 							return ILCT_COMBO;
 					}
+					return ILCT_BROWSE;
+
+				case FT_BOOL:
+				case FT_DEPENDENCY:
+				case FT_NONE:
+					// Nothing or default edit control
 					break;
+
+				case FT_RECURRENCE:
+					return ILCT_COMBO;
+
+				case FT_COLOR:
+					return ILCT_BROWSE;
+
+				default:
+					switch (nAttribID)
+					{
+					case TDCA_ALLOCTO:
+					case TDCA_ALLOCBY:
+					case TDCA_STATUS:
+					case TDCA_CATEGORY:
+					case TDCA_VERSION:
+					case TDCA_TAGS:
+					case TDCA_PRIORITY:
+					case TDCA_RISK:
+					case TDCA_COMMENTSFORMAT:
+						return ILCT_COMBO;
+
+					default:
+						if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID) && m_aCustAttribDefs.GetSize())
+						{
+							const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
+							GET_CUSTDEF_ALT(m_aCustAttribDefs, nAttribID, pDef, break);
+
+							if (pDef->IsList())
+								return ILCT_COMBO;
+						}
+						break;
+					}
 				}
 			}
+			break;
 		}
-		break;
-
-	case ANDOR_COL:
-		return ILCT_COMBO;
 	}
 
 	// all else
