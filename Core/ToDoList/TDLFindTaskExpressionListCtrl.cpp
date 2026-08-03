@@ -14,6 +14,7 @@
 #include "..\shared\GraphicsMisc.h"
 #include "..\Shared\DateHelper.h"
 #include "..\Shared\EnColorDialog.h"
+#include "..\Shared\WndPrompt.h"
 
 #include "..\Interfaces\ContentMgr.h"
 
@@ -269,8 +270,8 @@ BOOL CTDLFindTaskExpressionListCtrl::DeleteSelectedCell()
 		}
 		else if (nCol == VALUE_COL) // clear text
 		{
-			SetItemText(nRow, nCol, _T(""));
 			m_aSearchParams[nRow].ClearValue();
+			UpdateValueColumnText(nRow);
 		}
 	}
 	
@@ -790,7 +791,7 @@ int CTDLFindTaskExpressionListCtrl::InsertRule(int nRow, const SEARCHPARAM& rule
 	CString sItem = m_cbAttributes.GetAttributeName(rule);
 	int nNew = InsertRow(sItem, nRow);
 
-	SetItemText(nNew, OPERATOR_COL, GetOpName(rule.GetOperator()));
+	UpdateOperatorColumnText(nRow);
 	UpdateValueColumnText(nRow);
 
 	return nNew;
@@ -1057,28 +1058,17 @@ void CTDLFindTaskExpressionListCtrl::OnAttribEditOK()
 	if (nRow != CB_ERR)
 	{
 		SEARCHPARAM& rule = m_aSearchParams[nRow];
-		SEARCHPARAM ruleNew;
+		SEARCHPARAM ruleNew = rule;
 
 		if (m_cbAttributes.GetSelectedAttribute(ruleNew) && (rule != ruleNew))
 		{
-			BOOL bTypeChange = (rule.GetAttributeType() != ruleNew.GetAttributeType());
-
 			rule = ruleNew;
 
-			// update list text
 			CString sAttrib = m_cbAttributes.GetSelectedAttributeText();
 			SetItemText(nRow, ATTRIB_COL, sAttrib);
 
-			// clear the operator cell text if the operator was no longer valid
-			if (rule.OperatorIs(FOP_NONE))
-				SetItemText(nRow, OPERATOR_COL, _T(""));
-
-			// Clear the text value if the attribute type has changed
-			if (bTypeChange)
-			{
-				rule.ClearValue();
-				UpdateValueColumnText(nRow);
-			}
+			UpdateOperatorColumnText(nRow);
+			UpdateValueColumnText(nRow);
 
 			ValidateListData();
 		}
@@ -1130,25 +1120,15 @@ void CTDLFindTaskExpressionListCtrl::OnOperatorEditOK()
 
 	if (nSel != CB_ERR)
 	{
-		CString sSel;
-		m_cbOperators.GetLBText(nSel, sSel);
-
 		int nRow = GetCurSel();
-		SetItemText(nRow, OPERATOR_COL, sSel);
-
-		// keep data store synched
-		SEARCHPARAM& rule = m_aSearchParams[nRow];
 		FIND_OPERATOR nNewOp = (FIND_OPERATOR)m_cbOperators.GetItemData(nSel);
 
+		SEARCHPARAM& rule = m_aSearchParams[nRow];
 		rule.SetOperator(nNewOp);
 
-		// if the op is set/notset then clear the field
-		if (nNewOp == FOP_SET || nNewOp == FOP_NOT_SET)
-		{
-			rule.ClearValue();
-		}
-
+		UpdateOperatorColumnText(nRow);
 		UpdateValueColumnText(nRow);
+
 		ValidateListData();
 	}
 }
@@ -1278,16 +1258,11 @@ void CTDLFindTaskExpressionListCtrl::BuildListCtrl()
 	{
 		const SEARCHPARAM& rule = m_aSearchParams[nParam];
 
-		// attrib
 		CString sAttrib = m_cbAttributes.GetAttributeName(rule);
-		int nItem = InsertRow(sAttrib, nParam);
+		int nRow = InsertRow(sAttrib, nParam);
 
-		// operator
-		CString sOp = GetOpName(rule.GetOperator());
-		SetItemText(nItem, OPERATOR_COL, sOp);
-
-		// value
-		UpdateValueColumnText(nItem);
+		UpdateOperatorColumnText(nRow);
+		UpdateValueColumnText(nRow);
 	}
 	
 	ValidateListData();
@@ -1296,14 +1271,17 @@ void CTDLFindTaskExpressionListCtrl::BuildListCtrl()
 
 void CTDLFindTaskExpressionListCtrl::UpdateValueColumnText(int nRow)
 {
-	ASSERT(nRow >= 0 && nRow < m_aSearchParams.GetSize());
-	ASSERT(m_aSearchParams.GetSize() >= GetItemCount() - 1);
-
-	if (nRow < 0 || nRow >= m_aSearchParams.GetSize())
+	if ((nRow < 0) || (nRow >= m_aSearchParams.GetSize()))
+	{
+		ASSERT(0);
 		return;
+	}
 	
-	if (m_aSearchParams.GetSize() < GetItemCount() - 1)
+	if (m_aSearchParams.GetSize() < (GetItemCount() - 1))
+	{
+		ASSERT(0);
 		return;
+	}
 
 	const SEARCHPARAM& rule = m_aSearchParams[nRow];
 	CString sValue;
@@ -1355,6 +1333,24 @@ void CTDLFindTaskExpressionListCtrl::UpdateValueColumnText(int nRow)
 	}
 			
 	SetItemText(nRow, VALUE_COL, sValue);
+}
+
+void CTDLFindTaskExpressionListCtrl::UpdateOperatorColumnText(int nRow)
+{
+	if ((nRow < 0) || (nRow >= m_aSearchParams.GetSize()))
+	{
+		ASSERT(0);
+		return;
+	}
+
+	if (m_aSearchParams.GetSize() < (GetItemCount() - 1))
+	{
+		ASSERT(0);
+		return;
+	}
+
+	const SEARCHPARAM& rule = m_aSearchParams[nRow];
+	SetItemText(nRow, OPERATOR_COL, GetOpName(rule.GetOperator()));
 }
 
 CString CTDLFindTaskExpressionListCtrl::GetOpName(FIND_OPERATOR op)
@@ -1606,10 +1602,83 @@ COLORREF CTDLFindTaskExpressionListCtrl::GetItemTextColor(int nItem, int nCol, B
 	return CInputListCtrl::GetItemTextColor(nItem, nCol, bSelected, bDropHighlighted, bWndFocus);
 }
 
+BOOL CTDLFindTaskExpressionListCtrl::CellRequiresValue(int nRow, int nCol) const
+{
+	if (IsPrompt(nRow))
+		return FALSE;
+
+	const SEARCHPARAM& rule = m_aSearchParams[nRow];
+
+	switch (nCol)
+	{
+	case ATTRIB_COL:
+		return TRUE;
+
+	case OPERATOR_COL:
+		return !rule.TypeIs(FT_GROUP);
+
+	case ANDOR_COL:
+		return FALSE;
+
+	case VALUE_COL:
+		if (rule.OperatorIs(FOP_SET) || rule.OperatorIs(FOP_NOT_SET))
+		{
+			return FALSE;
+		}
+		else
+		{
+			switch (rule.GetAttribType())
+			{
+			case FT_BOOL:
+				ASSERT(0); // Handled above
+				return FALSE;
+
+			case FT_GROUP:
+			case FT_STRING:
+				return FALSE;
+
+			case FT_DEPENDENCY:
+			case FT_DATE:
+			case FT_DATERELATIVE:
+			case FT_DOUBLE:
+			case FT_TIMEPERIOD:
+			case FT_INTEGER:
+			case FT_RECURRENCE:
+			case FT_COLOR:
+			case FT_ICON:
+				break;
+
+			default:
+				ASSERT(0);
+				break;
+			}
+		}
+		break;
+	}
+
+	// All else
+	return TRUE;
+}
+
 void CTDLFindTaskExpressionListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, 
 													const CRect& rText, const CString& sText, 
 													COLORREF crText, UINT nDrawTextFlags)
 {
+	// If a required cell value is empty, handle that first
+	if (sText.IsEmpty() && CellRequiresValue(nRow, nCol))
+	{
+		CInputListCtrl::DrawCellText(pDC,
+									 nRow,
+									 nCol,
+									 rText,
+									 CEnString(IDS_FP_REQUIRED),
+									 CWndPrompt::GetTextColor(),
+									 nDrawTextFlags);
+
+		return;
+	}
+
+	// else
 	if (!IsPrompt(nRow))
 	{
 		const SEARCHPARAM& rule = m_aSearchParams[nRow];
@@ -1672,12 +1741,10 @@ void CTDLFindTaskExpressionListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol,
 				case FT_COLOR:
 					if (!sText.IsEmpty())
 					{
-						COLORREF color = _ttoi(GetItemText(nRow, nCol));
-
 						CRect rColor(rText);
 						rColor.DeflateRect(2, 2);
 
-						pDC->FillSolidRect(rColor, color);
+						pDC->FillSolidRect(rColor, _ttoi(sText));
 					}
 					return;
 
@@ -1690,11 +1757,6 @@ void CTDLFindTaskExpressionListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol,
 					return;
 				}
 			}
-			break;
-
-		case OPERATOR_COL:
-			if (rule.GetAttributeType() == FT_GROUP)
-				return;
 			break;
 
 		case ANDOR_COL:

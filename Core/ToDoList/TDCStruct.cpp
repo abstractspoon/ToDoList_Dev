@@ -1075,14 +1075,9 @@ BOOL SEARCHPARAM::SetAttribute(TDC_ATTRIBUTE nAttribID, FIND_ATTRIBTYPE nHint)
 	// update Attribute type
 	GetAttributeType();
 
-	// Reset 'extra' information stored in the union
+	// Clear value if type has changed
 	if (nAttribType != nPrevType)
-	{
-		if (nAttribType == FT_DATERELATIVE)
-			bRelativeDate = TRUE;
-		else
-			dwFlags = 0;
-	}
+		ClearValue();
 
 	ValidateOperator();
 	return TRUE;
@@ -1175,6 +1170,11 @@ BOOL SEARCHPARAM::SetOperator(FIND_OPERATOR nOp)
 	if (IsValidOperator(GetAttributeType(), nOp))
 	{
 		nOperator = nOp;
+
+		// if the op is set/notset then clear the field
+		if ((nOp == FOP_SET) || (nOp == FOP_NOT_SET) || (nOp == FOP_NONE))
+			ClearValue();
+
 		return TRUE;
 	}
 
@@ -1202,8 +1202,10 @@ void SEARCHPARAM::ClearValue()
 
 	// We need to very careful to only modify the union
 	// of extra values very specifically
-	if (nAttribType == FT_TIMEPERIOD)
-		nTimeUnits = TDCU_NULL;
+	if (nAttribType == FT_DATERELATIVE)
+		bRelativeDate = TRUE;
+	else
+		dwFlags = 0;
 }
 
 FIND_ATTRIBTYPE SEARCHPARAM::GetAttributeType(TDC_ATTRIBUTE nAttribID, BOOL bRelativeDate)
@@ -1300,6 +1302,7 @@ BOOL SEARCHPARAM::IsValidTypeHint(TDC_ATTRIBUTE nAttribID, FIND_ATTRIBTYPE nHint
 	case FT_COLOR:
 	case FT_STRING:
 	case FT_ICON:
+	case FT_GROUP:
 		return (nHint == nType);
 
 	case FT_DATE:
@@ -1311,11 +1314,12 @@ BOOL SEARCHPARAM::IsValidTypeHint(TDC_ATTRIBUTE nAttribID, FIND_ATTRIBTYPE nHint
 
 BOOL SEARCHPARAM::IsValidOperator(FIND_ATTRIBTYPE nType, FIND_OPERATOR nOp)
 {
+	if (nType == FT_GROUP)
+		return (nOp == FOP_NONE);
+
+	// else
 	switch (nOp)
 	{
-	case FOP_NONE:
-		return TRUE;
-
 	case FOP_EQUALS:
 	case FOP_NOT_EQUALS:
 		return (nType != FT_BOOL);
@@ -1355,7 +1359,12 @@ BOOL SEARCHPARAM::HasValidOperator() const
 void SEARCHPARAM::ValidateOperator()
 {
 	if (!HasValidOperator())
-		nOperator = FOP_NONE;
+	{
+		if (TypeIs(FT_GROUP))
+			nOperator = FOP_NONE;
+		else
+			nOperator = FOP_SET; // Valid for all other types
+	}
 }
 
 BOOL SEARCHPARAM::OperatorIs(FIND_OPERATOR nOp) const
@@ -1420,13 +1429,13 @@ BOOL SEARCHPARAM::SetFlags(DWORD flags)
 	{
 	case FT_DATE:
 	case FT_DATERELATIVE:
-		return SetRelativeDate((BOOL)dwFlags);
+		return SetRelativeDate((BOOL)flags);
 
 	case FT_TIMEPERIOD:
-		return SetTimeUnits((TDC_UNITS)dwFlags);
+		return SetTimeUnits((TDC_UNITS)flags);
 
 	case FT_STRING:
-		return SetMatchWholeWord((BOOL)dwFlags);
+		return SetMatchWholeWord((BOOL)flags);
 
 	default:
 		if (!flags)
@@ -1452,7 +1461,6 @@ BOOL SEARCHPARAM::SetRelativeDate(BOOL bRelative)
 			bRelativeDate = TRUE;
 			nAttribType = FT_DATERELATIVE;
 		}
-		ASSERT(!bRelativeDate);
 		return TRUE;
 
 	case FT_DATERELATIVE:
@@ -1461,7 +1469,6 @@ BOOL SEARCHPARAM::SetRelativeDate(BOOL bRelative)
 			bRelativeDate = FALSE;
 			nAttribType = FT_DATE;
 		}
-		ASSERT(!bRelativeDate);
 		return TRUE;
 	}
 

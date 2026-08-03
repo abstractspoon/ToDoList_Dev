@@ -135,8 +135,10 @@ protected:
 	CWnd* GetEditControl(int nRow, int nCol);
 	void ValidateListData() const;
 	void UpdateValueColumnText(int nRow);
+	void UpdateOperatorColumnText(int nRow);
 	void AddOperatorToCombo(FIND_OPERATOR op);
 	void MoveSelectedRule(BOOL bUp);
+	BOOL CellRequiresValue(int nRow, int nCol) const;
 
 	static CString GetOpName(FIND_OPERATOR op);
 };
