@@ -98,7 +98,7 @@ BOOL CTDLFindTaskAttributeComboBox::GetSelectedAttribute(SEARCHPARAM& rule) cons
 		}
 		else
 		{
-			nType = SEARCHPARAM::GetAttribType(nAttribID, bRelative);
+			nType = SEARCHPARAM::GetAttributeType(nAttribID, bRelative);
 			rule.SetAttribute(nAttribID, nType);
 		}
 
@@ -144,7 +144,7 @@ CString CTDLFindTaskAttributeComboBox::GetAttributeName(const SEARCHPARAM& rule)
 
 				if (attribDef.GetAttributeID() == nAttribID)
 				{
-					if (attribDef.IsDataType(TDCCA_DATE) && (rule.GetAttribType() == FT_DATERELATIVE))
+					if (attribDef.IsDataType(TDCCA_DATE) && (rule.GetAttributeType() == FT_DATERELATIVE))
 						sName.Format(IDS_CUSTOMRELDATECOLUMN, attribDef.sLabel);
 					else
 						sName.Format(IDS_CUSTOMCOLUMN, attribDef.sLabel);

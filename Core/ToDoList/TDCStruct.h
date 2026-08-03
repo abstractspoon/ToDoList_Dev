@@ -402,7 +402,7 @@ struct SEARCHPARAM
 	CString GetCustomAttributeID() const;
 	BOOL SetOperator(FIND_OPERATOR nOp);
 
-	FIND_ATTRIBTYPE GetAttribType() const;
+	FIND_ATTRIBTYPE GetAttributeType() const;
 	TDC_ATTRIBUTE GetAttribute() const;
 	FIND_OPERATOR GetOperator() const;
 	BOOL GetAnd() const;
@@ -430,7 +430,7 @@ struct SEARCHPARAM
 	int ValueAsInteger() const;
 	COleDateTime ValueAsDate() const;
 
-	static FIND_ATTRIBTYPE GetAttribType(TDC_ATTRIBUTE nAttribID, BOOL bRelativeDate);
+	static FIND_ATTRIBTYPE GetAttributeType(TDC_ATTRIBUTE nAttribID, BOOL bRelativeDate);
 	static BOOL IsValidOperator(FIND_ATTRIBTYPE nType, FIND_OPERATOR nOp);
 
 protected:

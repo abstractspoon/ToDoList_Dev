@@ -128,7 +128,7 @@ BOOL CTDCSearchParamHelper::DecodeAttribute(const CString& sAttrib, DWORD dwFlag
 			}
 			else
 			{
-				nFindType = SEARCHPARAM::GetAttribType(nAttribID, dwFlags);
+				nFindType = SEARCHPARAM::GetAttributeType(nAttribID, dwFlags);
 			}
 
 			ASSERT(nFindType != FT_NONE);
@@ -229,7 +229,7 @@ FIND_ATTRIBTYPE CTDCSearchParamHelper::GetAttributeFindType(TDC_ATTRIBUTE nAttri
 	}
 
 	// else
-	return SEARCHPARAM::GetAttribType(nAttribID, bRelativeDate);
+	return SEARCHPARAM::GetAttributeType(nAttribID, bRelativeDate);
 }
 
 BOOL CTDCSearchParamHelper::AppendCustomAttributeFilterRules(const CTDCCustomAttributeDataMap& mapData,

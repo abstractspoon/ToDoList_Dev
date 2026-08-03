@@ -211,7 +211,7 @@ void CTDLFindTaskExpressionListCtrl::SetISODateFormat(BOOL bIso)
 
 			while (nRow--)
 			{
-				if (m_aSearchParams[nRow].GetAttribType() == FT_DATE)
+				if (m_aSearchParams[nRow].GetAttributeType() == FT_DATE)
 					UpdateValueColumnText(nRow);
 			}
 		}
@@ -304,7 +304,7 @@ CWnd* CTDLFindTaskExpressionListCtrl::GetEditControl(int nItem, int nCol)
 		}
 		else
 		{
-			FIND_ATTRIBTYPE nType = rule.GetAttribType();
+			FIND_ATTRIBTYPE nType = rule.GetAttributeType();
 			TDC_ATTRIBUTE nAttribID = rule.GetAttribute();
 
 			switch (nType)
@@ -403,7 +403,7 @@ void CTDLFindTaskExpressionListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClic
 	case VALUE_COL:
 		if ((rule.GetOperator() != FOP_SET) && (rule.GetOperator() != FOP_NOT_SET))
 		{
-			switch (rule.GetAttribType())
+			switch (rule.GetAttributeType())
 			{
 			case FT_DATE:
 			case FT_RECURRENCE:
@@ -521,7 +521,7 @@ IL_COLUMNTYPE CTDLFindTaskExpressionListCtrl::GetCellType(int nRow, int nCol) co
 		{
 			TDC_ATTRIBUTE nAttribID = rule.GetAttribute();
 
-			switch (rule.GetAttribType())
+			switch (rule.GetAttributeType())
 			{
 			case FT_DATE:
 				return ILCT_DATE;
@@ -623,7 +623,7 @@ BOOL CTDLFindTaskExpressionListCtrl::CanEditCell(int nRow, int nCol) const
 		{
 		case VALUE_COL:
 			{
-				switch (rule.GetAttribType())
+				switch (rule.GetAttributeType())
 				{
 				case FT_BOOL:
 				case FT_DEPENDENCY:
@@ -641,7 +641,7 @@ BOOL CTDLFindTaskExpressionListCtrl::CanEditCell(int nRow, int nCol) const
 			break;
 
 		case OPERATOR_COL:
-			if (rule.GetAttribType() == FT_GROUP)
+			if (rule.GetAttributeType() == FT_GROUP)
 				return FALSE;
 			break;
 
@@ -662,7 +662,7 @@ void CTDLFindTaskExpressionListCtrl::PrepareEdit(int nRow, int /*nCol*/)
 
 	m_editBox.DeleteAllButtons();
 
-	switch (rule.GetAttribType())
+	switch (rule.GetAttributeType())
 	{
 	case FT_STRING:
 		m_editBox.ClearMask();
@@ -822,7 +822,7 @@ void CTDLFindTaskExpressionListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nC
 
 			m_cbOperators.ResetContent();
 			
-			FIND_ATTRIBTYPE nType = rule.GetAttribType();
+			FIND_ATTRIBTYPE nType = rule.GetAttributeType();
 
 			switch (nType)
 			{
@@ -1023,7 +1023,7 @@ void CTDLFindTaskExpressionListCtrl::ValidateListData() const
 	{
 		const SEARCHPARAM& rule = m_aSearchParams[nRule];
 
-		if (rule.GetAttribType() != FT_GROUP)
+		if (rule.GetAttributeType() != FT_GROUP)
 		{
 			// check matching attribute text less '(Custom/Relative)' suffixes
 			CString sRuleAttrib = m_cbAttributes.GetAttributeName(rule);
@@ -1061,7 +1061,7 @@ void CTDLFindTaskExpressionListCtrl::OnAttribEditOK()
 
 		if (m_cbAttributes.GetSelectedAttribute(ruleNew) && (rule != ruleNew))
 		{
-			BOOL bTypeChange = (rule.GetAttribType() != ruleNew.GetAttribType());
+			BOOL bTypeChange = (rule.GetAttributeType() != ruleNew.GetAttributeType());
 
 			rule = ruleNew;
 
@@ -1096,7 +1096,7 @@ void CTDLFindTaskExpressionListCtrl::OnValueEditOK(NMHDR* pNMHDR, LRESULT* pResu
 
 	SEARCHPARAM& rule = m_aSearchParams[nRow];
 
-	switch (rule.GetAttribType())
+	switch (rule.GetAttributeType())
 	{
 	case FT_STRING:
 	case FT_DATERELATIVE:
@@ -1313,7 +1313,7 @@ void CTDLFindTaskExpressionListCtrl::UpdateValueColumnText(int nRow)
 	{
 		try
 		{
-			switch (rule.GetAttribType())
+			switch (rule.GetAttributeType())
 			{
 			case FT_INTEGER:
 			case FT_STRING:
@@ -1591,7 +1591,7 @@ COLORREF CTDLFindTaskExpressionListCtrl::GetItemTextColor(int nItem, int nCol, B
 		{
 		case ATTRIB_COL:
 			// Show groups less intensly
-			if (m_aSearchParams[nItem].GetAttribType() == FT_GROUP)
+			if (m_aSearchParams[nItem].GetAttributeType() == FT_GROUP)
 				return ::GetSysColor(COLOR_3DDKSHADOW);
 			break;
 
@@ -1618,7 +1618,7 @@ void CTDLFindTaskExpressionListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol,
 		{
 		case VALUE_COL:
 			{
-				switch (rule.GetAttribType())
+				switch (rule.GetAttributeType())
 				{
 				case FT_ICON:
 					if (!sText.IsEmpty())
@@ -1693,7 +1693,7 @@ void CTDLFindTaskExpressionListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol,
 			break;
 
 		case OPERATOR_COL:
-			if (rule.GetAttribType() == FT_GROUP)
+			if (rule.GetAttributeType() == FT_GROUP)
 				return;
 			break;
 
