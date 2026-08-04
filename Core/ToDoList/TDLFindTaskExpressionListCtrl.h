@@ -36,9 +36,6 @@ public:
 	CTDLFindTaskExpressionListCtrl(const CContentMgr& mgrContent);
 	virtual ~CTDLFindTaskExpressionListCtrl();
 
-	BOOL IsValid() const { return m_aRules.IsValid(); }
-	BOOL IsBalanced(int& nNumGroupStarts, int& nNumGroupEnds) const { return m_aRules.IsBalanced(nNumGroupStarts, nNumGroupEnds); }
-
 	void SetRules(const SEARCHPARAM& param);
 	void SetRules(const CSearchParamArray& params);
 	const CSearchParamArray& Rules() const { return m_aRules; }

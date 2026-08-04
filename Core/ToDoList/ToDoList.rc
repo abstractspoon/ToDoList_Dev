@@ -6176,6 +6176,8 @@ BEGIN
     IDS_WEBUPDATE_TITLE     "ToDoList Web Update (c) AbstractSpoon"
     IDS_FP_REQUIRED         "<required>"
     IDS_FP_EMPTY            "<empty>"
+    IDS_MESSAGE_INCOMPLETERULES 
+                            "Invalid Search|The current search contains %d incomplete rules."
 END
 
 #endif    // English (Australia) resources

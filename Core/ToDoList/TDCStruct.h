@@ -469,8 +469,7 @@ class CSearchParamArray : public CArray<SEARCHPARAM, SEARCHPARAM&>
 {
 public:
 	BOOL IsValid() const; // Has some actual rules 
-	BOOL IsBalanced() const; // Begin/End groups
-	BOOL IsBalanced(int& nNumGroupStarts, int& nNumGroupEnds) const;
+	BOOL IsValid(int& nNumGroupStarts, int& nNumGroupEnds, int& nNumInvalidRules) const;
 
 	BOOL IsStartOfGroup(int nRule) const;
 	BOOL IsLastRule(int nRule) const;
@@ -480,6 +479,7 @@ public:
 
 protected:
 	void CountGroupings(int& nNumStarts, int& nNumEnds) const;
+	int CountIncompleteRules() const;
 };
 
 // ------------------------------------------------------------------------
