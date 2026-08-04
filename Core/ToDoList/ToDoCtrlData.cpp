@@ -2331,11 +2331,11 @@ TDC_SET CToDoCtrlData::SetTaskDate(DWORD dwTaskID, TODOITEM* pTDI, TDC_DATE nDat
 			}
 			break;
 			
-		case TDCD_STARTTIME:		
+		case TDCD_STARTTIME:
+			// add time to date component only if it exists
+			if (pTDI->HasStart())
 			{
-				// add time to date component only if it exists
-				if (pTDI->HasStart())
-					pTDI->dateStart = CDateHelper::MakeDate(pTDI->dateStart, dtDate);
+				pTDI->dateStart = CDateHelper::MakeDate(pTDI->dateStart, (bDateIsSet ? dtDate : 0.0));
 			}
 			break;
 			
@@ -2369,10 +2369,10 @@ TDC_SET CToDoCtrlData::SetTaskDate(DWORD dwTaskID, TODOITEM* pTDI, TDC_DATE nDat
 			break;
 			
 		case TDCD_DUETIME:		
+			// add time to date component only if it exists
+			if (pTDI->HasDue())
 			{
-				// add time to date component only if it exists
-				if (pTDI->HasDue())
-					pTDI->dateDue = CDateHelper::MakeDate(pTDI->dateDue, dtDate);
+				pTDI->dateDue = CDateHelper::MakeDate(pTDI->dateDue, (bDateIsSet ? dtDate : 0.0));
 			}
 			break;
 			
@@ -2404,12 +2404,10 @@ TDC_SET CToDoCtrlData::SetTaskDate(DWORD dwTaskID, TODOITEM* pTDI, TDC_DATE nDat
 			break;
 			
 		case TDCD_DONETIME:		
+			// add time to date component only if it exists
+			if (pTDI->IsDone())
 			{
-				// add time to date component only if it exists
-				if (pTDI->IsDone())
-					pTDI->dateDone = CDateHelper::MakeDate(pTDI->dateDone, dtDate);
-
-				bRecalcTimeEstimate = FALSE;
+				pTDI->dateDone = CDateHelper::MakeDate(pTDI->dateDone, (bDateIsSet ? dtDate : 0.0));
 			}
 			break;
 			
