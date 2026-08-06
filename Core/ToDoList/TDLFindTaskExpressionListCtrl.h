@@ -36,12 +36,9 @@ public:
 	CTDLFindTaskExpressionListCtrl(const CContentMgr& mgrContent);
 	virtual ~CTDLFindTaskExpressionListCtrl();
 
-	BOOL IsValid() const { return m_aSearchParams.IsValid(); }
-	BOOL IsBalanced(int& nNumGroupStarts, int& nNumGroupEnds) const { return m_aSearchParams.IsBalanced(nNumGroupStarts, nNumGroupEnds); }
-
-	void SetSearchParams(const SEARCHPARAM& param);
-	void SetSearchParams(const CSearchParamArray& params);
-	int GetSearchParams(CSearchParamArray& params) const;
+	void SetRules(const SEARCHPARAM& param);
+	void SetRules(const CSearchParamArray& params);
+	const CSearchParamArray& Rules() const { return m_aRules; }
 
 	void SetCustomAttributes(const CTDCCustomAttribDefinitionArray& aAttribDefs);
 	void SetAttributeListData(const TDCAUTOLISTDATA& tld, TDC_ATTRIBUTE nAttribID);
@@ -53,7 +50,7 @@ public:
 	BOOL AddRule();
 	BOOL DeleteSelectedRule();
 	BOOL CanDeleteSelectedRule() const { return CanDeleteSelectedCell(); }
-	BOOL HasRules() const { return m_aSearchParams.GetSize(); }
+	BOOL HasRules() const { return m_aRules.GetSize(); }
 	BOOL HasRule(TDC_ATTRIBUTE nAttribID) const;
 
 	void MoveSelectedRuleUp();
@@ -77,7 +74,7 @@ protected:
 	CTDLRiskComboBox				m_cbRisk;
 	CTDLIconComboBox				m_cbCustomIcons;
 
-	CSearchParamArray				m_aSearchParams;
+	CSearchParamArray				m_aRules;
 	CTDCCustomAttribDefinitionArray m_aCustAttribDefs;
 	TDCAUTOLISTDATA					m_tldListContents;
 	CTDCImageList					m_ilIcons;
@@ -131,12 +128,14 @@ protected:
 	void PrepareControl(CWnd& ctrl, int nRow, int nCol);
 	void BuildListCtrl();
 	int InsertRule(int nRow, const SEARCHPARAM& sp);
-	int GetRuleCount() const { return m_aSearchParams.GetSize(); }
+	int GetRuleCount() const { return m_aRules.GetSize(); }
 	CWnd* GetEditControl(int nRow, int nCol);
 	void ValidateListData() const;
 	void UpdateValueColumnText(int nRow);
+	void UpdateOperatorColumnText(int nRow);
 	void AddOperatorToCombo(FIND_OPERATOR op);
 	void MoveSelectedRule(BOOL bUp);
+	BOOL GetCellPrompt(int nRow, int nCol, const CString& sCellText, CString& sPrompt) const;
 
 	static CString GetOpName(FIND_OPERATOR op);
 };

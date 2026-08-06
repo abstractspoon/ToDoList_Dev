@@ -999,7 +999,7 @@ BOOL SEARCHPARAM::operator==(const SEARCHPARAM& rule) const
 	// test rest of attributes
 	if ((nOperator == rule.nOperator) && (bAnd == rule.bAnd) && (dwFlags == rule.dwFlags))
 	{
-		switch (GetAttribType())
+		switch (GetAttributeType())
 		{
 		case FT_BOOL:
 		case FT_DEPENDENCY:
@@ -1073,16 +1073,11 @@ BOOL SEARCHPARAM::SetAttribute(TDC_ATTRIBUTE nAttribID, FIND_ATTRIBTYPE nHint)
 	nAttribType = nHint;
 
 	// update Attribute type
-	GetAttribType();
+	GetAttributeType();
 
-	// Reset 'extra' information stored in the union
+	// Clear value if type has changed
 	if (nAttribType != nPrevType)
-	{
-		if (nAttribType == FT_DATERELATIVE)
-			bRelativeDate = TRUE;
-		else
-			dwFlags = 0;
-	}
+		ClearValue();
 
 	ValidateOperator();
 	return TRUE;
@@ -1115,7 +1110,7 @@ BOOL SEARCHPARAM::IsCustomAttribute() const
 
 BOOL SEARCHPARAM::IsRelativeDate(BOOL bMustHaveValue) const
 {
-	if (GetAttribType() != FT_DATERELATIVE)
+	if (GetAttributeType() != FT_DATERELATIVE)
 		return FALSE;
 
 	if (sValue.IsEmpty() && !bMustHaveValue)
@@ -1172,19 +1167,24 @@ CString SEARCHPARAM::GetCustomAttributeID() const
 
 BOOL SEARCHPARAM::SetOperator(FIND_OPERATOR nOp)
 {
-	if (IsValidOperator(GetAttribType(), nOp))
+	if (IsValidOperator(GetAttributeType(), nOp))
 	{
 		nOperator = nOp;
+
+		// if the op is set/notset then clear the field
+		if ((nOp == FOP_SET) || (nOp == FOP_NOT_SET) || (nOp == FOP_NONE))
+			ClearValue();
+
 		return TRUE;
 	}
 
 	return FALSE;
 }
 
-FIND_ATTRIBTYPE SEARCHPARAM::GetAttribType() const
+FIND_ATTRIBTYPE SEARCHPARAM::GetAttributeType() const
 {
 	if (nAttribType == FT_NONE)
-		nAttribType = GetAttribType(nAttributeID, bRelativeDate);
+		nAttribType = GetAttributeType(nAttributeID, bRelativeDate);
 
 	ASSERT((nAttribType != FT_NONE) ||
 	 	   (nAttributeID == TDCA_NONE) ||
@@ -1202,11 +1202,13 @@ void SEARCHPARAM::ClearValue()
 
 	// We need to very careful to only modify the union
 	// of extra values very specifically
-	if (nAttribType == FT_TIMEPERIOD)
-		nTimeUnits = TDCU_NULL;
+	if (nAttribType == FT_DATERELATIVE)
+		bRelativeDate = TRUE;
+	else
+		dwFlags = 0;
 }
 
-FIND_ATTRIBTYPE SEARCHPARAM::GetAttribType(TDC_ATTRIBUTE nAttribID, BOOL bRelativeDate)
+FIND_ATTRIBTYPE SEARCHPARAM::GetAttributeType(TDC_ATTRIBUTE nAttribID, BOOL bRelativeDate)
 {
 	switch (nAttribID)
 	{
@@ -1250,6 +1252,7 @@ FIND_ATTRIBTYPE SEARCHPARAM::GetAttribType(TDC_ATTRIBUTE nAttribID, BOOL bRelati
 
 	case TDCA_TIMEESTIMATE:
 	case TDCA_TIMESPENT:
+	case TDCA_TIMEREMAINING:
 		return FT_TIMEPERIOD;
 
 	case TDCA_COST:
@@ -1282,12 +1285,60 @@ FIND_ATTRIBTYPE SEARCHPARAM::GetAttribType(TDC_ATTRIBUTE nAttribID, BOOL bRelati
 	return FT_NONE;
 }
 
+BOOL SEARCHPARAM::RequiresOperator() const
+{
+	switch (GetAttributeType())
+	{
+	case FT_GROUP:
+		return FALSE;
+
+	case FT_NONE:
+		ASSERT(0);
+		break;
+	}
+
+	return TRUE;
+}
+
+BOOL SEARCHPARAM::RequiresValue() const
+{
+	if (OperatorIs(FOP_SET) || OperatorIs(FOP_NOT_SET))
+		return FALSE;
+
+	switch (GetAttributeType())
+	{
+	case FT_GROUP:
+	case FT_BOOL:
+		return FALSE;
+
+	case FT_STRING:
+	case FT_ICON:
+	case FT_DEPENDENCY:
+		return (OperatorIs(FOP_INCLUDES) || OperatorIs(FOP_NOT_INCLUDES));
+
+	case FT_NONE:
+		ASSERT(0);
+		break;
+
+	case FT_DATE:
+	case FT_DATERELATIVE:
+	case FT_DOUBLE:
+	case FT_TIMEPERIOD:
+	case FT_INTEGER:
+	case FT_COLOR: // integer
+	case FT_RECURRENCE: // integer
+		break;
+	}
+
+	return TRUE;
+}
+
 BOOL SEARCHPARAM::IsValidTypeHint(TDC_ATTRIBUTE nAttribID, FIND_ATTRIBTYPE nHint)
 {
 	if ((nHint == FT_NONE) || TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
 		return TRUE;
 
-	FIND_ATTRIBTYPE nType = GetAttribType(nAttribID, FALSE);
+	FIND_ATTRIBTYPE nType = GetAttributeType(nAttribID, FALSE);
 
 	switch (nType)
 	{
@@ -1300,6 +1351,7 @@ BOOL SEARCHPARAM::IsValidTypeHint(TDC_ATTRIBUTE nAttribID, FIND_ATTRIBTYPE nHint
 	case FT_COLOR:
 	case FT_STRING:
 	case FT_ICON:
+	case FT_GROUP:
 		return (nHint == nType);
 
 	case FT_DATE:
@@ -1311,11 +1363,12 @@ BOOL SEARCHPARAM::IsValidTypeHint(TDC_ATTRIBUTE nAttribID, FIND_ATTRIBTYPE nHint
 
 BOOL SEARCHPARAM::IsValidOperator(FIND_ATTRIBTYPE nType, FIND_OPERATOR nOp)
 {
+	if (nType == FT_GROUP)
+		return (nOp == FOP_NONE);
+
+	// else
 	switch (nOp)
 	{
-	case FOP_NONE:
-		return TRUE;
-
 	case FOP_EQUALS:
 	case FOP_NOT_EQUALS:
 		return (nType != FT_BOOL);
@@ -1349,13 +1402,18 @@ BOOL SEARCHPARAM::IsValidOperator(FIND_ATTRIBTYPE nType, FIND_OPERATOR nOp)
 
 BOOL SEARCHPARAM::HasValidOperator() const
 {
-	return IsValidOperator(GetAttribType(), nOperator);
+	return IsValidOperator(GetAttributeType(), nOperator);
 }
 
 void SEARCHPARAM::ValidateOperator()
 {
 	if (!HasValidOperator())
-		nOperator = FOP_NONE;
+	{
+		if (TypeIs(FT_GROUP))
+			nOperator = FOP_NONE;
+		else
+			nOperator = FOP_SET; // Valid for all other types
+	}
 }
 
 BOOL SEARCHPARAM::OperatorIs(FIND_OPERATOR nOp) const
@@ -1370,7 +1428,7 @@ BOOL SEARCHPARAM::AttributeIs(TDC_ATTRIBUTE nAttribID) const
 
 BOOL SEARCHPARAM::TypeIs(FIND_ATTRIBTYPE nType) const
 {
-	return (GetAttribType() == nType);
+	return (GetAttributeType() == nType);
 }
 
 BOOL SEARCHPARAM::HasString() const
@@ -1390,7 +1448,7 @@ void SEARCHPARAM::SetAnd(BOOL and)
 
 BOOL SEARCHPARAM::SetTimeUnits(TDC_UNITS nUnits)
 {
-	if (TypeIs(FT_TIMEPERIOD) && IsValidUnits(nUnits))
+	if (TypeIs(FT_TIMEPERIOD) && (IsValidUnits(nUnits) || (nUnits == TDCU_NULL)))
 	{
 		nTimeUnits = nUnits;
 		return TRUE;
@@ -1416,17 +1474,17 @@ BOOL SEARCHPARAM::SetMatchWholeWord(BOOL bMatchWhole)
 
 BOOL SEARCHPARAM::SetFlags(DWORD flags)
 {
-	switch (GetAttribType())
+	switch (GetAttributeType())
 	{
 	case FT_DATE:
 	case FT_DATERELATIVE:
-		return SetRelativeDate((BOOL)dwFlags);
+		return SetRelativeDate((BOOL)flags);
 
 	case FT_TIMEPERIOD:
-		return SetTimeUnits((TDC_UNITS)dwFlags);
+		return SetTimeUnits((TDC_UNITS)flags);
 
 	case FT_STRING:
-		return SetMatchWholeWord((BOOL)dwFlags);
+		return SetMatchWholeWord((BOOL)flags);
 
 	default:
 		if (!flags)
@@ -1444,7 +1502,7 @@ BOOL SEARCHPARAM::SetFlags(DWORD flags)
 
 BOOL SEARCHPARAM::SetRelativeDate(BOOL bRelative)
 {
-	switch (GetAttribType())
+	switch (GetAttributeType())
 	{
 	case FT_DATE:
 		if (bRelative)
@@ -1452,7 +1510,6 @@ BOOL SEARCHPARAM::SetRelativeDate(BOOL bRelative)
 			bRelativeDate = TRUE;
 			nAttribType = FT_DATERELATIVE;
 		}
-		ASSERT(!bRelativeDate);
 		return TRUE;
 
 	case FT_DATERELATIVE:
@@ -1461,7 +1518,6 @@ BOOL SEARCHPARAM::SetRelativeDate(BOOL bRelative)
 			bRelativeDate = FALSE;
 			nAttribType = FT_DATE;
 		}
-		ASSERT(!bRelativeDate);
 		return TRUE;
 	}
 
@@ -1507,7 +1563,7 @@ BOOL SEARCHPARAM::GetRelativeDate() const
 
 BOOL SEARCHPARAM::SetValue(const CString& sVal)
 {
-	switch (GetAttribType())
+	switch (GetAttributeType())
 	{
 	case FT_STRING:
 	case FT_DATERELATIVE:
@@ -1560,7 +1616,7 @@ BOOL SEARCHPARAM::SetValue(const CString& sVal)
 
 BOOL SEARCHPARAM::SetValue(double dVal)
 {
-	switch (GetAttribType())
+	switch (GetAttributeType())
 	{
 	case FT_DOUBLE:
 	case FT_TIMEPERIOD:
@@ -1575,7 +1631,7 @@ BOOL SEARCHPARAM::SetValue(double dVal)
 
 BOOL SEARCHPARAM::SetValue(int nVal)
 {
-	switch (GetAttribType())
+	switch (GetAttributeType())
 	{
 	case FT_INTEGER:
 	case FT_BOOL:
@@ -1597,7 +1653,7 @@ BOOL SEARCHPARAM::SetValue(int nVal)
 
 BOOL SEARCHPARAM::SetValue(const COleDateTime& dtVal)
 {
-	switch (GetAttribType())
+	switch (GetAttributeType())
 	{
 	case FT_DATE:
 		dtValue = dtVal;
@@ -1611,7 +1667,7 @@ BOOL SEARCHPARAM::SetValue(const COleDateTime& dtVal)
 
 CString SEARCHPARAM::ValueAsString() const
 {
-	switch (GetAttribType())
+	switch (GetAttributeType())
 	{
 	case FT_DATE:
 		if (CDateHelper::IsDateSet(dtValue))
@@ -1660,7 +1716,7 @@ double SEARCHPARAM::ValueAsDouble() const
 {
 	// Note: Dates are excluded because they can be
 	// 'null' which we can't represent with a number
-	switch (GetAttribType())
+	switch (GetAttributeType())
 	{
 	case FT_TIMEPERIOD:
 	case FT_DOUBLE:
@@ -1682,7 +1738,7 @@ int SEARCHPARAM::ValueAsInteger() const
 {
 	// Note: Dates are excluded because they can be
 	// null which is not representable as a number
-	switch (GetAttribType())
+	switch (GetAttributeType())
 	{
 	case FT_TIMEPERIOD:
 	case FT_DOUBLE:
@@ -1702,7 +1758,7 @@ int SEARCHPARAM::ValueAsInteger() const
 
 COleDateTime SEARCHPARAM::ValueAsDate() const
 {
-	switch (GetAttribType())
+	switch (GetAttributeType())
 	{
 	case FT_DATE:
 		return dtValue;
@@ -1733,34 +1789,33 @@ COleDateTime SEARCHPARAM::ValueAsDate() const
 
 BOOL CSearchParamArray::IsValid() const
 {
-	int nNumStarts, nNumEnds;
+	int nUnused1, nUnused2, nUnused3;
 	
-	if (!IsBalanced(nNumStarts, nNumEnds))
+	return IsValid(nUnused1, nUnused2, nUnused3);
+}
+
+BOOL CSearchParamArray::IsValid(int& nNumStarts, int& nNumEnds, int& nNumIncompleteRules) const
+{
+	CountGroupings(nNumStarts, nNumEnds);
+	nNumIncompleteRules = CountIncompleteRules();
+
+	if (nNumEnds != nNumStarts)
+		return FALSE;
+	
+	if (nNumIncompleteRules != 0)
 		return FALSE;
 
 	// Must have at least one 'real' rule
 	return (GetSize() > (nNumStarts + nNumEnds));
 }
 
-BOOL CSearchParamArray::IsBalanced() const
-{
-	int nUnused, nUnused2;
-	return IsBalanced(nUnused, nUnused2);
-}
-
-BOOL CSearchParamArray::IsBalanced(int& nNumStarts, int& nNumEnds) const
-{
-	CountGroupings(nNumStarts, nNumEnds);
-	return (nNumEnds == nNumStarts);
-}
-
 void CSearchParamArray::CountGroupings(int& nNumStarts, int& nNumEnds) const
 {
 	nNumStarts = nNumEnds = 0;
 
-	int nNumRules = GetSize();
+	int nRule = GetSize();
 
-	for (int nRule = 0; nRule < nNumRules; nRule++)
+	while (nRule--)
 	{
 		switch (GetAt(nRule).GetAttribute())
 		{
@@ -1768,6 +1823,27 @@ void CSearchParamArray::CountGroupings(int& nNumStarts, int& nNumEnds) const
 		case TDCA_MATCHGROUPEND:	nNumEnds++;		break;
 		}
 	}
+}
+
+int CSearchParamArray::CountIncompleteRules() const
+{
+	int nRule = GetSize(), nNumIncomplete = 0;
+
+	while (nRule--)
+	{
+		const SEARCHPARAM& rule = GetAt(nRule);
+
+		if (rule.RequiresOperator() && rule.OperatorIs(FOP_NONE))
+		{
+			nNumIncomplete++;
+		}
+		else if (rule.RequiresValue() && rule.ValueAsString().IsEmpty())
+		{
+			nNumIncomplete++;
+		}
+	}
+
+	return nNumIncomplete;
 }
 
 BOOL CSearchParamArray::IsStartOfGroup(int nRule) const
@@ -1951,7 +2027,7 @@ void SEARCHPARAMS::InitAttributeMap() const
 		{
 			const SEARCHPARAM& rule = aRules[nRule];
 
-			if (rule.GetAttribType() != FT_GROUP)
+			if (rule.GetAttributeType() != FT_GROUP)
 				mapAttrib.Add(rule.nAttributeID);
 		}
 	}

@@ -402,7 +402,7 @@ struct SEARCHPARAM
 	CString GetCustomAttributeID() const;
 	BOOL SetOperator(FIND_OPERATOR nOp);
 
-	FIND_ATTRIBTYPE GetAttribType() const;
+	FIND_ATTRIBTYPE GetAttributeType() const;
 	TDC_ATTRIBUTE GetAttribute() const;
 	FIND_OPERATOR GetOperator() const;
 	BOOL GetAnd() const;
@@ -419,6 +419,8 @@ struct SEARCHPARAM
 	BOOL HasValidOperator() const;
 	BOOL HasString() const;
 	BOOL HasIcon() const;
+	BOOL RequiresOperator() const;
+	BOOL RequiresValue() const;
 
 	void ValidateOperator();
 	BOOL OperatorIs(FIND_OPERATOR nOp) const;
@@ -430,7 +432,7 @@ struct SEARCHPARAM
 	int ValueAsInteger() const;
 	COleDateTime ValueAsDate() const;
 
-	static FIND_ATTRIBTYPE GetAttribType(TDC_ATTRIBUTE nAttribID, BOOL bRelativeDate);
+	static FIND_ATTRIBTYPE GetAttributeType(TDC_ATTRIBUTE nAttribID, BOOL bRelativeDate);
 	static BOOL IsValidOperator(FIND_ATTRIBTYPE nType, FIND_OPERATOR nOp);
 
 protected:
@@ -467,8 +469,7 @@ class CSearchParamArray : public CArray<SEARCHPARAM, SEARCHPARAM&>
 {
 public:
 	BOOL IsValid() const; // Has some actual rules 
-	BOOL IsBalanced() const; // Begin/End groups
-	BOOL IsBalanced(int& nNumGroupStarts, int& nNumGroupEnds) const;
+	BOOL IsValid(int& nNumGroupStarts, int& nNumGroupEnds, int& nNumInvalidRules) const;
 
 	BOOL IsStartOfGroup(int nRule) const;
 	BOOL IsLastRule(int nRule) const;
@@ -478,6 +479,7 @@ public:
 
 protected:
 	void CountGroupings(int& nNumStarts, int& nNumEnds) const;
+	int CountIncompleteRules() const;
 };
 
 // ------------------------------------------------------------------------

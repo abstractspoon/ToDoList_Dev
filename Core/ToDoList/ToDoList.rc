@@ -6174,6 +6174,10 @@ BEGIN
     IDS_IMPORTDLGFROMPAGE_TITLE "Import From"
     IDS_IMPORTDLGTOPAGE_TITLE "Import To"
     IDS_WEBUPDATE_TITLE     "ToDoList Web Update (c) AbstractSpoon"
+    IDS_FP_REQUIRED         "<required>"
+    IDS_FP_EMPTY            "<empty>"
+    IDS_MESSAGE_INCOMPLETERULES 
+                            "Invalid Search|The current search contains %d incomplete rules."
 END
 
 #endif    // English (Australia) resources

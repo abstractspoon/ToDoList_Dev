@@ -209,6 +209,7 @@ CTreeListSyncer::CTreeListSyncer(DWORD dwFlags)
 	m_bResyncPending(FALSE),
 	m_bResizePending(FALSE),
 	m_bResyncEnabled(TRUE),
+	m_bSplittingEnabled(TRUE),
 	m_bNeedInitItemHeight(TRUE),
 	m_hilSize(NULL),
 	m_bSplitting(FALSE),

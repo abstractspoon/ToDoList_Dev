@@ -8797,7 +8797,7 @@ BOOL CToDoCtrl::SelectNextTask(const CString& sPart, TDC_SELECTNEXTTASK nSelect)
 BOOL CToDoCtrl::SelectNextTask(const CString& sPart, TDC_SELECTNEXTTASK nSelect, TDC_ATTRIBUTE nAttribID, 
 							BOOL bCaseSensitive, BOOL bWholeWord, BOOL /*bFindReplace*/)
 {
-	if (!SEARCHPARAM::GetAttribType(nAttribID, FALSE) == FT_STRING)
+	if (!SEARCHPARAM::GetAttributeType(nAttribID, FALSE) == FT_STRING)
 	{
 		ASSERT(0);
 		return FALSE;
