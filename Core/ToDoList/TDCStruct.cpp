@@ -1409,10 +1409,17 @@ void SEARCHPARAM::ValidateOperator()
 {
 	if (!HasValidOperator())
 	{
-		if (TypeIs(FT_GROUP))
+		switch (GetAttributeType())
+		{
+		case FT_NONE:
+		case FT_GROUP:
 			nOperator = FOP_NONE;
-		else
-			nOperator = FOP_SET; // Valid for all other types
+			break;
+
+		default: // All else
+			nOperator = FOP_SET;
+			break;
+		}
 	}
 }
 

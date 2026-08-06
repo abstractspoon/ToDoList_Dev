@@ -52,7 +52,7 @@ void CSEARCHPARAMSTest::TestSEARCHPARAM()
 		SEARCHPARAM rule;
 
 		ExpectEQ(rule.GetAttribute(), TDCA_NONE);
-		ExpectEQ(rule.GetAttribType(), FT_NONE);
+		ExpectEQ(rule.GetAttributeType(), FT_NONE);
 		ExpectEQ(rule.GetOperator(), FOP_NONE);
 		ExpectEQ(rule.GetAnd(), TRUE);
 
@@ -275,8 +275,8 @@ void CSEARCHPARAMSTest::TestTextParam(TDC_ATTRIBUTE nAttribID, FIND_ATTRIBTYPE n
 	SEARCHPARAM rule(nAttribID);
 
 	ExpectEQ(rule.GetAttribute(), nAttribID);
-	ExpectEQ(rule.GetAttribType(), nType);
-	ExpectEQ(rule.GetOperator(), FOP_NONE);
+	ExpectEQ(rule.GetAttributeType(), nType);
+	ExpectEQ(rule.GetOperator(), FOP_SET);
 	ExpectEQ(rule.GetAnd(), TRUE);
 	ExpectEQ(rule.ValueAsString(), _T(""));
 	ExpectEQ(rule.GetMatchWholeWord(), FALSE);
@@ -312,8 +312,8 @@ void CSEARCHPARAMSTest::TestIntegerParam(TDC_ATTRIBUTE nAttribID, FIND_ATTRIBTYP
 	SEARCHPARAM rule(nAttribID);
 
 	ExpectEQ(rule.GetAttribute(), nAttribID);
-	ExpectEQ(rule.GetAttribType(), nType);
-	ExpectEQ(rule.GetOperator(), FOP_NONE);
+	ExpectEQ(rule.GetAttributeType(), nType);
+	ExpectEQ(rule.GetOperator(), FOP_SET);
 	ExpectEQ(rule.GetAnd(), TRUE);
 
 	ExpectEQ(rule.ValueAsString(), _T("0"));
@@ -363,8 +363,8 @@ void CSEARCHPARAMSTest::TestDecimalParam(TDC_ATTRIBUTE nAttribID, FIND_ATTRIBTYP
 	SEARCHPARAM rule(nAttribID);
 
 	ExpectEQ(rule.GetAttribute(), nAttribID);
-	ExpectEQ(rule.GetAttribType(), nType);
-	ExpectEQ(rule.GetOperator(), FOP_NONE);
+	ExpectEQ(rule.GetAttributeType(), nType);
+	ExpectEQ(rule.GetOperator(), FOP_SET);
 	ExpectEQ(rule.GetAnd(), TRUE);
 	ExpectEQ(rule.ValueAsString(), _T("0.000"));
 	ExpectEQ(rule.ValueAsInteger(), 0);
@@ -406,9 +406,9 @@ void CSEARCHPARAMSTest::TestDateParam(TDC_ATTRIBUTE nAttribID, FIND_ATTRIBTYPE n
 	rule.SetAttribute(nAttribID, nType);
 
 	ExpectEQ(rule.GetAttribute(), nAttribID);
-	ExpectEQ(rule.GetAttribType(), nType);
+	ExpectEQ(rule.GetAttributeType(), nType);
 
-	ExpectEQ(rule.GetOperator(), FOP_NONE);
+	ExpectEQ(rule.GetOperator(), FOP_SET);
 	ExpectEQ(rule.GetAnd(), TRUE);
 	ExpectEQ(rule.ValueAsDate(), CDateHelper::NullDate());
 
@@ -513,7 +513,7 @@ void CSEARCHPARAMSTest::TestGroupParam(TDC_ATTRIBUTE nAttribID)
 	SEARCHPARAM rule(nAttribID);
 
 	ExpectEQ(rule.GetAttribute(), nAttribID);
-	ExpectEQ(rule.GetAttribType(), FT_GROUP);
+	ExpectEQ(rule.GetAttributeType(), FT_GROUP);
 	ExpectEQ(rule.GetOperator(), FOP_NONE);
 	ExpectEQ(rule.GetAnd(), TRUE);
 
