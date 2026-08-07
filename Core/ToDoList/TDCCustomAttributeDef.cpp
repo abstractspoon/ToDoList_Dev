@@ -808,7 +808,7 @@ CString TDCCUSTOMATTRIBUTEDEFINITION::GetNextListItem(const CString& sItem, BOOL
 
 	default:
 		{
-			int nFind = Misc::Find(sItem, aDefaultListData);
+			int nFind = Misc::Find(sItem, aDefaultListData, FALSE, TRUE);
 			ASSERT((nFind != -1) || sItem.IsEmpty());
 
 			if (bNext)

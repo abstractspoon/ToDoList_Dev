@@ -2705,7 +2705,8 @@ void CTDLTaskAttributeListCtrl::PrepareSingleSelCombo(int nRow, const CStringArr
 	CString sValue = GetItemText(nRow, VALUE_COL);
 	combo.AddUniqueItem(sValue);
 
-	combo.SelectString(-1, sValue);
+	int nFind = combo.FindStringExact(-1, sValue);
+	combo.SetCurSel(nFind);
 }
 
 void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
@@ -3732,7 +3733,7 @@ void CTDLTaskAttributeListCtrl::OnComboSelChange(UINT nCtrlID)
 				sNewValue = Misc::Format(dTime);
 
 			// If the combo is visible, use the cell value as a 
-			// scratch pad but WITHOUT notifying the parent
+			// scratch pad but DON'T notify the parent
 			if (m_cbTimeOfDay.IsWindowVisible())
 			{
 				SetItemText(nRow, VALUE_COL, sNewValue);
