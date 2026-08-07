@@ -123,38 +123,45 @@ CString TDCREMINDER::FormatNotification(BOOL bISODates) const
 {
 	ASSERT(IsValid());
 
-	COleDateTime date;
+	COleDateTime date, dtNow(COleDateTime::GetCurrentTime());
 
-	if ((bRelative && !GetRelativeToDate(date)) ||
-		(!bRelative && !GetReminderDate(date)))
+	if (bRelative)
+	{
+		if (!GetRelativeToDate(date))
+			return _T("");
+
+		if ((nRelativeFromWhen == TDCR_DUEDATE) && CDateHelper::IsEndOfDay(date, TRUE))
+			date = CDateHelper::GetEndOfDay(date);
+	}
+	else if (!GetReminderDate(date))
 	{
 		return _T("");
 	}
 	
-	double dDiff = (date - COleDateTime::GetCurrentTime()), dAbsDiff = fabs(dDiff);
-
-	const double FIVE_MINS = (5.0 / MINS_IN_DAY);
-	const double ONE_HOUR = (1.0 / HOURS_IN_DAY);
-	const double ONE_DAY = 1.0;
-
 	CString sDiff;
+	double dDiff = (date - dtNow);
 
-	if (dAbsDiff >= FIVE_MINS)
+	if (CDateHelper::IsSameDay(date, dtNow))
 	{
-		TH_UNITS nUnits = THU_DAYS;
+		const double FIVE_MINS = (5.0 / MINS_IN_DAY);
+		const double ONE_HOUR = (1.0 / HOURS_IN_DAY);
 
-		if (dAbsDiff <= ONE_HOUR)
-		{
-			dAbsDiff *= MINS_IN_DAY;
-			nUnits = THU_MINS;
-		}
-		else if (dAbsDiff <= ONE_DAY)
-		{
-			dAbsDiff *= HOURS_IN_DAY;
-			nUnits = THU_HOURS;
-		}
+		double dAbsDiff = fabs(dDiff);
 
-		sDiff = CTimeHelper::FormatTime(dAbsDiff, nUnits, 0, '\0');
+		if (dAbsDiff >= FIVE_MINS)
+		{
+			TH_UNITS nUnits = THU_DAYS;
+
+			if (dAbsDiff <= ONE_HOUR)
+				sDiff = CTimeHelper::FormatTime((dAbsDiff * MINS_IN_DAY), THU_MINS, 0, '\0');
+			else
+				sDiff = CTimeHelper::FormatTime((dAbsDiff * HOURS_IN_DAY), THU_HOURS, 0, '\0');
+		}
+	}
+	else
+	{
+		dDiff = ((int)date.m_dt - (int)dtNow.m_dt);
+		sDiff = CTimeHelper::FormatTime(fabs(dDiff), THU_DAYS, 0, '\0');
 	}
 
 	CEnString sNotify;
