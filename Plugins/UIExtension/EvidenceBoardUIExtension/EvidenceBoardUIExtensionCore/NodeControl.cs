@@ -682,6 +682,10 @@ namespace EvidenceBoardUIExtension
 
 					PerformLayout();
 				}
+				else
+				{
+					ScrollToSelection(false);
+				}
 			}
 		}
 
@@ -704,7 +708,7 @@ namespace EvidenceBoardUIExtension
 				return false;
 
 			// else
-			AutoScrollMinSize = ZoomedSize;
+			UpdateScrollbars();
 			RecalcTextFont();
 			Invalidate();
 
@@ -721,7 +725,8 @@ namespace EvidenceBoardUIExtension
 			m_ZoomFactor = 1.0f;
 			m_ZoomLevel = 0;
 
-			AutoScrollMinSize = ZoomedSize;
+			UpdateScrollbars();
+			ScrollToSelection(false);
 			RecalcTextFont();
 			Invalidate();
 
@@ -733,7 +738,7 @@ namespace EvidenceBoardUIExtension
 		private void RecalcZoomFactor()
 		{
 			m_ZoomFactor = (float)Math.Pow(0.8, m_ZoomLevel);
-			AutoScrollMinSize = ZoomedSize;
+			UpdateScrollbars();
 		}
 
 		private void RecalcTextFont()
@@ -743,8 +748,16 @@ namespace EvidenceBoardUIExtension
 			else
 				m_TextFont = Font;
 
-			AutoScrollMinSize = ZoomedSize;
+			UpdateScrollbars();
 			OnTextFontChanged();
+		}
+
+		void UpdateScrollbars()
+		{
+			AutoScrollMinSize = ZoomedSize;
+
+			VerticalScroll.SmallChange = (Height / 10);
+			HorizontalScroll.SmallChange = (Width / 10);
 		}
 
 		protected virtual void OnTextFontChanged()
@@ -1237,10 +1250,11 @@ namespace EvidenceBoardUIExtension
 			if (GraphExtents.Equals(oldExtents))
 				return false;
 
-			AutoScrollMinSize = ZoomedSize;
-
 			if (!zoomToExtents || !ZoomToExtents())
+			{
+				UpdateScrollbars();
 				Invalidate();
+			}
 
 			ExtentsChange?.Invoke(this, null);
 			return true;
@@ -1263,6 +1277,7 @@ namespace EvidenceBoardUIExtension
 		{
 			base.OnSizeChanged(e);
 
+			UpdateScrollbars();
 			Invalidate();
 		}
 
@@ -1492,7 +1507,7 @@ namespace EvidenceBoardUIExtension
 					if (Rectangle.Union(DataExtents, m_PreDragBackgroundImageBounds) !=
 						Rectangle.Union(DataExtents, m_BackgroundImage.Extents))
 					{
-						AutoScrollMinSize = ZoomedSize;
+						UpdateScrollbars();
 
 						if (!zoomToExtents || !ZoomToExtents())
 							Invalidate();
@@ -1996,6 +2011,7 @@ namespace EvidenceBoardUIExtension
 			if (recalcExtents)
 				RecalcExtents(zoomedToExtents);
 
+			ScrollToSelection(false);
 			return true;
 		}
 

@@ -355,15 +355,13 @@ namespace MindMapUIExtension
 #if DEBUG
             m_DebugMode.Visible = false;
 #endif
-
-            int border = BorderWidth;
-
             // Total size of the graph
             Rectangle graphRect = Rectangle.Inflate(RootItem.TotalBounds, GraphPadding, GraphPadding);
 
-            // The portion of the client rect we are interested in 
-            // (excluding the top and left borders)
-            Rectangle srcRect = Rectangle.FromLTRB(border, 
+			// The portion of the client rect we are interested in 
+			// (excluding the top and left borders)
+			int border = BorderWidth;
+			Rectangle srcRect = Rectangle.FromLTRB(border, 
                                                    border, 
                                                    ClientRectangle.Width - border, 
                                                    ClientRectangle.Height - border);
@@ -721,6 +719,10 @@ namespace MindMapUIExtension
 					VerticalScroll.SetValue(newY);
 				}
 			}
+			else
+			{
+				EnsureSelectionVisible();
+			}
 
 			// Restore callbacks
 			EndUpdate();
@@ -733,6 +735,9 @@ namespace MindMapUIExtension
 		{
 			get
 			{
+				if (RootItem == null)
+					return Rectangle.Empty;
+
 				return Rectangle.Inflate(RootItem.TotalBounds, GraphPadding, GraphPadding);
 			}
 		}
@@ -754,7 +759,7 @@ namespace MindMapUIExtension
 
 			if (GraphRect != curSize)
 			{
-				AutoScrollMinSize = GraphRect.Size;
+				UpdateScrollbars();
 				UpdateTreeFont(false);
 				Invalidate();
 
@@ -937,6 +942,7 @@ namespace MindMapUIExtension
 			base.OnSizeChanged(e);
 
 			RecalculateDrawOffset();
+			UpdateScrollbars();
 		}
 
     	protected void OnTreeViewAfterExpandCollapse(object sender, TreeViewEventArgs e)
@@ -1888,11 +1894,9 @@ namespace MindMapUIExtension
             // Move the whole graph so that the top-left is (0,0)
             var graphRect = GraphRect;
             OffsetPositions(rootNode, -graphRect.Left, -graphRect.Top);
-            
-			AutoScrollMinSize = graphRect.Size;
-			VerticalScroll.SmallChange = (graphRect.Height / 100);
-
             RecalculateDrawOffset();
+
+			UpdateScrollbars();
 			Invalidate();
 
 			m_RecalcingPositions = false;
@@ -1909,6 +1913,14 @@ namespace MindMapUIExtension
 			Point toCentre = CentrePoint(toRect);
 
 			return new Point((toCentre.X - fromCentre.X), (toCentre.Y - fromCentre.Y));
+		}
+
+		private void UpdateScrollbars()
+		{
+			AutoScrollMinSize = GraphRect.Size;
+
+			VerticalScroll.SmallChange = (Height / 10);
+			HorizontalScroll.SmallChange = (Width / 10);
 		}
 
 		private void FlipPositionsHorizontally(TreeNode fromNode, TreeNode toNode)
