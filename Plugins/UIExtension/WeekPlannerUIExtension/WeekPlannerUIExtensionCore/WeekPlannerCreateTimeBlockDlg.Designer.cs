@@ -1,4 +1,4 @@
-﻿namespace DayViewUIExtension
+﻿namespace WeekPlannerUIExtension
 {
 	partial class DayViewCreateTimeBlockDlg
 	{
@@ -36,7 +36,7 @@
 			this.m_Error = new System.Windows.Forms.Label();
 			this.m_TaskId = new System.Windows.Forms.Label();
 			this.label1 = new System.Windows.Forms.Label();
-			this.m_Attributes = new DayViewUIExtension.DayViewTimeBlockAttributesPage();
+			this.m_Attributes = new WeekPlannerUIExtension.DayViewTimeBlockAttributesPage();
 			this.SuspendLayout();
 			// 
 			// label3
@@ -148,7 +148,7 @@
 			this.Controls.Add(this.OK);
 			this.Controls.Add(this.label5);
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-			this.Icon = global::DayViewUIExtension.Properties.Resources.dayview;
+			this.Icon = global::WeekPlannerUIExtension.Properties.Resources.dayview;
 			this.Name = "DayViewCreateTimeBlockDlg";
 			this.ShowInTaskbar = false;
 			this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;

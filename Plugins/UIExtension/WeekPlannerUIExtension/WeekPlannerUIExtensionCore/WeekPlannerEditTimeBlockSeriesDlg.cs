@@ -12,7 +12,7 @@ using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
 // ---------------------------------------------------------------
 
-namespace DayViewUIExtension
+namespace WeekPlannerUIExtension
 {
 	public partial class DayViewEditTimeBlockSeriesDlg : Form
 	{

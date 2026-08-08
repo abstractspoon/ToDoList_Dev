@@ -7,7 +7,7 @@ using System.Diagnostics;
 
 using Abstractspoon.Tdl.PluginHelpers;
 
-namespace DayViewUIExtension
+namespace WeekPlannerUIExtension
 {
 	public class TDLSelectionTool : Calendar.SelectionTool
 	{

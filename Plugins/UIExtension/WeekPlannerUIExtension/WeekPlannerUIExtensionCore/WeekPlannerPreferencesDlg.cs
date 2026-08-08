@@ -9,7 +9,7 @@ using System.Windows.Forms;
 
 using Abstractspoon.Tdl.PluginHelpers;
 
-namespace DayViewUIExtension
+namespace WeekPlannerUIExtension
 {
     partial class DayViewPreferencesDlg : Form
     {

@@ -8,8 +8,8 @@
     <ProjectGuid>{92FEFDB8-3F95-4404-A620-8003B51C5A53}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>DayViewUIExtension</RootNamespace>
-    <AssemblyName>DayViewUIExtensionCore</AssemblyName>
+    <RootNamespace>WeekPlannerUIExtension</RootNamespace>
+    <AssemblyName>WeekPlannerUIExtensionCore</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
@@ -74,7 +74,7 @@
     <Compile Include="DayViewPreferencesDlg.Designer.cs">
       <DependentUpon>DayViewPreferencesDlg.cs</DependentUpon>
     </Compile>
-    <Compile Include="DayViewUIExtensionCore.cs" />
+    <Compile Include="WeekPlannerUIExtensionCore.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>

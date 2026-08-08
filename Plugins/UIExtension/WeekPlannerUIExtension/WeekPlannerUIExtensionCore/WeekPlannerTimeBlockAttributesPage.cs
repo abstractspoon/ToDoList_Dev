@@ -9,7 +9,7 @@ using System.Windows.Forms;
 
 using Abstractspoon.Tdl.PluginHelpers;
 
-namespace DayViewUIExtension
+namespace WeekPlannerUIExtension
 {
 	public delegate void AttributeChangeEventHandler(object sender, EventArgs args);
 

@@ -1,4 +1,4 @@
-﻿namespace DayViewUIExtension
+﻿namespace WeekPlannerUIExtension
 {
     partial class DayViewPreferencesDlg
     {
@@ -309,7 +309,7 @@
 			this.Controls.Add(this.BtnOK);
 			this.Controls.Add(this.BtnCancel);
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-			this.Icon = global::DayViewUIExtension.Properties.Resources.dayview;
+			this.Icon = global::WeekPlannerUIExtension.Properties.Resources.dayview;
 			this.MaximizeBox = false;
 			this.MinimizeBox = false;
 			this.Name = "DayViewPreferencesDlg";

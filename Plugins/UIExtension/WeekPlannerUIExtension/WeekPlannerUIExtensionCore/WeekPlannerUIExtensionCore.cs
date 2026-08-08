@@ -11,11 +11,11 @@ using UIComponents;
 using Abstractspoon.Tdl.PluginHelpers;
 using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
-namespace DayViewUIExtension
+namespace WeekPlannerUIExtension
 {
 
 	[System.ComponentModel.DesignerCategory("")]
-	public class DayViewUIExtensionCore : Panel, IUIExtension
+	public class WeekPlannerUIExtensionCore : Panel, IUIExtension
 	{
 		private IntPtr m_HwndParent = IntPtr.Zero;
 		private TDLDayView m_DayView = null;
@@ -54,7 +54,7 @@ namespace DayViewUIExtension
 		
 		// --------------------------------------------------------------------------------------
 
-		public DayViewUIExtensionCore(String typeID, String uiName, IntPtr hwndParent, Translator trans)
+		public WeekPlannerUIExtensionCore(String typeID, String uiName, IntPtr hwndParent, Translator trans)
 		{
 			m_HwndParent = hwndParent;
 			m_Trans = trans;
@@ -519,7 +519,7 @@ namespace DayViewUIExtension
 		private void CreateToolbar()
 		{
 			var assembly = Assembly.GetExecutingAssembly();
-			var images = new Bitmap(assembly.GetManifestResourceStream("DayViewUIExtension.toolbar_std.bmp"));
+			var images = new Bitmap(assembly.GetManifestResourceStream("WeekPlannerUIExtension.toolbar_std.bmp"));
             
             m_TBImageList = new ImageList();
 			m_TBImageList.ColorDepth = ColorDepth.Depth32Bit;
