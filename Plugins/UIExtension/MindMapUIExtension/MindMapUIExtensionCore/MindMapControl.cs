@@ -94,8 +94,6 @@ namespace MindMapUIExtension
 		private RootAlignment m_Alignment;
 		private Color m_ConnectionColor;
 
-		private PerfData m_PerfData = new PerfData();
-
 		private float m_ZoomFactor = 1f;
 		private int m_ZoomLevel = 0;
 		double m_DpiFactor = 1.0;
@@ -492,10 +490,6 @@ namespace MindMapUIExtension
                     DrawInsertionMarker(e.Graphics, m_DropTarget);
 
 				PostDraw(e.Graphics, m_TreeView.Nodes);
-#if DEBUG
-				if (!SavingToImage)
-					m_PerfData.Draw(e.Graphics, (DebugMode() ? m_TreeView.Width : 0), 0);
-#endif
 			}
 		}
 
@@ -691,9 +685,6 @@ namespace MindMapUIExtension
 				relX = ((ptClient.X + HorizontalScroll.Value) / (float)HorizontalScroll.Maximum);
 				relY = ((ptClient.Y + VerticalScroll.Value) / (float)VerticalScroll.Maximum);
 			}
-#if DEBUG
-			m_PerfData.Reset();
-#endif
 			// Prevent all selection and expansion changes for the duration
 			BeginUpdate();
 
@@ -704,9 +695,6 @@ namespace MindMapUIExtension
 			var expandedNodes = new List<TreeNode>();
 			GetExpandedNodes(RootNode, ref expandedNodes);
 
-#if DEBUG
-			m_PerfData.GetExpandedNodesMs = m_PerfData.LocalElapsedMs;
-#endif
 			// Recalculate the zoom
 			m_ZoomLevel = level;
 			m_ZoomFactor = (float)Math.Pow(0.8, m_ZoomLevel);
@@ -714,14 +702,9 @@ namespace MindMapUIExtension
 			// Don't recalc positions here because it'll get done in EndUpdate
 			UpdateTreeFont(false);
 
-#if DEBUG
-			m_PerfData.UpdateTreeFontMs = m_PerfData.LocalElapsedMs;
-#endif
 			// Restore expanded nodes
 			SetExpandedNodes(expandedNodes);
-#if DEBUG
-			m_PerfData.SetExpandedNodesMs = m_PerfData.LocalElapsedMs;
-#endif
+
 			// Scroll the view to keep the mouse located in the 
 			// same relative position as before
 			if (ptClient != NullPoint)
@@ -742,10 +725,7 @@ namespace MindMapUIExtension
 			// Restore callbacks
 			EndUpdate();
 			PerformLayout();
-#if DEBUG
-			m_PerfData.EndUpdateMs = m_PerfData.LocalElapsedMs;
-			m_PerfData.ZoomToMs = m_PerfData.TotalElapsedMs;
-#endif
+
 			return true;
 		}
 
@@ -996,7 +976,6 @@ namespace MindMapUIExtension
         void OnDebugModeChanged(object sender, EventArgs e)
         {
             m_TreeView.Visible = DebugMode();
-			//m_TreeView.HoldRedraw = !m_TreeView.Visible;
 
             if (!RecalculateDrawOffset())
 				Invalidate();
@@ -1835,9 +1814,7 @@ namespace MindMapUIExtension
             MindMapItem rootItem = RootItem;
 
 			ResetPositions(rootNode);
-#if DEBUG
-			Stopwatch watch = Stopwatch.StartNew();
-#endif
+
 			using (Graphics graphics = m_TreeView.CreateGraphics())
             {
 				var rootLoc = m_Alignment;
@@ -1917,9 +1894,7 @@ namespace MindMapUIExtension
 
             RecalculateDrawOffset();
 			Invalidate();
-#if DEBUG
-			Debug.WriteLine("RecalculatePositions took {0} ms", watch.ElapsedMilliseconds);
-#endif
+
 			m_RecalcingPositions = false;
 		}
 
@@ -2066,9 +2041,6 @@ namespace MindMapUIExtension
 
         private Rectangle GetLogicalTreeNodePosition(Graphics graphics, TreeNode node)
         {
-#if DEBUG
-			int tickStart = Environment.TickCount;
-#endif
 			Rectangle itemBounds = node.Bounds;
 
             // Always calculate the width of the text because the tree 
@@ -2085,9 +2057,6 @@ namespace MindMapUIExtension
             int vertOffset = (m_TreeView.VertScrollPos * node.Bounds.Height);
 
             itemBounds.Offset(horzOffset, vertOffset);
-#if DEBUG
-			m_PerfData.GetLogicalTreeNodePosition += (Environment.TickCount - tickStart);
-#endif
 
             return itemBounds;
         }
