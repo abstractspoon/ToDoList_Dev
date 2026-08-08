@@ -148,7 +148,7 @@
 			this.Controls.Add(this.OK);
 			this.Controls.Add(this.label5);
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-			this.Icon = global::WeekPlannerUIExtension.Properties.Resources.dayview;
+			this.Icon = global::WeekPlannerUIExtension.Properties.Resources.WeekPlanner;
 			this.Name = "DayViewCreateTimeBlockDlg";
 			this.ShowInTaskbar = false;
 			this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;

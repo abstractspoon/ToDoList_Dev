@@ -52,7 +52,7 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDI_DAYVIEW             ICON                    "..\\DayViewUIExtensionCore\\Resources\\dayview.ico"
+IDI_WEEKPLANNER       ICON                    "..\\DayViewUIExtensionCore\\Resources\\WeekPlanner.ico"
 
 
 /////////////////////////////////////////////////////////////////////////////

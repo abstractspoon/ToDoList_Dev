@@ -63,9 +63,9 @@ namespace WeekPlannerUIExtension.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
         /// </summary>
-        internal static System.Drawing.Icon dayview {
+        internal static System.Drawing.Icon WeekPlanner {
             get {
-                object obj = ResourceManager.GetObject("dayview", resourceCulture);
+                object obj = ResourceManager.GetObject("WeekPlanner", resourceCulture);
                 return ((System.Drawing.Icon)(obj));
             }
         }
