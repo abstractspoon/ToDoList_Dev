@@ -11,12 +11,12 @@
 using namespace DayViewUIExtension;
 
 ///////////////////////////////////////////////////////////////////////////////
-// This class is exported from DayViewUIExtensionBridge.dll
+// This class is exported from WeekPlannerUIExtensionBridge.dll
 
-class CDayViewUIExtensionBridge : public IUIExtension
+class CWeekPlannerUIExtensionBridge : public IUIExtension
 {
 public:
-	CDayViewUIExtensionBridge();
+	CWeekPlannerUIExtensionBridge();
 
    void Release(); // releases the interface
 
@@ -39,12 +39,12 @@ protected:
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-// This class is exported from DayViewUIExtensionBridge.dll
+// This class is exported from WeekPlannerUIExtensionBridge.dll
 
-class CDayViewUIExtensionBridgeWindow : public IUIExtensionWindow
+class CWeekPlannerUIExtensionBridgeWindow : public IUIExtensionWindow
 {
 public:
-	CDayViewUIExtensionBridgeWindow(ITransText* pTT);
+	CWeekPlannerUIExtensionBridgeWindow(ITransText* pTT);
 
    BOOL Create(UINT nCtrlID, DWORD nStyle, long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent);
 
@@ -97,6 +97,6 @@ DLL_DECLSPEC int GetInterfaceVersion()
 
 DLL_DECLSPEC IUIExtension* CreateUIExtensionInterface()
 {
-   return new CDayViewUIExtensionBridge();
+   return new CWeekPlannerUIExtensionBridge();
 }
 
