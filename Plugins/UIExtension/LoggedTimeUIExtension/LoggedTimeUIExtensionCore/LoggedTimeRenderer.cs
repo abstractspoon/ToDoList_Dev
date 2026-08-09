@@ -16,7 +16,7 @@ namespace LoggedTimeUIExtension
 
 	public partial class LoggedTimeView : Calendar.IRenderer
 	{
-		private DayViewUIExtension.RenderHelper m_RenderHelper = new DayViewUIExtension.RenderHelper(); 
+		private WeekPlannerUIExtension.RenderHelper m_RenderHelper = new WeekPlannerUIExtension.RenderHelper(); 
 		private int m_DayWidth = -1;
 
 		// ------------------------------------------------------------------------

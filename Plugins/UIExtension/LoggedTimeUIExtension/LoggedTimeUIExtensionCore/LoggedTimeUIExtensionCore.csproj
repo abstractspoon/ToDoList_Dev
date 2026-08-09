@@ -127,9 +127,9 @@
       <Project>{D17A4D6A-4CAA-4470-8A19-F42463C021FD}</Project>
       <Name>DayView</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\DayViewUIExtension\DayViewUIExtensionCore\DayViewUIExtensionCore.csproj">
+    <ProjectReference Include="..\..\WeekPlannerUIExtension\WeekPlannerUIExtensionCore\WeekPlannerUIExtensionCore.csproj">
       <Project>{92fefdb8-3f95-4404-a620-8003b51c5a53}</Project>
-      <Name>DayViewUIExtensionCore</Name>
+      <Name>WeekPlannerUIExtensionCore</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

@@ -8,7 +8,7 @@
 #include <Interfaces\IUIExtension.h>
 
 #include <vcclr.h>
-using namespace DayViewUIExtension;
+using namespace WeekPlannerUIExtension;
 
 ///////////////////////////////////////////////////////////////////////////////
 // This class is exported from WeekPlannerUIExtensionBridge.dll
@@ -81,7 +81,7 @@ public:
    void FilterToolTipMessage(MSG* /*pMsg*/) { }
 
 protected:
-   gcroot<DayViewUIExtensionCore^> m_wnd;
+   gcroot<WeekPlannerUIExtensionCore^> m_wnd;
    ITransText* m_pTT;
    bool m_hasOldSettings;
 

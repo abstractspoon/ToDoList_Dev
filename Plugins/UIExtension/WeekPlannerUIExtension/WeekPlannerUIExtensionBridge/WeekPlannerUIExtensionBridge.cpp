@@ -25,21 +25,21 @@ using namespace System::Collections::Generic;
 using namespace System::Runtime::InteropServices;
 using namespace System::Drawing;
 
-using namespace DayViewUIExtension;
+using namespace WeekPlannerUIExtension;
 using namespace Abstractspoon::Tdl::PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-const LPCWSTR DAYVIEW_OLDGUID = L"4CBCF4EA-7B02-41E1-BE65-3E03025E1FFE";
+const LPCWSTR WEEKPLANNER_OLDGUID = L"4CBCF4EA-7B02-41E1-BE65-3E03025E1FFE";
 
-const LPCWSTR DAYVIEW_GUID = L"AD05F169-0203-4962-92CD-6E28F8E1A35B";
-const LPCWSTR DAYVIEW_NAME = L"Week Planner";
+const LPCWSTR WEEKPLANNER_GUID = L"AD05F169-0203-4962-92CD-6E28F8E1A35B";
+const LPCWSTR WEEKPLANNER_NAME = L"Week Planner";
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 CWeekPlannerUIExtensionBridge::CWeekPlannerUIExtensionBridge() : m_hIcon(NULL), m_pTT(nullptr)
 {
-	m_hIcon = Win32::LoadHIcon(L"WeekPlannerUIExtensionBridge.dll", IDI_DAYVIEW, 16, true);
+	m_hIcon = Win32::LoadHIcon(L"WeekPlannerUIExtensionBridge.dll", IDI_WEEKPLANNER, 16, true);
 }
 
 void CWeekPlannerUIExtensionBridge::Release()
@@ -55,7 +55,7 @@ void CWeekPlannerUIExtensionBridge::SetLocalizer(ITransText* pTT)
 
 LPCWSTR CWeekPlannerUIExtensionBridge::GetMenuText() const
 {
-	return DAYVIEW_NAME;
+	return WEEKPLANNER_NAME;
 }
 
 HICON CWeekPlannerUIExtensionBridge::GetIcon() const
@@ -65,7 +65,7 @@ HICON CWeekPlannerUIExtensionBridge::GetIcon() const
 
 LPCWSTR CWeekPlannerUIExtensionBridge::GetTypeID() const
 {
-	return DAYVIEW_GUID;
+	return WEEKPLANNER_GUID;
 }
 
 IUIExtensionWindow* CWeekPlannerUIExtensionBridge::CreateExtWindow(UINT nCtrlID, 
@@ -104,10 +104,10 @@ BOOL CWeekPlannerUIExtensionBridgeWindow::Create(UINT nCtrlID, DWORD nStyle,
 	long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent)
 {
 	msclr::auto_gcroot<Translator^> trans = gcnew Translator(m_pTT);
-	msclr::auto_gcroot<String^> typeID = gcnew String(DAYVIEW_GUID);
-	msclr::auto_gcroot<String^> uiName = gcnew String(DAYVIEW_NAME);
+	msclr::auto_gcroot<String^> typeID = gcnew String(WEEKPLANNER_GUID);
+	msclr::auto_gcroot<String^> uiName = gcnew String(WEEKPLANNER_NAME);
 
-	m_wnd = gcnew DayViewUIExtension::DayViewUIExtensionCore(typeID.get(), uiName.get(), static_cast<IntPtr>(hwndParent), trans.get());
+	m_wnd = gcnew WeekPlannerUIExtensionCore(typeID.get(), uiName.get(), static_cast<IntPtr>(hwndParent), trans.get());
 
 	HWND hWnd = GetHwnd();
 
@@ -130,12 +130,12 @@ HICON CWeekPlannerUIExtensionBridgeWindow::GetIcon() const
 
 LPCWSTR CWeekPlannerUIExtensionBridgeWindow::GetMenuText() const
 {
-	return DAYVIEW_NAME;
+	return WEEKPLANNER_NAME;
 }
 
 LPCWSTR CWeekPlannerUIExtensionBridgeWindow::GetTypeID() const
 {
-	return DAYVIEW_GUID;
+	return WEEKPLANNER_GUID;
 }
 
 bool CWeekPlannerUIExtensionBridgeWindow::SelectTask(DWORD dwTaskID, bool /*bTaskLink*/)
@@ -364,7 +364,7 @@ void CWeekPlannerUIExtensionBridgeWindow::SavePreferences(IPreferences* pPrefs, 
 	// Delete old settings
 	if (m_hasOldSettings)
 	{
-		auto oldKey = key->Replace(gcnew String(DAYVIEW_GUID), gcnew String(DAYVIEW_OLDGUID));
+		auto oldKey = key->Replace(gcnew String(WEEKPLANNER_GUID), gcnew String(WEEKPLANNER_OLDGUID));
 		prefs->DeleteProfileSection(oldKey, true);
 	}
 }
@@ -375,7 +375,7 @@ void CWeekPlannerUIExtensionBridgeWindow::LoadPreferences(const IPreferences* pP
 	msclr::auto_gcroot<String^> key = gcnew String(szKey);
 
 	// Backwards compatibility because of TypeID change
-	auto oldKey = key->Replace(gcnew String(DAYVIEW_GUID), gcnew String(DAYVIEW_OLDGUID));
+	auto oldKey = key->Replace(gcnew String(WEEKPLANNER_GUID), gcnew String(WEEKPLANNER_OLDGUID));
 	
 	if (prefs->HasProfileSection(oldKey))
 	{

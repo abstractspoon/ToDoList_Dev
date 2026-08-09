@@ -50,29 +50,29 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DayViewCreateTimeBlockDlg.cs">
+    <Compile Include="WeekPlannerCreateTimeBlockDlg.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="DayViewCreateTimeBlockDlg.Designer.cs">
-      <DependentUpon>DayViewCreateTimeBlockDlg.cs</DependentUpon>
+    <Compile Include="WeekPlannerCreateTimeBlockDlg.Designer.cs">
+      <DependentUpon>WeekPlannerCreateTimeBlockDlg.cs</DependentUpon>
     </Compile>
-    <Compile Include="DayViewEditTimeBlockSeriesDlg.cs">
+    <Compile Include="WeekPlannerEditTimeBlockSeriesDlg.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="DayViewEditTimeBlockSeriesDlg.Designer.cs">
-      <DependentUpon>DayViewEditTimeBlockSeriesDlg.cs</DependentUpon>
+    <Compile Include="WeekPlannerEditTimeBlockSeriesDlg.Designer.cs">
+      <DependentUpon>WeekPlannerEditTimeBlockSeriesDlg.cs</DependentUpon>
     </Compile>
-    <Compile Include="DayViewTimeBlockAttributesPage.cs">
+    <Compile Include="WeekPlannerTimeBlockAttributesPage.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="DayViewTimeBlockAttributesPage.Designer.cs">
-      <DependentUpon>DayViewTimeBlockAttributesPage.cs</DependentUpon>
+    <Compile Include="WeekPlannerTimeBlockAttributesPage.Designer.cs">
+      <DependentUpon>WeekPlannerTimeBlockAttributesPage.cs</DependentUpon>
     </Compile>
-    <Compile Include="DayViewPreferencesDlg.cs">
+    <Compile Include="WeekPlannerPreferencesDlg.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="DayViewPreferencesDlg.Designer.cs">
-      <DependentUpon>DayViewPreferencesDlg.cs</DependentUpon>
+    <Compile Include="WeekPlannerPreferencesDlg.Designer.cs">
+      <DependentUpon>WeekPlannerPreferencesDlg.cs</DependentUpon>
     </Compile>
     <Compile Include="WeekPlannerUIExtensionCore.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -91,18 +91,18 @@
     <Compile Include="TimeBlock.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="DayViewCreateTimeBlockDlg.resx">
-      <DependentUpon>DayViewCreateTimeBlockDlg.cs</DependentUpon>
+    <EmbeddedResource Include="WeekPlannerCreateTimeBlockDlg.resx">
+      <DependentUpon>WeekPlannerCreateTimeBlockDlg.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="DayViewEditTimeBlockSeriesDlg.resx">
-      <DependentUpon>DayViewEditTimeBlockSeriesDlg.cs</DependentUpon>
+    <EmbeddedResource Include="WeekPlannerEditTimeBlockSeriesDlg.resx">
+      <DependentUpon>WeekPlannerEditTimeBlockSeriesDlg.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="DayViewPreferencesDlg.resx">
-      <DependentUpon>DayViewPreferencesDlg.cs</DependentUpon>
+    <EmbeddedResource Include="WeekPlannerPreferencesDlg.resx">
+      <DependentUpon>WeekPlannerPreferencesDlg.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="DayViewTimeBlockAttributesPage.resx">
-      <DependentUpon>DayViewTimeBlockAttributesPage.cs</DependentUpon>
+    <EmbeddedResource Include="WeekPlannerTimeBlockAttributesPage.resx">
+      <DependentUpon>WeekPlannerTimeBlockAttributesPage.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
