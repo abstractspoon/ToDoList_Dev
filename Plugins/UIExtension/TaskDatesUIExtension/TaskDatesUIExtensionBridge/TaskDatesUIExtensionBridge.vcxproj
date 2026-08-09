@@ -11,9 +11,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{C4E31B1D-3E1C-45DC-9E0C-F6AE22F302C4}</ProjectGuid>
-    <RootNamespace>EisenhowerUIExtensionBridge</RootNamespace>
-    <ProjectName>EisenhowerUIExtensionBridge</ProjectName>
+    <ProjectGuid>{1BAD62D0-5F35-4B1A-BDA7-F1A2C10AC877}</ProjectGuid>
+    <RootNamespace>TaskDatesUIExtensionBridge</RootNamespace>
+    <ProjectName>TaskDatesUIExtensionBridge</ProjectName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -98,7 +98,7 @@ copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\Core\ToDoList\unicode_$(Con
     <ClCompile Include="dllmain.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
     </ClCompile>
-    <ClCompile Include="EisenhowerUIExtensionBridge.cpp">
+    <ClCompile Include="TaskDatesUIExtensionBridge.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</CompileAsManaged>
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</CompileAsManaged>
     </ClCompile>
@@ -107,7 +107,7 @@ copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\Core\ToDoList\unicode_$(Con
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="EisenhowerUIExtensionBridge.h" />
+    <ClInclude Include="TaskDatesUIExtensionBridge.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
@@ -122,14 +122,14 @@ copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\Core\ToDoList\unicode_$(Con
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="EisenhowerUIExtensionBridge.rc" />
+    <ResourceCompile Include="TaskDatesUIExtensionBridge.rc" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\EisenhowerUIExtensionCore\Resources\Eisenhower.ico" />
+    <None Include="..\TaskDatesUIExtensionCore\Resources\TaskDates.ico" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\EisenhowerUIExtensionCore\EisenhowerUIExtensionCore.csproj">
-      <Project>{2ea5f87a-cd7d-4eca-ac91-b8180c3b0ce3}</Project>
+    <ProjectReference Include="..\TaskDatesUIExtensionCore\TaskDatesUIExtensionCore.csproj">
+      <Project>{3fc06e3f-b94e-4088-9638-39f7406376b2}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
