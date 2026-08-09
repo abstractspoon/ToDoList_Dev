@@ -8,7 +8,7 @@ using System.Linq;
 using IIControls;
 using Abstractspoon.Tdl.PluginHelpers;
 
-namespace DayViewUIExtension
+namespace WeekPlannerUIExtension
 {
 	// ------------------------------------------------------------------------------
 

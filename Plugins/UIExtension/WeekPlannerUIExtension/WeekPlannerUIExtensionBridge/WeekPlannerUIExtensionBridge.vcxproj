@@ -12,8 +12,8 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{B382AA74-CAF8-4D01-B0A4-6A49F0979E45}</ProjectGuid>
-    <RootNamespace>DayViewUIExtensionBridge</RootNamespace>
-    <ProjectName>DayViewUIExtensionBridge</ProjectName>
+    <RootNamespace>WeekPlannerUIExtensionBridge</RootNamespace>
+    <ProjectName>WeekPlannerUIExtensionBridge</ProjectName>
 	<TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -98,7 +98,7 @@ copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\Core\ToDoList\unicode_$(Con
     <ClCompile Include="dllmain.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
     </ClCompile>
-    <ClCompile Include="DayViewUIExtensionBridge.cpp">
+    <ClCompile Include="WeekPlannerUIExtensionBridge.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</CompileAsManaged>
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</CompileAsManaged>
     </ClCompile>
@@ -107,7 +107,7 @@ copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\Core\ToDoList\unicode_$(Con
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="DayViewUIExtensionBridge.h" />
+    <ClInclude Include="WeekPlannerUIExtensionBridge.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
@@ -122,13 +122,13 @@ copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\Core\ToDoList\unicode_$(Con
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="DayViewUIExtensionBridge.rc" />
+    <ResourceCompile Include="WeekPlannerUIExtensionBridge.rc" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\DayViewUIExtensionCore\Resources\dayview.ico" />
+    <None Include="..\WeekPlannerUIExtensionCore\Resources\WeekPlanner.ico" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\DayViewUIExtensionCore\DayViewUIExtensionCore.csproj">
+    <ProjectReference Include="..\WeekPlannerUIExtensionCore\WeekPlannerUIExtensionCore.csproj">
       <Project>{92fefdb8-3f95-4404-a620-8003b51c5a53}</Project>
     </ProjectReference>
   </ItemGroup>

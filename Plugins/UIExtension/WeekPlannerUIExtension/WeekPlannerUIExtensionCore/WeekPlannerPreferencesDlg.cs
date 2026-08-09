@@ -9,9 +9,9 @@ using System.Windows.Forms;
 
 using Abstractspoon.Tdl.PluginHelpers;
 
-namespace DayViewUIExtension
+namespace WeekPlannerUIExtension
 {
-    partial class DayViewPreferencesDlg : Form
+    partial class WeekPlannerPreferencesDlg : Form
     {
 		private Translator m_Trans;
 		private IWin32Window m_Owner;
@@ -42,7 +42,7 @@ namespace DayViewUIExtension
 
 		// ------------------------------------------------------------------------
 
-        public DayViewPreferencesDlg(IWin32Window owner, Translator trans, Font font)
+        public WeekPlannerPreferencesDlg(IWin32Window owner, Translator trans, Font font)
         {
 			m_Trans = trans;
 			m_Owner = owner;

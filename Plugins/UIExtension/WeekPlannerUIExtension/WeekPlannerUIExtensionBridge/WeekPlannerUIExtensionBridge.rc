@@ -52,7 +52,7 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDI_DAYVIEW             ICON                    "..\\DayViewUIExtensionCore\\Resources\\dayview.ico"
+IDI_WEEKPLANNER       ICON                    "..\\WeekPlannerUIExtensionCore\\Resources\\WeekPlanner.ico"
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -80,9 +80,9 @@ BEGIN
             VALUE "CompanyName", "AbstractSpoon Software"
             VALUE "FileDescription", "ToDoList"
             VALUE "FileVersion", "1.0.0.1"
-            VALUE "InternalName", "DayViewUIExtensionBridge.dll"
+            VALUE "InternalName", "WeekPlannerUIExtensionBridge.dll"
             VALUE "LegalCopyright", "Copyright (C) 2025"
-            VALUE "OriginalFilename", "DayViewUIExtensionBridge.dll"
+            VALUE "OriginalFilename", "WeekPlannerUIExtensionBridge.dll"
             VALUE "ProductName", "ToDoList"
             VALUE "ProductVersion", "1.0.0.1"
         END

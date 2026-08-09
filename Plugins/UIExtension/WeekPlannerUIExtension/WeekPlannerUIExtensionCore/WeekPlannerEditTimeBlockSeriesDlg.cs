@@ -12,20 +12,20 @@ using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
 // ---------------------------------------------------------------
 
-namespace DayViewUIExtension
+namespace WeekPlannerUIExtension
 {
-	public partial class DayViewEditTimeBlockSeriesDlg : Form
+	public partial class WeekPlannerEditTimeBlockSeriesDlg : Form
 	{
 		Translator m_Trans;
 
 		// -----------------------------------
 
-		public DayViewEditTimeBlockSeriesDlg() // for designer
+		public WeekPlannerEditTimeBlockSeriesDlg() // for designer
 		{
 			InitializeComponent();
 		}
 
-		public DayViewEditTimeBlockSeriesDlg(string taskTitle,
+		public WeekPlannerEditTimeBlockSeriesDlg(string taskTitle,
 											uint taskId,											
 											WorkingWeek workWeek,
 											bool isoDateTimes, 

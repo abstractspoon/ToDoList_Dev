@@ -9,13 +9,13 @@ using System.Windows.Forms;
 
 using Abstractspoon.Tdl.PluginHelpers;
 
-namespace DayViewUIExtension
+namespace WeekPlannerUIExtension
 {
 	public delegate void AttributeChangeEventHandler(object sender, EventArgs args);
 
 	// ---------------------------------------------------
 
-	public partial class DayViewTimeBlockAttributesPage : UserControl
+	public partial class WeekPlannerTimeBlockAttributesPage : UserControl
 	{
 		[Flags]
 		public enum Mask
@@ -39,7 +39,7 @@ namespace DayViewUIExtension
 
 		// ---------------------------------------------------
 
-		public DayViewTimeBlockAttributesPage()
+		public WeekPlannerTimeBlockAttributesPage()
 		{
 			InitializeComponent();
 		}

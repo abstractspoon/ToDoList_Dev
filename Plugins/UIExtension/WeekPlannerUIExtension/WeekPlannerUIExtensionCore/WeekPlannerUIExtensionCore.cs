@@ -11,11 +11,11 @@ using UIComponents;
 using Abstractspoon.Tdl.PluginHelpers;
 using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
-namespace DayViewUIExtension
+namespace WeekPlannerUIExtension
 {
 
 	[System.ComponentModel.DesignerCategory("")]
-	public class DayViewUIExtensionCore : Panel, IUIExtension
+	public class WeekPlannerUIExtensionCore : Panel, IUIExtension
 	{
 		private IntPtr m_HwndParent = IntPtr.Zero;
 		private TDLDayView m_DayView = null;
@@ -40,7 +40,7 @@ namespace DayViewUIExtension
 		private WeekLabel m_WeekLabel;
 		private MonthComboBox m_MonthCombo;
 		private YearComboBox m_YearCombo;
-        private DayViewPreferencesDlg m_PrefsDlg;
+        private WeekPlannerPreferencesDlg m_PrefsDlg;
 		private DateRangeLink m_SelectedTaskDates;
 		private Label m_SelectedTaskDatesLabel;
 
@@ -54,7 +54,7 @@ namespace DayViewUIExtension
 		
 		// --------------------------------------------------------------------------------------
 
-		public DayViewUIExtensionCore(String typeID, String uiName, IntPtr hwndParent, Translator trans)
+		public WeekPlannerUIExtensionCore(String typeID, String uiName, IntPtr hwndParent, Translator trans)
 		{
 			m_HwndParent = hwndParent;
 			m_Trans = trans;
@@ -416,7 +416,7 @@ namespace DayViewUIExtension
 		private void InitializeComponent()
 		{
 			m_ControlsFont = new Font(FontName, 8.25f);
-			m_PrefsDlg = new DayViewPreferencesDlg(this, m_Trans, m_ControlsFont);
+			m_PrefsDlg = new WeekPlannerPreferencesDlg(this, m_Trans, m_ControlsFont);
 			m_WorkWeek = new WorkingWeek();
 
 			CreateMonthYearCombos();
@@ -519,7 +519,7 @@ namespace DayViewUIExtension
 		private void CreateToolbar()
 		{
 			var assembly = Assembly.GetExecutingAssembly();
-			var images = new Bitmap(assembly.GetManifestResourceStream("DayViewUIExtension.toolbar_std.bmp"));
+			var images = new Bitmap(assembly.GetManifestResourceStream("WeekPlannerUIExtension.toolbar_std.bmp"));
             
             m_TBImageList = new ImageList();
 			m_TBImageList.ColorDepth = ColorDepth.Depth32Bit;
@@ -719,13 +719,13 @@ namespace DayViewUIExtension
 
 				if (series != null)
 				{
-					var dlg = new DayViewEditTimeBlockSeriesDlg(block.Title,
-																block.RealTaskId, 
-																m_WorkWeek, 
-																m_DayView.DisplayDatesInISO,
-																series.Attributes, 
-																m_DefaultTimeBlockEditMask,
-																m_Trans);
+					var dlg = new WeekPlannerEditTimeBlockSeriesDlg(block.Title,
+																	block.RealTaskId, 
+																	m_WorkWeek, 
+																	m_DayView.DisplayDatesInISO,
+																	series.Attributes, 
+																	m_DefaultTimeBlockEditMask,
+																	m_Trans);
 					FormsUtil.SetFont(dlg, m_ControlsFont);
 
 					if (dlg.ShowDialog() != DialogResult.OK)
@@ -791,13 +791,13 @@ namespace DayViewUIExtension
 				attribs.ToDate = dates.End.Date;
 			}
 
-			var dlg = new DayViewCreateTimeBlockDlg(m_DayView.TaskItems, 
-													new UIExtension.TaskIcon(m_HwndParent),
-													m_WorkWeek,
-													m_DayView.DisplayDatesInISO,
-													m_SelectedTaskId,
-													attribs,
-													m_Trans);
+			var dlg = new WeekPlannerCreateTimeBlockDlg(m_DayView.TaskItems, 
+														new UIExtension.TaskIcon(m_HwndParent),
+														m_WorkWeek,
+														m_DayView.DisplayDatesInISO,
+														m_SelectedTaskId,
+														attribs,
+														m_Trans);
 
 			FormsUtil.SetFont(dlg, m_ControlsFont);
 

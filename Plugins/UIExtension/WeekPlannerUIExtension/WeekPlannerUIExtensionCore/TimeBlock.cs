@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 using Abstractspoon.Tdl.PluginHelpers;
 
-namespace DayViewUIExtension
+namespace WeekPlannerUIExtension
 {
 
 	// --------------------------------------------------------------

@@ -11,7 +11,7 @@ using System.Windows.Forms;
 using Abstractspoon.Tdl.PluginHelpers;
 using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
-namespace DayViewUIExtension
+namespace WeekPlannerUIExtension
 {
 	public class RenderHelper
 	{

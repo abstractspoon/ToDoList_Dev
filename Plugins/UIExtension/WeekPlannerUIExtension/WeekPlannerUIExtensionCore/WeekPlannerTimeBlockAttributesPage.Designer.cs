@@ -1,6 +1,6 @@
-﻿namespace DayViewUIExtension
+﻿namespace WeekPlannerUIExtension
 {
-	partial class DayViewTimeBlockAttributesPage
+	partial class WeekPlannerTimeBlockAttributesPage
 	{
 		/// <summary> 
 		/// Required designer variable.
@@ -200,7 +200,7 @@
 			this.m_TimeCheckBox.Visible = false;
 			this.m_TimeCheckBox.CheckedChanged += new System.EventHandler(this.OnTimeCheckBoxCheckChange);
 			// 
-			// DayViewTimeBlockAttributesPage
+			// WeekPlannerTimeBlockAttributesPage
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -218,7 +218,7 @@
 			this.Controls.Add(this.m_TimeLabel);
 			this.Controls.Add(this.m_DateCheckBox);
 			this.Controls.Add(this.m_TimeCheckBox);
-			this.Name = "DayViewTimeBlockAttributesPage";
+			this.Name = "WeekPlannerTimeBlockAttributesPage";
 			this.Size = new System.Drawing.Size(364, 191);
 			this.ResumeLayout(false);
 			this.PerformLayout();

@@ -12,20 +12,20 @@ using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
 // ----------------------------------------------------------
 
-namespace DayViewUIExtension
+namespace WeekPlannerUIExtension
 {
-	public partial class DayViewCreateTimeBlockDlg : Form
+	public partial class WeekPlannerCreateTimeBlockDlg : Form
 	{
 		Translator m_Trans;
 	
 		// -----------------------------------
 
-		public DayViewCreateTimeBlockDlg() // for designer
+		public WeekPlannerCreateTimeBlockDlg() // for designer
 		{
 			InitializeComponent();
 		}
 
-		public DayViewCreateTimeBlockDlg(IEnumerable<TaskItem> taskItems, 
+		public WeekPlannerCreateTimeBlockDlg(IEnumerable<TaskItem> taskItems, 
 										 UIExtension.TaskIcon taskIcons, 
 										 WorkingWeek workWeek,
 										 bool isoDateTimes,

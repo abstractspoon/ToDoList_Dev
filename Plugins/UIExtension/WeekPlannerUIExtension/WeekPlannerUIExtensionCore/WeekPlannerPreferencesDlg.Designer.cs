@@ -1,6 +1,6 @@
-﻿namespace DayViewUIExtension
+﻿namespace WeekPlannerUIExtension
 {
-    partial class DayViewPreferencesDlg
+    partial class WeekPlannerPreferencesDlg
     {
         /// <summary>
         /// Required designer variable.
@@ -299,7 +299,7 @@
 			this.BtnOK.Text = "OK";
 			this.BtnOK.UseVisualStyleBackColor = true;
 			// 
-			// DayViewPreferencesDlg
+			// WeekPlannerPreferencesDlg
 			// 
 			this.AcceptButton = this.BtnOK;
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -309,10 +309,10 @@
 			this.Controls.Add(this.BtnOK);
 			this.Controls.Add(this.BtnCancel);
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-			this.Icon = global::DayViewUIExtension.Properties.Resources.dayview;
+			this.Icon = global::WeekPlannerUIExtension.Properties.Resources.WeekPlanner;
 			this.MaximizeBox = false;
 			this.MinimizeBox = false;
-			this.Name = "DayViewPreferencesDlg";
+			this.Name = "WeekPlannerPreferencesDlg";
 			this.Padding = new System.Windows.Forms.Padding(10);
 			this.ShowInTaskbar = false;
 			this.Text = "Week Planner Preferences";

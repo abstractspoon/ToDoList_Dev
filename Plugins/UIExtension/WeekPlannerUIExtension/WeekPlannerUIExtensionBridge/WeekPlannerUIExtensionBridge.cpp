@@ -6,7 +6,7 @@
 #include <msclr\auto_gcroot.h>
 
 #include "stdafx.h" 
-#include "DayViewUIExtensionBridge.h"
+#include "WeekPlannerUIExtensionBridge.h"
 #include "resource.h"
 
 #include <Interfaces\ITasklist.h>
@@ -25,53 +25,53 @@ using namespace System::Collections::Generic;
 using namespace System::Runtime::InteropServices;
 using namespace System::Drawing;
 
-using namespace DayViewUIExtension;
+using namespace WeekPlannerUIExtension;
 using namespace Abstractspoon::Tdl::PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-const LPCWSTR DAYVIEW_OLDGUID = L"4CBCF4EA-7B02-41E1-BE65-3E03025E1FFE";
+const LPCWSTR WEEKPLANNER_OLDGUID = L"4CBCF4EA-7B02-41E1-BE65-3E03025E1FFE";
 
-const LPCWSTR DAYVIEW_GUID = L"AD05F169-0203-4962-92CD-6E28F8E1A35B";
-const LPCWSTR DAYVIEW_NAME = L"Week Planner";
+const LPCWSTR WEEKPLANNER_GUID = L"AD05F169-0203-4962-92CD-6E28F8E1A35B";
+const LPCWSTR WEEKPLANNER_NAME = L"Week Planner";
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-CDayViewUIExtensionBridge::CDayViewUIExtensionBridge() : m_hIcon(NULL), m_pTT(nullptr)
+CWeekPlannerUIExtensionBridge::CWeekPlannerUIExtensionBridge() : m_hIcon(NULL), m_pTT(nullptr)
 {
-	m_hIcon = Win32::LoadHIcon(L"DayViewUIExtensionBridge.dll", IDI_DAYVIEW, 16, true);
+	m_hIcon = Win32::LoadHIcon(L"WeekPlannerUIExtensionBridge.dll", IDI_WEEKPLANNER, 16, true);
 }
 
-void CDayViewUIExtensionBridge::Release()
+void CWeekPlannerUIExtensionBridge::Release()
 {
 	delete this;
 }
 
-void CDayViewUIExtensionBridge::SetLocalizer(ITransText* pTT)
+void CWeekPlannerUIExtensionBridge::SetLocalizer(ITransText* pTT)
 {
 	if (m_pTT == nullptr)
 		m_pTT = pTT;
 }
 
-LPCWSTR CDayViewUIExtensionBridge::GetMenuText() const
+LPCWSTR CWeekPlannerUIExtensionBridge::GetMenuText() const
 {
-	return DAYVIEW_NAME;
+	return WEEKPLANNER_NAME;
 }
 
-HICON CDayViewUIExtensionBridge::GetIcon() const
+HICON CWeekPlannerUIExtensionBridge::GetIcon() const
 {
 	return m_hIcon;
 }
 
-LPCWSTR CDayViewUIExtensionBridge::GetTypeID() const
+LPCWSTR CWeekPlannerUIExtensionBridge::GetTypeID() const
 {
-	return DAYVIEW_GUID;
+	return WEEKPLANNER_GUID;
 }
 
-IUIExtensionWindow* CDayViewUIExtensionBridge::CreateExtWindow(UINT nCtrlID, 
+IUIExtensionWindow* CWeekPlannerUIExtensionBridge::CreateExtWindow(UINT nCtrlID, 
 	DWORD nStyle, long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent)
 {
-	CDayViewUIExtensionBridgeWindow* pExtWnd = new CDayViewUIExtensionBridgeWindow(m_pTT);
+	CWeekPlannerUIExtensionBridgeWindow* pExtWnd = new CWeekPlannerUIExtensionBridgeWindow(m_pTT);
 
 	if (!pExtWnd->Create(nCtrlID, nStyle, nLeft, nTop, nWidth, nHeight, hwndParent))
 	{
@@ -82,32 +82,32 @@ IUIExtensionWindow* CDayViewUIExtensionBridge::CreateExtWindow(UINT nCtrlID,
 	return pExtWnd;
 }
 
-void CDayViewUIExtensionBridge::SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const
+void CWeekPlannerUIExtensionBridge::SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const
 {
 	// TODO
 }
 
-void CDayViewUIExtensionBridge::LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey)
+void CWeekPlannerUIExtensionBridge::LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey)
 {
 	// TODO
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-CDayViewUIExtensionBridgeWindow::CDayViewUIExtensionBridgeWindow(ITransText* pTT)
+CWeekPlannerUIExtensionBridgeWindow::CWeekPlannerUIExtensionBridgeWindow(ITransText* pTT)
 	: m_pTT(pTT), m_hasOldSettings(false)
 {
 
 }
 
-BOOL CDayViewUIExtensionBridgeWindow::Create(UINT nCtrlID, DWORD nStyle, 
+BOOL CWeekPlannerUIExtensionBridgeWindow::Create(UINT nCtrlID, DWORD nStyle, 
 	long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent)
 {
 	msclr::auto_gcroot<Translator^> trans = gcnew Translator(m_pTT);
-	msclr::auto_gcroot<String^> typeID = gcnew String(DAYVIEW_GUID);
-	msclr::auto_gcroot<String^> uiName = gcnew String(DAYVIEW_NAME);
+	msclr::auto_gcroot<String^> typeID = gcnew String(WEEKPLANNER_GUID);
+	msclr::auto_gcroot<String^> uiName = gcnew String(WEEKPLANNER_NAME);
 
-	m_wnd = gcnew DayViewUIExtension::DayViewUIExtensionCore(typeID.get(), uiName.get(), static_cast<IntPtr>(hwndParent), trans.get());
+	m_wnd = gcnew WeekPlannerUIExtensionCore(typeID.get(), uiName.get(), static_cast<IntPtr>(hwndParent), trans.get());
 
 	HWND hWnd = GetHwnd();
 
@@ -123,27 +123,27 @@ BOOL CDayViewUIExtensionBridgeWindow::Create(UINT nCtrlID, DWORD nStyle,
 	return false;
 }
 
-HICON CDayViewUIExtensionBridgeWindow::GetIcon() const
+HICON CWeekPlannerUIExtensionBridgeWindow::GetIcon() const
 {
 	return NULL;
 }
 
-LPCWSTR CDayViewUIExtensionBridgeWindow::GetMenuText() const
+LPCWSTR CWeekPlannerUIExtensionBridgeWindow::GetMenuText() const
 {
-	return DAYVIEW_NAME;
+	return WEEKPLANNER_NAME;
 }
 
-LPCWSTR CDayViewUIExtensionBridgeWindow::GetTypeID() const
+LPCWSTR CWeekPlannerUIExtensionBridgeWindow::GetTypeID() const
 {
-	return DAYVIEW_GUID;
+	return WEEKPLANNER_GUID;
 }
 
-bool CDayViewUIExtensionBridgeWindow::SelectTask(DWORD dwTaskID, bool /*bTaskLink*/)
+bool CWeekPlannerUIExtensionBridgeWindow::SelectTask(DWORD dwTaskID, bool /*bTaskLink*/)
 {
 	return m_wnd->SelectTask(dwTaskID);
 }
 
-bool CDayViewUIExtensionBridgeWindow::SelectTasks(const DWORD* pdwTaskIDs, int nTaskCount)
+bool CWeekPlannerUIExtensionBridgeWindow::SelectTasks(const DWORD* pdwTaskIDs, int nTaskCount)
 {
 	array<UInt32>^ taskIDs = gcnew array<UInt32>(nTaskCount);
 
@@ -153,26 +153,26 @@ bool CDayViewUIExtensionBridgeWindow::SelectTasks(const DWORD* pdwTaskIDs, int n
 	return m_wnd->SelectTasks(taskIDs);
 }
 
-void CDayViewUIExtensionBridgeWindow::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate)
+void CWeekPlannerUIExtensionBridgeWindow::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate)
 {
 	msclr::auto_gcroot<TaskList^> tasks = gcnew TaskList(pTasks);
 
 	m_wnd->UpdateTasks(tasks.get(), UIExtension::MapUpdateType(nUpdate));
 }
 
-bool CDayViewUIExtensionBridgeWindow::WantTaskUpdate(TDC_ATTRIBUTE nAttribID) const
+bool CWeekPlannerUIExtensionBridgeWindow::WantTaskUpdate(TDC_ATTRIBUTE nAttribID) const
 {
 	return m_wnd->WantTaskUpdate(Task::MapAttribute(nAttribID));
 }
 
-bool CDayViewUIExtensionBridgeWindow::PrepareNewTask(ITaskList* pTask) const
+bool CWeekPlannerUIExtensionBridgeWindow::PrepareNewTask(ITaskList* pTask) const
 {
 	msclr::auto_gcroot<TaskList^> task = gcnew TaskList(pTask);
 
 	return m_wnd->PrepareNewTask(task.get()->GetFirstTask());
 }
 
-bool CDayViewUIExtensionBridgeWindow::ProcessMessage(MSG* pMsg)
+bool CWeekPlannerUIExtensionBridgeWindow::ProcessMessage(MSG* pMsg)
 {
 	return m_wnd->ProcessMessage(IntPtr(pMsg->hwnd), 
 		pMsg->message, 
@@ -183,12 +183,12 @@ bool CDayViewUIExtensionBridgeWindow::ProcessMessage(MSG* pMsg)
 		pMsg->pt.y);
 }
 
-bool CDayViewUIExtensionBridgeWindow::DoIdleProcessing()
+bool CWeekPlannerUIExtensionBridgeWindow::DoIdleProcessing()
 {
 	return m_wnd->DoIdleProcessing();
 }
 
-bool CDayViewUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
+bool CWeekPlannerUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 {
 	switch (nCmd)
 	{
@@ -244,7 +244,7 @@ bool CDayViewUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCO
 	return false;
 }
 
-bool CDayViewUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA* pData) const
+bool CWeekPlannerUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA* pData) const
 {
 	switch (nCmd)
 	{
@@ -282,7 +282,7 @@ bool CDayViewUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd, const
 	return false;
 }
 
-DWORD CDayViewUIExtensionBridgeWindow::GetNextTask(IUI_APPCOMMAND nCmd, DWORD dwFromTaskID) const
+DWORD CWeekPlannerUIExtensionBridgeWindow::GetNextTask(IUI_APPCOMMAND nCmd, DWORD dwFromTaskID) const
 {
 	UIExtension::GetTask getTask;
 
@@ -297,7 +297,7 @@ DWORD CDayViewUIExtensionBridgeWindow::GetNextTask(IUI_APPCOMMAND nCmd, DWORD dw
 	return taskID;
 }
 
-bool CDayViewUIExtensionBridgeWindow::DoAppSelectCommand(IUI_APPCOMMAND nCmd, const IUISELECTTASK& select)
+bool CWeekPlannerUIExtensionBridgeWindow::DoAppSelectCommand(IUI_APPCOMMAND nCmd, const IUISELECTTASK& select)
 {
 	UIExtension::SelectTask selectWhat;
 
@@ -309,12 +309,12 @@ bool CDayViewUIExtensionBridgeWindow::DoAppSelectCommand(IUI_APPCOMMAND nCmd, co
 	return m_wnd->SelectTask(sWords, selectWhat, select.bCaseSensitive, select.bWholeWord, select.bFindReplace);
 }
 
-bool CDayViewUIExtensionBridgeWindow::GetLabelEditRect(LPRECT pEdit)
+bool CWeekPlannerUIExtensionBridgeWindow::GetLabelEditRect(LPRECT pEdit)
 {
 	return m_wnd->GetLabelEditRect((Int32&)pEdit->left, (Int32&)pEdit->top, (Int32&)pEdit->right, (Int32&)pEdit->bottom);
 }
 
-bool CDayViewUIExtensionBridgeWindow::HitTest(POINT ptScreen, IUIHITTEST& hitTest) const
+bool CWeekPlannerUIExtensionBridgeWindow::HitTest(POINT ptScreen, IUIHITTEST& hitTest) const
 {
 	auto ht = gcnew UIExtension::HitTest();
 
@@ -327,34 +327,34 @@ bool CDayViewUIExtensionBridgeWindow::HitTest(POINT ptScreen, IUIHITTEST& hitTes
 	return true;
 }
 
-bool CDayViewUIExtensionBridgeWindow::ShowContextMenu(POINT ptScreen)
+bool CWeekPlannerUIExtensionBridgeWindow::ShowContextMenu(POINT ptScreen)
 {
 	return m_wnd->ShowContextMenu(ptScreen.x, ptScreen.y);
 }
 
-void CDayViewUIExtensionBridgeWindow::SetUITheme(const UITHEME* pTheme)
+void CWeekPlannerUIExtensionBridgeWindow::SetUITheme(const UITHEME* pTheme)
 {
 	msclr::auto_gcroot<UITheme^> theme = gcnew UITheme(pTheme);
 
 	m_wnd->SetUITheme(theme.get());
 }
 
-void CDayViewUIExtensionBridgeWindow::SetTaskFont(HFONT hFont)
+void CWeekPlannerUIExtensionBridgeWindow::SetTaskFont(HFONT hFont)
 {
 	m_wnd->SetTaskFont(Win32::GetFaceName(hFont), Win32::GetPointSize(hFont));
 }
 
-void CDayViewUIExtensionBridgeWindow::SetReadOnly(bool bReadOnly)
+void CWeekPlannerUIExtensionBridgeWindow::SetReadOnly(bool bReadOnly)
 {
 	m_wnd->SetReadOnly(bReadOnly);
 }
 
-HWND CDayViewUIExtensionBridgeWindow::GetHwnd() const
+HWND CWeekPlannerUIExtensionBridgeWindow::GetHwnd() const
 {
 	return static_cast<HWND>(m_wnd->Handle.ToPointer());
 }
 
-void CDayViewUIExtensionBridgeWindow::SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const
+void CWeekPlannerUIExtensionBridgeWindow::SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const
 {
 	msclr::auto_gcroot<Preferences^> prefs = gcnew Preferences(pPrefs);
 	msclr::auto_gcroot<String^> key = gcnew String(szKey);
@@ -364,18 +364,18 @@ void CDayViewUIExtensionBridgeWindow::SavePreferences(IPreferences* pPrefs, LPCW
 	// Delete old settings
 	if (m_hasOldSettings)
 	{
-		auto oldKey = key->Replace(gcnew String(DAYVIEW_GUID), gcnew String(DAYVIEW_OLDGUID));
+		auto oldKey = key->Replace(gcnew String(WEEKPLANNER_GUID), gcnew String(WEEKPLANNER_OLDGUID));
 		prefs->DeleteProfileSection(oldKey, true);
 	}
 }
 
-void CDayViewUIExtensionBridgeWindow::LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey, bool bAppOnly)
+void CWeekPlannerUIExtensionBridgeWindow::LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey, bool bAppOnly)
 {
 	msclr::auto_gcroot<Preferences^> prefs = gcnew Preferences(pPrefs);
 	msclr::auto_gcroot<String^> key = gcnew String(szKey);
 
 	// Backwards compatibility because of TypeID change
-	auto oldKey = key->Replace(gcnew String(DAYVIEW_GUID), gcnew String(DAYVIEW_OLDGUID));
+	auto oldKey = key->Replace(gcnew String(WEEKPLANNER_GUID), gcnew String(WEEKPLANNER_OLDGUID));
 	
 	if (prefs->HasProfileSection(oldKey))
 	{
