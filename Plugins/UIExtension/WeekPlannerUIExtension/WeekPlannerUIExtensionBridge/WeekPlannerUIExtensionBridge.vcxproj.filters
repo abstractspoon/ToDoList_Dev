@@ -36,6 +36,6 @@
     <ResourceCompile Include="WeekPlannerUIExtensionBridge.rc" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\DayViewUIExtensionCore\Resources\WeekPlanner.ico" />
+    <None Include="..\WeekPlannerUIExtensionCore\Resources\WeekPlanner.ico" />
   </ItemGroup>
 </Project>

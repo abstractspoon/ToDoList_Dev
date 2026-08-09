@@ -1,6 +1,6 @@
 ﻿namespace WeekPlannerUIExtension
 {
-	partial class DayViewCreateTimeBlockDlg
+	partial class WeekPlannerCreateTimeBlockDlg
 	{
 		/// <summary>
 		/// Required designer variable.
@@ -36,7 +36,7 @@
 			this.m_Error = new System.Windows.Forms.Label();
 			this.m_TaskId = new System.Windows.Forms.Label();
 			this.label1 = new System.Windows.Forms.Label();
-			this.m_Attributes = new WeekPlannerUIExtension.DayViewTimeBlockAttributesPage();
+			this.m_Attributes = new WeekPlannerUIExtension.WeekPlannerTimeBlockAttributesPage();
 			this.SuspendLayout();
 			// 
 			// label3
@@ -132,7 +132,7 @@
 			this.m_Attributes.Size = new System.Drawing.Size(364, 183);
 			this.m_Attributes.TabIndex = 12;
 			// 
-			// DayViewCreateTimeBlockDlg
+			// WeekPlannerCreateTimeBlockDlg
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -149,7 +149,7 @@
 			this.Controls.Add(this.label5);
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
 			this.Icon = global::WeekPlannerUIExtension.Properties.Resources.WeekPlanner;
-			this.Name = "DayViewCreateTimeBlockDlg";
+			this.Name = "WeekPlannerCreateTimeBlockDlg";
 			this.ShowInTaskbar = false;
 			this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
@@ -166,7 +166,7 @@
 		private System.Windows.Forms.Button Cancel;
 		private System.Windows.Forms.Label label5;
 		private Abstractspoon.Tdl.PluginHelpers.TaskComboBox m_TaskCombo;
-		private DayViewTimeBlockAttributesPage m_Attributes;
+		private WeekPlannerTimeBlockAttributesPage m_Attributes;
 		private System.Windows.Forms.Label m_Error;
 		private System.Windows.Forms.Label m_TaskId;
 		private System.Windows.Forms.Label label1;

@@ -80,9 +80,9 @@ BEGIN
             VALUE "CompanyName", "AbstractSpoon Software"
             VALUE "FileDescription", "ToDoList"
             VALUE "FileVersion", "1.0.0.1"
-            VALUE "InternalName", "DayViewUIExtensionBridge.dll"
+            VALUE "InternalName", "WeekPlannerUIExtensionBridge.dll"
             VALUE "LegalCopyright", "Copyright (C) 2025"
-            VALUE "OriginalFilename", "DayViewUIExtensionBridge.dll"
+            VALUE "OriginalFilename", "WeekPlannerUIExtensionBridge.dll"
             VALUE "ProductName", "ToDoList"
             VALUE "ProductVersion", "1.0.0.1"
         END

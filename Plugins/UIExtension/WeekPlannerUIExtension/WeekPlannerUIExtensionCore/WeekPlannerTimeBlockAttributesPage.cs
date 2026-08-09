@@ -15,7 +15,7 @@ namespace WeekPlannerUIExtension
 
 	// ---------------------------------------------------
 
-	public partial class DayViewTimeBlockAttributesPage : UserControl
+	public partial class WeekPlannerTimeBlockAttributesPage : UserControl
 	{
 		[Flags]
 		public enum Mask
@@ -39,7 +39,7 @@ namespace WeekPlannerUIExtension
 
 		// ---------------------------------------------------
 
-		public DayViewTimeBlockAttributesPage()
+		public WeekPlannerTimeBlockAttributesPage()
 		{
 			InitializeComponent();
 		}

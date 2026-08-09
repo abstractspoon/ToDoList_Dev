@@ -125,7 +125,7 @@ copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\Core\ToDoList\unicode_$(Con
     <ResourceCompile Include="WeekPlannerUIExtensionBridge.rc" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\DayViewUIExtensionCore\Resources\WeekPlanner.ico" />
+    <None Include="..\WeekPlannerUIExtensionCore\Resources\WeekPlanner.ico" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\WeekPlannerUIExtensionCore\WeekPlannerUIExtensionCore.csproj">
