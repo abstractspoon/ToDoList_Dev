@@ -77,8 +77,6 @@ SET FILELIST=%FILELIST%;ScrollHelper.dll
 SET FILELIST=%FILELIST%;TreeViewHelper.dll
 SET FILELIST=%FILELIST%;WebBrowserEx.dll
 
-SET FILELIST=%FILELIST%;DayViewUIExtensionBridge.dll
-SET FILELIST=%FILELIST%;DayViewUIExtensionCore.dll
 SET FILELIST=%FILELIST%;EisenhowerUIExtensionBridge.dll
 SET FILELIST=%FILELIST%;EisenhowerUIExtensionControls.dll
 SET FILELIST=%FILELIST%;EisenhowerUIExtensionCore.dll
@@ -104,6 +102,8 @@ SET FILELIST=%FILELIST%;PDFExporterCore.dll
 SET FILELIST=%FILELIST%;PluginHelpers.dll
 SET FILELIST=%FILELIST%;SpreadsheetContentControlBridge.dll
 SET FILELIST=%FILELIST%;SpreadsheetContentControlCore.dll
+SET FILELIST=%FILELIST%;WeekPlannerUIExtensionBridge.dll
+SET FILELIST=%FILELIST%;WeekPlannerUIExtensionCore.dll
 SET FILELIST=%FILELIST%;WordCloudUIExtensionBridge.dll
 SET FILELIST=%FILELIST%;WordCloudUIExtensionCore.dll
 
