@@ -38,6 +38,10 @@
 			this.m_GroupByCombo = new System.Windows.Forms.ComboBox();
 			this.m_OptionsCombo = new TaskDatesUIExtension.TaskDatesOptionsComboBox();
 			this.m_TaskDatesCtrl = new TaskDatesUIExtension.TaskDatesControl();
+			this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+			this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+			this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+			this.columnHeader4 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.m_Toolbar.SuspendLayout();
 			this.SuspendLayout();
 			// 
@@ -46,7 +50,7 @@
 			this.m_GroupByLabel.AutoSize = true;
 			this.m_GroupByLabel.Location = new System.Drawing.Point(-3, 3);
 			this.m_GroupByLabel.Name = "m_GroupByLabel";
-			this.m_GroupByLabel.Size = new System.Drawing.Size(47, 13);
+			this.m_GroupByLabel.Size = new System.Drawing.Size(48, 13);
 			this.m_GroupByLabel.TabIndex = 25;
 			this.m_GroupByLabel.Text = "GroupBy";
 			// 
@@ -70,7 +74,7 @@
 			this.m_Toolbar.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.Flow;
 			this.m_Toolbar.Location = new System.Drawing.Point(336, 16);
 			this.m_Toolbar.Name = "m_Toolbar";
-			this.m_Toolbar.Size = new System.Drawing.Size(78, 23);
+			this.m_Toolbar.Size = new System.Drawing.Size(47, 23);
 			this.m_Toolbar.TabIndex = 28;
 			this.m_Toolbar.Text = "toolStrip1";
 			// 
@@ -98,11 +102,10 @@
 			// 
 			// m_GroupByCombo
 			// 
+			this.m_GroupByCombo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.m_GroupByCombo.Location = new System.Drawing.Point(0, 20);
 			this.m_GroupByCombo.Name = "m_GroupByCombo";
-			//this.m_GroupByCombo.SelectedOptions = TaskDatesUIExtension.TaskDatesOption.None;
 			this.m_GroupByCombo.Size = new System.Drawing.Size(158, 21);
-			this.m_GroupByCombo.Sorted = false;
 			this.m_GroupByCombo.TabIndex = 26;
 			// 
 			// m_OptionsCombo
@@ -114,14 +117,51 @@
 			this.m_OptionsCombo.Sorted = false;
 			this.m_OptionsCombo.TabIndex = 26;
 			// 
-			// m_TaskDatesListView
+			// m_TaskDatesCtrl
 			// 
+			this.m_TaskDatesCtrl.AlternateLineColor = System.Drawing.Color.Empty;
+			this.m_TaskDatesCtrl.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.columnHeader1,
+            this.columnHeader2,
+            this.columnHeader3,
+            this.columnHeader4});
+			this.m_TaskDatesCtrl.EnableHeaderTracking = false;
+			this.m_TaskDatesCtrl.GridlineColor = System.Drawing.Color.Empty;
 			this.m_TaskDatesCtrl.Location = new System.Drawing.Point(0, 47);
 			this.m_TaskDatesCtrl.Margin = new System.Windows.Forms.Padding(0);
-			this.m_TaskDatesCtrl.Name = "m_TaskDatesListView";
-			//this.m_TaskDatesCtrl.Options = TaskDatesUIExtension.TaskDatesOption.None;
+			this.m_TaskDatesCtrl.MinTaskColumnWidth = 100;
+			this.m_TaskDatesCtrl.Name = "m_TaskDatesCtrl";
+			this.m_TaskDatesCtrl.Options = TaskDatesUIExtension.TaskDatesOption.None;
+			this.m_TaskDatesCtrl.OwnerDraw = true;
+			this.m_TaskDatesCtrl.ReadOnly = false;
+			this.m_TaskDatesCtrl.Selected = false;
+			this.m_TaskDatesCtrl.ShowCompletionCheckboxes = false;
+			this.m_TaskDatesCtrl.ShowLabelTips = true;
+			this.m_TaskDatesCtrl.ShowMixedCompletionState = false;
+			this.m_TaskDatesCtrl.ShowParentsAsFolders = false;
 			this.m_TaskDatesCtrl.Size = new System.Drawing.Size(613, 399);
+			this.m_TaskDatesCtrl.SizeTaskColumnToFit = true;
 			this.m_TaskDatesCtrl.TabIndex = 0;
+			this.m_TaskDatesCtrl.TaskColorIsBackground = false;
+			this.m_TaskDatesCtrl.UseCompatibleStateImageBehavior = false;
+			this.m_TaskDatesCtrl.View = System.Windows.Forms.View.Details;
+			// 
+			// columnHeader1
+			// 
+			this.columnHeader1.Text = "Task Title";
+			this.columnHeader1.Width = 427;
+			// 
+			// columnHeader2
+			// 
+			this.columnHeader2.Text = "Date";
+			// 
+			// columnHeader3
+			// 
+			this.columnHeader3.Text = "Type";
+			// 
+			// columnHeader4
+			// 
+			this.columnHeader4.Text = "Leadin";
 			// 
 			// TaskDatesUIExtensionCore
 			// 
@@ -151,5 +191,9 @@
 		private System.Windows.Forms.ToolStrip m_Toolbar;
 		private System.Windows.Forms.ToolStripButton toolStripPreferencesBtn;
 		private System.Windows.Forms.ToolStripButton toolStripHelpBtn;
+		private System.Windows.Forms.ColumnHeader columnHeader1;
+		private System.Windows.Forms.ColumnHeader columnHeader2;
+		private System.Windows.Forms.ColumnHeader columnHeader3;
+		private System.Windows.Forms.ColumnHeader columnHeader4;
 	}
 }
