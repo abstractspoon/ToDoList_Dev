@@ -34,8 +34,9 @@ namespace TaskDatesUIExtension
 		// --------------------------------------------------------
 
 		const int TaskCol	= 0;
-		const int XCol		= 1; // TODO
-		const int YCol		= 2; // TODO
+		const int DateCol	= 1;
+		const int TypeCol	= 2;
+		const int LeadInCol = 3;
 
 		// --------------------------------------------------------
 
@@ -45,8 +46,8 @@ namespace TaskDatesUIExtension
 
 		private bool m_Selected;
 
-		private int[] m_ColHeaderWidth			= new int[3] { -1, -1, -1 };
-		private int[] m_ColValueMaxCharWidth	= new int[3] { -1, -1, -1 };
+		private int[] m_ColHeaderWidth			= new int[4] { -1, -1, -1, -1 };
+		private int[] m_ColValueMaxCharWidth	= new int[4] { -1, -1, -1, -1 };
 
 		// --------------------------------------------------------
 
@@ -63,7 +64,23 @@ namespace TaskDatesUIExtension
 		{
 			var selTaskIds = SelectedTaskIds;
 
-			var result = m_TaskItems.Update(tasks, type);
+			var modIds = m_TaskItems.Update(tasks, type);
+
+			switch (type)
+			{
+			case UIExtension.UpdateType.All:
+				RebuildListView();
+				break;
+
+			case UIExtension.UpdateType.Edit:
+				break;
+
+			case UIExtension.UpdateType.New:
+				break;
+
+			case UIExtension.UpdateType.Delete:
+				break;
+			}
 
 			if (selTaskIds != null)
 				SelectTasks(selTaskIds);
@@ -72,6 +89,19 @@ namespace TaskDatesUIExtension
 			// task update does NOT ALWAYS result in a subsequent repaint
 			// so we solve it with a delayed-redraw
 			m_IdleTasks.Redraw();
+		}
+
+		private void RebuildListView()
+		{
+			base.Items.Clear();
+
+			foreach (var item in m_TaskItems.Values)
+			{
+				foreach (var date in item.Dates)
+				{
+					AddDate(date);
+				}
+			}
 		}
 
 		public bool WantTaskUpdate(Task.Attribute attrib)
@@ -124,6 +154,22 @@ namespace TaskDatesUIExtension
 
 		public void LoadPreferences(Preferences prefs, String key, bool appOnly)
 		{
+			// App settings
+			TaskColorIsBackground = prefs.GetProfileBool("Preferences", "ColorTaskBackground", false);
+			ShowParentsAsFolders = prefs.GetProfileBool("Preferences", "ShowParentsAsFolders", false);
+			ShowCompletionCheckboxes = prefs.GetProfileBool("Preferences", "AllowCheckboxAgainstTreeItem", false);
+			ShowLabelTips = !prefs.GetProfileBool("Preferences", "ShowInfoTips", false);
+
+			if (prefs.GetProfileBool("Preferences", "AlternateLineColor", true))
+				AlternateLineColor = prefs.GetProfileColor("Preferences\\Colors", "AlternateLines", Color.Empty);
+			else
+				AlternateLineColor = Color.Empty;
+
+			if (prefs.GetProfileBool("Preferences", "SpecifyGridColor", true))
+				GridlineColor = prefs.GetProfileColor("Preferences\\Colors", "GridLines", Color.Empty);
+			else
+				GridlineColor = Color.Empty;
+
 			if (!appOnly)
 			{
 				// TODO
@@ -168,7 +214,7 @@ namespace TaskDatesUIExtension
 		{
 			Items.Clear();
 
-			m_ColValueMaxCharWidth[XCol] = m_ColValueMaxCharWidth[YCol] = -1;
+			m_ColValueMaxCharWidth[DateCol] = m_ColValueMaxCharWidth[TypeCol] = -1;
 		}
 
 		public uint GetTaskId(UIExtension.GetTask getTask)
@@ -183,8 +229,8 @@ namespace TaskDatesUIExtension
 
 		public void SetAttributeNames(string xAttribName, string yAttribName, bool updateColWidths)
 		{
-			Columns[XCol].Text = xAttribName;
-			Columns[YCol].Text = yAttribName;
+			Columns[DateCol].Text = xAttribName;
+			Columns[TypeCol].Text = yAttribName;
 
 			if (updateColWidths)
 				RefreshColumnWidths();
@@ -200,8 +246,9 @@ namespace TaskDatesUIExtension
 		{
 			using (var graphics = Graphics.FromHwnd(Handle))
 			{
-				RefreshVariableColumnWidth(XCol, graphics);
-				RefreshVariableColumnWidth(YCol, graphics);
+				RefreshVariableColumnWidth(DateCol, graphics);
+				RefreshVariableColumnWidth(TypeCol, graphics);
+				RefreshVariableColumnWidth(LeadInCol, graphics);
 			}
 
 			// Task column takes up tyhe slack
@@ -234,31 +281,33 @@ namespace TaskDatesUIExtension
 			SelectionChange?.Invoke(this, SelectedTaskIds);
 		}
 
-		protected bool AddTask(ITaskBase task, string xValue, string yValue)
+		protected bool AddDate(TaskItemDate date)
 		{
-			var lvItem = AddTask(task);
-			return SetTaskValues(lvItem, xValue, yValue);
+			var lvItem = AddTask(date);
+			return SetTaskValues(lvItem, date.Date.ToShortDateString(), date.Type, date.LeadIn);
 		}
 
-		protected bool SetTaskValues(uint taskId, string xValue, string yValue)
+		protected bool SetTaskValues(uint taskId, string date, string type, string leadin)
 		{
 			var lvItem = FindItem(taskId);
-			return SetTaskValues(lvItem, xValue, yValue);
+			return SetTaskValues(lvItem, date, type, leadin);
 		}
 
-		protected bool SetTaskValues(ListViewItem lvItem, string xValue, string yValue)
+		protected bool SetTaskValues(ListViewItem lvItem, string date, string type, string leadin)
 		{
 			if (lvItem == null)
 				return false;
 
-			while (lvItem.SubItems.Count < 3)
+			while (lvItem.SubItems.Count < 4)
 				lvItem.SubItems.Add("");
 
-			lvItem.SubItems[XCol].Text = xValue;
-			lvItem.SubItems[YCol].Text = yValue;
+			lvItem.SubItems[DateCol].Text = date;
+			lvItem.SubItems[TypeCol].Text = type;
+			lvItem.SubItems[LeadInCol].Text = leadin;
 
-			m_ColValueMaxCharWidth[XCol] = Math.Max(xValue.Length, m_ColValueMaxCharWidth[XCol]);
-			m_ColValueMaxCharWidth[YCol] = Math.Max(yValue.Length, m_ColValueMaxCharWidth[YCol]);
+			m_ColValueMaxCharWidth[DateCol] = Math.Max(date.Length, m_ColValueMaxCharWidth[DateCol]);
+			m_ColValueMaxCharWidth[TypeCol] = Math.Max(type.Length, m_ColValueMaxCharWidth[TypeCol]);
+			m_ColValueMaxCharWidth[LeadInCol] = Math.Max(leadin.Length, m_ColValueMaxCharWidth[TypeCol]);
 
 			return true;
 		}

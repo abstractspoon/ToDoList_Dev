@@ -136,9 +136,55 @@ namespace TaskDatesUIExtension
 
 	///////////////////////////////////////////////////////////////////////////
 
-	public class TaskItem : ITaskBase
+	public class TaskItem
 	{
-		// ITaskBase
+		TaskItemAttributes m_Attribs;
+		TaskItemDates m_Dates;
+
+		// -----------------------------------------------------------------
+
+		public TaskItem(String title, uint id)
+		{
+			m_Attribs = new TaskItemAttributes(title, id);
+			m_Dates = new TaskItemDates();
+		}
+
+		public IEnumerable<TaskItemDate> Dates { get { return m_Dates.Values; } }
+
+		public bool ProcessTaskUpdate(Task task)
+		{
+			if (!m_Attribs.ProcessTaskUpdate(task))
+				return false;
+
+			// Date Attributes
+			if (task.IsAttributeAvailable(Task.Attribute.StartDate))
+			{
+				var date = m_Dates.GetItem(m_Attribs, Task.Attribute.StartDate);
+				date.Date = task.GetStartDate(true); // TODO
+			}
+
+			if (task.IsAttributeAvailable(Task.Attribute.DueDate))
+			{
+				var date = m_Dates.GetItem(m_Attribs, Task.Attribute.DueDate);
+				date.Date = task.GetDueDate(true); // TODO
+			}
+
+			if (task.IsAttributeAvailable(Task.Attribute.DoneDate))
+			{
+				var date = m_Dates.GetItem(m_Attribs, Task.Attribute.DoneDate);
+				date.Date = task.GetDoneDate();
+			}
+
+			return true;
+		}
+
+		// -----------------------------------------------------------------
+	}
+
+	///////////////////////////////////////////////////////////////////////////
+
+	public class TaskItemAttributes
+	{
 		public String Title { get; private set; }
 		public String Position { get; private set; }
 		public uint Id { get; private set; }
@@ -147,24 +193,96 @@ namespace TaskDatesUIExtension
 		public bool IsParent { get; private set; }
 		public bool IsLocked { get; private set; }
 		public bool IsDone { get; private set; }
+		public bool IsGoodAsDone { get; private set; }
 
-		// Local
-		public bool IsFlagged { get; private set; }
-		public bool IsPartlyDone { get; private set; }
+		public TaskItemAttributes(String title, uint id)
+		{
+			Title = title;
+			Id = id;
+			TextColor = Color.Empty;
+		}
+
+		public bool ProcessTaskUpdate(Task task)
+		{
+			if (task.GetID() != Id)
+				return false;
+
+			IsParent = task.IsParent();
+			IsLocked = task.IsLocked(true); // Explicitly AND implicitly
+
+			if (task.IsAttributeAvailable(Task.Attribute.Title))
+				Title = task.GetTitle();
+
+			if (task.IsAttributeAvailable(Task.Attribute.Position))
+				Position = task.GetPositionString();
+
+			if (task.IsAttributeAvailable(Task.Attribute.Icon))
+				HasIcon = (task.GetIcon().Length > 0);
+
+			if (task.IsAttributeAvailable(Task.Attribute.Color))
+				TextColor = task.GetTextDrawingColor();
+
+			if (task.IsAttributeAvailable(Task.Attribute.DoneDate))
+			{
+				IsDone = task.IsDone();
+				IsGoodAsDone = task.IsGoodAsDone();
+			}
+
+			return true;
+		}
+	}
+
+	///////////////////////////////////////////////////////////////////////////
+
+	public class TaskItemDates : Dictionary<string, TaskItemDate>
+	{
+		public TaskItemDate GetItem(TaskItemAttributes attribs, Task.Attribute attribId, bool autoAdd = true)
+		{
+			return GetItem(attribs, attribId.ToString(), autoAdd);
+		}
+
+		public TaskItemDate GetItem(TaskItemAttributes attribs, string attribId, bool autoAdd = true)
+		{
+			TaskItemDate date = null;
+
+			if (!TryGetValue(attribId, out date) && autoAdd)
+			{
+				date = new TaskItemDate(attribs);
+				this[attribId.ToString()] = date;
+			}
+
+			return date;
+		}
+	}
+
+	///////////////////////////////////////////////////////////////////////////
+
+		public class TaskItemDate : ITaskBase
+	{
+		private TaskItemAttributes m_Attrib;
 
 		// -----------------------------------------------------------------
 
-		public TaskItem(String label, uint id)
+		// ITaskBase
+		public String Title		{ get { return m_Attrib.Title; } }
+		public String Position	{ get { return m_Attrib.Position; } }
+		public uint Id			{ get { return m_Attrib.Id; } }
+		public Color TextColor	{ get { return m_Attrib.TextColor; } }
+		public bool HasIcon		{ get { return m_Attrib.HasIcon; } }
+		public bool IsParent	{ get { return m_Attrib.IsParent; } }
+		public bool IsLocked	{ get { return m_Attrib.IsLocked; } }
+		public bool IsDone		{ get { return m_Attrib.IsDone; } }
+
+		// local
+		public DateTime Date;
+		public String Type = string.Empty;
+		public String LeadIn = string.Empty;
+
+		// -----------------------------------------------------------------
+
+		public TaskItemDate(TaskItemAttributes attrib)
 		{
-			Title = label;
-			Id = id;
-			Position = string.Empty;
-			TextColor = new Color();
-			HasIcon = false;
-			IsFlagged = false;
-			IsParent = false;
-            IsPartlyDone = false;
-			IsLocked = false;
+			m_Attrib = attrib;
 		}
 
 		public override string ToString() 
@@ -176,36 +294,6 @@ namespace TaskDatesUIExtension
 #endif
 		}
 
-		public bool ProcessTaskUpdate(Task task)
-		{
-			if (task.GetID() != Id)
-				return false;
-
-			IsParent = task.IsParent();
-			IsLocked = task.IsLocked(true); // Explicitly AND implicitly
-			IsPartlyDone = task.IsPartlyDone();
-
-			if (task.IsAttributeAvailable(Task.Attribute.Title))
-				Title = task.GetTitle();
-
-			if (task.IsAttributeAvailable(Task.Attribute.Position))
-				Position = task.GetPositionString();
-
-			if (task.IsAttributeAvailable(Task.Attribute.Icon))
-				HasIcon = (task.GetIcon().Length > 0);
-
-			if (task.IsAttributeAvailable(Task.Attribute.Flag))
-				IsFlagged = task.IsFlagged(false);
-
-			if (task.IsAttributeAvailable(Task.Attribute.Color))
-				TextColor = task.GetTextDrawingColor();
-
-			if (task.IsAttributeAvailable(Task.Attribute.DoneDate))
-                IsDone = (task.IsDone() || task.IsGoodAsDone());
-
-			return true;
-		}
 	}
-
 }
 
