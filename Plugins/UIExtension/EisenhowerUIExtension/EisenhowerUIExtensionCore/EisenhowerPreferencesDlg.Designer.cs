@@ -100,7 +100,7 @@
 			this.Controls.Add(this.m_Cancel);
 			this.Controls.Add(this.groupBox1);
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+			this.Icon = Properties.Resources.Eisenhower;
 			this.Name = "EisenhowerPreferencesDlg";
 			this.ShowInTaskbar = false;
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
