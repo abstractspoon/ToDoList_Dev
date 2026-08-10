@@ -137,7 +137,6 @@
 			this.m_TaskDatesCtrl.Selected = false;
 			this.m_TaskDatesCtrl.ShowCompletionCheckboxes = false;
 			this.m_TaskDatesCtrl.ShowLabelTips = true;
-			this.m_TaskDatesCtrl.ShowMixedCompletionState = false;
 			this.m_TaskDatesCtrl.ShowParentsAsFolders = false;
 			this.m_TaskDatesCtrl.Size = new System.Drawing.Size(613, 399);
 			this.m_TaskDatesCtrl.SizeTaskColumnToFit = true;

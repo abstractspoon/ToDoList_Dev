@@ -44,7 +44,6 @@ namespace TaskDatesUIExtension
 		private UIExtension.IdleRedraw m_IdleTasks = new UIExtension.IdleRedraw();
 
 		private bool m_Selected;
-		private bool m_ShowMixedCompletionState;
 
 		private int[] m_ColHeaderWidth			= new int[3] { -1, -1, -1 };
 		private int[] m_ColValueMaxCharWidth	= new int[3] { -1, -1, -1 };
@@ -125,8 +124,6 @@ namespace TaskDatesUIExtension
 
 		public void LoadPreferences(Preferences prefs, String key, bool appOnly)
 		{
-			m_TaskItems.WorkingWeek = new WorkingWeek(prefs);
-
 			if (!appOnly)
 			{
 				// TODO
@@ -279,20 +276,6 @@ namespace TaskDatesUIExtension
 			ResizeTaskColumnToFit();
 		}
 
-		public bool ShowMixedCompletionState
-		{
-			get { return m_ShowMixedCompletionState; }
-
-			set
-			{
-				if (m_ShowMixedCompletionState != value)
-				{
-					m_ShowMixedCompletionState = value;
-					Invalidate();
-				}
-			}
-		}
-
 		// --------------------------------------------------------
 		// Message handlers
 
@@ -346,18 +329,6 @@ namespace TaskDatesUIExtension
 			m_ColValueMaxCharWidth[YCol] = Math.Max(yValue.Length, m_ColValueMaxCharWidth[YCol]);
 
 			return true;
-		}
-
-		protected override CheckBoxState GetTaskCheckboxState(ITaskBase task)
-		{
-			if (m_ShowMixedCompletionState)
-			{
-				if ((bool)(task as TaskItem)?.IsPartlyDone)
-					return CheckBoxState.MixedNormal;
-			}
-
-			// all else
-			return base.GetTaskCheckboxState(task);
 		}
 
 		private void RefreshVariableColumnWidth(int col, Graphics g)

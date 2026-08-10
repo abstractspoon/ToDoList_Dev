@@ -9,10 +9,6 @@ namespace TaskDatesUIExtension
 {
 	public class TaskItems : Dictionary<uint, TaskItem>
 	{
-		public WorkingWeek WorkingWeek;
-
-		// -----------------------------------
-
 		public List<uint> Update(TaskList tasks, UIExtension.UpdateType type)
 		{
 			List<uint> taskIds = null;
@@ -122,7 +118,7 @@ namespace TaskDatesUIExtension
 				uint taskId = task.GetID();
 				var item = GetItem(taskId, true);
 
-				if (!item.ProcessTaskUpdate(task/*, WorkingWeek*/))
+				if (!item.ProcessTaskUpdate(task))
 					return false;
 
 				modifiedTaskIds?.Add(taskId);
