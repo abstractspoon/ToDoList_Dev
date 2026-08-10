@@ -13,6 +13,7 @@ namespace TaskDatesUIExtension
 			Prompt = trans.Translate("<none>", Translator.Type.Text);
 
 			AddItem(new CheckComboBoxItem("Hide parent tasks", (int)TaskDatesOption.HideParentTasks, trans), false);
+			AddItem(new CheckComboBoxItem("Hide completed tasks", (int)TaskDatesOption.HideCompletedTasks, trans), true);
 		}
 
 		public TaskDatesOption SelectedOptions

@@ -14,8 +14,9 @@ namespace TaskDatesUIExtension
 	[Flags]
 	public enum TaskDatesOption
 	{
-		None = 0x00,
-		HideParentTasks = 0x01,
+		None				= 0x00,
+		HideParentTasks		= 0x01,
+		HideCompletedTasks	= 0x02,
 	}
 
 	// --------------------------------------------
