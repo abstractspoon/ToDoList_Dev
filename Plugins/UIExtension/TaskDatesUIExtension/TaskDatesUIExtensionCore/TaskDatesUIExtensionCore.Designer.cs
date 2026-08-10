@@ -37,7 +37,7 @@
 			this.toolStripHelpBtn = new System.Windows.Forms.ToolStripButton();
 			this.m_GroupByCombo = new System.Windows.Forms.ComboBox();
 			this.m_OptionsCombo = new TaskDatesUIExtension.TaskDatesOptionsComboBox();
-			this.m_DatesListView = new TaskDatesUIExtension.TaskDatesListView();
+			this.m_TaskDatesCtrl = new TaskDatesUIExtension.TaskDatesControl();
 			this.m_Toolbar.SuspendLayout();
 			this.SuspendLayout();
 			// 
@@ -116,12 +116,12 @@
 			// 
 			// m_TaskDatesListView
 			// 
-			this.m_DatesListView.Location = new System.Drawing.Point(0, 47);
-			this.m_DatesListView.Margin = new System.Windows.Forms.Padding(0);
-			this.m_DatesListView.Name = "m_TaskDatesListView";
-			//this.m_DatesListView.Options = TaskDatesUIExtension.TaskDatesOption.None;
-			this.m_DatesListView.Size = new System.Drawing.Size(613, 399);
-			this.m_DatesListView.TabIndex = 0;
+			this.m_TaskDatesCtrl.Location = new System.Drawing.Point(0, 47);
+			this.m_TaskDatesCtrl.Margin = new System.Windows.Forms.Padding(0);
+			this.m_TaskDatesCtrl.Name = "m_TaskDatesListView";
+			//this.m_TaskDatesCtrl.Options = TaskDatesUIExtension.TaskDatesOption.None;
+			this.m_TaskDatesCtrl.Size = new System.Drawing.Size(613, 399);
+			this.m_TaskDatesCtrl.TabIndex = 0;
 			// 
 			// TaskDatesUIExtensionCore
 			// 
@@ -130,7 +130,7 @@
 			this.Controls.Add(this.m_GroupByCombo);
 			this.Controls.Add(this.m_OptionsLabel);
 			this.Controls.Add(this.m_OptionsCombo);
-			this.Controls.Add(this.m_DatesListView);
+			this.Controls.Add(this.m_TaskDatesCtrl);
 			this.Name = "TaskDatesUIExtensionCore";
 			this.Size = new System.Drawing.Size(616, 450);
 			this.m_Toolbar.ResumeLayout(false);
@@ -142,7 +142,7 @@
 
 		#endregion
 
-		private TaskDatesListView m_DatesListView;
+		private TaskDatesControl m_TaskDatesCtrl;
 		private System.Windows.Forms.ToolTip m_Tooltip;
 		private System.Windows.Forms.ComboBox m_GroupByCombo;
 		private System.Windows.Forms.Label m_GroupByLabel;

@@ -20,7 +20,9 @@ namespace TaskDatesUIExtension
 
 	// --------------------------------------------
 
-	public partial class TaskDatesListView : TaskListView
+	[System.ComponentModel.DesignerCategory("")]
+
+	public partial class TaskDatesControl : TaskListView
 	{
 		const int TaskCol	= 0;
 		const int XCol		= 1;
@@ -36,7 +38,7 @@ namespace TaskDatesUIExtension
 
 		// --------------------------------------------------------
 
-		public TaskDatesListView()
+		public TaskDatesControl()
 		{
 			EnableHeaderTracking = false;
 			MinTaskColumnWidth = DPIScaling.Scale(100);

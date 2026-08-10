@@ -46,8 +46,8 @@ namespace TaskDatesUIExtension
 				}
 
 				// Manual tweaking
-				m_DatesListView.Top -= 4;
-				m_DatesListView.Height += 4;
+				m_TaskDatesCtrl.Top -= 4;
+				m_TaskDatesCtrl.Height += 4;
 
 				int imageSize = DPIScaling.Scale(16);
 
@@ -68,11 +68,11 @@ namespace TaskDatesUIExtension
 			m_Toolbar.Renderer = m_TBRenderer;
 			Toolbars.FixupButtonSizes(m_Toolbar);
 
-			m_DatesListView.Initialize(/*m_TaskItems, */trans, m_TaskIcons);
+			m_TaskDatesCtrl.Initialize(/*m_TaskItems, */trans, m_TaskIcons);
 
-			m_DatesListView.EditTaskDone    += new EditTaskCompletionEventHandler(OnTaskDatesCtrlEditTaskDone);
-			m_DatesListView.EditTaskIcon    += new EditTaskIconEventHandler(OnTaskDatesCtrlEditTaskIcon);
-			m_DatesListView.EditTaskLabel   += new EditTaskLabelEventHandler(OnTaskDatesCtrlEditTaskLabel);
+			m_TaskDatesCtrl.EditTaskDone    += new EditTaskCompletionEventHandler(OnTaskDatesCtrlEditTaskDone);
+			m_TaskDatesCtrl.EditTaskIcon    += new EditTaskIconEventHandler(OnTaskDatesCtrlEditTaskIcon);
+			m_TaskDatesCtrl.EditTaskLabel   += new EditTaskLabelEventHandler(OnTaskDatesCtrlEditTaskLabel);
 			//m_TaskDatesCtrl.SelectionChange += new SelectionChangeEventHandler(OnTaskDatesCtrlSelectionChange);
 
 			m_OptionsCombo.Initialise(trans);
@@ -86,7 +86,7 @@ namespace TaskDatesUIExtension
 
 		public void UpdateTasks(TaskList tasks, UIExtension.UpdateType type)
 		{
-			var selTaskIds = m_DatesListView.SelectedTaskIds;
+			var selTaskIds = m_TaskDatesCtrl.SelectedTaskIds;
 
 			// TaskDatesData.Update() returns:
 			//
@@ -107,7 +107,7 @@ namespace TaskDatesUIExtension
 			UpdateToolbarButtonStates();
 
 			if (selTaskIds != null)
-				m_DatesListView.SelectTasks(selTaskIds);
+				m_TaskDatesCtrl.SelectTasks(selTaskIds);
 
 			// For reasons I don't yet understand, invalidation after a 
 			// task update does NOT ALWAYS result in a subsequent repaint
@@ -117,29 +117,29 @@ namespace TaskDatesUIExtension
 
 		public bool WantTaskUpdate(Task.Attribute attrib)
 		{
-			return true;//m_DatesListView.WantTaskUpdate(attrib);
+			return true;//m_TaskDatesCtrl.WantTaskUpdate(attrib);
 		}
 
 		public bool SelectTask(uint taskId)
 		{
-			return m_DatesListView.SelectTask(taskId);
+			return m_TaskDatesCtrl.SelectTask(taskId);
 		}
 
 		public bool SelectTasks(uint[] taskIDs)
 		{
-			return m_DatesListView.SelectTasks(taskIDs);
+			return m_TaskDatesCtrl.SelectTasks(taskIDs);
 		}
 
 		public bool SelectTask(String text, UIExtension.SelectTask selectTask, bool caseSensitive, bool wholeWord, bool findReplace)
 		{
-			return m_DatesListView.SelectTask(text, selectTask, caseSensitive, wholeWord, findReplace);
+			return m_TaskDatesCtrl.SelectTask(text, selectTask, caseSensitive, wholeWord, findReplace);
 		}
 
 		public bool ScrollToSelectedTask()
 		{
 			if (CanScrollToSelectedTask())
 			{
-				m_DatesListView.EnsureSelectionVisible();
+				m_TaskDatesCtrl.EnsureSelectionVisible();
 				return true;
 			}
 
@@ -148,12 +148,12 @@ namespace TaskDatesUIExtension
 
 		public bool CanScrollToSelectedTask()
 		{
-			return m_DatesListView.HasSelection;
+			return m_TaskDatesCtrl.HasSelection;
 		}
 
 		public bool PrepareNewTask(ref Task task)
 		{
-			return false;//m_DatesListView.PrepareNewTask(ref task);
+			return false;//m_TaskDatesCtrl.PrepareNewTask(ref task);
 		}
 
 		public bool ProcessMessage(IntPtr hwnd, UInt32 message, UInt32 wParam, UInt32 lParam, UInt32 time, Int32 xPos, Int32 yPos)
@@ -175,12 +175,12 @@ namespace TaskDatesUIExtension
 
 		public bool GetLabelEditRect(ref Int32 left, ref Int32 top, ref Int32 right, ref Int32 bottom)
 		{
-			Rectangle labelRect = m_DatesListView.SelectedTaskLabelRect;
+			Rectangle labelRect = m_TaskDatesCtrl.SelectedTaskLabelRect;
 			
 			if (labelRect.IsEmpty)
 				return false;
 			
-			labelRect = m_DatesListView.RectangleToScreen(labelRect);
+			labelRect = m_TaskDatesCtrl.RectangleToScreen(labelRect);
 			
 			left = labelRect.Left;
 			top = labelRect.Top;
@@ -192,12 +192,12 @@ namespace TaskDatesUIExtension
 
 		public bool HitTest(Int32 xScreen, Int32 yScreen, UIExtension.HitTest hitTest)
 		{
-			return m_DatesListView.HitTest(new Point(xScreen, yScreen), hitTest);
+			return m_TaskDatesCtrl.HitTest(new Point(xScreen, yScreen), hitTest);
 		}
 
 		public bool ShowContextMenu(Int32 xScreen, Int32 yScreen)
 		{
-			return true;//m_DatesListView.ShowContextMenu(new Point(xScreen, yScreen));
+			return true;//m_TaskDatesCtrl.ShowContextMenu(new Point(xScreen, yScreen));
 		}
 
 		public void SetUITheme(UITheme theme)
@@ -206,7 +206,7 @@ namespace TaskDatesUIExtension
 			m_GroupByLabel.ForeColor = theme.GetAppDrawingColor(UITheme.AppColor.AppText);
 			m_OptionsLabel.ForeColor = theme.GetAppDrawingColor(UITheme.AppColor.AppText);
 
-			//m_DatesListView.SetUITheme(theme);
+			//m_TaskDatesCtrl.SetUITheme(theme);
 
 			// Set the toolbar colors to be the same as the back color
 			theme.SetAppDrawingColor(UITheme.AppColor.ToolbarDark, BackColor);
@@ -217,17 +217,17 @@ namespace TaskDatesUIExtension
 
 		public void SetTaskFont(String faceName, int pointSize)
 		{
-			//m_DatesListView.SetFont(faceName, pointSize);
+			//m_TaskDatesCtrl.SetFont(faceName, pointSize);
 		}
 
 		public void SetReadOnly(bool bReadOnly)
 		{
-			m_DatesListView.ReadOnly = bReadOnly;
+			m_TaskDatesCtrl.ReadOnly = bReadOnly;
 		}
 
 		public void SavePreferences(Preferences prefs, String key)
 		{
-			//m_DatesListView.SavePreferences(prefs, key);
+			//m_TaskDatesCtrl.SavePreferences(prefs, key);
 		}
 
 		public void LoadPreferences(Preferences prefs, String key, bool appOnly)
@@ -239,13 +239,13 @@ namespace TaskDatesUIExtension
 				// TODO
 			}
 
-// 			m_DatesListView.LoadPreferences(prefs, key, appOnly);
-// 			m_OptionsCombo.SelectedOptions = m_DatesListView.Options;
+// 			m_TaskDatesCtrl.LoadPreferences(prefs, key, appOnly);
+// 			m_OptionsCombo.SelectedOptions = m_TaskDatesCtrl.Options;
 		}
 
 		public new bool Focused
 		{
-			get { return m_DatesListView.Focused; }
+			get { return m_TaskDatesCtrl.Focused; }
 		}
 
 		public bool CanMoveTask(UInt32 taskId, UInt32 destParentId, UInt32 destPrevSiblingId)
@@ -262,19 +262,19 @@ namespace TaskDatesUIExtension
 
 		public bool GetTask(UIExtension.GetTask getTask, ref UInt32 taskId)
 		{
-			taskId = m_DatesListView.GetTaskId(getTask);
+			taskId = m_TaskDatesCtrl.GetTaskId(getTask);
 
 			return (taskId != 0);
 		}
 
 		public Bitmap SaveToImage()
 		{
-			return null;//m_DatesListView.SaveToImage();
+			return null;//m_TaskDatesCtrl.SaveToImage();
 		}
 
 		public bool CanSaveToImage()
 		{
-			return true;//m_DatesListView.CanSaveToImage();
+			return true;//m_TaskDatesCtrl.CanSaveToImage();
 		}
 
 		// Message handlers ---------------------------------------------------
@@ -283,20 +283,20 @@ namespace TaskDatesUIExtension
 		{
 			base.OnGotFocus(e);
 
-			m_DatesListView.Focus();
+			m_TaskDatesCtrl.Focus();
 		}
 
 		protected override void OnSizeChanged(EventArgs e)
 		{
 			base.OnSizeChanged(e);
 
-			Rectangle rCtrl = m_DatesListView.Bounds;
+			Rectangle rCtrl = m_TaskDatesCtrl.Bounds;
 
 			rCtrl.X = 0;
 			rCtrl.Width = Width;
 			rCtrl.Height = (Height - rCtrl.Top - 1);
 
-			m_DatesListView.Bounds = rCtrl;
+			m_TaskDatesCtrl.Bounds = rCtrl;
 		}
 
 		private bool OnTaskDatesCtrlEditTaskDone(object sender, ITaskBase task)
@@ -327,7 +327,7 @@ namespace TaskDatesUIExtension
 
 		private void OnOptionsComboClosed(object sender, EventArgs e)
 		{
-			//m_DatesListView.Options = m_OptionsCombo.SelectedOptions;
+			//m_TaskDatesCtrl.Options = m_OptionsCombo.SelectedOptions;
 		}
 
 		private void UpdateToolbarButtonStates()
