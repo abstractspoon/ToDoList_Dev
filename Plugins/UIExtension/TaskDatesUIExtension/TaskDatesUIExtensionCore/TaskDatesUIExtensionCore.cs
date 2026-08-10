@@ -24,11 +24,9 @@ namespace TaskDatesUIExtension
 		private IntPtr m_HwndParent;
 		private Translator m_Trans;
 
-		private TaskItems m_TaskItems;
 		private UIExtension.TaskIcon m_TaskIcons;
 		private Font m_ControlsFont;
 		private UIThemeToolbarRenderer m_TBRenderer;
-		private UIExtension.IdleRedraw m_IdleTasks = new UIExtension.IdleRedraw();
 
 		// ------------------------------------------------
 
@@ -62,18 +60,17 @@ namespace TaskDatesUIExtension
 
 			m_ControlsFont = new Font(FontName, 8, FontStyle.Regular);
 			m_TaskIcons = new UIExtension.TaskIcon(parentHandle);
-			m_TaskItems = new TaskItems();
 
 			m_TBRenderer = new UIThemeToolbarRenderer();
 			m_Toolbar.Renderer = m_TBRenderer;
 			Toolbars.FixupButtonSizes(m_Toolbar);
 
-			m_TaskDatesCtrl.Initialize(/*m_TaskItems, */trans, m_TaskIcons);
+			m_TaskDatesCtrl.Initialize(trans, m_TaskIcons);
 
 			m_TaskDatesCtrl.EditTaskDone    += new EditTaskCompletionEventHandler(OnTaskDatesCtrlEditTaskDone);
 			m_TaskDatesCtrl.EditTaskIcon    += new EditTaskIconEventHandler(OnTaskDatesCtrlEditTaskIcon);
 			m_TaskDatesCtrl.EditTaskLabel   += new EditTaskLabelEventHandler(OnTaskDatesCtrlEditTaskLabel);
-			//m_TaskDatesCtrl.SelectionChange += new SelectionChangeEventHandler(OnTaskDatesCtrlSelectionChange);
+			m_TaskDatesCtrl.SelectionChange += new SelectionChangeEventHandler(OnTaskDatesCtrlSelectionChange);
 
 			m_OptionsCombo.Initialise(trans);
 			m_OptionsCombo.Sorted = true;
@@ -86,38 +83,14 @@ namespace TaskDatesUIExtension
 
 		public void UpdateTasks(TaskList tasks, UIExtension.UpdateType type)
 		{
-			var selTaskIds = m_TaskDatesCtrl.SelectedTaskIds;
-
-			// TaskDatesData.Update() returns:
-			//
-			// 1. A list of IDs of tasks which have been:
-			//
-			//	 1.1. Added
-			//	 1.2. Removed
-			//	 1.3. Modified
-			//
-			// 2. A list of variables which have been:
-			//	 2.1. Added
-			//   2.2. Removed
-			//   2.3. Had their numeric type changed (int <=> double)
-			//   2.4. Had their max/min range updated
-			// 
-			var result = m_TaskItems.Update(tasks, type);
+			m_TaskDatesCtrl.UpdateTasks(tasks, type);
 
 			UpdateToolbarButtonStates();
-
-			if (selTaskIds != null)
-				m_TaskDatesCtrl.SelectTasks(selTaskIds);
-
-			// For reasons I don't yet understand, invalidation after a 
-			// task update does NOT ALWAYS result in a subsequent repaint
-			// so we solve it with a delayed-redraw
-			m_IdleTasks.Redraw();
 		}
 
 		public bool WantTaskUpdate(Task.Attribute attrib)
 		{
-			return true;//m_TaskDatesCtrl.WantTaskUpdate(attrib);
+			return m_TaskDatesCtrl.WantTaskUpdate(attrib);
 		}
 
 		public bool SelectTask(uint taskId)
@@ -153,7 +126,7 @@ namespace TaskDatesUIExtension
 
 		public bool PrepareNewTask(ref Task task)
 		{
-			return false;//m_TaskDatesCtrl.PrepareNewTask(ref task);
+			return false;
 		}
 
 		public bool ProcessMessage(IntPtr hwnd, UInt32 message, UInt32 wParam, UInt32 lParam, UInt32 time, Int32 xPos, Int32 yPos)
@@ -170,7 +143,7 @@ namespace TaskDatesUIExtension
 
 		public bool DoIdleProcessing()
 		{
-			return m_IdleTasks.Process(this);
+			return m_TaskDatesCtrl.DoIdleProcessing();
 		}
 
 		public bool GetLabelEditRect(ref Int32 left, ref Int32 top, ref Int32 right, ref Int32 bottom)
@@ -197,7 +170,7 @@ namespace TaskDatesUIExtension
 
 		public bool ShowContextMenu(Int32 xScreen, Int32 yScreen)
 		{
-			return true;//m_TaskDatesCtrl.ShowContextMenu(new Point(xScreen, yScreen));
+			return m_TaskDatesCtrl.ShowContextMenu(new Point(xScreen, yScreen));
 		}
 
 		public void SetUITheme(UITheme theme)
@@ -206,7 +179,7 @@ namespace TaskDatesUIExtension
 			m_GroupByLabel.ForeColor = theme.GetAppDrawingColor(UITheme.AppColor.AppText);
 			m_OptionsLabel.ForeColor = theme.GetAppDrawingColor(UITheme.AppColor.AppText);
 
-			//m_TaskDatesCtrl.SetUITheme(theme);
+			m_TaskDatesCtrl.SetUITheme(theme);
 
 			// Set the toolbar colors to be the same as the back color
 			theme.SetAppDrawingColor(UITheme.AppColor.ToolbarDark, BackColor);
@@ -217,7 +190,7 @@ namespace TaskDatesUIExtension
 
 		public void SetTaskFont(String faceName, int pointSize)
 		{
-			//m_TaskDatesCtrl.SetFont(faceName, pointSize);
+			m_TaskDatesCtrl.SetFont(faceName, pointSize);
 		}
 
 		public void SetReadOnly(bool bReadOnly)
@@ -227,20 +200,18 @@ namespace TaskDatesUIExtension
 
 		public void SavePreferences(Preferences prefs, String key)
 		{
-			//m_TaskDatesCtrl.SavePreferences(prefs, key);
+			m_TaskDatesCtrl.SavePreferences(prefs, key);
 		}
 
 		public void LoadPreferences(Preferences prefs, String key, bool appOnly)
 		{
-			m_TaskItems.WorkingWeek = new WorkingWeek(prefs);
-
 			if (!appOnly)
 			{
 				// TODO
 			}
 
-// 			m_TaskDatesCtrl.LoadPreferences(prefs, key, appOnly);
-// 			m_OptionsCombo.SelectedOptions = m_TaskDatesCtrl.Options;
+ 			m_TaskDatesCtrl.LoadPreferences(prefs, key, appOnly);
+ 			m_OptionsCombo.SelectedOptions = m_TaskDatesCtrl.Options;
 		}
 
 		public new bool Focused
@@ -269,12 +240,12 @@ namespace TaskDatesUIExtension
 
 		public Bitmap SaveToImage()
 		{
-			return null;//m_TaskDatesCtrl.SaveToImage();
+			return m_TaskDatesCtrl.SaveToImage();
 		}
 
 		public bool CanSaveToImage()
 		{
-			return true;//m_TaskDatesCtrl.CanSaveToImage();
+			return m_TaskDatesCtrl.CanSaveToImage();
 		}
 
 		// Message handlers ---------------------------------------------------
@@ -327,7 +298,7 @@ namespace TaskDatesUIExtension
 
 		private void OnOptionsComboClosed(object sender, EventArgs e)
 		{
-			//m_TaskDatesCtrl.Options = m_OptionsCombo.SelectedOptions;
+			m_TaskDatesCtrl.Options = m_OptionsCombo.SelectedOptions;
 		}
 
 		private void UpdateToolbarButtonStates()

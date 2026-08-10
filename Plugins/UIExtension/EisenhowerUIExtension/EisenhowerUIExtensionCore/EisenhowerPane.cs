@@ -410,9 +410,9 @@ namespace EisenhowerUIExtension
 
 		private void OnListSelectionChange(object sender, EventArgs e)
 		{
-			// Don't forward selection changes:
+			// Don't forward selection changes if:
 
-			// 1. If bounds selecting
+			// 1. Bounds selecting
 			if (m_List.IsBoundSelecting)
 				return;
 
