@@ -32,7 +32,6 @@
 			this.m_OK = new System.Windows.Forms.Button();
 			this.m_Cancel = new System.Windows.Forms.Button();
 			this.m_Error = new System.Windows.Forms.Label();
-			this.groupBox1 = new System.Windows.Forms.GroupBox();
 			this.SuspendLayout();
 			// 
 			// m_OK
@@ -68,15 +67,6 @@
 			this.m_Error.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 			this.m_Error.Visible = false;
 			// 
-			// groupBox1
-			// 
-			this.groupBox1.Location = new System.Drawing.Point(10, 8);
-			this.groupBox1.Name = "groupBox1";
-			this.groupBox1.Size = new System.Drawing.Size(484, 241);
-			this.groupBox1.TabIndex = 24;
-			this.groupBox1.TabStop = false;
-			this.groupBox1.Text = "Matrix Setup";
-			// 
 			// TaskDatesPreferencesDlg
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -85,13 +75,12 @@
 			this.Controls.Add(this.m_Error);
 			this.Controls.Add(this.m_OK);
 			this.Controls.Add(this.m_Cancel);
-			this.Controls.Add(this.groupBox1);
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+			this.Icon = Properties.Resources.TaskDates;
 			this.Name = "TaskDatesPreferencesDlg";
 			this.ShowInTaskbar = false;
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-			this.Text = "Decision Matrix Preferences";
+			this.Text = "Task Dates Preferences";
 			this.ResumeLayout(false);
 
 		}
@@ -101,6 +90,5 @@
 		private System.Windows.Forms.Button m_OK;
 		private System.Windows.Forms.Button m_Cancel;
 		private System.Windows.Forms.Label m_Error;
-		private System.Windows.Forms.GroupBox groupBox1;
 	}
 }

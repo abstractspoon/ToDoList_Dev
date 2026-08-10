@@ -267,7 +267,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WeekPlannerUIExtensionBridg
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeekPlannerUIExtensionCore", "UIExtension\WeekPlannerUIExtension\WeekPlannerUIExtensionCore\WeekPlannerUIExtensionCore.csproj", "{92FEFDB8-3F95-4404-A620-8003B51C5A53}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TaskDates", "TaskDates", "{09E9D992-3D12-4DD9-934B-4AB0864BCE4A}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TaskDatesUIExtension", "TaskDatesUIExtension", "{09E9D992-3D12-4DD9-934B-4AB0864BCE4A}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TaskDatesUIExtensionBridge", "UIExtension\TaskDatesUIExtension\TaskDatesUIExtensionBridge\TaskDatesUIExtensionBridge.vcxproj", "{1BAD62D0-5F35-4B1A-BDA7-F1A2C10AC877}"
 EndProject

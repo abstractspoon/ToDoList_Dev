@@ -30,29 +30,30 @@
 		{
 			this.components = new System.ComponentModel.Container();
 			this.m_Tooltip = new System.Windows.Forms.ToolTip(this.components);
-			this.m_MatricesLabel = new System.Windows.Forms.Label();
+			this.m_GroupByLabel = new System.Windows.Forms.Label();
 			this.m_OptionsLabel = new System.Windows.Forms.Label();
 			this.m_Toolbar = new System.Windows.Forms.ToolStrip();
 			this.toolStripPreferencesBtn = new System.Windows.Forms.ToolStripButton();
 			this.toolStripHelpBtn = new System.Windows.Forms.ToolStripButton();
+			this.m_GroupByCombo = new System.Windows.Forms.ComboBox();
 			this.m_OptionsCombo = new TaskDatesUIExtension.TaskDatesOptionsComboBox();
 			this.m_DatesListView = new TaskDatesUIExtension.TaskDatesListView();
 			this.m_Toolbar.SuspendLayout();
 			this.SuspendLayout();
 			// 
-			// m_MatricesLabel
+			// m_GroupByLabel
 			// 
-			this.m_MatricesLabel.AutoSize = true;
-			this.m_MatricesLabel.Location = new System.Drawing.Point(-3, 3);
-			this.m_MatricesLabel.Name = "m_MatricesLabel";
-			this.m_MatricesLabel.Size = new System.Drawing.Size(47, 13);
-			this.m_MatricesLabel.TabIndex = 25;
-			this.m_MatricesLabel.Text = "Matrices";
+			this.m_GroupByLabel.AutoSize = true;
+			this.m_GroupByLabel.Location = new System.Drawing.Point(-3, 3);
+			this.m_GroupByLabel.Name = "m_GroupByLabel";
+			this.m_GroupByLabel.Size = new System.Drawing.Size(47, 13);
+			this.m_GroupByLabel.TabIndex = 25;
+			this.m_GroupByLabel.Text = "GroupBy";
 			// 
 			// m_OptionsLabel
 			// 
 			this.m_OptionsLabel.AutoSize = true;
-			this.m_OptionsLabel.Location = new System.Drawing.Point(223, 3);
+			this.m_OptionsLabel.Location = new System.Drawing.Point(165, 3);
 			this.m_OptionsLabel.Name = "m_OptionsLabel";
 			this.m_OptionsLabel.Size = new System.Drawing.Size(43, 13);
 			this.m_OptionsLabel.TabIndex = 27;
@@ -67,7 +68,7 @@
             this.toolStripPreferencesBtn,
             this.toolStripHelpBtn});
 			this.m_Toolbar.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.Flow;
-			this.m_Toolbar.Location = new System.Drawing.Point(391, 16);
+			this.m_Toolbar.Location = new System.Drawing.Point(336, 16);
 			this.m_Toolbar.Name = "m_Toolbar";
 			this.m_Toolbar.Size = new System.Drawing.Size(78, 23);
 			this.m_Toolbar.TabIndex = 28;
@@ -95,9 +96,18 @@
 			this.toolStripHelpBtn.ToolTipText = "Online Help";
 			this.toolStripHelpBtn.Click += new System.EventHandler(this.OnHelp);
 			// 
+			// m_GroupByCombo
+			// 
+			this.m_GroupByCombo.Location = new System.Drawing.Point(0, 20);
+			this.m_GroupByCombo.Name = "m_GroupByCombo";
+			//this.m_GroupByCombo.SelectedOptions = TaskDatesUIExtension.TaskDatesOption.None;
+			this.m_GroupByCombo.Size = new System.Drawing.Size(158, 21);
+			this.m_GroupByCombo.Sorted = false;
+			this.m_GroupByCombo.TabIndex = 26;
+			// 
 			// m_OptionsCombo
 			// 
-			this.m_OptionsCombo.Location = new System.Drawing.Point(226, 20);
+			this.m_OptionsCombo.Location = new System.Drawing.Point(168, 20);
 			this.m_OptionsCombo.Name = "m_OptionsCombo";
 			this.m_OptionsCombo.SelectedOptions = TaskDatesUIExtension.TaskDatesOption.None;
 			this.m_OptionsCombo.Size = new System.Drawing.Size(158, 21);
@@ -116,9 +126,10 @@
 			// TaskDatesUIExtensionCore
 			// 
 			this.Controls.Add(this.m_Toolbar);
+			this.Controls.Add(this.m_GroupByLabel);
+			this.Controls.Add(this.m_GroupByCombo);
 			this.Controls.Add(this.m_OptionsLabel);
 			this.Controls.Add(this.m_OptionsCombo);
-			this.Controls.Add(this.m_MatricesLabel);
 			this.Controls.Add(this.m_DatesListView);
 			this.Name = "TaskDatesUIExtensionCore";
 			this.Size = new System.Drawing.Size(616, 450);
@@ -133,7 +144,8 @@
 
 		private TaskDatesListView m_DatesListView;
 		private System.Windows.Forms.ToolTip m_Tooltip;
-		private System.Windows.Forms.Label m_MatricesLabel;
+		private System.Windows.Forms.ComboBox m_GroupByCombo;
+		private System.Windows.Forms.Label m_GroupByLabel;
 		private TaskDatesOptionsComboBox m_OptionsCombo;
 		private System.Windows.Forms.Label m_OptionsLabel;
 		private System.Windows.Forms.ToolStrip m_Toolbar;

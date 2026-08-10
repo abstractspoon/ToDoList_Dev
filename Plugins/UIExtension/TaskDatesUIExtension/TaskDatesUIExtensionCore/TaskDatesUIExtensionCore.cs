@@ -203,7 +203,8 @@ namespace TaskDatesUIExtension
 		public void SetUITheme(UITheme theme)
 		{
 			BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight);
-			m_MatricesLabel.ForeColor = theme.GetAppDrawingColor(UITheme.AppColor.AppText);
+			m_GroupByLabel.ForeColor = theme.GetAppDrawingColor(UITheme.AppColor.AppText);
+			m_OptionsLabel.ForeColor = theme.GetAppDrawingColor(UITheme.AppColor.AppText);
 
 			//m_DatesListView.SetUITheme(theme);
 

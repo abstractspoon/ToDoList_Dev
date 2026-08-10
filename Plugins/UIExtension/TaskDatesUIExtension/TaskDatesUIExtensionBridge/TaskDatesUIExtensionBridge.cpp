@@ -31,14 +31,14 @@ using namespace Abstractspoon::Tdl::PluginHelpers;
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 // REPLACE THIS WITH NEW GUID!
-const LPCWSTR EISENHOWER_GUID = L"C766D687-D8DD-4FB6-8822-FD16435EB5B6";
-const LPCWSTR EISENHOWER_NAME = L"Decision Matrix";
+const LPCWSTR TASKDATES_GUID = L"F9D3B948-24B0-4F69-AD95-7E18C099ADFD";
+const LPCWSTR TASKDATES_NAME = L"Task Dates";
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 CTaskDatesUIExtensionBridge::CTaskDatesUIExtensionBridge() : m_hIcon(NULL), m_pTT(nullptr)
 {
-	m_hIcon = Win32::LoadHIcon(L"TaskDatesUIExtensionBridge.dll", IDI_EISENHOWER, 16, true);
+	m_hIcon = Win32::LoadHIcon(L"TaskDatesUIExtensionBridge.dll", IDI_TASKDATES, 16, true);
 }
 
 void CTaskDatesUIExtensionBridge::Release()
@@ -54,7 +54,7 @@ void CTaskDatesUIExtensionBridge::SetLocalizer(ITransText* pTT)
 
 LPCWSTR CTaskDatesUIExtensionBridge::GetMenuText() const
 {
-	return EISENHOWER_NAME;
+	return TASKDATES_NAME;
 }
 
 HICON CTaskDatesUIExtensionBridge::GetIcon() const
@@ -64,7 +64,7 @@ HICON CTaskDatesUIExtensionBridge::GetIcon() const
 
 LPCWSTR CTaskDatesUIExtensionBridge::GetTypeID() const
 {
-	return EISENHOWER_GUID;
+	return TASKDATES_GUID;
 }
 
 IUIExtensionWindow* CTaskDatesUIExtensionBridge::CreateExtWindow(UINT nCtrlID, 
@@ -102,8 +102,8 @@ BOOL CTaskDatesUIExtensionBridgeWindow::Create(UINT nCtrlID, DWORD nStyle,
 	long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent)
 {
 	msclr::auto_gcroot<Translator^> trans = gcnew Translator(m_pTT);
-	msclr::auto_gcroot<String^> typeID = gcnew String(EISENHOWER_GUID);
-	msclr::auto_gcroot<String^> uiName = gcnew String(EISENHOWER_NAME);
+	msclr::auto_gcroot<String^> typeID = gcnew String(TASKDATES_GUID);
+	msclr::auto_gcroot<String^> uiName = gcnew String(TASKDATES_NAME);
 
 	m_wnd = gcnew TaskDatesUIExtension::TaskDatesUIExtensionCore(typeID.get(), uiName.get(), static_cast<IntPtr>(hwndParent), trans.get());
 
@@ -128,12 +128,12 @@ HICON CTaskDatesUIExtensionBridgeWindow::GetIcon() const
 
 LPCWSTR CTaskDatesUIExtensionBridgeWindow::GetMenuText() const
 {
-	return EISENHOWER_NAME;
+	return TASKDATES_NAME;
 }
 
 LPCWSTR CTaskDatesUIExtensionBridgeWindow::GetTypeID() const
 {
-	return EISENHOWER_GUID;
+	return TASKDATES_GUID;
 }
 
 bool CTaskDatesUIExtensionBridgeWindow::SelectTask(DWORD dwTaskID, bool /*bTaskLink*/)

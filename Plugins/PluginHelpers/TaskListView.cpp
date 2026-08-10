@@ -1324,6 +1324,9 @@ CheckBoxState TaskListView::GetTaskCheckboxState(ITaskBase^ task)
 
 void TaskListView::ResizeTaskColumnToFit()
 {
+	if (Columns->Count == 0)
+		return;
+
 	// Resize first column to fill remaining width
 	int otherColsWidth = 0;
 

@@ -2,7 +2,7 @@
 // Microsoft Visual C++ generated include file.
 // Used by TaskDatesUIExtensionBridge.rc
 //
-#define IDI_EISENHOWER                  102
+#define IDI_TASKDATES                  102
 
 // Next default values for new objects
 // 
