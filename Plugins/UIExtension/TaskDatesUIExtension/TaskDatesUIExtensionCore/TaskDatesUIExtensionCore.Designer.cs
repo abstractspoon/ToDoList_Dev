@@ -125,7 +125,6 @@
             this.columnHeader2,
             this.columnHeader3,
             this.columnHeader4});
-			this.m_TaskDatesCtrl.EnableHeaderTracking = false;
 			this.m_TaskDatesCtrl.GridlineColor = System.Drawing.Color.Empty;
 			this.m_TaskDatesCtrl.Location = new System.Drawing.Point(0, 47);
 			this.m_TaskDatesCtrl.Margin = new System.Windows.Forms.Padding(0);
@@ -134,7 +133,6 @@
 			this.m_TaskDatesCtrl.Options = TaskDatesUIExtension.TaskDatesOption.None;
 			this.m_TaskDatesCtrl.OwnerDraw = true;
 			this.m_TaskDatesCtrl.ReadOnly = false;
-			this.m_TaskDatesCtrl.Selected = false;
 			this.m_TaskDatesCtrl.ShowCompletionCheckboxes = false;
 			this.m_TaskDatesCtrl.ShowLabelTips = true;
 			this.m_TaskDatesCtrl.ShowParentsAsFolders = false;

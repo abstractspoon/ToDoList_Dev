@@ -44,8 +44,6 @@ namespace TaskDatesUIExtension
 		private TaskDatesOption m_Options = TaskDatesOption.None;
 		private UIExtension.IdleRedraw m_IdleTasks = new UIExtension.IdleRedraw();
 
-		private bool m_Selected;
-
 		private int[] m_ColHeaderWidth			= new int[4] { -1, -1, -1, -1 };
 		private int[] m_ColValueMaxCharWidth	= new int[4] { -1, -1, -1, -1 };
 
@@ -53,7 +51,7 @@ namespace TaskDatesUIExtension
 
 		public TaskDatesControl()
 		{
-			EnableHeaderTracking = false;
+			EnableHeaderTracking = true;
 			MinTaskColumnWidth = DPIScaling.Scale(100);
 			SizeTaskColumnToFit = true;
 
@@ -181,24 +179,6 @@ namespace TaskDatesUIExtension
 			// TODO
 		}
 
-		public bool Selected
-		{
-			get { return m_Selected; }
-
-			set
-			{
-				if (m_Selected != value)
-				{
-					m_Selected = value;
-
-					if (!m_Selected)
-						SelectedIndices.Clear();
-
-					Invalidate();
-				}
-			}
-		}
-
 		public Bitmap SaveToImage()
 		{
 			// TODO
@@ -219,7 +199,7 @@ namespace TaskDatesUIExtension
 
 		public uint GetTaskId(UIExtension.GetTask getTask)
 		{
-			return GetTaskIdEx(getTask, m_Selected);
+			return GetTaskIdEx(getTask, true);
 		}
 
 		public bool SelectTask(String text, UIExtension.SelectTask selectTask, bool caseSensitive, bool wholeWord, bool findReplace)
@@ -284,7 +264,7 @@ namespace TaskDatesUIExtension
 		protected bool AddDate(TaskItemDate date)
 		{
 			var lvItem = AddTask(date);
-			return SetTaskValues(lvItem, date.Date.ToShortDateString(), date.Type, date.LeadIn);
+			return SetTaskValues(lvItem, date.Date, date.Type, date.LeadIn);
 		}
 
 		protected bool SetTaskValues(uint taskId, string date, string type, string leadin)
