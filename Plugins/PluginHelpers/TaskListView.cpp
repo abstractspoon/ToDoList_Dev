@@ -237,11 +237,11 @@ TaskListView::TaskListView()
 	m_Trans(nullptr),
 	m_TaskIcons(nullptr),
 	m_LabelTip(nullptr),
-	m_BoldFont(nullptr),
 	m_ItemsHaveIcons(false),
 	m_ShowParentsAsFolders(false),
 	m_TaskColorIsBkgnd(false),
 	m_ShowCompletionCheckboxes(false),
+	m_StrikeThruCompletedTasks(true),
 	m_BoundSelectionTimer(nullptr),
 	m_GridlineColor(Color::Empty),
 	m_AlternateLineColor(Color::Empty),
@@ -642,7 +642,7 @@ LabelTipInfo^ TaskListView::ToolHitTest(Drawing::Point ptScreen)
 	tip->Text = task->Title;
 	tip->MultiLine = false;
 	tip->Rect = labelRect;
-	tip->Font = (ITaskBaseExt::IsTopLevel(task) ? m_BoldFont : Font);
+	tip->Font = (ITaskBaseExt::IsTopLevel(task) ? gcnew Drawing::Font(Font, FontStyle::Bold) : Font);
 
 	return tip;
 }
@@ -676,7 +676,6 @@ void TaskListView::OnFontChanged(EventArgs^ e)
 {
 	ListView::OnFontChanged(e);
 
-	m_BoldFont = gcnew Drawing::Font(Font, FontStyle::Bold);
 	Invalidate();
 }
 
@@ -776,6 +775,20 @@ void TaskListView::ShowCompletionCheckboxes::set(bool value)
 	}
 }
 
+bool TaskListView::StrikeThruCompletedTasks::get()
+{
+	return m_StrikeThruCompletedTasks;
+}
+
+void TaskListView::StrikeThruCompletedTasks::set(bool value)
+{
+	if (m_StrikeThruCompletedTasks != value)
+	{
+		m_StrikeThruCompletedTasks = value;
+		Invalidate();
+	}
+}
+
 bool TaskListView::ReadOnly::get()
 {
 	return m_ReadOnly;
@@ -867,7 +880,7 @@ void TaskListView::OnDrawItem(DrawListViewItemEventArgs^ e)
 	auto backColor = GetBackColor(task, e->Item->Index);
 	auto itemRect = e->Item->Bounds;
 
-	e->Graphics->FillRectangle(gcnew SolidBrush(backColor), 0, itemRect.Top + 1, Width, itemRect.Height);
+	e->Graphics->FillRectangle(gcnew SolidBrush(backColor), 0, itemRect.Top + 1, Width, itemRect.Height - 1);
 
 	// Horizontal grid line full width
 	Pen^ gridPen = nullptr;
@@ -875,7 +888,7 @@ void TaskListView::OnDrawItem(DrawListViewItemEventArgs^ e)
 	if (!m_GridlineColor.IsEmpty)
 	{
 		gridPen = gcnew Pen(m_GridlineColor);
-		e->Graphics->DrawLine(gridPen, 0, itemRect.Bottom, Width, itemRect.Bottom);
+		e->Graphics->DrawLine(gridPen, 0, itemRect.Bottom - 1, Width, itemRect.Bottom - 1);
 	}
 
 	// Selection highlight
@@ -908,7 +921,7 @@ void TaskListView::OnDrawItem(DrawListViewItemEventArgs^ e)
 		subItemRect.Width = Columns[colIndex]->Width;
 
 		auto textRect = Rectangle::Inflate(subItemRect, -LabelPadding, -1);
-		auto flags = (TextFormatFlags::SingleLine | TextFormatFlags::Bottom | TextFormatFlags::Left);
+		auto flags = (TextFormatFlags::SingleLine | TextFormatFlags::VerticalCenter | TextFormatFlags::Left);
 
 		if (colIndex == 0)
 		{
@@ -961,8 +974,19 @@ void TaskListView::OnDrawItem(DrawListViewItemEventArgs^ e)
 
 Drawing::Font^ TaskListView::GetFont(ITaskBase^ task, bool title)
 {
-	if (title && ITaskBaseExt::IsTopLevel(task))
-		return m_BoldFont;
+	if (title)
+	{
+		auto fontStyle = FontStyle::Regular;
+
+		if (ITaskBaseExt::IsTopLevel(task))
+			fontStyle = (fontStyle | FontStyle::Bold);
+
+		if (m_StrikeThruCompletedTasks && task->IsDone)
+			fontStyle = (fontStyle | FontStyle::Strikeout);
+
+		if (fontStyle != FontStyle::Regular)
+			return gcnew Drawing::Font(Font, fontStyle);
+	}
 
 	return Font;
 }
@@ -1324,6 +1348,9 @@ CheckBoxState TaskListView::GetTaskCheckboxState(ITaskBase^ task)
 
 void TaskListView::ResizeTaskColumnToFit()
 {
+	if (Columns->Count == 0)
+		return;
+
 	// Resize first column to fill remaining width
 	int otherColsWidth = 0;
 

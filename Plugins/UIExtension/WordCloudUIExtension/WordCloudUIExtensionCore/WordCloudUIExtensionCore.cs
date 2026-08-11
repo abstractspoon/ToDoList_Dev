@@ -601,6 +601,7 @@ namespace WordCloudUIExtension
             m_TaskMatchesList.TaskColorIsBackground = prefs.GetProfileBool("Preferences", "ColorTaskBackground", false);
             m_TaskMatchesList.ShowParentsAsFolders = prefs.GetProfileBool("Preferences", "ShowParentsAsFolders", false);
             m_TaskMatchesList.ShowCompletionCheckboxes = prefs.GetProfileBool("Preferences", "AllowCheckboxAgainstTreeItem", false);
+			m_TaskMatchesList.StrikeThruCompletedTasks = prefs.GetProfileBool("Preferences", "StrikethroughDone", true);
 			m_TaskMatchesList.ShowLabelTips = !prefs.GetProfileBool("Preferences", "ShowInfoTips", false);
 			m_TaskMatchesList.ShowMixedCompletionState = prefs.GetProfileBool("Preferences", "ShowMixedCompletionState", true);
 
