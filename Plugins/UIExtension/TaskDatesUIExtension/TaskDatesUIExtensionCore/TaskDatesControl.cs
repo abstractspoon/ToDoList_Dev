@@ -83,6 +83,8 @@ namespace TaskDatesUIExtension
 			if (selTaskIds != null)
 				SelectTasks(selTaskIds);
 
+			RefreshColumnWidths();
+
 			// For reasons I don't yet understand, invalidation after a 
 			// task update does NOT ALWAYS result in a subsequent repaint
 			// so we solve it with a delayed-redraw
@@ -222,19 +224,6 @@ namespace TaskDatesUIExtension
 		public uint FirstSelectedTaskId	{ get { return (HasSelection ? GetTaskId(SelectedIndices[0]) : 0); } }
 		public uint LastSelectedTaskId	{ get { return (HasSelection ? GetTaskId(SelectedIndices[LastIndex]) : 0); } }
 
-		public void RefreshColumnWidths()
-		{
-			using (var graphics = Graphics.FromHwnd(Handle))
-			{
-				RefreshVariableColumnWidth(DateCol, graphics);
-				RefreshVariableColumnWidth(TypeCol, graphics);
-				RefreshVariableColumnWidth(LeadInCol, graphics);
-			}
-
-			// Task column takes up tyhe slack
-			ResizeTaskColumnToFit();
-		}
-
 		// --------------------------------------------------------
 		// Message handlers
 
@@ -290,6 +279,19 @@ namespace TaskDatesUIExtension
 			m_ColValueMaxCharWidth[LeadInCol] = Math.Max(leadin.Length, m_ColValueMaxCharWidth[TypeCol]);
 
 			return true;
+		}
+
+		private void RefreshColumnWidths()
+		{
+			using (var graphics = Graphics.FromHwnd(Handle))
+			{
+				RefreshVariableColumnWidth(DateCol, graphics);
+				RefreshVariableColumnWidth(TypeCol, graphics);
+				RefreshVariableColumnWidth(LeadInCol, graphics);
+			}
+
+			// Task column takes up tyhe slack
+			ResizeTaskColumnToFit();
 		}
 
 		private void RefreshVariableColumnWidth(int col, Graphics g)
