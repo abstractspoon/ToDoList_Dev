@@ -880,7 +880,7 @@ void TaskListView::OnDrawItem(DrawListViewItemEventArgs^ e)
 	auto backColor = GetBackColor(task, e->Item->Index);
 	auto itemRect = e->Item->Bounds;
 
-	e->Graphics->FillRectangle(gcnew SolidBrush(backColor), 0, itemRect.Top + 1, Width, itemRect.Height);
+	e->Graphics->FillRectangle(gcnew SolidBrush(backColor), 0, itemRect.Top + 1, Width, itemRect.Height - 1);
 
 	// Horizontal grid line full width
 	Pen^ gridPen = nullptr;
@@ -888,7 +888,7 @@ void TaskListView::OnDrawItem(DrawListViewItemEventArgs^ e)
 	if (!m_GridlineColor.IsEmpty)
 	{
 		gridPen = gcnew Pen(m_GridlineColor);
-		e->Graphics->DrawLine(gridPen, 0, itemRect.Bottom, Width, itemRect.Bottom);
+		e->Graphics->DrawLine(gridPen, 0, itemRect.Bottom - 1, Width, itemRect.Bottom - 1);
 	}
 
 	// Selection highlight
@@ -921,7 +921,7 @@ void TaskListView::OnDrawItem(DrawListViewItemEventArgs^ e)
 		subItemRect.Width = Columns[colIndex]->Width;
 
 		auto textRect = Rectangle::Inflate(subItemRect, -LabelPadding, -1);
-		auto flags = (TextFormatFlags::SingleLine | TextFormatFlags::Bottom | TextFormatFlags::Left);
+		auto flags = (TextFormatFlags::SingleLine | TextFormatFlags::VerticalCenter | TextFormatFlags::Left);
 
 		if (colIndex == 0)
 		{
