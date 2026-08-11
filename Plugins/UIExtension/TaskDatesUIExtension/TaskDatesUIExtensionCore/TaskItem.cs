@@ -21,8 +21,7 @@ namespace TaskDatesUIExtension
 				break;
 
 			case UIExtension.UpdateType.Edit:
-				taskIds = RemoveCompletedTasks(tasks);
-				taskIds.AddRange(Update(tasks));
+				taskIds = Update(tasks);
 				break;
 
 			case UIExtension.UpdateType.New:
@@ -86,25 +85,6 @@ namespace TaskDatesUIExtension
 			return deletedTaskIds;
 		}
 
-		private List<uint> RemoveCompletedTasks(TaskList tasks)
-		{
-			var completedTaskIds = new List<uint>();
-
-			// 1. Locate the tasks
-			foreach (var taskId in Keys)
-			{
-				var task = tasks.FindTask(taskId);
-
-				if (task.IsDone() || task.IsGoodAsDone())
-					completedTaskIds.Add(taskId);
-			}
-
-			// 2. Remove them
-			completedTaskIds?.ForEach(id => Remove(id));
-
-			return completedTaskIds;
-		}
-
 		// -------------------------------------------------
 
 		private bool ProcessTaskUpdate(Task task, List<uint> modifiedTaskIds)
@@ -112,23 +92,19 @@ namespace TaskDatesUIExtension
 			if (!task.IsValid())
 				return false;
 
-			// Be careful not to re-add tasks which may have been completed
-			if (!task.IsDone() && !task.IsGoodAsDone())
-			{
-				uint taskId = task.GetID();
-				var item = GetItem(taskId, true);
+			uint taskId = task.GetID();
+			var item = GetItem(taskId, true);
 
-				if (!item.ProcessTaskUpdate(task))
-					return false;
+			if (!item.ProcessTaskUpdate(task))
+				return false;
 
-				modifiedTaskIds?.Add(taskId);
+			modifiedTaskIds?.Add(taskId);
 
-				// Process children
-				Task subtask = task.GetFirstSubtask();
+			// Process children
+			Task subtask = task.GetFirstSubtask();
 
-				while (subtask.IsValid() && ProcessTaskUpdate(subtask, modifiedTaskIds)) // RECURSIVE CALL
-					subtask = subtask.GetNextTask();
-			}
+			while (subtask.IsValid() && ProcessTaskUpdate(subtask, modifiedTaskIds)) // RECURSIVE CALL
+				subtask = subtask.GetNextTask();
 
 			return true;
 		}
@@ -160,19 +136,25 @@ namespace TaskDatesUIExtension
 			if (task.IsAttributeAvailable(Task.Attribute.StartDate))
 			{
 				var date = m_Dates.GetItem(m_Attribs, Task.Attribute.StartDate);
-				date.Date = task.GetStartDate(true); // TODO
+
+				date.Date = task.GetAttributeValue(Task.Attribute.StartDate, true, true); // TODO
+				date.Type = "Start Date"; // TODO
 			}
 
 			if (task.IsAttributeAvailable(Task.Attribute.DueDate))
 			{
 				var date = m_Dates.GetItem(m_Attribs, Task.Attribute.DueDate);
-				date.Date = task.GetDueDate(true); // TODO
+
+				date.Date = task.GetAttributeValue(Task.Attribute.DueDate, true, true); // TODO
+				date.Type = "Due Date";
 			}
 
 			if (task.IsAttributeAvailable(Task.Attribute.DoneDate))
 			{
 				var date = m_Dates.GetItem(m_Attribs, Task.Attribute.DoneDate);
-				date.Date = task.GetDoneDate();
+
+				date.Date = task.GetAttributeValue(Task.Attribute.DoneDate, true, true); // TODO
+				date.Type = "Completion Date";
 			}
 
 			return true;
@@ -274,7 +256,7 @@ namespace TaskDatesUIExtension
 		public bool IsDone		{ get { return m_Attrib.IsDone; } }
 
 		// local
-		public DateTime Date;
+		public string Date = string.Empty;
 		public String Type = string.Empty;
 		public String LeadIn = string.Empty;
 

@@ -31,8 +31,7 @@ namespace WordCloudUIExtension
 			MinTaskColumnWidth = DPIScaling.Scale(100);
 			SizeTaskColumnToFit = true;
 		}
-
-
+		
 		public new bool Initialize(Translator trans, UIExtension.TaskIcon taskIcons)
         {
 			if (this.Columns.Count == 0) // once only

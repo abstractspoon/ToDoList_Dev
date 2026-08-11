@@ -603,6 +603,7 @@ namespace WordCloudUIExtension
             m_TaskMatchesList.ShowCompletionCheckboxes = prefs.GetProfileBool("Preferences", "AllowCheckboxAgainstTreeItem", false);
 			m_TaskMatchesList.ShowLabelTips = !prefs.GetProfileBool("Preferences", "ShowInfoTips", false);
 			m_TaskMatchesList.ShowMixedCompletionState = prefs.GetProfileBool("Preferences", "ShowMixedCompletionState", true);
+			m_TaskMatchesList.StrikeThruCompletedTasks = !prefs.GetProfileBool("Preferences", "StrikethroughDone", true);
 
 			// Alternate line color
 			if (prefs.GetProfileBool("Preferences", "AlternateLineColor", true))

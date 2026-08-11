@@ -68,6 +68,7 @@ namespace Abstractspoon
 				property bool TaskColorIsBackground { bool get(); void set(bool value); }
 				property bool ShowParentsAsFolders { bool get(); void set(bool value); }
 				property bool ShowCompletionCheckboxes { bool get(); void set(bool value); }
+				property bool StrikeThruCompletedTasks { bool get(); void set(bool value); }
 				property bool ShowLabelTips { bool get(); void set(bool value); }
 				property bool IsBoundSelecting { bool get() { return (m_BoundSelectionTimer != nullptr); } }
 				property bool EnableHeaderTracking { bool get(); void set(bool value); }
@@ -101,7 +102,6 @@ namespace Abstractspoon
 				LabelTip^ m_LabelTip;
 				Windows::Forms::Timer^ m_BoundSelectionTimer;
 
-				Drawing::Font^ m_BoldFont;
 				Drawing::Color m_GridlineColor;
 				Drawing::Color m_AlternateLineColor;
 
@@ -109,6 +109,7 @@ namespace Abstractspoon
 				bool m_ShowParentsAsFolders;
 				bool m_TaskColorIsBkgnd;
 				bool m_ShowCompletionCheckboxes;
+				bool m_StrikeThruCompletedTasks;
 				bool m_EnableHeaderTracking;
 				bool m_SizeTaskColumnToFit;
 				bool m_ReadOnly;

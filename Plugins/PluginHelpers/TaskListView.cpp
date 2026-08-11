@@ -237,11 +237,11 @@ TaskListView::TaskListView()
 	m_Trans(nullptr),
 	m_TaskIcons(nullptr),
 	m_LabelTip(nullptr),
-	m_BoldFont(nullptr),
 	m_ItemsHaveIcons(false),
 	m_ShowParentsAsFolders(false),
 	m_TaskColorIsBkgnd(false),
 	m_ShowCompletionCheckboxes(false),
+	m_StrikeThruCompletedTasks(true),
 	m_BoundSelectionTimer(nullptr),
 	m_GridlineColor(Color::Empty),
 	m_AlternateLineColor(Color::Empty),
@@ -642,7 +642,7 @@ LabelTipInfo^ TaskListView::ToolHitTest(Drawing::Point ptScreen)
 	tip->Text = task->Title;
 	tip->MultiLine = false;
 	tip->Rect = labelRect;
-	tip->Font = (ITaskBaseExt::IsTopLevel(task) ? m_BoldFont : Font);
+	tip->Font = (ITaskBaseExt::IsTopLevel(task) ? gcnew Drawing::Font(Font, FontStyle::Bold) : Font);
 
 	return tip;
 }
@@ -676,7 +676,6 @@ void TaskListView::OnFontChanged(EventArgs^ e)
 {
 	ListView::OnFontChanged(e);
 
-	m_BoldFont = gcnew Drawing::Font(Font, FontStyle::Bold);
 	Invalidate();
 }
 
@@ -772,6 +771,20 @@ void TaskListView::ShowCompletionCheckboxes::set(bool value)
 	if (m_ShowCompletionCheckboxes != value)
 	{
 		m_ShowCompletionCheckboxes = value;
+		Invalidate();
+	}
+}
+
+bool TaskListView::StrikeThruCompletedTasks::get()
+{
+	return m_StrikeThruCompletedTasks;
+}
+
+void TaskListView::StrikeThruCompletedTasks::set(bool value)
+{
+	if (m_StrikeThruCompletedTasks != value)
+	{
+		m_StrikeThruCompletedTasks = value;
 		Invalidate();
 	}
 }
@@ -961,8 +974,19 @@ void TaskListView::OnDrawItem(DrawListViewItemEventArgs^ e)
 
 Drawing::Font^ TaskListView::GetFont(ITaskBase^ task, bool title)
 {
-	if (title && ITaskBaseExt::IsTopLevel(task))
-		return m_BoldFont;
+	if (title)
+	{
+		auto fontStyle = FontStyle::Regular;
+
+		if (ITaskBaseExt::IsTopLevel(task))
+			fontStyle = (fontStyle | FontStyle::Bold);
+
+		if (m_StrikeThruCompletedTasks && task->IsDone)
+			fontStyle = (fontStyle | FontStyle::Strikeout);
+
+		if (fontStyle != FontStyle::Regular)
+			return gcnew Drawing::Font(Font, fontStyle);
+	}
 
 	return Font;
 }

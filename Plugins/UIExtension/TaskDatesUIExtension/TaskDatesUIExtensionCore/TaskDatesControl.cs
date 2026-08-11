@@ -157,8 +157,8 @@ namespace TaskDatesUIExtension
 			// App settings
 			TaskColorIsBackground = prefs.GetProfileBool("Preferences", "ColorTaskBackground", false);
 			ShowParentsAsFolders = prefs.GetProfileBool("Preferences", "ShowParentsAsFolders", false);
-			ShowCompletionCheckboxes = prefs.GetProfileBool("Preferences", "AllowCheckboxAgainstTreeItem", false);
-			ShowLabelTips = !prefs.GetProfileBool("Preferences", "ShowInfoTips", false);
+			ShowLabelTips = (false == prefs.GetProfileBool("Preferences", "ShowInfoTips", false));
+			StrikeThruCompletedTasks = prefs.GetProfileBool("Preferences", "StrikethroughDone", true);
 
 			if (prefs.GetProfileBool("Preferences", "AlternateLineColor", true))
 				AlternateLineColor = prefs.GetProfileColor("Preferences\\Colors", "AlternateLines", Color.Empty);
