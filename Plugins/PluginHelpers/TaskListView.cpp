@@ -31,30 +31,6 @@ namespace Abstractspoon
 	{
 		namespace PluginHelpers
 		{
-			ref class DefaultItemComparer : System::Collections::IComparer
-			{
-			public:
-				DefaultItemComparer() : m_Column(0), m_Ascending(true) {}
-				DefaultItemComparer(int column, bool ascending) : m_Column(column), m_Ascending(ascending) {}
-
-				virtual int Compare(Object^ x, Object^ y)
-				{
-					int res = StringUtil::NaturalCompare(ASTYPE(x, ListViewItem)->SubItems[m_Column]->Text, 
-														 ASTYPE(y, ListViewItem)->SubItems[m_Column]->Text);
-
-					return (m_Ascending ? res : -res);
-				}
-
-				property int Column { int get() { return m_Column; } }
-				property bool Ascending { bool get() { return m_Ascending; } }
-
-			private:
-				int m_Column;
-				bool m_Ascending;
-			};
-
-			////////////////////////////////////////////////////////////////////////////////////////////////
-
 			// Private class (for now)
 			ref class HeaderControl : Windows::Forms::NativeWindow
 			{
@@ -79,6 +55,12 @@ namespace Abstractspoon
 					return (rWindow.PtInRect({ptScreen.X, ptScreen.Y}) != FALSE);
 				}
 
+				void Redraw()
+				{
+					::InvalidateRect(Win32::GetHwnd(Handle), NULL, FALSE);
+					::UpdateWindow(Win32::GetHwnd(Handle));
+				}
+
 			public:
 				property bool EnableTracking;
 
@@ -86,11 +68,34 @@ namespace Abstractspoon
 				ListView^ m_List;
 
 			protected:
+				void OnColumnClick(Object^ sender, ColumnClickEventArgs^ e)
+				{
+					Debug::Assert(sender == m_List);
+
+					auto sorter = ASTYPE(m_List->ListViewItemSorter, TaskListView::IItemComparer);
+
+					if (sorter != nullptr)
+					{
+						if (e->Column != sorter->Column)
+						{
+							sorter->Column = e->Column;
+							sorter->Ascending = true;
+						}
+						else
+						{
+							sorter->Ascending = !sorter->Ascending;
+						}
+
+						Redraw();
+						m_List->Sort();
+					}
+				}
+
 				void OnDrawColumnHeader(Object^ sender, DrawListViewColumnHeaderEventArgs^ e)
 				{
 					Debug::Assert(sender == m_List);
 
-					auto sorter = ASTYPE(m_List->ListViewItemSorter, DefaultItemComparer);
+					auto sorter = ASTYPE(m_List->ListViewItemSorter, TaskListView::IItemComparer);
 
 					if ((sorter == nullptr) || (sorter->Column != e->ColumnIndex))
 					{
@@ -117,10 +122,14 @@ namespace Abstractspoon
 					case HorizontalAlignment::Right: flags = (flags | TextFormatFlags::Right); break;
 					}
 
+					auto textRect = Rectangle::Inflate(e->Bounds, -2, 0);
+					textRect.Height--;
+					textRect.Width--;
+
 					TextRenderer::DrawText(e->Graphics,
 										   e->Header->Text,
 										   e->Font,
-										   Rectangle::Inflate(e->Bounds, -2/*LabelPadding*/, -1),
+										   textRect,
 										   e->ForeColor,
 										   flags);
 
@@ -165,35 +174,6 @@ namespace Abstractspoon
 					}
 				}
 
-				void OnColumnClick(Object^ sender, ColumnClickEventArgs^ e)
-				{
-					Debug::Assert(sender == m_List);
-
-					auto sorter = ASTYPE(m_List->ListViewItemSorter, DefaultItemComparer);
-
-					if (sorter == nullptr)
-					{
-						if (m_List->ListViewItemSorter != nullptr)
-							return; // not 'our' sorter
-
-						// else 
-						sorter = gcnew DefaultItemComparer(e->Column, true);
-					}
-					else if (e->Column != sorter->Column)
-					{
-						sorter = gcnew DefaultItemComparer(e->Column, true);
-
-						// Clear the previous sort arrow
-						::InvalidateRect(Win32::GetHwnd(Handle), NULL, FALSE);
-					}
-					else
-					{
-						sorter = gcnew DefaultItemComparer(e->Column, !sorter->Ascending);
-					}
-
-					m_List->ListViewItemSorter = sorter;
-				}
-
 				void OnColumnWidthChanging(Object^ sender, ColumnWidthChangingEventArgs^ e)
 				{
 					Debug::Assert(sender == m_List);
@@ -223,6 +203,60 @@ namespace Abstractspoon
 			};
 		}
 	}
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+TaskListView::DefaultItemComparer::DefaultItemComparer() 
+	: 
+	m_Column(-1), 
+	m_Ascending(true) 
+{
+}
+
+int TaskListView::DefaultItemComparer::Column::get()
+{
+	return m_Column;
+}
+
+void TaskListView::DefaultItemComparer::Column::set(int column)
+{
+	m_Column = column;
+}
+
+bool TaskListView::DefaultItemComparer::Ascending::get()
+{
+	return m_Ascending;
+}
+
+void TaskListView::DefaultItemComparer::Ascending::set(bool ascending)
+{
+	m_Ascending = ascending;
+}
+
+int TaskListView::DefaultItemComparer::Compare(Object^ x, Object^ y)
+{
+	if (m_Column == -1)
+		return 0; // not an error
+
+	return CompareItems(ASTYPE(x, ListViewItem), ASTYPE(y, ListViewItem));
+}
+
+int TaskListView::DefaultItemComparer::CompareItems(ListViewItem^ lvi1, ListViewItem^ lvi2)
+{
+	if ((lvi1 == nullptr) || 
+		(lvi2 == nullptr) ||
+		(m_Column < 0) || 
+		(m_Column >= lvi1->SubItems->Count) || 
+		(m_Column >= lvi2->SubItems->Count))
+	{
+		Debug::Assert(false);
+		return 0;
+	}
+	
+	int res = StringUtil::NaturalCompare(lvi1->SubItems[m_Column]->Text, lvi2->SubItems[m_Column]->Text);
+
+	return (m_Ascending ? res : -res);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -257,6 +291,11 @@ TaskListView::TaskListView()
 
 void TaskListView::Initialize(Translator^ trans, UIExtension::TaskIcon^ taskIcons)
 {
+	Initialize(trans, taskIcons, gcnew DefaultItemComparer());
+}
+
+void TaskListView::Initialize(Translator^ trans, UIExtension::TaskIcon^ taskIcons, TaskListView::IItemComparer^ comparer)
+{
 	m_Trans = trans;
 	m_TaskIcons = taskIcons;
 
@@ -269,6 +308,7 @@ void TaskListView::Initialize(Translator^ trans, UIExtension::TaskIcon^ taskIcon
 	DoubleBuffered = true;
 	HotTracking = false;
 	HoverSelection = false;
+	ListViewItemSorter = comparer;
 }
 
 void TaskListView::OnHandleCreated(EventArgs^ e)

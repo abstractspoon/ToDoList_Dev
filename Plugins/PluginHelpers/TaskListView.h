@@ -34,10 +34,22 @@ namespace Abstractspoon
 
 			public ref class TaskListView : Windows::Forms::ListView, ILabelTipHandler
 			{
+
+			public:
+				interface class IItemComparer : System::Collections::IComparer
+				{
+				public:
+					virtual property int Column { int get(); void set(int col); }
+					virtual property bool Ascending { bool get(); void set(bool ascending); }
+				};
+
+				// ---------------------------------------------------
+
 			public:
 				TaskListView();
 
 				void Initialize(Translator^ trans, UIExtension::TaskIcon^ taskIcons);
+				void Initialize(Translator^ trans, UIExtension::TaskIcon^ taskIcons, IItemComparer^ comparer);
 
 				Windows::Forms::ListViewItem^ AddTask(ITaskBase^ base);
 				bool RemoveTask(UInt32 taskId);
@@ -167,7 +179,34 @@ namespace Abstractspoon
 				property int FirstSelectedIndex { int get(); }
 				property int LastSelectedIndex { int get(); }
 				property int LastIndex { int get(); }
+
+				// ---------------------------------------------------
+
+				ref class DefaultItemComparer : IItemComparer
+				{
+				public:
+					DefaultItemComparer();
+
+					// IComparer
+					virtual int Compare(Object^ x, Object^ y);
+
+					// IItemComparer
+					virtual property int Column { int get(); void set(int col); }
+					virtual property bool Ascending { bool get(); void set(bool ascending); }
+
+				protected:
+					virtual int CompareItems(Windows::Forms::ListViewItem^ lvi1,
+											 Windows::Forms::ListViewItem^ lvi2);
+				private:
+					int m_Column;
+					bool m_Ascending;
+				};
+
 			};
+
+			///////////////////////////////////////////////////////////
+
+
 		}
 	}
 }
