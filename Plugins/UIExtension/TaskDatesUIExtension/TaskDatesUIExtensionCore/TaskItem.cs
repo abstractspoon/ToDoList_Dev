@@ -137,7 +137,7 @@ namespace TaskDatesUIExtension
 			{
 				var date = m_Dates.GetItem(m_Attribs, Task.Attribute.StartDate);
 
-				date.Date = task.GetAttributeValue(Task.Attribute.StartDate, true, true); // TODO
+				date.Date = task.GetStartDate(true); // TODO
 				date.Type = "Start Date"; // TODO
 			}
 
@@ -145,16 +145,16 @@ namespace TaskDatesUIExtension
 			{
 				var date = m_Dates.GetItem(m_Attribs, Task.Attribute.DueDate);
 
-				date.Date = task.GetAttributeValue(Task.Attribute.DueDate, true, true); // TODO
-				date.Type = "Due Date";
+				date.Date = task.GetDueDate(true); // TODO
+				date.Type = "Due Date"; // TODO
 			}
 
 			if (task.IsAttributeAvailable(Task.Attribute.DoneDate))
 			{
 				var date = m_Dates.GetItem(m_Attribs, Task.Attribute.DoneDate);
 
-				date.Date = task.GetAttributeValue(Task.Attribute.DoneDate, true, true); // TODO
-				date.Type = "Completion Date";
+				date.Date = task.GetDoneDate();
+				date.Type = "Completion Date"; // TODO
 			}
 
 			return true;
@@ -239,7 +239,7 @@ namespace TaskDatesUIExtension
 
 	///////////////////////////////////////////////////////////////////////////
 
-		public class TaskItemDate : ITaskBase
+	public class TaskItemDate : ITaskBase
 	{
 		private TaskItemAttributes m_Attrib;
 
@@ -256,7 +256,7 @@ namespace TaskDatesUIExtension
 		public bool IsDone		{ get { return m_Attrib.IsDone; } }
 
 		// local
-		public string Date = string.Empty;
+		public DateTime Date = DateTime.MinValue;
 		public String Type = string.Empty;
 		public String LeadIn = string.Empty;
 
@@ -276,6 +276,28 @@ namespace TaskDatesUIExtension
 #endif
 		}
 
+		public string FormatDate(bool iso)
+		{
+			if (DateIsSet)
+				return (iso ? Date.ToString("yyyy-MM-dd") : Date.ToShortDateString());
+
+			// else
+			return string.Empty;
+		}
+
+		public bool DateIsSet
+		{
+			get { return (Date != DateTime.MinValue); }
+		}
+
+		public static int CompareDates(TaskItemDate date1, TaskItemDate date2, bool ascending)
+		{
+			if (ascending)
+				return DateTime.Compare(date1.Date, date2.Date);
+
+			// else
+			return DateTime.Compare(date2.Date, date1.Date);
+		}
 	}
 }
 

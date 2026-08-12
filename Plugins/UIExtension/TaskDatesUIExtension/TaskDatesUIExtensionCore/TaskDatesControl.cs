@@ -33,7 +33,7 @@ namespace TaskDatesUIExtension
 		
 		// --------------------------------------------------------
 
-		const int TaskCol	= 0;
+		const int TitleCol	= 0;
 		const int DateCol	= 1;
 		const int TypeCol	= 2;
 		const int LeadInCol = 3;
@@ -47,6 +47,8 @@ namespace TaskDatesUIExtension
 		private int[] m_ColHeaderWidth			= new int[4] { -1, -1, -1, -1 };
 		private int[] m_ColValueMaxCharWidth	= new int[4] { -1, -1, -1, -1 };
 
+		private bool m_IsoDates;
+
 		// --------------------------------------------------------
 
 		public TaskDatesControl()
@@ -56,6 +58,11 @@ namespace TaskDatesUIExtension
 			SizeTaskColumnToFit = true;
 
 			base.SelectedIndexChanged += new EventHandler(OnListSelectionChange);
+		}
+
+		public new void Initialize(Translator trans, UIExtension.TaskIcon taskIcons)
+		{
+			base.Initialize(trans, taskIcons, new ItemDateComparer());
 		}
 
 		public void UpdateTasks(TaskList tasks, UIExtension.UpdateType type)
@@ -155,6 +162,8 @@ namespace TaskDatesUIExtension
 		public void LoadPreferences(Preferences prefs, String key, bool appOnly)
 		{
 			// App settings
+			ShowIsoDates(prefs.GetProfileBool("Preferences", "DisplayDatesInISO", false));
+
 			TaskColorIsBackground = prefs.GetProfileBool("Preferences", "ColorTaskBackground", false);
 			ShowParentsAsFolders = prefs.GetProfileBool("Preferences", "ShowParentsAsFolders", false);
 			ShowLabelTips = (false == prefs.GetProfileBool("Preferences", "ShowInfoTips", false));
@@ -227,6 +236,18 @@ namespace TaskDatesUIExtension
 		// --------------------------------------------------------
 		// Message handlers
 
+		private void ShowIsoDates(bool iso)
+		{
+			if (iso != m_IsoDates)
+			{
+				m_IsoDates = iso;
+
+				// Update item dates
+				foreach (ListViewItem lvi in Items)
+					SetItemValue(lvi, DateCol, (lvi.Tag as TaskItemDate).FormatDate(m_IsoDates));
+			}
+		}
+
 		private void OnListSelectionChange(object sender, EventArgs e)
 		{
 			// Don't forward selection changes if:
@@ -250,35 +271,32 @@ namespace TaskDatesUIExtension
 			SelectionChange?.Invoke(this, SelectedTaskIds);
 		}
 
-		protected bool AddDate(TaskItemDate date)
+		protected void AddDate(TaskItemDate date)
 		{
-			var lvItem = AddTask(date);
-			return SetTaskValues(lvItem, date.Date, date.Type, date.LeadIn);
+			SetItemValues(AddTask(date), date.FormatDate(m_IsoDates), date.Type, date.LeadIn);
 		}
 
-		protected bool SetTaskValues(uint taskId, string date, string type, string leadin)
+		protected void SetItemValues(uint taskId, string date, string type, string leadin)
 		{
-			var lvItem = FindItem(taskId);
-			return SetTaskValues(lvItem, date, type, leadin);
+			SetItemValues(FindItem(taskId), date, type, leadin);
 		}
 
-		protected bool SetTaskValues(ListViewItem lvItem, string date, string type, string leadin)
+		protected void SetItemValues(ListViewItem lvItem, string date, string type, string leadin)
 		{
-			if (lvItem == null)
-				return false;
+			SetItemValue(lvItem, DateCol, date);
+			SetItemValue(lvItem, TypeCol, type);
+			SetItemValue(lvItem, LeadInCol, leadin);
+		}
 
-			while (lvItem.SubItems.Count < 4)
+		protected void SetItemValue(ListViewItem lvItem, int column, string value)
+		{
+			Debug.Assert(lvItem != null);
+
+			while (lvItem.SubItems.Count <= column)
 				lvItem.SubItems.Add("");
 
-			lvItem.SubItems[DateCol].Text = date;
-			lvItem.SubItems[TypeCol].Text = type;
-			lvItem.SubItems[LeadInCol].Text = leadin;
-
-			m_ColValueMaxCharWidth[DateCol] = Math.Max(date.Length, m_ColValueMaxCharWidth[DateCol]);
-			m_ColValueMaxCharWidth[TypeCol] = Math.Max(type.Length, m_ColValueMaxCharWidth[TypeCol]);
-			m_ColValueMaxCharWidth[LeadInCol] = Math.Max(leadin.Length, m_ColValueMaxCharWidth[TypeCol]);
-
-			return true;
+			lvItem.SubItems[column].Text = value;
+			m_ColValueMaxCharWidth[column] = Math.Max(value.Length, m_ColValueMaxCharWidth[column]);
 		}
 
 		private void RefreshColumnWidths()
@@ -314,5 +332,20 @@ namespace TaskDatesUIExtension
 			Columns[col].Width = colWidth;
 		}
 
+		////////////////////////////////////////////////////////////////
+
+		class ItemDateComparer : DefaultItemComparer
+		{
+			protected override int CompareItems(ListViewItem lvi1, ListViewItem lvi2)
+			{
+				switch (Column)
+				{
+				case TaskDatesControl.DateCol:
+					return TaskItemDate.CompareDates((lvi1.Tag as TaskItemDate), (lvi2.Tag as TaskItemDate), Ascending);
+				}
+				
+				return base.CompareItems(lvi1, lvi2);
+			}
+		}
 	}
 }
