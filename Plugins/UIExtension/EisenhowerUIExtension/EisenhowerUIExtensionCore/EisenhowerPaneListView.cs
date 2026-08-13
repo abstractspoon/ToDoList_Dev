@@ -13,7 +13,7 @@ namespace EisenhowerUIExtension
 {
 	public partial class EisenhowerPaneListView : TaskListView
 	{
-		const int TaskCol	= 0;
+		const int TitleCol	= 0;
 		const int XCol		= 1;
 		const int YCol		= 2;
 
@@ -222,6 +222,14 @@ namespace EisenhowerUIExtension
 
 			// all else
 			return base.GetTaskCheckboxState(task);
+		}
+
+		protected override TextFormatFlags GetTextAlignment(int column)
+		{
+			if (column == TitleCol)
+				return base.GetTextAlignment(column);
+
+			return TextFormatFlags.Right; // numeric
 		}
 
 		private void RefreshVariableColumnWidth(int col, Graphics g)

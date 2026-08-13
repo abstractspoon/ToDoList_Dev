@@ -220,6 +220,18 @@ namespace TaskDatesUIExtension
 		// --------------------------------------------------------
 		// Message handlers
 
+		protected override TextFormatFlags GetTextAlignment(int column)
+		{
+			switch (column)
+			{
+			case TitleCol:
+			case TypeCol:
+				return base.GetTextAlignment(column);
+			}
+
+			return TextFormatFlags.Right; // numeric
+		}
+
 		private void RebuildListView()
 		{
 			base.Items.Clear();

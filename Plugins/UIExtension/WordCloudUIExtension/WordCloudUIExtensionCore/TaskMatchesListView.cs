@@ -16,6 +16,9 @@ namespace WordCloudUIExtension
 	{
 		const int DefaultMaxTaskId = 100;
 
+		const int TitleCol = 0;
+		const int IdCol = 0;
+
 		// -------------------------------------------------------------
 
 		private uint m_MaxTaskId = DefaultMaxTaskId;
@@ -41,7 +44,7 @@ namespace WordCloudUIExtension
 				Columns.Add(Translate("Task Matches", Translator.Type.Header));
 				Columns.Add(Translate("ID", Translator.Type.Header));
 
-				Columns[1].Width = -2; // Header width
+				Columns[IdCol].Width = -2; // Header width
 
 				// Hack to prevent base class showing a 'no-drag' cursor
 				// until we can work out a better fix
@@ -66,8 +69,8 @@ namespace WordCloudUIExtension
 				int headerWidth   = (int)(graphics.MeasureString(Columns[1].Text, Font).Width + (headerPadding * 2));
 				int maxItemWidth  = (int)(graphics.MeasureString(m_MaxTaskId.ToString(), Font).Width + (2 * DPIScaling.Scale(2)));
 
-				Columns[1].Width = Math.Max(headerWidth, maxItemWidth);
-				Columns[0].Width = (ClientRectangle.Width - Columns[1].Width - 2);
+				Columns[IdCol].Width = Math.Max(headerWidth, maxItemWidth);
+				Columns[TitleCol].Width = (ClientRectangle.Width - Columns[1].Width - 2);
 			}
 		}
 
@@ -109,6 +112,14 @@ namespace WordCloudUIExtension
 
 			// all else
 			return base.GetTaskCheckboxState(task);
+		}
+
+		protected override TextFormatFlags GetTextAlignment(int column)
+		{
+			if (column == TitleCol)
+				return base.GetTextAlignment(column);
+
+			return TextFormatFlags.Right; // numeric
 		}
 
 		public new UInt32 SelectTask(UInt32 taskId)

@@ -953,17 +953,15 @@ void TaskListView::OnDrawItem(DrawListViewItemEventArgs^ e)
 
 	auto subItemRect = itemRect;
 
-	for (int colIndex = 0; colIndex < e->Item->SubItems->Count; colIndex++)
+	for (int column = 0; column < e->Item->SubItems->Count; column++)
 	{
-		auto subItem = e->Item->SubItems[colIndex];
-		auto horzAlign = StringAlignment::Near;
-
-		subItemRect.Width = Columns[colIndex]->Width;
+		auto subItem = e->Item->SubItems[column];
+		subItemRect.Width = Columns[column]->Width;
 
 		auto textRect = Rectangle::Inflate(subItemRect, -LabelPadding, -1);
-		auto flags = (TextFormatFlags::SingleLine | TextFormatFlags::VerticalCenter | TextFormatFlags::Left);
+		auto flags = (GetTextAlignment(column) | TextFormatFlags::SingleLine | TextFormatFlags::VerticalCenter | TextFormatFlags::Left);
 
-		if (colIndex == 0)
+		if (column == 0)
 		{
 			flags = (flags | TextFormatFlags::EndEllipsis);
 
@@ -991,14 +989,10 @@ void TaskListView::OnDrawItem(DrawListViewItemEventArgs^ e)
 				textRect.Width -= TextIconOffset;
 			}
 		}
-		else // numbers
-		{
-			flags = (flags | TextFormatFlags::Right);
-		}
 
 		TextRenderer::DrawText(e->Graphics, 
 							   subItem->Text, 
-							   GetFont(task, (colIndex == 0)),
+							   GetFont(task, (column == 0)),
 							   textRect, 
 							   textColor, 
 							   flags);

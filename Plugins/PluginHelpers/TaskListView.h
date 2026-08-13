@@ -168,6 +168,7 @@ namespace Abstractspoon
 				virtual bool TaskMatches(ITaskBase^ task, String^ phrase, bool caseSensitive, bool wholeWord, bool findReplace);
 				virtual Windows::Forms::VisualStyles::CheckBoxState GetTaskCheckboxState(ITaskBase^ task);
 				virtual bool IsItemSelected(Windows::Forms::ListViewItem^ lvItem) { return lvItem->Selected; }
+				virtual Windows::Forms::TextFormatFlags GetTextAlignment(int column) { return Windows::Forms::TextFormatFlags::Left; }
 
 				property UIExtension::TaskIcon^ TaskIcons { UIExtension::TaskIcon^ get() { return m_TaskIcons; } }
 				property bool ItemsHaveIcons { bool get(); void set(bool value); };
