@@ -52,7 +52,7 @@
 			this.m_GroupByLabel.Name = "m_GroupByLabel";
 			this.m_GroupByLabel.Size = new System.Drawing.Size(48, 13);
 			this.m_GroupByLabel.TabIndex = 25;
-			this.m_GroupByLabel.Text = "GroupBy";
+			this.m_GroupByLabel.Text = "Group By";
 			// 
 			// m_OptionsLabel
 			// 
@@ -158,7 +158,7 @@
 			// 
 			// columnHeader4
 			// 
-			this.columnHeader4.Text = "Leadin";
+			this.columnHeader4.Text = "Offset";
 			// 
 			// TaskDatesUIExtensionCore
 			// 

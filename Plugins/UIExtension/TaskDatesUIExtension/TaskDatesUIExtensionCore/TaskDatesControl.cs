@@ -36,7 +36,7 @@ namespace TaskDatesUIExtension
 		const int TitleCol	= 0;
 		const int DateCol	= 1;
 		const int TypeCol	= 2;
-		const int LeadInCol = 3;
+		const int OffsetCol = 3;
 
 		// --------------------------------------------------------
 
@@ -75,6 +75,10 @@ namespace TaskDatesUIExtension
 			var availAttribs = tasks.GetAvailableAttributes(m_Trans);
 			var modIds = m_TaskItems.Update(tasks, type, availAttribs);
 
+			// Cache and clear sorter for performance
+			var sorter = ListViewItemSorter;
+			ListViewItemSorter = null;
+
 			switch (type)
 			{
 			case UIExtension.UpdateType.All:
@@ -96,6 +100,9 @@ namespace TaskDatesUIExtension
 				SelectTasks(selTaskIds);
 
 			RefreshColumnWidths();
+
+			// Restore sorter
+			ListViewItemSorter = sorter;
 
 			// For reasons I don't yet understand, invalidation after a 
 			// task update does NOT ALWAYS result in a subsequent repaint
@@ -220,13 +227,18 @@ namespace TaskDatesUIExtension
 			foreach (var item in m_TaskItems.Values)
 			{
 				foreach (var date in item.Dates)
-					SetItemValues(AddTask(date), date.FormatDate(m_IsoDates), date.Type, date.LeadIn);
+				{
+					SetItemValues(AddTask(date), 
+								  date.FormatDate(m_IsoDates), 
+								  date.Type, 
+								  date.FormatOffset(DateTime.Today));
+				}
 			}
 		}
 
 		private void RefreshListViewText(HashSet<uint> modIds, IEnumerable<TaskAttributeItem> attribs)
 		{
-			// Because multiple list items can have the same Id
+			// Because multiple list items can have the same Task Id
 			// we have to go thru the entire list looking for matches
 			foreach (ListViewItem lvi in Items)
 			{
@@ -249,7 +261,13 @@ namespace TaskDatesUIExtension
 						case Task.Attribute.LastModifiedDate:
 						case Task.Attribute.CustomAttribute:
 							if (date.AttributeId == TaskItemDates.GetAttributeId(attrib))
+							{
+								// Update the date
 								SetItemValue(lvi, DateCol, date.FormatDate(m_IsoDates));
+
+								// And its offset
+								SetItemValue(lvi, OffsetCol, date.FormatOffset(DateTime.Today));
+							}
 							break;
 						}
 					}
@@ -292,16 +310,11 @@ namespace TaskDatesUIExtension
 			SelectionChange?.Invoke(this, SelectedTaskIds);
 		}
 
-		protected void SetItemValues(uint taskId, string date, string type, string leadin)
-		{
-			SetItemValues(FindItem(taskId), date, type, leadin);
-		}
-
-		protected void SetItemValues(ListViewItem lvItem, string date, string type, string leadin)
+		protected void SetItemValues(ListViewItem lvItem, string date, string type, string offset)
 		{
 			SetItemValue(lvItem, DateCol, date);
 			SetItemValue(lvItem, TypeCol, type);
-			SetItemValue(lvItem, LeadInCol, leadin);
+			SetItemValue(lvItem, OffsetCol, offset);
 		}
 
 		protected void SetItemValue(ListViewItem lvItem, int column, string value)
@@ -309,10 +322,13 @@ namespace TaskDatesUIExtension
 			Debug.Assert(lvItem != null);
 
 			while (lvItem.SubItems.Count <= column)
-				lvItem.SubItems.Add("");
+				lvItem.SubItems.Add(String.Empty);
 
-			lvItem.SubItems[column].Text = value;
-			m_ColValueMaxCharWidth[column] = Math.Max(value.Length, m_ColValueMaxCharWidth[column]);
+			if (value != lvItem.SubItems[column].Text)
+			{
+				lvItem.SubItems[column].Text = value;
+				m_ColValueMaxCharWidth[column] = Math.Max(value.Length, m_ColValueMaxCharWidth[column]);
+			}
 		}
 
 		private void RefreshColumnWidths()
@@ -321,7 +337,7 @@ namespace TaskDatesUIExtension
 			{
 				RefreshVariableColumnWidth(DateCol, graphics);
 				RefreshVariableColumnWidth(TypeCol, graphics);
-				RefreshVariableColumnWidth(LeadInCol, graphics);
+				RefreshVariableColumnWidth(OffsetCol, graphics);
 			}
 
 			// Task column takes up tyhe slack

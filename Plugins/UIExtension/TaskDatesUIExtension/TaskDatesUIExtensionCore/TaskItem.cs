@@ -287,7 +287,6 @@ namespace TaskDatesUIExtension
 		// local
 		public DateTime Date = DateTime.MinValue;
 		public String Type = string.Empty;
-		public String LeadIn = string.Empty;
 
 		public String AttributeId { get; private set; }
 
@@ -313,6 +312,15 @@ namespace TaskDatesUIExtension
 		{
 			if (DateIsSet)
 				return (iso ? Date.ToString("yyyy-MM-dd") : Date.ToShortDateString());
+
+			// else
+			return string.Empty;
+		}
+
+		public string FormatOffset(DateTime from)
+		{
+			if (DateIsSet)
+				return DateTime.Today.Subtract(Date).Days.ToString();
 
 			// else
 			return string.Empty;
