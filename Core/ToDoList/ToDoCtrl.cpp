@@ -181,17 +181,9 @@ void CToDoCtrl::IDLETASKS::RefreshAttributeValues(const CTDCAttributeMap& mapAtt
 	if (!mapAttribIDs.MatchAll(m_mapRefreshAttribIDs))
 	{
 		if (mapAttribIDs.Has(TDCA_ALL) || !m_mapRefreshAttribIDs.IsEmpty())
-		{
 			m_mapRefreshAttribIDs.Set(TDCA_ALL);
-		}
 		else
-		{
 			m_mapRefreshAttribIDs.Append(mapAttribIDs);
-
-			// Always add modification attributes
-			m_mapRefreshAttribIDs.Add(TDCA_LASTMODBY);
-			m_mapRefreshAttribIDs.Add(TDCA_LASTMODDATE);
-		}
 	}
 }
 
