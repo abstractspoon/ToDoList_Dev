@@ -4871,6 +4871,8 @@ void CTDLTaskCtrlBase::SetModified(const CTDCAttributeMap& mapAttribIDs, BOOL bA
 		case TDCA_COMMENTS:
 		case TDCA_ENCRYPT:
 		case TDCA_METADATA:
+		case TDCA_LASTMODBY:
+		case TDCA_LASTMODDATE:
 			break;
 
 		case TDCA_COLOR:
@@ -5179,7 +5181,15 @@ void CTDLTaskCtrlBase::GetAttributesAffectedByMod(TDC_ATTRIBUTE nAttribID, CTDCA
 		break;
 	} // -------------------------------------------------------------------------
 
-	  // Finally check for colour change
+	// Add 'last modified' if the attributes contain a task attribute
+	// but it's not a 'new task edit'
+	if (!mapAttribIDs.IsEmpty() && TDC::IsTaskAttribute(mapAttribIDs.GetFirst()))
+	{
+		mapAttribIDs.Add(TDCA_LASTMODBY);
+		mapAttribIDs.Add(TDCA_LASTMODDATE);
+	}
+
+	// Finally check for colour change
 	if (ModsCauseTaskTextColorChange(mapAttribIDs) && !mapAttribIDs.Has(TDCA_ALL))
 	{
 		mapAttribIDs.Add(TDCA_COLOR);

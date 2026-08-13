@@ -54,8 +54,7 @@ private:
 	{
 		IDLETASKS(CToDoCtrl& tdc);
 
-		void RefreshAttributeValues(); // TDCA_ALL
-		void RefreshAttributeValues(const CTDCAttributeMap& aAttribIDs, BOOL bTaskMod);
+		void RefreshAttributeValues(const CTDCAttributeMap& aAttribIDs = TDCA_ALL);
 		BOOL Process();
 
 	protected:
