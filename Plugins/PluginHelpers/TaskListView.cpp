@@ -1143,7 +1143,7 @@ void TaskListView::WndProc(Message% m)
 
 				auto task = ASTYPE(lvHit->Tag, ITaskBase);
 
-				if (IsTaskEditable(task) && GetTaskLabelRect(task->Id).Contains(pos))
+				if (IsTaskEditable(task) && CalcLabelRect(lvHit, TaskListView::LabelExtents::TitleColumn).Contains(pos))
 					EditTaskLabel(this, task);
 
 				return; // We handled it
