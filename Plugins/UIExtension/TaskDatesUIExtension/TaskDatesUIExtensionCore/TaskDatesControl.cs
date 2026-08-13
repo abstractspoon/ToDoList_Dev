@@ -63,13 +63,17 @@ namespace TaskDatesUIExtension
 		public new void Initialize(Translator trans, UIExtension.TaskIcon taskIcons)
 		{
 			base.Initialize(trans, taskIcons, new ItemDateComparer());
+
+			// Hack to prevent base class showing a 'no-drag' cursor
+			// until we can work out a better fix
+			IsTaskDraggable += (s, e) => { return true; };
 		}
 
 		public void UpdateTasks(TaskList tasks, UIExtension.UpdateType type)
 		{
 			var selTaskIds = SelectedTaskIds;
-
-			var modIds = m_TaskItems.Update(tasks, type);
+			var availAttribs = tasks.GetAvailableAttributes(m_Trans);
+			var modIds = m_TaskItems.Update(tasks, type, availAttribs);
 
 			switch (type)
 			{
@@ -78,6 +82,7 @@ namespace TaskDatesUIExtension
 				break;
 
 			case UIExtension.UpdateType.Edit:
+				RefreshListViewText(modIds, availAttribs);
 				break;
 
 			case UIExtension.UpdateType.New:
@@ -96,19 +101,6 @@ namespace TaskDatesUIExtension
 			// task update does NOT ALWAYS result in a subsequent repaint
 			// so we solve it with a delayed-redraw
 			m_IdleTasks.Redraw();
-		}
-
-		private void RebuildListView()
-		{
-			base.Items.Clear();
-
-			foreach (var item in m_TaskItems.Values)
-			{
-				foreach (var date in item.Dates)
-				{
-					AddDate(date);
-				}
-			}
 		}
 
 		public bool WantTaskUpdate(Task.Attribute attrib)
@@ -143,12 +135,6 @@ namespace TaskDatesUIExtension
 		public void SetFont(String faceName, int pointSize)
 		{
 			base.Font = new Font(faceName, pointSize);
-		}
-
-		public new bool HitTest(Point ptScreen, UIExtension.HitTest hitTest)
-		{
-			// TODO
-			return false;
 		}
 
 		public bool ShowContextMenu(Point ptScreen)
@@ -218,15 +204,6 @@ namespace TaskDatesUIExtension
 			return SelectTaskEx(text, selectTask, caseSensitive, wholeWord, findReplace);
 		}
 
-		public void SetAttributeNames(string xAttribName, string yAttribName, bool updateColWidths)
-		{
-			Columns[DateCol].Text = xAttribName;
-			Columns[TypeCol].Text = yAttribName;
-
-			if (updateColWidths)
-				RefreshColumnWidths();
-		}
-
 		public uint FirstTaskId  { get { return base.GetTaskId(0); } }
 		public uint LastTaskId   { get { return base.GetTaskId(LastIndex); } }
 
@@ -235,6 +212,50 @@ namespace TaskDatesUIExtension
 
 		// --------------------------------------------------------
 		// Message handlers
+
+		private void RebuildListView()
+		{
+			base.Items.Clear();
+
+			foreach (var item in m_TaskItems.Values)
+			{
+				foreach (var date in item.Dates)
+					SetItemValues(AddTask(date), date.FormatDate(m_IsoDates), date.Type, date.LeadIn);
+			}
+		}
+
+		private void RefreshListViewText(HashSet<uint> modIds, IEnumerable<TaskAttributeItem> attribs)
+		{
+			// Because multiple list items can have the same Id
+			// we have to go thru the entire list looking for matches
+			foreach (ListViewItem lvi in Items)
+			{
+				TaskItemDate date = (lvi.Tag as TaskItemDate);
+
+				if (modIds.Contains(date.Id))
+				{
+					foreach (var attrib in attribs)
+					{
+						switch (attrib.AttributeId)
+						{
+						case Task.Attribute.Title:
+							SetItemValue(lvi, TitleCol, date.Title);
+							break;
+
+						case Task.Attribute.CreationDate:
+						case Task.Attribute.StartDate:
+						case Task.Attribute.DueDate:
+						case Task.Attribute.DoneDate:
+						case Task.Attribute.LastModifiedDate:
+						case Task.Attribute.CustomAttribute:
+							if (date.AttributeId == TaskItemDates.GetAttributeId(attrib))
+								SetItemValue(lvi, DateCol, date.FormatDate(m_IsoDates));
+							break;
+						}
+					}
+				}
+			}
+		}
 
 		private void ShowIsoDates(bool iso)
 		{
@@ -269,11 +290,6 @@ namespace TaskDatesUIExtension
 				return;
 
 			SelectionChange?.Invoke(this, SelectedTaskIds);
-		}
-
-		protected void AddDate(TaskItemDate date)
-		{
-			SetItemValues(AddTask(date), date.FormatDate(m_IsoDates), date.Type, date.LeadIn);
 		}
 
 		protected void SetItemValues(uint taskId, string date, string type, string leadin)

@@ -958,6 +958,20 @@ DateTime Task::GetCreationDate()
 	return DateTime::MinValue;
 }
 
+DateTime Task::GetDate(Attribute attrib, bool calculated)
+{
+	switch (attrib)
+	{
+	case Attribute::CreationDate:		return GetCreationDate();
+	case Attribute::StartDate:			return GetStartDate(calculated);
+	case Attribute::DueDate:			return GetDueDate(calculated);
+	case Attribute::DoneDate:			return GetDoneDate();
+	case Attribute::LastModifiedDate:	return GetLastModifiedDate();
+	}
+
+	return DateTime::MinValue;
+}
+
 String^ Task::GetDoneDateString()
 {
 	return GETTASKSTR(GetTaskDoneDateString);
@@ -980,7 +994,21 @@ String^ Task::GetCreationDateString()
 
 String^ Task::GetLastModifiedDateString()
 {
-	return "";//GETTASKSTR(GetTaskLastModifiedBy);
+	return GetLastModifiedDate().ToShortDateString();
+}
+
+String^ Task::GetDateString(Attribute attrib, bool calculated)
+{
+	switch (attrib)
+	{
+	case Attribute::CreationDate:		return GetCreationDateString();
+	case Attribute::StartDate:			return GetStartDateString(calculated);
+	case Attribute::DueDate:			return GetDueDateString(calculated);
+	case Attribute::DoneDate:			return GetDoneDateString();
+	case Attribute::LastModifiedDate:	return GetLastModifiedDateString();
+	}
+
+	return String::Empty;
 }
 
 String^ Task::GetLastModifiedBy()

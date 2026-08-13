@@ -9,23 +9,24 @@ namespace TaskDatesUIExtension
 {
 	public class TaskItems : Dictionary<uint, TaskItem>
 	{
-		public List<uint> Update(TaskList tasks, UIExtension.UpdateType type)
+		public HashSet<uint> Update(TaskList tasks, UIExtension.UpdateType type, IEnumerable<TaskAttributeItem> availAttribs)
 		{
-			List<uint> taskIds = null;
+			HashSet<uint> taskIds = null;
+			var dateAttribs = GetDateAttributeDefinitions(availAttribs);
 
 			switch (type)
 			{
 			case UIExtension.UpdateType.All:
 				Clear();
-				taskIds = Update(tasks);
+				taskIds = Update(tasks, dateAttribs);
 				break;
 
 			case UIExtension.UpdateType.Edit:
-				taskIds = Update(tasks);
+				taskIds = Update(tasks, dateAttribs);
 				break;
 
 			case UIExtension.UpdateType.New:
-				taskIds = Update(tasks);
+				taskIds = Update(tasks, dateAttribs);
 				break;
 
 			case UIExtension.UpdateType.Delete:
@@ -36,16 +37,42 @@ namespace TaskDatesUIExtension
 			return taskIds;
 		}
 
+		private List<TaskAttributeItem> GetDateAttributeDefinitions(IEnumerable<TaskAttributeItem> availAttribs)
+		{
+			var dateAttribs = new List<TaskAttributeItem>();
+
+			foreach (var attrib in availAttribs)
+			{
+				switch (attrib.AttributeId)
+				{
+				case Task.Attribute.CreationDate:
+				case Task.Attribute.StartDate:
+				case Task.Attribute.DueDate:
+				case Task.Attribute.DoneDate:
+				case Task.Attribute.LastModifiedDate:
+					dateAttribs.Add(attrib);
+					break;
+
+				case Task.Attribute.CustomAttribute:
+					if (attrib.CustomAttributeType == CustomAttributeDefinition.Attribute.Date)
+						dateAttribs.Add(attrib);
+					break;
+				}
+			}
+
+			return dateAttribs;
+		}
+
 		public bool HasItem(uint taskId)
 		{
 			return ContainsKey(taskId);
 		}
 
-		public TaskItem GetItem(uint taskId, bool autoCreate = false)
+		public TaskItem GetItem(uint taskId, bool autoAdd = false)
 		{
 			TaskItem taskItem;
 
-			if (!TryGetValue(taskId, out taskItem) && autoCreate)
+			if (!TryGetValue(taskId, out taskItem) && autoAdd)
 			{
 				taskItem = new TaskItem("", taskId);
 				Add(taskId, taskItem);
@@ -56,21 +83,21 @@ namespace TaskDatesUIExtension
 
 		// ---------------------------------
 
-		private List<uint> Update(TaskList tasks)
+		private HashSet<uint> Update(TaskList tasks, List<TaskAttributeItem> dateAttribs)
 		{
-			var modifiedTaskIds = new List<uint>();
+			var modifiedTaskIds = new HashSet<uint>();
 
 			Task task = tasks.GetFirstTask();
 
-			while (task.IsValid() && ProcessTaskUpdate(task, modifiedTaskIds))
+			while (task.IsValid() && ProcessTaskUpdate(task, dateAttribs, modifiedTaskIds))
 				task = task.GetNextTask();
 
 			return modifiedTaskIds;
 		}
 
-		private List<uint> RemoveDeletedTasks(TaskList tasks)
+		private HashSet<uint> RemoveDeletedTasks(TaskList tasks)
 		{
-			var deletedTaskIds = new List<uint>();
+			var deletedTaskIds = new HashSet<uint>();
 
 			// 1. Locate the tasks
 			foreach (var taskId in Keys)
@@ -80,14 +107,13 @@ namespace TaskDatesUIExtension
 			}
 
 			// 2. Remove them
-			deletedTaskIds?.ForEach(id => Remove(id));
+			foreach (var id in deletedTaskIds)
+				Remove(id);
 
 			return deletedTaskIds;
 		}
 
-		// -------------------------------------------------
-
-		private bool ProcessTaskUpdate(Task task, List<uint> modifiedTaskIds)
+		private bool ProcessTaskUpdate(Task task, IEnumerable<TaskAttributeItem> dateAttribs, HashSet<uint> modifiedTaskIds)
 		{
 			if (!task.IsValid())
 				return false;
@@ -95,7 +121,7 @@ namespace TaskDatesUIExtension
 			uint taskId = task.GetID();
 			var item = GetItem(taskId, true);
 
-			if (!item.ProcessTaskUpdate(task))
+			if (!item.ProcessTaskUpdate(task, dateAttribs))
 				return false;
 
 			modifiedTaskIds?.Add(taskId);
@@ -103,8 +129,11 @@ namespace TaskDatesUIExtension
 			// Process children
 			Task subtask = task.GetFirstSubtask();
 
-			while (subtask.IsValid() && ProcessTaskUpdate(subtask, modifiedTaskIds)) // RECURSIVE CALL
+			while (subtask.IsValid())
+			{
+				ProcessTaskUpdate(subtask, dateAttribs, modifiedTaskIds); // RECURSIVE CALL
 				subtask = subtask.GetNextTask();
+			}
 
 			return true;
 		}
@@ -125,42 +154,34 @@ namespace TaskDatesUIExtension
 			m_Dates = new TaskItemDates();
 		}
 
-		public IEnumerable<TaskItemDate> Dates { get { return m_Dates.Values; } }
+		public IEnumerable<TaskItemDate> Dates
+		{
+			get
+			{
+				return m_Dates.Values;
+			}
+		}
 
-		public bool ProcessTaskUpdate(Task task)
+		public bool ProcessTaskUpdate(Task task, IEnumerable<TaskAttributeItem> dateAttribs)
 		{
 			if (!m_Attribs.ProcessTaskUpdate(task))
 				return false;
 
 			// Date Attributes
-			if (task.IsAttributeAvailable(Task.Attribute.StartDate))
+			foreach (var attrib in dateAttribs)
 			{
-				var date = m_Dates.GetItem(m_Attribs, Task.Attribute.StartDate);
+				var date = m_Dates.GetItem(TaskItemDates.GetAttributeId(attrib), m_Attribs);
+				date.Type = attrib.Label;
 
-				date.Date = task.GetStartDate(true); // TODO
-				date.Type = "Start Date"; // TODO
-			}
-
-			if (task.IsAttributeAvailable(Task.Attribute.DueDate))
-			{
-				var date = m_Dates.GetItem(m_Attribs, Task.Attribute.DueDate);
-
-				date.Date = task.GetDueDate(true); // TODO
-				date.Type = "Due Date"; // TODO
-			}
-
-			if (task.IsAttributeAvailable(Task.Attribute.DoneDate))
-			{
-				var date = m_Dates.GetItem(m_Attribs, Task.Attribute.DoneDate);
-
-				date.Date = task.GetDoneDate();
-				date.Type = "Completion Date"; // TODO
+				if (attrib.IsCustom())
+					DateTime.TryParse(task.GetCustomAttributeValue(attrib.CustomAttributeId, true), out date.Date);
+				else
+					date.Date = task.GetDate(attrib.AttributeId, true); // TODO
 			}
 
 			return true;
 		}
 
-		// -----------------------------------------------------------------
 	}
 
 	///////////////////////////////////////////////////////////////////////////
@@ -218,22 +239,30 @@ namespace TaskDatesUIExtension
 
 	public class TaskItemDates : Dictionary<string, TaskItemDate>
 	{
-		public TaskItemDate GetItem(TaskItemAttributes attribs, Task.Attribute attribId, bool autoAdd = true)
+		public TaskItemDate GetItem(Task.Attribute attribId, TaskItemAttributes attribs = null)
 		{
-			return GetItem(attribs, attribId.ToString(), autoAdd);
+			return GetItem(attribId.ToString(), attribs);
 		}
 
-		public TaskItemDate GetItem(TaskItemAttributes attribs, string attribId, bool autoAdd = true)
+		public TaskItemDate GetItem(string attribId, TaskItemAttributes attribs = null)
 		{
 			TaskItemDate date = null;
 
-			if (!TryGetValue(attribId, out date) && autoAdd)
+			if (!TryGetValue(attribId, out date) && (attribs != null))
 			{
-				date = new TaskItemDate(attribs);
+				date = new TaskItemDate(attribId, attribs);
 				this[attribId.ToString()] = date;
 			}
 
 			return date;
+		}
+
+		public static string GetAttributeId(TaskAttributeItem attrib)
+		{
+			if (attrib.IsCustom())
+				return attrib.CustomAttributeId;
+
+			return attrib.AttributeId.ToString();
 		}
 	}
 
@@ -260,10 +289,14 @@ namespace TaskDatesUIExtension
 		public String Type = string.Empty;
 		public String LeadIn = string.Empty;
 
+		public String AttributeId { get; private set; }
+
 		// -----------------------------------------------------------------
 
-		public TaskItemDate(TaskItemAttributes attrib)
+		public TaskItemDate(string attribId, TaskItemAttributes attrib)
 		{
+			AttributeId = attribId;
+
 			m_Attrib = attrib;
 		}
 

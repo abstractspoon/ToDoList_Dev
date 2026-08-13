@@ -172,6 +172,9 @@ namespace Abstractspoon
 				String^ GetLastModifiedDateString();
 				String^ GetLastModifiedBy();
 
+				DateTime GetDate(Attribute attrib, bool calculated);
+				String^ GetDateString(Attribute attrib, bool calculated);
+
 				bool IsDone();
 				bool IsDue();
 				bool IsGoodAsDone();
