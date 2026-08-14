@@ -527,6 +527,16 @@ List<UInt32>^ TaskListView::SelectedTaskIds::get()
 	return taskIds;
 }
 
+List<ITaskBase^>^ TaskListView::SelectedTasks::get()
+{
+	auto tasks = gcnew List<ITaskBase^>();
+
+	for each (int index in SelectedIndices)
+		tasks->Add(GetTask(index));
+
+	return tasks;
+}
+
 UInt32 TaskListView::SelectedTaskId::get()
 {
 	auto selTask = SelectedTask;
@@ -911,10 +921,11 @@ TaskListView::UpdateState^ TaskListView::BeginUpdate()
 {
 	auto state = gcnew UpdateState();
 
+	state->SelectedTaskIds = SelectedTaskIds;
 	state->TopItem = TopItem;
 	state->Sorter = ListViewItemSorter;
-	ListViewItemSorter = nullptr;
 
+	ListViewItemSorter = nullptr;
 	ListView::BeginUpdate(); // => SetRedraw(FALSE)
 	
 	return state;
@@ -927,7 +938,31 @@ void TaskListView::EndUpdate(UpdateState^ state)
 	if ((state->TopItem != nullptr) && Items->Contains(state->TopItem))
 		TopItem = state->TopItem;
 
+	// Restore as much of the previous selection as possible
+	bool selChange = false;
+
+	if (state->SelectedTaskIds && state->SelectedTaskIds->Count)
+	{
+		int i = state->SelectedTaskIds->Count;
+
+		while (i-- > 0)
+		{
+			if (!HasTaskId(state->SelectedTaskIds[i]))
+			{
+				state->SelectedTaskIds->RemoveAt(i);
+				selChange = true;
+			}
+		}
+
+		SelectTasks(state->SelectedTaskIds);
+	}
+
 	ListView::EndUpdate(); // => SetRedraw(TRUE)
+
+	if (selChange)
+		SelectionChange(this, SelectedTaskIds);
+}
+
 void TaskListView::OnSelectedIndexChanged(EventArgs^ e)
 {
 	CheckNotifySelectionChanged();

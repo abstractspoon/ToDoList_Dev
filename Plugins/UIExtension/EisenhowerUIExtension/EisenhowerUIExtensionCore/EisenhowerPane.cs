@@ -245,8 +245,6 @@ namespace EisenhowerUIExtension
 
 		public bool RebuildTaskList()
 		{
-			var selTaskIds = (Selected ? SelectedTaskIds : null);
-
 			var state = m_List.BeginUpdate();
 			m_List.RemoveAll();
 
@@ -261,16 +259,6 @@ namespace EisenhowerUIExtension
 
 			m_List.RefreshColumnWidths();
 			m_List.EndUpdate(state);
-
-			// Restore as much of the previous selection as possible
-			if (selTaskIds?.Count > 0)
-			{
-				bool change = (selTaskIds.RemoveAll(id => !m_List.HasTaskId(id)) != 0);
-				m_List.SelectTasks(selTaskIds);
-
-				if (change)
-					SelectionChange?.Invoke(this, selTaskIds);
-			}
 
 			return true;
 		}

@@ -77,6 +77,7 @@ namespace Abstractspoon
 				property int SelectionCount { int get(); }
 				property bool HasSelection { bool get(); }
 				property List<UInt32>^ SelectedTaskIds { List<UInt32>^ get(); }
+				property List<ITaskBase^>^ SelectedTasks { List<ITaskBase^>^ get(); }
 
 				property bool TaskColorIsBackground { bool get(); void set(bool value); }
 				property bool ShowParentsAsFolders { bool get(); void set(bool value); }
@@ -114,6 +115,7 @@ namespace Abstractspoon
 				public:
 					System::Collections::IComparer^ Sorter;
 					Windows::Forms::ListViewItem^ TopItem;
+					List<UInt32>^ SelectedTaskIds;
 				};
 
 				UpdateState^ BeginUpdate();
