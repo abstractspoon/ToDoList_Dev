@@ -284,6 +284,8 @@ namespace TaskDatesUIExtension
 		public bool IsDone		{ get { return m_Attrib.IsDone; } }
 
 		// local
+		public bool IsGoodAsDone { get { return m_Attrib.IsGoodAsDone; } }
+
 		public DateTime Date = DateTime.MinValue;
 		public String AttributeId { get; private set; }
 

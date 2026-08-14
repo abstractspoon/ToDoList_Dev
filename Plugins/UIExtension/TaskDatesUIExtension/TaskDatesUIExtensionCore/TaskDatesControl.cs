@@ -65,7 +65,6 @@ namespace TaskDatesUIExtension
 		{
 			var state = BeginUpdate();
 
-			var selTaskIds = SelectedTaskIds;
 			var availAttribs = tasks.GetAvailableAttributes();
 			var modIds = m_TaskItems.Update(tasks, type, availAttribs);
 
@@ -86,9 +85,6 @@ namespace TaskDatesUIExtension
 			case UIExtension.UpdateType.Delete:
 				break;
 			}
-
-			if (selTaskIds != null)
-				SelectTasks(selTaskIds);
 
 			RefreshColumnWidths();
 			EndUpdate(state);
@@ -233,7 +229,7 @@ namespace TaskDatesUIExtension
 				{
 					foreach (var date in item.Dates)
 					{
-						if ((addDone && (date.IsDone /*|| date.IsGoodAsDone*/)) ||
+						if ((addDone && (date.IsDone || date.IsGoodAsDone)) ||
 							(addParents && date.IsParent))
 						{
 							AddDateToListView(date);
@@ -251,7 +247,7 @@ namespace TaskDatesUIExtension
 				{
 					TaskItemDate date = (Items[i].Tag as TaskItemDate);
 
-					if ((removeDone && (date.IsDone /*|| date.IsGoodAsDone*/)) ||
+					if ((removeDone && (date.IsDone || date.IsGoodAsDone)) ||
 						(removeParents && date.IsParent))
 					{
 						Items.RemoveAt(i);
