@@ -22,18 +22,10 @@ namespace TaskDatesUIExtension
 
 	// --------------------------------------------
 
-	public delegate void SelectionChangeEventHandler(Object sender, IList<uint> taskIds);
-
-	// ---------------------------------------------
-
 	[System.ComponentModel.DesignerCategory("")]
 
 	public partial class TaskDatesControl : TaskListView
 	{
-		public event SelectionChangeEventHandler SelectionChange;
-		
-		// --------------------------------------------------------
-
 		const int TitleCol	= 0;
 		const int DateCol	= 1;
 		const int TypeCol	= 2;
@@ -58,8 +50,6 @@ namespace TaskDatesUIExtension
 			EnableHeaderTracking = true;
 			MinTaskColumnWidth = DPIScaling.Scale(100);
 			SizeTaskColumnToFit = true;
-
-			base.SelectedIndexChanged += new EventHandler(OnListSelectionChange);
 		}
 
 		public new void Initialize(Translator trans, UIExtension.TaskIcon taskIcons)
@@ -387,33 +377,9 @@ namespace TaskDatesUIExtension
 			{
 				m_IsoDates = iso;
 
-				// Update item dates
 				foreach (ListViewItem lvi in Items)
 					SetItemValue(lvi, DateCol, (lvi.Tag as TaskItemDate).FormatDate(m_IsoDates));
 			}
-		}
-
-		private void OnListSelectionChange(object sender, EventArgs e)
-		{
-			// Don't forward selection changes if:
-
-			// 1. Bounds selecting
-			if (IsBoundSelecting)
-				return;
-
-			// 2. Nothing is selected and the control key is NOT pressed
-			//    ie. It's not a deliberate deselection
-			if ((SelectionCount == 0) && !ModifierKeys.HasFlag(Keys.Control))
-				return;
-
-			// 3. During keyboard navigation
-			if (System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.Up) ||
-				System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.Down) ||
-				System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.PageUp) ||
-				System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.PageDown))
-				return;
-
-			SelectionChange?.Invoke(this, SelectedTaskIds);
 		}
 
 		protected void SetItemValues(ListViewItem lvItem, string date, string type, string offset)

@@ -928,6 +928,49 @@ void TaskListView::EndUpdate(UpdateState^ state)
 		TopItem = state->TopItem;
 
 	ListView::EndUpdate(); // => SetRedraw(TRUE)
+void TaskListView::OnSelectedIndexChanged(EventArgs^ e)
+{
+	CheckNotifySelectionChanged();
+}
+
+void TaskListView::OnItemSelectionChanged(ListViewItemSelectionChangedEventArgs^ e)
+{
+	CheckNotifySelectionChanged();
+}
+
+void TaskListView::OnKeyUp(KeyEventArgs^ e)
+{
+	switch (e->KeyCode)
+	{
+	case Keys::Up:
+	case Keys::Down:
+	case Keys::PageUp:
+	case Keys::PageDown:
+		SelectionChange(this, SelectedTaskIds);
+		return;
+	}
+
+	ListView::OnKeyUp(e);
+}
+
+void TaskListView::CheckNotifySelectionChanged()
+{
+	// Don't forward selection changes if:
+
+	// 1. Bounds selecting
+	if (IsBoundSelecting)
+		return;
+
+	// 2. Nothing is selected and the control key is NOT pressed
+	//    ie. It's not a deliberate deselection
+	if ((SelectionCount == 0) && !ModifierKeys.HasFlag(Keys::Control))
+		return;
+
+	// 3. During keyboard navigation
+	if (Win32::IsCursorKeyPressed(true, false))
+		return;
+
+	SelectionChange(this, SelectedTaskIds);
 }
 
 void TaskListView::OnDrawItem(DrawListViewItemEventArgs^ e)

@@ -73,11 +73,9 @@ namespace EisenhowerUIExtension
 			m_List.EditTaskIcon += new EditTaskIconEventHandler(OnListEditTaskIcon);
 			m_List.EditTaskLabel += new EditTaskLabelEventHandler(OnListEditTaskLabel);
 			m_List.IsTaskDraggable += new IsTaskDraggableEventHandler(OnListIsTaskDraggable);
-
 			m_List.ItemDrag += new ItemDragEventHandler(OnListBeginItemDrag);
-			m_List.SelectedIndexChanged += new EventHandler(OnListSelectionChange);
-			m_List.KeyUp += new KeyEventHandler(OnListKeyUp);
 
+			m_List.SelectionChange += (s, e) => { SelectionChange?.Invoke(this, SelectedTaskIds); };
 			m_List.BoundSelectionEnded += (s, e) => { SelectionChange?.Invoke(this, SelectedTaskIds); };
 			m_List.GotFocus += (s, e) => { GotFocus?.Invoke(this, new EventArgs()); };
 
@@ -405,42 +403,6 @@ namespace EisenhowerUIExtension
 			{
 				using (var pen = new Pen(TitleBorderColor))
 					e.Graphics.DrawRectangle(pen, titleRect);
-			}
-		}
-
-		private void OnListSelectionChange(object sender, EventArgs e)
-		{
-			// Don't forward selection changes if:
-
-			// 1. Bounds selecting
-			if (m_List.IsBoundSelecting)
-				return;
-
-			// 2. Nothing is selected and the control key is NOT pressed
-			//    ie. It's not a deliberate deselection
-			if ((m_List.SelectionCount == 0) && !ModifierKeys.HasFlag(Keys.Control))
-				return;
-
-			// 3. During keyboard navigation
-			if (System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.Up) ||
-				System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.Down) ||
-				System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.PageUp) ||
-				System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.PageDown))
-				return;
-
-			SelectionChange?.Invoke(this, m_List.SelectedTaskIds);
-		}
-
-		private void OnListKeyUp(object sender, KeyEventArgs e)
-		{
-			switch (e.KeyCode)
-			{
-			case Keys.Up:
-			case Keys.Down:
-			case Keys.PageUp:
-			case Keys.PageDown:
-				SelectionChange?.Invoke(this, m_List.SelectedTaskIds);
-				return;
 			}
 		}
 

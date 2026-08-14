@@ -68,6 +68,7 @@ namespace Abstractspoon
 				static void SetWindowText(IntPtr hWnd, String^ text);
 				static bool DragDetect(IntPtr hWnd, Drawing::Point ptScreen);
 				static bool SetFocus(IntPtr hWnd);
+				static bool IsCursorKeyPressed(bool upDown, bool leftRight);
 
 				// Message cracking
 				static int LoWord(int n) { return LOWORD(n); }

@@ -24,6 +24,7 @@ namespace Abstractspoon
 			public delegate bool EditTaskIconEventHandler(Object^ sender, ITaskBase^ task);
 			public delegate bool EditTaskCompletionEventHandler(Object^ sender, ITaskBase^ task);
 			public delegate bool IsTaskDraggableEventHandler(Object^ sender, ITaskBase^ task);
+			public delegate void SelectionChangeEventHandler(Object^ sender, IList<UInt32>^ taskIds);
 
 			// ---------------------------------------------
 
@@ -102,6 +103,7 @@ namespace Abstractspoon
 				event EditTaskIconEventHandler^ EditTaskIcon;
 				event EditTaskCompletionEventHandler^ EditTaskDone;
 				event IsTaskDraggableEventHandler^ IsTaskDraggable;
+				event SelectionChangeEventHandler^ SelectionChange;
 
 				event EventHandler^ BoundSelectionEnded;
 
@@ -147,12 +149,15 @@ namespace Abstractspoon
 				void OnBeforeLabelEdit(Windows::Forms::LabelEditEventArgs^ e) override;
 				void OnDrawItem(Windows::Forms::DrawListViewItemEventArgs^ e) override;
 				void OnItemDrag(Windows::Forms::ItemDragEventArgs^ e) override;
+				void OnItemSelectionChanged(Windows::Forms::ListViewItemSelectionChangedEventArgs^ e) override;
+				void OnKeyUp(Windows::Forms::KeyEventArgs^ e) override;
 
 				void OnGotFocus(EventArgs^ e) override;
 				void OnLostFocus(EventArgs^ e) override;
 				void OnSizeChanged(EventArgs^ e) override;
 				void OnFontChanged(EventArgs^ e) override;
 				void OnHandleCreated(EventArgs^ e) override;
+				void OnSelectedIndexChanged(EventArgs^ e) override;
 
 				void OnBoundSelectionTimer(Object^ sender, EventArgs^ e);
 
@@ -175,6 +180,7 @@ namespace Abstractspoon
 				Drawing::Color GetTextColor(ITaskBase^ task, bool selected);
 				Drawing::Color GetBackColor(ITaskBase^ task, int row);
 				Drawing::Font^ GetFont(ITaskBase^ task, bool title);
+				void CheckNotifySelectionChanged();
 
 				// Derived classes optionally override
 				virtual bool TaskMatches(ITaskBase^ task, String^ phrase, bool caseSensitive, bool wholeWord, bool findReplace);

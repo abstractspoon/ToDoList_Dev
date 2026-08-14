@@ -677,7 +677,7 @@ namespace WordCloudUIExtension
 
 			this.Controls.Add(m_WordCloud);
 
-			m_WordCloud.SelectionChange += new SelectionChangeEventHandler(OnWordSelectionChanged);
+			m_WordCloud.SelectionChange += new SelectedWordChangeEventHandler(OnWordSelectionChanged);
 		}
 
 		private void CreateTaskMatchesListView()
@@ -694,7 +694,7 @@ namespace WordCloudUIExtension
 			this.Controls.Add(m_TaskMatchesList);
 
 			// Add message handlers
-			m_TaskMatchesList.SelectedIndexChanged += new EventHandler(OnTaskMatchesSelChanged);
+			m_TaskMatchesList.SelectionChange += new SelectionChangeEventHandler(OnTaskMatchesSelChanged);
             m_TaskMatchesList.EditTaskDone += new EditTaskCompletionEventHandler(OnTaskMatchesEditTaskDone);
             m_TaskMatchesList.EditTaskIcon += new EditTaskIconEventHandler(OnTaskMatchesEditTaskIcon);
             m_TaskMatchesList.EditTaskLabel += new EditTaskLabelEventHandler(OnTaskMatchesEditTaskLabel);
@@ -1079,12 +1079,10 @@ namespace WordCloudUIExtension
 			return selWord;
 		}
 
-		private void OnTaskMatchesSelChanged(object sender, EventArgs args)
+		private void OnTaskMatchesSelChanged(object sender, IList<uint> taskIds)
 		{
-			UInt32 selTaskId = m_TaskMatchesList.SelectedTaskId;
-
-			if (selTaskId != 0)
-				NotifyParentSelChange(selTaskId);
+			if (taskIds.Count != 0)
+				NotifyParentSelChange(taskIds[0]);
 		}
 
         private bool OnTaskMatchesEditTaskDone(object sender, ITaskBase task)
