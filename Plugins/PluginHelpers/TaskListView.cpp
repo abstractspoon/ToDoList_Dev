@@ -907,6 +907,29 @@ void TaskListView::AlternateLineColor::set(Color value)
 	}
 }
 
+TaskListView::UpdateState^ TaskListView::BeginUpdate()
+{
+	auto state = gcnew UpdateState();
+
+	state->TopItem = TopItem;
+	state->Sorter = ListViewItemSorter;
+	ListViewItemSorter = nullptr;
+
+	ListView::BeginUpdate(); // => SetRedraw(FALSE)
+	
+	return state;
+}
+
+void TaskListView::EndUpdate(UpdateState^ state)
+{
+	ListViewItemSorter = state->Sorter;
+
+	if ((state->TopItem != nullptr) && Items->Contains(state->TopItem))
+		TopItem = state->TopItem;
+
+	ListView::EndUpdate(); // => SetRedraw(TRUE)
+}
+
 void TaskListView::OnDrawItem(DrawListViewItemEventArgs^ e)
 {
 	e->DrawDefault = false;

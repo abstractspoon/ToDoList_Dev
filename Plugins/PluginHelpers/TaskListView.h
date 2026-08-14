@@ -105,6 +105,18 @@ namespace Abstractspoon
 
 				event EventHandler^ BoundSelectionEnded;
 
+				// -----------------------------------------------
+
+				ref class UpdateState
+				{
+				public:
+					System::Collections::IComparer^ Sorter;
+					Windows::Forms::ListViewItem^ TopItem;
+				};
+
+				UpdateState^ BeginUpdate();
+				void EndUpdate(UpdateState^ state);
+
 			private:
 				HeaderControl^ m_HeaderCtrl;
 

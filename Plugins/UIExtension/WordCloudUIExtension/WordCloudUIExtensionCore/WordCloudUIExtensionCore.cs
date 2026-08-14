@@ -974,7 +974,7 @@ namespace WordCloudUIExtension
 				UInt32 selItemId = m_TaskMatchesList.SelectedTaskId;
 
 				// Build a list of task items containing this value
-				m_TaskMatchesList.BeginUpdate();
+				var state = m_TaskMatchesList.BeginUpdate();
 				m_TaskMatchesList.ClearMatches();
 
 				foreach (var item in m_Items)
@@ -987,7 +987,7 @@ namespace WordCloudUIExtension
 							selItem = item.Value;
 					}
 				}
-				m_TaskMatchesList.EndUpdate();
+				m_TaskMatchesList.EndUpdate(state);
 
 				string headerText = m_Trans.Translate("Task Matches", Translator.Type.Header);
 

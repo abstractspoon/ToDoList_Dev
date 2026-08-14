@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -48,6 +49,7 @@ namespace TaskDatesUIExtension
 		private int[] m_ColValueMaxCharWidth	= new int[4] { -1, -1, -1, -1 };
 
 		private bool m_IsoDates;
+		private Dictionary<string, string> m_DateTypes;
 
 		// --------------------------------------------------------
 
@@ -71,18 +73,17 @@ namespace TaskDatesUIExtension
 
 		public void UpdateTasks(TaskList tasks, UIExtension.UpdateType type)
 		{
+			var state = BeginUpdate();
+
 			var selTaskIds = SelectedTaskIds;
 			var availAttribs = tasks.GetAvailableAttributes();
 			var modIds = m_TaskItems.Update(tasks, type, availAttribs);
 
-			// Cache and clear sorter for performance
-			var sorter = ListViewItemSorter;
-			ListViewItemSorter = null;
-
 			switch (type)
 			{
 			case UIExtension.UpdateType.All:
-				RebuildListView(GetDataTypes(availAttribs));
+				m_DateTypes = GetDataTypes(availAttribs, m_Trans);
+				RebuildListView();
 				break;
 
 			case UIExtension.UpdateType.Edit:
@@ -100,14 +101,20 @@ namespace TaskDatesUIExtension
 				SelectTasks(selTaskIds);
 
 			RefreshColumnWidths();
-
-			// Restore sorter
-			ListViewItemSorter = sorter;
+			EndUpdate(state);
 
 			// For reasons I don't yet understand, invalidation after a 
 			// task update does NOT ALWAYS result in a subsequent repaint
 			// so we solve it with a delayed-redraw
 			m_IdleTasks.Redraw();
+		}
+
+		private IComparer ClearSorter()
+		{
+			var sorter = ListViewItemSorter;
+			ListViewItemSorter = null;
+
+			return sorter;
 		}
 
 		public bool WantTaskUpdate(Task.Attribute attrib)
@@ -128,8 +135,8 @@ namespace TaskDatesUIExtension
 			{
 				if (value != m_Options)
 				{
+					AddRemoveListViewItems(m_Options, value);
 					m_Options = value;
-					// TODO
 				}
 			}
 		}
@@ -220,6 +227,51 @@ namespace TaskDatesUIExtension
 		// --------------------------------------------------------
 		// Message handlers
 
+		private void AddRemoveListViewItems(TaskDatesOption oldOptions, TaskDatesOption newOptions)
+		{
+			var state = BeginUpdate();
+
+			bool addParents = (oldOptions.HasFlag(TaskDatesOption.HideParentTasks) && !newOptions.HasFlag(TaskDatesOption.HideParentTasks));
+			bool addDone = (oldOptions.HasFlag(TaskDatesOption.HideCompletedTasks) && !newOptions.HasFlag(TaskDatesOption.HideCompletedTasks));
+
+			bool removeParents = (!oldOptions.HasFlag(TaskDatesOption.HideParentTasks) && newOptions.HasFlag(TaskDatesOption.HideParentTasks));
+			bool removeDone = (!oldOptions.HasFlag(TaskDatesOption.HideCompletedTasks) && newOptions.HasFlag(TaskDatesOption.HideCompletedTasks));
+
+			if (addParents || addDone)
+			{
+				foreach (var item in m_TaskItems.Values)
+				{
+					foreach (var date in item.Dates)
+					{
+						if ((addDone && (date.IsDone /*|| date.IsGoodAsDone*/)) ||
+							(addParents && date.IsParent))
+						{
+							AddDateToListView(date);
+						}
+					}
+				}
+
+			}
+
+			if (removeParents || removeDone)
+			{
+				int i = Items.Count;
+
+				while (i-- > 0)
+				{
+					TaskItemDate date = (Items[i].Tag as TaskItemDate);
+
+					if ((removeDone && (date.IsDone /*|| date.IsGoodAsDone*/)) ||
+						(removeParents && date.IsParent))
+					{
+						Items.RemoveAt(i);
+					}
+				}
+			}
+
+			EndUpdate(state);
+		}
+
 		protected override TextFormatFlags GetTextAlignment(int column)
 		{
 			switch (column)
@@ -232,26 +284,35 @@ namespace TaskDatesUIExtension
 			return TextFormatFlags.Right; // numeric
 		}
 
-		private void RebuildListView(Dictionary<string, string> dateTypes)
+		private void RebuildListView()
 		{
 			base.Items.Clear();
 
 			foreach (var item in m_TaskItems.Values)
 			{
 				foreach (var date in item.Dates)
-				{
-					string dateType = m_Trans.Translate("<unknown>", Translator.Type.Text);
-					dateTypes.TryGetValue(date.AttributeId, out dateType);
-
-					SetItemValues(AddTask(date), 
-								  date.FormatDate(m_IsoDates), 
-								  dateType,
-								  date.FormatOffset(DateTime.Today));
-				}
+					AddDateToListView(date);
 			}
 		}
 
-		private Dictionary<string, string> GetDataTypes(IEnumerable<TaskAttributeItem> attribs)
+		private bool AddDateToListView(TaskItemDate date)
+		{
+			var lvi = AddTask(date);
+
+			if (lvi == null)
+				return false;
+
+			string dateType = m_Trans.Translate("<unknown>", Translator.Type.Text);
+			m_DateTypes.TryGetValue(date.AttributeId, out dateType);
+
+			SetItemValues(lvi,
+						  date.FormatDate(m_IsoDates),
+						  dateType,
+						  date.FormatOffset(DateTime.Today));
+			return true;
+		}
+
+		private static Dictionary<string, string> GetDataTypes(IEnumerable<TaskAttributeItem> attribs, Translator trans)
 		{
 			var dateTypes = new Dictionary<string, string>();
 
@@ -275,7 +336,7 @@ namespace TaskDatesUIExtension
 				}
 
 				if (!string.IsNullOrEmpty(dateType))
-					dateTypes[TaskItemDates.GetAttributeId(attrib)] = m_Trans.Translate(dateType, Translator.Type.Text);
+					dateTypes[TaskItemDates.GetAttributeId(attrib)] = trans.Translate(dateType, Translator.Type.Text);
 			}
 
 			return dateTypes;

@@ -249,7 +249,7 @@ namespace EisenhowerUIExtension
 		{
 			var selTaskIds = (Selected ? SelectedTaskIds : null);
 
-			m_List.BeginUpdate();
+			var state = m_List.BeginUpdate();
 			m_List.RemoveAll();
 
 			if ((m_Tasks == null) || (m_Matrix == null))
@@ -262,7 +262,7 @@ namespace EisenhowerUIExtension
 				AddTask(task);
 
 			m_List.RefreshColumnWidths();
-			m_List.EndUpdate();
+			m_List.EndUpdate(state);
 
 			// Restore as much of the previous selection as possible
 			if (selTaskIds?.Count > 0)
