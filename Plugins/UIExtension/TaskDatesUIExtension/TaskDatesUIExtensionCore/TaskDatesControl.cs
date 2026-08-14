@@ -72,7 +72,7 @@ namespace TaskDatesUIExtension
 		public void UpdateTasks(TaskList tasks, UIExtension.UpdateType type)
 		{
 			var selTaskIds = SelectedTaskIds;
-			var availAttribs = tasks.GetAvailableAttributes(m_Trans);
+			var availAttribs = tasks.GetAvailableAttributes();
 			var modIds = m_TaskItems.Update(tasks, type, availAttribs);
 
 			// Cache and clear sorter for performance
@@ -82,7 +82,7 @@ namespace TaskDatesUIExtension
 			switch (type)
 			{
 			case UIExtension.UpdateType.All:
-				RebuildListView();
+				RebuildListView(GetDataTypes(availAttribs));
 				break;
 
 			case UIExtension.UpdateType.Edit:
@@ -232,7 +232,7 @@ namespace TaskDatesUIExtension
 			return TextFormatFlags.Right; // numeric
 		}
 
-		private void RebuildListView()
+		private void RebuildListView(Dictionary<string, string> dateTypes)
 		{
 			base.Items.Clear();
 
@@ -240,12 +240,45 @@ namespace TaskDatesUIExtension
 			{
 				foreach (var date in item.Dates)
 				{
+					string dateType = m_Trans.Translate("<unknown>", Translator.Type.Text);
+					dateTypes.TryGetValue(date.AttributeId, out dateType);
+
 					SetItemValues(AddTask(date), 
 								  date.FormatDate(m_IsoDates), 
-								  date.Type, 
+								  dateType,
 								  date.FormatOffset(DateTime.Today));
 				}
 			}
+		}
+
+		private Dictionary<string, string> GetDataTypes(IEnumerable<TaskAttributeItem> attribs)
+		{
+			var dateTypes = new Dictionary<string, string>();
+
+			foreach (var attrib in attribs)
+			{
+				string dateType = string.Empty;
+
+				switch (attrib.AttributeId)
+				{
+				// Use shortened values without trailing 'Date'
+				case Task.Attribute.CreationDate:		dateType = "Created"; break;
+				case Task.Attribute.StartDate:			dateType = "Start"; break;
+				case Task.Attribute.DueDate:			dateType = "Due"; break;
+				case Task.Attribute.DoneDate:			dateType = "Completed"; break;
+				case Task.Attribute.LastModifiedDate:	dateType = "Last Modified"; break;
+
+				case Task.Attribute.CustomAttribute:
+					if (attrib.CustomAttributeType == CustomAttributeDefinition.Attribute.Date)
+						dateTypes[attrib.CustomAttributeId] = attrib.Label;
+					break;
+				}
+
+				if (!string.IsNullOrEmpty(dateType))
+					dateTypes[TaskItemDates.GetAttributeId(attrib)] = m_Trans.Translate(dateType, Translator.Type.Text);
+			}
+
+			return dateTypes;
 		}
 
 		private void RefreshListViewText(HashSet<uint> modIds, IEnumerable<TaskAttributeItem> attribs)

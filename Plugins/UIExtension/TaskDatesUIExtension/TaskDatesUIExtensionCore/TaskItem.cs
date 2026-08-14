@@ -171,7 +171,6 @@ namespace TaskDatesUIExtension
 			foreach (var attrib in dateAttribs)
 			{
 				var date = m_Dates.GetItem(TaskItemDates.GetAttributeId(attrib), m_Attribs);
-				date.Type = attrib.Label;
 
 				if (attrib.IsCustom())
 					DateTime.TryParse(task.GetCustomAttributeValue(attrib.CustomAttributeId, true), out date.Date);
@@ -286,8 +285,6 @@ namespace TaskDatesUIExtension
 
 		// local
 		public DateTime Date = DateTime.MinValue;
-		public String Type = string.Empty;
-
 		public String AttributeId { get; private set; }
 
 		// -----------------------------------------------------------------
@@ -297,15 +294,6 @@ namespace TaskDatesUIExtension
 			AttributeId = attribId;
 
 			m_Attrib = attrib;
-		}
-
-		public override string ToString() 
-		{
-#if DEBUG
-			return String.Format("{0} ({1})", Title, Id);
-#else
-			return Title;
-#endif
 		}
 
 		public string FormatDate(bool iso)
