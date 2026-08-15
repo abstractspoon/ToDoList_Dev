@@ -206,12 +206,14 @@ namespace TaskDatesUIExtension
 
 			if (!appOnly)
 			{
+				m_Options = prefs.GetProfileEnum<TaskDatesOption>(key, "Options", TaskDatesOption.None);
 				// TODO
 			}
 		}
 
 		public void SavePreferences(Preferences prefs, String key)
 		{
+			prefs.WriteProfileEnum<TaskDatesOption>(key, "Options", m_Options);
 			// TODO
 		}
 
