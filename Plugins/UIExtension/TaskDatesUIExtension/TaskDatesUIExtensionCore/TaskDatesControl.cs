@@ -18,6 +18,8 @@ namespace TaskDatesUIExtension
 		None				= 0x00,
 		HideParentTasks		= 0x01,
 		HideCompletedTasks	= 0x02,
+
+		VisibilityOptions	= (HideParentTasks | HideCompletedTasks),
 	}
 
 	// --------------------------------------------
@@ -45,6 +47,10 @@ namespace TaskDatesUIExtension
 
 		// --------------------------------------------------------
 
+		public new event SelectionChangeEventHandler SelectionChange;
+
+		// --------------------------------------------------------
+
 		public TaskDatesControl()
 		{
 			EnableHeaderTracking = true;
@@ -59,10 +65,20 @@ namespace TaskDatesUIExtension
 			// Hack to prevent base class showing a 'no-drag' cursor
 			// until we can work out a better fix
 			IsTaskDraggable += (s, e) => { return true; };
+
+			base.SelectionChange += (s, e) => 
+			{
+				// Forward only unique task IDs
+				var selTaskIds = new HashSet<uint>(base.SelectedTaskIds).ToList<uint>();
+				SelectionChange?.Invoke(this, selTaskIds);
+			};
 		}
 
 		public void UpdateTasks(TaskList tasks, UIExtension.UpdateType type)
 		{
+			// We handle restoring selection because our base class
+			// expects item Ids to all be unique
+			var selTasks = SelectedTasks;
 			var state = BeginUpdate();
 
 			var availAttribs = tasks.GetAvailableAttributes();
@@ -87,12 +103,43 @@ namespace TaskDatesUIExtension
 			}
 
 			RefreshColumnWidths();
-			EndUpdate(state);
+			EndUpdate(state, selTasks);
 
 			// For reasons I don't yet understand, invalidation after a 
 			// task update does NOT ALWAYS result in a subsequent repaint
 			// so we solve it with a delayed-redraw
 			m_IdleTasks.Redraw();
+		}
+
+		private void EndUpdate(TaskListView.UpdateState state, IList<ITaskBase> selTasks)
+		{
+			// We handle restoring selection because our base class
+			// expects item Ids to all be unique
+			state.SelectedTaskIds = null;
+
+			SelectedIndices.Clear();
+			SelectedItems.Clear();
+
+			int i = Items.Count;
+
+			while (i-- > 0)
+			{
+				TaskItemDate date = (Items[i].Tag as TaskItemDate);
+
+				foreach (var selTask in selTasks)
+				{
+					if (date.IdsMatch(selTask as TaskItemDate))
+					{
+						Items[i].Selected = true;
+						break;
+					}
+				}
+			}
+
+			base.EndUpdate();
+
+			if (SelectionCount != selTasks.Count())
+				SelectionChange?.Invoke(this, SelectedTaskIds);
 		}
 
 		public bool WantTaskUpdate(Task.Attribute attrib)
@@ -191,6 +238,38 @@ namespace TaskDatesUIExtension
 			return GetTaskIdEx(getTask, true);
 		}
 
+		// Overrides base class
+		public new IList<uint> SelectedTaskIds
+		{
+			get { return new HashSet<uint>(base.SelectedTaskIds).ToList(); }
+		}
+
+		// Overrides base class
+		public new bool SelectTask(uint taskId)
+		{
+			// Nothing to do if the only selected task is the task of interest
+			var selTaskIds = new HashSet<uint>(base.SelectedTaskIds);
+
+			if ((selTaskIds.Count == 1) && (selTaskIds.First() == taskId))
+				return true;
+
+			// else
+			return base.SelectTask(taskId);
+		}
+
+		// Overrides base class
+		public new bool SelectTasks(IList<uint> taskIds)
+		{
+			var curSelTaskIds = new HashSet<uint>(base.SelectedTaskIds);
+			var newSelTaskIds = new HashSet<uint>(taskIds);
+
+			if (curSelTaskIds.SetEquals(newSelTaskIds))
+				return true;
+
+			// else
+			return base.SelectTasks(taskIds);
+		}
+
 		public bool SelectTask(String text, UIExtension.SelectTask selectTask, bool caseSensitive, bool wholeWord, bool findReplace)
 		{
 			return SelectTaskEx(text, selectTask, caseSensitive, wholeWord, findReplace);
@@ -201,6 +280,9 @@ namespace TaskDatesUIExtension
 
 		private void AddRemoveListViewItems(TaskDatesOption oldOptions, TaskDatesOption newOptions)
 		{
+			// We handle restoring selection because our base class
+			// expects item Ids to all be unique
+			var selTasks = SelectedTasks;
 			var state = BeginUpdate();
 
 			bool addParents = (oldOptions.HasFlag(TaskDatesOption.HideParentTasks) && !newOptions.HasFlag(TaskDatesOption.HideParentTasks));
@@ -215,14 +297,10 @@ namespace TaskDatesUIExtension
 				{
 					foreach (var date in item.Dates)
 					{
-						if ((addDone && (date.IsDone || date.IsGoodAsDone)) ||
-							(addParents && date.IsParent))
-						{
+						if (IsDateVisible(date, newOptions))
 							AddDateToListView(date);
-						}
 					}
 				}
-
 			}
 
 			if (removeParents || removeDone)
@@ -231,17 +309,28 @@ namespace TaskDatesUIExtension
 
 				while (i-- > 0)
 				{
-					TaskItemDate date = (Items[i].Tag as TaskItemDate);
-
-					if ((removeDone && (date.IsDone || date.IsGoodAsDone)) ||
-						(removeParents && date.IsParent))
-					{
+					if (!IsDateVisible((GetTask(i) as TaskItemDate), newOptions))
 						Items.RemoveAt(i);
-					}
 				}
 			}
 
-			EndUpdate(state);
+			EndUpdate(state, selTasks);
+		}
+
+		private bool IsDateVisible(TaskItemDate date)
+		{
+			return IsDateVisible(date, m_Options);
+		}
+
+		private bool IsDateVisible(TaskItemDate date, TaskDatesOption options)
+		{
+			if (options.HasFlag(TaskDatesOption.HideCompletedTasks) && (date.IsDone || date.IsGoodAsDone))
+				return false;
+
+			if (options.HasFlag(TaskDatesOption.HideParentTasks) && date.IsParent)
+				return false;
+
+			return true;
 		}
 
 		protected override TextFormatFlags GetTextAlignment(int column)

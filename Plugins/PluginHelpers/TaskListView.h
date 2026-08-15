@@ -67,7 +67,7 @@ namespace Abstractspoon
 
 				bool SelectTask(UInt32 taskId);
 				bool SelectTaskEx(String^ words, UIExtension::SelectTask selectTask, bool caseSensitive, bool wholeWord, bool findReplace);
-				bool SelectTasks(IList<UInt32>^ taskIDs);
+				bool SelectTasks(IList<UInt32>^ taskIds);
 				void EnsureSelectionVisible();
 
 				property UInt32 SelectedTaskId { UInt32 get(); }
@@ -76,8 +76,8 @@ namespace Abstractspoon
 
 				property int SelectionCount { int get(); }
 				property bool HasSelection { bool get(); }
-				property List<UInt32>^ SelectedTaskIds { List<UInt32>^ get(); }
-				property List<ITaskBase^>^ SelectedTasks { List<ITaskBase^>^ get(); }
+				property IList<UInt32>^ SelectedTaskIds { IList<UInt32>^ get(); }
+				property IList<ITaskBase^>^ SelectedTasks { IList<ITaskBase^>^ get(); }
 
 				property bool TaskColorIsBackground { bool get(); void set(bool value); }
 				property bool ShowParentsAsFolders { bool get(); void set(bool value); }
@@ -113,7 +113,7 @@ namespace Abstractspoon
 				public:
 					System::Collections::IComparer^ Sorter;
 					Windows::Forms::ListViewItem^ TopItem;
-					List<UInt32>^ SelectedTaskIds;
+					IList<UInt32>^ SelectedTaskIds;
 				};
 
 				UpdateState^ BeginUpdate();
