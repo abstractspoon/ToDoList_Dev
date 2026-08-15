@@ -78,7 +78,7 @@ namespace TaskDatesUIExtension
 		{
 			// We handle restoring selection because our base class
 			// expects item Ids to all be unique
-			var selTasks = SelectedTasks;
+			var selDates = SelectedTasks;
 			var state = BeginUpdate();
 
 			var availAttribs = tasks.GetAvailableAttributes();
@@ -92,54 +92,22 @@ namespace TaskDatesUIExtension
 				break;
 
 			case UIExtension.UpdateType.Edit:
-				RefreshListViewText(modIds, availAttribs);
-				break;
-
 			case UIExtension.UpdateType.New:
+				RefreshListViewItems(modIds, availAttribs);
 				break;
 
 			case UIExtension.UpdateType.Delete:
+				DeleteListViewItems(modIds);
 				break;
 			}
 
 			RefreshColumnWidths();
-			EndUpdate(state, selTasks);
+			EndUpdate(state, selDates);
 
 			// For reasons I don't yet understand, invalidation after a 
 			// task update does NOT ALWAYS result in a subsequent repaint
 			// so we solve it with a delayed-redraw
 			m_IdleTasks.Redraw();
-		}
-
-		private void EndUpdate(TaskListView.UpdateState state, IList<ITaskBase> selTasks)
-		{
-			// We handle restoring selection because our base class
-			// expects item Ids to all be unique
-			state.SelectedTaskIds = null;
-
-			SelectedIndices.Clear();
-			SelectedItems.Clear();
-
-			int i = Items.Count;
-
-			while (i-- > 0)
-			{
-				TaskItemDate date = (Items[i].Tag as TaskItemDate);
-
-				foreach (var selTask in selTasks)
-				{
-					if (date.IdsMatch(selTask as TaskItemDate))
-					{
-						Items[i].Selected = true;
-						break;
-					}
-				}
-			}
-
-			base.EndUpdate();
-
-			if (SelectionCount != selTasks.Count())
-				SelectionChange?.Invoke(this, SelectedTaskIds);
 		}
 
 		public bool WantTaskUpdate(Task.Attribute attrib)
@@ -280,6 +248,46 @@ namespace TaskDatesUIExtension
 		// --------------------------------------------------------
 		// Message handlers
 
+		private static String GetDateKey(TaskItemDate date)
+		{
+			return string.Format("{0}.{1}", date.Id, date.AttributeId);
+		}
+
+		private ListViewItem FindItem(TaskItemDate date)
+		{
+			var lvi = Items.Find(GetDateKey(date as TaskItemDate), false);
+
+			if (lvi?.Count() == 0)
+				return null;
+
+			// else
+			Debug.Assert(lvi.Count() == 1);
+			return lvi[0];
+		}
+
+		private void EndUpdate(TaskListView.UpdateState state, IList<ITaskBase> selDates)
+		{
+			// We handle restoring selection because our base class
+			// expects item Ids to all be unique
+			state.SelectedTaskIds = null;
+
+			SelectedIndices.Clear();
+			SelectedItems.Clear();
+
+			foreach (var date in selDates)
+			{
+				var lvi = FindItem(date as TaskItemDate);
+
+				if (lvi != null)
+					lvi.Selected = true;
+			}
+
+			base.EndUpdate(state);
+
+			if (SelectionCount != selDates.Count())
+				SelectionChange?.Invoke(this, SelectedTaskIds);
+		}
+
 		private void AddRemoveListViewItems(TaskDatesOption oldOptions, TaskDatesOption newOptions)
 		{
 			// We handle restoring selection because our base class
@@ -360,7 +368,10 @@ namespace TaskDatesUIExtension
 
 		private bool AddDateToListView(TaskItemDate date)
 		{
-			var lvi = AddTask(date);
+			if (!IsDateVisible(date) || (Items.Find(GetDateKey(date), false)?.Count() != 0))
+				return false;
+
+			var lvi = AddTask(date, GetDateKey(date));
 
 			if (lvi == null)
 				return false;
@@ -372,6 +383,7 @@ namespace TaskDatesUIExtension
 						  date.FormatDate(m_IsoDates),
 						  dateType,
 						  date.FormatOffset(DateTime.Today));
+
 			return true;
 		}
 
@@ -405,16 +417,42 @@ namespace TaskDatesUIExtension
 			return dateTypes;
 		}
 
-		private void RefreshListViewText(HashSet<uint> modIds, IEnumerable<TaskAttributeItem> attribs)
+		private void DeleteListViewItems(HashSet<uint> taskIds)
 		{
-			// Because multiple list items can have the same Task Id
-			// we have to go thru the entire list looking for matches
-			foreach (ListViewItem lvi in Items)
-			{
-				TaskItemDate date = (lvi.Tag as TaskItemDate);
+			int i = Items.Count;
 
-				if (modIds.Contains(date.Id))
+			while (i-- > 0)
+			{
+				uint id = GetTask(i).Id;
+
+				if (taskIds.Contains(id) && !m_TaskItems.HasItem(id))
+					Items.RemoveAt(i);
+			}
+		}
+
+		private void RefreshListViewItems(HashSet<uint> modIds, IEnumerable<TaskAttributeItem> attribs)
+		{
+			foreach (uint id in modIds)
+			{
+				var item = m_TaskItems.GetItem(id);
+
+				foreach (var date in item.Dates)
 				{
+					if (!IsDateVisible(date))
+					{
+						Items.RemoveByKey(GetDateKey(date));
+						continue;
+					}
+
+					var lvi = FindItem(date);
+
+					if (lvi == null)
+					{
+						AddDateToListView(date);
+						continue;
+					}
+
+					// else just update the text
 					foreach (var attrib in attribs)
 					{
 						switch (attrib.AttributeId)

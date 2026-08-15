@@ -350,10 +350,15 @@ void TaskListView::SizeTaskColumnToFit::set(bool value)
 
 ListViewItem^ TaskListView::AddTask(ITaskBase^ task)
 {
+	return AddTask(task, String::Empty);
+}
+
+ListViewItem^ TaskListView::AddTask(ITaskBase^ task, String^ key)
+{
 	if (Items->Count == 0)
 		ItemsHaveIcons = false;
 
-	auto lvItem = gcnew ListViewItem(task->Title);
+	auto lvItem = Items->Add(key, task->Title, -1);
 
 	lvItem->Tag = task;
 	lvItem->Selected = false;
@@ -364,7 +369,7 @@ ListViewItem^ TaskListView::AddTask(ITaskBase^ task)
 		ItemsHaveIcons = true;
 	}
 
-	return Items->Add(lvItem);
+	return lvItem;
 }
 
 bool TaskListView::RemoveTask(UInt32 taskId)

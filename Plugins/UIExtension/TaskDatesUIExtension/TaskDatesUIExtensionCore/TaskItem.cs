@@ -298,11 +298,6 @@ namespace TaskDatesUIExtension
 			m_Attrib = attrib;
 		}
 
-		public bool IdsMatch(TaskItemDate other)
-		{
-			return ((Id == other.Id) && (AttributeId == other.AttributeId));
-		}
-
 		public string FormatDate(bool iso)
 		{
 			if (DateIsSet)
