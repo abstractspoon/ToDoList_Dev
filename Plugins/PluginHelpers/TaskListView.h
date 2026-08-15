@@ -106,8 +106,6 @@ namespace Abstractspoon
 				event IsTaskDraggableEventHandler^ IsTaskDraggable;
 				event SelectionChangeEventHandler^ SelectionChange;
 
-				event EventHandler^ BoundSelectionEnded;
-
 				// -----------------------------------------------
 
 				ref class UpdateState

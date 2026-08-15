@@ -76,7 +76,6 @@ namespace EisenhowerUIExtension
 			m_List.ItemDrag += new ItemDragEventHandler(OnListBeginItemDrag);
 
 			m_List.SelectionChange += (s, e) => { SelectionChange?.Invoke(this, SelectedTaskIds); };
-			m_List.BoundSelectionEnded += (s, e) => { SelectionChange?.Invoke(this, SelectedTaskIds); };
 			m_List.GotFocus += (s, e) => { GotFocus?.Invoke(this, new EventArgs()); };
 
 			base.DragOver += new DragEventHandler(OnDragOver);

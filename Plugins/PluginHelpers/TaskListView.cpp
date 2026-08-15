@@ -1292,7 +1292,7 @@ void TaskListView::OnBoundSelectionTimer(Object^ sender, EventArgs^ e)
 		m_BoundSelectionTimer->Enabled = false;
 		m_BoundSelectionTimer = nullptr;
 
-		BoundSelectionEnded(this, gcnew EventArgs());
+		SelectionChange(this, SelectedTaskIds);
 	}
 }
 
