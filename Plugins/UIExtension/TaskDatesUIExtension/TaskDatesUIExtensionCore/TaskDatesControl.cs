@@ -95,14 +95,6 @@ namespace TaskDatesUIExtension
 			m_IdleTasks.Redraw();
 		}
 
-		private IComparer ClearSorter()
-		{
-			var sorter = ListViewItemSorter;
-			ListViewItemSorter = null;
-
-			return sorter;
-		}
-
 		public bool WantTaskUpdate(Task.Attribute attrib)
 		{
 			// TODO
@@ -203,12 +195,6 @@ namespace TaskDatesUIExtension
 		{
 			return SelectTaskEx(text, selectTask, caseSensitive, wholeWord, findReplace);
 		}
-
-		public uint FirstTaskId  { get { return base.GetTaskId(0); } }
-		public uint LastTaskId   { get { return base.GetTaskId(LastIndex); } }
-
-		public uint FirstSelectedTaskId	{ get { return (HasSelection ? GetTaskId(SelectedIndices[0]) : 0); } }
-		public uint LastSelectedTaskId	{ get { return (HasSelection ? GetTaskId(SelectedIndices[LastIndex]) : 0); } }
 
 		// --------------------------------------------------------
 		// Message handlers
