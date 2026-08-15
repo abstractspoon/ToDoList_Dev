@@ -480,16 +480,16 @@ namespace TaskDatesUIExtension
 		{
 			using (var graphics = Graphics.FromHwnd(Handle))
 			{
-				RefreshVariableColumnWidth(DateCol, graphics);
-				RefreshVariableColumnWidth(TypeCol, graphics);
-				RefreshVariableColumnWidth(OffsetCol, graphics);
+				RefreshColumnWidth(DateCol, graphics);
+				RefreshColumnWidth(TypeCol, graphics);
+				RefreshColumnWidth(OffsetCol, graphics);
 			}
 
 			// Task column takes up tyhe slack
 			ResizeTaskColumnToFit();
 		}
 
-		private void RefreshVariableColumnWidth(int col, Graphics g)
+		private void RefreshColumnWidth(int col, Graphics g)
 		{
 			int HeaderPadding = (6 * LabelPadding);
 
