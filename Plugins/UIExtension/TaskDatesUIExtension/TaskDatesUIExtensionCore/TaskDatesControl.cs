@@ -18,8 +18,7 @@ namespace TaskDatesUIExtension
 		None				= 0x00,
 		HideParentTasks		= 0x01,
 		HideCompletedTasks	= 0x02,
-
-		VisibilityOptions	= (HideParentTasks | HideCompletedTasks),
+		HideNullDates		= 0x04,
 	}
 
 	// --------------------------------------------
@@ -128,8 +127,10 @@ namespace TaskDatesUIExtension
 			{
 				if (value != m_Options)
 				{
-					AddRemoveListViewItems(m_Options, value);
+					var oldOptions = m_Options;
 					m_Options = value;
+
+					RefreshListViewItemVisibility(oldOptions ^ m_Options);
 				}
 			}
 		}
@@ -250,7 +251,7 @@ namespace TaskDatesUIExtension
 
 		private static String GetDateKey(TaskItemDate date)
 		{
-			return string.Format("{0}.{1}", date.Id, date.AttributeId);
+			return string.Format("{0}.{1}", date?.Id, date?.AttributeId);
 		}
 
 		private ListViewItem FindItem(TaskItemDate date)
@@ -282,44 +283,49 @@ namespace TaskDatesUIExtension
 					lvi.Selected = true;
 			}
 
+			// Enure the top item exists in the list
+			state.TopItem = FindItem(state.TopItem?.Tag as TaskItemDate);
+
 			base.EndUpdate(state);
 
 			if (SelectionCount != selDates.Count())
 				SelectionChange?.Invoke(this, SelectedTaskIds);
 		}
 
-		private void AddRemoveListViewItems(TaskDatesOption oldOptions, TaskDatesOption newOptions)
+		private void RefreshListViewItemVisibility(TaskDatesOption changedOptions)
 		{
 			// We handle restoring selection because our base class
 			// expects item Ids to all be unique
 			var selTasks = SelectedTasks;
 			var state = BeginUpdate();
 
-			bool addParents = (oldOptions.HasFlag(TaskDatesOption.HideParentTasks) && !newOptions.HasFlag(TaskDatesOption.HideParentTasks));
-			bool addDone = (oldOptions.HasFlag(TaskDatesOption.HideCompletedTasks) && !newOptions.HasFlag(TaskDatesOption.HideCompletedTasks));
+			bool addParents = (changedOptions.HasFlag(TaskDatesOption.HideParentTasks) && !m_Options.HasFlag(TaskDatesOption.HideParentTasks));
+			bool addDone = (changedOptions.HasFlag(TaskDatesOption.HideCompletedTasks) && !m_Options.HasFlag(TaskDatesOption.HideCompletedTasks));
+			bool addNull = (changedOptions.HasFlag(TaskDatesOption.HideNullDates) && !m_Options.HasFlag(TaskDatesOption.HideNullDates));
 
-			bool removeParents = (!oldOptions.HasFlag(TaskDatesOption.HideParentTasks) && newOptions.HasFlag(TaskDatesOption.HideParentTasks));
-			bool removeDone = (!oldOptions.HasFlag(TaskDatesOption.HideCompletedTasks) && newOptions.HasFlag(TaskDatesOption.HideCompletedTasks));
+			bool removeParents = (!changedOptions.HasFlag(TaskDatesOption.HideParentTasks) && m_Options.HasFlag(TaskDatesOption.HideParentTasks));
+			bool removeDone = (!changedOptions.HasFlag(TaskDatesOption.HideCompletedTasks) && m_Options.HasFlag(TaskDatesOption.HideCompletedTasks));
+			bool removeNull = (!changedOptions.HasFlag(TaskDatesOption.HideNullDates) && m_Options.HasFlag(TaskDatesOption.HideNullDates));
 
-			if (addParents || addDone)
+			if (addParents || addDone || addNull)
 			{
 				foreach (var item in m_TaskItems.Values)
 				{
 					foreach (var date in item.Dates)
 					{
-						if (IsDateVisible(date, newOptions))
+						if (IsDateVisible(date))
 							AddDateToListView(date);
 					}
 				}
 			}
 
-			if (removeParents || removeDone)
+			if (removeParents || removeDone || removeNull)
 			{
 				int i = Items.Count;
 
 				while (i-- > 0)
 				{
-					if (!IsDateVisible((GetTask(i) as TaskItemDate), newOptions))
+					if (!IsDateVisible((GetTask(i) as TaskItemDate)))
 						Items.RemoveAt(i);
 				}
 			}
@@ -329,15 +335,13 @@ namespace TaskDatesUIExtension
 
 		private bool IsDateVisible(TaskItemDate date)
 		{
-			return IsDateVisible(date, m_Options);
-		}
-
-		private bool IsDateVisible(TaskItemDate date, TaskDatesOption options)
-		{
-			if (options.HasFlag(TaskDatesOption.HideCompletedTasks) && (date.IsDone || date.IsGoodAsDone))
+			if (m_Options.HasFlag(TaskDatesOption.HideCompletedTasks) && (date.IsDone || date.IsGoodAsDone))
 				return false;
 
-			if (options.HasFlag(TaskDatesOption.HideParentTasks) && date.IsParent)
+			if (m_Options.HasFlag(TaskDatesOption.HideParentTasks) && date.IsParent)
+				return false;
+
+			if (m_Options.HasFlag(TaskDatesOption.HideNullDates) && !date.DateIsSet)
 				return false;
 
 			return true;
@@ -362,13 +366,18 @@ namespace TaskDatesUIExtension
 			foreach (var item in m_TaskItems.Values)
 			{
 				foreach (var date in item.Dates)
-					AddDateToListView(date);
+				{
+					if (IsDateVisible(date))
+						AddDateToListView(date);
+				}
 			}
 		}
 
 		private bool AddDateToListView(TaskItemDate date)
 		{
-			if (!IsDateVisible(date) || (Items.Find(GetDateKey(date), false)?.Count() != 0))
+			Debug.Assert(IsDateVisible(date));
+
+			if (Items.Find(GetDateKey(date), false)?.Count() != 0)
 				return false;
 
 			var lvi = AddTask(date, GetDateKey(date));

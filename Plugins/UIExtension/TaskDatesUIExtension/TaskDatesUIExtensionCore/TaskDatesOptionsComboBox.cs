@@ -14,6 +14,7 @@ namespace TaskDatesUIExtension
 
 			AddItem(new CheckComboBoxItem("Hide parent tasks", (int)TaskDatesOption.HideParentTasks, trans), false);
 			AddItem(new CheckComboBoxItem("Hide completed tasks", (int)TaskDatesOption.HideCompletedTasks, trans), true);
+			AddItem(new CheckComboBoxItem("Hide unset dates", (int)TaskDatesOption.HideNullDates, trans), true);
 		}
 
 		public TaskDatesOption SelectedOptions
