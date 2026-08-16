@@ -35,6 +35,7 @@ namespace TaskDatesUIExtension
 		// --------------------------------------------------------
 
 		private TaskItems m_TaskItems = new TaskItems();
+		private ItemDateComparer m_Comparer = new ItemDateComparer();
 		private TaskDatesOption m_Options = TaskDatesOption.None;
 		private UIExtension.IdleRedraw m_IdleTasks = new UIExtension.IdleRedraw();
 
@@ -59,7 +60,7 @@ namespace TaskDatesUIExtension
 
 		public new void Initialize(Translator trans, UIExtension.TaskIcon taskIcons)
 		{
-			base.Initialize(trans, taskIcons, new ItemDateComparer());
+			base.Initialize(trans, taskIcons, m_Comparer);
 
 			// Hack to prevent base class showing a 'no-drag' cursor
 			// until we can work out a better fix
@@ -176,14 +177,16 @@ namespace TaskDatesUIExtension
 			if (!appOnly)
 			{
 				m_Options = prefs.GetProfileEnum<TaskDatesOption>(key, "Options", TaskDatesOption.None);
-				// TODO
+				m_Comparer.Column = prefs.GetProfileInt(key, "SortColumn", DateCol);
+				m_Comparer.Ascending = prefs.GetProfileBool(key, "SortAscending", false); // most recent at the top
 			}
 		}
 
 		public void SavePreferences(Preferences prefs, String key)
 		{
 			prefs.WriteProfileEnum<TaskDatesOption>(key, "Options", m_Options);
-			// TODO
+			prefs.WriteProfileInt(key, "SortColumn", m_Comparer.Column);
+			prefs.WriteProfileBool(key, "SortAscending", m_Comparer.Ascending);
 		}
 
 		public Bitmap SaveToImage()
