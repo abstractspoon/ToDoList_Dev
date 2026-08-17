@@ -25,7 +25,7 @@ static char THIS_FILE[] = __FILE__;
 CTDLAddLoggedTimeDlg::CTDLAddLoggedTimeDlg(DWORD dwTaskID, BOOL bEnableAddTimeToTimeSpent, 
 										   BOOL bISODates, double dHours, CWnd* pParent /*=NULL*/)
 	: 
-	CTDLDialog(CTDLAddLoggedTimeDlg::IDD, _T("AddLoggedTime"), pParent), 
+	CTDLDialog(IDD_ADDLOGGEDTIME_DIALOG, _T("AddLoggedTime"), pParent),
 	m_cbTimeWhen(TCB_HALFHOURS | TCB_HOURSINDAY),
 	m_loggedTime(dHours, TDCU_HOURS),
 	m_dwTaskID(dwTaskID),
@@ -64,13 +64,12 @@ CTDLAddLoggedTimeDlg::CTDLAddLoggedTimeDlg(DWORD dwTaskID, BOOL bEnableAddTimeTo
 void CTDLAddLoggedTimeDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CTDLDialog::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CTDLAddLoggedTimeDlg)
+
 	DDX_Control(pDX, IDC_WHENDATE, m_dtcWhen);
 	DDX_Control(pDX, IDC_WHENTIME, m_cbTimeWhen);
 	DDX_Control(pDX, IDC_LOGGEDTIME, m_eLoggedTime);
 	DDX_Check(pDX, IDC_ADDTIMETOTIMESPENT, m_bAddTimeToTimeSpent);
 	DDX_Text(pDX, IDC_COMMENT, m_sComment);
-	//}}AFX_DATA_MAP
 
 	CTDCDialogHelper::DDX_Text(pDX, m_eLoggedTime, m_loggedTime);
 
@@ -90,7 +89,6 @@ void CTDLAddLoggedTimeDlg::DoDataExchange(CDataExchange* pDX)
 
 
 BEGIN_MESSAGE_MAP(CTDLAddLoggedTimeDlg, CTDLDialog)
-	//{{AFX_MSG_MAP(CTDLAddLoggedTimeDlg)
 	ON_BN_CLICKED(IDAPPLY, OnApply)
 	ON_EN_CHANGE(IDC_LOGGEDTIME, OnChange)
 	ON_EN_CHANGE(IDC_COMMENT, OnChange)
@@ -98,11 +96,9 @@ BEGIN_MESSAGE_MAP(CTDLAddLoggedTimeDlg, CTDLDialog)
 	ON_NOTIFY(DTN_DATETIMECHANGE, IDC_WHENDATE, OnNotifyChange)
 	ON_CBN_SELCHANGE(IDC_WHENTIME, OnChange)
 	ON_CBN_EDITCHANGE(IDC_WHENTIME, OnChange)
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
-// CTDLAddLoggedTimeDlg message handlers
 
 double CTDLAddLoggedTimeDlg::GetLoggedHours() const
 { 
@@ -148,8 +144,8 @@ BOOL CTDLAddLoggedTimeDlg::OnInitDialog()
 		CRect rCancel = CDialogHelper::GetCtrlRect(this, IDCANCEL);
 		int nXOffset = (rApply.left - rCancel.left);
 		
-		CDialogHelper::OffsetCtrl(this, IDOK, nXOffset, 0);
-		CDialogHelper::OffsetCtrl(this, IDCANCEL, nXOffset, 0);
+		OffsetCtrl(this, IDOK, nXOffset, 0);
+		OffsetCtrl(this, IDCANCEL, nXOffset, 0);
 	}
 	
 	// set focus to time spent if no time specified
@@ -161,8 +157,7 @@ BOOL CTDLAddLoggedTimeDlg::OnInitDialog()
 		return FALSE;
 	}
 
-	return TRUE;  // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX Property Pages should return FALSE
+	return TRUE;
 }
 
 void CTDLAddLoggedTimeDlg::OnApply() 

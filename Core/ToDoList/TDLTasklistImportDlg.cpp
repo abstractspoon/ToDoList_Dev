@@ -168,9 +168,7 @@ CTDLTasklistImportDlg::CTDLTasklistImportDlg(const CString& sFilePath, CWnd* pPa
 	m_nLoadRes(TDCF_UNSET),
 	m_bFirstShow(TRUE)
 {
-	//{{AFX_DATA_INIT(CTDLTasklistImportDlg)
 	m_bImportSubtasks = TRUE;
-	//}}AFX_DATA_INIT
 	m_bResetCreationDate = TRUE;
 	m_sFilePath = sFilePath;
 
@@ -181,26 +179,22 @@ CTDLTasklistImportDlg::CTDLTasklistImportDlg(const CString& sFilePath, CWnd* pPa
 void CTDLTasklistImportDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CTDLDialog::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CTDLTasklistImportDlg)
+
 	DDX_Check(pDX, IDC_RESETCREATIONDATE, m_bResetCreationDate);
 	DDX_Text(pDX, IDC_TDLFILEPATH, m_sFilePath);
 	DDX_Control(pDX, IDC_TDLFILEPATH, m_eFilePath);
 	DDX_Check(pDX, IDC_IMPORTSUBTASKS, m_bImportSubtasks);
-	//}}AFX_DATA_MAP
 }
 
 
 BEGIN_MESSAGE_MAP(CTDLTasklistImportDlg, CTDLDialog)
-	//{{AFX_MSG_MAP(CTDLTasklistImportDlg)
 	ON_BN_CLICKED(IDC_SELECTALL, OnSelectall)
 	ON_BN_CLICKED(IDC_SELECTNONE, OnSelectnone)
-	//}}AFX_MSG_MAP
 	ON_REGISTERED_MESSAGE(WM_TDCN_SELECTIONCHANGE, OnTDCNotifySelectionChange)
 	ON_WM_ERASEBKGND()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
-// CTDLTasklistImportDlg message handlers
 
 BOOL CTDLTasklistImportDlg::OnInitDialog() 
 {
@@ -217,8 +211,7 @@ BOOL CTDLTasklistImportDlg::OnInitDialog()
 	if (m_nLoadRes != TDCF_SUCCESS)
 		EndDialog(IDOK);
 	
-	return FALSE;  // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX Property Pages should return FALSE
+	return FALSE;
 }
 
 BOOL CTDLTasklistImportDlg::OnEraseBkgnd(CDC* pDC)
@@ -242,20 +235,17 @@ BOOL CTDLTasklistImportDlg::OnEraseBkgnd(CDC* pDC)
 
 void CTDLTasklistImportDlg::OnRepositionControls(int dx, int dy)
 {
-	CDialogHelper::ResizeChild(&m_taskTree, dx, dy);
-	CDialogHelper::ResizeChild(&m_eFilePath, dx, 0);
+	ResizeChild(&m_taskTree, dx, dy);
+	ResizeChild(&m_eFilePath, dx, 0);
 
-	CDialogHelper::OffsetCtrl(this, IDC_SELECTALL, 0, dy);
-	CDialogHelper::OffsetCtrl(this, IDC_SELECTNONE, 0, dy);
-	CDialogHelper::OffsetCtrl(this, IDC_EXPANDALL, 0, dy);
-	CDialogHelper::OffsetCtrl(this, IDC_IMPORTSUBTASKS, 0, dy);
-	CDialogHelper::OffsetCtrl(this, IDC_RESETCREATIONDATE, 0, dy);
+	OffsetCtrl(this, IDC_SELECTALL, 0, dy);
+	OffsetCtrl(this, IDC_SELECTNONE, 0, dy);
+	OffsetCtrl(this, IDC_EXPANDALL, 0, dy);
+	OffsetCtrl(this, IDC_IMPORTSUBTASKS, 0, dy);
+	OffsetCtrl(this, IDC_RESETCREATIONDATE, 0, dy);
 
-	CDialogHelper::OffsetCtrl(this, IDC_DIVIDER, 0, dy);
-	CDialogHelper::ResizeCtrl(this, IDC_DIVIDER, dx, 0);
-
-	CDialogHelper::OffsetCtrl(this, IDOK, dx, dy);
-	CDialogHelper::OffsetCtrl(this, IDCANCEL, dx, dy);
+	OffsetCtrl(this, IDC_DIVIDER, 0, dy);
+	ResizeCtrl(this, IDC_DIVIDER, dx, 0);
 }
 
 void CTDLTasklistImportDlg::OnSelectall() 

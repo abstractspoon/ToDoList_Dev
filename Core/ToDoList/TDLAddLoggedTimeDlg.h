@@ -10,8 +10,6 @@
 #include "TDLDialog.h"
 #include "ToDoItem.h"
 
-//#include "..\Interfaces\ITaskList.h"
-
 #include "..\shared\TimeEdit.h"
 #include "..\shared\Timecombobox.h"
 #include "..\shared\datetimectrlex.h"
@@ -38,38 +36,28 @@ public:
 	BOOL IsTracked() const { return m_bTracked; }
 
 protected:
-// Dialog Data
-	//{{AFX_DATA(CTDLAddLoggedTimeDlg)
-	enum { IDD = IDD_ADDLOGGEDTIME_DIALOG };
-	CTimeComboBox	m_cbTimeWhen;
-	TDCTIMEPERIOD	m_loggedTime;
-	DWORD	m_dwTaskID;
-	BOOL	m_bAddTimeToTimeSpent;
-	CString	m_sComment;
-	//}}AFX_DATA
+	CTimeComboBox m_cbTimeWhen;
+	TDCTIMEPERIOD m_loggedTime;
 	CDateTimeCtrlEx m_dtcWhen;
 	CTimeEdit m_eLoggedTime;
 	COleDateTime m_dtWhen;
+
 	BOOL m_bEnableAddTimeToTimeSpent;
 	BOOL m_bTracked;
+	DWORD m_dwTaskID;
+	BOOL m_bAddTimeToTimeSpent;
+	CString	m_sComment;
 
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CTDLAddLoggedTimeDlg)
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	virtual void DoDataExchange(CDataExchange* pDX);
 	virtual void OnOK();
-	//}}AFX_VIRTUAL
-
-// Implementation
-protected:
-	// Generated message map functions
-	//{{AFX_MSG(CTDLAddLoggedTimeDlg)
 	virtual BOOL OnInitDialog();
+
+protected:
 	afx_msg void OnApply();
 	afx_msg void OnChange();
 	afx_msg void OnNotifyChange(NMHDR* pNMHDR, LRESULT* pResult);
-	//}}AFX_MSG
+
 	DECLARE_MESSAGE_MAP()
 };
 
