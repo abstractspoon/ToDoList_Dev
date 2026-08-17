@@ -1,6 +1,6 @@
 // EnListCtrl.h : header file
 //
-#if !defined ( ENLISTCTRL_H )
+#if !defined ENLISTCTRL_H
 #define ENLISTCTRL_H 
 
 #include "enheaderctrl.h"
@@ -8,7 +8,6 @@
 #include <afxtempl.h>
 
 /////////////////////////////////////////////////////////////////////////////
-// CEnListCtrl window
 
 #define LVN_USERSELCHANGE			(LVN_LAST+1)
 #define LVN_COPY					(LVN_LAST+2)
@@ -19,8 +18,8 @@
 #define LVN_CHECKCHANGE				(LVN_LAST+7)
 
 /////////////////////////////////////////////////////////////////////////////
-
 // helper class for manipulating item grouping
+
 class CListCtrlItemGrouping
 {
 public:
@@ -49,6 +48,7 @@ protected:
 };
 
 /////////////////////////////////////////////////////////////////////////////
+// CEnListCtrl window
 
 class CEnListCtrl : public CListCtrl
 {
@@ -164,6 +164,7 @@ protected:
 	BOOL m_bAllowOffItemClickDeslection;
 	BOOL m_bSortEmptyBelow;
 	BOOL m_bResizingCols;
+	BOOL m_bForceResizePending;
 
 private:
 	CMap<int, int, CColumnData*, CColumnData*> m_mapColumnData; 
@@ -175,19 +176,14 @@ private:
 
 	static DWORD s_dwSelectionTheming;
 
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CEnListCtrl)
 protected:
 	virtual void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
 	virtual void MeasureItem(LPMEASUREITEMSTRUCT lpMeasureItemStruct);
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
 	virtual void PreSubclassWindow();
-	//}}AFX_VIRTUAL
 
-	// Generated message map functions
 protected:
-	//{{AFX_MSG(CEnListCtrl)
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
@@ -197,12 +193,13 @@ protected:
 	afx_msg void OnPaint();
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg void OnWindowPosChanged(WINDOWPOS* lpwndpos);
-	//}}AFX_MSG
 	afx_msg void OnTimer(UINT nIDEvent);
 	afx_msg BOOL OnColumnClick(NMHDR* pNMHDR, LPARAM* lResult);
 	afx_msg void OnHeaderCustomDraw(NMHDR* pNMHDR, LPARAM* lResult);
 	afx_msg BOOL OnListCustomDraw(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg LRESULT OnSetFont(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnForceResize(WPARAM wp, LPARAM lp);
+
 	DECLARE_MESSAGE_MAP()
 
 	// helpers
@@ -245,7 +242,6 @@ private:
 	static int CALLBACK CompareProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParam);
 };
 
-#endif
+#endif // ENLISTCTRL_H 
 
 /////////////////////////////////////////////////////////////////////////////
-/////////
