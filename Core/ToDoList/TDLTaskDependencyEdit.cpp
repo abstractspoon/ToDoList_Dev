@@ -503,8 +503,15 @@ void CTDLTaskDependencyListCtrl::OnTaskComboOK()
 {
 	m_cbTasks.ShowWindow(SW_HIDE);
 
-	int nRow = GetCurSel();
+	DWORD dwTaskID = m_cbTasks.GetSelectedTaskID();
+
+	if (!dwTaskID)
+		return;
+
 	CString sTask = m_cbTasks.GetSelectedTaskName();
+	ASSERT(!sTask.IsEmpty());
+
+	int nRow = GetCurSel();
 
 	if (IsPrompt(nRow))
 	{
@@ -516,7 +523,6 @@ void CTDLTaskDependencyListCtrl::OnTaskComboOK()
 		SetItemText(nRow, TASK_COL, sTask);
 	}
 
-	DWORD dwTaskID = m_cbTasks.GetSelectedTaskID();
 	HTASKITEM hTask = m_tasks.FindTask(dwTaskID);
 
 	SetItemData(nRow, dwTaskID);

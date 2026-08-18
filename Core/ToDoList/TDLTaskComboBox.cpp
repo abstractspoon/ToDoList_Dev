@@ -264,7 +264,7 @@ BOOL CTDLTaskComboBox::SelectNextItem(const CString& sText, BOOL bForward)
 	{
 		int nItem = CDialogHelper::FindItemByDataT(*this, dwTaskID);
 
-		if (nItem != CB_ERR)
+		if ((nItem != CB_ERR) && !IsDisabledItem(nItem))
 		{
 			SetCurSel(nItem);
 
