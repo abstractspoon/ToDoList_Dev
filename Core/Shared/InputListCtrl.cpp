@@ -10,6 +10,7 @@
 #include "enimagelist.h"
 #include "dlgunits.h"
 #include "MessageBox.h"
+#include "DialogHelper.h"
 
 #include "..\3rdParty\OSVersion.h"
 
@@ -1280,11 +1281,20 @@ void CInputListCtrl::HideControl(CWnd& ctrl, const CWnd* pWndIgnore)
 
 	if (!ctrl.GetSafeHwnd())
 		return;
-	
-	if (pWndIgnore && ctrl.IsKindOf(RUNTIME_CLASS(CDateTimeCtrl)))
+
+	if (ctrl.IsKindOf(RUNTIME_CLASS(CDateTimeCtrl)))
 	{
-		if (pWndIgnore->GetSafeHwnd() == (HWND)ctrl.SendMessage(DTM_GETMONTHCAL))
+		// No longer clear what situation this is handling so adding an assert
+		if (pWndIgnore && (pWndIgnore->GetSafeHwnd() == (HWND)ctrl.SendMessage(DTM_GETMONTHCAL)))
+		{
+			ASSERT(0);
 			return;
+		}
+	}
+	else if (CDialogHelper::IsComboEdit(ctrl))
+	{
+		HideControl(*ctrl.GetParent(), pWndIgnore);
+		return;
 	}
 
 	ctrl.ShowWindow(SW_HIDE);
