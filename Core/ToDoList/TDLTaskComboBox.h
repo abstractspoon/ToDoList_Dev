@@ -30,6 +30,7 @@ public:
 	BOOL SetSelectedTaskID(DWORD dwTaskID);
 
 	CString GetSelectedTaskName() const;
+	BOOL SelectNextItem(const CString& sText, BOOL bForward);
 	int GetSelectedTaskImage() const;
 
 	int Populate(const CTaskFile& tasks, const CTDCImageList& ilTasks, BOOL bIncDoneTasks = TRUE);

@@ -256,6 +256,29 @@ void CTDLTaskComboBox::SelectNextFind(BOOL bForward)
 	}
 }
 
+BOOL CTDLTaskComboBox::SelectNextItem(const CString& sText, BOOL bForward)
+{
+	DWORD dwTaskID = _ttoi(sText);
+
+	if (dwTaskID)
+	{
+		int nItem = CDialogHelper::FindItemByDataT(*this, dwTaskID);
+
+		if (nItem != CB_ERR)
+		{
+			SetCurSel(nItem);
+
+			if (CDialogHelper::ComboHasEdit(*this))
+				NotifyParent(CBN_SELCHANGE);
+
+			return TRUE;
+		}
+	}
+
+	// else
+	return COwnerdrawComboBoxBase::SelectNextItem(sText, bForward);
+}
+
 int CTDLTaskComboBox::GetExtraListboxWidth() const
 {
 	return (COwnerdrawComboBoxBase::GetExtraListboxWidth() + ICON_INDENT);
