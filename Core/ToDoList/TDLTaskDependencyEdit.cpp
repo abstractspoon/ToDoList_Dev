@@ -286,8 +286,8 @@ void CTDLTaskDependencyListCtrl::SetDependencies(const CTDCDependencyArray& aDep
 	VERIFY(DEPEND_COL == AddCol(CEnString(IDS_TDLBC_DEPENDS), (int)aWidths[DEPEND_COL], ILCT_COMBO));
 	VERIFY(LEADIN_COL == AddCol(CEnString(IDS_DEPENDSLEADIN_COL), (int)aWidths[LEADIN_COL]));
 
+	ShowColumn(LEADIN_COL, m_bShowLeadInTimes);
 	RecalcColumnWidths();
-	GetHeader()->ShowItem(LEADIN_COL, m_bShowLeadInTimes);
 
 	SetAutoRowPrompt(CEnString(IDS_NEWDEPENDENCY_PROMPT));
 	ShowGrid(TRUE, TRUE);
@@ -320,12 +320,14 @@ void CTDLTaskDependencyListCtrl::SetDependencies(const CTDCDependencyArray& aDep
 			int nRow = AddRow(sName, nImage);
 
 			SetItemData(nRow, depend.dwTaskID);
-			SetItemText(nRow, LEADIN_COL, Misc::Format(depend.nDaysLeadIn));
+			if (m_bShowLeadInTimes)
+				SetItemText(nRow, LEADIN_COL, Misc::Format(depend.nDaysLeadIn));
 		}
 		else
 		{
-			int nRow = AddRow(depend.Format());
-			SetItemText(nRow, LEADIN_COL, _T("0"));
+			// Only local dependencies have item data (task ID)
+			// Lead-in column is hidden
+			AddRow(depend.Format());
 		}
 	}
 }
@@ -365,7 +367,8 @@ BOOL CTDLTaskDependencyListCtrl::CanEditCell(int nRow, int nCol) const
 	switch (nCol)
 	{
 	case LEADIN_COL:
-		return (GetItemData(nRow) != 0);
+		// Only local dependencies support lead-in times
+		return IsLocalDepends(nRow);
 	}
 
 	// else
@@ -391,16 +394,25 @@ void CTDLTaskDependencyListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClick)
 
 COLORREF CTDLTaskDependencyListCtrl::GetItemBackColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const
 {
-	switch (nCol)
+	if (!IsPrompt(nItem))
 	{
-	case LEADIN_COL:
-		if (!IsPrompt(nItem) && !CanEditCell(nItem, nCol))
-			return GetSysColor(COLOR_3DFACE);
-		break;
+		switch (nCol)
+		{
+		case LEADIN_COL:
+			// Only local dependencies support lead-in times
+			if (!IsLocalDepends(nItem))
+				return GetSysColor(COLOR_3DFACE);
+			break;
+		}
 	}
 
 	// else
 	return CInputListCtrl::GetItemBackColor(nItem, nCol, bSelected, bDropHighlighted, bWndFocus);
+}
+
+BOOL CTDLTaskDependencyListCtrl::IsLocalDepends(int nRow) const
+{
+	return (GetItemData(nRow) != 0);
 }
 
 void CTDLTaskDependencyListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)

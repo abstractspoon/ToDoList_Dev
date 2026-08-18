@@ -1814,6 +1814,11 @@ BOOL CEnListCtrl::SetColumnText(int nCol, LPCTSTR szText)
 	return SetColumn(nCol, &lvc);
 }
 
+void CEnListCtrl::ShowColumn(int nCol, BOOL bShow)
+{
+	GetHeader()->ShowItem(nCol, bShow);
+}
+
 void CEnListCtrl::OnDestroy() 
 {
 	if (m_header.GetSafeHwnd())

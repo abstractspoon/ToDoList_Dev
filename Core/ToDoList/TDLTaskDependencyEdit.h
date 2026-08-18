@@ -100,6 +100,7 @@ protected:
 protected:
 	void PrepareTaskCombo(int nRow);
 	void RecalcColumnWidths();
+	BOOL IsLocalDepends(int nRow) const;
 };
 
 /////////////////////////////////////////////////////////////////////////////

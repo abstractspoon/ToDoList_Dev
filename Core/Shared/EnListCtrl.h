@@ -116,6 +116,7 @@ public:
 	void SetColumnTextColor(int nCol, COLORREF color);
 	void SetColumnFormat(int nCol, int nFormat);
 	int GetColumnFormat(int nCol) const;
+	void ShowColumn(int nCol, BOOL bShow);
 	BOOL SetColumnText(int nCol, LPCTSTR szText);
 	void DeleteAllColumns();
 	void SetLastColumnStretchy(BOOL bStretchy);
