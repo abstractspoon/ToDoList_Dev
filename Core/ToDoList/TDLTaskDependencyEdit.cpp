@@ -234,13 +234,16 @@ void CTDLTaskDependencyEdit::DDX(CDataExchange* pDX, CTDCDependencyArray& aValue
 enum
 {
 	TASK_COL,
+	ID_COL,
 	LEADIN_COL,
 
 	NUM_COLS // always last
 };
 
 const UINT COMBO_ID = 1001;
+
 const LPCTSTR PREFS_KEY = _T("Dependency");
+const LPCTSTR DEF_COLPROPORTIONS = _T("10|2|5");
 
 // ----------------------------------------------------------
 
@@ -271,7 +274,7 @@ void CTDLTaskDependencyListCtrl::SetDependencies(const CTDCDependencyArray& aDep
 
 	// create list columns
 	CPreferences prefs;
-	CString sColWidths = prefs.GetProfileString(PREFS_KEY, _T("ColWidths"), _T("20|10"));
+	CString sColWidths = prefs.GetProfileString(PREFS_KEY, _T("ColWidths"), DEF_COLPROPORTIONS);
 
 	CDWordArray aWidths;
 	Misc::Split(sColWidths, aWidths, '|');
@@ -284,8 +287,10 @@ void CTDLTaskDependencyListCtrl::SetDependencies(const CTDCDependencyArray& aDep
 	}
 
 	VERIFY(TASK_COL == AddCol(CEnString(IDS_TDLBC_DEPENDS), (int)aWidths[TASK_COL], ILCT_COMBO));
+	VERIFY(ID_COL == AddCol(CEnString(IDS_TDC_COLUMN_ID), (int)aWidths[ID_COL]));
 	VERIFY(LEADIN_COL == AddCol(CEnString(IDS_DEPENDSLEADIN_COL), (int)aWidths[LEADIN_COL]));
 
+	EnableColumnEditing(ID_COL, FALSE);
 	ShowColumn(LEADIN_COL, m_bShowLeadInTimes);
 	RecalcColumnWidths();
 
@@ -305,12 +310,7 @@ void CTDLTaskDependencyListCtrl::SetDependencies(const CTDCDependencyArray& aDep
 		if (depend.IsLocal())
 		{
 			HTASKITEM hTask = m_tasks.FindTask(depend.dwTaskID);
-			CString sName;
-
-			if (hTask)
-				sName.Format(_T("%s (%ld)"), m_tasks.GetTaskTitle(hTask), depend.dwTaskID);
-			else
-				sName = Misc::Format(depend.dwTaskID);
+			CString sName = (hTask ? m_tasks.GetTaskTitle(hTask) : Misc::Format(depend.dwTaskID));
 
 			int nImage = m_ilTasks.GetImageIndex(m_tasks.GetTaskIcon(hTask));
 
@@ -320,6 +320,8 @@ void CTDLTaskDependencyListCtrl::SetDependencies(const CTDCDependencyArray& aDep
 			int nRow = AddRow(sName, nImage);
 
 			SetItemData(nRow, depend.dwTaskID);
+			SetItemText(nRow, ID_COL, Misc::Format(depend.dwTaskID));
+
 			if (m_bShowLeadInTimes)
 				SetItemText(nRow, LEADIN_COL, Misc::Format(depend.nDaysLeadIn));
 		}
@@ -495,7 +497,10 @@ void CTDLTaskDependencyListCtrl::OnTaskComboOK()
 		SetItemText(nRow, TASK_COL, sTask);
 	}
 
-	SetItemData(nRow, m_cbTasks.GetSelectedTaskID());
+	DWORD dwTaskID = m_cbTasks.GetSelectedTaskID();
+
+	SetItemData(nRow, dwTaskID);
+	SetItemText(nRow, ID_COL, Misc::Format(dwTaskID));
 	SetItemImage(nRow, m_cbTasks.GetSelectedTaskImage());
 	SetFocus();
 }
