@@ -128,6 +128,7 @@ protected:
 	BOOL ValidateSelection(int& nSel, BOOL bForward) const;
 	BOOL IsValidIndex(int nItem) const { return ((nItem >= 0) && (nItem < GetCount())); }
 	BOOL FindNextItem(const CString& sText, int nFrom, int nTo, int nIncrement, int& nNext) const;
+	void NotifyParent(int nMsgID);
 
 protected:
 	void DeleteAllExtItemData();

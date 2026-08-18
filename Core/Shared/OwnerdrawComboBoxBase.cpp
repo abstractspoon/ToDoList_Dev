@@ -615,12 +615,15 @@ BOOL COwnerdrawComboBoxBase::HandleCursorKey(UINT nChar)
 	if (nNewSel != nCurSel)
 	{
 		SetCurSel(nNewSel);
-
-		int nMsgID = (GetDroppedState() ? CBN_SELCHANGE : CBN_SELENDOK);
-		GetParent()->SendMessage(WM_COMMAND, MAKEWPARAM(GetDlgCtrlID(), nMsgID), (LPARAM)GetSafeHwnd());
+		NotifyParent(GetDroppedState() ? CBN_SELCHANGE : CBN_SELENDOK);
 	}
 
 	return TRUE;
+}
+
+void COwnerdrawComboBoxBase::NotifyParent(int nMsgID)
+{
+	GetParent()->SendMessage(WM_COMMAND, MAKEWPARAM(GetDlgCtrlID(), nMsgID), (LPARAM)GetSafeHwnd());
 }
 
 void COwnerdrawComboBoxBase::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
@@ -841,6 +844,10 @@ BOOL COwnerdrawComboBoxBase::SelectNextItem(const CString& sText, BOOL bForward)
 		return FALSE;
 
 	SetCurSel(nNext);
+
+	if (CDialogHelper::ComboHasEdit(*this))
+		NotifyParent(CBN_SELCHANGE);
+
 	return TRUE;
 }
 
