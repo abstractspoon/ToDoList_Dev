@@ -233,7 +233,7 @@ void CTDLTaskDependencyEdit::DDX(CDataExchange* pDX, CTDCDependencyArray& aValue
 
 enum
 {
-	DEPEND_COL,
+	TASK_COL,
 	LEADIN_COL,
 
 	NUM_COLS // always last
@@ -283,7 +283,7 @@ void CTDLTaskDependencyListCtrl::SetDependencies(const CTDCDependencyArray& aDep
 		aWidths[LEADIN_COL] = GraphicsMisc::ScaleByDPIFactor(150);
 	}
 
-	VERIFY(DEPEND_COL == AddCol(CEnString(IDS_TDLBC_DEPENDS), (int)aWidths[DEPEND_COL], ILCT_COMBO));
+	VERIFY(TASK_COL == AddCol(CEnString(IDS_TDLBC_DEPENDS), (int)aWidths[TASK_COL], ILCT_COMBO));
 	VERIFY(LEADIN_COL == AddCol(CEnString(IDS_DEPENDSLEADIN_COL), (int)aWidths[LEADIN_COL]));
 
 	ShowColumn(LEADIN_COL, m_bShowLeadInTimes);
@@ -347,7 +347,7 @@ int CTDLTaskDependencyListCtrl::GetDependencies(CTDCDependencyArray& aDepends) c
 		{
 			depend.nDaysLeadIn = _ttoi(GetItemText(nRow, LEADIN_COL));
 		}
-		else if (depend.Parse(GetItemText(nRow, DEPEND_COL)))
+		else if (depend.Parse(GetItemText(nRow, TASK_COL)))
 		{
 			depend.nDaysLeadIn = 0;
 		}
@@ -382,7 +382,7 @@ void CTDLTaskDependencyListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClick)
 
 	switch (nCol)
 	{
-	case DEPEND_COL:
+	case TASK_COL:
 		ShowControl(m_cbTasks, nItem, nCol, bBtnClick);
 		break;
 
@@ -421,7 +421,7 @@ void CTDLTaskDependencyListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 
 	switch (nCol)
 	{
-	case DEPEND_COL:
+	case TASK_COL:
 		{
 			ASSERT(&ctrl == &m_cbTasks);
 
@@ -492,7 +492,7 @@ void CTDLTaskDependencyListCtrl::OnTaskComboOK()
 	}
 	else
 	{
-		SetItemText(nRow, DEPEND_COL, sTask);
+		SetItemText(nRow, TASK_COL, sTask);
 	}
 
 	SetItemData(nRow, m_cbTasks.GetSelectedTaskID());
