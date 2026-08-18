@@ -9408,6 +9408,7 @@ BOOL CToDoCtrl::EditSelectedTaskDependency()
 
 		filter.mapAttribs.Add(TDCA_TASKNAME);
 		filter.mapAttribs.Add(TDCA_ICON);
+		filter.mapAttribs.Add(TDCA_PATH);
 
 		CTaskFile tasks;
 		GetTasks(tasks, filter);

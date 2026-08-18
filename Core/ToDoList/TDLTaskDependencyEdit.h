@@ -87,6 +87,7 @@ protected:
 	virtual BOOL CanEditCell(int nRow, int nCol) const;
 	virtual void EditCell(int nItem, int nCol, BOOL bBtnClick);
 	virtual COLORREF GetItemBackColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
+	virtual void DrawCellText(CDC* pDC, int nItem, int nCol, const CRect& rText, const CString& sText, COLORREF crText, UINT nDrawTextFlags);
 	virtual void PrepareControl(CWnd& ctrl, int nRow, int nCol);
 
 protected:

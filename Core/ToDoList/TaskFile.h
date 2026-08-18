@@ -219,9 +219,11 @@ public:
 	BOOL SetTaskSubtaskCompletion(HTASKITEM hTask, const CString& sSubtaskDone);
 	BOOL SetTaskGoodAsDone(HTASKITEM hTask, BOOL bDone);
 	BOOL SetTaskPartlyDone(HTASKITEM hTask, BOOL bPartly);
-	BOOL SetTaskPath(HTASKITEM hTask, const CString& sPath);
 	BOOL SetTaskFlag(HTASKITEM hTask, BOOL bFlag, BOOL bCalc);
 	BOOL SetTaskLock(HTASKITEM hTask, BOOL bLock, BOOL bCalc);
+
+	BOOL SetTaskPath(HTASKITEM hTask, const CString& sPath);
+	CString GetTaskPath(HTASKITEM hTask) const;
 
 	BOOL SetTaskCategories(HTASKITEM hTask, const CStringArray& aCategories);
 	int  GetTaskCategories(HTASKITEM hTask, CStringArray& aCategories) const;
