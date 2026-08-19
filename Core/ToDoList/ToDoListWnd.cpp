@@ -14074,16 +14074,15 @@ void CToDoListWnd::OnUpdateViewRestoreDefaultTaskViewFontSize(CCmdUI* pCmdUI)
 
 void CToDoListWnd::OnMoveGoToTask() 
 {
-	CFilteredToDoCtrl& tdc = GetToDoCtrl();
-	CTDLGoToTaskDlg dialog(tdc);
-
-	if (dialog.DoModal(CMDICON(ID_MOVE_GOTOTASK)) == IDOK)
-		tdc.SelectTask(dialog.GetTaskID(), TRUE);
+	DoSelectTask(CMDICON(ID_MOVE_GOTOTASK), IDS_GOTOTASK_DLGTITLE, FALSE);
 }
 
 void CToDoListWnd::OnUpdateMoveGoToTask(CCmdUI* pCmdUI) 
 {
-	pCmdUI->Enable(GetToDoCtrl().GetTaskCount());
+	UINT nNumVisible = 0;
+	GetToDoCtrl().GetTaskCount(&nNumVisible);
+
+	pCmdUI->Enable(nNumVisible != 0);
 }
 
 BOOL CToDoListWnd::DoSelectTask(HICON hIcon, UINT nTitleStrID, BOOL bEditable)

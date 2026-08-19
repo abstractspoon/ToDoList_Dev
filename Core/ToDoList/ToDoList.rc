@@ -6178,6 +6178,11 @@ BEGIN
     IDS_FP_EMPTY            "<empty>"
     IDS_MESSAGE_INCOMPLETERULES 
                             "Invalid Search|The current search contains %d incomplete rules."
+    IDS_GOTOTASK_DLGTITLE   "Go To Task"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
     IDS_CREATESUBTASKINTASK_DLGTITLE "Select Parent Task"
 END
 

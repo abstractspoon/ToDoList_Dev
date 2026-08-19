@@ -2605,6 +2605,7 @@
 #define IDS_FP_REQUIRED                 51692
 #define IDS_FP_EMPTY                    51693
 #define IDS_MESSAGE_INCOMPLETERULES     51694
+#define IDS_GOTOTASK_DLGTITLE           51695
 #define IDS_CREATESUBTASKINTASK_DLGTITLE 51696
 
 // Next default values for new objects
