@@ -40,7 +40,7 @@ void CTDLSelectTaskDlg::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(CTDLSelectTaskDlg, CTDLDialog)
 	ON_CBN_SELCHANGE(IDC_TASKCOMBO, OnSelChangeTask)
-	ON_CBN_EDITUPDATE(IDC_TASKCOMBO, OnSelChangeTask)
+	ON_CBN_EDITUPDATE(IDC_TASKCOMBO, OnEditUpdateTask)
 	ON_CBN_DBLCLK(IDC_TASKCOMBO, OnDoubleClickTask)
 	ON_BN_CLICKED(IDC_SHOWDONETASKS, OnShowDoneTasks)
 END_MESSAGE_MAP()
@@ -86,7 +86,6 @@ BOOL CTDLSelectTaskDlg::OnInitDialog()
 	m_cbTasks.SetSelectedTaskID(m_dwSelTaskID);
 
 	OnSelChangeTask();
-
 	return TRUE;
 }
 
@@ -94,6 +93,11 @@ void CTDLSelectTaskDlg::OnSelChangeTask()
 {
 	m_dwSelTaskID = m_cbTasks.GetSelectedTaskID();
 	EnableDisableOK();
+}
+
+void CTDLSelectTaskDlg::OnEditUpdateTask()
+{
+	PostMessage(WM_COMMAND, MAKEWPARAM(IDC_TASKCOMBO, CBN_SELCHANGE), (LPARAM)(HWND)m_cbTasks);
 }
 
 void CTDLSelectTaskDlg::EnableDisableOK()
@@ -111,6 +115,6 @@ void CTDLSelectTaskDlg::OnShowDoneTasks()
 {
 	UpdateData();
 
-	m_cbTasks.Populate(m_tasks, m_ilTasks, m_bShowDoneTasks);
+	m_cbTasks.Populate(m_tasks, m_ilTasks, m_aRecentTaskIDs, m_bShowDoneTasks);
 	m_cbTasks.SetSelectedTaskID(m_dwSelTaskID);
 }

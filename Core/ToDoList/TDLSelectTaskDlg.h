@@ -51,6 +51,7 @@ protected:
 protected:
 	// Generated message map functions
 	afx_msg void OnSelChangeTask();
+	afx_msg void OnEditUpdateTask();
 	afx_msg void OnDoubleClickTask();
 	afx_msg void OnShowDoneTasks();
 	DECLARE_MESSAGE_MAP()
