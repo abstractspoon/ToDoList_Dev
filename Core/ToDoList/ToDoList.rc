@@ -6178,6 +6178,7 @@ BEGIN
     IDS_FP_EMPTY            "<empty>"
     IDS_MESSAGE_INCOMPLETERULES 
                             "Invalid Search|The current search contains %d incomplete rules."
+    IDS_CREATESUBTASKINTASK_DLGTITLE "Select Parent Task"
 END
 
 #endif    // English (Australia) resources

@@ -35,6 +35,7 @@
 #include "tdlOffsetDatesDlg.h"
 #include "TDLPasteTaskAttributesDlg.h"
 #include "tdlprintdialog.h"
+#include "TDLSelectTaskDlg.h"
 #include "tdlsetreminderdlg.h"
 #include "tdlshowreminderdlg.h"
 #include "TDLTasklistSaveAsDlg.h"
@@ -9894,7 +9895,6 @@ void CToDoListWnd::OnNewTask(UINT nCmdID)
 	}
 
 	TDC_INSERTWHERE nInsert = TDC::MapInsertIDToInsertWhere(nCmdID);
-
 	VERIFY(CreateNewTask(CEnString(IDS_TASK), nInsert, TRUE, dwDependencyID));
 }
 
@@ -9935,20 +9935,25 @@ void CToDoListWnd::OnUpdateNewTask(CCmdUI* pCmdUI)
 	}
 
 	TDC_INSERTWHERE nInsert = TDC::MapInsertIDToInsertWhere(nCmdID);
-
 	pCmdUI->Enable(CanCreateNewTask(nInsert, bDependent));
 }
 
 void CToDoListWnd::OnNewSubtaskInTask()
 {
-	BOOL bTop = (GetNewSubtaskCmdID() == ID_NEWSUBTASK_ATTOP);
-	
-	GetToDoCtrl().CreateNewSubtaskInTask(CEnString(IDS_TASK), bTop);
+	if (!DoSelectTask(CMDICON(ID_NEWSUBTASK_INTASK), IDS_CREATESUBTASKINTASK_DLGTITLE, TRUE))
+		return;
+
+	TDC_INSERTWHERE nInsert = TDC::MapInsertIDToInsertWhere(GetNewSubtaskCmdID());
+	VERIFY(CreateNewTask(CEnString(IDS_TASK), nInsert, TRUE));
 }
 
 void CToDoListWnd::OnUpdateNewSubtaskInTask(CCmdUI* pCmdUI)
 {
-	pCmdUI->Enable(GetToDoCtrl().CanCreateNewSubtaskInTask());
+	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
+	UINT nNumVisible = 0;
+
+	tdc.GetTaskCount(&nNumVisible);
+	pCmdUI->Enable(nNumVisible);
 }
 
 BOOL CToDoListWnd::CanCreateNewTask(TDC_INSERTWHERE nInsertWhere, BOOL bDependent) const
@@ -9981,7 +9986,6 @@ void CToDoListWnd::OnSplitTask(UINT nCmdID)
 	case ID_SPLITTASKINTO_FIVE:
 		{
 			int nNumPieces = (2 + (nCmdID - ID_SPLITTASKINTO_TWO));
-
 			VERIFY(GetToDoCtrl().SplitSelectedTask(nNumPieces));
 		}
 		break;
@@ -14080,6 +14084,43 @@ void CToDoListWnd::OnMoveGoToTask()
 void CToDoListWnd::OnUpdateMoveGoToTask(CCmdUI* pCmdUI) 
 {
 	pCmdUI->Enable(GetToDoCtrl().GetTaskCount());
+}
+
+BOOL CToDoListWnd::DoSelectTask(HICON hIcon, UINT nTitleStrID, BOOL bEditable)
+{
+	// Get all editable tasks for the active tasklist
+	DWORD dwFlags = (bEditable ? TDCGTF_NOTLOCKED : 0L);
+	TDCGETTASKS filter(TDCGT_ALL, dwFlags);
+
+	filter.mapAttribs.Add(TDCA_TASKNAME);
+	filter.mapAttribs.Add(TDCA_ICON);
+
+	CFilteredToDoCtrl& tdc = GetToDoCtrl();
+
+	CTaskFile tasks;
+	GetToDoCtrl().GetTasks(tasks, filter);
+
+	// Prepare the dialog
+	CTDLSelectTaskDlg dialog(tasks,
+							 tdc.GetTaskIconImageList(),
+							 tdc.GetPreferencesKey(_T("NewSubtaskInTask")));
+
+	dialog.SetStrikethroughCompletedTasks(Prefs().GetStrikethroughDone());
+	dialog.SetShowParentTasksAsFolders(Prefs().GetShowParentsAsFolders());
+	dialog.SetSelectedTaskID(tdc.GetSelectedTaskID());
+	dialog.SetCompletedTaskColor(Prefs().GetDoneTaskColor());
+
+	if (dialog.DoModal(NULL, nTitleStrID) != IDOK)
+		return FALSE;
+
+	// Select the chosen task
+	if (!tdc.SelectTask(dialog.GetSelectedTaskID(), FALSE))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	return TRUE;
 }
 
 void CToDoListWnd::OnToolsCleanupIniPreferences() 
