@@ -46,7 +46,6 @@ BEGIN_MESSAGE_MAP(CTDLSelectTaskDlg, CTDLDialog)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
-// CTDLSelectTaskDlg message handlers
 
 int CTDLSelectTaskDlg::DoModal(HICON hIcon, UINT nTitleStrID)
 {
