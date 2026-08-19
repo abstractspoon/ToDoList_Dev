@@ -20,7 +20,6 @@ class CTDCImageList;
 
 class CTDLSelectTaskDlg : public CTDLDialog
 {
-// Construction
 public:
 	CTDLSelectTaskDlg(const CTaskFile& tasks, const CTDCImageList& ilTasks, LPCTSTR szPrefsKey = NULL, CWnd* pParent = NULL);
 
@@ -45,11 +44,10 @@ protected:
 	BOOL m_bShowDoneTasks;
 
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	virtual void DoDataExchange(CDataExchange* pDX);
 	virtual BOOL OnInitDialog();
 
 protected:
-	// Generated message map functions
 	afx_msg void OnSelChangeTask();
 	afx_msg void OnEditUpdateTask();
 	afx_msg void OnDoubleClickTask();
@@ -59,8 +57,5 @@ protected:
 protected:
 	void EnableDisableOK();
 };
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
 #endif // !defined(AFX_TDLSELECTTASKDLG_H__135C804F_9469_4B97_AAE1_F05C79DE41DF__INCLUDED_)

@@ -23,7 +23,6 @@
 #include "tdccontentmgr.h"
 #include "TDLRecurringTaskEdit.h"
 #include "ToDoCtrlDataUtils.h"
-#include "TDLSelectTaskDlg.h"
 
 #include "..\shared\autoflag.h"
 #include "..\shared\clipboard.h"
@@ -3102,54 +3101,6 @@ BOOL CToDoCtrl::CanCreateNewTask(TDC_INSERTWHERE nInsertWhere) const
 	}
 
 	return FALSE;
-}
-
-BOOL CToDoCtrl::CreateNewSubtaskInTask(const CString& sText, BOOL bTop)
-{
-	// Get all editable tasks 
-	TDCGETTASKS filter(TDCGT_ALL, TDCGTF_NOTLOCKED);
-
-	filter.mapAttribs.Add(TDCA_TASKNAME);
-	filter.mapAttribs.Add(TDCA_ICON);
-
-	CTaskFile tasks;
-	GetTasks(tasks, filter);
-
-	// Prepare the dialog
-	CTDLSelectTaskDlg dialog(tasks,
-							 GetTaskIconImageList(),
-							 GetPreferencesKey(_T("NewSubtaskInTask")));
-
-	dialog.SetStrikethroughCompletedTasks(HasStyle(TDCS_STRIKETHOUGHDONETASKS));
-	dialog.SetShowParentTasksAsFolders(HasStyle(TDCS_SHOWPARENTSASFOLDERS));
-	dialog.SetSelectedTaskID(GetSelectedTaskID());
-	dialog.SetCompletedTaskColor(m_taskTree.GetCompletedTaskColor());
-
-	if (dialog.DoModal(NULL, IDS_SELECTSUBTASKPARENT_TITLE) != IDOK)
-		return FALSE;
-
-	// Select the chosen task
-	if (!SelectTask(dialog.GetSelectedTaskID(), FALSE))
-	{
-		ASSERT(0);
-		return FALSE;
-	}
-
-	// Create the task
-	TDC_INSERTWHERE nInsert = (bTop ? TDC_INSERTATTOPOFSELTASK : TDC_INSERTATBOTTOMOFSELTASK);
-
-	if (!CreateNewTask(sText, nInsert, TRUE))
-	{
-		ASSERT(0);
-		return FALSE;
-	}
-
-	return TRUE;
-}
-
-BOOL CToDoCtrl::CanCreateNewSubtaskInTask() const
-{
-	return m_taskTree.GetItemCount();
 }
 
 TODOITEM* CToDoCtrl::CreateNewTask(HTREEITEM htiParent)
