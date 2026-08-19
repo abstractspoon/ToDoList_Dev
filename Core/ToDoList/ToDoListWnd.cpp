@@ -417,9 +417,6 @@ CToDoListWnd::~CToDoListWnd()
 }
 
 BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
-//{{AFX_MSG_MAP(CToDoListWnd)
-	//}}AFX_MSG_MAP
-
 	ON_CBN_EDITCHANGE(IDC_QUICKFIND, OnEditChangeQuickFind)
 	ON_CBN_SELCHANGE(IDC_QUICKFIND, OnSelChangeQuickFind)
 
