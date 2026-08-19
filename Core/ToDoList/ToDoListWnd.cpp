@@ -27,7 +27,6 @@
 #include "tdlcustomattributedlg.h"
 #include "tdlexportDlg.h"
 #include "tdlfilterdlg.h"
-#include "TDLGoToTaskDlg.h"
 #include "tdlimportdialog.h"
 #include "TDLLanguageDlg.h"
 #include "tdlKeyboardShortcutDisplayDlg.h"
