@@ -9952,7 +9952,7 @@ void CToDoListWnd::OnUpdateNewSubtaskInTask(CCmdUI* pCmdUI)
 	UINT nNumVisible = 0;
 
 	tdc.GetTaskCount(&nNumVisible);
-	pCmdUI->Enable(nNumVisible);
+	pCmdUI->Enable(nNumVisible != 0);
 }
 
 BOOL CToDoListWnd::CanCreateNewTask(TDC_INSERTWHERE nInsertWhere, BOOL bDependent) const
