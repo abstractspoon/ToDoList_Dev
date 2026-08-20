@@ -245,9 +245,6 @@
     <ClCompile Include="..\ToDoList\TDLFindTasksDlg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\ToDoList\TDLGoToTaskDlg.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\ToDoList\TDLImpExpAttributeMappingListCtrl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -743,9 +740,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\ToDoList\TDLFindTasksDlg.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\ToDoList\TDLGoToTaskDlg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\ToDoList\TDLImpExpAttributeMappingListCtrl.h">

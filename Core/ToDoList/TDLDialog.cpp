@@ -36,24 +36,17 @@ CTDLDialog::CTDLDialog(UINT nIDTemplate, LPCTSTR szPrefsKey, CWnd* pParent)
 	m_sizeOrg(0, 0),
 	m_sPrefsKey(szPrefsKey)
 {
-	//{{AFX_DATA_INIT(CTDLDialog)
-	//}}AFX_DATA_INIT
 }
 
 void CTDLDialog::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
-
-	//{{AFX_DATA_MAP(CTDLDialog)
-	//}}AFX_DATA_MAP
 }
 
 IMPLEMENT_DYNAMIC(CTDLDialog, CDialog)
 
 BEGIN_MESSAGE_MAP(CTDLDialog, CDialog)
-	//{{AFX_MSG_MAP(CTDLDialog)
 	ON_WM_SIZE()
-	//}}AFX_MSG_MAP
 	ON_WM_HELPINFO()
 	ON_WM_GETMINMAXINFO()
 	ON_WM_DESTROY()
@@ -168,6 +161,12 @@ void CTDLDialog::OnSize(UINT nType, int cx, int cy)
 	}
 
 	m_btnHelp.UpdatePosition();
+}
+
+void CTDLDialog::OnRepositionControls(int dx, int dy)
+{
+	OffsetCtrl(this, IDOK, dx, dy);
+	OffsetCtrl(this, IDCANCEL, dx, dy);
 }
 
 void CTDLDialog::OnGetMinMaxInfo(MINMAXINFO* lpMMI)

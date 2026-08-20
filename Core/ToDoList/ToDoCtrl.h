@@ -74,7 +74,6 @@ private:
 
 	// ----------------------------------------------------
 
-// Construction
 public:
 	CToDoCtrl(const CTDCContentMgr& mgrContent, 
 			  const CShortcutManager& mgrShortcuts, 
@@ -189,8 +188,6 @@ public:
 
 	BOOL CreateNewTask(const CString& sText, TDC_INSERTWHERE nWhere, BOOL bEditLabel = TRUE, DWORD dwDependency = 0);
 	BOOL CanCreateNewTask(TDC_INSERTWHERE nInsertWhere) const;
-	BOOL CreateNewSubtaskInTask(const CString& sText, BOOL bTop); // 'Edit label' is implied
-	BOOL CanCreateNewSubtaskInTask() const;
 
 	void SetSubtaskDragDropPos(BOOL bTop = TRUE) { m_bDragDropSubtasksAtTop = bTop; }
 	BOOL SplitSelectedTask(int nNumSubtasks = 2);
@@ -553,19 +550,14 @@ protected:
 private:
 	IDLETASKS m_idleTasks;
 
-	// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CToDoCtrl)
 public:
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	virtual int OnToolHitTest(CPoint point, TOOLINFO * pTI) const;
 
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	virtual void DoDataExchange(CDataExchange* pDX);
 	virtual BOOL OnInitDialog();
-	//}}AFX_VIRTUAL
 
-	// Implementation
 protected:
 	void UpdateComments(const CString& sTextComments, const CBinaryData& customComments);
 	
@@ -573,9 +565,6 @@ protected:
 	static UINT WM_TDC_FIXUPPOSTDROPSELECTION;
 	static UINT WM_TDC_RECREATERECURRINGTASK;
 	
-	// Generated message map functions
-	//{{AFX_MSG(CToDoCtrl)
-	//}}AFX_MSG
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
@@ -866,8 +855,5 @@ protected:
 	static TDC_FILE SaveTaskfile(CTaskFile& tasks, const CString& sSavePath);
 	static int RemoveNonSelectedTasks(const CDWordSet& mapSelTaskIDs, CTaskFile& tasks, HTASKITEM hTask);
 };
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
 #endif // !defined(AFX_TODOCTRL_H__5951FDE6_508A_4A9D_A55D_D16EB026AEF7__INCLUDED_)

@@ -134,7 +134,6 @@ protected:
 	virtual int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
 
-	// Implementation
 protected:
 	CEnBrowserCtrl m_IE;
 	CEnImageList m_ilTabCtrl;
@@ -853,6 +852,7 @@ protected:
 	void DoPrint(BOOL bPreview = FALSE);
 	BOOL DoDueTaskNotification(int nTDC, int nDueBy);
 	BOOL DoTaskLink(const CString& sPath, DWORD dwTaskID, BOOL bStartup);
+	BOOL DoSelectTask(HICON hIcon, UINT nTitleStrID, BOOL bEditable);
 	void DoInsertDateAndTime(BOOL bDate, BOOL bTime);
 	BOOL CanInsertDateAndTime() const;
 	BOOL DoImportPasteFromClipboard(TDLID_IMPORTTO nWhere);
@@ -894,8 +894,5 @@ protected:
 	static void DisplayTimelogfile(LPCTSTR szFilePath);
 
 };
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
 #endif // !defined(AFX_TODOLISTWND_H__13051D32_D372_4205_BA71_05FAC2159F1C__INCLUDED_)

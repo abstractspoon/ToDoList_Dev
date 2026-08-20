@@ -709,7 +709,7 @@ CString CKanbanColumnCtrl::FormatTaskGroupHeaderText(DWORD dwHeaderID) const
 {
 	ASSERT(IsGroupHeaderTask(dwHeaderID));
 
-	CString sGroupBy;
+	CEnString sGroupBy;
 	m_mapGroupHeaders.Lookup(dwHeaderID, sGroupBy);
 
 	if (sGroupBy.IsEmpty())

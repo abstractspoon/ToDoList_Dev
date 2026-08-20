@@ -36,9 +36,9 @@ const LPCTSTR PREFS_KEY = _T("TaskIcons");
 /////////////////////////////////////////////////////////////////////////////
 // CTDLTaskIconDlg dialog
 
-CTDLTaskIconDlg::CTDLTaskIconDlg(const CTDCImageList& ilIcons, const CString& sSelName, BOOL bWantNoneItem, int nNumImages, CWnd* pParent /*=NULL*/)
+CTDLTaskIconDlg::CTDLTaskIconDlg(const CTDCImageList& ilIcons, const CString& sSelName, BOOL bWantNoneItem, int nNumImages, CWnd* pParent)
 	: 
-	CTDLDialog(CTDLTaskIconDlg::IDD, PREFS_KEY, pParent),
+	CTDLDialog(IDD_TASKICON_DIALOG, PREFS_KEY, pParent),
 	m_ilIcons(ilIcons), 
 	m_sIconName(sSelName), 
 	m_bMultiSel(FALSE),
@@ -48,9 +48,9 @@ CTDLTaskIconDlg::CTDLTaskIconDlg(const CTDCImageList& ilIcons, const CString& sS
 {
 }
 
-CTDLTaskIconDlg::CTDLTaskIconDlg(const CTDCImageList& ilIcons, const CStringArray& aSelNames, int nNumImages, CWnd* pParent /*=NULL*/)
+CTDLTaskIconDlg::CTDLTaskIconDlg(const CTDCImageList& ilIcons, const CStringArray& aSelNames, int nNumImages, CWnd* pParent)
 	: 
-	CTDLDialog(CTDLTaskIconDlg::IDD, PREFS_KEY, pParent),
+	CTDLDialog(IDD_TASKICON_DIALOG, PREFS_KEY, pParent),
 	m_ilIcons(ilIcons), 
 	m_bMultiSel(TRUE),
 	m_bWantNone(FALSE),
@@ -67,14 +67,12 @@ CTDLTaskIconDlg::CTDLTaskIconDlg(const CTDCImageList& ilIcons, const CStringArra
 void CTDLTaskIconDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CTDLDialog::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CTDLTaskIconDlg)
+
 	DDX_Control(pDX, IDC_ICONLIST, m_lcIcons);
-	//}}AFX_DATA_MAP
 }
 
 
 BEGIN_MESSAGE_MAP(CTDLTaskIconDlg, CTDLDialog)
-	//{{AFX_MSG_MAP(CTDLTaskIconDlg)
 	ON_NOTIFY(NM_DBLCLK, IDC_ICONLIST, OnDblclkIconlist)
 	ON_NOTIFY(LVN_ITEMCHANGED, IDC_ICONLIST, OnItemchangedIconlist)
 	ON_NOTIFY(LVN_ENDLABELEDIT, IDC_ICONLIST, OnEndlabeleditIconlist)
@@ -83,11 +81,9 @@ BEGIN_MESSAGE_MAP(CTDLTaskIconDlg, CTDLDialog)
 	ON_NOTIFY(LVN_BEGINLABELEDIT, IDC_ICONLIST, OnBeginlabeleditIconlist)
 	ON_WM_ERASEBKGND()
 	ON_BN_CLICKED(IDC_RELOADICONS, OnReloadIcons)
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
-// CTDLTaskIconDlg message handlers
 
 BOOL CTDLTaskIconDlg::OnInitDialog() 
 {
@@ -114,8 +110,7 @@ BOOL CTDLTaskIconDlg::OnInitDialog()
 
 	CThemed::SetWindowTheme(&m_lcIcons, _T("Explorer"));
 
-	return FALSE;  // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX Property Pages should return FALSE
+	return FALSE;
 }
 
 int CTDLTaskIconDlg::DoModal(HICON hIcon)
@@ -382,14 +377,12 @@ void CTDLTaskIconDlg::OnRepositionControls(int dx, int dy)
 {
 	CTDLDialog::OnRepositionControls(dx, dy);
 	
-	CDialogHelper::ResizeCtrl(this, IDC_ICONLIST, dx, dy);
-	CDialogHelper::ResizeCtrl(this, IDC_DIVIDER, dx, 0);
+	ResizeCtrl(this, IDC_ICONLIST, dx, dy);
+	ResizeCtrl(this, IDC_DIVIDER, dx, 0);
 
-	CDialogHelper::OffsetCtrl(this, IDC_EDITLABEL, 0, dy);
-	CDialogHelper::OffsetCtrl(this, IDC_DIVIDER, 0, dy);
-	CDialogHelper::OffsetCtrl(this, IDC_RELOADICONS, dx, dy);
-	CDialogHelper::OffsetCtrl(this, IDOK, dx, dy);
-	CDialogHelper::OffsetCtrl(this, IDCANCEL, dx, dy);
+	OffsetCtrl(this, IDC_EDITLABEL, 0, dy);
+	OffsetCtrl(this, IDC_DIVIDER, 0, dy);
+	OffsetCtrl(this, IDC_RELOADICONS, dx, dy);
 }
 
 void CTDLTaskIconDlg::OnEditlabel() 

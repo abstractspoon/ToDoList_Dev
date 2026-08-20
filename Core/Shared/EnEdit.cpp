@@ -318,7 +318,7 @@ BOOL CEnEdit::PreTranslateMessage(MSG* pMsg)
 
 void CEnEdit::OnNcCalcSize(BOOL bCalcValidRects, NCCALCSIZE_PARAMS FAR* lpncsp) 
 {
-	if (!(GetStyle() & ES_MULTILINE))
+	if (GetButtonCount() && !(GetStyle() & ES_MULTILINE))
 	{
 		if (bCalcValidRects)
 		{
@@ -327,7 +327,7 @@ void CEnEdit::OnNcCalcSize(BOOL bCalcValidRects, NCCALCSIZE_PARAMS FAR* lpncsp)
 			lpncsp->rgrc[0].right -= GetButtonsWidth();
 			lpncsp->rgrc[0].right += GetSystemMetrics(SM_CXEDGE);
 
-			if (m_bParentIsCombo)
+			if (m_bParentIsCombo != -1)
 			{
 				if (m_nBtnPadding == 0)
 					lpncsp->rgrc[0].right++;

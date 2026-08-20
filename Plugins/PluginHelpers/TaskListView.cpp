@@ -1065,7 +1065,7 @@ void TaskListView::OnDrawItem(DrawListViewItemEventArgs^ e)
 		subItemRect.Width = Columns[column]->Width;
 
 		auto textRect = Rectangle::Inflate(subItemRect, -LabelPadding, -1);
-		auto flags = (GetTextAlignment(column) | TextFormatFlags::SingleLine | TextFormatFlags::VerticalCenter | TextFormatFlags::Left);
+		auto flags = (GetTextAlignment(column) | TextFormatFlags::SingleLine | TextFormatFlags::VerticalCenter);
 
 		if (column == 0)
 		{

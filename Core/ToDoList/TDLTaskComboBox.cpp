@@ -218,8 +218,16 @@ BOOL CTDLTaskComboBox::PreTranslateMessage(MSG* pMsg)
 		switch (pMsg->message)
 		{
 		case WM_KEYDOWN:
-			if (pMsg->wParam == VK_F3)
+			switch (pMsg->wParam)
+			{
+			case VK_F3:
 				SelectNextFind(!Misc::ModKeysArePressed(MKS_SHIFT));
+				break;
+
+			case VK_RETURN:
+				NotifyParent(CBN_SELENDOK);
+				break;
+			}
 			break;
 		}
 	}
@@ -235,6 +243,9 @@ void CTDLTaskComboBox::SelectNextFind(BOOL bForward)
 	GetWindowText(sText);
 	
 	DWORD dwSel = GetEditSel();
+
+	if (!GetDroppedState())
+		SendMessage(CB_SHOWDROPDOWN, TRUE);
 
 	if (SelectNextItem(sText, bForward))
 	{

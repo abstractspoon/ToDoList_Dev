@@ -473,10 +473,6 @@ SOURCE=..\ToDoList\TDLFindTasksDlg.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\ToDoList\TDLGoToTaskDlg.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=..\ToDoList\TDLIconComboBox.cpp
 # End Source File
 # Begin Source File
@@ -1174,10 +1170,6 @@ SOURCE=..\ToDoList\TDLFindTaskExpressionListCtrl.h
 # Begin Source File
 
 SOURCE=..\ToDoList\TDLFindTasksDlg.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ToDoList\TDLGoToTaskDlg.h
 # End Source File
 # Begin Source File
 

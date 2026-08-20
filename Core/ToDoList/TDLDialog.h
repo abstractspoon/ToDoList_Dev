@@ -23,9 +23,8 @@ class CTDLDialog : public CDialog, protected CDialogHelper
 
 	static COLORREF GetErrorLabelTextColor();
 
-// Construction
 protected:
-	CTDLDialog(UINT nIDTemplate, LPCTSTR szPrefsKey = NULL, CWnd* pParent = NULL);   // standard constructor
+	CTDLDialog(UINT nIDTemplate, LPCTSTR szPrefsKey = NULL, CWnd* pParent = NULL);
 
 protected:
 	CWinHelpButton m_btnHelp;
@@ -38,19 +37,15 @@ protected:
 	CString m_sPrefsKey;
 
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	virtual void DoDataExchange(CDataExchange* pDX);
 	virtual BOOL OnInitDialog();
 
-	virtual void OnRepositionControls(int /*dx*/, int /*dy*/) {}
+	virtual void OnRepositionControls(int dx, int dy);
 	virtual BOOL DoIdleProcessing() { return FALSE; }
 
-// Implementation
 protected:
-	// Generated message map functions
-	//{{AFX_MSG(CTDLDialog)
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnDestroy();
-	//}}AFX_MSG
 	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
 	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
 	afx_msg void OnGetMinMaxInfo(MINMAXINFO* lpMMI);
@@ -62,8 +57,5 @@ protected:
 	BOOL IsResizable() const;
 	BOOL SetIcon(UINT nIconID);
 };
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
 #endif // !defined(AFX_TDLDIALOG_H__72F38546_6EAE_43DA_A698_8F791C458BC8__INCLUDED_)

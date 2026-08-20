@@ -45,46 +45,31 @@ protected:
 
 class CTDLTasklistImportDlg : public CTDLDialog
 {
-// Construction
 public:
-	CTDLTasklistImportDlg(const CString& sFilePath, CWnd* pParent = NULL);   // standard constructor
+	CTDLTasklistImportDlg(const CString& sFilePath, CWnd* pParent = NULL);
 
 	IIMPORTEXPORT_RESULT GetSelectedTasks(ITaskList* pTasks);
 
 protected:
-// Dialog Data
-	//{{AFX_DATA(CTDLTasklistImportDlg)
-	enum { IDD = IDD_TDLIMPORTEXPORT_DIALOG };
-	BOOL	m_bResetCreationDate;
-	CString	m_sFilePath;
-	BOOL	m_bImportSubtasks;
-	//}}AFX_DATA
+	BOOL m_bResetCreationDate;
+	CString m_sFilePath;
+	BOOL m_bImportSubtasks;
+	BOOL m_bFirstShow;
 
 	CFileEdit	m_eFilePath;
 	CTDLTaskTreeImportCtrl m_taskTree;
 	CTaskFile m_tasksSelected;
 	TDC_FILE m_nLoadRes;
-	BOOL m_bFirstShow;
 
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CTDLTasklistImportDlg)
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-	//}}AFX_VIRTUAL
-
-// Implementation
-protected:
+	virtual void DoDataExchange(CDataExchange* pDX);
 	virtual BOOL OnInitDialog();
 	virtual void OnOK();
 	virtual void OnRepositionControls(int dx, int dy);
 	virtual BOOL DoIdleProcessing();
 
-	// Generated message map functions
-	//{{AFX_MSG(CTDLTasklistImportDlg)
 	afx_msg void OnSelectall();
 	afx_msg void OnSelectnone();
-	//}}AFX_MSG
 	afx_msg LRESULT OnTDCNotifySelectionChange(WPARAM wp, LPARAM lp);
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 
@@ -92,8 +77,5 @@ protected:
 
 	void ResetSelectedTaskCreationDate(HTASKITEM hTask, BOOL bAndSiblings);
 };
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
 #endif // !defined(AFX_TDLTASKLISTIMPORTDLG_H__F9A9753D_D022_4FC7_B781_DB11A4B4A6E4__INCLUDED_)
