@@ -12,21 +12,20 @@ namespace TaskDatesUIExtension
 		public HashSet<uint> Update(TaskList tasks, UIExtension.UpdateType type, IEnumerable<TaskAttributeItem> availAttribs)
 		{
 			HashSet<uint> taskIds = null;
-			var dateAttribs = GetDateAttributeDefinitions(availAttribs);
 
 			switch (type)
 			{
 			case UIExtension.UpdateType.All:
 				Clear();
-				taskIds = Update(tasks, dateAttribs);
+				taskIds = Update(tasks, availAttribs);
 				break;
 
 			case UIExtension.UpdateType.Edit:
-				taskIds = Update(tasks, dateAttribs);
+				taskIds = Update(tasks, availAttribs);
 				break;
 
 			case UIExtension.UpdateType.New:
-				taskIds = Update(tasks, dateAttribs);
+				taskIds = Update(tasks, availAttribs);
 				break;
 
 			case UIExtension.UpdateType.Delete:
@@ -35,32 +34,6 @@ namespace TaskDatesUIExtension
 			}
 
 			return taskIds;
-		}
-
-		private List<TaskAttributeItem> GetDateAttributeDefinitions(IEnumerable<TaskAttributeItem> availAttribs)
-		{
-			var dateAttribs = new List<TaskAttributeItem>();
-
-			foreach (var attrib in availAttribs)
-			{
-				switch (attrib.AttributeId)
-				{
-				case Task.Attribute.CreationDate:
-				case Task.Attribute.StartDate:
-				case Task.Attribute.DueDate:
-				case Task.Attribute.DoneDate:
-				case Task.Attribute.LastModifiedDate:
-					dateAttribs.Add(attrib);
-					break;
-
-				case Task.Attribute.CustomAttribute:
-					if (attrib.CustomAttributeType == CustomAttributeDefinition.Attribute.Date)
-						dateAttribs.Add(attrib);
-					break;
-				}
-			}
-
-			return dateAttribs;
 		}
 
 		public bool HasItem(uint taskId)
@@ -83,7 +56,7 @@ namespace TaskDatesUIExtension
 
 		// ---------------------------------
 
-		private HashSet<uint> Update(TaskList tasks, List<TaskAttributeItem> dateAttribs)
+		private HashSet<uint> Update(TaskList tasks, IEnumerable<TaskAttributeItem> dateAttribs)
 		{
 			var modifiedTaskIds = new HashSet<uint>();
 
@@ -113,7 +86,7 @@ namespace TaskDatesUIExtension
 			return deletedTaskIds;
 		}
 
-		private bool ProcessTaskUpdate(Task task, IEnumerable<TaskAttributeItem> dateAttribs, HashSet<uint> modifiedTaskIds)
+		private bool ProcessTaskUpdate(Task task, IEnumerable<TaskAttributeItem> availAttribs, HashSet<uint> modifiedTaskIds)
 		{
 			if (!task.IsValid())
 				return false;
@@ -121,7 +94,7 @@ namespace TaskDatesUIExtension
 			uint taskId = task.GetID();
 			var item = GetItem(taskId, true);
 
-			if (!item.ProcessTaskUpdate(task, dateAttribs))
+			if (!item.ProcessTaskUpdate(task, availAttribs))
 				return false;
 
 			modifiedTaskIds?.Add(taskId);
@@ -131,7 +104,7 @@ namespace TaskDatesUIExtension
 
 			while (subtask.IsValid())
 			{
-				ProcessTaskUpdate(subtask, dateAttribs, modifiedTaskIds); // RECURSIVE CALL
+				ProcessTaskUpdate(subtask, availAttribs, modifiedTaskIds); // RECURSIVE CALL
 				subtask = subtask.GetNextTask();
 			}
 
@@ -162,25 +135,27 @@ namespace TaskDatesUIExtension
 			}
 		}
 
-		public bool ProcessTaskUpdate(Task task, IEnumerable<TaskAttributeItem> dateAttribs)
+		public bool ProcessTaskUpdate(Task task, IEnumerable<TaskAttributeItem> availAttribs)
 		{
 			if (!m_Attribs.ProcessTaskUpdate(task))
 				return false;
 
 			// Date Attributes
-			foreach (var attrib in dateAttribs)
+			foreach (var attrib in availAttribs)
 			{
-				var date = m_Dates.GetItem(TaskItemDates.GetAttributeId(attrib), m_Attribs);
+				if (attrib.IsDate())
+				{
+					var date = m_Dates.GetItem(attrib.GetId(), m_Attribs);
 
-				if (attrib.IsCustom())
-					DateTime.TryParse(task.GetCustomAttributeValue(attrib.CustomAttributeId, true), out date.Date);
-				else
-					date.Date = task.GetDate(attrib.AttributeId, true); // TODO
+					if (attrib.IsCustom())
+						DateTime.TryParse(task.GetCustomAttributeValue(attrib.CustomAttributeId, true), out date.Date);
+					else
+						date.Date = task.GetDate(attrib.AttributeId, true); // TODO
+				}
 			}
 
 			return true;
 		}
-
 	}
 
 	///////////////////////////////////////////////////////////////////////////
@@ -255,8 +230,31 @@ namespace TaskDatesUIExtension
 
 			return date;
 		}
+	}
 
-		public static string GetAttributeId(TaskAttributeItem attrib)
+	///////////////////////////////////////////////////////////////////////////
+
+	public static class TaskAttributeItemExtensions
+	{
+		public static bool IsDate(this TaskAttributeItem attrib)
+		{
+			switch (attrib.AttributeId)
+			{
+			case Task.Attribute.CreationDate:
+			case Task.Attribute.StartDate:
+			case Task.Attribute.DueDate:
+			case Task.Attribute.DoneDate:
+			case Task.Attribute.LastModifiedDate:
+				return true;
+
+			case Task.Attribute.CustomAttribute:
+				return (attrib.CustomAttributeType == CustomAttributeDefinition.Attribute.Date);
+			}
+
+			return false;
+		}
+
+		public static string GetId(this TaskAttributeItem attrib)
 		{
 			if (attrib.IsCustom())
 				return attrib.CustomAttributeId;

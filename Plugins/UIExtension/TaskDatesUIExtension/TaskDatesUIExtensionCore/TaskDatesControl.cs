@@ -43,7 +43,9 @@ namespace TaskDatesUIExtension
 		private int[] m_ColValueMaxCharWidth	= new int[4] { -1, -1, -1, -1 };
 
 		private bool m_IsoDates;
-		private Dictionary<string, string> m_DateTypes;
+
+		private Dictionary<string, string> m_MapDateAttribIdToLabel;
+		private List <TaskAttributeItem> m_DateAttributeTypes;
 
 		// --------------------------------------------------------
 
@@ -87,7 +89,7 @@ namespace TaskDatesUIExtension
 			switch (type)
 			{
 			case UIExtension.UpdateType.All:
-				m_DateTypes = GetDataTypes(availAttribs, m_Trans);
+				UpdateDateAttributeTypes(availAttribs);
 				RebuildListView();
 				break;
 
@@ -110,10 +112,24 @@ namespace TaskDatesUIExtension
 			m_IdleTasks.Redraw();
 		}
 
-		public bool WantTaskUpdate(Task.Attribute attrib)
+		public bool WantTaskUpdate(Task.Attribute attribId)
 		{
-			// TODO
-			return true;
+			switch (attribId)
+			{
+			case Task.Attribute.Title:
+			case Task.Attribute.CreationDate:
+			case Task.Attribute.StartDate:
+			case Task.Attribute.DueDate:
+			case Task.Attribute.DoneDate:
+			case Task.Attribute.LastModifiedDate:
+			case Task.Attribute.CustomAttribute:
+			case Task.Attribute.Position:
+			case Task.Attribute.Icon:
+			case Task.Attribute.Color:
+				return true;
+			}
+
+			return false;
 		}
 
 		public bool DoIdleProcessing()
@@ -247,6 +263,11 @@ namespace TaskDatesUIExtension
 		public bool SelectTask(String text, UIExtension.SelectTask selectTask, bool caseSensitive, bool wholeWord, bool findReplace)
 		{
 			return SelectTaskEx(text, selectTask, caseSensitive, wholeWord, findReplace);
+		}
+
+		public IEnumerable<TaskAttributeItem> DateAttributeTypes
+		{
+			get { return m_DateAttributeTypes; }
 		}
 
 		// --------------------------------------------------------
@@ -388,8 +409,10 @@ namespace TaskDatesUIExtension
 			if (lvi == null)
 				return false;
 
-			string dateType = m_Trans.Translate("<unknown>", Translator.Type.Text);
-			m_DateTypes.TryGetValue(date.AttributeId, out dateType);
+			string dateType;
+
+			if (!m_MapDateAttribIdToLabel.TryGetValue(date.AttributeId, out dateType))
+				dateType = m_Trans.Translate("<unknown>", Translator.Type.Text);
 
 			SetItemValues(lvi,
 						  date.FormatDate(m_IsoDates),
@@ -399,34 +422,53 @@ namespace TaskDatesUIExtension
 			return true;
 		}
 
-		private static Dictionary<string, string> GetDataTypes(IEnumerable<TaskAttributeItem> attribs, Translator trans)
+		private TaskAttributeItem MakeAttribute(Task.Attribute attribId, String label)
 		{
-			var dateTypes = new Dictionary<string, string>();
+			return new TaskAttributeItem() { AttributeId = attribId, Label = m_Trans.Translate(label, Translator.Type.Text) };
+		}
 
-			foreach (var attrib in attribs)
+		private void UpdateDateAttributeTypes(IEnumerable<TaskAttributeItem> attribs)
+		{
+			bool updateMapping = false;
+
+			// Add built-in attributes, once only, but WITHOUT trailing 'Date'
+			if (m_DateAttributeTypes == null)
 			{
-				string dateType = string.Empty;
+				m_DateAttributeTypes = new List<TaskAttributeItem>();
+				m_MapDateAttribIdToLabel = new Dictionary<string, string>();
 
-				switch (attrib.AttributeId)
-				{
-				// Use shortened values without trailing 'Date'
-				case Task.Attribute.CreationDate:		dateType = "Created"; break;
-				case Task.Attribute.StartDate:			dateType = "Start"; break;
-				case Task.Attribute.DueDate:			dateType = "Due"; break;
-				case Task.Attribute.DoneDate:			dateType = "Completed"; break;
-				case Task.Attribute.LastModifiedDate:	dateType = "Last Modified"; break;
+				m_DateAttributeTypes.Add(MakeAttribute(Task.Attribute.CreationDate, "Created"));
+				m_DateAttributeTypes.Add(MakeAttribute(Task.Attribute.StartDate, "Start"));
+				m_DateAttributeTypes.Add(MakeAttribute(Task.Attribute.DueDate, "Due"));
+				m_DateAttributeTypes.Add(MakeAttribute(Task.Attribute.DoneDate, "Completed"));
+				m_DateAttributeTypes.Add(MakeAttribute(Task.Attribute.LastModifiedDate, "Last Modified"));
 
-				case Task.Attribute.CustomAttribute:
-					if (attrib.CustomAttributeType == CustomAttributeDefinition.Attribute.Date)
-						dateTypes[attrib.CustomAttributeId] = attrib.Label;
-					break;
-				}
-
-				if (!string.IsNullOrEmpty(dateType))
-					dateTypes[TaskItemDates.GetAttributeId(attrib)] = trans.Translate(dateType, Translator.Type.Text);
+				updateMapping = true;
 			}
 
-			return dateTypes;
+			// Custom date attributes
+			if (attribs.Any(a => (a.AttributeId == Task.Attribute.CustomAttribute)))
+			{
+				// Remove all and update
+				m_DateAttributeTypes.RemoveAll(a => a.IsCustom());
+
+				foreach (var attrib in attribs)
+				{
+					if (attrib.IsCustom() && attrib.IsDate())
+						m_DateAttributeTypes.Add(attrib);
+				}
+
+				updateMapping = true;
+			}
+
+			// Update the label mapping
+			if (updateMapping)
+			{
+				m_MapDateAttribIdToLabel.Clear();
+
+				foreach (var attrib in m_DateAttributeTypes)
+					m_MapDateAttribIdToLabel[attrib.GetId()] = attrib.Label;
+			}
 		}
 
 		private void DeleteListViewItems(HashSet<uint> taskIds)
@@ -479,7 +521,7 @@ namespace TaskDatesUIExtension
 						case Task.Attribute.DoneDate:
 						case Task.Attribute.LastModifiedDate:
 						case Task.Attribute.CustomAttribute:
-							if (date.AttributeId == TaskItemDates.GetAttributeId(attrib))
+							if (date.AttributeId == attrib.GetId())
 							{
 								// Update the date
 								SetItemValue(lvi, DateCol, date.FormatDate(m_IsoDates));
