@@ -11,29 +11,22 @@ namespace TaskDatesUIExtension
 	{
 		public HashSet<uint> Update(TaskList tasks, UIExtension.UpdateType type, IEnumerable<TaskAttributeItem> availAttribs)
 		{
-			HashSet<uint> taskIds = null;
-
 			switch (type)
 			{
 			case UIExtension.UpdateType.All:
 				Clear();
-				taskIds = Update(tasks, availAttribs);
-				break;
+				return Update(tasks, availAttribs);
 
 			case UIExtension.UpdateType.Edit:
-				taskIds = Update(tasks, availAttribs);
-				break;
-
 			case UIExtension.UpdateType.New:
-				taskIds = Update(tasks, availAttribs);
-				break;
+				return Update(tasks, availAttribs);
 
 			case UIExtension.UpdateType.Delete:
-				taskIds = RemoveDeletedTasks(tasks);
-				break;
+				return RemoveDeletedTasks(tasks);
 			}
 
-			return taskIds;
+			Debug.Assert(false);
+			return null;
 		}
 
 		public bool HasItem(uint taskId)
@@ -129,10 +122,13 @@ namespace TaskDatesUIExtension
 
 		public IEnumerable<TaskItemDate> Dates
 		{
-			get
-			{
-				return m_Dates.Values;
-			}
+			get	{ return m_Dates.Values; }
+		}
+
+		public DateTime GetDate(string attribId)
+		{
+			var date = m_Dates.GetItem(attribId);
+			return ((date != null) ? date.Date : TaskItemDate.NullDate);
 		}
 
 		public bool ProcessTaskUpdate(Task task, IEnumerable<TaskAttributeItem> availAttribs)
@@ -284,8 +280,12 @@ namespace TaskDatesUIExtension
 		// local
 		public bool IsGoodAsDone { get { return m_Attrib.IsGoodAsDone; } }
 
-		public DateTime Date = DateTime.MinValue;
+		public DateTime Date = NullDate;
 		public String AttributeId { get; private set; }
+
+		// -----------------------------------------------------------------
+
+		public static readonly DateTime NullDate = DateTime.MinValue;
 
 		// -----------------------------------------------------------------
 
@@ -308,7 +308,7 @@ namespace TaskDatesUIExtension
 		public string FormatOffset(DateTime from)
 		{
 			if (DateIsSet)
-				return DateTime.Today.Subtract(Date).Days.ToString();
+				return from.Subtract(Date.Date).Days.ToString();
 
 			// else
 			return string.Empty;
@@ -316,7 +316,7 @@ namespace TaskDatesUIExtension
 
 		public bool DateIsSet
 		{
-			get { return (Date != DateTime.MinValue); }
+			get { return (Date != NullDate); }
 		}
 
 		public static int CompareDates(TaskItemDate date1, TaskItemDate date2, bool ascending)

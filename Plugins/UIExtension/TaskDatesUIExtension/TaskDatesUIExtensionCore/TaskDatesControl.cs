@@ -45,7 +45,14 @@ namespace TaskDatesUIExtension
 		private bool m_IsoDates;
 
 		private Dictionary<string, string> m_MapDateAttribIdToLabel;
-		private List <TaskAttributeItem> m_DateAttributeTypes;
+		private List<TaskAttributeItem> m_DateAttributeTypes;
+		private List<TaskAttributeItem> m_OffsetAttributeTypes;
+		private string m_OffsetAttributeId;
+		private HashSet<string> m_VisibleDateAttributeIds;
+
+		// --------------------------------------------------------
+
+		public const string TodayAttributeId = "___TODAY___";
 
 		// --------------------------------------------------------
 
@@ -144,11 +151,37 @@ namespace TaskDatesUIExtension
 			{
 				if (value != m_Options)
 				{
-					var oldOptions = m_Options;
+					var changedOptions = (m_Options ^ value);
 					m_Options = value;
 
-					RefreshListViewItemVisibility(oldOptions ^ m_Options);
+					if (RefreshListViewItemVisibility(changedOptions) > 0)
+						RefreshColumnWidths();
 				}
+			}
+		}
+
+		public void SetVisibleDateAttributeTypes(IEnumerable<string> attribIds)
+		{
+			var changedAttribIds = m_VisibleDateAttributeIds;
+			m_VisibleDateAttributeIds = new HashSet<string>(attribIds);
+			
+			if (m_TaskItems.Count > 0)
+			{
+				changedAttribIds.SymmetricExceptWith(m_VisibleDateAttributeIds);
+
+				if (RefreshListViewItemVisibility(changedAttribIds) > 0)
+					RefreshColumnWidths();
+			}
+		}
+
+		public void SetOffsetAttribute(string attribId)
+		{
+			if (attribId != m_OffsetAttributeId)
+			{
+				m_OffsetAttributeId = attribId;
+
+				if (m_TaskItems.Count > 0)
+					RefreshListViewDateOffsets();
 			}
 		}
 
@@ -270,6 +303,11 @@ namespace TaskDatesUIExtension
 			get { return m_DateAttributeTypes; }
 		}
 
+		public IEnumerable<TaskAttributeItem> OffsetAttributeTypes
+		{
+			get { return m_OffsetAttributeTypes; }
+		}
+
 		// --------------------------------------------------------
 		// Message handlers
 
@@ -316,49 +354,94 @@ namespace TaskDatesUIExtension
 				SelectionChange?.Invoke(this, SelectedTaskIds);
 		}
 
-		private void RefreshListViewItemVisibility(TaskDatesOption changedOptions)
+		private int RefreshListViewItemVisibility(TaskDatesOption changedOptions)
+		{
+			if (changedOptions == TaskDatesOption.None)
+				return 0;
+
+			var allOptions = (TaskDatesOption[])Enum.GetValues(typeof(TaskDatesOption));
+			bool checkHide = false, checkShow = false;
+
+			foreach (var option in allOptions)
+			{
+				if (changedOptions.HasFlag(option))
+				{
+					bool hasHideOption = m_Options.HasFlag(option);
+
+					checkShow |= !hasHideOption;
+					checkHide |= hasHideOption;
+				}
+			}
+
+			return RefreshListViewItemVisibility(checkHide, checkShow);
+		}
+
+		private int RefreshListViewItemVisibility(HashSet<string> changedAttribIds)
+		{
+			if (changedAttribIds.Count == 0)
+				return 0;
+
+			bool checkHide = false, checkShow = false;
+
+			foreach (var id in changedAttribIds)
+			{
+				bool hasId = m_VisibleDateAttributeIds.Contains(id);
+
+				checkShow |= hasId;
+				checkHide |= !hasId;
+			}
+
+			return RefreshListViewItemVisibility(checkHide, checkShow);
+		}
+
+		private int RefreshListViewItemVisibility(bool checkHide, bool checkShow)
 		{
 			// We handle restoring selection because our base class
 			// expects item Ids to all be unique
 			var selTasks = SelectedTasks;
 			var state = BeginUpdate();
 
-			bool addParents = (changedOptions.HasFlag(TaskDatesOption.HideParentTasks) && !m_Options.HasFlag(TaskDatesOption.HideParentTasks));
-			bool addDone = (changedOptions.HasFlag(TaskDatesOption.HideCompletedTasks) && !m_Options.HasFlag(TaskDatesOption.HideCompletedTasks));
-			bool addNull = (changedOptions.HasFlag(TaskDatesOption.HideNullDates) && !m_Options.HasFlag(TaskDatesOption.HideNullDates));
+			int numChanges = 0;
 
-			bool removeParents = (!changedOptions.HasFlag(TaskDatesOption.HideParentTasks) && m_Options.HasFlag(TaskDatesOption.HideParentTasks));
-			bool removeDone = (!changedOptions.HasFlag(TaskDatesOption.HideCompletedTasks) && m_Options.HasFlag(TaskDatesOption.HideCompletedTasks));
-			bool removeNull = (!changedOptions.HasFlag(TaskDatesOption.HideNullDates) && m_Options.HasFlag(TaskDatesOption.HideNullDates));
-
-			if (addParents || addDone || addNull)
-			{
-				foreach (var item in m_TaskItems.Values)
-				{
-					foreach (var date in item.Dates)
-					{
-						if (IsDateVisible(date))
-							AddDateToListView(date);
-					}
-				}
-			}
-
-			if (removeParents || removeDone || removeNull)
+			if (checkHide)
 			{
 				int i = Items.Count;
 
 				while (i-- > 0)
 				{
-					if (!IsDateVisible((GetTask(i) as TaskItemDate)))
+					if (!WantShowDate((GetTask(i) as TaskItemDate)))
+					{
 						Items.RemoveAt(i);
+						numChanges++;
+					}
+				}
+			}
+
+			if (checkShow)
+			{
+				foreach (var item in m_TaskItems.Values)
+				{
+					foreach (var date in item.Dates)
+					{
+						if (WantShowDate(date))
+						{
+							AddDateToListView(date);
+							numChanges++;
+						}
+					}
 				}
 			}
 
 			EndUpdate(state, selTasks);
+
+			return numChanges;
 		}
 
-		private bool IsDateVisible(TaskItemDate date)
+		private bool WantShowDate(TaskItemDate date)
 		{
+			if (!m_VisibleDateAttributeIds.Contains(date.AttributeId))
+				return false;
+
 			if (m_Options.HasFlag(TaskDatesOption.HideCompletedTasks) && (date.IsDone || date.IsGoodAsDone))
 				return false;
 
@@ -391,7 +474,7 @@ namespace TaskDatesUIExtension
 			{
 				foreach (var date in item.Dates)
 				{
-					if (IsDateVisible(date))
+					if (WantShowDate(date))
 						AddDateToListView(date);
 				}
 			}
@@ -399,7 +482,7 @@ namespace TaskDatesUIExtension
 
 		private bool AddDateToListView(TaskItemDate date)
 		{
-			Debug.Assert(IsDateVisible(date));
+			Debug.Assert(WantShowDate(date));
 
 			if (Items.Find(GetDateKey(date), false)?.Count() != 0)
 				return false;
@@ -417,7 +500,7 @@ namespace TaskDatesUIExtension
 			SetItemValues(lvi,
 						  date.FormatDate(m_IsoDates),
 						  dateType,
-						  date.FormatOffset(DateTime.Today));
+						  FormatDateOffset(date));
 
 			return true;
 		}
@@ -429,12 +512,13 @@ namespace TaskDatesUIExtension
 
 		private void UpdateDateAttributeTypes(IEnumerable<TaskAttributeItem> attribs)
 		{
-			bool updateMapping = false;
+			bool modified = false;
 
 			// Add built-in attributes, once only, but WITHOUT trailing 'Date'
 			if (m_DateAttributeTypes == null)
 			{
 				m_DateAttributeTypes = new List<TaskAttributeItem>();
+				m_OffsetAttributeTypes = new List<TaskAttributeItem>();
 				m_MapDateAttribIdToLabel = new Dictionary<string, string>();
 
 				m_DateAttributeTypes.Add(MakeAttribute(Task.Attribute.CreationDate, "Created"));
@@ -443,7 +527,7 @@ namespace TaskDatesUIExtension
 				m_DateAttributeTypes.Add(MakeAttribute(Task.Attribute.DoneDate, "Completed"));
 				m_DateAttributeTypes.Add(MakeAttribute(Task.Attribute.LastModifiedDate, "Last Modified"));
 
-				updateMapping = true;
+				modified = true;
 			}
 
 			// Custom date attributes
@@ -455,19 +539,36 @@ namespace TaskDatesUIExtension
 				foreach (var attrib in attribs)
 				{
 					if (attrib.IsCustom() && attrib.IsDate())
-						m_DateAttributeTypes.Add(attrib);
+					{
+						var custAttrib = new TaskAttributeItem(attrib);
+						custAttrib.Label = string.Format(m_Trans.Translate("{0} (Custom)", Translator.Type.Text), attrib.Label);
+
+						m_DateAttributeTypes.Add(custAttrib);
+					}
 				}
 
-				updateMapping = true;
+				modified = true;
 			}
 
-			// Update the label mapping
-			if (updateMapping)
+			if (modified)
 			{
+				// Update the label mapping
 				m_MapDateAttribIdToLabel.Clear();
 
 				foreach (var attrib in m_DateAttributeTypes)
 					m_MapDateAttribIdToLabel[attrib.GetId()] = attrib.Label;
+
+				// and the offset attributes
+				m_OffsetAttributeTypes.Clear();
+				m_OffsetAttributeTypes.AddRange(m_DateAttributeTypes.Where(a => a.IsCustom()));
+
+				m_OffsetAttributeTypes.Insert(0, new TaskAttributeItem()
+				{
+					Label = m_Trans.Translate("Today", Translator.Type.ComboBox),
+					AttributeId = Task.Attribute.CustomAttribute,
+					CustomAttributeId = TaskDatesControl.TodayAttributeId,
+					CustomAttributeType = CustomAttributeDefinition.Attribute.Date,
+				});
 			}
 		}
 
@@ -492,7 +593,7 @@ namespace TaskDatesUIExtension
 
 				foreach (var date in item.Dates)
 				{
-					if (!IsDateVisible(date))
+					if (!WantShowDate(date))
 					{
 						Items.RemoveByKey(GetDateKey(date));
 						continue;
@@ -527,13 +628,34 @@ namespace TaskDatesUIExtension
 								SetItemValue(lvi, DateCol, date.FormatDate(m_IsoDates));
 
 								// And its offset
-								SetItemValue(lvi, OffsetCol, date.FormatOffset(DateTime.Today));
+								SetItemValue(lvi, OffsetCol, FormatDateOffset(date));
 							}
 							break;
 						}
 					}
 				}
 			}
+		}
+
+		private string FormatDateOffset(TaskItemDate date)
+		{
+			if (m_OffsetAttributeId == TodayAttributeId)
+				return date.FormatOffset(DateTime.Today);
+
+			//if (m_OffsetAttributeId == ???)
+			//	return ...
+
+			if (m_OffsetAttributeId == date.AttributeId)
+				return (date.DateIsSet ? "0" : string.Empty);
+
+			var task = m_TaskItems.GetItem(date.Id);
+			return date.FormatOffset(task.GetDate(m_OffsetAttributeId));
+		}
+
+		private void RefreshListViewDateOffsets()
+		{
+			foreach (ListViewItem lvi in Items)
+				SetItemValue(lvi, OffsetCol, FormatDateOffset(lvi.Tag as TaskItemDate));
 		}
 
 		private void ShowIsoDates(bool iso)
@@ -611,8 +733,21 @@ namespace TaskDatesUIExtension
 				{
 				case TaskDatesControl.DateCol:
 					return TaskItemDate.CompareDates((lvi1.Tag as TaskItemDate), (lvi2.Tag as TaskItemDate), Ascending);
+
+				case TaskDatesControl.OffsetCol:
+					{
+						var strOffset1 = lvi1.SubItems[TaskDatesControl.OffsetCol].Text;
+						var strOffset2 = lvi2.SubItems[TaskDatesControl.OffsetCol].Text;
+
+						if (!string.IsNullOrEmpty(strOffset1) && !string.IsNullOrEmpty(strOffset2))
+						{
+							int diff = (int.Parse(strOffset1) - int.Parse(strOffset2));
+							return (Ascending ? diff : -diff);
+						}
+					}
+					break;
 				}
-				
+
 				return base.CompareItems(lvi1, lvi2);
 			}
 		}

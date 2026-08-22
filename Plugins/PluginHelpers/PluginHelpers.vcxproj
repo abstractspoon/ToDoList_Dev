@@ -125,6 +125,7 @@ copy $(SolutionDir)$(ConfigurationName)\Microsoft.VisualStudio.OLE.Interop.dll "
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="CheckComboBox.h" />
+    <ClInclude Include="CheckListBox.h" />
     <ClInclude Include="ClipboardUtil.h" />
     <ClInclude Include="ColorUtil.h" />
     <ClInclude Include="Compression.h" />
@@ -165,6 +166,7 @@ copy $(SolutionDir)$(ConfigurationName)\Microsoft.VisualStudio.OLE.Interop.dll "
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CheckComboBox.cpp" />
+    <ClCompile Include="CheckListBox.cpp" />
     <ClCompile Include="ClipboardUtil.cpp" />
     <ClCompile Include="ColorUtil.cpp" />
     <ClCompile Include="Compression.cpp" />

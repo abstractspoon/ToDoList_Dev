@@ -300,6 +300,8 @@ namespace Abstractspoon
 				String^ Id;
 				String^ Label;
 				String^ ListData; // \n delimited
+
+				String^ ToString() override { return Label; }
 			};
 
 			////////////////////////////////////////////////////////////////////////////////////////////////
@@ -317,6 +319,8 @@ namespace Abstractspoon
 				Task::Attribute AttributeId;
 				String^ CustomAttributeId;
 				CustomAttributeDefinition::Attribute CustomAttributeType;
+
+				String^ ToString() override { return Label; }
 			};
 
 			////////////////////////////////////////////////////////////////////////////////////////////////

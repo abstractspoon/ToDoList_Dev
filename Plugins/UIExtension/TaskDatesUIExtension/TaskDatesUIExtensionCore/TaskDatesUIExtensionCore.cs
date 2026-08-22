@@ -27,6 +27,7 @@ namespace TaskDatesUIExtension
 		private UIExtension.TaskIcon m_TaskIcons;
 		private Font m_ControlsFont;
 		private UIThemeToolbarRenderer m_TBRenderer;
+		private TaskDatesPreferencesDlg m_PrefsDlg;
 
 		// ------------------------------------------------
 
@@ -60,6 +61,7 @@ namespace TaskDatesUIExtension
 
 			m_ControlsFont = new Font(FontName, 8, FontStyle.Regular);
 			m_TaskIcons = new UIExtension.TaskIcon(parentHandle);
+			m_PrefsDlg = new TaskDatesPreferencesDlg(trans);
 
 			m_TBRenderer = new UIThemeToolbarRenderer();
 			m_Toolbar.Renderer = m_TBRenderer;
@@ -200,6 +202,7 @@ namespace TaskDatesUIExtension
 
 		public void SavePreferences(Preferences prefs, String key)
 		{
+			m_PrefsDlg.SavePreferences(prefs, key);
 			m_TaskDatesCtrl.SavePreferences(prefs, key);
 		}
 
@@ -207,7 +210,10 @@ namespace TaskDatesUIExtension
 		{
 			if (!appOnly)
 			{
-				// TODO
+				m_PrefsDlg.LoadPreferences(prefs, key);
+
+				m_TaskDatesCtrl.SetVisibleDateAttributeTypes(m_PrefsDlg.SelectedDateAttributeIds);
+				m_TaskDatesCtrl.SetOffsetAttribute(m_PrefsDlg.SelectedOffsetAttributeId);
 			}
 
  			m_TaskDatesCtrl.LoadPreferences(prefs, key, appOnly);
@@ -308,11 +314,11 @@ namespace TaskDatesUIExtension
 
 		private void OnPreferences(object sender, EventArgs e)
 		{
-			var dlg = new TaskDatesPreferencesDlg(m_Trans);
-
-			if (dlg.ShowDialog() == DialogResult.OK)
+			if (m_PrefsDlg.ShowDialog(m_TaskDatesCtrl.DateAttributeTypes,
+									  m_TaskDatesCtrl.OffsetAttributeTypes) == DialogResult.OK)
 			{
-				// TODO
+				m_TaskDatesCtrl.SetVisibleDateAttributeTypes(m_PrefsDlg.SelectedDateAttributeIds);
+				m_TaskDatesCtrl.SetOffsetAttribute(m_PrefsDlg.SelectedOffsetAttributeId);
 			}
 		}
 

@@ -68,6 +68,18 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DateAttributeCheckListBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DateAttributeCheckListBox.Designer.cs">
+      <DependentUpon>DateAttributeCheckListBox.cs</DependentUpon>
+    </Compile>
+    <Compile Include="OffsetAttributeComboBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="OffsetAttributeComboBox.Designer.cs">
+      <DependentUpon>OffsetAttributeComboBox.cs</DependentUpon>
+    </Compile>
     <Compile Include="TaskDatesControl.cs" />
     <Compile Include="TaskDatesOptionsComboBox.cs">
       <SubType>Component</SubType>

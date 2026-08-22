@@ -322,13 +322,13 @@ bool Win32::SetFocus(IntPtr hWnd)
 bool Win32::IsCursorKeyPressed(bool upDown, bool leftRight)
 {
 	if (upDown && leftRight)
-		return Misc::IsCursorKeyPressed(MKC_ANY);
+		return (Misc::IsCursorKeyPressed(MKC_ANY) != FALSE);
 
 	if (upDown)
-		return Misc::IsCursorKeyPressed(MKC_UPDOWN);
+		return (Misc::IsCursorKeyPressed(MKC_UPDOWN) != FALSE);
 
 	if (leftRight)
-		return Misc::IsCursorKeyPressed(MKC_LEFTRIGHT);
+		return (Misc::IsCursorKeyPressed(MKC_LEFTRIGHT) != FALSE);
 
 	return false;
 }
