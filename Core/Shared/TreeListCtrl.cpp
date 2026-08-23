@@ -1360,27 +1360,18 @@ LRESULT CTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 				}
 				else if (Misc::ModKeysArePressed(0))
 				{
-					// Handle expanding/contracting tasks
+					// Handle expanding/collapsing if there's nothing to do
 					switch (wp)
 					{
 					case VK_MULTIPLY:
-					case VK_RIGHT:
-						if (TSH().IsAnyItemCollapsed())
-						{
-							ExpandSelection(TRUE, (wp == VK_MULTIPLY));
-						}
-						return 0L; // we handled it
+						if (!TSH().IsAnyItemCollapsed())
+							return 0L;
+						break;
 
 					case VK_SUBTRACT:
-					case VK_LEFT:
-						if (TSH().IsAnyItemExpanded())
-						{
-							bSelChange = TSH().RemoveChildDuplicates();
-							ExpandSelection(FALSE);
-
-							ProcessSelectionChange(bSelChange);
-						}
-						return 0L; // we handled it
+						if (!TSH().IsAnyItemExpanded())
+							return 0L;
+						break;
 					}
 				}
 			}
