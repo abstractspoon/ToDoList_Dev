@@ -2447,6 +2447,11 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 		break;
 
 	case WM_PAINT:
+		if (!m_bSavingToImage && IsList(hRealWnd))
+			RefreshListDrawColAttributes(hRealWnd);
+		break;
+
+	case WM_PRINT:
 		if (IsList(hRealWnd))
 			RefreshListDrawColAttributes(hRealWnd);
 		break;
