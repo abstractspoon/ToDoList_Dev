@@ -1126,8 +1126,13 @@ LRESULT CTabbedToDoCtrl::OnPostTabViewChange(WPARAM nOldView, LPARAM nNewView)
 		break;
 
 	case FTCV_TASKLIST:
-		SyncListSelectionToTree(FALSE);
-		m_taskList.EnsureSelectionVisible(FALSE);
+		{
+			SyncListSelectionToTree(FALSE);
+			m_taskList.EnsureSelectionVisible(FALSE);
+
+			// Make sure any column width initialisation is finished
+			while (m_taskList.DoIdleProcessing());
+		}
 		break;
 		
 	case FTCV_UIEXTENSION1:
