@@ -5963,6 +5963,7 @@ BOOL CTDLTaskCtrlBase::SaveToImage(CBitmap& bmImage)
 	BOOL bRes = DoSaveToImage(bmImage, m_crGridLine);
 
 	ResyncScrollPos(Tasks(), m_lcColumns);
+	EnsureSelectionVisible(FALSE);
 
 	return bRes;
 }
