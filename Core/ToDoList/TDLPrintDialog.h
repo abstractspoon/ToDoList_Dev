@@ -136,6 +136,7 @@ protected:
 
 protected:
 	afx_msg void OnChangeStyle();
+	afx_msg void OnSelchangeTabcontrol(NMHDR* pNMHDR, LRESULT* pResult);
 	DECLARE_MESSAGE_MAP()
 };
 

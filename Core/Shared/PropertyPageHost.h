@@ -17,7 +17,6 @@ class CForwardMsgPropertyPage : public CPropertyPage
 {
 	DECLARE_DYNAMIC(CForwardMsgPropertyPage)
 
-	// Construction
 public:
 	CForwardMsgPropertyPage(UINT nIDTemplate, UINT nIDCaption = 0);
 	CForwardMsgPropertyPage(LPCTSTR lpszTemplateName, UINT nIDCaption = 0);
@@ -40,7 +39,6 @@ class CCmdNotifyPropertyPage : public CForwardMsgPropertyPage
 {
 	DECLARE_DYNAMIC(CCmdNotifyPropertyPage)
 
-	// Construction
 public:
 	CCmdNotifyPropertyPage(UINT nIDTemplate, UINT nIDCaption = 0);
 	CCmdNotifyPropertyPage(LPCTSTR lpszTemplateName, UINT nIDCaption = 0);
@@ -56,7 +54,6 @@ protected:
 
 class CPropertyPageHost : public CWnd
 {
-// Construction
 public:
 	CPropertyPageHost();
 	virtual ~CPropertyPageHost();
@@ -116,21 +113,15 @@ protected:
 	CUIntSet m_mapForwardMsgs;
 	BOOL m_bCmdNotifyParent;
 
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CPropertyPageHost)
-	public:
-	virtual BOOL PreTranslateMessage(MSG* pMsg);
-	//}}AFX_VIRTUAL
-
-	// Generated message map functions
 protected:
-	//{{AFX_MSG(CPropertyPageHost)
+	virtual BOOL PreTranslateMessage(MSG* pMsg);
+
+protected:
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
-	//}}AFX_MSG
 	afx_msg LRESULT OnGetCurrentPageHwnd(WPARAM wParam, LPARAM lParam);
+
 	DECLARE_MESSAGE_MAP()
 
 protected:

@@ -12,6 +12,8 @@
 #include "PropertyPageHost.h"
 #include "tabctrlex.h"
 
+/////////////////////////////////////////////////////////////////////////////
+
 class CTabbedPropertyPageHost : public CPropertyPageHost  
 {
 public:
@@ -29,10 +31,7 @@ protected:
 	CTabCtrlEx m_tabCtrl;
 	CImageList* m_pImages;
 
-	// Generated message map functions
 protected:
-	//{{AFX_MSG(CTabbedPropertyPageHost)
-	//}}AFX_MSG
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnSelchangeTabcontrol(NMHDR* pNMHDR, LRESULT* pResult);
