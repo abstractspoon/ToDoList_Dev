@@ -121,7 +121,7 @@ BOOL CCopyWndContents::DoCopy(CBitmap& bmp, const CRect& rFromTo)
 
 	::ReleaseDC(m_hWnd, *pDC);
 
-	return TRUE;
+	return (bmp.GetSafeHandle() != NULL);
 }
 
 void CCopyWndContents::DoPrint(CDC& dc, int /*nHPage*/, int /*nVPage*/)
@@ -374,7 +374,8 @@ CCopyHeaderCtrlContents::~CCopyHeaderCtrlContents()
 
 CCopyListCtrlContents::CCopyListCtrlContents(HWND hWnd) : CCopyWndContents(hWnd)
 {
-	ASSERT(CWinClasses::IsClass(hWnd, WC_LISTVIEW));
+	ASSERT(CWinClasses::IsClass(hWnd, WC_LISTVIEW) || 
+		   CWinClasses::IsWinFormsControl(hWnd, WC_LISTVIEW));
 
 	CRect rect;
 	
@@ -527,10 +528,24 @@ int CCopyListCtrlContents::CalcHeaderHeight() const
 void CCopyListCtrlContents::DoPrint(CDC& dc, int /*nHPage*/, int nVPage)
 {
 	CPoint ptOrg = dc.GetWindowOrg();
+
 	CCopyWndContents::DoPrint(m_hWnd, dc, PRF_CLIENT | PRF_CHILDREN);
 
-	if (nVPage && !HasStyle(LVS_NOSCROLL))
+	if (CWinClasses::IsWinFormsControl(m_hWnd) && (nVPage == 0))
+	{
+		int nSaveDC = dc.SaveDC();
+
+		dc.SetWindowOrg(ptOrg.x + 2, ptOrg.y);
+		dc.ExcludeClipRect(CRect(CPoint(0, CalcHeaderHeight()), GetContentsSize()));
+
+		CCopyWndContents::DoPrint(m_hWnd, dc, PRF_CLIENT | PRF_CHILDREN);
+
+		dc.RestoreDC(nSaveDC);
+	}
+	else if (nVPage && !HasStyle(LVS_NOSCROLL))
+	{
 		dc.SetWindowOrg(ptOrg.x, CalcHeaderHeight());
+	}
 }
 
 int CCopyListCtrlContents::GetContentScrollPos(BOOL bVert) const
