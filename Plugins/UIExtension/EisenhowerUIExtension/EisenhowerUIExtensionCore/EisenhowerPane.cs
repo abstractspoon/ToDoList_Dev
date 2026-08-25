@@ -331,6 +331,34 @@ namespace EisenhowerUIExtension
 			m_List.EnsureSelectionVisible();
 		}
 
+		public Bitmap SaveToImage()
+		{
+			int width = Width, height = m_List.Bounds.Top;
+			var listBmp = m_List.SaveToImage();
+
+			if (listBmp != null)
+			{
+				width = listBmp.Width;
+				height += listBmp.Height;
+			}
+
+			var paneBmp = new Bitmap(width, height);
+
+			using (var graphics = Graphics.FromImage(paneBmp))
+			{
+				graphics.FillRectangle(SystemBrushes.Window, Rectangle.FromLTRB(0, 0, width, height));
+				graphics.DrawImage(m_Icon.Image, 2, 2);
+
+				var titleRect = new Rectangle(m_TitleBar.Left, 0, width, m_List.Bounds.Top);
+				graphics.DrawString(m_TitleBar.Text, Font, SystemBrushes.WindowText, titleRect, new StringFormat() { LineAlignment = StringAlignment.Far});
+
+				if (listBmp != null)
+					graphics.DrawImage(listBmp, 0, m_List.Bounds.Top);
+			}
+			
+			return paneBmp;
+		}
+
 		// --------------------------------------------------------
 		// Message Handlers
 
