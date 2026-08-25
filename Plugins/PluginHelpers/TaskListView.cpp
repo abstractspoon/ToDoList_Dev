@@ -9,6 +9,7 @@
 #include <shared\Clipboard.h>
 #include <shared\Misc.h>
 #include <shared\GraphicsMisc.h>
+#include <shared\CopyWndContents.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -553,6 +554,21 @@ ListViewItem^ TaskListView::FindItem(UInt32 taskId)
 
 	// else
 	return nullptr;
+}
+
+Drawing::Bitmap^ TaskListView::SaveToImage()
+{
+	CCopyListCtrlContents wnd(Win32::GetHwnd(Handle));
+	
+	CBitmap bmp;
+	wnd.DoCopy(bmp);
+
+	EnsureSelectionVisible();
+
+	if (!bmp.GetSafeHandle())
+		return nullptr;
+
+	return Drawing::Bitmap::FromHbitmap(IntPtr(bmp.m_hObject));
 }
 
 String^ TaskListView::Translate(String^ text, Translator::Type type)
@@ -1352,7 +1368,7 @@ void TaskListView::ResizeTaskColumnToFit()
 		return;
 
 	// Resize first column to fill remaining width
-	int otherColsWidth = 0;
+	int otherColsWidth = (Win32::HasVScroll(Handle) ? 0 : SystemInformation::VerticalScrollBarWidth);
 
 	for (int i = 1; i < Columns->Count; i++)
 		otherColsWidth += Columns[i]->Width;

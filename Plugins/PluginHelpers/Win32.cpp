@@ -205,6 +205,16 @@ int Win32::GetHScrollPos(IntPtr hWnd)
 	return ::GetScrollPos(GetHwnd(hWnd), SB_HORZ);
 }
 
+bool Win32::HasHScroll(IntPtr hWnd)
+{
+	return HasStyle(hWnd, WS_HSCROLL, false);
+}
+
+bool Win32::HasVScroll(IntPtr hWnd)
+{
+	return HasStyle(hWnd, WS_VSCROLL, false);
+}
+
 int Win32::GetSystemDPI()
 {
 	if (s_nDPI == 0)

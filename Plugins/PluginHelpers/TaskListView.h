@@ -51,6 +51,7 @@ namespace Abstractspoon
 				Drawing::Rectangle GetTaskLabelRect(UInt32 taskId);
 				Drawing::Rectangle GetTaskLabelRect(int index);
 				void ResizeTaskColumnToFit();
+				Drawing::Bitmap^ SaveToImage();
 
 				bool SelectTask(UInt32 taskId);
 				bool SelectTaskEx(String^ words, UIExtension::SelectTask selectTask, bool caseSensitive, bool wholeWord, bool findReplace);
