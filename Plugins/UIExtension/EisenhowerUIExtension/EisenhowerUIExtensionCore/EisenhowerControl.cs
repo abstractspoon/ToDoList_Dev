@@ -607,8 +607,8 @@ namespace EisenhowerUIExtension
 			}
 
 			// Create out final bitmap
-			const int SplitWidth = 5;
-			var bitmap = new Bitmap(((maxSize.Width * 2) + SplitWidth), ((maxSize.Height * 2) + SplitWidth));
+			const int SplitWidth = 4;
+			var bitmap = new Bitmap(((maxSize.Width * 2) + SplitWidth), (maxSize.Height * 2));
 
 			using (var graphics = Graphics.FromImage(bitmap))
 			{
@@ -623,13 +623,13 @@ namespace EisenhowerUIExtension
 						bmpPos.X = (maxSize.Width + SplitWidth);
 
 					if (m_Panes[i].Matrix.YVariable.RangeIsLow)
-						bmpPos.Y = (maxSize.Height + SplitWidth);
+						bmpPos.Y = maxSize.Height;
 
 					graphics.DrawImage(bitmaps[i], bmpPos);
 				}
 
-				graphics.DrawLine(SystemPens.ControlDark, (bitmap.Width / 2), 0, (bitmap.Width / 2), bitmap.Height);
-				graphics.DrawLine(SystemPens.ControlDark, 0, (bitmap.Height / 2), bitmap.Width, (bitmap.Height / 2));
+				graphics.DrawLine(SystemPens.ControlDark, maxSize.Width, 0, maxSize.Width, bitmap.Height);
+				graphics.DrawLine(SystemPens.ControlDark, 0, maxSize.Height, bitmap.Width, maxSize.Height);
 			}
 
 			return bitmap;

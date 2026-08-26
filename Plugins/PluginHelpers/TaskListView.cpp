@@ -1406,7 +1406,7 @@ void TaskListView::ResizeTaskColumnToFit(int width)
 	int otherColsWidth = 0;
 	
 	if (!m_SavingToImage)
-		(Win32::HasVScroll(Handle) ? 0 : SystemInformation::VerticalScrollBarWidth);
+		otherColsWidth = (Win32::HasVScroll(Handle) ? 0 : SystemInformation::VerticalScrollBarWidth);
 
 	for (int i = 1; i < Columns->Count; i++)
 		otherColsWidth += Columns[i]->Width;
@@ -1416,4 +1416,11 @@ void TaskListView::ResizeTaskColumnToFit(int width)
 	taskColWidth = Math::Max(0, taskColWidth);
 
 	Columns[0]->Width = taskColWidth;
+
+	// It seems that the resizing doesn't always 
+	// work the first time 'save to image' is called
+	// but (experimentally) setting the column width
+	// on the underlying listview does
+	if (m_SavingToImage)
+		ListView_SetColumnWidth(Win32::GetHwnd(Handle), 0, taskColWidth);
 }
