@@ -71,6 +71,7 @@ namespace Abstractspoon
 				static bool DragDetect(IntPtr hWnd, Drawing::Point ptScreen);
 				static bool SetFocus(IntPtr hWnd);
 				static void ForceResize(IntPtr hWnd) { DoFrameChangeEx(hWnd, false); }
+				static bool LockUpdates(IntPtr hWnd);
 
 				// Message cracking
 				static int LoWord(int n) { return LOWORD(n); }

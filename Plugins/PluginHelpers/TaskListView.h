@@ -49,9 +49,11 @@ namespace Abstractspoon
 				UInt32 GetNextTaskId(int index, bool next, bool topLevel);
 				bool HasTaskId(UInt32 taskId);
 				Drawing::Rectangle GetTaskLabelRect(UInt32 taskId);
-				Drawing::Rectangle GetTaskLabelRect(int index);
 				void ResizeTaskColumnToFit();
+
 				Drawing::Bitmap^ SaveToImage();
+				Drawing::Bitmap^ SaveToImage(int reqWidth);
+				int GetRequiredWidthForImage();
 
 				bool SelectTask(UInt32 taskId);
 				bool SelectTaskEx(String^ words, UIExtension::SelectTask selectTask, bool caseSensitive, bool wholeWord, bool findReplace);
@@ -114,6 +116,7 @@ namespace Abstractspoon
 				bool m_EnableHeaderTracking;
 				bool m_SizeTaskColumnToFit;
 				bool m_ReadOnly;
+				bool m_SavingToImage;
 
 				int m_CheckBoxSize;
 
@@ -152,17 +155,17 @@ namespace Abstractspoon
 				Drawing::Color GetTextColor(ITaskBase^ task, bool selected);
 				Drawing::Color GetBackColor(ITaskBase^ task, int row);
 				Drawing::Font^ GetFont(ITaskBase^ task, bool title);
+				void ResizeTaskColumnToFit(int width);
 
 				// Derived classes optionally override
 				virtual bool TaskMatches(ITaskBase^ task, String^ phrase, bool caseSensitive, bool wholeWord, bool findReplace);
 				virtual Windows::Forms::VisualStyles::CheckBoxState GetTaskCheckboxState(ITaskBase^ task);
-				virtual bool IsItemSelected(Windows::Forms::ListViewItem^ lvItem) { return lvItem->Selected; }
+				virtual bool IsItemSelected(Windows::Forms::ListViewItem^ lvItem) { return (!m_SavingToImage && lvItem->Selected); }
 
 				property UIExtension::TaskIcon^ TaskIcons { UIExtension::TaskIcon^ get() { return m_TaskIcons; } }
 				property bool ItemsHaveIcons { bool get(); void set(bool value); };
 				property int TextIconOffset { int get(); }
 				property int CheckboxOffset	{ int get(); }
-				property int ImageSize { int get(); }
 				property int LabelPadding { int get() { return 2; } }
 
 				property int FirstSelectedIndex { int get(); }

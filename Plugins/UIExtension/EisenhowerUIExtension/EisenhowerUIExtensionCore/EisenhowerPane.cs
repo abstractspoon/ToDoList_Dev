@@ -331,10 +331,10 @@ namespace EisenhowerUIExtension
 			m_List.EnsureSelectionVisible();
 		}
 
-		public Bitmap SaveToImage()
+		public Bitmap SaveToImage(int reqWidth)
 		{
 			int width = Width, height = m_List.Bounds.Top;
-			var listBmp = m_List.SaveToImage();
+			var listBmp = m_List.SaveToImage(reqWidth);
 
 			if (listBmp != null)
 			{
@@ -347,17 +347,24 @@ namespace EisenhowerUIExtension
 			using (var graphics = Graphics.FromImage(paneBmp))
 			{
 				graphics.FillRectangle(SystemBrushes.Window, Rectangle.FromLTRB(0, 0, width, height));
-				graphics.DrawImage(m_Icon.Image, 2, 2);
 
 				var titleRect = new Rectangle(m_TitleBar.Left, 0, width, m_List.Bounds.Top);
+				graphics.FillRectangle(SystemBrushes.ControlLight, titleRect);
+
+				graphics.DrawImage(m_Icon.Image, 2, 2);
 				graphics.DrawString(m_TitleBar.Text, Font, SystemBrushes.WindowText, titleRect, new StringFormat() { LineAlignment = StringAlignment.Far});
 
 				if (listBmp != null)
 					graphics.DrawImage(listBmp, 0, m_List.Bounds.Top);
 			}
-			
+
 			return paneBmp;
 		}
+
+		public int RequiredWidthForImage
+		{
+			get { return m_List.GetRequiredWidthForImage(); }
+		} 
 
 		// --------------------------------------------------------
 		// Message Handlers

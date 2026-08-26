@@ -577,8 +577,62 @@ namespace EisenhowerUIExtension
 
 		public Bitmap SaveToImage()
 		{
-			// TODO
-			return null;
+			// Get the maximum required pane width
+			// tracking the maximum size as we go
+			var maxSize = Size.Empty;
+
+			for (int i = 0; i < m_Panes.Count; i++)
+				maxSize.Width = Math.Max(maxSize.Width, m_Panes[i].RequiredWidthForImage);
+
+			// Get the individual pane bitmaps,
+			// tracking the maximum height as we go
+			var bitmaps = new Bitmap[m_Panes.Count];
+
+			{
+				Win32.LockUpdates(Handle);
+
+				for (int i = 0; i < m_Panes.Count; i++)
+				{
+					bitmaps[i] = m_Panes[i].SaveToImage(maxSize.Width);
+
+					if (bitmaps[i] == null)
+					{
+						Win32.LockUpdates(IntPtr.Zero);
+						return null;
+					}
+
+					maxSize.Height = Math.Max(maxSize.Height, bitmaps[i].Height);
+				}
+				Win32.LockUpdates(IntPtr.Zero);
+			}
+
+			// Create out final bitmap
+			const int SplitWidth = 5;
+			var bitmap = new Bitmap(((maxSize.Width * 2) + SplitWidth), ((maxSize.Height * 2) + SplitWidth));
+
+			using (var graphics = Graphics.FromImage(bitmap))
+			{
+				graphics.FillRectangle(SystemBrushes.Window, 0, 0, bitmap.Width, bitmap.Height);
+
+				// Copy the pane bitmaps to the appropriate location
+				for (int i = 0; i < m_Panes.Count; i++)
+				{
+					var bmpPos = Point.Empty;
+
+					if (m_Panes[i].Matrix.XVariable.RangeIsLow)
+						bmpPos.X = (maxSize.Width + SplitWidth);
+
+					if (m_Panes[i].Matrix.YVariable.RangeIsLow)
+						bmpPos.Y = (maxSize.Height + SplitWidth);
+
+					graphics.DrawImage(bitmaps[i], bmpPos);
+				}
+
+				graphics.DrawLine(SystemPens.ControlDark, (bitmap.Width / 2), 0, (bitmap.Width / 2), bitmap.Height);
+				graphics.DrawLine(SystemPens.ControlDark, 0, (bitmap.Height / 2), bitmap.Width, (bitmap.Height / 2));
+			}
+
+			return bitmap;
 		}
 
 		public void SetFont(String fontName, int fontSize)

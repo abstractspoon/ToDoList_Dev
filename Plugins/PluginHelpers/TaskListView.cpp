@@ -228,7 +228,8 @@ namespace Abstractspoon
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-const int IMAGE_SIZE = DPIScaling::Scale(16);
+const int ImageSize = DPIScaling::Scale(16);
+const int LvItemPadding = 2;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -249,6 +250,7 @@ TaskListView::TaskListView()
 	m_EnableHeaderTracking(true),
 	m_SizeTaskColumnToFit(false),
 	m_ReadOnly(false),
+	m_SavingToImage(false),
 	m_CheckBoxSize(-1)
 {
 	m_LabelTip = gcnew LabelTip(this);
@@ -533,15 +535,6 @@ Drawing::Rectangle TaskListView::GetTaskLabelRect(UInt32 taskId)
 	return CalcLabelRect(item, TaskListView::LabelExtents::TitleColumn);
 }
 
-Drawing::Rectangle TaskListView::GetTaskLabelRect(int index)
-{
-	if ((index < 0) || (index > LastIndex))
-		return Drawing::Rectangle::Empty;
-
-	// else 
-	return CalcLabelRect(Items[index], TaskListView::LabelExtents::TitleColumn);
-}
-
 ListViewItem^ TaskListView::FindItem(UInt32 taskId)
 {
 	for each(ListViewItem^ lvItem in Items)
@@ -558,17 +551,59 @@ ListViewItem^ TaskListView::FindItem(UInt32 taskId)
 
 Drawing::Bitmap^ TaskListView::SaveToImage()
 {
-	CCopyListCtrlContents wnd(Win32::GetHwnd(Handle));
-	
-	CBitmap bmp;
-	wnd.DoCopy(bmp);
+	return SaveToImage(-1);
+}
 
+Drawing::Bitmap^ TaskListView::SaveToImage(int reqWidth)
+{
+	if (Columns->Count == 0)
+		return nullptr;
+
+	CBitmap bmp;
+	{
+		m_SavingToImage = true;
+		ResizeTaskColumnToFit(reqWidth);
+
+		CCopyListCtrlContents wnd(Win32::GetHwnd(Handle));
+		wnd.DoCopy(bmp);
+
+		m_SavingToImage = false;
+	}
+
+	ResizeTaskColumnToFit();
 	EnsureSelectionVisible();
 
 	if (!bmp.GetSafeHandle())
 		return nullptr;
 
 	return Drawing::Bitmap::FromHbitmap(IntPtr(bmp.m_hObject));
+}
+
+int TaskListView::GetRequiredWidthForImage()
+{
+	if (Columns->Count == 0)
+		return 0;
+
+	// Calculate min title width to show all text 
+	int reqWidth = 0;
+	auto graphics = Graphics::FromHwnd(Handle);
+
+	for each(ListViewItem^ lvi in Items)
+	{
+		int textWidth = TextRenderer::MeasureText(lvi->Text, GetFont(ASTYPE(lvi->Tag, ITaskBase), true)).Width;
+		reqWidth = Math::Max(reqWidth, textWidth);
+	}
+
+	// title text indentation
+	reqWidth += (2 * (LvItemPadding + 1));
+	reqWidth += CheckboxOffset;
+	reqWidth += TextIconOffset;
+
+	// Add other columns as-is
+	for (int i = 1; i < Columns->Count; i++)
+		reqWidth += Columns[i]->Width;
+
+	return reqWidth;
 }
 
 String^ TaskListView::Translate(String^ text, Translator::Type type)
@@ -838,11 +873,6 @@ bool TaskListView::ItemsHaveIcons::get()
 void TaskListView::ItemsHaveIcons::set(bool value)
 {
 	m_ItemsHaveIcons = value;
-}
-
-int TaskListView::ImageSize::get()
-{
-	return IMAGE_SIZE;
 }
 
 int TaskListView::TextIconOffset::get() 
@@ -1364,16 +1394,24 @@ CheckBoxState TaskListView::GetTaskCheckboxState(ITaskBase^ task)
 
 void TaskListView::ResizeTaskColumnToFit()
 {
+	ResizeTaskColumnToFit(ClientRectangle.Width);
+}
+
+void TaskListView::ResizeTaskColumnToFit(int width)
+{
 	if (Columns->Count == 0)
 		return;
 
 	// Resize first column to fill remaining width
-	int otherColsWidth = (Win32::HasVScroll(Handle) ? 0 : SystemInformation::VerticalScrollBarWidth);
+	int otherColsWidth = 0;
+	
+	if (!m_SavingToImage)
+		(Win32::HasVScroll(Handle) ? 0 : SystemInformation::VerticalScrollBarWidth);
 
 	for (int i = 1; i < Columns->Count; i++)
 		otherColsWidth += Columns[i]->Width;
 
-	int taskColWidth = (ClientRectangle.Width - otherColsWidth - 2);
+	int taskColWidth = (width - otherColsWidth - 2);
 	taskColWidth = Math::Max(MinTaskColumnWidth, taskColWidth);
 	taskColWidth = Math::Max(0, taskColWidth);
 

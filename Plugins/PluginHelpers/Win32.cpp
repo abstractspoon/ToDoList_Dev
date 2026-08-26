@@ -328,6 +328,11 @@ bool Win32::SetFocus(IntPtr hWnd)
 	return (::GetFocus() == GetHwnd(hWnd));
 }
 
+bool Win32::LockUpdates(IntPtr hWnd)
+{
+	return (::LockWindowUpdate(GetHwnd(hWnd)) != FALSE);
+}
+
 int Win32::SendMessage(IntPtr hWnd, UInt32 wMsg, UIntPtr wParam, IntPtr lParam)
 {
 	return ::SendMessage(GetHwnd(hWnd), wMsg, (WPARAM)wParam, (LPARAM)lParam.ToInt32());
