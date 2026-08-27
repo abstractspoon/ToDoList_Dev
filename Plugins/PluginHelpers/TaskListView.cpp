@@ -584,20 +584,26 @@ int TaskListView::GetRequiredWidthForImage()
 	if (Columns->Count == 0)
 		return 0;
 
-	// Calculate min title width to show all text 
-	int reqWidth = 0;
+	// Calculate min width to show all text 
 	auto graphics = Graphics::FromHwnd(Handle);
 
-	for each(ListViewItem^ lvi in Items)
-	{
-		int textWidth = TextRenderer::MeasureText(lvi->Text, GetFont(ASTYPE(lvi->Tag, ITaskBase), true)).Width;
-		reqWidth = Math::Max(reqWidth, textWidth);
-	}
+	// Title header text
+	int reqWidth = TextRenderer::MeasureText(Columns[0]->Text, Font).Width;
 
-	// title text indentation
-	reqWidth += (2 * (LvItemPadding + 1));
-	reqWidth += CheckboxOffset;
-	reqWidth += TextIconOffset;
+	// Title Item text
+	if (Items->Count > 0)
+	{
+		for each(ListViewItem^ lvi in Items)
+		{
+			int textWidth = TextRenderer::MeasureText(lvi->Text, GetFont(ASTYPE(lvi->Tag, ITaskBase), true)).Width;
+			reqWidth = Math::Max(reqWidth, textWidth);
+		}
+
+		// Title text indentation
+		reqWidth += (2 * (LvItemPadding + 1));
+		reqWidth += CheckboxOffset;
+		reqWidth += TextIconOffset;
+	}
 
 	// Add other columns as-is
 	for (int i = 1; i < Columns->Count; i++)
@@ -1411,9 +1417,10 @@ void TaskListView::ResizeTaskColumnToFit(int width)
 	for (int i = 1; i < Columns->Count; i++)
 		otherColsWidth += Columns[i]->Width;
 
-	int taskColWidth = (width - otherColsWidth - 2);
-	taskColWidth = Math::Max(MinTaskColumnWidth, taskColWidth);
-	taskColWidth = Math::Max(0, taskColWidth);
+	int taskColWidth = Math::Max(0, (width - otherColsWidth - 2));
+
+	if (!m_SavingToImage)
+		taskColWidth = Math::Max(MinTaskColumnWidth, taskColWidth);
 
 	Columns[0]->Width = taskColWidth;
 

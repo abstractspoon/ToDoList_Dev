@@ -577,38 +577,65 @@ namespace EisenhowerUIExtension
 
 		public Bitmap SaveToImage()
 		{
-			// Get the maximum required pane width
-			// tracking the maximum size as we go
-			var maxSize = Size.Empty;
+			// If one pane has many more tasks than the others
+			// and we size all the panes to the size of the 
+			// largest we can end up with a huge sparsely
+			// populated image that can appear to be 'broken'
+			// if only the sparsely populated part is visible.
+			// However, we do need to make sure that the vertical
+			// and horizontal pairs of panes have the same dimension.
 
+			// 1. Determine the required widths of the left/right pairs
+			int highXWidth = 0, lowXWidth = 0;
+			
 			for (int i = 0; i < m_Panes.Count; i++)
-				maxSize.Width = Math.Max(maxSize.Width, m_Panes[i].RequiredWidthForImage);
+			{
+				int width = m_Panes[i].RequiredWidthForImage;
 
-			// Get the individual pane bitmaps,
-			// tracking the maximum height as we go
+				if (m_Panes[i].Matrix.XVariable.RangeIsHigh)
+					highXWidth = Math.Max(highXWidth, width);
+				else
+					lowXWidth = Math.Max(lowXWidth, width);
+			}
+
+			// 2. Render the pane bitmaps with their appropriate width
 			var bitmaps = new Bitmap[m_Panes.Count];
 
 			{
 				Win32.LockUpdates(Handle);
+				bool success = true;
 
-				for (int i = 0; i < m_Panes.Count; i++)
+				for (int i = 0; ((i < m_Panes.Count) && success); i++)
 				{
-					bitmaps[i] = m_Panes[i].SaveToImage(maxSize.Width);
+					if (m_Panes[i].Matrix.XVariable.RangeIsHigh)
+						bitmaps[i] = m_Panes[i].SaveToImage(highXWidth);
+					else
+						bitmaps[i] = m_Panes[i].SaveToImage(lowXWidth);
 
-					if (bitmaps[i] == null)
-					{
-						Win32.LockUpdates(IntPtr.Zero);
-						return null;
-					}
-
-					maxSize.Height = Math.Max(maxSize.Height, bitmaps[i].Height);
+					success = (bitmaps[i] != null);
 				}
 				Win32.LockUpdates(IntPtr.Zero);
+
+				if (!success)
+					return null;
 			}
 
-			// Create out final bitmap
+			// 3. Determine the required heights of the top/bottom pairs
+			int highYHeight = 0, lowYHeight = 0;
+
+			for (int i = 0; i < m_Panes.Count; i++)
+			{
+				int height = bitmaps[i].Height;
+
+				if (m_Panes[i].Matrix.YVariable.RangeIsHigh)
+					highYHeight = Math.Max(highYHeight, height);
+				else
+					lowYHeight = Math.Max(lowYHeight, height);
+			}
+
+			// 4. Create out final bitmap
 			const int SplitWidth = 4;
-			var bitmap = new Bitmap(((maxSize.Width * 2) + SplitWidth), (maxSize.Height * 2));
+			var bitmap = new Bitmap((highXWidth + lowXWidth + SplitWidth), (highYHeight + lowYHeight));
 
 			using (var graphics = Graphics.FromImage(bitmap))
 			{
@@ -620,16 +647,17 @@ namespace EisenhowerUIExtension
 					var bmpPos = Point.Empty;
 
 					if (m_Panes[i].Matrix.XVariable.RangeIsLow)
-						bmpPos.X = (maxSize.Width + SplitWidth);
+						bmpPos.X = (highXWidth + SplitWidth);
 
 					if (m_Panes[i].Matrix.YVariable.RangeIsLow)
-						bmpPos.Y = maxSize.Height;
+						bmpPos.Y = highYHeight;
 
 					graphics.DrawImage(bitmaps[i], bmpPos);
 				}
 
-				graphics.DrawLine(SystemPens.ControlDark, maxSize.Width, 0, maxSize.Width, bitmap.Height);
-				graphics.DrawLine(SystemPens.ControlDark, 0, maxSize.Height, bitmap.Width, maxSize.Height);
+				// Dividing lines
+				graphics.DrawLine(SystemPens.ControlDark, highXWidth, 0, highXWidth, bitmap.Height);
+				graphics.DrawLine(SystemPens.ControlDark, 0, highYHeight, bitmap.Width, highYHeight);
 			}
 
 			return bitmap;
