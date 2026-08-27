@@ -69,7 +69,6 @@ public:
 	inline UINT GetTaskCount() const { return m_data.GetTaskCount(); }
 	inline int GetSelectedCount() const { return m_lcTasks.GetSelectedCount(); }
 	inline int GetItemCount() const { return m_lcTasks.GetItemCount(); }
-	inline int GetVisibleItemCount() const { return m_lcTasks.GetItemCount(); }
 
 	DWORD GetTaskID(int nItem) const;
 	DWORD GetSelectedTaskID() const;
