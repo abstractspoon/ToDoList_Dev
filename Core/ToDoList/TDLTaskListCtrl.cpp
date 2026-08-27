@@ -554,6 +554,9 @@ BOOL CTDLTaskListCtrl::SetSortNoneGroupBelow(BOOL bBelow)
 void CTDLTaskListCtrl::OnBuildComplete()
 {
 	UpdateGroupHeaders();
+	
+	if (GetGroupCount())
+		Resort();
 }
 
 BOOL CTDLTaskListCtrl::UpdateGroupHeaders()

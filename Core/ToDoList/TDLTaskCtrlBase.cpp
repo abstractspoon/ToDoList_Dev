@@ -1793,7 +1793,7 @@ void CTDLTaskCtrlBase::Sort(TDC_COLUMN nBy, BOOL bAllowToggle, BOOL bCheckSortab
 	m_sort.SetSortBy(nBy, bAscending);
 	m_sort.bModSinceLastSort = FALSE;
 	
-	if (m_data.GetTaskCount() > 1)
+	if (GetItemCount() > 1)
 		DoSort();
 }
 
