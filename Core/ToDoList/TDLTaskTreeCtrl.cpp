@@ -1136,7 +1136,7 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 				// if not on an 'active' column
 				ASSERT(hti == GetTreeSelItem(m_tcTasks));
 
-				if (TCH().TreeCtrl().ItemHasChildren(hti))
+				if (m_tcTasks.ItemHasChildren(hti))
 				{
 					ExpandItem(hti, !TCH().IsItemExpanded(hti));
 					return 0L; // we handled it
