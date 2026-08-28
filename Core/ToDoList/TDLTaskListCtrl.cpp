@@ -348,14 +348,8 @@ LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const CIntArra
 			break;
 		}
 	}
-	else
+	else if (hwndList == m_lcTasks)
 	{
-		if (hwndList == m_lcColumns)
-		{
-			// columns handled by base class
-			return CTDLTaskCtrlBase::OnListCustomDraw(pLVCD, aColOrder, aColWidths);
-		}
-
 		switch (pLVCD->nmcd.dwDrawStage)
 		{
 		case CDDS_PREPAINT:
@@ -387,6 +381,10 @@ LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const CIntArra
 			}
 			break;
 		}
+	}
+	else // attribute columns handled by base class
+	{
+		return CTDLTaskCtrlBase::OnListCustomDraw(pLVCD, aColOrder, aColWidths);
 	}
 	
 	return dwRes;
