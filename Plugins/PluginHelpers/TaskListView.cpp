@@ -570,7 +570,7 @@ Drawing::Bitmap^ TaskListView::SaveToImage(int reqWidth)
 		m_SavingToImage = false;
 	}
 
-	ResizeTaskColumnToFit();
+	ResizeTaskColumnToFit(); // restore
 	EnsureSelectionVisible();
 
 	if (!bmp.GetSafeHandle())
@@ -1400,13 +1400,16 @@ CheckBoxState TaskListView::GetTaskCheckboxState(ITaskBase^ task)
 
 void TaskListView::ResizeTaskColumnToFit()
 {
-	ResizeTaskColumnToFit(ClientRectangle.Width);
+	ResizeTaskColumnToFit(-1);
 }
 
 void TaskListView::ResizeTaskColumnToFit(int width)
 {
 	if (Columns->Count == 0)
 		return;
+
+	if (width <= 0)
+		width = ClientRectangle.Width;
 
 	// Resize first column to fill remaining width
 	int otherColsWidth = 0;
