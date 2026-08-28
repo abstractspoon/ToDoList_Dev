@@ -24,8 +24,8 @@ public:
 	
 	void RemoveOptions(DWORD dwOptions);
 
-	static DWORD LoadOptions(const IPreferences* pPrefs, LPCTSTR szKey);
-	static void SaveOptions(DWORD dwOptions, IPreferences* pPrefs, LPCTSTR szKey);
+	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey);
+	void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;
 
 protected:
 	DWORD m_dwRemovedOptions;
