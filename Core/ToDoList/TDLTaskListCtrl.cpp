@@ -633,10 +633,7 @@ int CTDLTaskListCtrl::CalcGroupHeaders(CStringSet& mapNewHeaders, CStringSet& ma
 		}
 		else if (IsGrouped())
 		{
-			sGroupHeader = GetTaskGroupValue(dwTaskID);
-
-			if (!mapNewHeaders.Has(sGroupHeader))
-				mapNewHeaders.Add(sGroupHeader);
+			mapNewHeaders.Add(GetTaskGroupValue(dwTaskID));
 		}
 	}
 
