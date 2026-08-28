@@ -577,8 +577,90 @@ namespace EisenhowerUIExtension
 
 		public Bitmap SaveToImage()
 		{
-			// TODO
-			return null;
+			// If one pane has many more tasks than the others
+			// and we size all the panes to the size of the 
+			// largest we can end up with a huge sparsely
+			// populated image that can appear to be 'broken'
+			// if only the sparsely populated part is visible.
+			// However, we do need to make sure that the vertical
+			// and horizontal pairs of panes have the same dimension.
+
+			// 1. Determine the required widths of the left/right pairs
+			int highXWidth = 0, lowXWidth = 0;
+			
+			for (int i = 0; i < m_Panes.Count; i++)
+			{
+				int width = m_Panes[i].RequiredWidthForImage;
+
+				if (m_Panes[i].Matrix.XVariable.RangeIsHigh)
+					highXWidth = Math.Max(highXWidth, width);
+				else
+					lowXWidth = Math.Max(lowXWidth, width);
+			}
+
+			// 2. Render the pane bitmaps with their appropriate width
+			var bitmaps = new Bitmap[m_Panes.Count];
+
+			{
+				Win32.LockUpdates(Handle);
+				bool success = true;
+
+				for (int i = 0; ((i < m_Panes.Count) && success); i++)
+				{
+					if (m_Panes[i].Matrix.XVariable.RangeIsHigh)
+						bitmaps[i] = m_Panes[i].SaveToImage(highXWidth);
+					else
+						bitmaps[i] = m_Panes[i].SaveToImage(lowXWidth);
+
+					success = (bitmaps[i] != null);
+				}
+				Win32.LockUpdates(IntPtr.Zero);
+
+				if (!success)
+					return null;
+			}
+
+			// 3. Determine the required heights of the top/bottom pairs
+			int highYHeight = 0, lowYHeight = 0;
+
+			for (int i = 0; i < m_Panes.Count; i++)
+			{
+				int height = bitmaps[i].Height;
+
+				if (m_Panes[i].Matrix.YVariable.RangeIsHigh)
+					highYHeight = Math.Max(highYHeight, height);
+				else
+					lowYHeight = Math.Max(lowYHeight, height);
+			}
+
+			// 4. Create out final bitmap
+			const int SplitWidth = 4;
+			var bitmap = new Bitmap((highXWidth + lowXWidth + SplitWidth), (highYHeight + lowYHeight));
+
+			using (var graphics = Graphics.FromImage(bitmap))
+			{
+				graphics.FillRectangle(SystemBrushes.Window, 0, 0, bitmap.Width, bitmap.Height);
+
+				// Copy the pane bitmaps to the appropriate location
+				for (int i = 0; i < m_Panes.Count; i++)
+				{
+					var bmpPos = Point.Empty;
+
+					if (m_Panes[i].Matrix.XVariable.RangeIsLow)
+						bmpPos.X = (highXWidth + SplitWidth);
+
+					if (m_Panes[i].Matrix.YVariable.RangeIsLow)
+						bmpPos.Y = highYHeight;
+
+					graphics.DrawImage(bitmaps[i], bmpPos);
+				}
+
+				// Dividing lines
+				graphics.DrawLine(SystemPens.ControlDark, highXWidth, 0, highXWidth, bitmap.Height);
+				graphics.DrawLine(SystemPens.ControlDark, 0, highYHeight, bitmap.Width, highYHeight);
+			}
+
+			return bitmap;
 		}
 
 		public void SetFont(String fontName, int fontSize)

@@ -9,6 +9,7 @@
 #include <shared\Clipboard.h>
 #include <shared\Misc.h>
 #include <shared\GraphicsMisc.h>
+#include <shared\CopyWndContents.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -227,7 +228,8 @@ namespace Abstractspoon
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-const int IMAGE_SIZE = DPIScaling::Scale(16);
+const int ImageSize = DPIScaling::Scale(16);
+const int LvItemPadding = 2;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -248,6 +250,7 @@ TaskListView::TaskListView()
 	m_EnableHeaderTracking(true),
 	m_SizeTaskColumnToFit(false),
 	m_ReadOnly(false),
+	m_SavingToImage(false),
 	m_CheckBoxSize(-1)
 {
 	m_LabelTip = gcnew LabelTip(this);
@@ -532,15 +535,6 @@ Drawing::Rectangle TaskListView::GetTaskLabelRect(UInt32 taskId)
 	return CalcLabelRect(item, TaskListView::LabelExtents::TitleColumn);
 }
 
-Drawing::Rectangle TaskListView::GetTaskLabelRect(int index)
-{
-	if ((index < 0) || (index > LastIndex))
-		return Drawing::Rectangle::Empty;
-
-	// else 
-	return CalcLabelRect(Items[index], TaskListView::LabelExtents::TitleColumn);
-}
-
 ListViewItem^ TaskListView::FindItem(UInt32 taskId)
 {
 	for each(ListViewItem^ lvItem in Items)
@@ -553,6 +547,69 @@ ListViewItem^ TaskListView::FindItem(UInt32 taskId)
 
 	// else
 	return nullptr;
+}
+
+Drawing::Bitmap^ TaskListView::SaveToImage()
+{
+	return SaveToImage(-1);
+}
+
+Drawing::Bitmap^ TaskListView::SaveToImage(int reqWidth)
+{
+	if (Columns->Count == 0)
+		return nullptr;
+
+	CBitmap bmp;
+	{
+		m_SavingToImage = true;
+		ResizeTaskColumnToFit(reqWidth);
+
+		CCopyListCtrlContents wnd(Win32::GetHwnd(Handle));
+		wnd.DoCopy(bmp);
+
+		m_SavingToImage = false;
+	}
+
+	ResizeTaskColumnToFit(); // restore
+	EnsureSelectionVisible();
+
+	if (!bmp.GetSafeHandle())
+		return nullptr;
+
+	return Drawing::Bitmap::FromHbitmap(IntPtr(bmp.m_hObject));
+}
+
+int TaskListView::GetRequiredWidthForImage()
+{
+	if (Columns->Count == 0)
+		return 0;
+
+	// Calculate min width to show all text 
+	auto graphics = Graphics::FromHwnd(Handle);
+
+	// Title header text
+	int reqWidth = TextRenderer::MeasureText(Columns[0]->Text, Font).Width;
+
+	// Title Item text
+	if (Items->Count > 0)
+	{
+		for each(ListViewItem^ lvi in Items)
+		{
+			int textWidth = TextRenderer::MeasureText(lvi->Text, GetFont(ASTYPE(lvi->Tag, ITaskBase), true)).Width;
+			reqWidth = Math::Max(reqWidth, textWidth);
+		}
+
+		// Title text indentation
+		reqWidth += (2 * (LvItemPadding + 1));
+		reqWidth += CheckboxOffset;
+		reqWidth += TextIconOffset;
+	}
+
+	// Add other columns as-is
+	for (int i = 1; i < Columns->Count; i++)
+		reqWidth += Columns[i]->Width;
+
+	return reqWidth;
 }
 
 String^ TaskListView::Translate(String^ text, Translator::Type type)
@@ -822,11 +879,6 @@ bool TaskListView::ItemsHaveIcons::get()
 void TaskListView::ItemsHaveIcons::set(bool value)
 {
 	m_ItemsHaveIcons = value;
-}
-
-int TaskListView::ImageSize::get()
-{
-	return IMAGE_SIZE;
 }
 
 int TaskListView::TextIconOffset::get() 
@@ -1348,18 +1400,37 @@ CheckBoxState TaskListView::GetTaskCheckboxState(ITaskBase^ task)
 
 void TaskListView::ResizeTaskColumnToFit()
 {
+	ResizeTaskColumnToFit(-1);
+}
+
+void TaskListView::ResizeTaskColumnToFit(int width)
+{
 	if (Columns->Count == 0)
 		return;
 
+	if (width <= 0)
+		width = ClientRectangle.Width;
+
 	// Resize first column to fill remaining width
 	int otherColsWidth = 0;
+	
+	if (!m_SavingToImage)
+		otherColsWidth = (Win32::HasVScroll(Handle) ? 0 : SystemInformation::VerticalScrollBarWidth);
 
 	for (int i = 1; i < Columns->Count; i++)
 		otherColsWidth += Columns[i]->Width;
 
-	int taskColWidth = (ClientRectangle.Width - otherColsWidth - 2);
-	taskColWidth = Math::Max(MinTaskColumnWidth, taskColWidth);
-	taskColWidth = Math::Max(0, taskColWidth);
+	int taskColWidth = Math::Max(0, (width - otherColsWidth - 2));
+
+	if (!m_SavingToImage)
+		taskColWidth = Math::Max(MinTaskColumnWidth, taskColWidth);
 
 	Columns[0]->Width = taskColWidth;
+
+	// It seems that the resizing doesn't always 
+	// work the first time 'save to image' is called
+	// but (experimentally) setting the column width
+	// on the underlying listview does
+	if (m_SavingToImage)
+		ListView_SetColumnWidth(Win32::GetHwnd(Handle), 0, taskColWidth);
 }

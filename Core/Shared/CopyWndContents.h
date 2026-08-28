@@ -14,13 +14,13 @@
 class CCopyWndContents
 {
 public:
-	CCopyWndContents(CWnd& wnd);
+	CCopyWndContents(HWND hWnd);
 	virtual ~CCopyWndContents();
 
 	BOOL DoCopy(CBitmap& bmp, const CRect& rFromTo = CRect(0, 0, -1, -1));
 
 protected:
-	CWnd& m_wnd;
+	HWND m_hWnd;
 
 protected:
 	virtual int PageDown(int nCurVertPos);
@@ -39,7 +39,7 @@ protected:
 	CSize GetContentsSize() const { return m_sizeContent; }
 	CSize GetPageSize() const { return m_sizePage; }
 
-	BOOL HasStyle(DWORD dwStyle) const { return ((m_wnd.GetStyle() & dwStyle) == dwStyle); }
+	BOOL HasStyle(DWORD dwStyle) const;
 
 	static void DoPrint(HWND hwnd, HDC hdc, DWORD dwFlags = PRF_CLIENT);
 
@@ -53,14 +53,13 @@ private:
 class CCopyTreeCtrlContents : public CCopyWndContents
 {
 public:
-	CCopyTreeCtrlContents(CTreeCtrl& tree);
+	CCopyTreeCtrlContents(HWND hWnd);
 	virtual ~CCopyTreeCtrlContents();
 
 	BOOL DoCopy(CBitmap& bmp, const CRect& rFromTo = CRect(0, 0, -1, -1));
 
 protected:
 	int m_nItemHeight;
-	CTreeCtrl& m_tree;
 
 protected:
 	virtual void DoPageDown();
@@ -74,14 +73,13 @@ protected:
 class CCopyListCtrlContents : public CCopyWndContents
 {
 public:
-	CCopyListCtrlContents(CListCtrl& list);
+	CCopyListCtrlContents(HWND hWnd);
 	virtual ~CCopyListCtrlContents();
 
 	BOOL DoCopy(CBitmap& bmp, const CRect& rFromTo = CRect(0, 0, -1, -1));
 
 protected:
 	int m_nItemHeight;
-	CListCtrl& m_list;
 
 protected:
 	virtual int PageDown(int nCurVertPos);
@@ -101,7 +99,7 @@ protected:
 class CCopyHeaderCtrlContents : public CCopyWndContents
 {
 public:
-	CCopyHeaderCtrlContents(CHeaderCtrl& hdr);
+	CCopyHeaderCtrlContents(HWND hWnd);
 	virtual ~CCopyHeaderCtrlContents();
 };
 
@@ -110,7 +108,7 @@ public:
 class CCopyEditContents : public CCopyWndContents
 {
 public:
-	CCopyEditContents(CEdit& edit);
+	CCopyEditContents(HWND hWnd);
 	virtual ~CCopyEditContents();
 
 protected:
