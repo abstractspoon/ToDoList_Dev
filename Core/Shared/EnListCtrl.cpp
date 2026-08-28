@@ -259,6 +259,8 @@ const DWORD NOTSET = 0xffffffff;
 const COLORREF ELC_GRIDCOLOR = RGB(192, 192, 192);
 const int TIMERID_EDITLABELS = 42;
 
+const int WM_FORCERESIZE = (WM_USER + 1);
+
 /////////////////////////////////////////////////////////////////////////////
 
 DWORD CEnListCtrl::s_dwSelectionTheming = MAKELONG(TRUE, FALSE);
@@ -298,7 +300,8 @@ CEnListCtrl::CEnListCtrl()
 	m_bAlternateRowColoring(FALSE),
 	m_bSortEmptyBelow(TRUE),
 	m_bAllowOffItemClickDeslection(TRUE),
-	m_bResizingCols(FALSE)
+	m_bResizingCols(FALSE),
+	m_bForceResizePending(FALSE)
 {
 }
 
@@ -308,7 +311,6 @@ CEnListCtrl::~CEnListCtrl()
 }
 
 BEGIN_MESSAGE_MAP(CEnListCtrl, CListCtrl)
-	//{{AFX_MSG_MAP(CEnListCtrl)
 	ON_WM_LBUTTONDOWN()
 	ON_WM_KEYUP()
 	ON_WM_SIZE()
@@ -319,8 +321,8 @@ BEGIN_MESSAGE_MAP(CEnListCtrl, CListCtrl)
 	ON_WM_PAINT()
 	ON_WM_ERASEBKGND()
 	ON_WM_WINDOWPOSCHANGED()
-	//}}AFX_MSG_MAP
 	ON_MESSAGE(WM_SETFONT, OnSetFont)
+	ON_MESSAGE(WM_FORCERESIZE, OnForceResize)
 	ON_WM_TIMER()
 	ON_NOTIFY_REFLECT_EX(LVN_COLUMNCLICK, OnColumnClick)
 	ON_NOTIFY_REFLECT_EX(NM_CUSTOMDRAW, OnListCustomDraw)
@@ -328,7 +330,6 @@ BEGIN_MESSAGE_MAP(CEnListCtrl, CListCtrl)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
-// CEnListCtrl message handlers
 
 BOOL CEnListCtrl::EnableGroupView(BOOL bEnable)
 {
@@ -1431,14 +1432,22 @@ void CEnListCtrl::ForceResize(BOOL bRecalcItemHeight)
 	if (bRecalcItemHeight)
 		m_nItemHeight = -1;
 
-	if (GetSafeHwnd())
+	if (GetSafeHwnd() && !m_bForceResizePending)
 	{
-		CRect rClient;
-		GetClientRect(rClient);
-
-		WINDOWPOS wp = { GetSafeHwnd(), NULL, 0, 0, rClient.Width(), rClient.Height(), SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOZORDER };
-		SendMessage(WM_WINDOWPOSCHANGED, 0, (LPARAM)&wp);
+		PostMessage(WM_FORCERESIZE);
+		m_bForceResizePending = TRUE;
 	}
+}
+
+LRESULT CEnListCtrl::OnForceResize(WPARAM /*wp*/, LPARAM /*lp*/)
+{
+	CRect rClient;
+	GetClientRect(rClient);
+
+	WINDOWPOS wp = { GetSafeHwnd(), NULL, 0, 0, rClient.Width(), rClient.Height(), SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOZORDER };
+	SendMessage(WM_WINDOWPOSCHANGED, 0, (LPARAM)&wp);
+
+	return 0L;
 }
 
 BOOL CEnListCtrl::SetMinItemHeight(int nHeight)
@@ -1803,6 +1812,11 @@ BOOL CEnListCtrl::SetColumnText(int nCol, LPCTSTR szText)
 	lvc.pszText = (LPTSTR)szText;
 
 	return SetColumn(nCol, &lvc);
+}
+
+void CEnListCtrl::ShowColumn(int nCol, BOOL bShow)
+{
+	GetHeader()->ShowItem(nCol, bShow);
 }
 
 void CEnListCtrl::OnDestroy() 
