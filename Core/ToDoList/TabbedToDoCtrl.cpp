@@ -247,21 +247,9 @@ BOOL CTabbedToDoCtrl::OnInitDialog()
 
 	// Prepare the list-specific comboboxes
 	BuildListGroupByCombo();
-	InitListOptionsCombo();
+	m_mgrPrompts.SetComboPrompt(m_cbListOptions, IDS_TDC_NONE);
 
 	return FALSE;
-}
-
-void CTabbedToDoCtrl::InitListOptionsCombo()
-{
-	// once only
-	if (!m_cbListOptions.GetCount())
-	{
-		m_dwListOptions = CTDLTaskListCtrlOptionsComboBox::LoadOptions(CPreferences(), GetPreferencesKey());
-		m_cbListOptions.SetCheckedByItemData(m_dwListOptions);
-
-		m_mgrPrompts.SetComboPrompt(m_cbListOptions, IDS_TDC_NONE);
-	}
 }
 
 void CTabbedToDoCtrl::BuildListGroupByCombo()
