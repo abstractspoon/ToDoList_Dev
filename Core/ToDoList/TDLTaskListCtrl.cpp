@@ -199,7 +199,7 @@ void CTDLTaskListCtrl::OnStylesUpdated(const CTDCStyleMap& styles, BOOL bAllowRe
 			UpdateGroupHeaders();
 
 			if (bAllowResort)
-				DoSort();
+				Resort();
 		}
 	}
 }
@@ -348,14 +348,8 @@ LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const CIntArra
 			break;
 		}
 	}
-	else
+	else if (hwndList == m_lcTasks)
 	{
-		if (hwndList == m_lcColumns)
-		{
-			// columns handled by base class
-			return CTDLTaskCtrlBase::OnListCustomDraw(pLVCD, aColOrder, aColWidths);
-		}
-
 		switch (pLVCD->nmcd.dwDrawStage)
 		{
 		case CDDS_PREPAINT:
@@ -387,6 +381,10 @@ LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const CIntArra
 			}
 			break;
 		}
+	}
+	else // attribute columns handled by base class
+	{
+		return CTDLTaskCtrlBase::OnListCustomDraw(pLVCD, aColOrder, aColWidths);
 	}
 	
 	return dwRes;
@@ -482,7 +480,7 @@ BOOL CTDLTaskListCtrl::SetGroupBy(TDC_COLUMN nGroupBy, BOOL bSortGroupsAscending
 			UpdateGroupHeaders();
 
 		if (bGroupChange || (bSortChange && (IsGrouped() || IsSorting())))
-			DoSort();
+			Resort();
 	}
 
 	return TRUE;
@@ -554,6 +552,9 @@ BOOL CTDLTaskListCtrl::SetSortNoneGroupBelow(BOOL bBelow)
 void CTDLTaskListCtrl::OnBuildComplete()
 {
 	UpdateGroupHeaders();
+	
+	if (GetGroupCount())
+		Resort();
 }
 
 BOOL CTDLTaskListCtrl::UpdateGroupHeaders()
@@ -630,10 +631,7 @@ int CTDLTaskListCtrl::CalcGroupHeaders(CStringSet& mapNewHeaders, CStringSet& ma
 		}
 		else if (IsGrouped())
 		{
-			sGroupHeader = GetTaskGroupValue(dwTaskID);
-
-			if (!mapNewHeaders.Has(sGroupHeader))
-				mapNewHeaders.Add(sGroupHeader);
+			mapNewHeaders.Add(GetTaskGroupValue(dwTaskID));
 		}
 	}
 
@@ -831,7 +829,7 @@ void CTDLTaskListCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, BOOL bA
 			UpdateGroupHeaders();
 
 			if (bAllowResort)
-				DoSort();
+				Resort();
 		}
 	}
 
@@ -840,6 +838,8 @@ void CTDLTaskListCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, BOOL bA
 
 void CTDLTaskListCtrl::Resort(BOOL bAllowToggle)
 {
+	// Base class will reject a resort if the sorting is 
+	// set to TDCC_NONE but we need it for the grouping
 	if (IsGrouped() && !IsSorting())
 		DoSort();
 	else

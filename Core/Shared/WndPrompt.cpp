@@ -52,7 +52,7 @@ BOOL CWndPrompt::Initialize(HWND hWnd, LPCTSTR szPrompt, UINT nCheckMsg,
 			m_bIncReadonlyEdit = bIncReadonlyEdit;
 			
 			if (WantPrompt())
-				Invalidate();
+				Invalidate(FALSE);
 
 			return TRUE;
 		}
@@ -71,7 +71,7 @@ void CWndPrompt::SetPrompt(LPCTSTR szPrompt, BOOL bCentred)
 			m_bCentred = bCentred;
 
 		if (WantPrompt())
-			Invalidate();
+			Invalidate(FALSE);
 	}
 	else
 	{
@@ -85,8 +85,11 @@ LRESULT CWndPrompt::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 	{
 	case WM_KILLFOCUS:
 	case WM_SETFOCUS:
-		if (CWinClasses::IsEditControl(hRealWnd) && WantPrompt(FALSE))
-			Invalidate();
+		if (WantPrompt(FALSE))
+		{
+			Invalidate(FALSE);
+			UpdateWindow(hRealWnd);
+		}
 		break;
 
 	case WM_PRINT:

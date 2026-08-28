@@ -17,8 +17,6 @@ static char THIS_FILE[]=__FILE__;
 const UINT IDC_TABCTRL = 1001;
 
 //////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 
 CTabbedPropertyPageHost::CTabbedPropertyPageHost(DWORD dwFlags, ETabOrientation orientation) : 
 	m_tabCtrl(dwFlags, orientation), 
@@ -33,12 +31,12 @@ CTabbedPropertyPageHost::~CTabbedPropertyPageHost()
 }
 
 BEGIN_MESSAGE_MAP(CTabbedPropertyPageHost, CPropertyPageHost)
-	//{{AFX_MSG_MAP(CPropertyPageHost)
-	//}}AFX_MSG_MAP
 	ON_WM_CREATE()
 	ON_WM_SIZE()
 	ON_NOTIFY(TCN_SELCHANGE, IDC_TABCTRL, OnSelchangeTabcontrol)
 END_MESSAGE_MAP()
+
+//////////////////////////////////////////////////////////////////////
 
 int CTabbedPropertyPageHost::OnCreate(LPCREATESTRUCT lpCreateStruct) 
 {
@@ -171,9 +169,15 @@ BOOL CTabbedPropertyPageHost::SetActivePage(CPropertyPage* pPage, BOOL bAndFocus
 	return SetActivePage(FindPage(pPage), bAndFocus);
 }
 
-void CTabbedPropertyPageHost::OnSelchangeTabcontrol(NMHDR* /*pNMHDR*/, LRESULT* pResult) 
+void CTabbedPropertyPageHost::OnSelchangeTabcontrol(NMHDR* pNMHDR, LRESULT* pResult) 
 {
 	SetActivePage(m_tabCtrl.GetCurSel());
+	
+	// Forward to parent
+	NMHDR nmhParent = *pNMHDR;
+	nmhParent.hwndFrom = *this;
+
+	GetParent()->SendMessage(WM_NOTIFY, GetDlgCtrlID(), (LPARAM)&nmhParent);
 
 	*pResult = 0;
 }

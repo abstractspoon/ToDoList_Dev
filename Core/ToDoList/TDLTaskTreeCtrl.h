@@ -124,7 +124,6 @@ public:
 	inline HTREEITEM GetSelectedItem() const { return TSH().GetFirstItem(); }
 	inline HTREEITEM GetTreeSelectedItem() const { return m_tcTasks.GetSelectedItem(); }
 	inline int GetItemCount() const { return m_tcTasks.GetCount(); }
-	inline int GetVisibleItemCount() const { return m_tcTasks.GetVisibleCount(); }
 	inline BOOL ItemHasChildren(HTREEITEM hti) const { return m_tcTasks.ItemHasChildren(hti); }
 	inline BOOL ItemHasParent(HTREEITEM hti) const { return (GetParentItem(hti) != NULL); }
 	inline HTREEITEM GetChildItem(HTREEITEM htiParent = NULL) const { return m_tcTasks.GetChildItem(htiParent); }
