@@ -316,6 +316,58 @@ namespace EisenhowerUIExtension
 			m_List.EnsureSelectionVisible();
 		}
 
+		public Bitmap SaveToImage(int reqWidth)
+		{
+			int height = m_List.Bounds.Top;
+			var listBmp = m_List.SaveToImage(reqWidth);
+
+			if (listBmp != null)
+				height += listBmp.Height;
+
+			var paneBmp = new Bitmap(reqWidth, height);
+
+			using (var graphics = Graphics.FromImage(paneBmp))
+			{
+				graphics.FillRectangle(SystemBrushes.Window, Rectangle.FromLTRB(0, 0, reqWidth, height));
+
+				var titleRect = new Rectangle(m_TitleBar.Left, 0, reqWidth, m_List.Bounds.Top);
+				graphics.FillRectangle(SystemBrushes.ControlLight, titleRect);
+
+				var fmt = new StringFormat(StringFormatFlags.NoWrap)
+				{
+					LineAlignment = StringAlignment.Far
+				};
+				graphics.DrawString(m_TitleBar.Text, Font, SystemBrushes.WindowText, titleRect, fmt);
+
+				graphics.DrawImage(m_Icon.Image, 2, 2);
+
+				if (listBmp != null)
+					graphics.DrawImage(listBmp, 0, m_List.Bounds.Top);
+			}
+
+			return paneBmp;
+		}
+
+		public int RequiredWidthForImage
+		{
+			get
+			{
+				int reqWidth = m_List.GetRequiredWidthForImage();
+
+				// Title text and icon
+				using (var graphics = Graphics.FromHwnd(Handle))
+				{
+					int titleWidth = (int)graphics.MeasureString(m_TitleBar.Text, Font).Width;
+					titleWidth += m_Icon.Width;
+					titleWidth += 2;
+
+					reqWidth = Math.Max(reqWidth, titleWidth);
+				}
+
+				return reqWidth;
+			}
+		} 
+
 		// --------------------------------------------------------
 		// Message Handlers
 
@@ -397,10 +449,9 @@ namespace EisenhowerUIExtension
 		{
 			base.OnFontChanged(e);
 
-			if (Selected)
-				m_TitleBar.Font = new Font(Font, (Selected ? FontStyle.Bold : FontStyle.Regular));
-
+			m_TitleBar.Font = new Font(Font, (Selected ? FontStyle.Bold : FontStyle.Regular));
 			m_List.Font = Font;
+
 			ResizeList();
 		}
 

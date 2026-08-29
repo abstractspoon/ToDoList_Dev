@@ -247,21 +247,9 @@ BOOL CTabbedToDoCtrl::OnInitDialog()
 
 	// Prepare the list-specific comboboxes
 	BuildListGroupByCombo();
-	InitListOptionsCombo();
+	m_mgrPrompts.SetComboPrompt(m_cbListOptions, IDS_TDC_NONE);
 
 	return FALSE;
-}
-
-void CTabbedToDoCtrl::InitListOptionsCombo()
-{
-	// once only
-	if (!m_cbListOptions.GetCount())
-	{
-		m_dwListOptions = CTDLTaskListCtrlOptionsComboBox::LoadOptions(CPreferences(), GetPreferencesKey());
-		m_cbListOptions.SetCheckedByItemData(m_dwListOptions);
-
-		m_mgrPrompts.SetComboPrompt(m_cbListOptions, IDS_TDC_NONE);
-	}
 }
 
 void CTabbedToDoCtrl::BuildListGroupByCombo()
@@ -348,9 +336,7 @@ void CTabbedToDoCtrl::OnListOptionsCheckChanged()
 	}
 
 	if (dwNewOptions != dwPrevOptions)
-	{
 		RebuildList();
-	}
 }
 
 void CTabbedToDoCtrl::OnTreeExpandItem(NMHDR* /*pNMHDR*/, LRESULT* /*pResult*/)
@@ -655,13 +641,13 @@ void CTabbedToDoCtrl::SaveListViewState(CPreferences& prefs, const CString& sKey
 	prefs.WriteProfileInt(sKey, _T("ListViewVisible"), IsListViewTabShowing());
 	prefs.WriteProfileInt(sKey, _T("ListViewGroupBy"), m_nListViewGroupBy);
 
-	CTDLTaskListCtrlOptionsComboBox::SaveOptions(m_dwListOptions, prefs, sKey);
+	m_cbListOptions.SavePreferences(prefs, sKey);
 }
 
 void CTabbedToDoCtrl::RestoreListViewState(const CPreferences& prefs, const CString& sKey)
 {
-	m_dwListOptions = CTDLTaskListCtrlOptionsComboBox::LoadOptions(prefs, sKey);
-	m_cbListOptions.SetCheckedByItemData(m_dwListOptions);
+	m_cbListOptions.LoadPreferences(prefs, sKey);
+	m_dwListOptions = m_cbListOptions.GetCheckedItemData();
 
 	m_nListViewGroupBy = prefs.GetProfileEnum(sKey, _T("ListViewGroupBy"), TDCC_NONE);
 	m_taskList.SetGroupBy(m_nListViewGroupBy, HasListOption(LVO_SORTGROUPSASCENDING), HasListOption(LVO_SORTNONEGROUPBELOW));
@@ -1126,8 +1112,13 @@ LRESULT CTabbedToDoCtrl::OnPostTabViewChange(WPARAM nOldView, LPARAM nNewView)
 		break;
 
 	case FTCV_TASKLIST:
-		SyncListSelectionToTree(FALSE);
-		m_taskList.EnsureSelectionVisible(FALSE);
+		{
+			SyncListSelectionToTree(FALSE);
+			m_taskList.EnsureSelectionVisible(FALSE);
+
+			// Make sure any column width initialisation is finished
+			while (m_taskList.DoIdleProcessing());
+		}
 		break;
 		
 	case FTCV_UIEXTENSION1:

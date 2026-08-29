@@ -115,7 +115,6 @@ public:
 	inline BOOL HasSelection() const { return GetSelectedCount(); }
 
 	virtual int GetItemCount() const = 0;
-	virtual int GetVisibleItemCount() const = 0;
 	virtual int GetSelectedCount() const = 0;
  	virtual int GetSelectedTaskIDs(CDWordArray& aTaskIDs, BOOL bTrue, BOOL bOrdered = FALSE) const = 0;
 	virtual DWORD GetSelectedTaskID() const = 0;

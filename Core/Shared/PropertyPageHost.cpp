@@ -108,17 +108,13 @@ CPropertyPageHost::~CPropertyPageHost()
 
 
 BEGIN_MESSAGE_MAP(CPropertyPageHost, CWnd)
-	//{{AFX_MSG_MAP(CPropertyPageHost)
 	ON_WM_SIZE()
 	ON_WM_ERASEBKGND()
 	ON_WM_CREATE()
-	//}}AFX_MSG_MAP
 	ON_MESSAGE(PSM_GETCURRENTPAGEHWND, OnGetCurrentPageHwnd)
 END_MESSAGE_MAP()
 
-
-/////////////////////////////////////////////////////////////////////////////
-// CPropertyPageHost message handlers
+// --------------------------------------------------------------
 
 BOOL CPropertyPageHost::Create(UINT nRefCtrlID, CWnd* pParent, UINT uCtrlID)
 {
@@ -485,8 +481,6 @@ LRESULT CPropertyPageHost::WindowProc(UINT message, WPARAM wParam, LPARAM lParam
 BOOL COccManager::IsDialogMessage(CWnd* pWndDlg, LPMSG lpMsg)
 {
 	CWnd* pWndFocus = CWnd::GetFocus();
-//	HWND hWndFocus = pWndFocus->GetSafeHwnd();
-//	HWND hWndDlg = pWndDlg->GetSafeHwnd();
 	UINT uMsg = lpMsg->message;
 
 	if (((uMsg >= WM_KEYFIRST) && (uMsg <= WM_KEYLAST)) ||

@@ -1041,27 +1041,18 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 				}
 				else if (Misc::ModKeysArePressed(0))
 				{
-					// Handle expanding/contracting tasks
+					// Handle expanding/collapsing if there's nothing to do
 					switch (wp)
 					{
 					case VK_MULTIPLY:
-					case VK_RIGHT:
-						if (TSH().IsAnyItemCollapsed())
-						{
-							ExpandSelection(TRUE, (wp == VK_MULTIPLY));
-						}
-						return 0L; // we handled it
+						if (!TSH().IsAnyItemCollapsed())
+							return 0L;
+						break;
 
 					case VK_SUBTRACT:
-					case VK_LEFT:
-						if (TSH().IsAnyItemExpanded())
-						{
-							bSelChange = TSH().RemoveChildDuplicates();
-							ExpandSelection(FALSE);
-							
-							ProcessSelectionChange(bSelChange, SC_BYKEYBOARD);
-						}
-						return 0L; // we handled it
+						if (!TSH().IsAnyItemExpanded())
+							return 0L;
+						break;
 					}
 				}
 			}
@@ -1145,7 +1136,7 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 				// if not on an 'active' column
 				ASSERT(hti == GetTreeSelItem(m_tcTasks));
 
-				if (TCH().TreeCtrl().ItemHasChildren(hti))
+				if (m_tcTasks.ItemHasChildren(hti))
 				{
 					ExpandItem(hti, !TCH().IsItemExpanded(hti));
 					return 0L; // we handled it

@@ -206,6 +206,16 @@ int Win32::GetHScrollPos(IntPtr hWnd)
 	return ::GetScrollPos(GetHwnd(hWnd), SB_HORZ);
 }
 
+bool Win32::HasHScroll(IntPtr hWnd)
+{
+	return HasStyle(hWnd, WS_HSCROLL, false);
+}
+
+bool Win32::HasVScroll(IntPtr hWnd)
+{
+	return HasStyle(hWnd, WS_VSCROLL, false);
+}
+
 int Win32::GetSystemDPI()
 {
 	if (s_nDPI == 0)
@@ -331,6 +341,11 @@ bool Win32::IsCursorKeyPressed(bool upDown, bool leftRight)
 		return (Misc::IsCursorKeyPressed(MKC_LEFTRIGHT) != FALSE);
 
 	return false;
+}
+
+bool Win32::LockUpdates(IntPtr hWnd)
+{
+	return (::LockWindowUpdate(GetHwnd(hWnd)) != FALSE);
 }
 
 int Win32::SendMessage(IntPtr hWnd, UInt32 wMsg, UIntPtr wParam, IntPtr lParam)

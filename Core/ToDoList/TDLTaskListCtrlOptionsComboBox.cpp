@@ -67,8 +67,10 @@ void CTDLTaskListCtrlOptionsComboBox::RemoveOptions(DWORD dwOptions)
 	}
 }
 
-DWORD CTDLTaskListCtrlOptionsComboBox::LoadOptions(const IPreferences* pPrefs, LPCTSTR szKey)
+void CTDLTaskListCtrlOptionsComboBox::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey)
 {
+	ASSERT(GetCount());
+
 	DWORD dwOptions = 0;
 
 	// Backwards compatibility (misspelt option)
@@ -83,11 +85,15 @@ DWORD CTDLTaskListCtrlOptionsComboBox::LoadOptions(const IPreferences* pPrefs, L
 	Misc::SetFlag(dwOptions, LVO_SORTNONEGROUPBELOW,	pPrefs->GetProfileInt(szKey, _T("ListViewSortNoneGroupBelow"),	FALSE));
 	Misc::SetFlag(dwOptions, LVO_HIDENOGROUPVALUE,		pPrefs->GetProfileInt(szKey, _T("ListViewHideNoGroupValue"),	FALSE));
 
-	return dwOptions;
+	SetCheckedByItemData(dwOptions);
 }
 
-void CTDLTaskListCtrlOptionsComboBox::SaveOptions(DWORD dwOptions, IPreferences* pPrefs, LPCTSTR szKey)
+void CTDLTaskListCtrlOptionsComboBox::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 {
+	ASSERT(GetCount());
+
+	DWORD dwOptions = GetCheckedItemData();
+
 	pPrefs->WriteProfileInt(szKey, _T("ListViewHideParents"),			(dwOptions & LVO_HIDEPARENTS));
 	pPrefs->WriteProfileInt(szKey, _T("ListViewHideCollapsed"),			(dwOptions & LVO_HIDECOLLAPSED));
 	pPrefs->WriteProfileInt(szKey, _T("ListViewSortNoneGroupBelow"),	(dwOptions & LVO_SORTNONEGROUPBELOW));

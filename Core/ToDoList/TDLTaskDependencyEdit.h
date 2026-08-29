@@ -51,12 +51,7 @@ protected:
 	virtual void PreSubclassWindow();
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 
-// Implementation
 protected:
-	// Generated message map functions
-	//{{AFX_MSG(CTDLTaskDependencyEdit)
-		// NOTE: the ClassWizard will add member functions here
-	//}}AFX_MSG
 	afx_msg BOOL OnChange();
 	afx_msg HBRUSH CtlColor(CDC* pDC, UINT nCtlColor);
 	afx_msg void OnKillFocus(CWnd* pNewWnd);
@@ -69,7 +64,7 @@ protected:
 };
 
 /////////////////////////////////////////////////////////////////////////////
-// CTDLTaskDependencyOptionDlg dialog
+// CTDLTaskDependencyListCtrl control
 
 class CTDLTaskDependencyListCtrl : public CInputListCtrl
 {
@@ -88,31 +83,32 @@ protected:
 	const CTaskFile& m_tasks;
 	const CTDCImageList& m_ilTasks;
 
-// Implementation
 protected:
 	virtual BOOL CanEditCell(int nRow, int nCol) const;
 	virtual void EditCell(int nItem, int nCol, BOOL bBtnClick);
 	virtual COLORREF GetItemBackColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
+	virtual void DrawCellText(CDC* pDC, int nItem, int nCol, const CRect& rText, const CString& sText, COLORREF crText, UINT nDrawTextFlags);
 	virtual void PrepareControl(CWnd& ctrl, int nRow, int nCol);
 
 protected:
-	// Generated message map functions
-	//{{AFX_MSG(CTDLTaskDependencyListCtrl)
-	//}}AFX_MSG
 	afx_msg void OnTaskComboCancel();
 	afx_msg void OnTaskComboOK();
+	afx_msg void OnSize(UINT nType, int cx, int cy);
+	afx_msg void OnDestroy();
 
 	DECLARE_MESSAGE_MAP()
 
 protected:
 	void PrepareTaskCombo(int nRow);
+	void RecalcColumnWidths();
+	BOOL IsLocalDepends(int nRow) const;
 };
 
-// ----------------------------------------------
+/////////////////////////////////////////////////////////////////////////////
+// CTDLTaskDependencyOptionDlg dialog
 
 class CTDLTaskDependencyEditDlg : public CTDLDialog
 {
-// Construction
 public:
 	CTDLTaskDependencyEditDlg(const CDWordArray& aDependentTaskIDs, const CTaskFile& tasks, 
 							  const CTDCImageList& ilTasks, const CTDCDependencyArray& aDepends, 
@@ -121,26 +117,17 @@ public:
 	int GetDependencies(CTDCDependencyArray& aDepends) const;
 
 protected:
-// Dialog Data
-	//{{AFX_DATA(CTDLTaskDependencyOptionDlg)
-	//}}AFX_DATA
 	CTDLTaskDependencyListCtrl m_lcDependencies;
 	CTDCDependencyArray m_aDepends;
-	
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CTDLTaskDependencyOptionDlg)
-	protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-	virtual void OnOK();
-	//}}AFX_VIRTUAL
-	virtual BOOL OnInitDialog();
+	BOOL m_bShowLeadInTimes;
 
-// Implementation
 protected:
-	// Generated message map functions
-	//{{AFX_MSG(CTDLTaskDependencyOptionDlg)
-	//}}AFX_MSG
+	virtual void DoDataExchange(CDataExchange* pDX);
+	virtual void OnOK();
+	virtual BOOL OnInitDialog();
+	virtual void OnRepositionControls(int dx, int dy);
+
+protected:
 	DECLARE_MESSAGE_MAP()
 };
 

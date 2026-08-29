@@ -19,7 +19,8 @@ CTDLSelectTaskDlg::CTDLSelectTaskDlg(const CTaskFile& tasks, const CTDCImageList
 	: 
 	CTDLDialog(IDD_SELECTTASK_DIALOG, szPrefsKey, pParent),
 	m_tasks(tasks),
-	m_ilTasks(ilTasks)
+	m_ilTasks(ilTasks),
+	m_dwSelTaskID(0)
 {
 	if (!m_sPrefsKey.IsEmpty())
 	{
@@ -39,6 +40,7 @@ void CTDLSelectTaskDlg::DoDataExchange(CDataExchange* pDX)
 }
 
 BEGIN_MESSAGE_MAP(CTDLSelectTaskDlg, CTDLDialog)
+	ON_WM_CTLCOLOR()
 	ON_CBN_SELCHANGE(IDC_TASKCOMBO, OnSelChangeTask)
 	ON_CBN_EDITUPDATE(IDC_TASKCOMBO, OnEditUpdateTask)
 	ON_CBN_DBLCLK(IDC_TASKCOMBO, OnDoubleClickTask)
@@ -96,12 +98,26 @@ void CTDLSelectTaskDlg::OnSelChangeTask()
 
 void CTDLSelectTaskDlg::OnEditUpdateTask()
 {
-	PostMessage(WM_COMMAND, MAKEWPARAM(IDC_TASKCOMBO, CBN_SELCHANGE), (LPARAM)(HWND)m_cbTasks);
+	m_bDoIdleSelChange = TRUE;
+}
+
+BOOL CTDLSelectTaskDlg::DoIdleProcessing()
+{
+	if (m_bDoIdleSelChange)
+	{
+		OnSelChangeTask();
+		m_bDoIdleSelChange = FALSE;
+	}
+
+	return CTDLDialog::DoIdleProcessing();
 }
 
 void CTDLSelectTaskDlg::EnableDisableOK()
 {
 	GetDlgItem(IDOK)->EnableWindow(m_dwSelTaskID);
+
+	BOOL bShowError = (!m_dwSelTaskID && m_cbTasks.GetWindowTextLength());
+	GetDlgItem(IDC_TASKNOTFOUND)->ShowWindow(bShowError ? SW_SHOW : SW_HIDE);
 }
 
 void CTDLSelectTaskDlg::OnDoubleClickTask()
@@ -116,4 +132,14 @@ void CTDLSelectTaskDlg::OnShowDoneTasks()
 
 	m_cbTasks.Populate(m_tasks, m_ilTasks, m_aRecentTaskIDs, m_bShowDoneTasks);
 	m_cbTasks.SetSelectedTaskID(m_dwSelTaskID);
+}
+
+HBRUSH CTDLSelectTaskDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
+{
+	HBRUSH hbr = CTDLDialog::OnCtlColor(pDC, pWnd, nCtlColor);
+
+	if (pWnd->GetDlgCtrlID() == IDC_TASKNOTFOUND)
+		pDC->SetTextColor(CTDLDialog::GetErrorLabelTextColor());
+
+	return hbr;
 }

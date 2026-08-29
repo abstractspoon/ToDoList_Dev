@@ -46,16 +46,23 @@ protected:
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);
 	virtual BOOL OnInitDialog();
+	virtual BOOL DoIdleProcessing();
 
 protected:
 	afx_msg void OnSelChangeTask();
 	afx_msg void OnEditUpdateTask();
 	afx_msg void OnDoubleClickTask();
 	afx_msg void OnShowDoneTasks();
+	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
+
 	DECLARE_MESSAGE_MAP()
 
 protected:
 	void EnableDisableOK();
+
+private:
+	BOOL m_bDoIdleSelChange;
+
 };
 
 #endif // !defined(AFX_TDLSELECTTASKDLG_H__135C804F_9469_4B97_AAE1_F05C79DE41DF__INCLUDED_)

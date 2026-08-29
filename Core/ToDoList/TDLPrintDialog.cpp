@@ -163,6 +163,7 @@ BEGIN_MESSAGE_MAP(CTDLPrintDialog, CTDLDialog)
 	ON_BN_CLICKED(IDC_STYLE_STYLESHEET, OnChangeStyle)
 	ON_BN_CLICKED(IDC_STYLE_SIMPLE, OnChangeStyle)
 	ON_BN_CLICKED(IDC_STYLE_OTHER, OnChangeStyle)
+	ON_NOTIFY(TCN_SELCHANGE, AFX_IDW_PANE_FIRST, OnSelchangeTabcontrol)
 END_MESSAGE_MAP()
 
 // --------------------------------------------------------------
@@ -180,7 +181,6 @@ BOOL CTDLPrintDialog::OnInitDialog()
 	VERIFY(m_ppHost.SetActivePage(m_nPrevActiveTab));
 	
 	OnChangeStyle();
-
 	return TRUE;
 }
 
@@ -216,13 +216,16 @@ COleDateTime CTDLPrintDialog::GetDate() const
 
 void CTDLPrintDialog::OnChangeStyle()
 {
-	TDLPD_STYLE nStyle = m_pageStyle.GetExportStyle();
-
 	// Disable OK for invalid inputs
-	GetDlgItem(IDOK)->EnableWindow(nStyle != TDLPDS_NONE);
+	GetDlgItem(IDOK)->EnableWindow(m_pageStyle.GetExportStyle() != TDLPDS_NONE);
+}
 
-	// Disable task selection for 'Task view image' option
-	m_pageTaskSel.EnableWindow(nStyle != TDLPDS_IMAGE);
+void CTDLPrintDialog::OnSelchangeTabcontrol(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	if (m_ppHost.GetActivePage() == &m_pageTaskSel)
+		m_pageTaskSel.EnableWindow(m_pageStyle.GetExportStyle() != TDLPDS_IMAGE);
+
+	*pResult = 0;
 }
 
 /////////////////////////////////////////////////////////////////////////////

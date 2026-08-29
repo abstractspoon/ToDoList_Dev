@@ -19,8 +19,7 @@ static char THIS_FILE[]=__FILE__;
 #endif
 
 //////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
+// CTDLTaskDependencyEdit 
 
 CTDLTaskDependencyEdit::CTDLTaskDependencyEdit() 
 	: 
@@ -35,14 +34,13 @@ CTDLTaskDependencyEdit::~CTDLTaskDependencyEdit()
 }
 
 BEGIN_MESSAGE_MAP(CTDLTaskDependencyEdit, CEnEdit)
-	//{{AFX_MSG_MAP(CTDLTaskDependencyEdit)
-	//}}AFX_MSG_MAP
 	ON_CONTROL_REFLECT_EX(EN_CHANGE, OnChange)
 	ON_WM_CTLCOLOR_REFLECT()
 	ON_WM_KILLFOCUS()
 
 END_MESSAGE_MAP()
-//////////////////////////////////////////////////////////////////////
+
+// ----------------------------------------------------------
 
 void CTDLTaskDependencyEdit::PreSubclassWindow()
 {
@@ -231,17 +229,24 @@ void CTDLTaskDependencyEdit::DDX(CDataExchange* pDX, CTDCDependencyArray& aValue
 }
 
 /////////////////////////////////////////////////////////////////////////////
-// CTDLTaskDependencyOptionDlg dialog
+// CTDLTaskDependencyListCtrl control
 
 enum
 {
-	DEPEND_COL,
+	TASK_COL,
+	ID_COL,
+	PATH_COL,
 	LEADIN_COL,
+
+	NUM_COLS // always last
 };
 
 const UINT COMBO_ID = 1001;
 
-/////////////////////////////////////////////////////////////////////////////
+const LPCTSTR PREFS_KEY = _T("Dependency");
+const LPCTSTR DEF_COLPROPORTIONS = _T("10|2|10|5");
+
+// ----------------------------------------------------------
 
 CTDLTaskDependencyListCtrl::CTDLTaskDependencyListCtrl(const CDWordArray& aDependentTaskIDs, const CTaskFile& tasks, 
 													   const CTDCImageList& ilTasks, BOOL bShowParentsAsFolders, BOOL bShowLeadInTimes)
@@ -256,10 +261,10 @@ CTDLTaskDependencyListCtrl::CTDLTaskDependencyListCtrl(const CDWordArray& aDepen
 }
 
 BEGIN_MESSAGE_MAP(CTDLTaskDependencyListCtrl, CInputListCtrl)
-	//{{AFX_MSG_MAP(CTDLTaskDependencyListCtrl)
-	//}}AFX_MSG_MAP
 	ON_CBN_SELENDCANCEL(COMBO_ID, OnTaskComboCancel)
 	ON_CBN_SELENDOK(COMBO_ID, OnTaskComboOK)
+	ON_WM_SIZE()
+	ON_WM_DESTROY()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -268,24 +273,38 @@ void CTDLTaskDependencyListCtrl::SetDependencies(const CTDCDependencyArray& aDep
 {
 	ASSERT(GetSafeHwnd());
 
-	CRect rList;
-	GetClientRect(rList);
-	
-	if (m_bShowLeadInTimes)
+	// create list columns
+	CPreferences prefs;
+	CString sColWidths = prefs.GetProfileString(PREFS_KEY, _T("ColWidths"), DEF_COLPROPORTIONS);
+
+	CDWordArray aWidths;
+
+	if (Misc::Split(sColWidths, aWidths, '|') != NUM_COLS)
 	{
-		AddCol(CEnString(IDS_TDLBC_DEPENDS), ((rList.Width() * 2) / 3), ILCT_COMBO);
-		AddCol(CEnString(IDS_DEPENDSLEADIN_COL), (rList.Width() / 3));
+		Misc::Split(DEF_COLPROPORTIONS, aWidths, '|');
 	}
-	else
+	else if (m_bShowLeadInTimes && !prefs.GetProfileInt(PREFS_KEY, _T("ShowLeadinCol"), TRUE))
 	{
-		AddCol(CEnString(IDS_TDLBC_DEPENDS), rList.Width(), ILCT_COMBO);
+		// Restore leadin column if it was previously hidden
+		ASSERT(aWidths[LEADIN_COL] == 0);
+		aWidths[LEADIN_COL] = GraphicsMisc::ScaleByDPIFactor(150);
 	}
+
+	VERIFY(TASK_COL == AddCol(CEnString(IDS_TDLBC_DEPENDS), (int)aWidths[TASK_COL], ILCT_COMBO));
+	VERIFY(ID_COL == AddCol(CEnString(IDS_TDC_COLUMN_ID), (int)aWidths[ID_COL]));
+	VERIFY(PATH_COL == AddCol(CEnString(IDS_TDC_COLUMN_PATH), (int)aWidths[PATH_COL]));
+	VERIFY(LEADIN_COL == AddCol(CEnString(IDS_DEPENDSLEADIN_COL), (int)aWidths[LEADIN_COL]));
+
+	EnableColumnEditing(ID_COL, FALSE);
+	EnableColumnEditing(PATH_COL, FALSE);
+	ShowColumn(LEADIN_COL, m_bShowLeadInTimes);
+	RecalcColumnWidths();
 
 	SetAutoRowPrompt(CEnString(IDS_NEWDEPENDENCY_PROMPT));
 	ShowGrid(TRUE, TRUE);
 	AutoAdd(TRUE, FALSE);
 
-	// This gets around the constness
+	// This gets around the constness of m_ilTasks
 	ListView_SetImageList(*this, m_ilTasks, LVSIL_SMALL);
 
 	CreateControl(m_cbTasks, COMBO_ID, CBS_DROPDOWN); // edit field and no sort
@@ -297,12 +316,7 @@ void CTDLTaskDependencyListCtrl::SetDependencies(const CTDCDependencyArray& aDep
 		if (depend.IsLocal())
 		{
 			HTASKITEM hTask = m_tasks.FindTask(depend.dwTaskID);
-			CString sName;
-
-			if (hTask)
-				sName.Format(_T("%s (%ld)"), m_tasks.GetTaskTitle(hTask), depend.dwTaskID);
-			else
-				sName = Misc::Format(depend.dwTaskID);
+			CString sName = (hTask ? m_tasks.GetTaskTitle(hTask) : Misc::Format(depend.dwTaskID));
 
 			int nImage = m_ilTasks.GetImageIndex(m_tasks.GetTaskIcon(hTask));
 
@@ -312,12 +326,17 @@ void CTDLTaskDependencyListCtrl::SetDependencies(const CTDCDependencyArray& aDep
 			int nRow = AddRow(sName, nImage);
 
 			SetItemData(nRow, depend.dwTaskID);
-			SetItemText(nRow, LEADIN_COL, Misc::Format(depend.nDaysLeadIn));
+			SetItemText(nRow, ID_COL, Misc::Format(depend.dwTaskID));
+			SetItemText(nRow, PATH_COL, m_tasks.GetTaskPath(hTask));
+
+			if (m_bShowLeadInTimes)
+				SetItemText(nRow, LEADIN_COL, Misc::Format(depend.nDaysLeadIn));
 		}
 		else
 		{
-			int nRow = AddRow(depend.Format());
-			SetItemText(nRow, LEADIN_COL, _T("0"));
+			// Only local dependencies have item data (task ID)
+			// Lead-in column is hidden
+			AddRow(depend.Format());
 		}
 	}
 }
@@ -337,7 +356,7 @@ int CTDLTaskDependencyListCtrl::GetDependencies(CTDCDependencyArray& aDepends) c
 		{
 			depend.nDaysLeadIn = _ttoi(GetItemText(nRow, LEADIN_COL));
 		}
-		else if (depend.Parse(GetItemText(nRow, DEPEND_COL)))
+		else if (depend.Parse(GetItemText(nRow, TASK_COL)))
 		{
 			depend.nDaysLeadIn = 0;
 		}
@@ -357,7 +376,8 @@ BOOL CTDLTaskDependencyListCtrl::CanEditCell(int nRow, int nCol) const
 	switch (nCol)
 	{
 	case LEADIN_COL:
-		return (GetItemData(nRow) != 0);
+		// Only local dependencies support lead-in times
+		return IsLocalDepends(nRow);
 	}
 
 	// else
@@ -371,7 +391,7 @@ void CTDLTaskDependencyListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClick)
 
 	switch (nCol)
 	{
-	case DEPEND_COL:
+	case TASK_COL:
 		ShowControl(m_cbTasks, nItem, nCol, bBtnClick);
 		break;
 
@@ -383,16 +403,37 @@ void CTDLTaskDependencyListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClick)
 
 COLORREF CTDLTaskDependencyListCtrl::GetItemBackColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const
 {
-	switch (nCol)
+	if (!IsPrompt(nItem))
 	{
-	case LEADIN_COL:
-		if (!IsPrompt(nItem) && !CanEditCell(nItem, nCol))
-			return GetSysColor(COLOR_3DFACE);
-		break;
+		switch (nCol)
+		{
+		case LEADIN_COL:
+			// Only local dependencies support lead-in times
+			if (!IsLocalDepends(nItem))
+				return GetSysColor(COLOR_3DFACE);
+			break;
+		}
 	}
 
 	// else
 	return CInputListCtrl::GetItemBackColor(nItem, nCol, bSelected, bDropHighlighted, bWndFocus);
+}
+
+BOOL CTDLTaskDependencyListCtrl::IsLocalDepends(int nRow) const
+{
+	return (GetItemData(nRow) != 0);
+}
+
+void CTDLTaskDependencyListCtrl::DrawCellText(CDC* pDC, int nItem, int nCol, const CRect& rText, const CString& sText, COLORREF crText, UINT nDrawTextFlags)
+{
+	switch (nCol)
+	{
+	case PATH_COL:
+		nDrawTextFlags |= DT_PATH_ELLIPSIS;
+		break;
+	}
+
+	CInputListCtrl::DrawCellText(pDC, nItem, nCol, rText, sText, crText, nDrawTextFlags);
 }
 
 void CTDLTaskDependencyListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
@@ -401,7 +442,7 @@ void CTDLTaskDependencyListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 
 	switch (nCol)
 	{
-	case DEPEND_COL:
+	case TASK_COL:
 		{
 			ASSERT(&ctrl == &m_cbTasks);
 
@@ -419,6 +460,39 @@ void CTDLTaskDependencyListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 	}
 }
 
+void CTDLTaskDependencyListCtrl::OnDestroy()
+{
+	CInputListCtrl::OnDestroy();
+
+	// Save state
+	CPreferences prefs;
+
+	CIntArray aColWidths;
+	GetHeader()->GetItemWidths(aColWidths);
+	
+	prefs.WriteProfileString(PREFS_KEY, _T("ColWidths"), Misc::FormatArrayT(aColWidths, _T("%d"), '|'));
+	prefs.WriteProfileInt(PREFS_KEY, _T("ShowLeadinCol"), m_bShowLeadInTimes);
+}
+
+void CTDLTaskDependencyListCtrl::OnSize(UINT nType, int cx, int cy)
+{
+	CInputListCtrl::OnSize(nType, cx, cy);
+
+	RecalcColumnWidths();
+}
+
+void CTDLTaskDependencyListCtrl::RecalcColumnWidths()
+{
+	CRect rAvail;
+	GetClientRect(rAvail);
+
+	int nCol = NUM_COLS, nTotalColWidth = GetHeader()->CalcTotalItemWidth();
+	double dFactor = (double)rAvail.Width() / nTotalColWidth;
+
+	while (nCol--)
+		SetColumnWidth(nCol, (int)(GetColumnWidth(nCol) * dFactor));
+}
+
 void CTDLTaskDependencyListCtrl::OnTaskComboCancel()
 {
 	m_cbTasks.ShowWindow(SW_HIDE);
@@ -429,8 +503,15 @@ void CTDLTaskDependencyListCtrl::OnTaskComboOK()
 {
 	m_cbTasks.ShowWindow(SW_HIDE);
 
-	int nRow = GetCurSel();
+	DWORD dwTaskID = m_cbTasks.GetSelectedTaskID();
+
+	if (!dwTaskID)
+		return;
+
 	CString sTask = m_cbTasks.GetSelectedTaskName();
+	ASSERT(!sTask.IsEmpty());
+
+	int nRow = GetCurSel();
 
 	if (IsPrompt(nRow))
 	{
@@ -439,11 +520,16 @@ void CTDLTaskDependencyListCtrl::OnTaskComboOK()
 	}
 	else
 	{
-		SetItemText(nRow, DEPEND_COL, sTask);
+		SetItemText(nRow, TASK_COL, sTask);
 	}
 
-	SetItemData(nRow, m_cbTasks.GetSelectedTaskID());
+	HTASKITEM hTask = m_tasks.FindTask(dwTaskID);
+
+	SetItemData(nRow, dwTaskID);
+	SetItemText(nRow, ID_COL, Misc::Format(dwTaskID));
+	SetItemText(nRow, PATH_COL, m_tasks.GetTaskPath(hTask));
 	SetItemImage(nRow, m_cbTasks.GetSelectedTaskImage());
+
 	SetFocus();
 }
 
@@ -489,16 +575,16 @@ void CTDLTaskDependencyListCtrl::PrepareTaskCombo(int nRow)
 }
 
 /////////////////////////////////////////////////////////////////////////////
+// CTDLTaskDependencyEditDlg
 
 CTDLTaskDependencyEditDlg::CTDLTaskDependencyEditDlg(const CDWordArray& aDependentTaskIDs, const CTaskFile& tasks, const CTDCImageList& ilTasks,
 													 const CTDCDependencyArray& aDepends, BOOL bShowParentsAsFolders, 
-													 BOOL bShowLeadInTimes, CWnd* pParent /*=NULL*/)
+													 BOOL bShowLeadInTimes, CWnd* pParent)
 	: 
-	CTDLDialog(IDD_TASKDEPENDENCY_DIALOG, _T("Dependency"), pParent),
-	m_lcDependencies(aDependentTaskIDs, tasks, ilTasks, bShowParentsAsFolders, bShowLeadInTimes)
+	CTDLDialog(IDD_TASKDEPENDENCY_DIALOG, PREFS_KEY, pParent),
+	m_lcDependencies(aDependentTaskIDs, tasks, ilTasks, bShowParentsAsFolders, bShowLeadInTimes),
+	m_bShowLeadInTimes(bShowLeadInTimes)
 {
-	//{{AFX_DATA_INIT(CRecurringTaskOptionDlg)
-	//}}AFX_DATA_INIT
 	m_aDepends.Copy(aDepends);
 }
 
@@ -506,20 +592,13 @@ void CTDLTaskDependencyEditDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CTDLDialog::DoDataExchange(pDX);
 
-	//{{AFX_DATA_MAP(CRecurringTaskOptionDlg)
-	//}}AFX_DATA_MAP
-
 	DDX_Control(pDX, IDC_DEPENDENCIES, m_lcDependencies);
 }
 
 BEGIN_MESSAGE_MAP(CTDLTaskDependencyEditDlg, CTDLDialog)
-	//{{AFX_MSG_MAP(CRecurringTaskOptionDlg)
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
-/////////////////////////////////////////////////////////////////////////////
-// CRecurringTaskOptionDlg message handlers
-/////////////////////////////////////////////////////////////////////////////
+// ----------------------------------------------------------
 
 BOOL CTDLTaskDependencyEditDlg::OnInitDialog()  
 {
@@ -527,8 +606,7 @@ BOOL CTDLTaskDependencyEditDlg::OnInitDialog()
 
 	m_lcDependencies.SetDependencies(m_aDepends);
 
-	return TRUE;  // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX Property Pages should return FALSE
+	return TRUE;
 }
 
 void CTDLTaskDependencyEditDlg::OnOK()  
@@ -544,4 +622,12 @@ int CTDLTaskDependencyEditDlg::GetDependencies(CTDCDependencyArray& aDepends) co
 
 	return aDepends.GetSize();
 }
+
+void CTDLTaskDependencyEditDlg::OnRepositionControls(int dx, int dy)
+{
+	CTDLDialog::OnRepositionControls(dx, dy);
+
+	ResizeChild(&m_lcDependencies, dx, dy);
+}
+
 

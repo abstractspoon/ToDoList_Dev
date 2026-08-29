@@ -852,7 +852,7 @@ protected:
 	void DoPrint(BOOL bPreview = FALSE);
 	BOOL DoDueTaskNotification(int nTDC, int nDueBy);
 	BOOL DoTaskLink(const CString& sPath, DWORD dwTaskID, BOOL bStartup);
-	BOOL DoSelectTask(HICON hIcon, UINT nTitleStrID, BOOL bEditable);
+	BOOL DoSelectTask(HICON hIcon, UINT nTitleStrID, BOOL bExcludeLocked, DWORD dwInitialTaskID);
 	void DoInsertDateAndTime(BOOL bDate, BOOL bTime);
 	BOOL CanInsertDateAndTime() const;
 	BOOL DoImportPasteFromClipboard(TDLID_IMPORTTO nWhere);

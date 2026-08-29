@@ -9936,8 +9936,13 @@ void CToDoListWnd::OnUpdateNewTask(CCmdUI* pCmdUI)
 
 void CToDoListWnd::OnNewSubtaskInTask()
 {
-	if (!DoSelectTask(CMDICON(ID_NEWSUBTASK_INTASK), IDS_CREATESUBTASKINTASK_DLGTITLE, TRUE))
+	if (!DoSelectTask(CMDICON(ID_NEWSUBTASK_INTASK), 
+					  IDS_CREATESUBTASKINTASK_DLGTITLE, 
+					  TRUE, // unlocked tasks only
+					  GetToDoCtrl().GetSelectedTaskID()))
+	{
 		return;
+	}
 
 	TDC_INSERTWHERE nInsert = TDC::MapInsertIDToInsertWhere(GetNewSubtaskCmdID());
 	VERIFY(CreateNewTask(CEnString(IDS_TASK), nInsert, TRUE));
@@ -14070,7 +14075,7 @@ void CToDoListWnd::OnUpdateViewRestoreDefaultTaskViewFontSize(CCmdUI* pCmdUI)
 
 void CToDoListWnd::OnMoveGoToTask() 
 {
-	DoSelectTask(CMDICON(ID_MOVE_GOTOTASK), IDS_GOTOTASK_DLGTITLE, FALSE);
+	DoSelectTask(CMDICON(ID_MOVE_GOTOTASK), IDS_GOTOTASK_DLGTITLE, FALSE, 0L);
 }
 
 void CToDoListWnd::OnUpdateMoveGoToTask(CCmdUI* pCmdUI) 
@@ -14081,10 +14086,10 @@ void CToDoListWnd::OnUpdateMoveGoToTask(CCmdUI* pCmdUI)
 	pCmdUI->Enable(nNumVisible != 0);
 }
 
-BOOL CToDoListWnd::DoSelectTask(HICON hIcon, UINT nTitleStrID, BOOL bEditable)
+BOOL CToDoListWnd::DoSelectTask(HICON hIcon, UINT nTitleStrID, BOOL bExcludeLocked, DWORD dwInitialTaskID)
 {
 	// Get all editable tasks for the active tasklist
-	DWORD dwFlags = (bEditable ? TDCGTF_NOTLOCKED : 0L);
+	DWORD dwFlags = (bExcludeLocked ? TDCGTF_NOTLOCKED : 0L);
 	TDCGETTASKS filter(TDCGT_ALL, dwFlags);
 
 	filter.mapAttribs.Add(TDCA_TASKNAME);
@@ -14102,7 +14107,7 @@ BOOL CToDoListWnd::DoSelectTask(HICON hIcon, UINT nTitleStrID, BOOL bEditable)
 
 	dialog.SetStrikethroughCompletedTasks(Prefs().GetStrikethroughDone());
 	dialog.SetShowParentTasksAsFolders(Prefs().GetShowParentsAsFolders());
-	dialog.SetSelectedTaskID(tdc.GetSelectedTaskID());
+	dialog.SetSelectedTaskID(dwInitialTaskID);
 	dialog.SetCompletedTaskColor(Prefs().GetDoneTaskColor());
 
 	if (dialog.DoModal(NULL, nTitleStrID) != IDOK)
