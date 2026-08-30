@@ -1662,7 +1662,7 @@ namespace Calendar
             ResolveAppointmentsEventArgs args = new ResolveAppointmentsEventArgs(StartDate, EndDate);
             OnResolveAppointments(args);
 
-			if (LegacyScrollbars)
+			if (LegacyScrollbars && !SavingToImage)
 			{
 				using (SolidBrush backBrush = new SolidBrush(renderer.BackColor()))
 					e.Graphics.FillRectangle(backBrush, rect);
@@ -1673,7 +1673,6 @@ namespace Calendar
 			}
 
 			e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-			e.Graphics.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
 
             Rectangle headerRectangle = rect;
             headerRectangle.X += (HourLabelWidth + hourLabelIndent);
@@ -1689,7 +1688,7 @@ namespace Calendar
 			daysRectangle.Y += HeaderHeight;
 			daysRectangle.Height -= HeaderHeight;
 
-			if (!LegacyScrollbars)
+			if (!LegacyScrollbars && !SavingToImage)
 				daysRectangle.Height -= hscroll.Height;
 
             DrawDays(e, ref daysRectangle);
@@ -1708,8 +1707,11 @@ namespace Calendar
 
 				// Draw lines delineating the top of the vertical scrollbar
 				// and the left of the horizontal scrollbar
-				e.Graphics.DrawLine(SystemPens.ControlDark, vscroll.Left, vscroll.Top - 1, vscroll.Right, vscroll.Top -1);
-				e.Graphics.DrawLine(SystemPens.ControlDark, hscroll.Left - 1, hscroll.Top, hscroll.Left - 1, hscroll.Bottom);
+				if (!SavingToImage)
+				{
+					e.Graphics.DrawLine(SystemPens.ControlDark, vscroll.Left, vscroll.Top - 1, vscroll.Right, vscroll.Top - 1);
+					e.Graphics.DrawLine(SystemPens.ControlDark, hscroll.Left - 1, hscroll.Top, hscroll.Left - 1, hscroll.Bottom);
+				}
 			}
 
 			DrawHourLabels(e, hourLabelRectangle);
