@@ -348,11 +348,9 @@ namespace EisenhowerUIExtension
 				var titleRect = new Rectangle(m_TitleBar.Left, 0, reqWidth, m_List.Bounds.Top);
 				graphics.FillRectangle(SystemBrushes.ControlLight, titleRect);
 
-				var fmt = new StringFormat(StringFormatFlags.NoWrap)
-				{
-					LineAlignment = StringAlignment.Far
-				};
-				graphics.DrawString(m_TitleBar.Text, Font, SystemBrushes.WindowText, titleRect, fmt);
+				// Text. Use TextRenderer for consistency with core app
+				var flags = (TextFormatFlags.VerticalCenter | TextFormatFlags.SingleLine | TextFormatFlags.NoClipping);
+				TextRenderer.DrawText(graphics, m_TitleBar.Text, Font, titleRect, SystemColors.WindowText, SystemColors.ControlLight, flags);
 
 				graphics.DrawImage(m_Icon.Image, 2, 2);
 
