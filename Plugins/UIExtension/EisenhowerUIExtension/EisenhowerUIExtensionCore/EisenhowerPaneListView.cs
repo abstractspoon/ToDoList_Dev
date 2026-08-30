@@ -146,10 +146,11 @@ namespace EisenhowerUIExtension
 													 labelRect.Height,
 													 false); // opaque
 
-					// Must use Graphics.DrawString here because there's a bug 
-					// in PluginHelpers.DragImage which results in the text 
-					// appearing to be rendered twice.
-					graphics.DrawString(task.Title, GetFont(task, true), SystemBrushes.WindowText, labelRect);
+					// Text. Use TextRenderer for consistency with core app
+					var flags = (TextFormatFlags.VerticalCenter | TextFormatFlags.SingleLine | TextFormatFlags.NoClipping);
+					var backColor = UIExtension.SelectionRect.GetColor(UIExtension.SelectionRect.Style.Selected);
+
+					TextRenderer.DrawText(graphics, task.Title, GetFont(task, true), labelRect, SystemColors.WindowText, backColor, flags);
 
 					// Next item
 					labelRect.Y = labelRect.Bottom;
