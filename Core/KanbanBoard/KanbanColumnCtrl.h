@@ -130,6 +130,7 @@ protected:
 	BOOL m_bReadOnly;
 	
 	mutable BOOL m_bCheckingIsSorted;
+	mutable BOOL m_bCalculatingImageSize;
 
 	CFontCache& m_fonts;
 	const CKanbanItemMap& m_data;
