@@ -558,12 +558,12 @@ void CTDLTaskCtrlBase::UpdateSelectedTaskPath()
 }
 
 // internal
-void CTDLTaskCtrlBase::DoUpdateSelectedTaskPath()
+void CTDLTaskCtrlBase::DoUpdateSelectedTaskPath(BOOL bSavingToImage)
 {
 	CEnString sHeader(IDS_TDC_COLUMN_TASK);
 	
 	// add the item path to the header
-	if (HasStyle(TDCS_SHOWPATHINHEADER) && HasSelection() && SelectionHasSameParent())
+	if (!bSavingToImage && HasStyle(TDCS_SHOWPATHINHEADER) && HasSelection() && SelectionHasSameParent())
 	{
 		CRect rHeader;
 		::GetClientRect(m_hdrTasks, rHeader);
@@ -5958,12 +5958,14 @@ BOOL CTDLTaskCtrlBase::SaveToImage(CBitmap& bmImage)
 		return FALSE;
 
 	CLockUpdates lock(GetSafeHwnd());
+	DoUpdateSelectedTaskPath(TRUE);
 
 	// Allow derived classes to get involved
 	BOOL bRes = DoSaveToImage(bmImage, m_crGridLine);
 
 	ResyncScrollPos(Tasks(), m_lcColumns);
 	EnsureSelectionVisible(FALSE);
+	DoUpdateSelectedTaskPath(FALSE);
 
 	return bRes;
 }
