@@ -2354,20 +2354,31 @@ int CTDLTaskListCtrl::CalcRequiredTitleColumnWidthForImage()
 	{
 		DWORD dwTaskID = GetTaskID(nItem);
 
-		const TODOITEM* pTDI = m_data.GetTrueTask(dwTaskID);
-		const TODOSTRUCTURE* pTDS = m_data.LocateTask(dwTaskID);
-
-		int nTitleLen = pTDI->sTitle.GetLength();
-
-		if (pTDS->ParentIsRoot())
+		if (IsGroupHeaderTask(dwTaskID))
 		{
+			CString sText = FormatTaskGroupHeaderText(dwTaskID);
+			int nTitleLen = sText.GetLength();
+
 			if (nTitleLen > sLongestTopLevel.GetLength())
-				sLongestTopLevel = pTDI->sTitle;
+				sLongestTopLevel = sText;
 		}
 		else
 		{
-			if (nTitleLen > sLongestChild.GetLength())
-				sLongestChild = pTDI->sTitle;
+			const TODOITEM* pTDI = m_data.GetTrueTask(dwTaskID);
+			const TODOSTRUCTURE* pTDS = m_data.LocateTask(dwTaskID);
+
+			int nTitleLen = pTDI->sTitle.GetLength();
+
+			if (pTDS->ParentIsRoot())
+			{
+				if (nTitleLen > sLongestTopLevel.GetLength())
+					sLongestTopLevel = pTDI->sTitle;
+			}
+			else
+			{
+				if (nTitleLen > sLongestChild.GetLength())
+					sLongestChild = pTDI->sTitle;
+			}
 		}
 	}
 
