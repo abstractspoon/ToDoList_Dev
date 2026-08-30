@@ -1786,7 +1786,7 @@ namespace EvidenceBoardUIExtension
 			var titleRect = CalcTaskLabelRect(taskItem, taskRect, true);
 			var flags = (TextFormatFlags.Top | TextFormatFlags.WordBreak | TextFormatFlags.EndEllipsis);
 
-			TextRenderer.DrawText(graphics, taskItem.ToString(), GetTaskLabelFont(taskItem), titleRect, textColor, flags);
+			TextRenderer.DrawText(graphics, taskItem.ToString(), GetTaskLabelFont(taskItem), titleRect, textColor, backColor, flags);
 
 			// Image
 			if (taskItem.IsImageExpanded)
