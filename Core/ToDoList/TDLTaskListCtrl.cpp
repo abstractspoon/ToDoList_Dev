@@ -334,7 +334,7 @@ LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const CIntArra
 				{
 					CString sHeader;
 
-					if (hwndList == m_lcTasks)
+					if ((hwndList == m_lcTasks) && (!m_bSavingToImage || (m_lcTasks.GetScrollPos(SB_HORZ) == 0)))
 						sHeader = FormatTaskGroupHeaderText(pLVCD->nmcd.lItemlParam);
 
 					CDC* pDC = CDC::FromHandle(pLVCD->nmcd.hdc);
