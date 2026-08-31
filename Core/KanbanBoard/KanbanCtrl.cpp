@@ -1579,8 +1579,8 @@ BOOL CKanbanCtrl::UpdateTrackableTaskPriorityOrRiskAttribute(KANBANITEM* pKI, TD
 			if (nNewValue >= 0)
 				sNewValue = Misc::Format(nNewValue);
 
-			// Avoid default handling for tasks whose values are entirely 
-			// defined by whether they are 'Due' or 'Completed'
+			// Tasks whose values are entirely defined by whether 
+			// they are 'Due' or 'Completed' need minimal handling
 			if (pKI->HasDueOrDonePriorityOrRisk(m_dwOptions))
 			{
 				CStringArray aNewValues;
