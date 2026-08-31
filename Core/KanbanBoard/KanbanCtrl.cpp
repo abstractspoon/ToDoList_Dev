@@ -1021,35 +1021,35 @@ BOOL CKanbanCtrl::UpdateData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL 
 			if (pTasks->IsAttributeAvailable(TDCA_ALLOCTO))
 			{
 				GetTaskAllocTo(pTasks, hTask, aValues);
-				bRebuild |= UpdateTrackableTaskAttribute(pKI, TDCA_ALLOCTO, aValues);
+				bRebuild |= UpdateTrackableTaskMultiValueAttribute(pKI, TDCA_ALLOCTO, aValues);
 			}
 
 			if (pTasks->IsAttributeAvailable(TDCA_CATEGORY))
 			{
 				GetTaskCategories(pTasks, hTask, aValues);
-				bRebuild |= UpdateTrackableTaskAttribute(pKI, TDCA_CATEGORY, aValues);
+				bRebuild |= UpdateTrackableTaskMultiValueAttribute(pKI, TDCA_CATEGORY, aValues);
 			}
 
 			if (pTasks->IsAttributeAvailable(TDCA_TAGS))
 			{
 				GetTaskTags(pTasks, hTask, aValues);
-				bRebuild |= UpdateTrackableTaskAttribute(pKI, TDCA_TAGS, aValues);
+				bRebuild |= UpdateTrackableTaskMultiValueAttribute(pKI, TDCA_TAGS, aValues);
 			}
 
 			if (pTasks->IsAttributeAvailable(TDCA_ALLOCBY))
-				bRebuild |= UpdateTrackableTaskAttribute(pKI, TDCA_ALLOCBY, pTasks->GetTaskAllocatedBy(hTask));
+				bRebuild |= UpdateTrackableTaskSingleValueAttribute(pKI, TDCA_ALLOCBY, pTasks->GetTaskAllocatedBy(hTask));
 
 			if (pTasks->IsAttributeAvailable(TDCA_STATUS))
-				bRebuild |= UpdateTrackableTaskAttribute(pKI, TDCA_STATUS, pTasks->GetTaskStatus(hTask));
+				bRebuild |= UpdateTrackableTaskSingleValueAttribute(pKI, TDCA_STATUS, pTasks->GetTaskStatus(hTask));
 
 			if (pTasks->IsAttributeAvailable(TDCA_VERSION))
-				bRebuild |= UpdateTrackableTaskAttribute(pKI, TDCA_VERSION, pTasks->GetTaskVersion(hTask));
+				bRebuild |= UpdateTrackableTaskSingleValueAttribute(pKI, TDCA_VERSION, pTasks->GetTaskVersion(hTask));
 
 			if (pTasks->IsAttributeAvailable(TDCA_PRIORITY))
-				bRebuild |= UpdateTrackableTaskAttribute(pKI, TDCA_PRIORITY, pTasks->GetTaskPriority(hTask, true)); // calculated
+				bRebuild |= UpdateTrackableTaskPriorityOrRiskAttribute(pKI, TDCA_PRIORITY, pTasks->GetTaskPriority(hTask, true)); // calculated
 
 			if (pTasks->IsAttributeAvailable(TDCA_RISK))
-				bRebuild |= UpdateTrackableTaskAttribute(pKI, TDCA_RISK, pTasks->GetTaskRisk(hTask, true)); // calculated
+				bRebuild |= UpdateTrackableTaskPriorityOrRiskAttribute(pKI, TDCA_RISK, pTasks->GetTaskRisk(hTask, true)); // calculated
 
 			if (pTasks->IsAttributeAvailable(TDCA_CUSTOMATTRIB))
 			{
@@ -1567,41 +1567,46 @@ CString CKanbanCtrl::GetXMLTag(TDC_ATTRIBUTE nAttribID)
 	return EMPTY_STR;
 }
 
-BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, TDC_ATTRIBUTE nAttribID, int nNewValue)
+BOOL CKanbanCtrl::UpdateTrackableTaskPriorityOrRiskAttribute(KANBANITEM* pKI, TDC_ATTRIBUTE nAttribID, int nNewValue)
 {
 	switch (nAttribID)
 	{
 	case TDCA_PRIORITY:
 	case TDCA_RISK:
+		{
+			CString sNewValue;
+
+			if (nNewValue >= 0)
+				sNewValue = Misc::Format(nNewValue);
+
+			// Avoid default handling for tasks whose values are entirely 
+			// defined by whether they are 'Due' or 'Completed'
+			if (pKI->HasDueOrDonePriorityOrRisk(m_dwOptions))
+			{
+				CStringArray aNewValues;
+				Misc::AddUniqueItem(sNewValue, aNewValues);
+
+				pKI->SetTrackedAttributeValues(KBUtils::GetAttributeID(nAttribID), aNewValues);
+				return FALSE;
+			}
+
+			// all else
+			return UpdateTrackableTaskSingleValueAttribute(pKI, nAttribID, sNewValue);
+		}
 		break;
 
 	default:
 		ASSERT(0);
-		return FALSE;
+		break;
 	}
 
-	CString sNewValue;
-
-	if (nNewValue >= 0)
-		sNewValue = Misc::Format(nNewValue);
-
-	// special handling for tasks which ought not to be moved
-	if (pKI->HasDueOrDonePriorityOrRisk(m_dwOptions))
-	{
-		CStringArray aNewValues;
-		aNewValues.Add(sNewValue);
-
-		pKI->SetTrackedAttributeValues(KBUtils::GetAttributeID(nAttribID), aNewValues);
-		return FALSE;
-	}
-
-	// all else
-	return UpdateTrackableTaskAttribute(pKI, nAttribID, sNewValue);
+	return FALSE;
 }
 
-BOOL CKanbanCtrl::IsTrackedAttributeMultiValue() const
+BOOL CKanbanCtrl::IsMultiValueAttribute(TDC_ATTRIBUTE nAttribID)
 {
-	switch (m_nTrackedAttributeID)
+	// Note: Not callable with TDCA_CUSTMATTRIBUTE
+	switch (nAttribID)
 	{
 	case TDCA_PRIORITY:
 	case TDCA_RISK:
@@ -1615,65 +1620,62 @@ BOOL CKanbanCtrl::IsTrackedAttributeMultiValue() const
 	case TDCA_TAGS:
 		return TRUE;
 
-	case TDCA_CUSTOMATTRIB:
-		{
-			int nDef = m_aCustomAttribDefs.FindDefinition(m_sTrackAttribID);
-			
-			if (nDef != -1)
-				return m_aCustomAttribDefs[nDef].bMultiValue;
-		}
+	default:
+		ASSERT(0);
 		break;
 	}
 
+	return FALSE;
+}
+
+BOOL CKanbanCtrl::IsTrackedAttributeMultiValue() const
+{
+	if (m_nTrackedAttributeID == TDCA_CUSTOMATTRIB)
+	{
+		int nDef = m_aCustomAttribDefs.FindDefinition(m_sTrackAttribID);
+			
+		if (nDef != -1)
+			return m_aCustomAttribDefs[nDef].bMultiValue;
+
+		return FALSE;
+	}
+
 	// all else
+	return IsMultiValueAttribute(m_nTrackedAttributeID);
+}
+
+BOOL CKanbanCtrl::UpdateTrackableTaskSingleValueAttribute(KANBANITEM* pKI, TDC_ATTRIBUTE nAttribID, const CString& sNewValue)
+{
+	if (!IsMultiValueAttribute(nAttribID))
+	{
+		CStringArray aNewValues;
+		Misc::AddUniqueItem(sNewValue, aNewValues); // excludes empty values
+
+		return UpdateTrackableTaskAttribute(pKI, KBUtils::GetAttributeID(nAttribID), aNewValues);
+	}
+
+	// All else
 	ASSERT(0);
 	return FALSE;
 }
 
-BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, TDC_ATTRIBUTE nAttribID, const CString& sNewValue)
+BOOL CKanbanCtrl::UpdateTrackableTaskMultiValueAttribute(KANBANITEM* pKI, TDC_ATTRIBUTE nAttribID, const CStringArray& aNewValues)
 {
-	switch (nAttribID)
+	if (IsMultiValueAttribute(nAttribID))
 	{
-	case TDCA_PRIORITY:
-	case TDCA_RISK:
-	case TDCA_ALLOCBY:
-	case TDCA_STATUS:
-	case TDCA_VERSION:
-		break;
+		if (aNewValues.GetSize() > 0)
+			return UpdateTrackableTaskAttribute(pKI, KBUtils::GetAttributeID(nAttribID), aNewValues);
 
-	default:
-		ASSERT(0);
-		return FALSE;
-	}
-	
-	CStringArray aNewValues;
-	aNewValues.Add(sNewValue);
+		// else
+		CStringArray aTemp;
+		aTemp.Add(_T(""));
 
-	return UpdateTrackableTaskAttribute(pKI, KBUtils::GetAttributeID(nAttribID), aNewValues);
-}
-
-BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, TDC_ATTRIBUTE nAttribID, const CStringArray& aNewValues)
-{
-	switch (nAttribID)
-	{
-	case TDCA_ALLOCTO:
-	case TDCA_CATEGORY:
-	case TDCA_TAGS:
-		if (aNewValues.GetSize() == 0)
-		{
-			CStringArray aTemp;
-			aTemp.Add(_T(""));
-
-			return UpdateTrackableTaskAttribute(pKI, nAttribID, aTemp); // RECURSIVE CALL
-		}
-		break;
-
-	default:
-		ASSERT(0);
-		return FALSE;
+		return UpdateTrackableTaskMultiValueAttribute(pKI, nAttribID, aTemp); // RECURSIVE CALL
 	}
 
-	return UpdateTrackableTaskAttribute(pKI, KBUtils::GetAttributeID(nAttribID), aNewValues);
+	// All else
+	ASSERT(0);
+	return FALSE;
 }
 
 BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, const CString& sAttribID, const CStringArray& aNewValues)
