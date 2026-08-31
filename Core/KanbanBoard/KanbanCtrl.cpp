@@ -1579,12 +1579,12 @@ BOOL CKanbanCtrl::UpdateTrackableTaskPriorityOrRiskAttribute(KANBANITEM* pKI, TD
 			if (nNewValue >= 0)
 				sNewValue = Misc::Format(nNewValue);
 
-			// Tasks whose values are entirely defined by whether 
-			// they are 'Due' or 'Completed' need minimal handling
 			if (pKI->HasDueOrDonePriorityOrRisk(m_dwOptions))
 			{
+				// Bypass default handling for tasks whose values are 
+				// entirely defined by whether they are 'Due' or 'Completed'
 				CStringArray aNewValues;
-				Misc::AddUniqueItem(sNewValue, aNewValues);
+				Misc::AddUniqueItem(sNewValue, aNewValues); // excludes empty values
 
 				pKI->SetTrackedAttributeValues(KBUtils::GetAttributeID(nAttribID), aNewValues);
 				return FALSE;
@@ -1603,10 +1603,9 @@ BOOL CKanbanCtrl::UpdateTrackableTaskPriorityOrRiskAttribute(KANBANITEM* pKI, TD
 	return FALSE;
 }
 
-BOOL CKanbanCtrl::IsMultiValueAttribute(TDC_ATTRIBUTE nAttribID)
+BOOL CKanbanCtrl::IsTrackedAttributeMultiValue() const
 {
-	// Note: Not callable with TDCA_CUSTMATTRIBUTE
-	switch (nAttribID)
+	switch (m_nTrackedAttributeID)
 	{
 	case TDCA_PRIORITY:
 	case TDCA_RISK:
@@ -1620,38 +1619,37 @@ BOOL CKanbanCtrl::IsMultiValueAttribute(TDC_ATTRIBUTE nAttribID)
 	case TDCA_TAGS:
 		return TRUE;
 
-	default:
-		ASSERT(0);
+	case TDCA_CUSTOMATTRIB:
+		{
+			int nDef = m_aCustomAttribDefs.FindDefinition(m_sTrackAttribID);
+			
+			if (nDef != -1)
+				return m_aCustomAttribDefs[nDef].bMultiValue;
+		}
 		break;
 	}
 
-	return FALSE;
-}
-
-BOOL CKanbanCtrl::IsTrackedAttributeMultiValue() const
-{
-	if (m_nTrackedAttributeID == TDCA_CUSTOMATTRIB)
-	{
-		int nDef = m_aCustomAttribDefs.FindDefinition(m_sTrackAttribID);
-			
-		if (nDef != -1)
-			return m_aCustomAttribDefs[nDef].bMultiValue;
-
-		return FALSE;
-	}
-
 	// all else
-	return IsMultiValueAttribute(m_nTrackedAttributeID);
+	ASSERT(0);
+	return FALSE;
 }
 
 BOOL CKanbanCtrl::UpdateTrackableTaskSingleValueAttribute(KANBANITEM* pKI, TDC_ATTRIBUTE nAttribID, const CString& sNewValue)
 {
-	if (!IsMultiValueAttribute(nAttribID))
+	switch (nAttribID)
 	{
-		CStringArray aNewValues;
-		Misc::AddUniqueItem(sNewValue, aNewValues); // excludes empty values
+	case TDCA_PRIORITY:
+	case TDCA_RISK:
+	case TDCA_ALLOCBY:
+	case TDCA_STATUS:
+	case TDCA_VERSION:
+		{
+			CStringArray aNewValues;
+			Misc::AddUniqueItem(sNewValue, aNewValues); // excludes empty values
 
-		return UpdateTrackableTaskAttribute(pKI, KBUtils::GetAttributeID(nAttribID), aNewValues);
+			return UpdateTrackableTaskAttribute(pKI, KBUtils::GetAttributeID(nAttribID), aNewValues);
+		}
+		break;
 	}
 
 	// All else
@@ -1661,16 +1659,22 @@ BOOL CKanbanCtrl::UpdateTrackableTaskSingleValueAttribute(KANBANITEM* pKI, TDC_A
 
 BOOL CKanbanCtrl::UpdateTrackableTaskMultiValueAttribute(KANBANITEM* pKI, TDC_ATTRIBUTE nAttribID, const CStringArray& aNewValues)
 {
-	if (IsMultiValueAttribute(nAttribID))
+	switch (nAttribID)
 	{
-		if (aNewValues.GetSize() > 0)
-			return UpdateTrackableTaskAttribute(pKI, KBUtils::GetAttributeID(nAttribID), aNewValues);
+	case TDCA_ALLOCTO:
+	case TDCA_CATEGORY:
+	case TDCA_TAGS:
+		{
+			if (aNewValues.GetSize() > 0)
+				return UpdateTrackableTaskAttribute(pKI, KBUtils::GetAttributeID(nAttribID), aNewValues);
 
-		// else
-		CStringArray aTemp;
-		aTemp.Add(_T(""));
+			// else
+			CStringArray aTemp;
+			aTemp.Add(_T(""));
 
-		return UpdateTrackableTaskMultiValueAttribute(pKI, nAttribID, aTemp); // RECURSIVE CALL
+			return UpdateTrackableTaskMultiValueAttribute(pKI, nAttribID, aTemp); // RECURSIVE CALL
+		}
+		break;
 	}
 
 	// All else

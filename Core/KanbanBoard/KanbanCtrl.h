@@ -258,7 +258,6 @@ protected:
 	static BOOL HasNonParentTasks(const CKanbanItemArray* pItems);
 	static void UpdateItemDisplayAttributes(KANBANITEM* pKI, const ITASKLISTBASE* pTasks, HTASKITEM hTask);
 	static void BuildTaskIDMap(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CDWordSet& mapIDs, BOOL bAndSiblings);
-	static BOOL IsMultiValueAttribute(TDC_ATTRIBUTE nAttribID);
 };
 
 #endif // !defined(AFX_KANBANCTRL_H__016B94F3_1D28_4532_97EF_95F1D9D5CE55__INCLUDED_)
