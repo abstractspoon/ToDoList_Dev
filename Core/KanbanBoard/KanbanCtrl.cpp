@@ -1584,7 +1584,10 @@ BOOL CKanbanCtrl::UpdateTrackableTaskPriorityOrRiskAttribute(KANBANITEM* pKI, TD
 				// Bypass default handling for tasks whose values are 
 				// entirely defined by whether they are 'Due' or 'Completed'
 				CStringArray aNewValues;
-				Misc::AddUniqueItem(sNewValue, aNewValues); // excludes empty values
+
+				// Exclude empty values
+				if (!sNewValue.IsEmpty())
+					aNewValues.Add(sNewValue);
 
 				pKI->SetTrackedAttributeValues(KBUtils::GetAttributeID(nAttribID), aNewValues);
 				return FALSE;
@@ -1645,7 +1648,10 @@ BOOL CKanbanCtrl::UpdateTrackableTaskSingleValueAttribute(KANBANITEM* pKI, TDC_A
 	case TDCA_VERSION:
 		{
 			CStringArray aNewValues;
-			Misc::AddUniqueItem(sNewValue, aNewValues); // excludes empty values
+
+			// Exclude empty values
+			if (!sNewValue.IsEmpty())
+				aNewValues.Add(sNewValue);
 
 			return UpdateTrackableTaskAttribute(pKI, KBUtils::GetAttributeID(nAttribID), aNewValues);
 		}
