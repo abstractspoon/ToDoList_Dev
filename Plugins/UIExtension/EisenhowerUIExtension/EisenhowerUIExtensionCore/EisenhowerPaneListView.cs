@@ -124,7 +124,6 @@ namespace EisenhowerUIExtension
 
 				if ((task != null) && !task.IsLocked)
 				{
-					labelRect.X = 0;
 					labelRect.Width = CalcLabelDragImageWidth(task, graphics);
 
 					// Icon
