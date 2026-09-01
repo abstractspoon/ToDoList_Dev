@@ -124,7 +124,6 @@ namespace EisenhowerUIExtension
 
 				if ((task != null) && !task.IsLocked)
 				{
-					labelRect.X = LabelPadding;
 					labelRect.Width = CalcLabelDragImageWidth(task, graphics);
 
 					// Icon
@@ -138,6 +137,9 @@ namespace EisenhowerUIExtension
 					}
 
 					// Selection
+					labelRect.X += LabelPadding;
+					labelRect.Width -= LabelPadding;
+
 					UIExtension.SelectionRect.Draw(Handle,
 													 graphics,
 													 labelRect.X,
