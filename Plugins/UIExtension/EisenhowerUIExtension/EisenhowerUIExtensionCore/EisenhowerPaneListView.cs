@@ -124,7 +124,7 @@ namespace EisenhowerUIExtension
 
 				if ((task != null) && !task.IsLocked)
 				{
-					labelRect.X = LabelPadding;
+					labelRect.X = 0;
 					labelRect.Width = CalcLabelDragImageWidth(task, graphics);
 
 					// Icon
@@ -138,17 +138,23 @@ namespace EisenhowerUIExtension
 					}
 
 					// Selection
+					var selStyle = UIExtension.SelectionRect.Style.Selected;
+
+					labelRect.X += LabelPadding;
+					labelRect.Width -= LabelPadding;
+
 					UIExtension.SelectionRect.Draw(Handle,
 													 graphics,
 													 labelRect.X,
 													 labelRect.Y,
 													 labelRect.Width,
 													 labelRect.Height,
-													 false); // opaque
+													 selStyle,
+													 false);  // opaque
 
 					// Text. Use TextRenderer for consistency with core app
 					var flags = (TextFormatFlags.VerticalCenter | TextFormatFlags.SingleLine | TextFormatFlags.NoClipping);
-					var backColor = UIExtension.SelectionRect.GetColor(UIExtension.SelectionRect.Style.Selected);
+					var backColor = UIExtension.SelectionRect.GetColor(selStyle);
 
 					TextRenderer.DrawText(graphics, task.Title, GetFont(task, true), labelRect, SystemColors.WindowText, backColor, flags);
 
@@ -253,7 +259,7 @@ namespace EisenhowerUIExtension
 			if ((task == null) || task.IsLocked)
 				return 0;
 
-			int labelWidth = (int)graphics.MeasureString(task.Title, GetFont(task, true)).Width;
+			int labelWidth = TextRenderer.MeasureText(graphics, task.Title, GetFont(task, true)).Width;
 
 			if (ItemsHaveIcons)
 				labelWidth += TextIconOffset;
