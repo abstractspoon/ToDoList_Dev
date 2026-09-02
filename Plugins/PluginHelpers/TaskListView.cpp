@@ -1068,6 +1068,20 @@ void TaskListView::CheckNotifySelectionChanged()
 	SelectionChange(this, SelectedTaskIds);
 }
 
+int TaskListView::MapDisplayIndexToColumn(int index)
+{
+	if (!AllowColumnReorder)
+		return index;
+
+	for (int col = 0; col < Columns->Count; col++)
+	{
+		if (Columns[col]->DisplayIndex == index)
+			return col;
+	}
+
+	return -1;
+}
+
 void TaskListView::OnDrawItem(DrawListViewItemEventArgs^ e)
 {
 	e->DrawDefault = false;
@@ -1114,8 +1128,11 @@ void TaskListView::OnDrawItem(DrawListViewItemEventArgs^ e)
 
 	auto subItemRect = itemRect;
 
-	for (int col = 0; col < e->Item->SubItems->Count; col++)
+	for (int i = 0; i < e->Item->SubItems->Count; i++) // display items
 	{
+		int col = MapDisplayIndexToColumn(i);
+		Debug::Assert(col != -1);
+		
 		auto subItem = e->Item->SubItems[col];
 		subItemRect.Width = Columns[col]->Width;
 

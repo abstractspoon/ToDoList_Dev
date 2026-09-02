@@ -187,6 +187,7 @@ namespace Abstractspoon
 				Drawing::Font^ GetFont(ITaskBase^ task, bool title);
 				void CheckNotifySelectionChanged();
 				void ResizeTaskColumnToFit(int width);
+				int MapDisplayIndexToColumn(int index);
 
 				// Derived classes optionally override
 				virtual bool TaskMatches(ITaskBase^ task, String^ phrase, bool caseSensitive, bool wholeWord, bool findReplace);
