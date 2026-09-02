@@ -38,10 +38,6 @@
 			this.m_GroupByCombo = new System.Windows.Forms.ComboBox();
 			this.m_OptionsCombo = new TaskDatesUIExtension.TaskDatesOptionsComboBox();
 			this.m_TaskDatesCtrl = new TaskDatesUIExtension.TaskDatesControl();
-			this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-			this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-			this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-			this.columnHeader4 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.m_Toolbar.SuspendLayout();
 			this.SuspendLayout();
 			// 
@@ -50,7 +46,7 @@
 			this.m_GroupByLabel.AutoSize = true;
 			this.m_GroupByLabel.Location = new System.Drawing.Point(-3, 3);
 			this.m_GroupByLabel.Name = "m_GroupByLabel";
-			this.m_GroupByLabel.Size = new System.Drawing.Size(48, 13);
+			this.m_GroupByLabel.Size = new System.Drawing.Size(51, 13);
 			this.m_GroupByLabel.TabIndex = 25;
 			this.m_GroupByLabel.Text = "Group By";
 			// 
@@ -120,11 +116,6 @@
 			// m_TaskDatesCtrl
 			// 
 			this.m_TaskDatesCtrl.AlternateLineColor = System.Drawing.Color.Empty;
-			this.m_TaskDatesCtrl.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.columnHeader1,
-            this.columnHeader2,
-            this.columnHeader3,
-            this.columnHeader4});
 			this.m_TaskDatesCtrl.GridlineColor = System.Drawing.Color.Empty;
 			this.m_TaskDatesCtrl.Location = new System.Drawing.Point(0, 47);
 			this.m_TaskDatesCtrl.Margin = new System.Windows.Forms.Padding(0);
@@ -138,27 +129,11 @@
 			this.m_TaskDatesCtrl.ShowParentsAsFolders = false;
 			this.m_TaskDatesCtrl.Size = new System.Drawing.Size(613, 399);
 			this.m_TaskDatesCtrl.SizeTaskColumnToFit = true;
+			this.m_TaskDatesCtrl.StrikeThruCompletedTasks = true;
 			this.m_TaskDatesCtrl.TabIndex = 0;
 			this.m_TaskDatesCtrl.TaskColorIsBackground = false;
 			this.m_TaskDatesCtrl.UseCompatibleStateImageBehavior = false;
 			this.m_TaskDatesCtrl.View = System.Windows.Forms.View.Details;
-			// 
-			// columnHeader1
-			// 
-			this.columnHeader1.Text = "Task Title";
-			this.columnHeader1.Width = 427;
-			// 
-			// columnHeader2
-			// 
-			this.columnHeader2.Text = "Date";
-			// 
-			// columnHeader3
-			// 
-			this.columnHeader3.Text = "Type";
-			// 
-			// columnHeader4
-			// 
-			this.columnHeader4.Text = "Offset";
 			// 
 			// TaskDatesUIExtensionCore
 			// 
@@ -188,9 +163,5 @@
 		private System.Windows.Forms.ToolStrip m_Toolbar;
 		private System.Windows.Forms.ToolStripButton toolStripPreferencesBtn;
 		private System.Windows.Forms.ToolStripButton toolStripHelpBtn;
-		private System.Windows.Forms.ColumnHeader columnHeader1;
-		private System.Windows.Forms.ColumnHeader columnHeader2;
-		private System.Windows.Forms.ColumnHeader columnHeader3;
-		private System.Windows.Forms.ColumnHeader columnHeader4;
 	}
 }

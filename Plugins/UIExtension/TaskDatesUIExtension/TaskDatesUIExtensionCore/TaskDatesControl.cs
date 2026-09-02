@@ -28,9 +28,11 @@ namespace TaskDatesUIExtension
 	public partial class TaskDatesControl : TaskListView
 	{
 		const int TitleCol	= 0;
-		const int DateCol	= 1;
-		const int TypeCol	= 2;
-		const int OffsetCol = 3;
+		const int IdCol		= 1;
+		const int DateCol	= 2;
+		const int WeekCol	= 3;
+		const int TypeCol	= 4;
+		const int OffsetCol = 5;
 
 		// --------------------------------------------------------
 
@@ -39,8 +41,8 @@ namespace TaskDatesUIExtension
 		private TaskDatesOption m_Options = TaskDatesOption.None;
 		private UIExtension.IdleRedraw m_IdleTasks = new UIExtension.IdleRedraw();
 
-		private int[] m_ColHeaderWidth			= new int[4] { -1, -1, -1, -1 };
-		private int[] m_ColValueMaxCharWidth	= new int[4] { -1, -1, -1, -1 };
+		private int[] m_ColHeaderWidth			= new int[6] { -1, -1, -1, -1, -1, -1 };
+		private int[] m_ColValueMaxCharWidth	= new int[6] { -1, -1, -1, -1, -1, -1 };
 
 		private bool m_IsoDates;
 
@@ -70,6 +72,16 @@ namespace TaskDatesUIExtension
 		public new void Initialize(Translator trans, UIExtension.TaskIcon taskIcons)
 		{
 			base.Initialize(trans, taskIcons, m_Comparer);
+
+			// Add columns
+			Columns.Add(trans.Translate("Title",  Translator.Type.Header), 20, HorizontalAlignment.Left);
+			Columns.Add(trans.Translate("Id",     Translator.Type.Header), 20, HorizontalAlignment.Right);
+			Columns.Add(trans.Translate("Date",   Translator.Type.Header), 20, HorizontalAlignment.Right);
+			Columns.Add(trans.Translate("Week",   Translator.Type.Header), 20, HorizontalAlignment.Right);
+			Columns.Add(trans.Translate("Type",   Translator.Type.Header), 20, HorizontalAlignment.Left);
+			Columns.Add(trans.Translate("Offset", Translator.Type.Header), 20, HorizontalAlignment.Right);
+
+			RefreshColumnWidths();
 
 			// Hack to prevent base class showing a 'no-drag' cursor
 			// until we can work out a better fix
@@ -507,10 +519,11 @@ namespace TaskDatesUIExtension
 			if (!m_MapDateAttribIdToLabel.TryGetValue(date.AttributeId, out dateType))
 				dateType = m_Trans.Translate("<unknown>", Translator.Type.Text);
 
-			SetItemValues(lvi,
-						  date.FormatDate(m_IsoDates),
-						  dateType,
-						  FormatDateOffset(date));
+			SetItemValue(lvi, IdCol, date.Id.ToString());
+			SetItemValue(lvi, DateCol, FormatDate(date));
+			SetItemValue(lvi, WeekCol, FormatWeekNumber(date));
+			SetItemValue(lvi, TypeCol, dateType);
+			SetItemValue(lvi, OffsetCol, FormatDateOffset(date));
 
 			return true;
 		}
@@ -634,10 +647,8 @@ namespace TaskDatesUIExtension
 						case Task.Attribute.CustomAttribute:
 							if (date.AttributeId == attrib.GetId())
 							{
-								// Update the date
-								SetItemValue(lvi, DateCol, date.FormatDate(m_IsoDates));
-
-								// And its offset
+								SetItemValue(lvi, DateCol, FormatDate(date));
+								SetItemValue(lvi, WeekCol, FormatWeekNumber(date));
 								SetItemValue(lvi, OffsetCol, FormatDateOffset(date));
 							}
 							break;
@@ -645,6 +656,16 @@ namespace TaskDatesUIExtension
 					}
 				}
 			}
+		}
+
+		private string FormatDate(TaskItemDate date)
+		{
+			return date.FormatDate(m_IsoDates);
+		}
+
+		private string FormatWeekNumber(TaskItemDate date)
+		{
+			return string.Format("{0}.{1}", date.Date.Year, DateUtil.WeekOfYear(date.Date));
 		}
 
 		private string FormatDateOffset(TaskItemDate date)
@@ -679,23 +700,16 @@ namespace TaskDatesUIExtension
 			}
 		}
 
-		protected void SetItemValues(ListViewItem lvItem, string date, string type, string offset)
+		protected void SetItemValue(ListViewItem lvi, int column, string value)
 		{
-			SetItemValue(lvItem, DateCol, date);
-			SetItemValue(lvItem, TypeCol, type);
-			SetItemValue(lvItem, OffsetCol, offset);
-		}
+			Debug.Assert(lvi != null);
 
-		protected void SetItemValue(ListViewItem lvItem, int column, string value)
-		{
-			Debug.Assert(lvItem != null);
+			while (lvi.SubItems.Count <= column)
+				lvi.SubItems.Add(String.Empty);
 
-			while (lvItem.SubItems.Count <= column)
-				lvItem.SubItems.Add(String.Empty);
-
-			if (value != lvItem.SubItems[column].Text)
+			if (value != lvi.SubItems[column].Text)
 			{
-				lvItem.SubItems[column].Text = value;
+				lvi.SubItems[column].Text = value;
 				m_ColValueMaxCharWidth[column] = Math.Max(value.Length, m_ColValueMaxCharWidth[column]);
 			}
 		}
@@ -704,9 +718,8 @@ namespace TaskDatesUIExtension
 		{
 			using (var graphics = Graphics.FromHwnd(Handle))
 			{
-				RefreshColumnWidth(DateCol, graphics);
-				RefreshColumnWidth(TypeCol, graphics);
-				RefreshColumnWidth(OffsetCol, graphics);
+				for (int col = 1; col < Columns.Count; col++)
+					RefreshColumnWidth(col, graphics);
 			}
 
 			// Task column takes up tyhe slack
