@@ -307,7 +307,7 @@ namespace TaskDatesUIExtension
 
 		public string FormatOffset(DateTime from)
 		{
-			if (DateIsSet)
+			if (DateIsSet && (from != NullDate))
 				return from.Subtract(Date.Date).Days.ToString();
 
 			// else
