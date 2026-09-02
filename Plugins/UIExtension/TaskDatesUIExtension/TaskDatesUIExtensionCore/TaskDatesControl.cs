@@ -74,12 +74,12 @@ namespace TaskDatesUIExtension
 			base.Initialize(trans, taskIcons, m_Comparer);
 
 			// Add columns
-			Columns.Add(trans.Translate("Title",  Translator.Type.Header), 20, HorizontalAlignment.Left);
-			Columns.Add(trans.Translate("Id",     Translator.Type.Header), 20, HorizontalAlignment.Right);
-			Columns.Add(trans.Translate("Date",   Translator.Type.Header), 20, HorizontalAlignment.Right);
-			Columns.Add(trans.Translate("Week",   Translator.Type.Header), 20, HorizontalAlignment.Right);
-			Columns.Add(trans.Translate("Type",   Translator.Type.Header), 20, HorizontalAlignment.Left);
-			Columns.Add(trans.Translate("Offset", Translator.Type.Header), 20, HorizontalAlignment.Right);
+			Columns.Add(trans.Translate("Title",  Translator.Type.Header), 0, HorizontalAlignment.Left);
+			Columns.Add(trans.Translate("Id",     Translator.Type.Header), 0, HorizontalAlignment.Right);
+			Columns.Add(trans.Translate("Date",   Translator.Type.Header), 0, HorizontalAlignment.Right);
+			Columns.Add(trans.Translate("Week",   Translator.Type.Header), 0, HorizontalAlignment.Right);
+			Columns.Add(trans.Translate("Type",   Translator.Type.Header), 0, HorizontalAlignment.Left);
+			Columns.Add(trans.Translate("Offset", Translator.Type.Header), 0, HorizontalAlignment.Right);
 
 			RefreshColumnWidths();
 

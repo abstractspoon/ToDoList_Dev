@@ -39,7 +39,7 @@ namespace TaskDatesUIExtension
 				}
 			}
 
-			ColumnWidth = (maxTextWidth + ItemHeight);
+			ColumnWidth = (maxTextWidth + (ItemHeight * 2));
 		}
 
 		public HashSet<string> SelectedDateAttributeIds
