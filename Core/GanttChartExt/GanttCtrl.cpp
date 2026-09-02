@@ -1697,17 +1697,22 @@ void CGanttCtrl::OnGetDragItemRect(CDC& dc, HTREEITEM hti, CRect& rItem)
 
 void CGanttCtrl::OnDrawDragItem(CDC& dc, HTREEITEM hti, const CRect& rItem)
 {
+	CRect rLabel(rItem);
+	rLabel.left += IMAGE_SIZE;
+
 	DWORD dwTaskID = GetTaskID(hti);
-	DrawTreeItemIcon(&dc, hti, dwTaskID, rItem);
+	DrawTreeItemIcon(&dc, hti, dwTaskID, rLabel);
 
 	GANTTITEM* pGI = NULL;
 	GET_GI(dwTaskID, pGI);
 
-	HGDIOBJ hFontOld = dc.SelectObject(GetTreeItemFont(hti, *pGI, GTLCC_TITLE));
+	{
+		HGDIOBJ hFontOld = dc.SelectObject(GetTreeItemFont(hti, *pGI, GTLCC_TITLE));
 
-	CTreeDragDropRenderer::OnDrawDragItem(dc, hti, rItem);
+		CTreeDragDropRenderer::OnDrawDragItem(dc, hti, rLabel);
 
-	dc.SelectObject(hFontOld);
+		dc.SelectObject(hFontOld);
+	}
 }
 
 void CGanttCtrl::ClearDependencyPickLine(CDC* pDC)

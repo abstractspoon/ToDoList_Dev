@@ -223,16 +223,17 @@ protected:
 	BOOL NotifyParentAttibuteChange(const CDWordArray& aTaskIDs);
 	void NotifyParentSelectionChange();
 	BOOL GetColumnAttributeValue(const CKanbanColumnCtrl* pDestCol, const CPoint& ptScreen, CString& sValue) const;
-	BOOL UpdateTrackableTaskAttribute(KANBANITEM* pKI, TDC_ATTRIBUTE nAttribID, const CString& sNewValue);
-	BOOL UpdateTrackableTaskAttribute(KANBANITEM* pKI, TDC_ATTRIBUTE nAttribID, int nNewValue);
-	BOOL UpdateTrackableTaskAttribute(KANBANITEM* pKI, TDC_ATTRIBUTE nAttribID, const CStringArray& aNewValues);
-	BOOL UpdateTrackableTaskAttribute(KANBANITEM* pKI, const CString& sAttribID, const CStringArray& aNewValues);
 	void LoadDefaultAttributeListValues(const IPreferences* pPrefs, LPCTSTR szAttribID, LPCTSTR szSubKey);
 	BOOL IsTrackedAttributeMultiValue() const;
 	BOOL IsTracking(const CString& sAttribID) const;
 	BOOL UpdateNeedsItemHeightRefresh(const ITASKLISTBASE* pTasks) const;
 	BOOL HandleKeyDown(WPARAM wp, LPARAM lp);
 	void LoadDefaultAttributeListValues(const IPreferences* pPrefs);
+
+	BOOL UpdateTrackableTaskSingleValueAttribute(KANBANITEM* pKI, TDC_ATTRIBUTE nAttribID, const CString& sNewValue);
+	BOOL UpdateTrackableTaskPriorityOrRiskAttribute(KANBANITEM* pKI, TDC_ATTRIBUTE nAttribID, int nNewValue);
+	BOOL UpdateTrackableTaskMultiValueAttribute(KANBANITEM* pKI, TDC_ATTRIBUTE nAttribID, const CStringArray& aNewValues);
+	BOOL UpdateTrackableTaskAttribute(KANBANITEM* pKI, const CString& sAttribID, const CStringArray& aNewValues);
 
 	void UpdateData(const ITASKLISTBASE* pTasks);
 	BOOL UpdateData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL bAndSiblings);

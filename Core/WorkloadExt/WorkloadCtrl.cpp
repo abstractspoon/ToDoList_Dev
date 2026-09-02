@@ -1746,17 +1746,22 @@ void CWorkloadCtrl::OnGetDragItemRect(CDC& dc, HTREEITEM hti, CRect& rItem)
 
 void CWorkloadCtrl::OnDrawDragItem(CDC& dc, HTREEITEM hti, const CRect& rItem)
 {
+	CRect rLabel(rItem);
+	rLabel.left += IMAGE_SIZE;
+
 	DWORD dwTaskID = GetTaskID(hti);
-	DrawTreeItemIcon(&dc, hti, dwTaskID, rItem);
+	DrawTreeItemIcon(&dc, hti, dwTaskID, rLabel);
 
 	WORKLOADITEM* pWI = NULL;
 	GET_WI(dwTaskID, pWI);
 
-	HGDIOBJ hFontOld = dc.SelectObject(GetTreeItemFont(hti, *pWI, WLCC_TITLE));
+	{
+		HGDIOBJ hFontOld = dc.SelectObject(GetTreeItemFont(hti, *pWI, WLCC_TITLE));
 
-	CTreeDragDropRenderer::OnDrawDragItem(dc, hti, rItem);
+		CTreeDragDropRenderer::OnDrawDragItem(dc, hti, rLabel);
 
-	dc.SelectObject(hFontOld);
+		dc.SelectObject(hFontOld);
+	}
 }
 
 UINT CWorkloadCtrl::OnDragOverItem(const TLCITEMMOVE& move, UINT nCursor)

@@ -510,11 +510,13 @@ void CTDLTaskTreeCtrl::OnGetDragItemRect(CDC& dc, HTREEITEM hti, CRect& rItem)
 
 	VERIFY(m_data.GetTask(GetTaskID(hti), pTDI, pTDS));
 
-	HFONT hOldFont = PrepareDCFont(&dc, pTDI, pTDS, TRUE);
+	{
+		HFONT hOldFont = PrepareDCFont(&dc, pTDI, pTDS, TRUE);
 
-	CTreeDragDropRenderer::OnGetDragItemRect(dc, hti, rItem);
+		CTreeDragDropRenderer::OnGetDragItemRect(dc, hti, rItem);
 
-	dc.SelectObject(hOldFont);
+		dc.SelectObject(hOldFont);
+	}
 	rItem.left -= ICON_SIZE;
 }
 
@@ -529,18 +531,20 @@ void CTDLTaskTreeCtrl::OnDrawDragItem(CDC& dc, HTREEITEM hti, const CRect& rItem
 							  FALSE, 
 							  TRUE);
 	CRect rText(rItem);
-	rText.OffsetRect(ICON_SIZE, 0);
+	rText.left += ICON_SIZE;
 
 	const TODOITEM* pTDI = NULL;
 	const TODOSTRUCTURE* pTDS = NULL;
 
 	VERIFY(m_data.GetTask(GetTaskID(hti), pTDI, pTDS));
 
-	HFONT hOldFont = PrepareDCFont(&dc, pTDI, pTDS, TRUE);
+	{
+		HFONT hOldFont = PrepareDCFont(&dc, pTDI, pTDS, TRUE);
 
-	CTreeDragDropRenderer::OnDrawDragItem(dc, hti, rText);
+		CTreeDragDropRenderer::OnDrawDragItem(dc, hti, rText);
 
-	dc.SelectObject(hOldFont);
+		dc.SelectObject(hOldFont);
+	}
 }
 
 BOOL CTDLTaskTreeCtrl::GetSelectionBoundingRect(CRect& rSelection) const
