@@ -1114,15 +1114,15 @@ void TaskListView::OnDrawItem(DrawListViewItemEventArgs^ e)
 
 	auto subItemRect = itemRect;
 
-	for (int column = 0; column < e->Item->SubItems->Count; column++)
+	for (int col = 0; col < e->Item->SubItems->Count; col++)
 	{
-		auto subItem = e->Item->SubItems[column];
-		subItemRect.Width = Columns[column]->Width;
+		auto subItem = e->Item->SubItems[col];
+		subItemRect.Width = Columns[col]->Width;
 
 		auto textRect = Rectangle::Inflate(subItemRect, -LabelPadding, -1);
-		auto flags = (GetTextAlignment(column) | TextFormatFlags::SingleLine | TextFormatFlags::VerticalCenter);
+		auto flags = (GetTextAlignment(col) | TextFormatFlags::SingleLine | TextFormatFlags::VerticalCenter);
 
-		if (column == 0)
+		if (col == 0)
 		{
 			flags = (flags | TextFormatFlags::EndEllipsis);
 
@@ -1153,7 +1153,7 @@ void TaskListView::OnDrawItem(DrawListViewItemEventArgs^ e)
 
 		TextRenderer::DrawText(e->Graphics, 
 							   subItem->Text, 
-							   GetFont(task, (column == 0)),
+							   GetFont(task, (col == 0)),
 							   textRect, 
 							   textColor, 
 							   flags);
