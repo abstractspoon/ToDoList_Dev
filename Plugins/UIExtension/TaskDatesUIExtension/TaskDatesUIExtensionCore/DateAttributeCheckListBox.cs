@@ -25,16 +25,23 @@ namespace TaskDatesUIExtension
 								IEnumerable<string> selDateAttribIds)
 		{
 			Items.Clear();
-// 			SelectedIndices.Clear();
-// 			SelectedItems.Clear();
 
-			foreach (var attrib in dateAttribs)
+			int maxTextWidth = 0;
+
+			using (var graphics = Graphics.FromHwnd(Handle))
 			{
-				int i = Items.Add(attrib);
-				SetItemChecked(i, selDateAttribIds.Contains(attrib.GetId()));
+				foreach (var attrib in dateAttribs)
+				{
+					int i = Items.Add(attrib);
+					SetItemChecked(i, selDateAttribIds.Contains(attrib.GetId()));
+
+					maxTextWidth = Math.Max(maxTextWidth, (int)graphics.MeasureString(attrib.ToString(), Font).Width);
+				}
 			}
+
+			ColumnWidth = (maxTextWidth + ItemHeight);
 		}
-		
+
 		public HashSet<string> SelectedDateAttributeIds
 		{
 			get

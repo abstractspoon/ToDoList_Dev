@@ -61,7 +61,7 @@ namespace TaskDatesUIExtension
 
 			m_ControlsFont = new Font(FontName, 8, FontStyle.Regular);
 			m_TaskIcons = new UIExtension.TaskIcon(parentHandle);
-			m_PrefsDlg = new TaskDatesPreferencesDlg(trans);
+			m_PrefsDlg = new TaskDatesPreferencesDlg(trans, m_ControlsFont);
 
 			m_TBRenderer = new UIThemeToolbarRenderer();
 			m_Toolbar.Renderer = m_TBRenderer;
