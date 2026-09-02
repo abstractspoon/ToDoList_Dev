@@ -665,6 +665,7 @@ namespace TaskDatesUIExtension
 
 		private string FormatWeekNumber(TaskItemDate date)
 		{
+			// Place year first for sorting
 			return string.Format("{0}.{1}", date.Date.Year, DateUtil.WeekOfYear(date.Date));
 		}
 
