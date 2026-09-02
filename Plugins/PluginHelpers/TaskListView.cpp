@@ -614,6 +614,9 @@ Drawing::Bitmap^ TaskListView::SaveToImage(int reqWidth)
 	if (Columns->Count == 0)
 		return nullptr;
 
+	if (reqWidth <= 0)
+		reqWidth = GetRequiredWidthForImage();
+
 	CBitmap bmp;
 	{
 		m_SavingToImage = true;

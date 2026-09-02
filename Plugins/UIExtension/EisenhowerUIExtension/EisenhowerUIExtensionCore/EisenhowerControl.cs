@@ -614,7 +614,7 @@ namespace EisenhowerUIExtension
 
 					success = (bitmaps[i] != null);
 				}
-				Win32.LockUpdates(IntPtr.Zero);
+				Win32.UnlockUpdates();
 
 				if (!success)
 					return null;

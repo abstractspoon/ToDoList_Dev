@@ -238,15 +238,25 @@ namespace TaskDatesUIExtension
 			prefs.WriteProfileBool(key, "SortAscending", m_Comparer.Ascending);
 		}
 
-		public Bitmap SaveToImage()
+		public new Bitmap SaveToImage()
 		{
-			// TODO
-			return null;
+			if (!CanSaveToImage())
+				return null;
+
+			Bitmap bmp = null;
+			{
+				Win32.LockUpdates(Handle);
+
+				bmp = base.SaveToImage();
+
+				Win32.UnlockUpdates();
+			}
+			return bmp;
 		}
 
 		public bool CanSaveToImage()
 		{
-			return true;
+			return (Items.Count > 0);
 		}
 
 		public void RemoveAll()

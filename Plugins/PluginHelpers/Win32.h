@@ -72,7 +72,9 @@ namespace Abstractspoon
 				static bool SetFocus(IntPtr hWnd);
 				static bool IsCursorKeyPressed(bool upDown, bool leftRight);
 				static void ForceResize(IntPtr hWnd) { DoFrameChangeEx(hWnd, false); }
+
 				static bool LockUpdates(IntPtr hWnd);
+				static bool UnlockUpdates() { return LockUpdates(IntPtr::Zero); }
 
 				// Message cracking
 				static int LoWord(int n) { return LOWORD(n); }
