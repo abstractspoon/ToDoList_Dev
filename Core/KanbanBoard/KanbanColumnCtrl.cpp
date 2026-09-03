@@ -130,6 +130,7 @@ CKanbanColumnCtrl::CKanbanColumnCtrl(const CKanbanItemMap& data,
 	m_bDrawTaskLocks(FALSE),
 	m_bDrawTaskFileLinks(FALSE),
 	m_bCheckingIsSorted(FALSE),
+	m_bCalculatingImageSize(FALSE),
 	m_dwDisplay(0),
 	m_dwOptions(0),
 	m_crGroupHeaderBkgnd(CLR_NONE),
@@ -1656,35 +1657,38 @@ LRESULT CKanbanColumnCtrl::OnGetNextItem(WPARAM wp, LPARAM /*lp*/)
 {
 	HTREEITEM hti = (HTREEITEM)Default();
 
-	if (!m_bCheckingIsSorted && hti && IsGroupHeaderItem(hti))
+	if (!m_bCheckingIsSorted && !m_bCalculatingImageSize)
 	{
-		switch (wp)
+		if (hti && IsGroupHeaderItem(hti))
 		{
-		case TVGN_NEXT:
-		case TVGN_PREVIOUS:
-		case TVGN_FIRSTVISIBLE:
-		case TVGN_NEXTVISIBLE:
-		case TVGN_PREVIOUSVISIBLE:
-		case TVGN_NEXTSELECTED:
-			hti = GetNextItem(hti, wp);
-			break;
+			switch (wp)
+			{
+			case TVGN_NEXT:
+			case TVGN_PREVIOUS:
+			case TVGN_FIRSTVISIBLE:
+			case TVGN_NEXTVISIBLE:
+			case TVGN_PREVIOUSVISIBLE:
+			case TVGN_NEXTSELECTED:
+				hti = GetNextItem(hti, wp);
+				break;
 
-		case TVGN_CHILD:
-			hti = GetNextItem(hti, TVGN_NEXT);
-			break;
+			case TVGN_CHILD:
+				hti = GetNextItem(hti, TVGN_NEXT);
+				break;
 
-		case TVGN_LASTVISIBLE:
-			hti = GetNextItem(hti, TVGN_PREVIOUSVISIBLE);
-			break;
+			case TVGN_LASTVISIBLE:
+				hti = GetNextItem(hti, TVGN_PREVIOUSVISIBLE);
+				break;
 
-		case TVGN_ROOT:
-		case TVGN_DROPHILITE:
-		case TVGN_CARET:
-		case TVGN_PARENT:
-			// These should NEVER be group headers
-			ASSERT(0);
-			hti = NULL;
-			break;
+			case TVGN_ROOT:
+			case TVGN_DROPHILITE:
+			case TVGN_CARET:
+			case TVGN_PARENT:
+				// These should NEVER be group headers
+				ASSERT(0);
+				hti = NULL;
+				break;
+			}
 		}
 	}
 
@@ -2839,6 +2843,7 @@ BOOL CKanbanColumnCtrl::SaveToImage(CBitmap& bmImage, const CSize& reqColSize)
 
 CSize CKanbanColumnCtrl::CalcRequiredSizeForImage() const
 {
+	CAutoFlag af(m_bCalculatingImageSize, TRUE);
 	CClientDC dc(const_cast<CKanbanColumnCtrl*>(this));
 
 	int nMinHeaderWidth = (GraphicsMisc::GetTextWidth(&dc, m_columnDef.sTitle) + (2 * LV_PADDING));

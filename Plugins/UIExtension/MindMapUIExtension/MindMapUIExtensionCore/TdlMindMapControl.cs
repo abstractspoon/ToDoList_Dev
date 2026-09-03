@@ -1171,45 +1171,41 @@ namespace MindMapUIExtension
                     textColor = taskItem.TextColor;
             }
 
+			// Back colour
+			var backStyle = UIExtension.SelectionRect.Style.None;
+			var backColor = SystemColors.Window;
+
 			switch (nodeState)
 			{
-				case NodeDrawState.Selected:
-                    UIExtension.SelectionRect.Draw(this.Handle, 
-													graphics, 
-													rect.X, 
-													rect.Y, 
-													rect.Width, 
-													rect.Height, 
-													false); // opaque
-					break;
+			case NodeDrawState.Selected:
+				backStyle = UIExtension.SelectionRect.Style.Selected;
+				break;
 
-				case NodeDrawState.DropTarget:
-                    UIExtension.SelectionRect.Draw(this.Handle, 
-													graphics, 
-													rect.X, 
-													rect.Y, 
-													rect.Width, 
-													rect.Height,
-													UIExtension.SelectionRect.Style.DropHighlighted,
-													false); // opaque
-					break;
+			case NodeDrawState.DropTarget:
+				backStyle = UIExtension.SelectionRect.Style.Selected;
+				break;
+			}
+
+			if (backStyle != UIExtension.SelectionRect.Style.None)
+			{
+				UIExtension.SelectionRect.Draw(this.Handle,
+												graphics,
+												rect.X,
+												rect.Y,
+												rect.Width,
+												rect.Height,
+												backStyle,
+												false); // opaque
+
+				backColor = UIExtension.SelectionRect.GetColor(backStyle);
 			}
 
 			if (DebugMode())
                graphics.DrawRectangle(new Pen(Color.Green), rect);
 
-			// Text, using 'TextRenderer' for consistency with the core app.
-			// EXCEPT for the drag image text because there's a bug in the 'DragImage'
-			// which results in the text appearing to be rendered twice.
-			if (isDragImage)
-			{
-				graphics.DrawString(taskItem.Title, nodeFont, new SolidBrush(textColor), rect);
-			}
-			else
-			{
-				var flags = (TextFormatFlags.SingleLine | TextFormatFlags.VerticalCenter | TextFormatFlags.NoClipping);
-				TextRenderer.DrawText(graphics, taskItem.Title, nodeFont, rect, textColor, flags);
-			}
+			// Text. Use 'TextRenderer' for consistency with the core app
+			var flags = (TextFormatFlags.SingleLine | TextFormatFlags.VerticalCenter | TextFormatFlags.NoClipping);
+			TextRenderer.DrawText(graphics, taskItem.Title, nodeFont, rect, textColor, backColor, flags);
 
 			// Draw Windows shortcut icon if task is a reference
 			if (taskItem.IsReference)

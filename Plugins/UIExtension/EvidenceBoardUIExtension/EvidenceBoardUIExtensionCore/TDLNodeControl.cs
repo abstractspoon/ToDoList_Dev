@@ -1475,10 +1475,15 @@ namespace EvidenceBoardUIExtension
 					matrix.Rotate(textAngle, MatrixOrder.Append);
 					matrix.Translate(textOffset.X, textOffset.Y, MatrixOrder.Append);
 
-					graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
-					graphics.Transform = matrix;
-					graphics.DrawString(link.Attributes.Label, TextFont, SystemBrushes.WindowText/*new SolidBrush(color)*/, Point.Empty, format);
-					graphics.ResetTransform();
+					{
+						graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
+
+						graphics.Transform = matrix;
+						graphics.DrawString(link.Attributes.Label, TextFont, SystemBrushes.WindowText, Point.Empty, format);
+						graphics.ResetTransform();
+
+						graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.SystemDefault;
+					}
 				}
 			}
 		}
@@ -1781,7 +1786,7 @@ namespace EvidenceBoardUIExtension
 			var titleRect = CalcTaskLabelRect(taskItem, taskRect, true);
 			var flags = (TextFormatFlags.Top | TextFormatFlags.WordBreak | TextFormatFlags.EndEllipsis);
 
-			TextRenderer.DrawText(graphics, taskItem.ToString(), GetTaskLabelFont(taskItem), titleRect, textColor, flags);
+			TextRenderer.DrawText(graphics, taskItem.ToString(), GetTaskLabelFont(taskItem), titleRect, textColor, backColor, flags);
 
 			// Image
 			if (taskItem.IsImageExpanded)
@@ -1792,7 +1797,6 @@ namespace EvidenceBoardUIExtension
 				// Image spin button
 				DrawTaskImageNavigationButtons(graphics, taskItem, imageRect);
 			}
-
 
 			graphics.SmoothingMode = SmoothingMode.AntiAlias;
 		}

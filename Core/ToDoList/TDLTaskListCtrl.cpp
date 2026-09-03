@@ -334,7 +334,7 @@ LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const CIntArra
 				{
 					CString sHeader;
 
-					if (hwndList == m_lcTasks)
+					if ((hwndList == m_lcTasks) && (!m_bSavingToImage || (m_lcTasks.GetScrollPos(SB_HORZ) == 0)))
 						sHeader = FormatTaskGroupHeaderText(pLVCD->nmcd.lItemlParam);
 
 					CDC* pDC = CDC::FromHandle(pLVCD->nmcd.hdc);
@@ -2354,20 +2354,31 @@ int CTDLTaskListCtrl::CalcRequiredTitleColumnWidthForImage()
 	{
 		DWORD dwTaskID = GetTaskID(nItem);
 
-		const TODOITEM* pTDI = m_data.GetTrueTask(dwTaskID);
-		const TODOSTRUCTURE* pTDS = m_data.LocateTask(dwTaskID);
-
-		int nTitleLen = pTDI->sTitle.GetLength();
-
-		if (pTDS->ParentIsRoot())
+		if (IsGroupHeaderTask(dwTaskID))
 		{
+			CString sText = FormatTaskGroupHeaderText(dwTaskID);
+			int nTitleLen = sText.GetLength();
+
 			if (nTitleLen > sLongestTopLevel.GetLength())
-				sLongestTopLevel = pTDI->sTitle;
+				sLongestTopLevel = sText;
 		}
 		else
 		{
-			if (nTitleLen > sLongestChild.GetLength())
-				sLongestChild = pTDI->sTitle;
+			const TODOITEM* pTDI = m_data.GetTrueTask(dwTaskID);
+			const TODOSTRUCTURE* pTDS = m_data.LocateTask(dwTaskID);
+
+			int nTitleLen = pTDI->sTitle.GetLength();
+
+			if (pTDS->ParentIsRoot())
+			{
+				if (nTitleLen > sLongestTopLevel.GetLength())
+					sLongestTopLevel = pTDI->sTitle;
+			}
+			else
+			{
+				if (nTitleLen > sLongestChild.GetLength())
+					sLongestChild = pTDI->sTitle;
+			}
 		}
 	}
 

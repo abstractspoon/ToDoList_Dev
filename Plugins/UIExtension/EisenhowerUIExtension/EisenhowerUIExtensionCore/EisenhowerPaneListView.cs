@@ -137,6 +137,8 @@ namespace EisenhowerUIExtension
 					}
 
 					// Selection
+					var selStyle = UIExtension.SelectionRect.Style.Selected;
+
 					labelRect.X += LabelPadding;
 					labelRect.Width -= LabelPadding;
 
@@ -146,12 +148,14 @@ namespace EisenhowerUIExtension
 													 labelRect.Y,
 													 labelRect.Width,
 													 labelRect.Height,
-													 false); // opaque
+													 selStyle,
+													 false);  // opaque
 
-					// Must use Graphics.DrawString here because there's a bug 
-					// in PluginHelpers.DragImage which results in the text 
-					// appearing to be rendered twice.
-					graphics.DrawString(task.Title, GetFont(task, true), SystemBrushes.WindowText, labelRect);
+					// Text. Use TextRenderer for consistency with core app
+					var flags = (TextFormatFlags.VerticalCenter | TextFormatFlags.SingleLine | TextFormatFlags.NoClipping);
+					var backColor = UIExtension.SelectionRect.GetColor(selStyle);
+
+					TextRenderer.DrawText(graphics, task.Title, GetFont(task, true), labelRect, SystemColors.WindowText, backColor, flags);
 
 					// Next item
 					labelRect.Y = labelRect.Bottom;
@@ -254,7 +258,7 @@ namespace EisenhowerUIExtension
 			if ((task == null) || task.IsLocked)
 				return 0;
 
-			int labelWidth = (int)graphics.MeasureString(task.Title, GetFont(task, true)).Width;
+			int labelWidth = TextRenderer.MeasureText(graphics, task.Title, GetFont(task, true)).Width;
 
 			if (ItemsHaveIcons)
 				labelWidth += TextIconOffset;
