@@ -339,7 +339,7 @@ namespace EisenhowerUIExtension
 			if (listBmp != null)
 				height += listBmp.Height;
 
-			var paneBmp = new Bitmap(reqWidth, height);
+			var paneBmp = new Bitmap(listBmp.Width, height);
 
 			using (var graphics = Graphics.FromImage(paneBmp))
 			{
@@ -370,7 +370,7 @@ namespace EisenhowerUIExtension
 				// Title text and icon
 				using (var graphics = Graphics.FromHwnd(Handle))
 				{
-					int titleWidth = (int)graphics.MeasureString(m_TitleBar.Text, Font).Width;
+					int titleWidth = TextRenderer.MeasureText(graphics, m_TitleBar.Text, Font).Width;
 					titleWidth += m_Icon.Width;
 					titleWidth += 2;
 
