@@ -158,6 +158,7 @@ namespace EisenhowerUIExtension
 					TextRenderer.DrawText(graphics, task.Title, GetFont(task, true), labelRect, SystemColors.WindowText, backColor, flags);
 
 					// Next item
+					labelRect.X = 0;
 					labelRect.Y = labelRect.Bottom;
 				}
 			}
