@@ -80,6 +80,7 @@ public:
 
 protected:
 	int m_nItemHeight;
+	BOOL m_bWinForms;
 
 protected:
 	virtual int PageDown(int nCurVertPos);
