@@ -12,8 +12,8 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{EEE3E597-D0EB-4520-8177-2EC5AC97E999}</ProjectGuid>
-    <RootNamespace>ToDoTxtImpExpBridge</RootNamespace>
-    <ProjectName>ToDoTxtImpExpBridge</ProjectName>
+    <RootNamespace>TodoTxtImpExpBridge</RootNamespace>
+    <ProjectName>TodoTxtImpExpBridge</ProjectName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -95,7 +95,7 @@ copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\Core\ToDoList\unicode_$(Con
     <ClCompile Include="dllmain.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
     </ClCompile>
-    <ClCompile Include="ToDoTxtImpExpBridge.cpp">
+    <ClCompile Include="TodoTxtImpExpBridge.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</CompileAsManaged>
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</CompileAsManaged>
     </ClCompile>
@@ -105,18 +105,18 @@ copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\Core\ToDoList\unicode_$(Con
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
-    <ClInclude Include="ToDoTxtImpExpBridge.h" />
+    <ClInclude Include="TodoTxtImpExpBridge.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="ToDoTxtImpExpBridge.rc" />
+    <ResourceCompile Include="TodoTxtImpExpBridge.rc" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ToDoTxtImpExpCore\ToDoTxtImpExpCore.csproj">
+    <ProjectReference Include="..\TodoTxtImpExpCore\TodoTxtImpExpCore.csproj">
       <Project>{0426fc20-91cd-4459-9e4d-88493a25bee2}</Project>
     </ProjectReference>
   </ItemGroup>

@@ -70,9 +70,9 @@ BEGIN
             VALUE "CompanyName", "AbstractSpoon Software"
             VALUE "FileDescription", "ToDoList"
             VALUE "FileVersion", "1.0.0.1"
-            VALUE "InternalName", "ToDoTxtImpExpBridge.dll"
+            VALUE "InternalName", "TodoTxtImpExpBridge.dll"
             VALUE "LegalCopyright", "Copyright (C) 2025"
-            VALUE "OriginalFilename", "ToDoTxtImpExpBridge.dll"
+            VALUE "OriginalFilename", "TodoTxtImpExpBridge.dll"
             VALUE "ProductName", "ToDoList"
             VALUE "ProductVersion", "1.0.0.1"
         END

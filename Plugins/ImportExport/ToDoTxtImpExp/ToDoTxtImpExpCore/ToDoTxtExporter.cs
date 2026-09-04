@@ -5,17 +5,17 @@ using System.Text;
 using System.Windows.Forms;
 using Abstractspoon.Tdl.PluginHelpers;
 
-namespace ToDoTxtImpExp
+namespace TodoTxtImpExp
 {
     [System.ComponentModel.DesignerCategory("")]
 
-    public class ToDoTxtExporter
+    public class TodoTxtExporter
     {
 		private Translator m_Trans;
 
         // ----------------------------------------------------------
 
-		public ToDoTxtExporter(Translator trans)
+		public TodoTxtExporter(Translator trans)
         {
             m_Trans = trans;
         }

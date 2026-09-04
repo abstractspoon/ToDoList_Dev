@@ -7,10 +7,10 @@
 
 #include <Interfaces\IImportExport.h>
 
-class CToDoTxtImpExpBridge : public IExportTasklist, public IImportTasklist
+class CTodoTxtImpExpBridge : public IExportTasklist, public IImportTasklist
 {
 public:
-	CToDoTxtImpExpBridge();
+	CTodoTxtImpExpBridge();
 
    void Release(); // releases the interface
 
@@ -40,10 +40,10 @@ DLL_DECLSPEC int GetInterfaceVersion()
 
 DLL_DECLSPEC IExportTasklist* CreateExportInterface()
 {
-   return new CToDoTxtImpExpBridge();
+   return new CTodoTxtImpExpBridge();
 }
 
 DLL_DECLSPEC IImportTasklist* CreateImportInterface()
 {
-   return new CToDoTxtImpExpBridge();
+   return new CTodoTxtImpExpBridge();
 }

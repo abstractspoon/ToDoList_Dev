@@ -2,7 +2,7 @@
 //
 
 #include "stdafx.h"
-#include "ToDoTxtImpExpBridge.h"
+#include "TodoTxtImpExpBridge.h"
 
 #include <unknwn.h>
 #include <tchar.h>
@@ -18,7 +18,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-using namespace ToDoTxtImpExp;
+using namespace TodoTxtImpExp;
 using namespace System;
 using namespace System::Collections::Generic;
 using namespace System::Runtime::InteropServices;
@@ -28,46 +28,46 @@ using namespace Abstractspoon::Tdl::PluginHelpers;
 
 // This is the constructor of a class that has been exported.
 // see ExporterBridge.h for the class definition
-CToDoTxtImpExpBridge::CToDoTxtImpExpBridge()
+CTodoTxtImpExpBridge::CTodoTxtImpExpBridge()
 	:
 	m_hIcon(NULL),
 	m_pTT(nullptr)
 {
-	//m_hIcon = Win32::LoadHIcon(L"ToDoTxtImpExpBridge.dll", IDI_TODOTXT, 16, true);
+	//m_hIcon = Win32::LoadHIcon(L"TodoTxtImpExpBridge.dll", IDI_TODOTXT, 16, true);
 }
 
-void CToDoTxtImpExpBridge::Release()
+void CTodoTxtImpExpBridge::Release()
 {
 	delete this;
 }
 
-void CToDoTxtImpExpBridge::SetLocalizer(ITransText* pTT)
+void CTodoTxtImpExpBridge::SetLocalizer(ITransText* pTT)
 {
 	if (m_pTT == nullptr)
 		m_pTT = pTT;
 }
 
-HICON CToDoTxtImpExpBridge::GetIcon() const
+HICON CTodoTxtImpExpBridge::GetIcon() const
 {
 	return m_hIcon;
 }
 
-LPCWSTR CToDoTxtImpExpBridge::GetMenuText() const
+LPCWSTR CTodoTxtImpExpBridge::GetMenuText() const
 {
 	return L"todo.txt";
 }
 
-LPCWSTR CToDoTxtImpExpBridge::GetFileFilter() const
+LPCWSTR CTodoTxtImpExpBridge::GetFileFilter() const
 {
 	return L"txt";
 }
 
-LPCWSTR CToDoTxtImpExpBridge::GetFileExtension() const
+LPCWSTR CTodoTxtImpExpBridge::GetFileExtension() const
 {
 	return L"txt";
 }
 
-LPCWSTR CToDoTxtImpExpBridge::GetTypeID() const
+LPCWSTR CTodoTxtImpExpBridge::GetTypeID() const
 {
 	return L"E18EBEBB-4F06-476B-B3C9-069A6B25D521";
 }
@@ -75,9 +75,9 @@ LPCWSTR CToDoTxtImpExpBridge::GetTypeID() const
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 // IExportTasklist
-IIMPORTEXPORT_RESULT CToDoTxtImpExpBridge::Export(const ITaskList* pSrcTaskFile, LPCWSTR szDestFilePath, DWORD dwFlags, IPreferences* pPrefs, LPCWSTR szKey)
+IIMPORTEXPORT_RESULT CTodoTxtImpExpBridge::Export(const ITaskList* pSrcTaskFile, LPCWSTR szDestFilePath, DWORD dwFlags, IPreferences* pPrefs, LPCWSTR szKey)
 {
-	auto exporter = gcnew ToDoTxtExporter(gcnew Translator(m_pTT));
+	auto exporter = gcnew TodoTxtExporter(gcnew Translator(m_pTT));
 
 	if (exporter->Export(gcnew TaskList(pSrcTaskFile),
 						 gcnew String(szDestFilePath),
@@ -92,16 +92,16 @@ IIMPORTEXPORT_RESULT CToDoTxtImpExpBridge::Export(const ITaskList* pSrcTaskFile,
 	return IIER_OTHER;
 }
 
-IIMPORTEXPORT_RESULT CToDoTxtImpExpBridge::Export(const IMultiTaskList* pSrcTaskFile, LPCWSTR szDestFilePath, DWORD dwFlags, IPreferences* pPrefs, LPCWSTR szKey)
+IIMPORTEXPORT_RESULT CTodoTxtImpExpBridge::Export(const IMultiTaskList* pSrcTaskFile, LPCWSTR szDestFilePath, DWORD dwFlags, IPreferences* pPrefs, LPCWSTR szKey)
 {
 	// TODO
 	return IIER_OTHER;
 }
 
 // IImportTasklist
-IIMPORTEXPORT_RESULT CToDoTxtImpExpBridge::Import(LPCWSTR szSrcFilePath, ITaskList* pDestTaskFile, DWORD dwFlags, IPreferences* pPrefs, LPCWSTR szKey)
+IIMPORTEXPORT_RESULT CTodoTxtImpExpBridge::Import(LPCWSTR szSrcFilePath, ITaskList* pDestTaskFile, DWORD dwFlags, IPreferences* pPrefs, LPCWSTR szKey)
 {
-	auto importer = gcnew ToDoTxtImporter(gcnew Translator(m_pTT));
+	auto importer = gcnew TodoTxtImporter(gcnew Translator(m_pTT));
 	
 	if (importer->Import(gcnew String(szSrcFilePath),
 						 gcnew TaskList(pDestTaskFile),

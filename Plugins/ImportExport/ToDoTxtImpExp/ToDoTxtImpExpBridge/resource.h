@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used by ToDoTxtImpExpBridge.rc
+// Used by TodoTxtImpExpBridge.rc
 //
 
 // Next default values for new objects
