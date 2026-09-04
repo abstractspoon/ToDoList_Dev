@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "TodoTxtImpExpBridge.h"
+#include "resource.h"
 
 #include <unknwn.h>
 #include <tchar.h>
@@ -22,6 +23,7 @@ using namespace TodoTxtImpExp;
 using namespace System;
 using namespace System::Collections::Generic;
 using namespace System::Runtime::InteropServices;
+
 using namespace Abstractspoon::Tdl::PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -33,7 +35,7 @@ CTodoTxtImpExpBridge::CTodoTxtImpExpBridge()
 	m_hIcon(NULL),
 	m_pTT(nullptr)
 {
-	//m_hIcon = Win32::LoadHIcon(L"TodoTxtImpExpBridge.dll", IDI_TODOTXT, 16, true);
+	m_hIcon = Win32::LoadHIcon(L"TodoTxtImpExpBridge.dll", IDI_TODOTXT, 16, true);
 }
 
 void CTodoTxtImpExpBridge::Release()

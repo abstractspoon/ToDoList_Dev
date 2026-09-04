@@ -60,7 +60,7 @@
     <EmbeddedResource Include="Properties\Resources.resx" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Resources\todotxt.ico" />
+    <EmbeddedResource Include="Resources\todotxt.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
