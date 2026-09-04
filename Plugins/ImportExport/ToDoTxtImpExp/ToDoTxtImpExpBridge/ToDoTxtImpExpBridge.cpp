@@ -30,7 +30,7 @@ using namespace Abstractspoon::Tdl::PluginHelpers;
 // see ExporterBridge.h for the class definition
 CToDoTxtImpExpBridge::CToDoTxtImpExpBridge()
 {
-	//m_hIcon = Win32::LoadHIcon(L"ToDoTxtImpExpBridge.dll", IDI_SAMPLE, 16, true);
+	//m_hIcon = Win32::LoadHIcon(L"ToDoTxtImpExpBridge.dll", IDI_TODOTXT, 16, true);
 }
 
 void CToDoTxtImpExpBridge::Release()
@@ -51,17 +51,17 @@ HICON CToDoTxtImpExpBridge::GetIcon() const
 
 LPCWSTR CToDoTxtImpExpBridge::GetMenuText() const
 {
-	return L"ToDoTxt";
+	return L"ToDo.Txt";
 }
 
 LPCWSTR CToDoTxtImpExpBridge::GetFileFilter() const
 {
-	return L"smp";
+	return L"txt";
 }
 
 LPCWSTR CToDoTxtImpExpBridge::GetFileExtension() const
 {
-	return L"smp";
+	return L"txt";
 }
 
 LPCWSTR CToDoTxtImpExpBridge::GetTypeID() const
@@ -71,19 +71,19 @@ LPCWSTR CToDoTxtImpExpBridge::GetTypeID() const
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
+// IExportTasklist
 IIMPORTEXPORT_RESULT CToDoTxtImpExpBridge::Export(const ITaskList* pSrcTaskFile, LPCWSTR szDestFilePath, DWORD dwFlags, IPreferences* pPrefs, LPCWSTR szKey)
 {
-	// call into out sibling C# module to do the actual work
-	msclr::auto_gcroot<Preferences^> prefs = gcnew Preferences(pPrefs);
-	msclr::auto_gcroot<TaskList^> srcTasks = gcnew TaskList(pSrcTaskFile);
-	msclr::auto_gcroot<Translator^> trans = gcnew Translator(m_pTT);
-	msclr::auto_gcroot<ToDoTxtImpExpCore^> expCore = gcnew ToDoTxtImpExpCore(trans.get());
-	
-	// do the export
-	bool bSilent = ((dwFlags & IIEF_SILENT) != 0);
+	auto exporter = gcnew ToDoTxtExporter(gcnew Translator(m_pTT));
 
-	if (expCore->Export(srcTasks.get(), gcnew String(szDestFilePath), bSilent, prefs.get(), gcnew String(szKey)))
+	if (exporter->Export(gcnew TaskList(pSrcTaskFile),
+						 gcnew String(szDestFilePath),
+						 ((dwFlags & IIEF_SILENT) != 0),
+						 gcnew Preferences(pPrefs),
+						 gcnew String(szKey)))
+	{
 		return IIER_SUCCESS;
+	}
 
 	// else
 	return IIER_OTHER;
@@ -92,5 +92,23 @@ IIMPORTEXPORT_RESULT CToDoTxtImpExpBridge::Export(const ITaskList* pSrcTaskFile,
 IIMPORTEXPORT_RESULT CToDoTxtImpExpBridge::Export(const IMultiTaskList* pSrcTaskFile, LPCWSTR szDestFilePath, DWORD dwFlags, IPreferences* pPrefs, LPCWSTR szKey)
 {
 	// TODO
+	return IIER_OTHER;
+}
+
+// IImportTasklist
+IIMPORTEXPORT_RESULT CToDoTxtImpExpBridge::Import(LPCWSTR szSrcFilePath, ITaskList* pDestTaskFile, DWORD dwFlags, IPreferences* pPrefs, LPCWSTR szKey)
+{
+	auto importer = gcnew ToDoTxtImporter(gcnew Translator(m_pTT));
+	
+	if (importer->Import(gcnew String(szSrcFilePath),
+						 gcnew TaskList(pDestTaskFile),
+						 ((dwFlags & IIEF_SILENT) != 0),
+						 gcnew Preferences(pPrefs),
+						 gcnew String(szKey)))
+	{
+		return IIER_SUCCESS;
+	}
+
+	// else
 	return IIER_OTHER;
 }

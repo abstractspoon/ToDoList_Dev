@@ -9,13 +9,13 @@ namespace ToDoTxtImpExp
 {
     [System.ComponentModel.DesignerCategory("")]
 
-    public class ToDoTxtImpExpCore
+    public class ToDoTxtExporter
     {
 		private Translator m_Trans;
 
         // ----------------------------------------------------------
 
-		public ToDoTxtImpExpCore(Translator trans)
+		public ToDoTxtExporter(Translator trans)
         {
             m_Trans = trans;
         }

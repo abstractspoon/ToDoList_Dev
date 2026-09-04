@@ -46,8 +46,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ToDoTxtImpExpCore.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ToDoTxtExporter.cs" />
+    <Compile Include="ToDoTxtImporter.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\PluginHelpers\PluginHelpers.vcxproj">

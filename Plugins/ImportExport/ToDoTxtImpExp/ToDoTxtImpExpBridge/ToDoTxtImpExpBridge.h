@@ -7,8 +7,7 @@
 
 #include <Interfaces\IImportExport.h>
 
-// This class is exported from ExporterBridge.dll
-class CToDoTxtImpExpBridge : public IExportTasklist //, IImportTaskList
+class CToDoTxtImpExpBridge : public IExportTasklist, public IImportTasklist
 {
 public:
 	CToDoTxtImpExpBridge();
@@ -27,6 +26,8 @@ public:
    IIMPORTEXPORT_RESULT Export(const ITaskList* pSrcTaskFile, LPCWSTR szDestFilePath, DWORD dwFlags, IPreferences* pPrefs, LPCWSTR szKey);
    IIMPORTEXPORT_RESULT Export(const IMultiTaskList* pSrcTaskFile, LPCWSTR szDestFilePath, DWORD dwFlags, IPreferences* pPrefs, LPCWSTR szKey);
 
+   IIMPORTEXPORT_RESULT Import(LPCWSTR szSrcFilePath, ITaskList* pDestTaskFile, DWORD dwFlags, IPreferences* pPrefs, LPCWSTR szKey);
+
 protected:
 	HICON m_hIcon;
 	ITransText* m_pTT;
@@ -44,5 +45,5 @@ DLL_DECLSPEC IExportTasklist* CreateExportInterface()
 
 DLL_DECLSPEC IImportTasklist* CreateImportInterface()
 {
-   return NULL; // new CToDoTxtImpExpBridge()
+   return new CToDoTxtImpExpBridge();
 }
