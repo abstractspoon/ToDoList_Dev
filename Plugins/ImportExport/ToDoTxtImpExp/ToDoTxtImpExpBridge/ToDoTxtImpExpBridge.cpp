@@ -29,6 +29,9 @@ using namespace Abstractspoon::Tdl::PluginHelpers;
 // This is the constructor of a class that has been exported.
 // see ExporterBridge.h for the class definition
 CToDoTxtImpExpBridge::CToDoTxtImpExpBridge()
+	:
+	m_hIcon(NULL),
+	m_pTT(nullptr)
 {
 	//m_hIcon = Win32::LoadHIcon(L"ToDoTxtImpExpBridge.dll", IDI_TODOTXT, 16, true);
 }
@@ -51,7 +54,7 @@ HICON CToDoTxtImpExpBridge::GetIcon() const
 
 LPCWSTR CToDoTxtImpExpBridge::GetMenuText() const
 {
-	return L"ToDo.Txt";
+	return L"todo.txt";
 }
 
 LPCWSTR CToDoTxtImpExpBridge::GetFileFilter() const
@@ -66,7 +69,7 @@ LPCWSTR CToDoTxtImpExpBridge::GetFileExtension() const
 
 LPCWSTR CToDoTxtImpExpBridge::GetTypeID() const
 {
-	return L"F0D68A9A-EEA3-4D2A-9242-86CF893CE8B0";
+	return L"E18EBEBB-4F06-476B-B3C9-069A6B25D521";
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
