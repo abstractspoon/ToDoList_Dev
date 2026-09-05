@@ -1214,12 +1214,12 @@ BOOL CTDCTaskMatcher::ValueMatches(double dValue, const SEARCHPARAM& rule, CStri
 	BOOL bMatch = FALSE;
 	double dSearchVal = rule.ValueAsDouble();
 
-	BOOL bTime = (rule.AttributeIs(TDCA_TIMEESTIMATE) || 
-				  rule.AttributeIs(TDCA_TIMESPENT) ||
-				  (rule.IsCustomAttribute() && 
-				  (TDCCA_TIMEPERIOD == m_data.m_aCustomAttribDefs.GetAttributeDataType(rule.GetCustomAttributeID()))));
+	BOOL bTimePeriod = (rule.AttributeIs(TDCA_TIMEESTIMATE) ||
+						rule.AttributeIs(TDCA_TIMESPENT) ||
+						(rule.IsCustomAttribute() &&
+						(TDCCA_TIMEPERIOD == CustomAttribDefs().GetAttributeDataType(rule.GetCustomAttributeID()))));
 
-	if (bTime)
+	if (bTimePeriod)
 	{
 		TH_UNITS nTHUints = TDC::MapUnitsToTHUnits(rule.GetTimeUnits());
 		dSearchVal = CTimeHelper().Convert(dSearchVal, nTHUints, THU_HOURS);
@@ -1262,7 +1262,7 @@ BOOL CTDCTaskMatcher::ValueMatches(double dValue, const SEARCHPARAM& rule, CStri
 	
 	if (bMatch && (dValue != 0.0))
 	{
-		if (bTime)
+		if (bTimePeriod)
 			sWhatMatched = Misc::Format(dValue, 3, _T(" H"));
 		else
 			sWhatMatched = Misc::Format(dValue, 3);
@@ -3576,8 +3576,9 @@ BOOL CTDCTaskCalculator::DoCustomAttributeCalculation(const TODOITEM* pTDI, cons
 													  double& dResult, TDC_UNITS nUnits, BOOL bAggregated) const
 {
 	const TDCCUSTOMATTRIBUTECALCULATION& calc = attribDef.Calculation();
+	const CTDCCustomAttribDefinitionArray& attribDefs = CustomAttribDefs();
 
-	if (!CustomAttribDefs().IsValidCalculation(calc))
+	if (!attribDefs.IsValidCalculation(calc))
 		return FALSE;
 
 	double dFirstVal = 0.0, dSecondVal = 0.0;
@@ -3595,11 +3596,11 @@ BOOL CTDCTaskCalculator::DoCustomAttributeCalculation(const TODOITEM* pTDI, cons
 			dResult = (dFirstVal + dSecondVal);
 
 			// Date calculations may need extra post-processing
-			BOOL bFirstIsDate = (CustomAttribDefs().GetCalculationOperandDataType(calc.opFirst) == TDCCA_DATE);
+			BOOL bFirstIsDate = (attribDefs.GetCalculationOperandDataType(calc.opFirst) == TDCCA_DATE);
 
 			if (bFirstIsDate)
 			{
-				ASSERT(CustomAttribDefs().GetCalculationOperandDataType(calc.opSecond) != TDCCA_DATE);
+				ASSERT(attribDefs.GetCalculationOperandDataType(calc.opSecond) != TDCCA_DATE);
 
 				// If the date has a time component but the result falls on
 				// a day boundary then the result date needs decrementing
@@ -3657,8 +3658,8 @@ BOOL CTDCTaskCalculator::DoCustomAttributeCalculation(const TODOITEM* pTDI, cons
 		break;
 	}
 
-	if ((m_data.m_aCustomAttribDefs.GetCalculationResultDataType(calc) == TDCCA_DATE) &&
-		!m_data.m_aCustomAttribDefs.CalculationHasFeature(attribDef, TDCCAF_SHOWTIMEOFDAY))
+	if ((attribDefs.GetCalculationResultDataType(calc) == TDCCA_DATE) &&
+		!attribDefs.CalculationHasFeature(attribDef, TDCCAF_SHOWTIMEOFDAY))
 	{
 		dResult = (int)dResult;
 	}
@@ -4864,7 +4865,7 @@ BOOL CTDCTaskFormatter::WantFormatValue(double dValue, const TDCCUSTOMATTRIBUTED
 		return TRUE;
 
 	if (attribDef.IsCalculation())
-		return !m_data.m_aCustomAttribDefs.CalculationHasFeature(attribDef, TDCCAF_HIDEZERO);
+		return !CustomAttribDefs().CalculationHasFeature(attribDef, TDCCAF_HIDEZERO);
 
 	// else
 	return !attribDef.HasFeature(TDCCAF_HIDEZERO);
