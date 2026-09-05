@@ -6165,6 +6165,7 @@ END
 STRINGTABLE DISCARDABLE 
 BEGIN
     IDS_CREATESUBTASKINTASK_DLGTITLE "Select Parent Task"
+    IDS_CUSTOM_FEATURE_IGNORETIMEOFDAY "Ignore 'Date > Time of Day'"
 END
 
 #endif    // English (Australia) resources
