@@ -690,7 +690,7 @@ int CTDLTaskAttributeListCtrl::GetGroupAttributes(TDC_ATTRIBUTEGROUP nGroup, CMa
 				TDC_ATTRIBUTE nAttribID = attribDef.GetAttributeID();
 				mapAttrib[nAttribID] = attribDef.sLabel;
 
-				if (attribDef.IsDataType(TDCCA_DATE) && attribDef.HasFeature(TDCCAF_SHOWTIME))
+				if (attribDef.IsDataType(TDCCA_DATE) && attribDef.HasFeature(TDCCAF_SHOWTIMEOFDAY))
 					mapAttrib[CUSTOMTIMEATTRIBID(nAttribID)] = attribDef.sLabel;
 			}
 		}
@@ -769,7 +769,7 @@ void CTDLTaskAttributeListCtrl::Populate()
 					int nRow = AddRow(sAttrib);
 					SetItemData(nRow, attribDef.GetAttributeID());
 
-					if (attribDef.IsDataType(TDCCA_DATE) && attribDef.HasFeature(TDCCAF_SHOWTIME))
+					if (attribDef.IsDataType(TDCCA_DATE) && attribDef.HasFeature(TDCCAF_SHOWTIMEOFDAY))
 					{
 						nRow = AddRow(sAttrib);
 						SetItemData(nRow, CUSTOMTIMEATTRIBID(attribDef.GetAttributeID()));
@@ -2533,7 +2533,7 @@ BOOL CTDLTaskAttributeListCtrl::GetCustomAttributeData(const CString& sAttribID,
 		
 		if (CDateHelper::IsDateSet(date))
 		{
-			if (pDef->HasFeature(TDCCAF_SHOWTIME))
+			if (pDef->HasFeature(TDCCAF_SHOWTIMEOFDAY))
 			{
 				TDC_ATTRIBUTE nTimeAttribID = CUSTOMTIMEATTRIBID(nAttribID);
 				date.m_dt += _ttof(GetValueText(nTimeAttribID));
@@ -2569,7 +2569,7 @@ TDC_ATTRIBUTE CTDLTaskAttributeListCtrl::MapTimeToDate(TDC_ATTRIBUTE nTimeAttrib
 			const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
 			GET_CUSTDEF_ALT(m_aCustomAttribDefs, nDateAttribID, pDef, break);
 
-			ASSERT(pDef->IsDataType(TDCCA_DATE) && pDef->HasFeature(TDCCAF_SHOWTIME));
+			ASSERT(pDef->IsDataType(TDCCA_DATE) && pDef->HasFeature(TDCCAF_SHOWTIMEOFDAY));
 #endif
 			return nDateAttribID;
 		}
@@ -3112,7 +3112,7 @@ CWnd* CTDLTaskAttributeListCtrl::GetEditControl(int nRow, BOOL bBtnClick)
 			const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
 			GET_CUSTDEF_RET(m_aCustomAttribDefs, MapTimeToDate(nAttribID), pDef, NULL);
 
-			if (pDef->HasFeature(TDCCAF_SHOWTIME))
+			if (pDef->HasFeature(TDCCAF_SHOWTIMEOFDAY))
 			{
 				return &m_cbTimeOfDay;
 			}

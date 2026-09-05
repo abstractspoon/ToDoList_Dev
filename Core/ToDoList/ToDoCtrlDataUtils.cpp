@@ -3526,7 +3526,7 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(const TODOITEM* pTDI, const 
 		if (dCalcValue >= DBL_MAX)
 			dCalcValue = DBL_NULL;
 	}
-	else if (bIsDate && !attribDef.HasFeature(TDCCAF_SHOWTIME))
+	else if (bIsDate && !attribDef.HasFeature(TDCCAF_SHOWTIMEOFDAY))
 	{
 		if (!attribDef.GetDataAsDouble(data, dCalcValue, nUnits))
 			return FALSE;
@@ -3658,7 +3658,7 @@ BOOL CTDCTaskCalculator::DoCustomAttributeCalculation(const TODOITEM* pTDI, cons
 	}
 
 	if ((m_data.m_aCustomAttribDefs.GetCalculationResultDataType(calc) == TDCCA_DATE) &&
-		!m_data.m_aCustomAttribDefs.CalculationHasFeature(attribDef, TDCCAF_SHOWTIME))
+		!m_data.m_aCustomAttribDefs.CalculationHasFeature(attribDef, TDCCAF_SHOWTIMEOFDAY))
 	{
 		dResult = (int)dResult;
 	}
@@ -4777,7 +4777,7 @@ CString CTDCTaskFormatter::GetTaskCustomAttributeData(const TODOITEM* pTDI, cons
 					return GetTimePeriod(dValue, nUnits, TRUE);
 
 				case TDCCA_DATE:
-					return GetDateTime(dValue, CustomAttribDefs().CalculationHasFeature(attribDef, TDCCAF_SHOWTIME));
+					return GetDateTime(dValue, CustomAttribDefs().CalculationHasFeature(attribDef, TDCCAF_SHOWTIMEOFDAY));
 
 				case TDCCA_DOUBLE:
 				case TDCCA_INTEGER:
@@ -4829,7 +4829,7 @@ CString CTDCTaskFormatter::GetTaskCustomAttributeData(const TODOITEM* pTDI, cons
 			if (!m_calculator.GetTaskCustomAttributeData(pTDI, pTDS, attribDef, dDate))
 				return EMPTY_STR;
 
-			return GetDateTime(dDate, attribDef.HasFeature(TDCCAF_SHOWTIME));
+			return GetDateTime(dDate, attribDef.HasFeature(TDCCAF_SHOWTIMEOFDAY));
 		}
 		break;
 

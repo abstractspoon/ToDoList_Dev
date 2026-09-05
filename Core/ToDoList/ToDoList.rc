@@ -5778,7 +5778,7 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    IDS_CUSTOM_FEATURE_SHOWTIME "Show Time"
+    IDS_CUSTOM_FEATURE_SHOWTIMEOFDAY "Show 'Time of Day'"
     IDS_CONFIRM_UNINSTALL   "Are you sure you want to delete the application folder and its entire contents?"
     IDS_FINDTASKS           "Find Tasks"
     IDS_STARTBYNOW_CONFIRMREFILTER 

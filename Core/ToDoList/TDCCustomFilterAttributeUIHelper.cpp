@@ -712,7 +712,7 @@ void CTDCCustomFilterAttributeUIHelper::SetBuddyVisibility(const CWnd* pParent, 
 			}
 			else
 			{
-				if (attribDef.HasFeature(TDCCAF_SHOWTIME))
+				if (attribDef.HasFeature(TDCCAF_SHOWTIMEOFDAY))
 					ctrl.ShowBuddy(pParent, TRUE);
 			}
 			break;

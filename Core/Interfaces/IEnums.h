@@ -251,7 +251,7 @@ enum // custom attribute features
 	TDCCAF_MINIMIZE				= 0x0004, // Numbers/Dates only
 	TDCCAF_MAXIMIZE				= 0x0008, // Numbers/Dates only
 	TDCCAF_HIDEZERO				= 0x0010, // Numbers only
-	TDCCAF_SHOWTIME				= 0x0020, // Dates only
+	TDCCAF_SHOWTIMEOFDAY		= 0x0020, // Dates only
 	TDCCAF_FILTER				= 0x0040, 
 	TDCCAF_INHERITPARENTCHANGES	= 0x0080, 
 	TDCCAF_DISPLAYASPERCENT		= 0x0100, // Numbers only

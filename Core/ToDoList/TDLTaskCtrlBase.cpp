@@ -3191,7 +3191,7 @@ BOOL CTDLTaskCtrlBase::DrawItemCustomColumn(const TODOITEM* pTDI, const TODOSTRU
 			if (m_calculator.GetTaskCustomAttributeData(pTDI, pTDS, *pDef, dDate))
 			{
 				DrawColumnDate(pDC, dDate, TDCD_CUSTOM, rCol, crText, FALSE,
-							   pDef->HasFeature(TDCCAF_SHOWTIME), pDef->nTextAlignment);
+							   pDef->HasFeature(TDCCAF_SHOWTIMEOFDAY), pDef->nTextAlignment);
 			}
 		}
 		break;
@@ -5559,7 +5559,7 @@ int CTDLTaskCtrlBase::CalcMaxCustomAttributeColWidth(TDC_COLUMN nColID, CDC* pDC
 	switch (m_aCustomAttribDefs.GetAttributeDataType(*pDef))
 	{
 	case TDCCA_DATE:
-		return CalcMaxDateColWidth(TDCD_CUSTOM, pDC, pDef->HasFeature(TDCCAF_SHOWTIME));
+		return CalcMaxDateColWidth(TDCD_CUSTOM, pDC, pDef->HasFeature(TDCCAF_SHOWTIMEOFDAY));
 
 	case TDCCA_ICON:
 		if (pDef->IsList())

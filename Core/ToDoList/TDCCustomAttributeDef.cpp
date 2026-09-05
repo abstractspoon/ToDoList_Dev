@@ -711,7 +711,7 @@ BOOL TDCCUSTOMATTRIBUTEDEFINITION::AttributeSupportsFeature(DWORD dwDataType, DW
 	case TDCCA_DATE:
 		return ((dwFeature == TDCCAF_MAXIMIZE) ||
 				(dwFeature == TDCCAF_MINIMIZE) ||
-				(dwFeature == TDCCAF_SHOWTIME));
+				(dwFeature == TDCCAF_SHOWTIMEOFDAY));
 
 	case TDCCA_BOOL:
 	case TDCCA_STRING:
@@ -1037,7 +1037,7 @@ CString TDCCUSTOMATTRIBUTEDEFINITION::FormatData(const TDCCADATA& data, BOOL bIS
 	switch (GetDataType())
 	{
 	case TDCCA_DATE:
-		return data.FormatAsDate(bISODates, HasFeature(TDCCAF_SHOWTIME));
+		return data.FormatAsDate(bISODates, HasFeature(TDCCAF_SHOWTIMEOFDAY));
 
 	case TDCCA_DOUBLE:
 	case TDCCA_INTEGER:
