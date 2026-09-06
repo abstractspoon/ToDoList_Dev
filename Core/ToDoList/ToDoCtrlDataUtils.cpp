@@ -3746,7 +3746,7 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeOperandValue(const TODOITEM* pTDI
 	ASSERT(pTDI);
 
 	// Numeric types only
-	BOOL bAggregated = (dwFeatures & TDCCAF_ACCUMULATE);
+	BOOL bAccumulated = (dwFeatures & TDCCAF_ACCUMULATE);
 
 	switch (nAttribID)
 	{
@@ -3755,7 +3755,7 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeOperandValue(const TODOITEM* pTDI
 		return TRUE;
 
 	case TDCA_COST:
-		if (bAggregated)
+		if (bAccumulated)
 		{
 			dValue = GetTaskCost(pTDI, pTDS);
 		}
@@ -3770,7 +3770,7 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeOperandValue(const TODOITEM* pTDI
 
 	case TDCA_PERCENT:
 		{
-			if (bAggregated)
+			if (bAccumulated)
 				dValue = GetTaskPercentDone(pTDI, pTDS);
 			else
 				dValue = pTDI->nPercentDone;
@@ -3779,7 +3779,7 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeOperandValue(const TODOITEM* pTDI
 
 	case TDCA_PRIORITY:
 		{
-			if (bAggregated)
+			if (bAccumulated)
 				dValue = GetTaskPriority(pTDI, pTDS, TRUE);
 			else
 				dValue = pTDI->nPriority;
@@ -3788,7 +3788,7 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeOperandValue(const TODOITEM* pTDI
 
 	case TDCA_RISK:
 		{
-			if (bAggregated)
+			if (bAccumulated)
 				dValue = GetTaskRisk(pTDI, pTDS);
 			else
 				dValue = pTDI->nRisk;
@@ -3815,7 +3815,7 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeOperandValue(const TODOITEM* pTDI
 		{
 			COleDateTime date = pTDI->dateDue;
 
-			if (bAggregated)
+			if (bAccumulated)
 				date = GetTaskDueDate(pTDI, pTDS);
 
 			if (CDateHelper::IsDateSet(date))
@@ -3830,7 +3830,7 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeOperandValue(const TODOITEM* pTDI
 		{
 			COleDateTime date = pTDI->dateLastMod;
 
-			if (bAggregated)
+			if (bAccumulated)
 				date = GetTaskLastModifiedDate(pTDI, pTDS);
 
 			if (CDateHelper::IsDateSet(date))
@@ -3845,7 +3845,7 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeOperandValue(const TODOITEM* pTDI
 		{
 			COleDateTime date = pTDI->dateStart;
 
-			if (bAggregated)
+			if (bAccumulated)
 				date = GetTaskStartDate(pTDI, pTDS);
 
 			if (CDateHelper::IsDateSet(date))
@@ -3857,34 +3857,30 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeOperandValue(const TODOITEM* pTDI
 		break;
 
 	case TDCA_TIMEESTIMATE:
+		if (bAccumulated)
 		{
-			if (bAggregated)
-			{
-				dValue = GetTaskTimeEstimate(pTDI, pTDS, nUnits);
-			}
-			else
-			{
-				TDCTIMEPERIOD time = pTDI->timeEstimate;
-				time.SetUnits(nUnits, TRUE);
+			dValue = GetTaskTimeEstimate(pTDI, pTDS, nUnits);
+		}
+		else
+		{
+			TDCTIMEPERIOD time = pTDI->timeEstimate;
+			time.SetUnits(nUnits, TRUE);
 
-				dValue = time.dAmount;
-			}
+			dValue = time.dAmount;
 		}
 		return TRUE;
 
 	case TDCA_TIMESPENT:
+		if (bAccumulated)
 		{
-			if (bAggregated)
-			{
-				dValue = GetTaskTimeSpent(pTDI, pTDS, nUnits);
-			}
-			else
-			{
-				TDCTIMEPERIOD time = pTDI->timeSpent;
-				time.SetUnits(nUnits, TRUE);
+			dValue = GetTaskTimeSpent(pTDI, pTDS, nUnits);
+		}
+		else
+		{
+			TDCTIMEPERIOD time = pTDI->timeSpent;
+			time.SetUnits(nUnits, TRUE);
 
-				dValue = time.dAmount;
-			}
+			dValue = time.dAmount;
 		}
 		return TRUE;
 	}
