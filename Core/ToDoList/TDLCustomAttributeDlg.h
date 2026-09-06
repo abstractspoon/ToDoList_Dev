@@ -172,7 +172,6 @@ protected:
 	CMaskEdit	m_eUniqueID;
 	CComboBox	m_cbDataType;
 	CComboBox	m_cbAlign;
-	CTDLCustomAttribFeatureComboBox	m_cbFeatures;
 	CEnToolBar m_toolbar;
 	CToolbarHelper m_tbHelper;
 	CFileEdit	m_eTaskfile;
@@ -182,6 +181,7 @@ protected:
 
 	CCustomAttributeListPage m_pageList;
 	CCustomAttributeCalcPage m_pageCalc;
+	CTDLCustomAttribFeatureComboBox	m_cbFeatures;
 
 protected:
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
@@ -218,6 +218,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 	void BuildDataTypeCombo();
+	void RefreshFeatureCombo(int nRow, TDCCUSTOMATTRIBUTEDEFINITION& attrib);
 	BOOL AddAttributeToListCtrl(const TDCCUSTOMATTRIBUTEDEFINITION& attrib, BOOL bNew, int nPos = -1);
 	void EnableControls();
 	void UpdateRemainingCount();

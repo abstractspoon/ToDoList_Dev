@@ -57,37 +57,50 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CTDLCustomAttribFeatureComboBox message handlers
 
-BOOL CTDLCustomAttribFeatureComboBox::SetAttributeDefinition(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef)
-{
-	return SetAttributeDefinition(attribDef.GetDataType(), attribDef.GetListType(), attribDef.dwFeatures);
-}
-
-BOOL CTDLCustomAttribFeatureComboBox::SetAttributeDefinition(DWORD dwDataType, DWORD dwListType, DWORD dwSelectedFeatures)
+BOOL CTDLCustomAttribFeatureComboBox::SetAttributeDefinition(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef,
+															 const CTDCCustomAttribDefinitionArray& aAttribDefs)
 {
 	ASSERT_VALID(this);
 
 	if (!GetSafeHwnd())
 		return FALSE;
 
-	BuildCombo(dwDataType, dwListType, dwSelectedFeatures);
-
-	return (GetCount() > 0);
-}
-
-void CTDLCustomAttribFeatureComboBox::BuildCombo(DWORD dwDataType, DWORD dwListType, DWORD dwSelectedFeatures)
-{
 	ResetContent();
+
+	DWORD dwDataType = attribDef.GetDataType();
+	DWORD dwListType = attribDef.GetListType();
+
+	BOOL bCalc = (dwDataType & TDCCA_CALCULATION);
+
+	if (bCalc)
+	{
+		dwDataType = aAttribDefs.GetCalculationResultDataType(attribDef.Calculation());
+		dwListType = TDCCA_NOTALIST;
+	}
 
 	for (int nFeature = 0; nFeature < NUM_FEATURES; nFeature++)
 	{
 		const TDCFEATURE& feature = FEATURES[nFeature];
+		BOOL bAddFeature = TDCCUSTOMATTRIBUTEDEFINITION::AttributeSupportsFeature(dwDataType, dwListType, feature.dwFeature);
 
-		if (TDCCUSTOMATTRIBUTEDEFINITION::AttributeSupportsFeature(dwDataType, dwListType, feature.dwFeature))
+		if (!bAddFeature && bCalc && (feature.dwFeature == TDCCAF_IGNORETIMEOFDAY))
+		{
+			// Only supported when subtracting dates
+			const TDCCUSTOMATTRIBUTECALCULATION& calc = attribDef.Calculation();
+
+			bAddFeature = ((calc.nOperator == TDCCAC_SUBTRACT) &&
+							(aAttribDefs.GetCalculationOperandDataType(calc.opFirst) == TDCCA_DATE) &&
+							(aAttribDefs.GetCalculationOperandDataType(calc.opSecond) == TDCCA_DATE));
+		}		
+		
+		if (bAddFeature)
 			CDialogHelper::AddStringT(*this, feature.nStringID, feature.dwFeature);
 	}
 
-	SetCheckedByItemData(dwSelectedFeatures);
+	SetCheckedByItemData(attribDef.dwFeatures);
 	EnableTooltip();
+
+	return TRUE;
 }
 
 DWORD CTDLCustomAttribFeatureComboBox::GetSelectedFeatures() const

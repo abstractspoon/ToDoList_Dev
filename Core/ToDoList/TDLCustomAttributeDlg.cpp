@@ -921,7 +921,6 @@ CTDLCustomAttributeDlg::CTDLCustomAttributeDlg(const CString& sTaskFile,
 											   CWnd* pParent)
 	: 
 	CTDLDialog(IDD_ADDCUSTOMATTRIB_DIALOG, _T("CustomAttributes"), pParent),
-
 	m_eTaskfile(FES_NOBROWSE), 
 	m_eUniqueID(_T(". \r\n\t"), ME_EXCLUDE),
 	m_sTaskFile(sTaskFile),
@@ -1212,15 +1211,7 @@ void CTDLCustomAttributeDlg::OnItemchangedAttriblist(NMHDR* pNMHDR, LRESULT* /*p
 		m_pageCalc.SetCalculation(attrib.Calculation());
 		m_pageCalc.ExcludeCustomAttribute(attrib);
 
-		if (attrib.IsDataType(TDCCA_CALCULATION))
-		{
-			DWORD dwDataType = m_aAttribDef.GetCalculationResultDataType(attrib.Calculation());
-			m_cbFeatures.SetAttributeDefinition(dwDataType, TDCCA_NOTALIST, attrib.dwFeatures);
-		}
-		else
-		{
-			m_cbFeatures.SetAttributeDefinition(attrib);
-		}
+		m_cbFeatures.SetAttributeDefinition(attrib, m_aAttribDefs);
 	}
 	else
 	{
@@ -1292,6 +1283,20 @@ int CTDLCustomAttributeDlg::GetCurSel()
 	return nSel;
 }
 
+void CTDLCustomAttributeDlg::RefreshFeatureCombo(int nRow, TDCCUSTOMATTRIBUTEDEFINITION& attrib)
+{
+	m_cbFeatures.SetAttributeDefinition(attrib, m_aAttribDefs);
+
+	// And features in case they changed
+	m_dwFeatures = m_cbFeatures.GetSelectedFeatures();
+
+	if (attrib.dwFeatures != m_dwFeatures)
+	{
+		attrib.dwFeatures = m_dwFeatures;
+		m_lcAttributes.SetItemText(nRow, COL_FEATURES, FormatFeatureList(m_dwFeatures));
+	}
+}
+
 void CTDLCustomAttributeDlg::OnSelchangeDatatype() 
 {
 	UpdateData();
@@ -1308,16 +1313,7 @@ void CTDLCustomAttributeDlg::OnSelchangeDatatype()
 	m_lcAttributes.SetItemText(nSel, COL_DATATYPE, sDataType);
 
 	// update feature combo
-	m_cbFeatures.SetAttributeDefinition(attrib);
-
-	// And features in case they changed
-	m_dwFeatures = m_cbFeatures.GetSelectedFeatures();
-
-	if (attrib.dwFeatures != m_dwFeatures)
-	{
-		attrib.dwFeatures = m_dwFeatures;
-		m_lcAttributes.SetItemText(nSel, COL_FEATURES, FormatFeatureList(m_dwFeatures));
-	}
+	RefreshFeatureCombo(nSel, attrib);
 	
 	// Update alignment if it changed
 	if (m_nAlignment != (int)attrib.nTextAlignment)
@@ -1374,16 +1370,7 @@ LRESULT CTDLCustomAttributeDlg::OnChangeListAttributes(WPARAM wp, LPARAM lp)
 		m_pageList.SetListType(attrib.GetListType());
 
 		// update feature combo
-		m_cbFeatures.SetAttributeDefinition(attrib);
-
-		// And features in case they changed
-		m_dwFeatures = m_cbFeatures.GetSelectedFeatures();
-	
-		if ((attrib.dwFeatures != m_dwFeatures) || (!bWasList && attrib.IsList()))
-		{
-			attrib.dwFeatures = m_dwFeatures;
-			m_lcAttributes.SetItemText(nSel, COL_FEATURES, FormatFeatureList(m_dwFeatures));
-		}
+		RefreshFeatureCombo(nSel, attrib);
 
 		// and list
 		CString sDummy, sListType;
@@ -1416,9 +1403,8 @@ LRESULT CTDLCustomAttributeDlg::OnChangeCalculationAttributes(WPARAM wp, LPARAM 
 	attrib.SetCalculation(calc);
 
 	// Update feature combo
-	DWORD dwDataType = m_aAttribDef.GetCalculationResultDataType(attrib.Calculation());
-	m_cbFeatures.SetAttributeDefinition(dwDataType, TDCCA_NOTALIST, attrib.dwFeatures);
-	
+	RefreshFeatureCombo(nSel, attrib);
+		
 	return 0L;
 }
 

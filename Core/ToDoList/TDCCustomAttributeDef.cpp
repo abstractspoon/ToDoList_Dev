@@ -720,10 +720,9 @@ BOOL TDCCUSTOMATTRIBUTEDEFINITION::AttributeSupportsFeature(DWORD dwDataType, DW
 		break;
 
 	case TDCCA_CALCULATION:
-		// For all features other than TDCCAF_IGNORETIMEOFDAY, 
-		// the caller is responsible for determining the calculation 
+		// Caller is responsible for determining the calculation 
 		// result type and passing that as the argument
-		return (dwFeature == TDCCAF_IGNORETIMEOFDAY);
+		break;
 
 	default:
 		ASSERT(0);
