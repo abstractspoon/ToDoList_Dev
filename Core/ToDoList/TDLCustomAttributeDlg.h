@@ -116,7 +116,7 @@ protected:
 	CString m_sExcludedCustAttribID;
 
 	TDCCUSTOMATTRIBUTECALCULATION m_calc;
-	CTDCCustomAttribDefinitionArray m_aAttribDef;
+	CTDCCustomAttribDefinitionArray m_aAttribDefs;
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);
@@ -166,7 +166,7 @@ protected:
 	DWORD m_dwDataType;
 	DWORD m_dwFeatures;
 
-	CTDCCustomAttribDefinitionArray m_aAttribDef;
+	CTDCCustomAttribDefinitionArray m_aAttribDefs;
 
 	CEnListCtrl	m_lcAttributes;
 	CMaskEdit	m_eUniqueID;
