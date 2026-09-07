@@ -1212,9 +1212,10 @@ int CTDCCustomAttribDefinitionArray::Find(const CString& sAttribID, int nIgnore)
 
 		while (nDef--)
 		{
-			const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = ElementAt(nDef);
+			if (nDef == nIgnore)
+				continue;
 
-			if ((nDef != nIgnore) && (attribDef.sUniqueID.CompareNoCase(sAttribID) == 0))
+			if ((ElementAt(nDef).sUniqueID.CompareNoCase(sAttribID) == 0))
 				return nDef;
 		}
 	}
@@ -1466,14 +1467,16 @@ CString CTDCCustomAttribDefinitionArray::FormatData(const TDCCADATA& data, const
 
 CString CTDCCustomAttribDefinitionArray::FormatData(const TDCCADATA& data, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, BOOL bISODates) const
 {
-	if (!attribDef.IsDataType(TDCCA_CALCULATION))
-		return attribDef.FormatData(data, bISODates);
-
 	// A bit of hackery for calculation types
-	TDCCUSTOMATTRIBUTEDEFINITION temp = attribDef;
-	temp.SetDataType(GetAttributeDataType(attribDef, TRUE));
+	if (attribDef.IsDataType(TDCCA_CALCULATION))
+	{
+		TDCCUSTOMATTRIBUTEDEFINITION temp = attribDef;
+		temp.SetDataType(GetAttributeDataType(attribDef, TRUE));
 
-	return temp.FormatData(data, bISODates);
+		return temp.FormatData(data, bISODates);
+	}
+
+	return attribDef.FormatData(data, bISODates);
 }
 
 BOOL CTDCCustomAttribDefinitionArray::IsColumnSortable(TDC_COLUMN nCustColID) const
