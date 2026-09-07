@@ -3601,7 +3601,7 @@ BOOL CTDCTaskCalculator::DoCustomAttributeCalculation(const TODOITEM* pTDI, cons
 			{
 				ASSERT(CustomAttribDefs().GetCalculationOperandDataType(calc.opSecond) != TDCCA_DATE);
 
-				BOOL bFirstIsDue = CustomAttributeOperandDerivesFromDueDate(calc.opFirst);
+				BOOL bFirstIsDue = CustomAttribDefs().CalculationOperandDerivesFromDueDate(calc.opFirst);
 
 				// If the date is derived from 'Due' and has a time component,
 				// but the result falls on a day boundary then the result date 
@@ -3628,8 +3628,8 @@ BOOL CTDCTaskCalculator::DoCustomAttributeCalculation(const TODOITEM* pTDI, cons
 
 			if (bFirstIsDate && bSecondIsDate)
 			{
-				BOOL bFirstIsDue = CustomAttributeOperandDerivesFromDueDate(calc.opFirst);
-				BOOL bSecondIsDue = CustomAttributeOperandDerivesFromDueDate(calc.opSecond);
+				BOOL bFirstIsDue = CustomAttribDefs().CalculationOperandDerivesFromDueDate(calc.opFirst);
+				BOOL bSecondIsDue = CustomAttribDefs().CalculationOperandDerivesFromDueDate(calc.opSecond);
 
 				if (Misc::StatesDiffer(bFirstIsDue, bSecondIsDue))
 				{
@@ -3673,39 +3673,6 @@ BOOL CTDCTaskCalculator::DoCustomAttributeCalculation(const TODOITEM* pTDI, cons
 	}
 
 	return TRUE;
-}
-
-BOOL CTDCTaskCalculator::CustomAttributeOperandDerivesFromDueDate(const TDCCUSTOMATTRIBUTECALCULATIONOPERAND& op) const
-{
-	if (op.nAttributeID == TDCA_DUEDATE)
-		return TRUE;
-
-	if (op.IsCustom())
-	{
-		const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
-		GET_CUSTDEF_RET(CustomAttribDefs(), op.sCustAttribID, pDef, FALSE);
-
-		if (pDef->IsCalculation())
-		{
-			const TDCCUSTOMATTRIBUTECALCULATIONOPERAND& opFirst = pDef->Calculation().opFirst;
-			const TDCCUSTOMATTRIBUTECALCULATIONOPERAND& opSecond = pDef->Calculation().opSecond;
-
-			if (CustomAttributeOperandDerivesFromDueDate(opFirst)) // RECURSIVE CALL
-			{
-				// other operand CANNOT be a date
-				return (CustomAttribDefs().GetCalculationOperandDataType(opSecond) != TDCCA_DATE);
-			}
-
-			// else try the reverse
-			if (CustomAttribDefs().GetCalculationOperandDataType(opFirst) != TDCCA_DATE)
-			{
-				return CustomAttributeOperandDerivesFromDueDate(opSecond); // RECURSIVE CALL
-			}
-		}
-	}
-
-	// all else
-	return FALSE;
 }
 
 BOOL CTDCTaskCalculator::GetFirstCustomAttributeOperandValue(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, 

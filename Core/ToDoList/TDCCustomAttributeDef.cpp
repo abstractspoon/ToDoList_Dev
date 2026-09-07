@@ -1333,6 +1333,38 @@ BOOL CTDCCustomAttribDefinitionArray::AnyCalculationUsesAnyAttribute(const CTDCA
 	return FALSE;
 }
 
+BOOL CTDCCustomAttribDefinitionArray::CalculationOperandDerivesFromDueDate(const TDCCUSTOMATTRIBUTECALCULATIONOPERAND& op) const
+{
+	if (op.nAttributeID == TDCA_DUEDATE)
+		return TRUE;
+
+	if (op.IsCustom())
+	{
+		const TDCCUSTOMATTRIBUTEDEFINITION attribDef = GetDefinition(op.sCustAttribID);
+
+		if (attribDef.IsCalculation())
+		{
+			const TDCCUSTOMATTRIBUTECALCULATIONOPERAND& opFirst = attribDef.calculation.opFirst;
+			const TDCCUSTOMATTRIBUTECALCULATIONOPERAND& opSecond = attribDef.calculation.opSecond;
+
+			if (CalculationOperandDerivesFromDueDate(opFirst)) // RECURSIVE CALL
+			{
+				// other operand CANNOT be a date
+				return (GetCalculationOperandDataType(opSecond) != TDCCA_DATE);
+			}
+
+			// else try the reverse
+			if (GetCalculationOperandDataType(opFirst) != TDCCA_DATE)
+			{
+				return CalculationOperandDerivesFromDueDate(opSecond); // RECURSIVE CALL
+			}
+		}
+	}
+
+	// all else
+	return FALSE;
+}
+
 TDC_ATTRIBUTE CTDCCustomAttribDefinitionArray::GetAttributeID(TDC_COLUMN nCustColID) const
 {
 	return GetDefinition(nCustColID).GetAttributeID();

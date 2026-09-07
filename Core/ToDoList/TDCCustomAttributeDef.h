@@ -250,6 +250,7 @@ public:
 	DWORD GetCalculationResultDataType(const TDCCUSTOMATTRIBUTECALCULATION& calc) const;
 	BOOL CalculationHasFeature(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, DWORD dwFeature) const;
 	BOOL AnyCalculationUsesAnyAttribute(const CTDCAttributeMap& mapAttribIDs) const;
+	BOOL CalculationOperandDerivesFromDueDate(const TDCCUSTOMATTRIBUTECALCULATIONOPERAND& op) const;
 
 	// VC6 fixes
 	const TDCCUSTOMATTRIBUTEDEFINITION& operator[](int nIndex) const { return ElementAt(nIndex); }
