@@ -3184,14 +3184,16 @@ BOOL CTDLTaskCtrlBase::DrawItemCustomColumn(const TODOITEM* pTDI, const TODOSTRU
 	switch (dwDataType)
 	{
 	case TDCCA_DATE:
-		if (!data.IsEmpty())
+		// Don't check 'data' because it will be empty for custom calculations
 		{
 			double dDate = 0.0;
 			
 			if (m_calculator.GetTaskCustomAttributeData(pTDI, pTDS, *pDef, dDate))
 			{
-				DrawColumnDate(pDC, dDate, TDCD_CUSTOM, rCol, crText, FALSE,
-							   pDef->HasFeature(TDCCAF_SHOWTIME), pDef->nTextAlignment);
+				BOOL bShowTime = m_aCustomAttribDefs.AttributeHasFeature(*pDef, TDCCAF_SHOWTIME);
+				BOOL bDerivesFromDue = (bShowTime && pDef->IsCalculation() && m_aCustomAttribDefs.CalculationDerivesFromDueDate(pDef->Calculation()));
+
+				DrawColumnDate(pDC, dDate, TDCD_CUSTOM, rCol, crText, FALSE, bShowTime, bDerivesFromDue, pDef->nTextAlignment);
 			}
 		}
 		break;
@@ -3321,32 +3323,37 @@ int CTDLTaskCtrlBase::CalcRequiredIconColumnWidth(int nNumImage, BOOL bWithPaddi
 	return nColWidth;
 }
 
-BOOL CTDLTaskCtrlBase::FormatDate(const COleDateTime& date, TDC_DATE nDate, CString& sDate, CString& sTime, CString& sDow, BOOL bCustomWantsTime) const
+BOOL CTDLTaskCtrlBase::FormatDate(const COleDateTime& date, TDC_DATE nDate, CString& sDate, CString& sTime, CString& sDow, 
+								  BOOL bCustomWantsTime, BOOL bCustomDerivesFromDue) const
 {
+	sTime.Empty();
+	sDow.Empty();
+
 	sDate = m_formatter.GetDateOnly(date, TRUE);
 
 	if (sDate.IsEmpty())
 		return FALSE;
 
 	if (WantDrawColumnTime(nDate, bCustomWantsTime))
-		sTime = m_formatter.GetTimeOnly(date, nDate);
-	else
-		sTime.Empty();
+	{
+		if (bCustomDerivesFromDue)
+			sTime = m_formatter.GetTimeOnly(date, TDCD_DUE);
+		else
+			sTime = m_formatter.GetTimeOnly(date, nDate);
+	}
 
 	if (HasStyle(TDCS_SHOWWEEKDAYINDATES))
 		sDow = CDateHelper::GetDayOfWeekName(CDateHelper::GetDayOfWeek(date), TRUE);
-	else
-		sDow.Empty();
 
 	return TRUE;
 }
 
-void CTDLTaskCtrlBase::DrawColumnDate(CDC* pDC, const COleDateTime& date, TDC_DATE nDate, const CRect& rect,
-									  COLORREF crText, BOOL bCalculated, BOOL bCustomWantsTime, int nAlign)
+void CTDLTaskCtrlBase::DrawColumnDate(CDC* pDC, const COleDateTime& date, TDC_DATE nDate, const CRect& rect, COLORREF crText, 
+									  BOOL bCalculated, BOOL bCustomWantsTime, BOOL bCustomDerivesFromDue, int nAlign)
 {
 	CString sDate, sTime, sDow;
 
-	if (!FormatDate(date, nDate, sDate, sTime, sDow, bCustomWantsTime))
+	if (!FormatDate(date, nDate, sDate, sTime, sDow, bCustomWantsTime, bCustomDerivesFromDue))
 		return; // nothing to do
 
 	BOOL bHasTime = !sTime.IsEmpty();
@@ -5559,7 +5566,7 @@ int CTDLTaskCtrlBase::CalcMaxCustomAttributeColWidth(TDC_COLUMN nColID, CDC* pDC
 	switch (m_aCustomAttribDefs.GetAttributeDataType(*pDef))
 	{
 	case TDCCA_DATE:
-		return CalcMaxDateColWidth(TDCD_CUSTOM, pDC, pDef->HasFeature(TDCCAF_SHOWTIME));
+		return CalcMaxDateColWidth(TDCD_CUSTOM, pDC, m_aCustomAttribDefs.AttributeHasFeature(*pDef, TDCCAF_SHOWTIME));
 
 	case TDCCA_ICON:
 		if (pDef->IsList())

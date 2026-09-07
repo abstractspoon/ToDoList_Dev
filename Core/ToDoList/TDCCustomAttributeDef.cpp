@@ -1329,6 +1329,11 @@ BOOL CTDCCustomAttribDefinitionArray::AnyCalculationUsesAnyAttribute(const CTDCA
 	return FALSE;
 }
 
+BOOL CTDCCustomAttribDefinitionArray::CalculationDerivesFromDueDate(const TDCCUSTOMATTRIBUTECALCULATION& calc) const
+{
+	return CalculationOperandDerivesFromDueDate(calc.opFirst);
+}
+
 BOOL CTDCCustomAttribDefinitionArray::CalculationOperandDerivesFromDueDate(const TDCCUSTOMATTRIBUTECALCULATIONOPERAND& op) const
 {
 	if (op.nAttributeID == TDCA_DUEDATE)
