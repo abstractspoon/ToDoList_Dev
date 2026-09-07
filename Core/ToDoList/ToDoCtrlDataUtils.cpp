@@ -3556,15 +3556,11 @@ TDC_UNITS CTDCTaskCalculator::GetTaskCustomAttributeUnits(const TODOITEM* pTDI, 
 
 		return data.GetTimeUnits();
 	}
-	else if (attribDef.IsDataType(TDCCA_CALCULATION))
+	else if (attribDef.IsDataType(TDCCA_CALCULATION) && 
+			(CustomAttribDefs().GetAttributeDataType(attribDef) == TDCCA_TIMEPERIOD))
 	{
-		const TDCCUSTOMATTRIBUTECALCULATION& calc = attribDef.Calculation();
-
-		if (CustomAttribDefs().GetCalculationResultDataType(calc) == TDCCA_TIMEPERIOD)
-		{
-			// TODO
-			return TDCU_DAYS;
-		}
+		// TODO
+		return TDCU_DAYS;
 	}
 
 	// all else
@@ -3666,7 +3662,7 @@ BOOL CTDCTaskCalculator::DoCustomAttributeCalculation(const TODOITEM* pTDI, cons
 		break;
 	}
 
-	if ((m_data.m_aCustomAttribDefs.GetCalculationResultDataType(calc) == TDCCA_DATE) &&
+	if ((m_data.m_aCustomAttribDefs.GetAttributeDataType(attribDef) == TDCCA_DATE) &&
 		!m_data.m_aCustomAttribDefs.AttributeHasFeature(attribDef, TDCCAF_SHOWTIME))
 	{
 		dResult = (int)dResult;
@@ -4741,11 +4737,9 @@ CString CTDCTaskFormatter::GetTaskCustomAttributeData(const TODOITEM* pTDI, cons
 			double dValue = 0.0;
 			TDC_UNITS nUnits = TDCU_DAYS;
 
-			BOOL bSuccess = m_calculator.GetTaskCustomAttributeData(pTDI, pTDS, attribDef, dValue, nUnits);
-
-			if (bSuccess)
+			if (m_calculator.GetTaskCustomAttributeData(pTDI, pTDS, attribDef, dValue, nUnits))
 			{
-				DWORD dwResultType = CustomAttribDefs().GetCalculationResultDataType(attribDef.Calculation());
+				DWORD dwResultType = CustomAttribDefs().GetAttributeDataType(attribDef);
 
 				switch (dwResultType)
 				{

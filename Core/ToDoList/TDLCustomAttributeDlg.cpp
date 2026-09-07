@@ -1214,7 +1214,7 @@ void CTDLCustomAttributeDlg::OnItemchangedAttriblist(NMHDR* pNMHDR, LRESULT* /*p
 
 		if (attrib.IsDataType(TDCCA_CALCULATION))
 		{
-			DWORD dwDataType = m_aAttribDef.GetCalculationResultDataType(attrib.Calculation());
+			DWORD dwDataType = m_aAttribDef.GetAttributeDataType(attrib);
 			m_cbFeatures.SetAttributeDefinition(dwDataType, TDCCA_NOTALIST, attrib.dwFeatures);
 		}
 		else
@@ -1416,7 +1416,7 @@ LRESULT CTDLCustomAttributeDlg::OnChangeCalculationAttributes(WPARAM wp, LPARAM 
 	attrib.SetCalculation(calc);
 
 	// Update feature combo
-	DWORD dwDataType = m_aAttribDef.GetCalculationResultDataType(attrib.Calculation());
+	DWORD dwDataType = m_aAttribDef.GetAttributeDataType(attrib);
 	m_cbFeatures.SetAttributeDefinition(dwDataType, TDCCA_NOTALIST, attrib.dwFeatures);
 	
 	return 0L;
