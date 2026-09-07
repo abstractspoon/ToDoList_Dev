@@ -1030,7 +1030,7 @@ COleDateTime CDateHelper::GetDate(DH_DATE nDate)
 		break;
 
 	case DHD_ENDTHISWEEK:
-		date = (GetDate(DHD_BEGINTHISWEEK).m_dt + 7.0); // RECURSIVE CALL
+		date = (GetDate(DHD_BEGINTHISWEEK).m_dt + 6.0); // RECURSIVE CALL
 		break;
 
 	case DHD_ENDNEXTWEEK:
