@@ -3601,10 +3601,17 @@ BOOL CTDCTaskCalculator::DoCustomAttributeCalculation(const TODOITEM* pTDI, cons
 			{
 				ASSERT(CustomAttribDefs().GetCalculationOperandDataType(calc.opSecond) != TDCCA_DATE);
 
-				// If the date has a time component but the result falls on
-				// a day boundary then the result date needs decrementing
-				if (CDateHelper::DateHasTime(dFirstVal) && CDateHelper::IsEndOfDay(dResult, TRUE))
+				BOOL bFirstIsDue = CustomAttributeOperandDerivesFromDueDate(calc.opFirst);
+
+				// If the date is derived from 'Due' and has a time component,
+				// but the result falls on a day boundary then the result date 
+				// needs decrementing
+				if (bFirstIsDue && 
+					CDateHelper::DateHasTime(dFirstVal) && 
+					CDateHelper::IsEndOfDay(dResult, TRUE))
+				{
 					dResult--;
+				}
 			}
 		}
 		break;
@@ -3626,11 +3633,13 @@ BOOL CTDCTaskCalculator::DoCustomAttributeCalculation(const TODOITEM* pTDI, cons
 
 				if (Misc::StatesDiffer(bFirstIsDue, bSecondIsDue))
 				{
-					if (bFirstIsDue && !CDateHelper::DateHasTime(dFirstVal))
+					if (bFirstIsDue && 
+						!CDateHelper::DateHasTime(dFirstVal))
 					{
 						dFirstVal++;
 					}
-					else if (bSecondIsDue && !CDateHelper::DateHasTime(dSecondVal))
+					else if (bSecondIsDue && 
+							 !CDateHelper::DateHasTime(dSecondVal))
 					{
 						dSecondVal++;
 					}
