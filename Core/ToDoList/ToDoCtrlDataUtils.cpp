@@ -3667,7 +3667,7 @@ BOOL CTDCTaskCalculator::DoCustomAttributeCalculation(const TODOITEM* pTDI, cons
 	}
 
 	if ((m_data.m_aCustomAttribDefs.GetCalculationResultDataType(calc) == TDCCA_DATE) &&
-		!m_data.m_aCustomAttribDefs.CalculationHasFeature(attribDef, TDCCAF_SHOWTIME))
+		!m_data.m_aCustomAttribDefs.AttributeHasFeature(attribDef, TDCCAF_SHOWTIME))
 	{
 		dResult = (int)dResult;
 	}
@@ -4753,7 +4753,7 @@ CString CTDCTaskFormatter::GetTaskCustomAttributeData(const TODOITEM* pTDI, cons
 					return GetTimePeriod(dValue, nUnits, TRUE);
 
 				case TDCCA_DATE:
-					return GetDateTime(dValue, CustomAttribDefs().CalculationHasFeature(attribDef, TDCCAF_SHOWTIME));
+					return GetDateTime(dValue, CustomAttribDefs().AttributeHasFeature(attribDef, TDCCAF_SHOWTIME));
 
 				case TDCCA_DOUBLE:
 				case TDCCA_INTEGER:
@@ -4839,11 +4839,7 @@ BOOL CTDCTaskFormatter::WantFormatValue(double dValue, const TDCCUSTOMATTRIBUTED
 	if (dValue != 0.0)
 		return TRUE;
 
-	if (attribDef.IsCalculation())
-		return !m_data.m_aCustomAttribDefs.CalculationHasFeature(attribDef, TDCCAF_HIDEZERO);
-
-	// else
-	return !attribDef.HasFeature(TDCCAF_HIDEZERO);
+	return !m_data.m_aCustomAttribDefs.AttributeHasFeature(attribDef, TDCCAF_HIDEZERO);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////

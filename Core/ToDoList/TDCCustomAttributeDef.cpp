@@ -1277,24 +1277,19 @@ BOOL CTDCCustomAttribDefinitionArray::AnyHasFeature(DWORD dwFeature) const
 
 	while (nDef--)
 	{
-		const TDCCUSTOMATTRIBUTEDEFINITION& def = ElementAt(nDef);
-
-		if (def.HasFeature(dwFeature))
-			return TRUE;
-
-		if (def.IsCalculation() && CalculationHasFeature(def, dwFeature))
+		if (AttributeHasFeature(ElementAt(nDef), dwFeature))
 			return TRUE;
 	}
 
 	return FALSE;
 }
 
-BOOL CTDCCustomAttribDefinitionArray::CalculationHasFeature(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, DWORD dwFeature) const
+BOOL CTDCCustomAttribDefinitionArray::AttributeHasFeature(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, DWORD dwFeature) const
 {
-	if (!attribDef.IsDataType(TDCCA_CALCULATION))
+	if (!Misc::HasFlag(attribDef.dwFeatures, dwFeature))
 		return FALSE;
 
-	if (!Misc::HasFlag(attribDef.dwFeatures, dwFeature))
+	if (!attribDef.IsCalculation())
 		return FALSE;
 
 	DWORD dwResultType = GetCalculationResultDataType(attribDef.calculation);
