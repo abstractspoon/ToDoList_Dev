@@ -3179,7 +3179,7 @@ BOOL CTDLTaskCtrlBase::DrawItemCustomColumn(const TODOITEM* pTDI, const TODOSTRU
 	pTDI->GetCustomAttributeValue(pDef->sUniqueID, data);
 
 	CRect rCol(rSubItem);
-	DWORD dwDataType = pDef->GetDataType();
+	DWORD dwDataType = m_aCustomAttribDefs.GetAttributeDataType(*pDef);
 	
 	switch (dwDataType)
 	{
