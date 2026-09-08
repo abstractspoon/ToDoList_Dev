@@ -6313,7 +6313,7 @@ BOOL CTDCLongestItemMap::Initialise(const CTDCColumnIDMap& mapCols, const CTDCCu
 			const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
 			GET_CUSTDEF_ALT(aCustAttribDefs, nColID, pDef, continue);
 
-			if (!IsSupported(*pDef))
+			if (!IsSupported(*pDef, aCustAttribDefs))
 				continue;
 		}
 
@@ -6411,9 +6411,9 @@ BOOL CTDCLongestItemMap::IsSupported(TDC_COLUMN nColID)
 	return TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(nColID);
 }
 
-BOOL CTDCLongestItemMap::IsSupported(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef)
+BOOL CTDCLongestItemMap::IsSupported(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, const CTDCCustomAttribDefinitionArray& aCustAttribDefs)
 {
-	switch (attribDef.GetDataType())
+	switch (aCustAttribDefs.GetAttributeDataType(attribDef))
 	{
 	case TDCCA_DATE:
 	case TDCCA_BOOL:
@@ -6623,7 +6623,7 @@ CString CTDCTaskColumnSizer::GetLongestValue(const TDCCUSTOMATTRIBUTEDEFINITION&
 {
 	CString sLongest;
 
-	if (!CTDCLongestItemMap::IsSupported(attribDef))
+	if (!CTDCLongestItemMap::IsSupported(attribDef, CustomAttribDefs()))
 	{
 		ASSERT(0);
 	}
@@ -6647,7 +6647,7 @@ CString CTDCTaskColumnSizer::GetLongestValue(const TDCCUSTOMATTRIBUTEDEFINITION&
 
 BOOL CTDCTaskColumnSizer::GetLongestAggregatedValue(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, const CDWordArray& aTaskIDs, CString& sLongest) const
 {
-	if (!CTDCLongestItemMap::IsSupported(attribDef))
+	if (!CTDCLongestItemMap::IsSupported(attribDef, CustomAttribDefs()))
 	{
 		ASSERT(0);
 		return FALSE;

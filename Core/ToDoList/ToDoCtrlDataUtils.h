@@ -482,7 +482,7 @@ public:
 	CString GetLongestValue(TDC_COLUMN nColID) const;
 
 	static BOOL IsSupported(TDC_COLUMN nColID);
-	static BOOL IsSupported(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef);
+	static BOOL IsSupported(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, const CTDCCustomAttribDefinitionArray& aCustAttribDefs);
 };
 
 // --------------------------------------------------------------------
