@@ -237,7 +237,7 @@ public:
 	CString GetTaskTitlePaths(const CDWordArray& aTaskIDs, DWORD dwFlags, TCHAR cSep = 0) const;
 
 	// Helpers
-	CString GetDateTime(const COleDateTime& date, BOOL bAllowTime = TRUE) const;
+	CString GetDateTime(const COleDateTime& date, BOOL bAllowTime = TRUE, BOOL bForceTime = FALSE) const;
 	CString GetDateOnly(const COleDateTime& date, BOOL bWantYear) const;
 	CString GetTimeOnly(const COleDateTime& date, TDC_DATE nDate) const;
 	CString GetCost(double dCost) const;

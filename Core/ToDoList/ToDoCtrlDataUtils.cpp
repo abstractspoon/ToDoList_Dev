@@ -4030,7 +4030,7 @@ CString CTDCTaskFormatter::GetTaskTimeRemaining(DWORD dwTaskID) const
 	return GetTaskTimeRemaining(pTDI, pTDS);
 }
 
-CString CTDCTaskFormatter::GetDateTime(const COleDateTime& date, BOOL bAllowTime) const
+CString CTDCTaskFormatter::GetDateTime(const COleDateTime& date, BOOL bAllowTime, BOOL bForceTime) const
 {
 	if (!CDateHelper::IsDateSet(date))
 		return EMPTY_STR;
@@ -4039,7 +4039,9 @@ CString CTDCTaskFormatter::GetDateTime(const COleDateTime& date, BOOL bAllowTime
 	
 	Misc::SetFlag(dwDateFmt, DHFD_ISO, HasStyle(TDCS_SHOWDATESINISO));
 	Misc::SetFlag(dwDateFmt, DHFD_DOW, HasStyle(TDCS_SHOWWEEKDAYINDATES));
-	Misc::SetFlag(dwDateFmt, DHFD_TIME | DHFD_NOSEC, (bAllowTime && CDateHelper::DateHasTime(date)));
+
+	BOOL bWantTime = (bAllowTime && (bForceTime || CDateHelper::DateHasTime(date)));
+	Misc::SetFlag(dwDateFmt, (DHFD_TIME | DHFD_NOSEC), bWantTime);
 
 	return CDateHelper::FormatDate(date, dwDateFmt);
 }
@@ -4739,7 +4741,19 @@ CString CTDCTaskFormatter::GetTaskCustomAttributeData(const TODOITEM* pTDI, cons
 					return GetTimePeriod(dValue, nUnits, TRUE);
 
 				case TDCCA_DATE:
-					return GetDateTime(dValue, CustomAttribDefs().AttributeHasFeature(attribDef, TDCCAF_SHOWTIME));
+					{
+						BOOL bShowTime = CustomAttribDefs().AttributeHasFeature(attribDef, TDCCAF_SHOWTIME);
+
+						if (bShowTime && 
+							!CDateHelper::DateHasTime(dValue) &&
+							CustomAttribDefs().CalculationDerivesFromDueDate(attribDef.Calculation()))
+						{
+							dValue = CDateHelper::GetEndOfDay(dValue);
+						}
+
+						return GetDateTime(dValue, bShowTime, bShowTime);
+					}
+					break;
 
 				case TDCCA_DOUBLE:
 				case TDCCA_INTEGER:
