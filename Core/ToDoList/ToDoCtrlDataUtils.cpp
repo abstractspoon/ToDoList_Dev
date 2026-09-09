@@ -4746,7 +4746,7 @@ CString CTDCTaskFormatter::GetTaskCustomAttributeData(const TODOITEM* pTDI, cons
 
 						if (bShowTime && 
 							!CDateHelper::DateHasTime(dValue) &&
-							CustomAttribDefs().CalculationDerivesFromDueDate(attribDef.Calculation()))
+							CustomAttribDefs().CalculationOperandDerivesFromDueDate(attribDef.Calculation().opFirst))
 						{
 							dValue = CDateHelper::GetEndOfDay(dValue);
 						}

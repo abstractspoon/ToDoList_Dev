@@ -3191,7 +3191,9 @@ BOOL CTDLTaskCtrlBase::DrawItemCustomColumn(const TODOITEM* pTDI, const TODOSTRU
 			if (m_calculator.GetTaskCustomAttributeData(pTDI, pTDS, *pDef, dDate))
 			{
 				BOOL bShowTime = m_aCustomAttribDefs.AttributeHasFeature(*pDef, TDCCAF_SHOWTIME);
-				BOOL bDerivesFromDue = (bShowTime && pDef->IsCalculation() && m_aCustomAttribDefs.CalculationDerivesFromDueDate(pDef->Calculation()));
+				BOOL bDerivesFromDue = (bShowTime && 
+										pDef->IsCalculation() && 
+										m_aCustomAttribDefs.CalculationOperandDerivesFromDueDate(pDef->Calculation().opFirst));
 
 				DrawColumnDate(pDC, dDate, TDCD_CUSTOM, rCol, crText, FALSE, bShowTime, bDerivesFromDue, pDef->nTextAlignment);
 			}

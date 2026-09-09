@@ -250,7 +250,6 @@ public:
 	DWORD GetCalculationOperandDataType(const TDCCUSTOMATTRIBUTECALCULATIONOPERAND& op) const;
 	DWORD GetCalculationResultDataType(const TDCCUSTOMATTRIBUTECALCULATION& calc) const;
 	BOOL AnyCalculationUsesAnyAttribute(const CTDCAttributeMap& mapAttribIDs) const;
-	BOOL CalculationDerivesFromDueDate(const TDCCUSTOMATTRIBUTECALCULATION& calc) const;
 	BOOL CalculationOperandDerivesFromDueDate(const TDCCUSTOMATTRIBUTECALCULATIONOPERAND& op) const;
 
 	// VC6 fixes
