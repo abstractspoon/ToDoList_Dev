@@ -5154,13 +5154,6 @@ void CTDLTaskCtrlBase::GetAttributesAffectedByMod(TDC_ATTRIBUTE nAttribID, CTDCA
 		GetAttributesAffectedByMod(TDCA_DONEDATE, mapAttribIDs); // RECURSIVE CALL
 		break;
 
-	case TDCA_CUSTOMATTRIB_DEFS: // ------------------------------------------------
-		// Special case: We replace the definition 
-		// attribute with the value attribute
-		mapAttribIDs.Remove(TDCA_CUSTOMATTRIB_DEFS);
-		mapAttribIDs.Add(TDCA_CUSTOMATTRIB);
-		break;
-
 	case TDCA_TIMEESTIMATE: // ----------------------------------------------------
 		if (bWantUpdateDependentDates)
 		{
