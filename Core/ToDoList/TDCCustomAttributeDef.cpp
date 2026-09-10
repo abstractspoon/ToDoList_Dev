@@ -1290,12 +1290,10 @@ BOOL CTDCCustomAttribDefinitionArray::AttributeHasFeature(const TDCCUSTOMATTRIBU
 	if (!Misc::HasFlag(attribDef.dwFeatures, dwFeature))
 		return FALSE;
 
-	if (!attribDef.IsCalculation())
-		return FALSE;
+	DWORD dwDataType = GetAttributeDataType(attribDef);
+	DWORD dwListType = attribDef.GetListType();
 
-	DWORD dwResultType = GetCalculationResultDataType(attribDef.calculation);
-
-	return TDCCUSTOMATTRIBUTEDEFINITION::AttributeSupportsFeature(dwResultType, attribDef.GetListType(), dwFeature);
+	return TDCCUSTOMATTRIBUTEDEFINITION::AttributeSupportsFeature(dwDataType, dwListType, dwFeature);
 }
 
 BOOL CTDCCustomAttribDefinitionArray::AnyCalculationUsesAnyAttribute(const CTDCAttributeMap& mapAttribIDs) const

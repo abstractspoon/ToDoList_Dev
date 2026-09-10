@@ -3435,16 +3435,20 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(const TODOITEM* pTDI, const 
 {
 	CHECKSET_ALREADY_PROCESSED(mapProcessedIDs, pTDS, FALSE);
 
-	double dCalcValue = DBL_NULL, dSubtaskVal;
 	TDCCADATA data;
+	double dCalcValue = DBL_NULL;
 
 	if (attribDef.IsDataType(TDCCA_CALCULATION))
 	{
 		if (!DoCustomAttributeCalculation(pTDI, pTDS, attribDef, dCalcValue, nUnits, attribDef.IsAggregated()))
 			return FALSE;
-	}
 
-	data.Set(dCalcValue);
+		data.Set(dCalcValue);
+	}
+	else
+	{
+		pTDI->GetCustomAttributeValue(attribDef.sUniqueID, data);
+	}
 
 	if (attribDef.HasFeature(TDCCAF_ACCUMULATE))
 	{
@@ -3462,6 +3466,8 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(const TODOITEM* pTDI, const 
 
 			if (GET_SUBTASK(pTDS, nSubtask, pTDIChild, pTDSChild))
 			{
+				double dSubtaskVal;
+
 				if (GetTaskCustomAttributeData(pTDIChild, pTDSChild, attribDef, dSubtaskVal, nUnits, mapProcessedIDs)) // RECURSIVE CALL
 					dCalcValue += dSubtaskVal;
 			}
@@ -3485,6 +3491,8 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(const TODOITEM* pTDI, const 
 
 			if (GET_SUBTASK(pTDS, nSubtask, pTDIChild, pTDSChild))
 			{
+				double dSubtaskVal;
+
 				if (GetTaskCustomAttributeData(pTDIChild, pTDSChild, attribDef, dSubtaskVal, nUnits, mapProcessedIDs)) // RECURSIVE CALL
 					dCalcValue = max(dSubtaskVal, dCalcValue);
 			}
@@ -3511,6 +3519,8 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(const TODOITEM* pTDI, const 
 
 			if (GET_SUBTASK(pTDS, nSubtask, pTDIChild, pTDSChild))
 			{
+				double dSubtaskVal;
+
 				if (GetTaskCustomAttributeData(pTDIChild, pTDSChild, attribDef, dSubtaskVal, nUnits, mapProcessedIDs)) // RECURSIVE CALL
 					dCalcValue = min(dSubtaskVal, dCalcValue);
 			}
@@ -3523,18 +3533,20 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(const TODOITEM* pTDI, const 
 	{
 		if (!attribDef.GetDataAsDouble(data, dCalcValue, nUnits))
 			return FALSE;
-
-		BOOL bIsDate = (CustomAttribDefs().GetAttributeDataType(attribDef) == TDCCA_DATE);
-		BOOL bShowTime = (bIsDate && CustomAttribDefs().AttributeHasFeature(attribDef, TDCCAF_SHOWTIME));
-
-		if (bIsDate && !bShowTime)
-			dCalcValue = (int)dCalcValue;
 	}
 
 	if (dCalcValue == DBL_NULL)
 		return FALSE;
 
 	dValue = dCalcValue;
+
+	// Truncate time of day as required
+	if ((CustomAttribDefs().GetAttributeDataType(attribDef) == TDCCA_DATE) &&
+		!CustomAttribDefs().AttributeHasFeature(attribDef, TDCCAF_SHOWTIME))
+	{
+		dValue = (int)dValue;
+	}
+
 	return TRUE;
 }
 
