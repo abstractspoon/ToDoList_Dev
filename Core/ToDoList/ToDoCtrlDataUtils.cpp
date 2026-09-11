@@ -3542,7 +3542,7 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(const TODOITEM* pTDI, const 
 
 	// Truncate time of day as required
 	if ((CustomAttribDefs().GetAttributeDataType(attribDef) == TDCCA_DATE) &&
-		!CustomAttribDefs().AttributeHasFeature(attribDef, TDCCAF_SHOWTIME))
+		!CustomAttribDefs().AttributeHasFeature(attribDef, TDCCAF_SHOWTIMEOFDAY))
 	{
 		dValue = (int)dValue;
 	}
@@ -3668,7 +3668,7 @@ BOOL CTDCTaskCalculator::DoCustomAttributeCalculation(const TODOITEM* pTDI, cons
 	}
 
 	if ((m_data.m_aCustomAttribDefs.GetAttributeDataType(attribDef) == TDCCA_DATE) &&
-		!m_data.m_aCustomAttribDefs.AttributeHasFeature(attribDef, TDCCAF_SHOWTIME))
+		!m_data.m_aCustomAttribDefs.AttributeHasFeature(attribDef, TDCCAF_SHOWTIMEOFDAY))
 	{
 		dResult = (int)dResult;
 	}
@@ -4753,7 +4753,7 @@ CString CTDCTaskFormatter::GetTaskCustomAttributeData(const TODOITEM* pTDI, cons
 
 				case TDCCA_DATE:
 					{
-						BOOL bShowTime = CustomAttribDefs().AttributeHasFeature(attribDef, TDCCAF_SHOWTIME);
+						BOOL bShowTime = CustomAttribDefs().AttributeHasFeature(attribDef, TDCCAF_SHOWTIMEOFDAY);
 
 						if (bShowTime && 
 							!CDateHelper::DateHasTime(dValue) &&
