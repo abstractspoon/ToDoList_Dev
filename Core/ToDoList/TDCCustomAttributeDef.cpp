@@ -672,6 +672,12 @@ BOOL TDCCUSTOMATTRIBUTEDEFINITION::AttributeSupportsFeature(DWORD dwDataType, DW
 	case TDCCAF_EXCLUDEBLANKITEM:
 		return ((dwListType == TDCCA_AUTOLIST) || (dwListType == TDCCA_FIXEDLIST));
 
+	case TDCCAF_IGNORETIMEOFDAY:
+		// Not supported by this function because it requires more context.
+		// Use 'CTDCCustomAttribDefinitionArray::AttributeSupportsFeature' instead.
+		ASSERT(0);
+		return FALSE;
+
 	default:
 		// Other features not supported on multi-list types
 		if ((dwListType == TDCCA_AUTOMULTILIST) || (dwListType == TDCCA_FIXEDMULTILIST))
@@ -720,8 +726,9 @@ BOOL TDCCUSTOMATTRIBUTEDEFINITION::AttributeSupportsFeature(DWORD dwDataType, DW
 		break;
 
 	case TDCCA_CALCULATION:
-		// Caller is responsible for determining the calculation 
-		// result type and passing that as the argument
+		// Not supported by this function because it requires more context.
+		// Use 'CTDCCustomAttribDefinitionArray::AttributeSupportsFeature' instead.
+		ASSERT(0);
 		break;
 
 	default:
@@ -1290,6 +1297,31 @@ BOOL CTDCCustomAttribDefinitionArray::AttributeHasFeature(const TDCCUSTOMATTRIBU
 	if (!Misc::HasFlag(attribDef.dwFeatures, dwFeature))
 		return FALSE;
 
+	return AttributeSupportsFeature(attribDef, dwFeature);
+}
+
+BOOL CTDCCustomAttribDefinitionArray::AttributeSupportsFeature(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, DWORD dwFeature) const
+{
+	// special case 
+	if (dwFeature == TDCCAF_IGNORETIMEOFDAY)
+	{
+		// Must be a subtraction of two dates
+		if (!attribDef.IsCalculation())
+			return FALSE;
+
+		if (attribDef.Calculation().nOperator != TDCCAC_SUBTRACT)
+			return FALSE;
+
+		if (TDCCA_DATE != GetCalculationOperandDataType(attribDef.Calculation().opFirst))
+			return FALSE;
+
+		if (TDCCA_DATE != GetCalculationOperandDataType(attribDef.Calculation().opSecond))
+			return FALSE;
+
+		return TRUE;
+	}
+
+	// All else
 	DWORD dwDataType = GetAttributeDataType(attribDef);
 	DWORD dwListType = attribDef.GetListType();
 

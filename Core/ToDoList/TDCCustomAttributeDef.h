@@ -220,7 +220,9 @@ public:
 
 	BOOL AnyHasFeature(DWORD dwFeature) const;
 	BOOL MatchAny(const CTDCCustomAttribDefinitionArray& aAttribDefs) const;
+
 	BOOL AttributeHasFeature(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, DWORD dwFeature) const;
+	BOOL AttributeSupportsFeature(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, DWORD dwFeature) const;
 	
 	TDC_ATTRIBUTE GetAttributeID(TDC_COLUMN nCustColID) const;
 	TDC_ATTRIBUTE GetAttributeID(const CString& sCustAttribID) const;

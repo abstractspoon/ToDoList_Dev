@@ -70,7 +70,7 @@ BOOL CTDLCustomAttribFeatureComboBox::SetAttributeDefinition(const TDCCUSTOMATTR
 	DWORD dwDataType = attribDef.GetDataType();
 	DWORD dwListType = attribDef.GetListType();
 
-	BOOL bCalc = (dwDataType & TDCCA_CALCULATION);
+	BOOL bCalc = (dwDataType == TDCCA_CALCULATION);
 
 	if (bCalc)
 	{
@@ -81,19 +81,8 @@ BOOL CTDLCustomAttribFeatureComboBox::SetAttributeDefinition(const TDCCUSTOMATTR
 	for (int nFeature = 0; nFeature < NUM_FEATURES; nFeature++)
 	{
 		const TDCFEATURE& feature = FEATURES[nFeature];
-		BOOL bAddFeature = TDCCUSTOMATTRIBUTEDEFINITION::AttributeSupportsFeature(dwDataType, dwListType, feature.dwFeature);
-
-		if (!bAddFeature && bCalc && (feature.dwFeature == TDCCAF_IGNORETIMEOFDAY))
-		{
-			// Only supported when subtracting dates
-			const TDCCUSTOMATTRIBUTECALCULATION& calc = attribDef.Calculation();
-
-			bAddFeature = ((calc.nOperator == TDCCAC_SUBTRACT) &&
-							(aAttribDefs.GetCalculationOperandDataType(calc.opFirst) == TDCCA_DATE) &&
-							(aAttribDefs.GetCalculationOperandDataType(calc.opSecond) == TDCCA_DATE));
-		}		
 		
-		if (bAddFeature)
+		if (aAttribDefs.AttributeSupportsFeature(attribDef, feature.dwFeature))
 			CDialogHelper::AddStringT(*this, feature.nStringID, feature.dwFeature);
 	}
 
