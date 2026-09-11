@@ -341,13 +341,13 @@ BOOL CTaskCalendarCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE n
 	{
 		RecalcDataRange();
 		RebuildCellTasks();
-		RestoreSelection(dwRealSelTaskID, sCustDateAttribID, bSelTaskWasVisible);
 
 		if (nUpdate == IUI_EDIT)
 			m_aSortedTasks.SetNeedsResort(m_nSortBy, m_bSortAscending);
 		else
 			m_aSortedTasks.SetNeedsRebuild();
 	}
+	RestoreSelection(dwRealSelTaskID, sCustDateAttribID, bSelTaskWasVisible);
 
 	return bChange;
 }

@@ -1404,7 +1404,6 @@ LRESULT CTDLCustomAttributeDlg::OnChangeCalculationAttributes(WPARAM wp, LPARAM 
 
 	// Update feature combo
 	RefreshFeatureCombo(nSel, attrib);
-		
 	return 0L;
 }
 
