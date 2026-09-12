@@ -3887,14 +3887,29 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeOperandValue(const TODOITEM* pTDI
 
 	TDCCADATA data;
 
-	if (attribDef.IsDataType(TDCCA_CALCULATION))
+	switch (attribDef.GetAttributeType())
+	{
+	case TDCCA_CALCULATION:
 		return DoCustomAttributeCalculation(pTDI, pTDS, attribDef, dValue, nUnits); // RECURSIVE CALL
 
-	// else
-	if (pTDI->GetCustomAttributeValue(attribDef.sUniqueID, data))
-		return attribDef.GetDataAsDouble(data, dValue, nUnits);
+	case TDCCA_DATE:
+		if (pTDI->GetCustomAttributeValue(attribDef.sUniqueID, data) &&
+			attribDef.GetDataAsDouble(data, dValue, nUnits))
+		{
+			if (!attribDef.HasFeature(TDCCAF_SHOWTIMEOFDAY))
+				dValue = (int)dValue;
 
-	// else allow strictly numeric types to be empty == 0.0
+			return TRUE;
+		}
+		break;
+
+	default:
+		if (pTDI->GetCustomAttributeValue(attribDef.sUniqueID, data))
+			return attribDef.GetDataAsDouble(data, dValue, nUnits);
+		break;
+	}
+
+	// Allow strictly numeric types to be empty == 0.0
 	switch (attribDef.GetDataType())
 	{
 	case TDCCA_INTEGER:
