@@ -705,7 +705,7 @@ void CTDCCUSTOMATTRIBUTECALCULATIONTest::TestTDCCUSTOMATTRIBUTECALCULATIONResult
 				}
 			}
 
-			// .dwFeatures = TDCCAF_SHOWTIMEOFDAY
+			// ID_CUSTDATEPLUSCUSTDOUBLE.dwFeatures = TDCCAF_SHOWTIMEOFDAY
 			{
 				CTempCustAttribDef tempCalcDef(ID_CUSTDATEPLUSCUSTDOUBLE, aAttribDefs, TDCCAF_SHOWTIMEOFDAY);
 				ExpectTrue(aAttribDefs.AttributeHasFeature(tempCalcDef, TDCCAF_SHOWTIMEOFDAY));
@@ -1022,6 +1022,7 @@ void CTDCCUSTOMATTRIBUTECALCULATIONTest::TestTDCCUSTOMATTRIBUTECALCULATIONResult
 					ExpectEQ(dValue, 41261.0);
 				}
 
+				// ID_CUSTDATE.dwFeatures = TDCCAF_SHOWTIMEOFDAY
 				{
 					CTempCustAttribDef tempDateDef(ID_CUSTDATE, aAttribDefs, TDCCAF_SHOWTIMEOFDAY);
 					ExpectTrue(aAttribDefs.AttributeHasFeature(tempDateDef, TDCCAF_SHOWTIMEOFDAY));
