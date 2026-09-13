@@ -3644,13 +3644,11 @@ BOOL CTDCTaskCalculator::DoCustomAttributeCalculation(const TODOITEM* pTDI, cons
 
 					if (Misc::StatesDiffer(bFirstIsDue, bSecondIsDue))
 					{
-						if (bFirstIsDue &&
-							!CDateHelper::DateHasTime(dFirstVal))
+						if (bFirstIsDue && !CDateHelper::DateHasTime(dFirstVal))
 						{
 							dFirstVal++;
 						}
-						else if (bSecondIsDue &&
-								 !CDateHelper::DateHasTime(dSecondVal))
+						else if (bSecondIsDue && !CDateHelper::DateHasTime(dSecondVal))
 						{
 							dSecondVal++;
 						}
