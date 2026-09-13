@@ -24,8 +24,8 @@ public:
 	TESTRESULT Run();
 
 protected:
-	void TestTDCCUSTOMATTRIBUTECALCULATION();
-	void TestTDCCUSTOMATTRIBUTECALCULATIONSimple();
+	void TestTDCCUSTOMATTRIBUTECALCULATIONValidity();
+	void TestTDCCUSTOMATTRIBUTECALCULATIONResults();
 
 	void InitCustomAttributes(CTDCCustomAttribDefinitionArray& aAttribDef);
 	void InitDataModel(CToDoCtrlData& data);
