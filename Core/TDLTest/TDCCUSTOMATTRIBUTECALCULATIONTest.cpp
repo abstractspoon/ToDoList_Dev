@@ -53,6 +53,8 @@ public:
 		m_aAttribDefs(aAttribDefs),
 		m_nAttrib(aAttribDefs.Find(m_sAttribID))
 	{
+		ASSERT(m_nAttrib != -1);
+
 		m_dwOrgFeatures = m_aAttribDefs[m_nAttrib].dwFeatures;
 		m_aAttribDefs[m_nAttrib].dwFeatures = dwFeature;
 	}
