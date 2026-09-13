@@ -25,17 +25,18 @@ struct TDCFEATURE
 
 const TDCFEATURE FEATURES[] = 
 {
-	{ IDS_CUSTOM_FEATURE_SORTABLE,		TDCCAF_SORT },
-	{ IDS_CUSTOM_FEATURE_ACCUMULATED,	TDCCAF_ACCUMULATE },
-	{ IDS_CUSTOM_FEATURE_MINIMUM,		TDCCAF_MINIMIZE },
-	{ IDS_CUSTOM_FEATURE_MAXIMUM,		TDCCAF_MAXIMIZE },
-	{ IDS_CUSTOM_FEATURE_HIDEZERO,		TDCCAF_HIDEZERO },
-	{ IDS_CUSTOM_FEATURE_SHOWTIME,		TDCCAF_SHOWTIME },
-	{ IDS_CUSTOM_FEATURE_FILTER,		TDCCAF_FILTER },
-	{ IDS_CUSTOM_FEATURE_INHERITANCE,	TDCCAF_INHERITPARENTCHANGES },
-	{ IDS_CUSTOM_FEATURE_PERCENTAGE,	TDCCAF_DISPLAYASPERCENT },
-	{ IDS_CUSTOM_FEATURE_NOBLANK,		TDCCAF_EXCLUDEBLANKITEM },
-	{ IDS_CUSTOM_FEATURE_ONEDECIMAL,	TDCCAF_ONEDECIMAL },
+	{ IDS_CUSTOM_FEATURE_SORTABLE,			TDCCAF_SORT },
+	{ IDS_CUSTOM_FEATURE_ACCUMULATED,		TDCCAF_ACCUMULATE },
+	{ IDS_CUSTOM_FEATURE_MINIMUM,			TDCCAF_MINIMIZE },
+	{ IDS_CUSTOM_FEATURE_MAXIMUM,			TDCCAF_MAXIMIZE },
+	{ IDS_CUSTOM_FEATURE_HIDEZERO,			TDCCAF_HIDEZERO },
+	{ IDS_CUSTOM_FEATURE_SHOWTIMEOFDAY,		TDCCAF_SHOWTIMEOFDAY },
+	{ IDS_CUSTOM_FEATURE_FILTER,			TDCCAF_FILTER },
+	{ IDS_CUSTOM_FEATURE_INHERITANCE,		TDCCAF_INHERITPARENTCHANGES },
+	{ IDS_CUSTOM_FEATURE_PERCENTAGE,		TDCCAF_DISPLAYASPERCENT },
+	{ IDS_CUSTOM_FEATURE_NOBLANK,			TDCCAF_EXCLUDEBLANKITEM },
+	{ IDS_CUSTOM_FEATURE_ONEDECIMAL,		TDCCAF_ONEDECIMAL },
+	{ IDS_CUSTOM_FEATURE_IGNORETIMEOFDAY,	TDCCAF_IGNORETIMEOFDAY },
 };
 const int NUM_FEATURES = sizeof(FEATURES) / sizeof(TDCFEATURE);
 
@@ -56,37 +57,39 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CTDLCustomAttribFeatureComboBox message handlers
 
-BOOL CTDLCustomAttribFeatureComboBox::SetAttributeDefinition(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef)
-{
-	return SetAttributeDefinition(attribDef.GetDataType(), attribDef.GetListType(), attribDef.dwFeatures);
-}
-
-BOOL CTDLCustomAttribFeatureComboBox::SetAttributeDefinition(DWORD dwDataType, DWORD dwListType, DWORD dwSelectedFeatures)
+BOOL CTDLCustomAttribFeatureComboBox::SetAttributeDefinition(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef,
+															 const CTDCCustomAttribDefinitionArray& aAttribDefs)
 {
 	ASSERT_VALID(this);
 
 	if (!GetSafeHwnd())
 		return FALSE;
 
-	BuildCombo(dwDataType, dwListType, dwSelectedFeatures);
-
-	return (GetCount() > 0);
-}
-
-void CTDLCustomAttribFeatureComboBox::BuildCombo(DWORD dwDataType, DWORD dwListType, DWORD dwSelectedFeatures)
-{
 	ResetContent();
+
+	DWORD dwDataType = attribDef.GetDataType();
+	DWORD dwListType = attribDef.GetListType();
+
+	BOOL bCalc = (dwDataType == TDCCA_CALCULATION);
+
+	if (bCalc)
+	{
+		dwDataType = aAttribDefs.GetCalculationResultDataType(attribDef.Calculation());
+		dwListType = TDCCA_NOTALIST;
+	}
 
 	for (int nFeature = 0; nFeature < NUM_FEATURES; nFeature++)
 	{
 		const TDCFEATURE& feature = FEATURES[nFeature];
-
-		if (TDCCUSTOMATTRIBUTEDEFINITION::AttributeSupportsFeature(dwDataType, dwListType, feature.dwFeature))
+		
+		if (aAttribDefs.AttributeSupportsFeature(attribDef, feature.dwFeature))
 			CDialogHelper::AddStringT(*this, feature.nStringID, feature.dwFeature);
 	}
 
-	SetCheckedByItemData(dwSelectedFeatures);
+	SetCheckedByItemData(attribDef.dwFeatures);
 	EnableTooltip();
+
+	return TRUE;
 }
 
 DWORD CTDLCustomAttribFeatureComboBox::GetSelectedFeatures() const

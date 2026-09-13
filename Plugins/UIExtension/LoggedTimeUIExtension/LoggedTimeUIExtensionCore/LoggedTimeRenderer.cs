@@ -325,7 +325,7 @@ namespace LoggedTimeUIExtension
 			return FormatTime(entry.Length.TotalHours, "{0}H duration", "{0}m duration", trans);
 		}
 
-		void DrawTaskText(Graphics g, Calendar.AppointmentView apptView, Rectangle rect, Color textColor)
+		void DrawTaskText(Graphics g, Calendar.AppointmentView apptView, Rectangle rect, Color textColor, Color backColor)
 		{
 			var entry = (apptView.Appointment as LogEntry);
 
@@ -343,7 +343,7 @@ namespace LoggedTimeUIExtension
 #if DEBUG
 			text.Insert(0, string.Format("[{0}]", entry.Id));
 #endif
-			m_RenderHelper.DrawItemText(g, string.Join("\n", text), rect, textColor, FontStyle.Regular, false);
+			m_RenderHelper.DrawItemText(g, string.Join("\n", text), rect, textColor, backColor, FontStyle.Regular, false);
 		}
 
 		public void DrawAppointment(Graphics g, Rectangle daysRect, Calendar.AppointmentView apptView, bool isSelected)
@@ -367,8 +367,7 @@ namespace LoggedTimeUIExtension
 			var apptRect = apptView.Rectangle;
 
 			DrawTaskBackground(g, apptRect, apptView, isSelected, fillColor, borderColor);
-			//DrawTaskIconAndGripper(g, apptView, isSelected, barColor, ref apptRect);
-			DrawTaskText(g, apptView, apptRect, textColor);
+			DrawTaskText(g, apptView, apptRect, textColor, fillColor);
 		}
 
 		protected void DrawTodayTime(PaintEventArgs e, Rectangle rect, DateTime date)

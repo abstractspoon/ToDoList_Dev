@@ -3907,8 +3907,7 @@ void CTabbedToDoCtrl::UpdateExtensionViews(const CTDCAttributeMap& mapAttribIDs,
 			 mapAttribIDs.Has(TDCA_MERGE) ||
 			 mapAttribIDs.Has(TDCA_ARCHIVE))
 	{
-		// These attributes require an entire refresh of the current view 
-		// (if it's an extension) and mark the others as needing updates
+		// Entire refresh of the current view and mark the others as needing updates
 		UpdateExtensionViewsTasks(mapAttribIDs);
 	}
 	else if (mapAttribIDs.Has(TDCA_POSITION) ||
@@ -3954,7 +3953,7 @@ void CTabbedToDoCtrl::UpdateExtensionViews(const CTDCAttributeMap& mapAttribIDs,
 		if (bFixupSelection)
 			m_taskTree.SelectTasks(aSelTaskIDs);
 	}
-	else // all else
+	else // all else -> Just selected tasks
 	{
 		UpdateExtensionViewsSelection(mapAttribIDs);
 	}
@@ -3962,9 +3961,14 @@ void CTabbedToDoCtrl::UpdateExtensionViews(const CTDCAttributeMap& mapAttribIDs,
 
 void CTabbedToDoCtrl::PrepareAttributesForExtensionViewUpdate(CTDCAttributeMap& mapAttribIDs)
 {
-	// Replace any individual custom attribute IDs with TDCA_CUSTOMATTRIB_ALL
-	if (!mapAttribIDs.Has(TDCA_CUSTOMATTRIB_ALL))
+	if (mapAttribIDs.Has(TDCA_CUSTOMATTRIB_DEFS))
 	{
+		mapAttribIDs.Remove(TDCA_CUSTOMATTRIB_DEFS);
+		mapAttribIDs.Add(TDCA_CUSTOMATTRIB_ALL);
+	}
+	else if (!mapAttribIDs.Has(TDCA_CUSTOMATTRIB_ALL))
+	{
+		// Replace any individual custom attribute IDs with TDCA_CUSTOMATTRIB_ALL
 		int nNumRemoved = 0;
 		POSITION pos = mapAttribIDs.GetStartPosition();
 
@@ -4032,6 +4036,7 @@ void CTabbedToDoCtrl::UpdateExtensionViewsTasks(const CTDCAttributeMap& mapAttri
 		   mapAttribIDs.HasOnly(TDCA_NEWTASK) ||
 		   mapAttribIDs.HasOnly(TDCA_MERGE) ||
 		   mapAttribIDs.HasOnly(TDCA_ARCHIVE) ||
+		   mapAttribIDs.HasOnly(TDCA_CUSTOMATTRIB_ALL) ||
 		   mapAttribIDs.HasOnly(TDCA_PROJECTNAME) ||
 		   mapAttribIDs.HasOnly(TDCA_ENCRYPT) ||
 		   mapAttribIDs.HasOnly(TDCA_POSITION) ||

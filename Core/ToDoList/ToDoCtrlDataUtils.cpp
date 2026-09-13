@@ -45,6 +45,10 @@ static const double  DBL_NULL = (double)0xFFFFFFFFFFFFFFFF;
 
 //////////////////////////////////////////////////////////////////////
 
+#define CAD(fn) m_data.m_aCustomAttribDefs.fn
+
+//////////////////////////////////////////////////////////////////////
+
 CTDCTaskMatcher::CTDCTaskMatcher(const CToDoCtrlData& data, const CTDCReminderHelper& reminders, const CContentMgr& mgrContent)
 	: 
 	CTDCDataHelperBase(data),
@@ -1214,12 +1218,12 @@ BOOL CTDCTaskMatcher::ValueMatches(double dValue, const SEARCHPARAM& rule, CStri
 	BOOL bMatch = FALSE;
 	double dSearchVal = rule.ValueAsDouble();
 
-	BOOL bTime = (rule.AttributeIs(TDCA_TIMEESTIMATE) || 
-				  rule.AttributeIs(TDCA_TIMESPENT) ||
-				  (rule.IsCustomAttribute() && 
-				  (TDCCA_TIMEPERIOD == m_data.m_aCustomAttribDefs.GetAttributeDataType(rule.GetCustomAttributeID()))));
+	BOOL bTimePeriod = (rule.AttributeIs(TDCA_TIMEESTIMATE) ||
+						rule.AttributeIs(TDCA_TIMESPENT) ||
+						(rule.IsCustomAttribute() &&
+						(TDCCA_TIMEPERIOD == CAD(GetAttributeDataType(rule.GetCustomAttributeID())))));
 
-	if (bTime)
+	if (bTimePeriod)
 	{
 		TH_UNITS nTHUints = TDC::MapUnitsToTHUnits(rule.GetTimeUnits());
 		dSearchVal = CTimeHelper().Convert(dSearchVal, nTHUints, THU_HOURS);
@@ -1262,7 +1266,7 @@ BOOL CTDCTaskMatcher::ValueMatches(double dValue, const SEARCHPARAM& rule, CStri
 	
 	if (bMatch && (dValue != 0.0))
 	{
-		if (bTime)
+		if (bTimePeriod)
 			sWhatMatched = Misc::Format(dValue, 3, _T(" H"));
 		else
 			sWhatMatched = Misc::Format(dValue, 3);
@@ -3435,25 +3439,22 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(const TODOITEM* pTDI, const 
 {
 	CHECKSET_ALREADY_PROCESSED(mapProcessedIDs, pTDS, FALSE);
 
-	double dCalcValue = DBL_NULL, dSubtaskVal;
 	TDCCADATA data;
-	BOOL bIsDate = FALSE;
+	double dCalcValue = DBL_NULL;
 
 	if (attribDef.IsDataType(TDCCA_CALCULATION))
 	{
-		if (!DoCustomAttributeCalculation(pTDI, pTDS, attribDef, dCalcValue, nUnits, attribDef.IsAggregated()))
+		if (!DoCustomAttributeCalculation(pTDI, pTDS, attribDef, dCalcValue, nUnits))
 			return FALSE;
 
 		data.Set(dCalcValue);
-		bIsDate = (CustomAttribDefs().GetCalculationResultDataType(attribDef.Calculation()) == TDCCA_DATE);
 	}
 	else
 	{
 		pTDI->GetCustomAttributeValue(attribDef.sUniqueID, data);
-		bIsDate = attribDef.IsDataType(TDCCA_DATE);
 	}
 
-	if (attribDef.HasFeature(TDCCAF_ACCUMULATE))
+	if (CAD(AttributeHasFeature(attribDef, TDCCAF_ACCUMULATE)))
 	{
 		ASSERT(attribDef.SupportsFeature(TDCCAF_ACCUMULATE) ||
 			   attribDef.IsDataType(TDCCA_CALCULATION));
@@ -3469,12 +3470,14 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(const TODOITEM* pTDI, const 
 
 			if (GET_SUBTASK(pTDS, nSubtask, pTDIChild, pTDSChild))
 			{
+				double dSubtaskVal;
+
 				if (GetTaskCustomAttributeData(pTDIChild, pTDSChild, attribDef, dSubtaskVal, nUnits, mapProcessedIDs)) // RECURSIVE CALL
 					dCalcValue += dSubtaskVal;
 			}
 		}
 	}
-	else if (attribDef.HasFeature(TDCCAF_MAXIMIZE))
+	else if (CAD(AttributeHasFeature(attribDef, TDCCAF_MAXIMIZE)))
 	{
 		ASSERT(attribDef.SupportsFeature(TDCCAF_MAXIMIZE) ||
 			   attribDef.IsDataType(TDCCA_CALCULATION));
@@ -3492,6 +3495,8 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(const TODOITEM* pTDI, const 
 
 			if (GET_SUBTASK(pTDS, nSubtask, pTDIChild, pTDSChild))
 			{
+				double dSubtaskVal;
+
 				if (GetTaskCustomAttributeData(pTDIChild, pTDSChild, attribDef, dSubtaskVal, nUnits, mapProcessedIDs)) // RECURSIVE CALL
 					dCalcValue = max(dSubtaskVal, dCalcValue);
 			}
@@ -3500,7 +3505,7 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(const TODOITEM* pTDI, const 
 		if (dCalcValue <= -DBL_MAX)
 			dCalcValue = DBL_NULL;
 	}
-	else if (attribDef.HasFeature(TDCCAF_MINIMIZE))
+	else if (CAD(AttributeHasFeature(attribDef, TDCCAF_MINIMIZE)))
 	{
 		ASSERT(attribDef.SupportsFeature(TDCCAF_MINIMIZE) ||
 			   attribDef.IsDataType(TDCCA_CALCULATION));
@@ -3518,6 +3523,8 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(const TODOITEM* pTDI, const 
 
 			if (GET_SUBTASK(pTDS, nSubtask, pTDIChild, pTDSChild))
 			{
+				double dSubtaskVal;
+
 				if (GetTaskCustomAttributeData(pTDIChild, pTDSChild, attribDef, dSubtaskVal, nUnits, mapProcessedIDs)) // RECURSIVE CALL
 					dCalcValue = min(dSubtaskVal, dCalcValue);
 			}
@@ -3525,13 +3532,6 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(const TODOITEM* pTDI, const 
 
 		if (dCalcValue >= DBL_MAX)
 			dCalcValue = DBL_NULL;
-	}
-	else if (bIsDate && !attribDef.HasFeature(TDCCAF_SHOWTIME))
-	{
-		if (!attribDef.GetDataAsDouble(data, dCalcValue, nUnits))
-			return FALSE;
-
-		dCalcValue = (int)dCalcValue;
 	}
 	else
 	{
@@ -3543,6 +3543,14 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(const TODOITEM* pTDI, const 
 		return FALSE;
 
 	dValue = dCalcValue;
+
+	// Truncate time of day as required
+	if ((TDCCA_DATE == CAD(GetAttributeDataType(attribDef))) &&
+		!CAD(AttributeHasFeature(attribDef, TDCCAF_SHOWTIMEOFDAY)))
+	{
+		dValue = (int)dValue;
+	}
+
 	return TRUE;
 }
 
@@ -3556,15 +3564,11 @@ TDC_UNITS CTDCTaskCalculator::GetTaskCustomAttributeUnits(const TODOITEM* pTDI, 
 
 		return data.GetTimeUnits();
 	}
-	else if (attribDef.IsDataType(TDCCA_CALCULATION))
+	else if (attribDef.IsDataType(TDCCA_CALCULATION) && 
+			(TDCCA_TIMEPERIOD == CAD(GetAttributeDataType(attribDef))))
 	{
-		const TDCCUSTOMATTRIBUTECALCULATION& calc = attribDef.Calculation();
-
-		if (CustomAttribDefs().GetCalculationResultDataType(calc) == TDCCA_TIMEPERIOD)
-		{
-			// TODO
-			return TDCU_DAYS;
-		}
+		// TODO
+		return TDCU_DAYS;
 	}
 
 	// all else
@@ -3573,19 +3577,19 @@ TDC_UNITS CTDCTaskCalculator::GetTaskCustomAttributeUnits(const TODOITEM* pTDI, 
 
 BOOL CTDCTaskCalculator::DoCustomAttributeCalculation(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, 
 													  const TDCCUSTOMATTRIBUTEDEFINITION& attribDef,
-													  double& dResult, TDC_UNITS nUnits, BOOL bAggregated) const
+													  double& dResult, TDC_UNITS nUnits) const
 {
 	const TDCCUSTOMATTRIBUTECALCULATION& calc = attribDef.Calculation();
 
-	if (!CustomAttribDefs().IsValidCalculation(calc))
+	if (!CAD(IsValidCalculation(calc)))
 		return FALSE;
 
 	double dFirstVal = 0.0, dSecondVal = 0.0;
 
-	if (!GetFirstCustomAttributeOperandValue(pTDI, pTDS, calc, dFirstVal, nUnits, bAggregated)) // RECURSIVE CALL
+	if (!GetFirstCustomAttributeOperandValue(pTDI, pTDS, calc, dFirstVal, nUnits, attribDef.dwFeatures))
 		return FALSE;
 
-	if (!GetSecondCustomAttributeOperandValue(pTDI, pTDS, calc, dSecondVal, nUnits, bAggregated)) // RECURSIVE CALL
+	if (!GetSecondCustomAttributeOperandValue(pTDI, pTDS, calc, dSecondVal, nUnits, attribDef.dwFeatures))
 		return FALSE;
 
 	switch (calc.nOperator)
@@ -3595,16 +3599,23 @@ BOOL CTDCTaskCalculator::DoCustomAttributeCalculation(const TODOITEM* pTDI, cons
 			dResult = (dFirstVal + dSecondVal);
 
 			// Date calculations may need extra post-processing
-			BOOL bFirstIsDate = (CustomAttribDefs().GetCalculationOperandDataType(calc.opFirst) == TDCCA_DATE);
+			BOOL bFirstIsDate = (TDCCA_DATE == CAD(GetCalculationOperandDataType(calc.opFirst)));
 
 			if (bFirstIsDate)
 			{
-				ASSERT(CustomAttribDefs().GetCalculationOperandDataType(calc.opSecond) != TDCCA_DATE);
+				ASSERT(TDCCA_DATE != CAD(GetCalculationOperandDataType(calc.opSecond)));
 
-				// If the date has a time component but the result falls on
-				// a day boundary then the result date needs decrementing
-				if (CDateHelper::DateHasTime(dFirstVal) && CDateHelper::IsEndOfDay(dResult, TRUE))
+				BOOL bFirstIsDue = CAD(CalculationOperandDerivesFromDueDate(calc.opFirst));
+
+				// If the date is derived from 'Due' and has a time component,
+				// but the result falls on a day boundary then the result date 
+				// needs decrementing
+				if (bFirstIsDue && 
+					CDateHelper::DateHasTime(dFirstVal) && 
+					CDateHelper::IsEndOfDay(dResult, TRUE))
+				{
 					dResult--;
+				}
 			}
 		}
 		break;
@@ -3616,23 +3627,31 @@ BOOL CTDCTaskCalculator::DoCustomAttributeCalculation(const TODOITEM* pTDI, cons
 			//     3) That value has no time component (ie. falls on the end of the day)
 			//
 			// Then: Increment that value before performing the calculation
-			BOOL bFirstIsDate = (CustomAttribDefs().GetCalculationOperandDataType(calc.opFirst) == TDCCA_DATE);
-			BOOL bSecondIsDate = (CustomAttribDefs().GetCalculationOperandDataType(calc.opSecond) == TDCCA_DATE);
+			BOOL bFirstIsDate = (TDCCA_DATE == CAD(GetCalculationOperandDataType(calc.opFirst)));
+			BOOL bSecondIsDate = (TDCCA_DATE == CAD(GetCalculationOperandDataType(calc.opSecond)));
 
 			if (bFirstIsDate && bSecondIsDate)
 			{
-				BOOL bFirstIsDue = CustomAttributeOperandDerivesFromDueDate(calc.opFirst);
-				BOOL bSecondIsDue = CustomAttributeOperandDerivesFromDueDate(calc.opSecond);
-
-				if (Misc::StatesDiffer(bFirstIsDue, bSecondIsDue))
+				if (CAD(AttributeHasFeature(attribDef, TDCCAF_IGNORETIMEOFDAY)))
 				{
-					if (bFirstIsDue && !CDateHelper::DateHasTime(dFirstVal))
+					dFirstVal = (int)dFirstVal;
+					dSecondVal = (int)dSecondVal;
+				}
+				else
+				{
+					BOOL bFirstIsDue = CAD(CalculationOperandDerivesFromDueDate(calc.opFirst));
+					BOOL bSecondIsDue = CAD(CalculationOperandDerivesFromDueDate(calc.opSecond));
+
+					if (Misc::StatesDiffer(bFirstIsDue, bSecondIsDue))
 					{
-						dFirstVal++;
-					}
-					else if (bSecondIsDue && !CDateHelper::DateHasTime(dSecondVal))
-					{
-						dSecondVal++;
+						if (bFirstIsDue && !CDateHelper::DateHasTime(dFirstVal))
+						{
+							dFirstVal++;
+						}
+						else if (bSecondIsDue && !CDateHelper::DateHasTime(dSecondVal))
+						{
+							dSecondVal++;
+						}
 					}
 				}
 			}
@@ -3657,8 +3676,8 @@ BOOL CTDCTaskCalculator::DoCustomAttributeCalculation(const TODOITEM* pTDI, cons
 		break;
 	}
 
-	if ((m_data.m_aCustomAttribDefs.GetCalculationResultDataType(calc) == TDCCA_DATE) &&
-		!m_data.m_aCustomAttribDefs.CalculationHasFeature(attribDef, TDCCAF_SHOWTIME))
+	if ((m_data.m_aCustomAttribDefs.GetAttributeDataType(attribDef) == TDCCA_DATE) &&
+		!m_data.m_aCustomAttribDefs.AttributeHasFeature(attribDef, TDCCAF_SHOWTIMEOFDAY))
 	{
 		dResult = (int)dResult;
 	}
@@ -3666,51 +3685,18 @@ BOOL CTDCTaskCalculator::DoCustomAttributeCalculation(const TODOITEM* pTDI, cons
 	return TRUE;
 }
 
-BOOL CTDCTaskCalculator::CustomAttributeOperandDerivesFromDueDate(const TDCCUSTOMATTRIBUTECALCULATIONOPERAND& op) const
-{
-	if (op.nAttributeID == TDCA_DUEDATE)
-		return TRUE;
-
-	if (op.IsCustom())
-	{
-		const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
-		GET_CUSTDEF_RET(CustomAttribDefs(), op.sCustAttribID, pDef, FALSE);
-
-		if (pDef->IsCalculation())
-		{
-			const TDCCUSTOMATTRIBUTECALCULATIONOPERAND& opFirst = pDef->Calculation().opFirst;
-			const TDCCUSTOMATTRIBUTECALCULATIONOPERAND& opSecond = pDef->Calculation().opSecond;
-
-			if (CustomAttributeOperandDerivesFromDueDate(opFirst)) // RECURSIVE CALL
-			{
-				// other operand CANNOT be a date
-				return (CustomAttribDefs().GetCalculationOperandDataType(opSecond) != TDCCA_DATE);
-			}
-
-			// else try the reverse
-			if (CustomAttribDefs().GetCalculationOperandDataType(opFirst) != TDCCA_DATE)
-			{
-				return CustomAttributeOperandDerivesFromDueDate(opSecond); // RECURSIVE CALL
-			}
-		}
-	}
-
-	// all else
-	return FALSE;
-}
-
 BOOL CTDCTaskCalculator::GetFirstCustomAttributeOperandValue(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, 
 															 const  TDCCUSTOMATTRIBUTECALCULATION& calc, 
-															 double& dValue, TDC_UNITS nUnits, BOOL bAggregated) const
+															 double& dValue, TDC_UNITS nUnits, DWORD dwFeatures) const
 {
 	ASSERT(calc.IsValid(FALSE));
 
-	return GetTaskCustomAttributeOperandValue(pTDI, pTDS, calc.opFirst, dValue, nUnits, bAggregated);
+	return GetTaskCustomAttributeOperandValue(pTDI, pTDS, calc.opFirst, dValue, nUnits, dwFeatures);
 }
 
 BOOL CTDCTaskCalculator::GetSecondCustomAttributeOperandValue(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, 
 															  const TDCCUSTOMATTRIBUTECALCULATION& calc, 
-															  double& dValue, TDC_UNITS nUnits, BOOL bAggregated) const
+															  double& dValue, TDC_UNITS nUnits, DWORD dwFeatures) const
 {
 	ASSERT(calc.IsValid(FALSE));
 
@@ -3720,31 +3706,33 @@ BOOL CTDCTaskCalculator::GetSecondCustomAttributeOperandValue(const TODOITEM* pT
 		return TRUE;
 	}
 
-	return GetTaskCustomAttributeOperandValue(pTDI, pTDS, calc.opSecond, dValue, nUnits, bAggregated);
+	return GetTaskCustomAttributeOperandValue(pTDI, pTDS, calc.opSecond, dValue, nUnits, dwFeatures);
 }
 
 BOOL CTDCTaskCalculator::GetTaskCustomAttributeOperandValue(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, 
 															const TDCCUSTOMATTRIBUTECALCULATIONOPERAND& op, 
-															double& dValue, TDC_UNITS nUnits, BOOL bAggregated) const
+															double& dValue, TDC_UNITS nUnits, DWORD dwFeatures) const
 {
 	if (op.IsCustom())
 	{
 		const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
 		GET_CUSTDEF_RET(CustomAttribDefs(), op.sCustAttribID, pDef, FALSE);
 
-		return GetTaskCustomAttributeOperandValue(pTDI, pTDS, *pDef, dValue, nUnits, bAggregated); // RECURSIVE CALL
+		return GetTaskCustomAttributeOperandValue(pTDI, pTDS, *pDef, dValue, nUnits); // PSEUDO-RECURSIVE CALL
 	}
 
 	// else built-in attribute
-	return GetTaskCustomAttributeOperandValue(pTDI, pTDS, op.nAttributeID, dValue, nUnits, bAggregated);
+	return GetTaskCustomAttributeOperandValue(pTDI, pTDS, op.nAttributeID, dValue, nUnits, dwFeatures);
 }
 
 BOOL CTDCTaskCalculator::GetTaskCustomAttributeOperandValue(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_ATTRIBUTE nAttribID, 
-															double& dValue, TDC_UNITS nUnits, BOOL bAggregated) const
+															double& dValue, TDC_UNITS nUnits, DWORD dwFeatures) const
 {
 	ASSERT(pTDI);
 
 	// Numeric types only
+	BOOL bAccumulated = (dwFeatures & TDCCAF_ACCUMULATE);
+
 	switch (nAttribID)
 	{
 	case TDCA_TODAY:
@@ -3752,7 +3740,7 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeOperandValue(const TODOITEM* pTDI
 		return TRUE;
 
 	case TDCA_COST:
-		if (bAggregated)
+		if (bAccumulated)
 		{
 			dValue = GetTaskCost(pTDI, pTDS);
 		}
@@ -3767,7 +3755,7 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeOperandValue(const TODOITEM* pTDI
 
 	case TDCA_PERCENT:
 		{
-			if (bAggregated)
+			if (bAccumulated)
 				dValue = GetTaskPercentDone(pTDI, pTDS);
 			else
 				dValue = pTDI->nPercentDone;
@@ -3776,7 +3764,7 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeOperandValue(const TODOITEM* pTDI
 
 	case TDCA_PRIORITY:
 		{
-			if (bAggregated)
+			if (bAccumulated)
 				dValue = GetTaskPriority(pTDI, pTDS, TRUE);
 			else
 				dValue = pTDI->nPriority;
@@ -3785,7 +3773,7 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeOperandValue(const TODOITEM* pTDI
 
 	case TDCA_RISK:
 		{
-			if (bAggregated)
+			if (bAccumulated)
 				dValue = GetTaskRisk(pTDI, pTDS);
 			else
 				dValue = pTDI->nRisk;
@@ -3812,7 +3800,7 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeOperandValue(const TODOITEM* pTDI
 		{
 			COleDateTime date = pTDI->dateDue;
 
-			if (bAggregated)
+			if (bAccumulated)
 				date = GetTaskDueDate(pTDI, pTDS);
 
 			if (CDateHelper::IsDateSet(date))
@@ -3827,7 +3815,7 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeOperandValue(const TODOITEM* pTDI
 		{
 			COleDateTime date = pTDI->dateLastMod;
 
-			if (bAggregated)
+			if (bAccumulated)
 				date = GetTaskLastModifiedDate(pTDI, pTDS);
 
 			if (CDateHelper::IsDateSet(date))
@@ -3842,7 +3830,7 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeOperandValue(const TODOITEM* pTDI
 		{
 			COleDateTime date = pTDI->dateStart;
 
-			if (bAggregated)
+			if (bAccumulated)
 				date = GetTaskStartDate(pTDI, pTDS);
 
 			if (CDateHelper::IsDateSet(date))
@@ -3854,34 +3842,30 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeOperandValue(const TODOITEM* pTDI
 		break;
 
 	case TDCA_TIMEESTIMATE:
+		if (bAccumulated)
 		{
-			if (bAggregated)
-			{
-				dValue = GetTaskTimeEstimate(pTDI, pTDS, nUnits);
-			}
-			else
-			{
-				TDCTIMEPERIOD time = pTDI->timeEstimate;
-				time.SetUnits(nUnits, TRUE);
+			dValue = GetTaskTimeEstimate(pTDI, pTDS, nUnits);
+		}
+		else
+		{
+			TDCTIMEPERIOD time = pTDI->timeEstimate;
+			time.SetUnits(nUnits, TRUE);
 
-				dValue = time.dAmount;
-			}
+			dValue = time.dAmount;
 		}
 		return TRUE;
 
 	case TDCA_TIMESPENT:
+		if (bAccumulated)
 		{
-			if (bAggregated)
-			{
-				dValue = GetTaskTimeSpent(pTDI, pTDS, nUnits);
-			}
-			else
-			{
-				TDCTIMEPERIOD time = pTDI->timeSpent;
-				time.SetUnits(nUnits, TRUE);
+			dValue = GetTaskTimeSpent(pTDI, pTDS, nUnits);
+		}
+		else
+		{
+			TDCTIMEPERIOD time = pTDI->timeSpent;
+			time.SetUnits(nUnits, TRUE);
 
-				dValue = time.dAmount;
-			}
+			dValue = time.dAmount;
 		}
 		return TRUE;
 	}
@@ -3891,7 +3875,7 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeOperandValue(const TODOITEM* pTDI
 
 BOOL CTDCTaskCalculator::GetTaskCustomAttributeOperandValue(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, 
 															const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, 
-															double& dValue, TDC_UNITS nUnits, BOOL bAggregated) const
+															double& dValue, TDC_UNITS nUnits) const
 {
 	if (!pTDI || (!attribDef.IsDataType(TDCCA_CALCULATION) && !attribDef.bEnabled))
 	{
@@ -3901,14 +3885,29 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeOperandValue(const TODOITEM* pTDI
 
 	TDCCADATA data;
 
-	if (attribDef.IsDataType(TDCCA_CALCULATION))
-		return DoCustomAttributeCalculation(pTDI, pTDS, attribDef, dValue, nUnits, bAggregated); // RECURSIVE CALL
+	switch (attribDef.GetAttributeType())
+	{
+	case TDCCA_CALCULATION:
+		return DoCustomAttributeCalculation(pTDI, pTDS, attribDef, dValue, nUnits); // RECURSIVE CALL
 
-	// else
-	if (pTDI->GetCustomAttributeValue(attribDef.sUniqueID, data))
-		return attribDef.GetDataAsDouble(data, dValue, nUnits);
+	case TDCCA_DATE:
+		if (pTDI->GetCustomAttributeValue(attribDef.sUniqueID, data) &&
+			attribDef.GetDataAsDouble(data, dValue, nUnits))
+		{
+			if (!attribDef.HasFeature(TDCCAF_SHOWTIMEOFDAY))
+				dValue = (int)dValue;
 
-	// else allow strictly numeric types to be empty == 0.0
+			return TRUE;
+		}
+		break;
+
+	default:
+		if (pTDI->GetCustomAttributeValue(attribDef.sUniqueID, data))
+			return attribDef.GetDataAsDouble(data, dValue, nUnits);
+		break;
+	}
+
+	// Allow strictly numeric types to be empty == 0.0
 	switch (attribDef.GetDataType())
 	{
 	case TDCCA_INTEGER:
@@ -4066,7 +4065,7 @@ CString CTDCTaskFormatter::GetTaskTimeRemaining(DWORD dwTaskID) const
 	return GetTaskTimeRemaining(pTDI, pTDS);
 }
 
-CString CTDCTaskFormatter::GetDateTime(const COleDateTime& date, BOOL bAllowTime) const
+CString CTDCTaskFormatter::GetDateTime(const COleDateTime& date, BOOL bAllowTime, BOOL bForceTime) const
 {
 	if (!CDateHelper::IsDateSet(date))
 		return EMPTY_STR;
@@ -4075,7 +4074,9 @@ CString CTDCTaskFormatter::GetDateTime(const COleDateTime& date, BOOL bAllowTime
 	
 	Misc::SetFlag(dwDateFmt, DHFD_ISO, HasStyle(TDCS_SHOWDATESINISO));
 	Misc::SetFlag(dwDateFmt, DHFD_DOW, HasStyle(TDCS_SHOWWEEKDAYINDATES));
-	Misc::SetFlag(dwDateFmt, DHFD_TIME | DHFD_NOSEC, (bAllowTime && CDateHelper::DateHasTime(date)));
+
+	BOOL bWantTime = (bAllowTime && (bForceTime || CDateHelper::DateHasTime(date)));
+	Misc::SetFlag(dwDateFmt, (DHFD_TIME | DHFD_NOSEC), bWantTime);
 
 	return CDateHelper::FormatDate(date, dwDateFmt);
 }
@@ -4765,11 +4766,9 @@ CString CTDCTaskFormatter::GetTaskCustomAttributeData(const TODOITEM* pTDI, cons
 			double dValue = 0.0;
 			TDC_UNITS nUnits = TDCU_DAYS;
 
-			BOOL bSuccess = m_calculator.GetTaskCustomAttributeData(pTDI, pTDS, attribDef, dValue, nUnits);
-
-			if (bSuccess)
+			if (m_calculator.GetTaskCustomAttributeData(pTDI, pTDS, attribDef, dValue, nUnits))
 			{
-				DWORD dwResultType = CustomAttribDefs().GetCalculationResultDataType(attribDef.Calculation());
+				DWORD dwResultType = CAD(GetAttributeDataType(attribDef));
 
 				switch (dwResultType)
 				{
@@ -4777,7 +4776,19 @@ CString CTDCTaskFormatter::GetTaskCustomAttributeData(const TODOITEM* pTDI, cons
 					return GetTimePeriod(dValue, nUnits, TRUE);
 
 				case TDCCA_DATE:
-					return GetDateTime(dValue, CustomAttribDefs().CalculationHasFeature(attribDef, TDCCAF_SHOWTIME));
+					{
+						BOOL bShowTime = CAD(AttributeHasFeature(attribDef, TDCCAF_SHOWTIMEOFDAY));
+
+						if (bShowTime && 
+							!CDateHelper::DateHasTime(dValue) &&
+							CAD(CalculationOperandDerivesFromDueDate(attribDef.Calculation().opFirst)))
+						{
+							dValue = CDateHelper::GetEndOfDay(dValue);
+						}
+
+						return GetDateTime(dValue, bShowTime, bShowTime);
+					}
+					break;
 
 				case TDCCA_DOUBLE:
 				case TDCCA_INTEGER:
@@ -4829,7 +4840,7 @@ CString CTDCTaskFormatter::GetTaskCustomAttributeData(const TODOITEM* pTDI, cons
 			if (!m_calculator.GetTaskCustomAttributeData(pTDI, pTDS, attribDef, dDate))
 				return EMPTY_STR;
 
-			return GetDateTime(dDate, attribDef.HasFeature(TDCCAF_SHOWTIME));
+			return GetDateTime(dDate, attribDef.HasFeature(TDCCAF_SHOWTIMEOFDAY));
 		}
 		break;
 
@@ -4863,11 +4874,7 @@ BOOL CTDCTaskFormatter::WantFormatValue(double dValue, const TDCCUSTOMATTRIBUTED
 	if (dValue != 0.0)
 		return TRUE;
 
-	if (attribDef.IsCalculation())
-		return !m_data.m_aCustomAttribDefs.CalculationHasFeature(attribDef, TDCCAF_HIDEZERO);
-
-	// else
-	return !attribDef.HasFeature(TDCCAF_HIDEZERO);
+	return !m_data.m_aCustomAttribDefs.AttributeHasFeature(attribDef, TDCCAF_HIDEZERO);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -6355,7 +6362,7 @@ BOOL CTDCLongestItemMap::Initialise(const CTDCColumnIDMap& mapCols, const CTDCCu
 			const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
 			GET_CUSTDEF_ALT(aCustAttribDefs, nColID, pDef, continue);
 
-			if (!IsSupported(*pDef))
+			if (!IsSupported(*pDef, aCustAttribDefs))
 				continue;
 		}
 
@@ -6453,9 +6460,9 @@ BOOL CTDCLongestItemMap::IsSupported(TDC_COLUMN nColID)
 	return TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(nColID);
 }
 
-BOOL CTDCLongestItemMap::IsSupported(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef)
+BOOL CTDCLongestItemMap::IsSupported(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, const CTDCCustomAttribDefinitionArray& aCustAttribDefs)
 {
-	switch (attribDef.GetDataType())
+	switch (aCustAttribDefs.GetAttributeDataType(attribDef))
 	{
 	case TDCCA_DATE:
 	case TDCCA_BOOL:
@@ -6665,7 +6672,7 @@ CString CTDCTaskColumnSizer::GetLongestValue(const TDCCUSTOMATTRIBUTEDEFINITION&
 {
 	CString sLongest;
 
-	if (!CTDCLongestItemMap::IsSupported(attribDef))
+	if (!CTDCLongestItemMap::IsSupported(attribDef, CustomAttribDefs()))
 	{
 		ASSERT(0);
 	}
@@ -6689,13 +6696,13 @@ CString CTDCTaskColumnSizer::GetLongestValue(const TDCCUSTOMATTRIBUTEDEFINITION&
 
 BOOL CTDCTaskColumnSizer::GetLongestAggregatedValue(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, const CDWordArray& aTaskIDs, CString& sLongest) const
 {
-	if (!CTDCLongestItemMap::IsSupported(attribDef))
+	if (!CTDCLongestItemMap::IsSupported(attribDef, CustomAttribDefs()))
 	{
 		ASSERT(0);
 		return FALSE;
 	}
 
-	switch (CustomAttribDefs().GetAttributeDataType(attribDef))
+	switch (CAD(GetAttributeDataType(attribDef)))
 	{
 	case TDCCA_DOUBLE:
 	case TDCCA_FRACTION:
@@ -6874,7 +6881,8 @@ int CTDCTaskColumnSizer::GetLongestValues(const CTDCColumnIDMap& mapCols, const 
 					mapLongest.UpdateValue(attribDef.GetColumnID(), sLongest);
 					attribDef.bEnabled = FALSE; // Prevent GetLongestValue overwriting 
 				}
-				else if (attribDef.SupportsFeature(TDCCAF_HIDEZERO) && !attribDef.HasFeature(TDCCAF_HIDEZERO))
+				else if (CAD(AttributeHasFeature(attribDef, TDCCAF_HIDEZERO)) &&
+						 !CAD(AttributeHasFeature(attribDef, TDCCAF_HIDEZERO)))
 				{
 					// initialise zero value once only
 					sLongest = attribDef.FormatData(TDCCADATA(), FALSE);
@@ -6990,7 +6998,7 @@ BOOL CTDCTaskAttributeCopier::CanCopyAttributeValues(TDC_ATTRIBUTE nFromAttrib, 
 {
 	// Can't copy to calculations
 	if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nToAttrib) &&
-		(CustomAttribDefs().GetAttributeDataType(nToAttrib) == TDCCA_CALCULATION))
+		(TDCCA_CALCULATION == CAD(GetAttributeDataType(nToAttrib))))
 	{
 		return FALSE;
 	}
@@ -7077,7 +7085,7 @@ TDC_ATTRIBUTEGROUP CTDCTaskAttributeCopier::GetAttributeGroup(TDC_ATTRIBUTE nAtt
 	{
 		if (bResolveCustomAttrib)
 		{
-			DWORD dwAttribType = CustomAttribDefs().GetAttributeDataType(nAttribID);
+			DWORD dwAttribType = CAD(GetAttributeDataType(nAttribID));
 			return TDCCUSTOMATTRIBUTEDEFINITION::GetAttributeGroup(dwAttribType);
 		}
 
@@ -7138,7 +7146,7 @@ BOOL CTDCTaskAttributeCopier::CopyAttributeValue(const TODOITEM& tdiFrom, TDC_AT
 					const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
 					GET_CUSTDEF_ALT(CustomAttribDefs(), nFromAttribID, pDef, FALSE);
 
-					DWORD dwDataType = CustomAttribDefs().GetAttributeDataType(*pDef);
+					DWORD dwDataType = CAD(GetAttributeDataType(*pDef));
 					double dValue = dataFrom.AsDouble();
 
 					if (m_formatter.WantFormatValue(dValue, *pDef))
@@ -7317,7 +7325,7 @@ BOOL CTDCTaskAttributeCopier::CanCopyColumnValues(TDC_COLUMN nColID) const
 	default:
 		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(nColID))
 		{
-			switch (CustomAttribDefs().GetAttributeDataType(nColID))
+			switch (CAD(GetAttributeDataType(nColID)))
 			{
 			case TDCCA_BOOL:
 			case TDCCA_ICON:

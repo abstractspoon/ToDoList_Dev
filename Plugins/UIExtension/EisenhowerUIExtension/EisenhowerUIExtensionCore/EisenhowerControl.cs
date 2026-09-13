@@ -635,7 +635,7 @@ namespace EisenhowerUIExtension
 
 			// 4. Create out final bitmap
 			const int SplitWidth = 4;
-			var bitmap = new Bitmap((highXWidth + lowXWidth + SplitWidth), (highYHeight + lowYHeight));
+			var bitmap = new Bitmap((highXWidth + lowXWidth + SplitWidth), (highYHeight + lowYHeight + SplitWidth));
 
 			using (var graphics = Graphics.FromImage(bitmap))
 			{
@@ -650,12 +650,14 @@ namespace EisenhowerUIExtension
 						bmpPos.X = (highXWidth + SplitWidth);
 
 					if (m_Panes[i].Matrix.YVariable.RangeIsLow)
-						bmpPos.Y = highYHeight;
+						bmpPos.Y = (highYHeight + SplitWidth);
 
 					graphics.DrawImage(bitmaps[i], bmpPos);
 				}
 
 				// Dividing lines
+				highYHeight += SplitWidth;
+
 				graphics.DrawLine(SystemPens.ControlDark, highXWidth, 0, highXWidth, bitmap.Height);
 				graphics.DrawLine(SystemPens.ControlDark, 0, highYHeight, bitmap.Width, highYHeight);
 			}

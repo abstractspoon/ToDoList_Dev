@@ -203,12 +203,8 @@ FIND_ATTRIBTYPE CTDCSearchParamHelper::GetAttributeFindType(TDC_ATTRIBUTE nAttri
 		if (pDef->IsList() && !pDef->IsDataType(TDCCA_ICON))
 			return FT_STRING;
 
-		DWORD dwAttribType = pDef->GetDataType();
+		DWORD dwAttribType = aAttribDefs.GetAttributeDataType(*pDef);
 
-		if (dwAttribType == TDCCA_CALCULATION)
-			dwAttribType = aAttribDefs.GetCalculationResultDataType(pDef->Calculation());
-
-		// else
 		switch (dwAttribType)
 		{
 		case TDCCA_STRING:		return FT_STRING;

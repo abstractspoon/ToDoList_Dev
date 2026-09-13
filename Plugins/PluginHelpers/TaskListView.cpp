@@ -645,7 +645,7 @@ int TaskListView::GetRequiredWidthForImage()
 	// Calculate min width to show all text 
 	auto graphics = Graphics::FromHwnd(Handle);
 
-	// Title header text
+	// Title column header text
 	int reqWidth = TextRenderer::MeasureText(Columns[0]->Text, Font).Width;
 
 	// Title Item text
@@ -653,7 +653,7 @@ int TaskListView::GetRequiredWidthForImage()
 	{
 		for each(ListViewItem^ lvi in Items)
 		{
-			int textWidth = TextRenderer::MeasureText(lvi->Text, GetFont(ASTYPE(lvi->Tag, ITaskBase), true)).Width;
+			int textWidth = TextRenderer::MeasureText(graphics, lvi->Text, GetFont(ASTYPE(lvi->Tag, ITaskBase), true)).Width;
 			reqWidth = Math::Max(reqWidth, textWidth);
 		}
 
@@ -1124,8 +1124,6 @@ void TaskListView::OnDrawItem(DrawListViewItemEventArgs^ e)
 
 	// Finally the column values
 	auto textColor = GetTextColor(task, selected);
-	auto textBrush = gcnew SolidBrush(textColor);
-
 	auto subItemRect = itemRect;
 
 	for (int i = 0; i < e->Item->SubItems->Count; i++) // display items

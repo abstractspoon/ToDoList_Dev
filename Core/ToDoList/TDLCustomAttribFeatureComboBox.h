@@ -19,8 +19,7 @@ public:
 	CTDLCustomAttribFeatureComboBox();
 	virtual ~CTDLCustomAttribFeatureComboBox();
 
-	BOOL SetAttributeDefinition(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef);
-	BOOL SetAttributeDefinition(DWORD dwDataType, DWORD dwListType, DWORD dwSelectedFeatures);
+	BOOL SetAttributeDefinition(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, const CTDCCustomAttribDefinitionArray& aAttribDefs);
 	DWORD GetSelectedFeatures() const;
 
 	static CString FormatFeatureList(DWORD dwFeatures);
@@ -29,7 +28,6 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	void BuildCombo(DWORD dwDataType, DWORD dwListType, DWORD dwSelectedFeatures);
 	void OnCheckChange(int nIndex);
 };
 

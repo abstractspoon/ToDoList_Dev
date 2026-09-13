@@ -263,7 +263,10 @@ int CCopyWndContents::GetContentScrollPos(BOOL bVert) const
 
 /////////////////////////////////////////////////////////////////////////////////////
 
-CCopyTreeCtrlContents::CCopyTreeCtrlContents(HWND hWnd) : CCopyWndContents(hWnd)
+CCopyTreeCtrlContents::CCopyTreeCtrlContents(HWND hWnd) 
+	: 
+	CCopyWndContents(hWnd),
+	m_nItemHeight(-1)
 {
 	ASSERT(CWinClasses::IsClass(hWnd, WC_TREEVIEW));
 
@@ -372,17 +375,19 @@ CCopyHeaderCtrlContents::~CCopyHeaderCtrlContents()
 
 /////////////////////////////////////////////////////////////////////////////////////
 
-CCopyListCtrlContents::CCopyListCtrlContents(HWND hWnd) : CCopyWndContents(hWnd)
+CCopyListCtrlContents::CCopyListCtrlContents(HWND hWnd) 
+	: 
+	CCopyWndContents(hWnd),
+	m_bWinForms(FALSE),
+	m_nItemHeight(10)
 {
-	ASSERT(CWinClasses::IsClass(hWnd, WC_LISTVIEW) || 
-		   CWinClasses::IsWinFormsControl(hWnd, WC_LISTVIEW));
+	m_bWinForms = CWinClasses::IsWinFormsControl(hWnd, WC_LISTVIEW);
+	ASSERT(m_bWinForms || CWinClasses::IsClass(hWnd, WC_LISTVIEW));
 
 	CRect rect;
 	
 	if (ListView_GetItemRect(m_hWnd, 0, &rect, LVIR_BOUNDS))
 		m_nItemHeight = rect.Height();
-	else
-		m_nItemHeight = 10;
 }
 
 CCopyListCtrlContents::~CCopyListCtrlContents()
@@ -468,7 +473,7 @@ CSize CCopyListCtrlContents::CalcContentsSize() const
 	if (hwndHdr)
 	{
 		int nCol = Header_GetItemCount(hwndHdr);
-		int nWidth = 0;
+		int nWidth = (m_bWinForms ? 2 : 0); // FUDGE
 
 		while (nCol--)
 			nWidth += ListView_GetColumnWidth(m_hWnd, nCol);

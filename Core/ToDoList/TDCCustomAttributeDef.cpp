@@ -672,6 +672,12 @@ BOOL TDCCUSTOMATTRIBUTEDEFINITION::AttributeSupportsFeature(DWORD dwDataType, DW
 	case TDCCAF_EXCLUDEBLANKITEM:
 		return ((dwListType == TDCCA_AUTOLIST) || (dwListType == TDCCA_FIXEDLIST));
 
+	case TDCCAF_IGNORETIMEOFDAY:
+		// Not supported by this function because it requires more context.
+		// Use 'CTDCCustomAttribDefinitionArray::AttributeSupportsFeature' instead.
+		ASSERT(0);
+		return FALSE;
+
 	default:
 		// Other features not supported on multi-list types
 		if ((dwListType == TDCCA_AUTOMULTILIST) || (dwListType == TDCCA_FIXEDMULTILIST))
@@ -711,7 +717,7 @@ BOOL TDCCUSTOMATTRIBUTEDEFINITION::AttributeSupportsFeature(DWORD dwDataType, DW
 	case TDCCA_DATE:
 		return ((dwFeature == TDCCAF_MAXIMIZE) ||
 				(dwFeature == TDCCAF_MINIMIZE) ||
-				(dwFeature == TDCCAF_SHOWTIME));
+				(dwFeature == TDCCAF_SHOWTIMEOFDAY));
 
 	case TDCCA_BOOL:
 	case TDCCA_STRING:
@@ -720,9 +726,10 @@ BOOL TDCCUSTOMATTRIBUTEDEFINITION::AttributeSupportsFeature(DWORD dwDataType, DW
 		break;
 
 	case TDCCA_CALCULATION:
-		// Unknowable. Caller responsible for extracting the 
-		// calculation result type and using that as the argument
- 		break;
+		// Not supported by this function because it requires more context.
+		// Use 'CTDCCustomAttribDefinitionArray::AttributeSupportsFeature' instead.
+		ASSERT(0);
+		break;
 
 	default:
 		ASSERT(0);
@@ -1037,7 +1044,7 @@ CString TDCCUSTOMATTRIBUTEDEFINITION::FormatData(const TDCCADATA& data, BOOL bIS
 	switch (GetDataType())
 	{
 	case TDCCA_DATE:
-		return data.FormatAsDate(bISODates, HasFeature(TDCCAF_SHOWTIME));
+		return data.FormatAsDate(bISODates, HasFeature(TDCCAF_SHOWTIMEOFDAY));
 
 	case TDCCA_DOUBLE:
 	case TDCCA_INTEGER:
@@ -1212,9 +1219,10 @@ int CTDCCustomAttribDefinitionArray::Find(const CString& sAttribID, int nIgnore)
 
 		while (nDef--)
 		{
-			const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = ElementAt(nDef);
+			if (nDef == nIgnore)
+				continue;
 
-			if ((nDef != nIgnore) && (attribDef.sUniqueID.CompareNoCase(sAttribID) == 0))
+			if ((ElementAt(nDef).sUniqueID.CompareNoCase(sAttribID) == 0))
 				return nDef;
 		}
 	}
@@ -1277,29 +1285,47 @@ BOOL CTDCCustomAttribDefinitionArray::AnyHasFeature(DWORD dwFeature) const
 
 	while (nDef--)
 	{
-		const TDCCUSTOMATTRIBUTEDEFINITION& def = ElementAt(nDef);
-
-		if (def.HasFeature(dwFeature))
-			return TRUE;
-
-		if (def.IsCalculation() && CalculationHasFeature(def, dwFeature))
+		if (AttributeHasFeature(ElementAt(nDef), dwFeature))
 			return TRUE;
 	}
 
 	return FALSE;
 }
 
-BOOL CTDCCustomAttribDefinitionArray::CalculationHasFeature(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, DWORD dwFeature) const
+BOOL CTDCCustomAttribDefinitionArray::AttributeHasFeature(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, DWORD dwFeature) const
 {
-	if (!attribDef.IsDataType(TDCCA_CALCULATION))
-		return FALSE;
-
 	if (!Misc::HasFlag(attribDef.dwFeatures, dwFeature))
 		return FALSE;
 
-	DWORD dwResultType = GetCalculationResultDataType(attribDef.calculation);
+	return AttributeSupportsFeature(attribDef, dwFeature);
+}
 
-	return TDCCUSTOMATTRIBUTEDEFINITION::AttributeSupportsFeature(dwResultType, attribDef.GetListType(), dwFeature);
+BOOL CTDCCustomAttribDefinitionArray::AttributeSupportsFeature(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, DWORD dwFeature) const
+{
+	// special case 
+	if (dwFeature == TDCCAF_IGNORETIMEOFDAY)
+	{
+		// Must be a subtraction of two dates
+		if (!attribDef.IsCalculation())
+			return FALSE;
+
+		if (attribDef.Calculation().nOperator != TDCCAC_SUBTRACT)
+			return FALSE;
+
+		if (TDCCA_DATE != GetCalculationOperandDataType(attribDef.Calculation().opFirst))
+			return FALSE;
+
+		if (TDCCA_DATE != GetCalculationOperandDataType(attribDef.Calculation().opSecond))
+			return FALSE;
+
+		return TRUE;
+	}
+
+	// All else
+	DWORD dwDataType = GetAttributeDataType(attribDef);
+	DWORD dwListType = attribDef.GetListType();
+
+	return TDCCUSTOMATTRIBUTEDEFINITION::AttributeSupportsFeature(dwDataType, dwListType, dwFeature);
 }
 
 BOOL CTDCCustomAttribDefinitionArray::AnyCalculationUsesAnyAttribute(const CTDCAttributeMap& mapAttribIDs) const
@@ -1330,6 +1356,38 @@ BOOL CTDCCustomAttribDefinitionArray::AnyCalculationUsesAnyAttribute(const CTDCA
 			return TRUE;
 	}
 
+	return FALSE;
+}
+
+BOOL CTDCCustomAttribDefinitionArray::CalculationOperandDerivesFromDueDate(const TDCCUSTOMATTRIBUTECALCULATIONOPERAND& op) const
+{
+	if (op.nAttributeID == TDCA_DUEDATE)
+		return TRUE;
+
+	if (op.IsCustom())
+	{
+		const TDCCUSTOMATTRIBUTEDEFINITION attribDef = GetDefinition(op.sCustAttribID);
+
+		if (attribDef.IsCalculation())
+		{
+			const TDCCUSTOMATTRIBUTECALCULATIONOPERAND& opFirst = attribDef.calculation.opFirst;
+			const TDCCUSTOMATTRIBUTECALCULATIONOPERAND& opSecond = attribDef.calculation.opSecond;
+
+			if (CalculationOperandDerivesFromDueDate(opFirst)) // RECURSIVE CALL
+			{
+				// other operand CANNOT be a date
+				return (GetCalculationOperandDataType(opSecond) != TDCCA_DATE);
+			}
+
+			// else try the reverse
+			if (GetCalculationOperandDataType(opFirst) != TDCCA_DATE)
+			{
+				return CalculationOperandDerivesFromDueDate(opSecond); // RECURSIVE CALL
+			}
+		}
+	}
+
+	// all else
 	return FALSE;
 }
 
@@ -1439,14 +1497,16 @@ CString CTDCCustomAttribDefinitionArray::FormatData(const TDCCADATA& data, const
 
 CString CTDCCustomAttribDefinitionArray::FormatData(const TDCCADATA& data, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, BOOL bISODates) const
 {
-	if (!attribDef.IsDataType(TDCCA_CALCULATION))
-		return attribDef.FormatData(data, bISODates);
-
 	// A bit of hackery for calculation types
-	TDCCUSTOMATTRIBUTEDEFINITION temp = attribDef;
-	temp.SetDataType(GetAttributeDataType(attribDef, TRUE));
+	if (attribDef.IsDataType(TDCCA_CALCULATION))
+	{
+		TDCCUSTOMATTRIBUTEDEFINITION temp = attribDef;
+		temp.SetDataType(GetAttributeDataType(attribDef, TRUE));
 
-	return temp.FormatData(data, bISODates);
+		return temp.FormatData(data, bISODates);
+	}
+
+	return attribDef.FormatData(data, bISODates);
 }
 
 BOOL CTDCCustomAttribDefinitionArray::IsColumnSortable(TDC_COLUMN nCustColID) const

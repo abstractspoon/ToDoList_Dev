@@ -572,6 +572,7 @@ namespace TDC
 		case TDCA_UNDO:
 		case TDCA_PASTE:
 		case TDCA_NEWTASK:			
+		case TDCA_CUSTOMATTRIB_ALL:			
 			return IUI_ALL;
 
 		case TDCA_DELETE:

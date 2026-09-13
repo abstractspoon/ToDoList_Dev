@@ -536,25 +536,36 @@ namespace WeekPlannerUIExtension
 			}
 
 			// Header text
-			g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
-
-			// Use bold font for first-day-of-month
-			Font font = ((DateUtil.GetDay(date) == 1) ? BoldFont : BaseFont);
-
 			Rectangle rText = rect;
 			rText.X += HeaderPadding;
 			rText.Width -= HeaderPadding;
 
 			string text = FormatHeaderText(date, DowStyle, MonthStyle, firstDay, DisplayDatesInISO);
 
-			// Note: We use TextRenderer because it handle RTL drawing
-			// in a way that is consistent with the core app
-			var flags = TextFormatFlags.VerticalCenter | TextFormatFlags.Left | TextFormatFlags.NoClipping | TextFormatFlags.SingleLine;
+			// Use bold font for first-day-of-month
+			Font font = ((DateUtil.GetDay(date) == 1) ? BoldFont : BaseFont);
 
+			// Note: Only use TextRenderer for RTL drawing to be consistent 
+			//       with the core app but not elsewhere because without
+			//       a reliable back colour this will produce artifacts
+			//       with 'save to image'
 			if (DateUtil.WantRTLDates())
-				flags |= TextFormatFlags.RightToLeft;
+			{
+				g.TextRenderingHint = TextRenderingHint.AntiAlias;
 
-			TextRenderer.DrawText(g, text, font, rText, SystemColors.ControlText, Color.Empty, flags);
+				var flags = (TextFormatFlags.VerticalCenter | TextFormatFlags.Left | TextFormatFlags.NoClipping | TextFormatFlags.SingleLine | TextFormatFlags.RightToLeft);
+				TextRenderer.DrawText(g, text, font, rText, SystemColors.ControlText, flags);
+
+				g.TextRenderingHint = TextRenderingHint.SystemDefault;
+			}
+			else
+			{
+				var fmt = new StringFormat(StringFormatFlags.NoClip | StringFormatFlags.NoWrap)
+				{
+					LineAlignment = StringAlignment.Center
+				};
+				g.DrawString(text, font, SystemBrushes.ControlText, rText, fmt);
+			}
 		}
 
 		public virtual void DrawDayBackground(Graphics g, Rectangle rect)
@@ -624,7 +635,7 @@ namespace WeekPlannerUIExtension
 			}
 		}
 
-		public void DrawItemText(Graphics g, string text, Rectangle rect, Color textColor, FontStyle fontStyle, bool isLong)
+		public void DrawItemText(Graphics g, string text, Rectangle rect, Color textColor, Color backColor, FontStyle fontStyle, bool isLong)
 		{
 			if (rect.Width <= 0)
 				return;
@@ -641,15 +652,15 @@ namespace WeekPlannerUIExtension
 				flags |= TextFormatFlags.WordBreak;
 			}
 
-			// We use 'TextRenderer' for consistency with the core app
+			// Use TextRenderer for consistency with core app
 			if (fontStyle != FontStyle.Regular)
 			{
 				using (Font font = new Font(BaseFont, fontStyle))
-					TextRenderer.DrawText(g, text, font, rect, textColor, flags);
+					TextRenderer.DrawText(g, text, font, rect, textColor, backColor, flags);
 			}
 			else
 			{
-				TextRenderer.DrawText(g, text, BaseFont, rect, textColor, flags);
+				TextRenderer.DrawText(g, text, BaseFont, rect, textColor, backColor, flags);
 			}
 		}
 
@@ -1176,12 +1187,12 @@ namespace WeekPlannerUIExtension
 			return fontStyle;
 		}
 
-		void DrawTaskText(Graphics g, Calendar.AppointmentView apptView, Rectangle rect, Color textColor)
+		void DrawTaskText(Graphics g, Calendar.AppointmentView apptView, Rectangle rect, Color textColor, Color backColor)
 		{
 			var appt = apptView.Appointment;
 			var fontStyle = GetTaskFontStyle(appt);
 
-			m_RenderHelper.DrawItemText(g, appt.Title, rect, textColor, fontStyle, apptView.IsLong);
+			m_RenderHelper.DrawItemText(g, appt.Title, rect, textColor, backColor, fontStyle, apptView.IsLong);
 		}
 
 		public bool CalcAppointmentRects(Calendar.AppointmentView apptView)
@@ -1358,7 +1369,7 @@ namespace WeekPlannerUIExtension
 				// Start Part ------------------------------------------
 				DrawTaskBackground(g, startRect, apptView, isSelected, fillColor, borderColor, false, true);
 				DrawTaskIconAndGripper(g, apptView, isSelected, barColor, ref startRect);
-				DrawTaskText(g, apptView, startRect, textColor);
+				DrawTaskText(g, apptView, startRect, textColor, fillColor);
 
 				tdlView.TextHorzOffset = (startRect.X - apptView.Rectangle.X);
 
@@ -1366,12 +1377,12 @@ namespace WeekPlannerUIExtension
 				if (!todayRect.IsEmpty)
 				{
 					DrawTaskBackground(g, todayRect, apptView, isSelected, fillColor, borderColor, true, true);
-					DrawTaskText(g, apptView, todayRect, textColor);
+					DrawTaskText(g, apptView, todayRect, textColor, fillColor);
 				}
 
 				// End Part --------------------------------------------
 				DrawTaskBackground(g, endRect, apptView, isSelected, fillColor, borderColor, true, false);
-				DrawTaskText(g, apptView, endRect, textColor);
+				DrawTaskText(g, apptView, endRect, textColor, fillColor);
 			}
 			else // draw continuous)
 			{
@@ -1379,7 +1390,7 @@ namespace WeekPlannerUIExtension
 
 				DrawTaskBackground(g, apptRect, apptView, isSelected, fillColor, borderColor, false, false);
 				DrawTaskIconAndGripper(g, apptView, isSelected, barColor, ref apptRect);
-				DrawTaskText(g, apptView, apptRect, textColor);
+				DrawTaskText(g, apptView, apptRect, textColor, fillColor);
 
 				tdlView.TextHorzOffset = (apptView.Rectangle.X - apptRect.X);
 			}
