@@ -5196,7 +5196,7 @@ BOOL CToDoCtrl::IsNewTaskTitleEditMod(const CTDCAttributeMap& mapAttribIDs, cons
 void CToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const CDWordArray& aModTaskIDs, BOOL bAllowResort)
 {
 	ASSERT(aModTaskIDs.GetSize() || 
-		   mapAttribIDs.HasOnly(TDCA_CUSTOMATTRIB) ||
+		   mapAttribIDs.HasOnly(TDCA_CUSTOMATTRIB_DEFS) ||
 		   mapAttribIDs.HasOnly(TDCA_PASTE) ||
 		   mapAttribIDs.HasOnly(TDCA_PROJECTNAME) || 
 		   mapAttribIDs.HasOnly(TDCA_UNDO) ||
