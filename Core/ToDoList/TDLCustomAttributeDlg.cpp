@@ -597,10 +597,10 @@ BOOL CCustomAttributeCalcPage::OnInitDialog()
 
 void CCustomAttributeCalcPage::SetAttributeDefinitions(const CTDCCustomAttribDefinitionArray& aAttribDef)
 {
-	m_aAttribDef.Copy(aAttribDef);
+	m_aAttribDefs.Copy(aAttribDef);
 
-	m_cbFirstOperand.SetCustomAttributes(m_aAttribDef);
-	m_cbSecondOperandAttrib.SetCustomAttributes(m_aAttribDef);
+	m_cbFirstOperand.SetCustomAttributes(m_aAttribDefs);
+	m_cbSecondOperandAttrib.SetCustomAttributes(m_aAttribDefs);
 
 	if (GetSafeHwnd())
 	{
@@ -649,10 +649,10 @@ BOOL CCustomAttributeCalcPage::IsDate(TDC_ATTRIBUTE nAttribID) const
 {
 	if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
 	{
-		int nDef = m_aAttribDef.Find(nAttribID);
+		int nDef = m_aAttribDefs.Find(nAttribID);
 		ASSERT(nDef >= 0);
 
-		return m_aAttribDef[nDef].IsDataType(TDCCA_DATE);
+		return m_aAttribDefs[nDef].IsDataType(TDCCA_DATE);
 	}
 
 	// else 
@@ -670,11 +670,11 @@ BOOL CCustomAttributeCalcPage::IsTimePeriod(TDC_ATTRIBUTE nAttribID) const
 	default:
 		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
 		{
-			int nDef = m_aAttribDef.Find(nAttribID);
+			int nDef = m_aAttribDefs.Find(nAttribID);
 			ASSERT(nDef >= 0);
 
 			if (nDef >= 0)
-				return (m_aAttribDef[nDef].IsDataType(TDCCA_TIMEPERIOD));
+				return (m_aAttribDefs[nDef].IsDataType(TDCCA_TIMEPERIOD));
 		}
 		break;
 	}
@@ -684,12 +684,12 @@ BOOL CCustomAttributeCalcPage::IsTimePeriod(TDC_ATTRIBUTE nAttribID) const
 
 BOOL CCustomAttributeCalcPage::IsDate(const TDCCUSTOMATTRIBUTECALCULATIONOPERAND& op) const
 {
-	return (m_aAttribDef.GetCalculationOperandDataType(op) == TDCCA_DATE);
+	return (m_aAttribDefs.GetCalculationOperandDataType(op) == TDCCA_DATE);
 }
 
 BOOL CCustomAttributeCalcPage::IsTimePeriod(const TDCCUSTOMATTRIBUTECALCULATIONOPERAND& op) const
 {
-	return (m_aAttribDef.GetCalculationOperandDataType(op) == TDCCA_TIMEPERIOD);
+	return (m_aAttribDefs.GetCalculationOperandDataType(op) == TDCCA_TIMEPERIOD);
 }
 
 int CCustomAttributeCalcPage::BuildFirstOperandFilter(CTDCAttributeMap& mapAttrib) const
@@ -709,9 +709,9 @@ int CCustomAttributeCalcPage::BuildFirstOperandFilter(CTDCAttributeMap& mapAttri
 	mapAttrib.Add(TDCA_TIMESPENT);
 	mapAttrib.Add(TDCA_TODAY);
 
-	for (int nDef = 0; nDef < m_aAttribDef.GetSize(); nDef++)
+	for (int nDef = 0; nDef < m_aAttribDefs.GetSize(); nDef++)
 	{
-		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aAttribDef[nDef];
+		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aAttribDefs[nDef];
 
 		if (m_sExcludedCustAttribID == attribDef.sUniqueID)
 			continue;
@@ -850,7 +850,7 @@ void CCustomAttributeCalcPage::UpdateResultType()
 	if (!m_calc.IsValid(FALSE))
 		m_sResultType.Empty();
 	else
-		m_sResultType = GetDataTypeLabel(m_aAttribDef.GetCalculationResultDataType(m_calc));
+		m_sResultType = GetDataTypeLabel(m_aAttribDefs.GetCalculationResultDataType(m_calc));
 
 	UpdateData(FALSE);
 }
@@ -921,12 +921,11 @@ CTDLCustomAttributeDlg::CTDLCustomAttributeDlg(const CString& sTaskFile,
 											   CWnd* pParent)
 	: 
 	CTDLDialog(IDD_ADDCUSTOMATTRIB_DIALOG, _T("CustomAttributes"), pParent),
-
 	m_eTaskfile(FES_NOBROWSE), 
 	m_eUniqueID(_T(". \r\n\t"), ME_EXCLUDE),
 	m_sTaskFile(sTaskFile),
 	m_pageList(ilTaskIcons),
-	m_aAttribDef(aAttribDef),
+	m_aAttribDefs(aAttribDef),
 	m_dwDataType(TDCCA_STRING),
 	m_dwFeatures(TDCCAF_SORT),
 	m_nAlignment(DT_LEFT)
@@ -1029,9 +1028,9 @@ BOOL CTDLCustomAttributeDlg::OnInitDialog()
 	ListView_SetExtendedListViewStyleEx(m_lcAttributes, LVS_EX_FULLROWSELECT, LVS_EX_FULLROWSELECT);
 	ListView_SetExtendedListViewStyleEx(m_lcAttributes, LVS_EX_DOUBLEBUFFER, LVS_EX_DOUBLEBUFFER);
 
-	for (int nAtt = 0; nAtt < m_aAttribDef.GetSize(); nAtt++)
+	for (int nAtt = 0; nAtt < m_aAttribDefs.GetSize(); nAtt++)
 	{
-		const TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttribDef[nAtt];
+		const TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttribDefs[nAtt];
 		VERIFY (AddAttributeToListCtrl(attrib, FALSE) >= 0);
 	}
 	UpdateRemainingCount();
@@ -1104,7 +1103,7 @@ CString CTDLCustomAttributeDlg::FormatFeatureList(DWORD dwFeatures)
 
 int CTDLCustomAttributeDlg::GetAttributeDefinitions(CTDCCustomAttribDefinitionArray& aAttribDef) const
 {
-	aAttribDef.Copy(m_aAttribDef);
+	aAttribDef.Copy(m_aAttribDefs);
 
 	return aAttribDef.GetSize();
 }
@@ -1112,9 +1111,9 @@ int CTDLCustomAttributeDlg::GetAttributeDefinitions(CTDCCustomAttribDefinitionAr
 void CTDLCustomAttributeDlg::OnOK()
 {
 	// check for duplicate unique IDs
-	for (int nAtt = 0; nAtt < m_aAttribDef.GetSize(); nAtt++)
+	for (int nAtt = 0; nAtt < m_aAttribDefs.GetSize(); nAtt++)
 	{
-		const TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttribDef[nAtt];
+		const TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttribDefs[nAtt];
 
 		if (UniqueIDExists(attrib.sUniqueID, nAtt))
 		{
@@ -1194,7 +1193,7 @@ void CTDLCustomAttributeDlg::OnItemchangedAttriblist(NMHDR* pNMHDR, LRESULT* /*p
 
 	if (nSel >= 0)
 	{
-		const TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttribDef[nSel];
+		const TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttribDefs[nSel];
 
 		m_sColumnTitle = attrib.sColumnTitle;
 		m_dwFeatures = attrib.dwFeatures;
@@ -1212,15 +1211,7 @@ void CTDLCustomAttributeDlg::OnItemchangedAttriblist(NMHDR* pNMHDR, LRESULT* /*p
 		m_pageCalc.SetCalculation(attrib.Calculation());
 		m_pageCalc.ExcludeCustomAttribute(attrib);
 
-		if (attrib.IsDataType(TDCCA_CALCULATION))
-		{
-			DWORD dwDataType = m_aAttribDef.GetAttributeDataType(attrib);
-			m_cbFeatures.SetAttributeDefinition(dwDataType, TDCCA_NOTALIST, attrib.dwFeatures);
-		}
-		else
-		{
-			m_cbFeatures.SetAttributeDefinition(attrib);
-		}
+		m_cbFeatures.SetAttributeDefinition(attrib, m_aAttribDefs);
 	}
 	else
 	{
@@ -1258,7 +1249,7 @@ void CTDLCustomAttributeDlg::EnableControls()
 		m_eUniqueID.EnableWindow(TRUE);
 		m_eUniqueID.SetReadOnly(m_lcAttributes.GetItemData(nSel) == 0);
 
-		const TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttribDef[nSel];
+		const TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttribDefs[nSel];
 		bIsCalculation = (attrib.GetDataType() == TDCCA_CALCULATION);
 	}
 	else
@@ -1292,6 +1283,20 @@ int CTDLCustomAttributeDlg::GetCurSel()
 	return nSel;
 }
 
+void CTDLCustomAttributeDlg::RefreshFeatureCombo(int nRow, TDCCUSTOMATTRIBUTEDEFINITION& attrib)
+{
+	m_cbFeatures.SetAttributeDefinition(attrib, m_aAttribDefs);
+
+	// And features in case they changed
+	m_dwFeatures = m_cbFeatures.GetSelectedFeatures();
+
+	if (attrib.dwFeatures != m_dwFeatures)
+	{
+		attrib.dwFeatures = m_dwFeatures;
+		m_lcAttributes.SetItemText(nRow, COL_FEATURES, FormatFeatureList(m_dwFeatures));
+	}
+}
+
 void CTDLCustomAttributeDlg::OnSelchangeDatatype() 
 {
 	UpdateData();
@@ -1299,7 +1304,7 @@ void CTDLCustomAttributeDlg::OnSelchangeDatatype()
 	// update data type
 	int nSel = GetCurSel();
 
-	TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttribDef[nSel];
+	TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttribDefs[nSel];
 	attrib.SetDataType(m_dwDataType);
 
 	CString sDataType, sUnused;
@@ -1308,16 +1313,7 @@ void CTDLCustomAttributeDlg::OnSelchangeDatatype()
 	m_lcAttributes.SetItemText(nSel, COL_DATATYPE, sDataType);
 
 	// update feature combo
-	m_cbFeatures.SetAttributeDefinition(attrib);
-
-	// And features in case they changed
-	m_dwFeatures = m_cbFeatures.GetSelectedFeatures();
-
-	if (attrib.dwFeatures != m_dwFeatures)
-	{
-		attrib.dwFeatures = m_dwFeatures;
-		m_lcAttributes.SetItemText(nSel, COL_FEATURES, FormatFeatureList(m_dwFeatures));
-	}
+	RefreshFeatureCombo(nSel, attrib);
 	
 	// Update alignment if it changed
 	if (m_nAlignment != (int)attrib.nTextAlignment)
@@ -1340,7 +1336,7 @@ void CTDLCustomAttributeDlg::OnSelchangeAlignment()
 	int nSel = GetCurSel();
 
 	// update attribute
-	TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttribDef[nSel];
+	TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttribDefs[nSel];
 	attrib.nTextAlignment = m_nAlignment;
 
 	// and list
@@ -1355,7 +1351,7 @@ LRESULT CTDLCustomAttributeDlg::OnChangeListAttributes(WPARAM wp, LPARAM lp)
 	int nSel = GetCurSel();
 	ASSERT(nSel >= 0);
 
-	TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttribDef[nSel];
+	TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttribDefs[nSel];
 
 	DWORD dwListType = m_pageList.GetListType();
 
@@ -1374,16 +1370,7 @@ LRESULT CTDLCustomAttributeDlg::OnChangeListAttributes(WPARAM wp, LPARAM lp)
 		m_pageList.SetListType(attrib.GetListType());
 
 		// update feature combo
-		m_cbFeatures.SetAttributeDefinition(attrib);
-
-		// And features in case they changed
-		m_dwFeatures = m_cbFeatures.GetSelectedFeatures();
-	
-		if ((attrib.dwFeatures != m_dwFeatures) || (!bWasList && attrib.IsList()))
-		{
-			attrib.dwFeatures = m_dwFeatures;
-			m_lcAttributes.SetItemText(nSel, COL_FEATURES, FormatFeatureList(m_dwFeatures));
-		}
+		RefreshFeatureCombo(nSel, attrib);
 
 		// and list
 		CString sDummy, sListType;
@@ -1412,13 +1399,11 @@ LRESULT CTDLCustomAttributeDlg::OnChangeCalculationAttributes(WPARAM wp, LPARAM 
 	int nSel = GetCurSel();
 	ASSERT(nSel >= 0);
 
-	TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttribDef[nSel];
+	TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttribDefs[nSel];
 	attrib.SetCalculation(calc);
 
 	// Update feature combo
-	DWORD dwDataType = m_aAttribDef.GetAttributeDataType(attrib);
-	m_cbFeatures.SetAttributeDefinition(dwDataType, TDCCA_NOTALIST, attrib.dwFeatures);
-	
+	RefreshFeatureCombo(nSel, attrib);
 	return 0L;
 }
 
@@ -1428,7 +1413,7 @@ void CTDLCustomAttributeDlg::OnChangeColumntitle()
 
 	// update attribute
 	int nSel = GetCurSel();
-	TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttribDef[nSel];
+	TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttribDefs[nSel];
 
 	attrib.sColumnTitle = m_sColumnTitle;
 
@@ -1467,7 +1452,7 @@ void CTDLCustomAttributeDlg::MakeUniqueID(CString& sID, int nIgnore) const
 
 BOOL CTDLCustomAttributeDlg::UniqueIDExists(const CString& sID, int nIgnore) const
 {
-	return (m_aAttribDef.Find(sID, nIgnore) != -1);
+	return (m_aAttribDefs.Find(sID, nIgnore) != -1);
 }
 
 void CTDLCustomAttributeDlg::OnBeginlabeleditAttributelist(NMHDR* /*pNMHDR*/, LRESULT* /*pResult*/) 
@@ -1499,7 +1484,7 @@ void CTDLCustomAttributeDlg::OnEndlabeleditAttributelist(NMHDR* pNMHDR, LRESULT*
 			return;
 		}
 		
-		TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttribDef[nSel];
+		TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttribDefs[nSel];
 		
 		// if this is the first edit then use the text to create a UNIQUE ID
 		// for the attrib
@@ -1519,7 +1504,7 @@ void CTDLCustomAttributeDlg::OnEndlabeleditAttributelist(NMHDR* pNMHDR, LRESULT*
 	UpdateData(FALSE); // update unique ID field
 	EnableControls();
 
-	m_pageCalc.SetAttributeDefinitions(m_aAttribDef);
+	m_pageCalc.SetAttributeDefinitions(m_aAttribDefs);
 
 	// Strangely, it seems the act of auto-editing the label
 	// interferes with the update of the toolbar button states
@@ -1533,7 +1518,7 @@ void CTDLCustomAttributeDlg::OnChangeUniqueid()
 	int nSel = GetCurSel();
 
 	// update attribute
-	TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttribDef[nSel];
+	TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttribDefs[nSel];
 	attrib.sUniqueID = m_sUniqueID;
 }
 
@@ -1572,7 +1557,7 @@ void CTDLCustomAttributeDlg::OnImport()
 						continue; // skip item
 				}
 
-				m_aAttribDef.Add(attribDef);
+				m_aAttribDefs.Add(attribDef);
 				AddAttributeToListCtrl(attribDef, FALSE);
 				nNumImported++;
 			}
@@ -1599,7 +1584,7 @@ void CTDLCustomAttributeDlg::OnClickAttributelist(NMHDR* pNMHDR, LRESULT* pResul
 		if (m_lcAttributes.GetItemRect(pNMIA->iItem, rCheck, LVIR_ICON) &&
 			rCheck.PtInRect(pNMIA->ptAction))
 		{
-			TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttribDef[pNMIA->iItem];
+			TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttribDefs[pNMIA->iItem];
 			
 			attrib.bEnabled = !attrib.bEnabled;
 			m_lcAttributes.SetItemImage(pNMIA->iItem, (attrib.bEnabled ? 2 : 1));
@@ -1624,7 +1609,7 @@ BOOL CTDLCustomAttributeDlg::PreTranslateMessage(MSG* pMsg)
 			case VK_SPACE:
 				if (pMsg->hwnd == m_lcAttributes)
 				{
-					TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttribDef[nSel];
+					TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttribDefs[nSel];
 					
 					attrib.bEnabled = !attrib.bEnabled;
 					m_lcAttributes.SetItemImage(nSel, (attrib.bEnabled ? 2 : 1));
@@ -1686,7 +1671,7 @@ void CTDLCustomAttributeDlg::OnNewAttribute()
 	// add to attrib array
 	TDCCUSTOMATTRIBUTEDEFINITION attrib(CEnString(IDS_CAD_NEWATTRIB));
 
-	m_aAttribDef.Add(attrib);
+	m_aAttribDefs.Add(attrib);
 	int nIndex = AddAttributeToListCtrl(attrib, TRUE);
 
 	// select
@@ -1712,7 +1697,7 @@ void CTDLCustomAttributeDlg::OnDeleteAttribute()
 	if (nSel >= 0)
 	{
 		m_lcAttributes.DeleteItem(nSel);
-		m_aAttribDef.RemoveAt(nSel);
+		m_aAttribDefs.RemoveAt(nSel);
 
 		// Move selection to next attribute
 		if (nSel == m_lcAttributes.GetItemCount())
@@ -1781,16 +1766,16 @@ void CTDLCustomAttributeDlg::MoveAttribute(int nRows)
 
 	// save off attribute
 	CHoldRedraw hr(m_lcAttributes, NCR_PAINT);
-	TDCCUSTOMATTRIBUTEDEFINITION attrib = m_aAttribDef[nRow];
+	TDCCUSTOMATTRIBUTEDEFINITION attrib = m_aAttribDefs[nRow];
 
 	// delete attrib
-	m_aAttribDef.RemoveAt(nRow);
+	m_aAttribDefs.RemoveAt(nRow);
 	m_lcAttributes.DeleteItem(nRow);
 
 	// reinsert attribute
 	nRow += nRows;
 
-	m_aAttribDef.InsertAt(nRow, attrib);
+	m_aAttribDefs.InsertAt(nRow, attrib);
 	nRow = AddAttributeToListCtrl(attrib, FALSE, nRow);
 
 	// restore selection
@@ -1804,7 +1789,7 @@ void CTDLCustomAttributeDlg::OnChangeFeatures()
 	int nSel = GetCurSel();
 
 	// update attribute
-	TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttribDef[nSel];
+	TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttribDefs[nSel];
 
 	if (attrib.dwFeatures != m_dwFeatures)
 	{

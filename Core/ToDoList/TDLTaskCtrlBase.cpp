@@ -3190,7 +3190,7 @@ BOOL CTDLTaskCtrlBase::DrawItemCustomColumn(const TODOITEM* pTDI, const TODOSTRU
 			
 			if (m_calculator.GetTaskCustomAttributeData(pTDI, pTDS, *pDef, dDate))
 			{
-				BOOL bShowTime = m_aCustomAttribDefs.AttributeHasFeature(*pDef, TDCCAF_SHOWTIME);
+				BOOL bShowTime = m_aCustomAttribDefs.AttributeHasFeature(*pDef, TDCCAF_SHOWTIMEOFDAY);
 				BOOL bDerivesFromDue = (bShowTime && 
 										pDef->IsCalculation() && 
 										m_aCustomAttribDefs.CalculationOperandDerivesFromDueDate(pDef->Calculation().opFirst));
@@ -5568,7 +5568,7 @@ int CTDLTaskCtrlBase::CalcMaxCustomAttributeColWidth(TDC_COLUMN nColID, CDC* pDC
 	switch (m_aCustomAttribDefs.GetAttributeDataType(*pDef))
 	{
 	case TDCCA_DATE:
-		return CalcMaxDateColWidth(TDCD_CUSTOM, pDC, m_aCustomAttribDefs.AttributeHasFeature(*pDef, TDCCAF_SHOWTIME));
+		return CalcMaxDateColWidth(TDCD_CUSTOM, pDC, m_aCustomAttribDefs.AttributeHasFeature(*pDef, TDCCAF_SHOWTIMEOFDAY));
 
 	case TDCCA_ICON:
 		if (pDef->IsList())
