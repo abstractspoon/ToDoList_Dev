@@ -1130,7 +1130,7 @@ bool TaskList::ClearMetaData(String^ sKey)
 
 Task^ Task::NewSubtask(String^ sTitle)
 {
-	HTASKITEM hTask = (m_pTaskList ? m_pTaskList->NewTask(MS(sTitle), nullptr, 0) : nullptr);
+	HTASKITEM hTask = (m_pTaskList ? m_pTaskList->NewTask(MS(sTitle), m_hTask, 0) : nullptr);
 
 	return gcnew Task(m_pTaskList, hTask);
 }
