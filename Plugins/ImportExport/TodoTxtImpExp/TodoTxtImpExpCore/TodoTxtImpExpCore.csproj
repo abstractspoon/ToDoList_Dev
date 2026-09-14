@@ -44,8 +44,8 @@
     <Reference Include="System.Security" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
-    <Reference Include="TodoTxtLib">
-      <HintPath>..\..\..\3rdParty\TodoTxtLib\TodoTxtLib.dll</HintPath>
+    <Reference Include="TodoLib">
+      <HintPath>..\..\..\3rdParty\TodoTxtLib\TodoLib.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
