@@ -32,7 +32,6 @@ namespace TodoTxtImpExp
 			var srcTasks = new ToDoLib.TaskList(srcFilePath);
 
 			// Retrieve globals
-//			var projects = srcTasks.Projects;
 			var contexts = srcTasks.Contexts;
 			var priorities = srcTasks.Priorities;
 
@@ -48,13 +47,39 @@ namespace TodoTxtImpExp
 			// Process the tasks
 			foreach (var srcTask in srcTasks.Tasks)
 			{
-				Task destParentTask, destTask;
+				Task destTask;
 
-				if (!string.IsNullOrEmpty(srcTask.PrimaryProject) && parentMapping.TryGetValue(srcTask.PrimaryProject, out destParentTask))
-					destTask = destParentTask.NewSubtask(srcTask.Body);
-				else
-					destTask = destTaskFile.NewTask(srcTask.Body);
+				if (srcTask.Projects.Count > 0)
+				{
+					// Create 'real' subtask from 'Primary project'
+					Task destParentTask;
 
+					if (parentMapping.TryGetValue(srcTask.PrimaryProject, out destParentTask))
+					{
+						destTask = destParentTask.NewSubtask(srcTask.Body);
+						ImportTaskAttributes(srcTask, destTask, options);
+
+						// For any other projects create references to this 'real' subtask
+						foreach (var project in srcTask.Projects)
+						{
+							if (project != srcTask.PrimaryProject)
+							{
+								if (parentMapping.TryGetValue(project, out destParentTask))
+								{
+									var refTask = destParentTask.NewSubtask(srcTask.Body);
+									refTask.SetReferenceID(destTask.GetID());
+
+									// Reference task gets its attributes from 'real' task
+								}
+							}
+						}
+
+						continue;
+					}
+				}
+
+				// All else
+				destTask = destTaskFile.NewTask(srcTask.Body);
 				ImportTaskAttributes(srcTask, destTask, options);
 			}
 

@@ -1210,6 +1210,11 @@ bool Task::SetColor(UInt32 color)
 	return SETTASKVAL(SetTaskColor, color);
 }
 
+bool Task::SetReferenceID(UInt32 id)
+{
+	return SETTASKVAL(SetTaskReferenceID, id);
+}
+
 bool Task::SetPriority(Byte nPriority)
 {
 	return SETTASKVAL(SetTaskPriority, nPriority);

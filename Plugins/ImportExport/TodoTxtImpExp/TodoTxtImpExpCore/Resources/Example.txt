@@ -3,7 +3,7 @@
 2015-01-12 @Work draw diagram +DubaiMetro
 (A) Urgently buy milk @Errands
 X This has been done @Home +Renovations
-(A) Call Mom @Phone +Family
+(A) Call Mom @Phone +Family +Health
 (A) Schedule annual checkup +Health
 (B) Outline chapter 5 +Novel @Computer
 (C) Add cover sheets @Office +TPSReports

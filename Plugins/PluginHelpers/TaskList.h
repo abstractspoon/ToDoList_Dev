@@ -214,6 +214,7 @@ namespace Abstractspoon
 				bool AddFileLink(String^ sFileLink);
 
 				bool SetColor(UInt32 color);
+				bool SetReferenceID(UInt32 id);
 				bool SetPriority(Byte nPriority);
 				bool SetRisk(Byte Risk);
 

@@ -184,7 +184,6 @@ public:
 	COleDateTime GetTaskCreationDateOle(HTASKITEM hTask) const;
 
 	BOOL SetTaskID(HTASKITEM hTask, unsigned long nID);
-	BOOL SetTaskReferenceID(HTASKITEM hTask, unsigned long nRefID);
 	int GetTaskIDs(CDWordArray& aTaskIDs, BOOL bIncParents = TRUE) const;
 
 	BOOL SetTaskAttributes(HTASKITEM hTask, const TODOITEM& tdi);
@@ -265,6 +264,8 @@ public:
 	double GetTaskTimeRemaining(HTASKITEM hTask, TDC_UNITS& cUnits) const;
 	unsigned long GetCustomAttributeFeatures(int nIndex) const;
 	unsigned long GetCustomAttributeCalculationResultType(int nIndex) const;
+
+	bool SetTaskReferenceID(HTASKITEM hTask, unsigned long nRefID);
 
 	//////////////////////////////////////////////////////////////
 	// ITaskList17 implementation 
