@@ -23,42 +23,94 @@ namespace TodoTxtImpExp
 		public bool Import(string srcFilePath, TaskList destTaskFile, uint flags, Preferences prefs, string prefKey)
         {
 			// Possibly display a dialog to get input on how to 
-			// map ToDoList task attributes to the output format
-			// TODO
+			// map the input attributes to ToDoList task attributes
+			var options = new TodoTxtImporterOptionsForm();
 
-            // Process the tasks
+			if (options.ShowDialog() != DialogResult.OK)
+				return false;
+
 			var srcTasks = new ToDoLib.TaskList(srcFilePath);
 
-			foreach (var srcTask in srcTasks.Tasks)
+			// Retrieve globals
+//			var projects = srcTasks.Projects;
+			var contexts = srcTasks.Contexts;
+			var priorities = srcTasks.Priorities;
+
+			// Create any parent tasks, mapped by name
+			var parentMapping = new Dictionary<string, Task>();
+
+			if (options.ImportProjectAsParentTask)
 			{
-
-
+				foreach (var project in srcTasks.Projects)
+					parentMapping.Add(project, destTaskFile.NewTask(project.Substring(1)));
 			}
 
-            return true;
+			// Process the tasks
+			foreach (var srcTask in srcTasks.Tasks)
+			{
+				Task destParentTask, destTask;
+
+				if (!string.IsNullOrEmpty(srcTask.PrimaryProject) && parentMapping.TryGetValue(srcTask.PrimaryProject, out destParentTask))
+					destTask = destParentTask.NewSubtask(srcTask.Body);
+				else
+					destTask = destTaskFile.NewTask(srcTask.Body);
+
+				ImportTaskAttributes(srcTask, destTask, options);
+			}
+
+			return true;
         }
 
-//         protected bool ExportTask(Task task /*, probably with some additional parameters*/)
-//         {
-//             // Process task's own attributes
-//             // TODO
-// 
-//             // Export task's children
-//             Task subtask = task.GetFirstSubtask();
-// 
-//             while (subtask.IsValid())
-//             {
-//                 if (!ExportTask(subtask /*, probably with some additional parameters*/ ))
-//                 {
-//                     // Decide whether to stop or not
-//                     // TODO
-//                 }
-// 
-//                 subtask = subtask.GetNextTask();
-//             }
-// 
-//             return true;
-//         }
+        protected bool ImportTaskAttributes(ToDoLib.Task srcTask, Task destTask, TodoTxtImporterOptionsForm options)
+        {
+			// Process task's own attributes
+			// Dates
+			DateTime date;
+
+			if (DateTime.TryParse(srcTask.DueDate, out date))
+				destTask.SetDueDate(date);
+
+			if (DateTime.TryParse(srcTask.CompletedDate, out date))
+				destTask.SetDoneDate(date);
+
+			if (DateTime.TryParse(srcTask.CreationDate, out date))
+				destTask.SetCreationDate(date);
+
+			if (DateTime.TryParse(srcTask.ThresholdDate, out date))
+				destTask.SetStartDate(date);
+
+			// Contexts
+			foreach (var context in srcTask.Contexts)
+			{
+				if (options.ImportContextAsCategory)
+					destTask.AddCategory(context.Substring(1));
+				else
+					destTask.AddTag(context.Substring(1));
+			}
+
+			// Projects
+			foreach (var context in srcTask.Projects)
+			{
+				if (options.ImportProjectAsCategory)
+				{
+					destTask.AddCategory(context.Substring(1));
+				}
+				else if (options.ImportProjectAsTag)
+				{
+					destTask.AddTag(context.Substring(1));
+				}
+				else // as parent tasks
+				{
+					// TODO
+				}
+			}
+
+			// Priority
+			// TODO
+
+
+			return true;
+        }
 
         // ----------------------------------------------------------
     }
