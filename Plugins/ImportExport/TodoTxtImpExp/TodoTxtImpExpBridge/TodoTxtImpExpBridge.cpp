@@ -61,7 +61,7 @@ LPCWSTR CTodoTxtImpExpBridge::GetMenuText() const
 
 LPCWSTR CTodoTxtImpExpBridge::GetFileFilter() const
 {
-	return L"txt";
+	return L"todo.txt Files (*.txt)|*.txt||";
 }
 
 LPCWSTR CTodoTxtImpExpBridge::GetFileExtension() const
