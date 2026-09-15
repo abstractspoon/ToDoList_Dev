@@ -5209,7 +5209,10 @@ void CToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const CDWordAr
 	SetModified(TRUE);
 
 	if (mapAttribIDs.Has(TDCA_PASTE))
+	{
+		m_ctrlAttributes.SetAutoListData(TDCA_ALL, m_tldAll);
 		UpdateAutoListData();
+	}
 	
 	// For new tasks we want to do as little processing as possible 
 	// so as not to delay the appearance of the title edit field.
