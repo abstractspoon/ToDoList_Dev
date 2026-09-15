@@ -160,10 +160,11 @@
 			this.Controls.Add(this.label1);
 			this.Controls.Add(this.m_ContextGroup);
 			this.Controls.Add(this.m_ProjectGroup);
+			this.Icon = Properties.Resources.TodoTxt;
 			this.Name = "TodoTxtImporterOptionsForm";
 			this.ShowInTaskbar = false;
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-			this.Text = "Todo.Txt Importer Options";
+			this.Text = "todo.txt Options";
 			this.m_ContextGroup.ResumeLayout(false);
 			this.m_ContextGroup.PerformLayout();
 			this.m_ProjectGroup.ResumeLayout(false);
