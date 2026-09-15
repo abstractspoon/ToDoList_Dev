@@ -1,13 +1,19 @@
 ﻿
 using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Diagnostics;
 using System.Windows.Forms;
+
 using Abstractspoon.Tdl.PluginHelpers;
 
 namespace TodoTxtImpExp
 {
-    [System.ComponentModel.DesignerCategory("")]
+	using ParentMapping = Dictionary<string, Task>;
+	using PriorityMapping = Dictionary<string, byte>;
+
+       // ----------------------------------------------------------
+
+	[System.ComponentModel.DesignerCategory("")]
 
     public class TodoTxtImporter
     {
@@ -32,17 +38,10 @@ namespace TodoTxtImpExp
 			var srcTasks = new ToDoLib.TaskList(srcFilePath);
 
 			// Retrieve globals
-			var contexts = srcTasks.Contexts;
-			var priorities = srcTasks.Priorities;
+			var priorityMap = CreatePriorityMapping(srcTasks);
 
 			// Create any parent tasks, mapped by name
-			var parentMapping = new Dictionary<string, Task>();
-
-			if (options.ImportProjectAsParentTask)
-			{
-				foreach (var project in srcTasks.Projects)
-					parentMapping.Add(project, destTaskFile.NewTask(project.Substring(1)));
-			}
+			var parentMap = CreateParentTasks(srcTasks, destTaskFile, options);
 
 			// Process the tasks
 			foreach (var srcTask in srcTasks.Tasks)
@@ -54,17 +53,17 @@ namespace TodoTxtImpExp
 					// Create 'real' subtask from 'Primary project'
 					Task destParentTask;
 
-					if (parentMapping.TryGetValue(srcTask.PrimaryProject, out destParentTask))
+					if (parentMap.TryGetValue(srcTask.PrimaryProject, out destParentTask))
 					{
 						destTask = destParentTask.NewSubtask(srcTask.Body);
-						ImportTaskAttributes(srcTask, destTask, options);
+						ImportTaskAttributes(srcTask, destTask, options, priorityMap);
 
 						// For any other projects create references to this 'real' subtask
 						foreach (var project in srcTask.Projects)
 						{
 							if (project != srcTask.PrimaryProject)
 							{
-								if (parentMapping.TryGetValue(project, out destParentTask))
+								if (parentMap.TryGetValue(project, out destParentTask))
 								{
 									var refTask = destParentTask.NewSubtask(srcTask.Body);
 									refTask.SetReferenceID(destTask.GetID());
@@ -80,13 +79,42 @@ namespace TodoTxtImpExp
 
 				// All else
 				destTask = destTaskFile.NewTask(srcTask.Body);
-				ImportTaskAttributes(srcTask, destTask, options);
+				ImportTaskAttributes(srcTask, destTask, options, priorityMap);
 			}
 
 			return true;
         }
 
-        protected bool ImportTaskAttributes(ToDoLib.Task srcTask, Task destTask, TodoTxtImporterOptionsForm options)
+		private ParentMapping CreateParentTasks(ToDoLib.TaskList srcTasks, TaskList destTaskFile, TodoTxtImporterOptionsForm options)
+		{
+			var parentMapping = new ParentMapping();
+
+			if (options.ImportProjectAsParentTask)
+			{
+				foreach (var project in srcTasks.Projects)
+				{
+					var parentTask = destTaskFile.NewTask(project.Substring(1));
+					parentTask.SetPriority(-2); // none
+
+					parentMapping.Add(project, parentTask);
+				}
+			}
+
+			return parentMapping;
+		}
+
+		private PriorityMapping CreatePriorityMapping(ToDoLib.TaskList srcTasks)
+		{
+			var priorityMap = new PriorityMapping();
+
+			for (int i = 0; i < 26; i++)
+				priorityMap.Add(string.Format("({0})", (char)('A' + i)), (byte)Math.Max((10 - i), 0));
+
+			return priorityMap;
+		}
+
+        protected bool ImportTaskAttributes(ToDoLib.Task srcTask, Task destTask,
+											TodoTxtImporterOptionsForm options, PriorityMapping priorityMap)
         {
 			// Process task's own attributes
 			// Dates
@@ -108,31 +136,33 @@ namespace TodoTxtImpExp
 			foreach (var context in srcTask.Contexts)
 			{
 				if (options.ImportContextAsCategory)
+				{
 					destTask.AddCategory(context.Substring(1));
-				else
+				}
+				else if (options.ImportContextAsTag)
+				{
 					destTask.AddTag(context.Substring(1));
+				}
 			}
 
 			// Projects
-			foreach (var context in srcTask.Projects)
+			foreach (var project in srcTask.Projects)
 			{
 				if (options.ImportProjectAsCategory)
 				{
-					destTask.AddCategory(context.Substring(1));
+					destTask.AddCategory(project.Substring(1));
 				}
 				else if (options.ImportProjectAsTag)
 				{
-					destTask.AddTag(context.Substring(1));
-				}
-				else // as parent tasks
-				{
-					// TODO
+					destTask.AddTag(project.Substring(1));
 				}
 			}
 
 			// Priority
-			// TODO
+			byte priority;
 
+			if (priorityMap.TryGetValue(srcTask.Priority, out priority))
+				destTask.SetPriority(priority);
 
 			return true;
         }
