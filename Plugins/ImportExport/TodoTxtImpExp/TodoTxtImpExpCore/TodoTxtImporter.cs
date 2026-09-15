@@ -94,8 +94,6 @@ namespace TodoTxtImpExp
 				foreach (var project in srcTasks.Projects)
 				{
 					var parentTask = destTaskFile.NewTask(project.Substring(1));
-					parentTask.SetPriority(-2); // none
-
 					parentMapping.Add(project, parentTask);
 				}
 			}
