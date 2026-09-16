@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "TaskComboBox.h"
 #include "Win32.h"
+#include "UIExtension.h"
 
 #include <shared\Clipboard.h>
 #include <shared\Misc.h>
@@ -67,6 +68,7 @@ TaskComboBox::TaskComboBox()
 {
 	Sorted = false; // we control the order
 	AutoCompleteMode = System::Windows::Forms::AutoCompleteMode::None;
+	Font = UIExtension::ControlFont();
 }
 
 void TaskComboBox::Initialise(IEnumerable<ITaskBase^>^ taskItems,
@@ -163,10 +165,10 @@ void TaskComboBox::OnDrawItem(DrawItemEventArgs^ e)
 			rect.X += UIExtension::TaskIcon::IconSize;
 		}
 
-		auto brush = TextBrush(e);
 		auto font = ((!task->IsNone && ITaskBaseExt::IsTopLevel(task)) ? m_BoldFont : Font);
+		auto flags = (TextFormatFlags::Left | TextFormatFlags::VerticalCenter);
 
-		e->Graphics->DrawString(task->Title, font, brush, rect);
+		TextRenderer::DrawText(e->Graphics, task->Title, font, rect, TextColor(e), flags);
 		e->DrawFocusRectangle();
 	}
 }
