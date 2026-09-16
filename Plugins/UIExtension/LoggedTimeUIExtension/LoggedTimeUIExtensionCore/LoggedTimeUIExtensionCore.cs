@@ -24,8 +24,6 @@ namespace LoggedTimeUIExtension
 		private String m_TypeId, m_UiName;
 		private WorkingWeek m_WorkWeek;
 
-		private const string FontName = "Tahoma";
-
 		private static Color DefGridColor = Color.FromArgb(192, 192, 192);
         private static int LabelTop = DPIScaling.Scale(2);
         private static int ComboTop = (LabelTop + DPIScaling.Scale(2));
@@ -44,7 +42,7 @@ namespace LoggedTimeUIExtension
         private IIControls.ToolStripEx m_Toolbar;
 		private ImageList m_TBImageList;
 		private UIThemeToolbarRenderer m_ToolbarRenderer;
-		private Font m_ControlsFont;
+		private Font m_ControlsFont = UIExtension.ControlFont();
 
 		// --------------------------------------------------------------------------------------
 
@@ -279,7 +277,6 @@ namespace LoggedTimeUIExtension
 
 		private void InitializeComponent()
 		{
-			m_ControlsFont = new Font(FontName, 8.25f);
 			m_PrefsDlg = new LoggedTimePreferencesDlg(this, m_Trans, m_ControlsFont);
 			m_WorkWeek = new WorkingWeek();
 
@@ -305,7 +302,7 @@ namespace LoggedTimeUIExtension
 			m_TimeLog.LogAccessStatusChanged += new LogAccessStatusEventHandler(OnTimeLogAccessStatusChanged);
 
 			m_TimeLog.StartDate = DateTime.Now;
-			m_TimeLog.SetFont(FontName, 8);
+			m_TimeLog.SetFont(UIExtension.ControlFontName(), 8); // default
 			m_WeekLabel.StartDate = m_TimeLog.StartDate;
 
             if (VisualStyleRenderer.IsSupported)
@@ -338,7 +335,7 @@ namespace LoggedTimeUIExtension
 		{
 			m_WeekLabel = new WeekLabel(m_Trans);
 
-			m_WeekLabel.Font = new Font(FontName, 14);
+			m_WeekLabel.Font = new Font(m_ControlsFont.FontFamily, 14);
             m_WeekLabel.Location = new Point(m_Toolbar.Right + ControlSpacing, LabelTop);
             m_WeekLabel.Height = m_Toolbar.Height;
 			m_WeekLabel.TextAlign = System.Drawing.ContentAlignment.TopLeft;

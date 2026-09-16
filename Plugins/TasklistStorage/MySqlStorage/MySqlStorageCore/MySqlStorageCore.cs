@@ -14,16 +14,13 @@ namespace MySqlStorage
     public class MySqlStorageCore
     {
         private Translator m_Trans;
-        private Font m_ControlsFont;
-
-		private const string FontName = "Tahoma";
+		private Font m_ControlsFont = UIExtension.ControlFont();
 
 		// ------------------------------------------------------------------
 
 		public MySqlStorageCore(Translator trans)
         {
             m_Trans = trans;
-			m_ControlsFont = new Font(FontName, 8.25f);
 
 			// Once only translation
 			ColumnInfo.PrimaryKey = trans.Translate(ColumnInfo.PrimaryKey, Translator.Type.Text);

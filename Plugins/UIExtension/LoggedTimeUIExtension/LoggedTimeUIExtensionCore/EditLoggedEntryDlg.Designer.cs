@@ -73,7 +73,6 @@
 			// label
 			// 
 			this.label.AutoSize = true;
-			this.label.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
 			this.label.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.label.Location = new System.Drawing.Point(7, 12);
 			this.label.Name = "label";
@@ -93,7 +92,6 @@
 			// m_TaskId
 			// 
 			this.m_TaskId.AutoSize = true;
-			this.m_TaskId.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
 			this.m_TaskId.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.m_TaskId.Location = new System.Drawing.Point(107, 39);
 			this.m_TaskId.Name = "m_TaskId";
@@ -103,7 +101,6 @@
 			// label3
 			// 
 			this.label3.AutoSize = true;
-			this.label3.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
 			this.label3.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.label3.Location = new System.Drawing.Point(7, 39);
 			this.label3.Name = "label3";

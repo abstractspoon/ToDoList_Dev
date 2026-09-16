@@ -27,6 +27,8 @@ namespace HTMLReportExporter
 		public override String ToString() { return FileName; }
 	}
 
+	///////////////////////////////////////////////////////////////
+
 	public partial class HtmlReportTemplateForm : Form
 	{
 		private String m_TypeId = String.Empty;
@@ -105,7 +107,7 @@ namespace HTMLReportExporter
 
         private void InitialiseFontAndColors()
         {
-            var controlsFont = new Font("Tahoma", 8.25f);
+            var controlsFont = UIExtension.AppFont();
 
             FormsUtil.SetFont(this, controlsFont);
 

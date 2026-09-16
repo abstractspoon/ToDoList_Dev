@@ -16,16 +16,12 @@ namespace EvidenceBoardUIExtension
 	[System.ComponentModel.DesignerCategory("")]
 	public class EvidenceBoardUIExtensionCore : Panel, IUIExtension
     {
-        private const string FontName = "Tahoma";
-
-        // ----------------------------------------------------------------------------
-
         private IntPtr m_HwndParent = IntPtr.Zero;
         private String m_UiName;
 
         private Translator m_Trans;
         private UIExtension.TaskIcon m_TaskIcons;
-        private Font m_ControlsFont;
+		private Font m_ControlsFont = UIExtension.ControlFont();
 
         private TDLNodeControl m_Control;
 		private EvidenceBoardPreferencesDlg m_PrefsDlg;
@@ -350,13 +346,12 @@ namespace EvidenceBoardUIExtension
         private void InitializeComponent()
         {
             m_TaskIcons = new UIExtension.TaskIcon(m_HwndParent);
-            m_ControlsFont = new Font(FontName, 8.25f);
 
 			m_PrefsDlg = new EvidenceBoardPreferencesDlg(this, m_Trans, m_ControlsFont);
 
 			m_Control = new TDLNodeControl(m_Trans, m_TaskIcons);
 			m_Control.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right | AnchorStyles.Bottom;
-            m_Control.SetFont(FontName, 8);
+            m_Control.SetFont(UIExtension.ControlFontName(), 8);
 
 			if (VisualStyleRenderer.IsSupported)
                 m_Control.BorderStyle = BorderStyle.FixedSingle;

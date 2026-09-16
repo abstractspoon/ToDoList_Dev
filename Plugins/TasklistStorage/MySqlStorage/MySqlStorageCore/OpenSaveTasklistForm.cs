@@ -18,7 +18,7 @@ namespace MySqlStorage
 		TasklistConnectionInfo m_TasklistInfo;
 
 		Translator m_Trans;
-		Font m_ControlsFont;
+		Font m_ControlsFont = UIExtension.ControlFont();
 
 		// -----------------------------------------------------------------
 
@@ -34,7 +34,6 @@ namespace MySqlStorage
 			m_Connection = conn;
 			m_TasklistInfo = tasklistInfo;
 			m_Trans = trans;
-			m_ControlsFont = ctrlsFont;
 
 			if (m_OpenTasklist)
 			{

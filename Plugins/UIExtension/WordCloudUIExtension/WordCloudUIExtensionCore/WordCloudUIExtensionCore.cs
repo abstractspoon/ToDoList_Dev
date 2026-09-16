@@ -26,8 +26,6 @@ namespace WordCloudUIExtension
 
 	public class WordCloudUIExtensionCore : Panel, IUIExtension
 	{
-        private const string FontName = "Tahoma";
-
         private static int MinSplitWidth = DPIScaling.Scale(25 * 2);
 		private static int LabelTop = DPIScaling.Scale(2); 
 		private static int ComboTop = DPIScaling.Scale(20);
@@ -67,7 +65,7 @@ namespace WordCloudUIExtension
 		private ImageList m_TBImageList;
 		private UIThemeToolbarRenderer m_TBRenderer;
 
-		private Font m_ControlsFont;
+		private Font m_ControlsFont = UIExtension.ControlFont();
 		private String m_UserIgnoreFilePath, m_LangIgnoreFilePath;
 		private Timer m_CommentsTimer;
 
@@ -82,7 +80,6 @@ namespace WordCloudUIExtension
 			m_Attrib = Task.Attribute.Title;
             m_ExcludedWords = new CommonWords(); // English by default
 
-			m_ControlsFont = new Font(FontName, 8, FontStyle.Regular);
 			m_TaskIcons = new UIExtension.TaskIcon(hwndParent);
 
 			m_CommentsTimer = new Timer();
@@ -673,7 +670,7 @@ namespace WordCloudUIExtension
 			m_WordCloud.Size = new Size(100, 100);
 			m_WordCloud.Cursor = Cursors.Default;
 			m_WordCloud.LayoutType = Gma.CodeCloud.Controls.LayoutType.Spiral;
-            m_WordCloud.SetFont(FontName, 10); // default
+            m_WordCloud.SetFont(m_ControlsFont.Name, 10); // default
 
 			this.Controls.Add(m_WordCloud);
 

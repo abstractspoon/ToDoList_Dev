@@ -13,8 +13,8 @@ using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
 namespace WeekPlannerUIExtension
 {
-
 	[System.ComponentModel.DesignerCategory("")]
+
 	public class WeekPlannerUIExtensionCore : Panel, IUIExtension
 	{
 		private IntPtr m_HwndParent = IntPtr.Zero;
@@ -22,8 +22,6 @@ namespace WeekPlannerUIExtension
 		private Translator m_Trans = null;
 		private String m_TypeId, m_UiName;
 		private WorkingWeek m_WorkWeek = null;
-
-		private const string FontName = "Tahoma";
 
 		private static Color DefGridColor = Color.FromArgb(192, 192, 192);
         private static int LabelTop = DPIScaling.Scale(2);
@@ -47,7 +45,7 @@ namespace WeekPlannerUIExtension
         private IIControls.ToolStripEx m_Toolbar;
 		private ImageList m_TBImageList;
 		private UIThemeToolbarRenderer m_ToolbarRenderer;
-		private Font m_ControlsFont;
+		private Font m_ControlsFont = UIExtension.ControlFont();
 
 		private TimeBlockSeriesAttributes m_DefaultNewTimeBlockAttributes;
 		private TimeBlockSeriesAttributes.EditMask m_DefaultTimeBlockEditMask;
@@ -415,7 +413,6 @@ namespace WeekPlannerUIExtension
 
 		private void InitializeComponent()
 		{
-			m_ControlsFont = new Font(FontName, 8.25f);
 			m_PrefsDlg = new WeekPlannerPreferencesDlg(this, m_Trans, m_ControlsFont);
 			m_WorkWeek = new WorkingWeek();
 
@@ -447,7 +444,7 @@ namespace WeekPlannerUIExtension
 			m_DayView.MouseDown += new MouseEventHandler(OnDayViewMouseClick);
 
 			m_DayView.StartDate = DateTime.Now;
-			m_DayView.SetFont(FontName, 8);
+			m_DayView.SetFont(m_ControlsFont.Name, 8); // Default font
 			m_WeekLabel.StartDate = m_DayView.StartDate;
 
             if (VisualStyleRenderer.IsSupported)
@@ -475,7 +472,7 @@ namespace WeekPlannerUIExtension
 		{
 			m_WeekLabel = new WeekLabel(m_Trans);
 
-			m_WeekLabel.Font = new Font(FontName, 14);
+			m_WeekLabel.Font = new Font(m_ControlsFont.Name, 14);
             m_WeekLabel.Location = new Point(m_Toolbar.Right + ControlSpacing, LabelTop);
             m_WeekLabel.Height = m_Toolbar.Height;
 			m_WeekLabel.TextAlign = System.Drawing.ContentAlignment.TopLeft;
