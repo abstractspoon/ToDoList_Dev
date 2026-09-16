@@ -302,7 +302,7 @@ namespace LoggedTimeUIExtension
 			m_TimeLog.LogAccessStatusChanged += new LogAccessStatusEventHandler(OnTimeLogAccessStatusChanged);
 
 			m_TimeLog.StartDate = DateTime.Now;
-			m_TimeLog.SetFont(UIExtension.ControlFontName(), 8); // default
+			m_TimeLog.SetFont(m_ControlsFont.Name, 8); // default
 			m_WeekLabel.StartDate = m_TimeLog.StartDate;
 
             if (VisualStyleRenderer.IsSupported)
