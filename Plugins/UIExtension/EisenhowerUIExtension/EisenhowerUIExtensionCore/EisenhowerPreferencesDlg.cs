@@ -36,6 +36,8 @@ namespace EisenhowerUIExtension
 
 			m_SetupListCtrl.ChangeEvent += (s, e) => OnMatrixSetupChange(e);
 			m_Error.ForeColor = DrawingColor.GetErrorLabelTextColor(BackColor);
+
+			FormsUtil.SetFont(this, UIExtension.ControlFont());
 		}
 
 		public new DialogResult ShowDialog()
