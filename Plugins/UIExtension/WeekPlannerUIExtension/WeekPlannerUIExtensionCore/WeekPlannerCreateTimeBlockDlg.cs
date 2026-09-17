@@ -26,12 +26,12 @@ namespace WeekPlannerUIExtension
 		}
 
 		public WeekPlannerCreateTimeBlockDlg(IEnumerable<TaskItem> taskItems, 
-										 UIExtension.TaskIcon taskIcons, 
-										 WorkingWeek workWeek,
-										 bool isoDateTimes,
-										 uint taskId,
-										 TimeBlockSeriesAttributes attribs,
-										 Translator trans)
+											 UIExtension.TaskIcon taskIcons, 
+											 WorkingWeek workWeek,
+											 bool isoDateTimes,
+											 uint taskId,
+											 TimeBlockSeriesAttributes attribs,
+											 Translator trans)
 			:
 			this()
 		{
