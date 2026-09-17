@@ -16,7 +16,6 @@ namespace HTMLContentControl
     public partial class HTMLContentControlCore : System.Windows.Forms.UserControl, IContentControlWnd
     {
         private IntPtr m_HwndParent;
-        private Font m_ControlsFont = UIExtension.ControlFont();
         private Translator m_Trans;
         private String m_TypeID;
 
@@ -35,8 +34,8 @@ namespace HTMLContentControl
             m_TypeID = typeId;
             m_HwndParent = hwndParent;
             m_Trans = trans;
-			m_HtmlEditControl = new TDLHtmlEditorControl(m_ControlsFont, m_Trans);
-			m_PrefsDlg = new HTMLPreferencesDlg(m_ControlsFont, m_Trans);
+			m_HtmlEditControl = new TDLHtmlEditorControl(m_Trans);
+			m_PrefsDlg = new HTMLPreferencesDlg(m_Trans);
 
 			if (s_CoreList.Count > 0)
 				UpdateWatermark(s_CoreList.First().m_PrefsDlg);
@@ -194,9 +193,9 @@ namespace HTMLContentControl
             this.ResizeRedraw = true;
             this.Margin = new System.Windows.Forms.Padding(0);
             this.Padding = new System.Windows.Forms.Padding(0);
-            this.Font = m_ControlsFont;
+            this.Font = UIExtension.ControlFont();
 
-			m_HtmlEditControl = new TDLHtmlEditorControl(m_ControlsFont, m_Trans);
+			m_HtmlEditControl = new TDLHtmlEditorControl(m_Trans);
 			m_HtmlEditControl.Name = "m_HtmlEditControl";
 			m_HtmlEditControl.Bounds = ClientRectangle;
 

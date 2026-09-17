@@ -14,8 +14,8 @@ using CustomComboBox;
 
 namespace HTMLContentControl
 {
-
 	[System.ComponentModel.DesignerCategory("")]
+
     class TDLHtmlEditorControl : HtmlEditorControlEx
     {
 		[DllImport("User32.dll")]
@@ -49,7 +49,9 @@ namespace HTMLContentControl
 
 		// ---------------------------------------------------------------
 
-		public TDLHtmlEditorControl(System.Drawing.Font font, Translator trans) : base(font, trans, false)
+		public TDLHtmlEditorControl(Translator trans) 
+			: 
+			base(UIExtension.ControlFont(), trans, false)
         {
             m_TextChangeTimer = new Timer();
 
