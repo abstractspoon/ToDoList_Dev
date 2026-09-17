@@ -42,7 +42,6 @@ namespace LoggedTimeUIExtension
         private IIControls.ToolStripEx m_Toolbar;
 		private ImageList m_TBImageList;
 		private UIThemeToolbarRenderer m_ToolbarRenderer;
-		private Font m_ControlsFont = UIExtension.ControlFont();
 
 		// --------------------------------------------------------------------------------------
 
@@ -277,15 +276,16 @@ namespace LoggedTimeUIExtension
 
 		private void InitializeComponent()
 		{
-			m_PrefsDlg = new LoggedTimePreferencesDlg(this, m_Trans, m_ControlsFont);
+			m_PrefsDlg = new LoggedTimePreferencesDlg(this, m_Trans);
 			m_WorkWeek = new WorkingWeek();
 
 			CreateMonthYearCombos();
 			CreateToolbar();
 			CreateWeekLabel();
+			CreateTimeLogView(); // view always comes last
 
-			// view always comes last
-			CreateTimeLogView();
+			FormsUtil.SetFont(this, UIExtension.ControlFont());
+			m_WeekLabel.Font = new Font(Font.Name, 14);
 		}
 
 		private void CreateTimeLogView()
@@ -302,7 +302,7 @@ namespace LoggedTimeUIExtension
 			m_TimeLog.LogAccessStatusChanged += new LogAccessStatusEventHandler(OnTimeLogAccessStatusChanged);
 
 			m_TimeLog.StartDate = DateTime.Now;
-			m_TimeLog.SetFont(m_ControlsFont.Name, 8); // default
+			m_TimeLog.SetFont(UIExtension.ControlFont().Name, 8); // default
 			m_WeekLabel.StartDate = m_TimeLog.StartDate;
 
             if (VisualStyleRenderer.IsSupported)
@@ -335,7 +335,6 @@ namespace LoggedTimeUIExtension
 		{
 			m_WeekLabel = new WeekLabel(m_Trans);
 
-			m_WeekLabel.Font = new Font(m_ControlsFont.FontFamily, 14);
             m_WeekLabel.Location = new Point(m_Toolbar.Right + ControlSpacing, LabelTop);
             m_WeekLabel.Height = m_Toolbar.Height;
 			m_WeekLabel.TextAlign = System.Drawing.ContentAlignment.TopLeft;
@@ -544,8 +543,6 @@ namespace LoggedTimeUIExtension
 												attrib,
 												m_Trans);
 
-			FormsUtil.SetFont(dlg, m_ControlsFont);
-
 			m_TimeLog.ForceShowSelection = true;
 
 			var res = dlg.ShowDialog();
@@ -592,8 +589,6 @@ namespace LoggedTimeUIExtension
 											 m_TimeLog.DisplayDatesInISO,
 											 (m_TimeLog.ReadOnly || (taskItem == null) || taskItem.IsLocked),
 											 m_Trans);
-
-			FormsUtil.SetFont(dlg, m_ControlsFont);
 
 			m_TimeLog.ForceShowSelection = true;
 
@@ -663,7 +658,6 @@ namespace LoggedTimeUIExtension
 		{
 			m_MonthCombo = new MonthComboBox();
 
-			m_MonthCombo.Font = m_ControlsFont;
             m_MonthCombo.Location = new Point(0, ComboTop);
             m_MonthCombo.Size = new Size(ComboWidth, ComboHeight);
 			m_MonthCombo.SelectedIndexChanged += new EventHandler(OnMonthYearSelChanged);
@@ -672,7 +666,6 @@ namespace LoggedTimeUIExtension
 
 			m_YearCombo = new YearComboBox();
 
-			m_YearCombo.Font = m_ControlsFont;
             m_YearCombo.Location = new Point(m_MonthCombo.Right + ControlSpacing, ComboTop);
             m_YearCombo.Size = new Size(ComboWidth, ComboHeight);
 			m_YearCombo.SelectedIndexChanged += new EventHandler(OnMonthYearSelChanged);

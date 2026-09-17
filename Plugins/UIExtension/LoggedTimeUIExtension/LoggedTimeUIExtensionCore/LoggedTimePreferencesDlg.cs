@@ -42,14 +42,14 @@ namespace LoggedTimeUIExtension
 
 		// ------------------------------------------------------------------------
 
-        public LoggedTimePreferencesDlg(IWin32Window owner, Translator trans, Font font)
+        public LoggedTimePreferencesDlg(IWin32Window owner, Translator trans)
         {
 			m_Trans = trans;
 			m_Owner = owner;
 			
             InitializeComponent();
 
-			FormsUtil.SetFont(this, font);
+			FormsUtil.SetFont(this, UIExtension.ControlFont());
 			m_Trans.Translate(this);
 
 			// Build 'slot minutes' combo

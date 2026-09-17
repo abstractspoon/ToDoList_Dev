@@ -51,6 +51,7 @@ namespace LoggedTimeUIExtension
 
 			m_Error.ForeColor = DrawingColor.GetErrorLabelTextColor(BackColor);
 
+			FormsUtil.SetFont(this, UIExtension.ControlFont());
 			m_Trans = trans;
 			m_Trans.Translate(this);
 		}
