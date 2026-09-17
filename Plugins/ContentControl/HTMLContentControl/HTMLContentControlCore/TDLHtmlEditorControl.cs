@@ -49,9 +49,7 @@ namespace HTMLContentControl
 
 		// ---------------------------------------------------------------
 
-		public TDLHtmlEditorControl(Translator trans) 
-			: 
-			base(UIExtension.ControlFont(), trans, false)
+		public TDLHtmlEditorControl(Translator trans) : base(trans, false)
         {
             m_TextChangeTimer = new Timer();
 

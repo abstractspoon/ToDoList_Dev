@@ -8,6 +8,7 @@
 #include "ClipboardUtil.h"
 #include "PluginHelpers.h"
 #include "HtmlEditorControlEx.h"
+#include "UIExtension.h"
 
 #include <shared\Clipboard.h>
 #include <shared\Misc.h>
@@ -29,11 +30,11 @@ using namespace Abstractspoon::Tdl::PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-HtmlEditorControlEx::HtmlEditorControlEx(Drawing::Font^ font, Translator^ trans, bool fixupToolbarButtonSizes) 
+HtmlEditorControlEx::HtmlEditorControlEx(Translator^ trans, bool fixupToolbarButtonSizes) 
 	: 
 	m_AutoFixupToolbarButtonsSize(fixupToolbarButtonSizes)
 {
-	m_ControlsFont = font;
+	m_ControlsFont = UIExtension::ControlFont();
 
 	m_ToolbarRenderer = gcnew UIThemeToolbarRenderer();
 	m_ToolbarRenderer->SetUITheme(gcnew UITheme());

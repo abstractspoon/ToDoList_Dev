@@ -18,7 +18,7 @@ namespace Abstractspoon
 			public ref class HtmlEditorControlEx : MSDN::Html::Editor::HtmlEditorControl
 			{
 			public:
-				HtmlEditorControlEx(Drawing::Font^ controlFont, Translator^ trans, bool fixupToolbarButtonSizes);
+				HtmlEditorControlEx(Translator^ trans, bool fixupToolbarButtonSizes);
 
 				void SetUITheme(UITheme^ theme);
 				void SetBodyFont(String^ fontName, int pointSize);
