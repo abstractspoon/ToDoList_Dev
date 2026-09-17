@@ -350,7 +350,6 @@ namespace EvidenceBoardUIExtension
 
 			m_Control = new TDLNodeControl(m_Trans, m_TaskIcons);
 			m_Control.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right | AnchorStyles.Bottom;
-            m_Control.SetFont(UIExtension.ControlFont().Name, 8);
 
 			if (VisualStyleRenderer.IsSupported)
                 m_Control.BorderStyle = BorderStyle.FixedSingle;

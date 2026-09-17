@@ -642,6 +642,8 @@ namespace WordCloudUIExtension
 			CreateToolbar();
 
 			FormsUtil.SetFont(this, UIExtension.ControlFont());
+            m_WordCloud.SetFont(Font.Name, 10); // default
+
 			Invalidate(true);
 		}
 
@@ -670,7 +672,6 @@ namespace WordCloudUIExtension
 			m_WordCloud.Size = new Size(100, 100);
 			m_WordCloud.Cursor = Cursors.Default;
 			m_WordCloud.LayoutType = Gma.CodeCloud.Controls.LayoutType.Spiral;
-            m_WordCloud.SetFont(UIExtension.ControlFont().Name, 10); // default
 
 			this.Controls.Add(m_WordCloud);
 
