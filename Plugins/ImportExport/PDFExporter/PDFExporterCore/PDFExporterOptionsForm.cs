@@ -21,11 +21,11 @@ namespace PDFExporter
 
 		public PDFExporterOptionsForm(FontMappings fonts, Translator trans)
 		{
-			m_Trans = trans;
-
 			InitializeComponent();
 
 			FormsUtil.SetFont(this, UIExtension.ControlFont());
+			m_Trans = trans;
+
 			BuildFontCombo(fonts);
 			UpdateOKButton();
 		}

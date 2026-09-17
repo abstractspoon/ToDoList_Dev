@@ -38,6 +38,7 @@ namespace EisenhowerUIExtension
 			m_Error.ForeColor = DrawingColor.GetErrorLabelTextColor(BackColor);
 
 			FormsUtil.SetFont(this, UIExtension.ControlFont());
+			m_Trans.Translate(this);
 		}
 
 		public new DialogResult ShowDialog()

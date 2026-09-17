@@ -79,9 +79,9 @@ namespace EisenhowerUIExtension
 			m_OptionsCombo.Sorted = true;
 			m_OptionsCombo.DropDownClosed += new EventHandler(OnOptionsComboClosed);
 
+			FormsUtil.SetFont(this, UIExtension.ControlFont());
 			m_Trans.Translate(this);
 
-			FormsUtil.SetFont(this, UIExtension.ControlFont());
 			EnableMatrixComboEvents(true);
 		}
 

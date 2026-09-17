@@ -35,6 +35,7 @@ namespace WeekPlannerUIExtension
 			:
 			this()
 		{
+			m_Trans = trans;
 			m_TaskTitle.Text = taskTitle;
 			m_TaskId.Text = taskId.ToString();
 
@@ -45,7 +46,6 @@ namespace WeekPlannerUIExtension
 			m_Error.ForeColor = DrawingColor.GetErrorLabelTextColor(BackColor);
 
 			FormsUtil.SetFont(this, UIExtension.ControlFont());
-			m_Trans = trans;
 			m_Trans.Translate(this);
 
 			ValidateInputs();

@@ -35,6 +35,7 @@ namespace LoggedTimeUIExtension
 			this()
 		{
 			m_Entry = entry;
+			m_Trans = trans;
 
 			if (entry.TaskId == 0)
 			{
@@ -52,7 +53,6 @@ namespace LoggedTimeUIExtension
 			m_Error.ForeColor = DrawingColor.GetErrorLabelTextColor(BackColor);
 
 			FormsUtil.SetFont(this, UIExtension.ControlFont());
-			m_Trans = trans;
 			m_Trans.Translate(this);
 		}
 
