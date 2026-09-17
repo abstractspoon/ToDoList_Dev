@@ -387,7 +387,7 @@ namespace HTMLContentControl
 							var popup = new PopupListBox();
 
 							popup.ListBox.Items.AddRange(items);
-							popup.ListBox.Font = m_ControlsFont;
+							popup.ListBox.Font = Font;
 
 							popup.Closed += new ToolStripDropDownClosedEventHandler(OnAttributeListBoxClosed);
 

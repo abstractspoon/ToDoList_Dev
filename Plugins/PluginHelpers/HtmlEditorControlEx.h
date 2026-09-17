@@ -43,7 +43,6 @@ namespace Abstractspoon
 
 			protected:
 				UIThemeToolbarRenderer^ m_ToolbarRenderer;
-				Drawing::Font^ m_ControlsFont;
 				Translator^ m_Trans;
 				bool m_AutoFixupToolbarButtonsSize;
 

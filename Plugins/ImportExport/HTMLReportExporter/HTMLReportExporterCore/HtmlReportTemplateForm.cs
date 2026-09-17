@@ -107,17 +107,15 @@ namespace HTMLReportExporter
 
         private void InitialiseFontAndColors()
         {
-            var controlsFont = UIExtension.ControlFont();
-
-            FormsUtil.SetFont(this, controlsFont);
+            FormsUtil.SetFont(this, UIExtension.ControlFont());
 
             // Manual fixups
-            htmlReportHeaderControl.SetControlFont(controlsFont);
-            htmlReportTitleControl.SetControlFont(controlsFont);
-            htmlReportTasksControl.SetControlFont(controlsFont);
-            htmlReportFooterControl.SetControlFont(controlsFont);
+            htmlReportHeaderControl.SetControlFont(Font);
+            htmlReportTitleControl.SetControlFont(Font);
+            htmlReportTasksControl.SetControlFont(Font);
+            htmlReportFooterControl.SetControlFont(Font);
 
-            toolStripFileHistory.Font = controlsFont;
+            toolStripFileHistory.Font = Font;
 
             this.htmlReportHeaderControl.BackColor = headerPage.BackColor;
             this.htmlReportTitleControl.BackColor = headerPage.BackColor;

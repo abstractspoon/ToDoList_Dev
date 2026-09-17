@@ -34,8 +34,6 @@ HtmlEditorControlEx::HtmlEditorControlEx(Translator^ trans, bool fixupToolbarBut
 	: 
 	m_AutoFixupToolbarButtonsSize(fixupToolbarButtonSizes)
 {
-	m_ControlsFont = UIExtension::ControlFont();
-
 	m_ToolbarRenderer = gcnew UIThemeToolbarRenderer();
 	m_ToolbarRenderer->SetUITheme(gcnew UITheme());
 
@@ -49,15 +47,13 @@ HtmlEditorControlEx::HtmlEditorControlEx(Translator^ trans, bool fixupToolbarBut
 
 void HtmlEditorControlEx::SetControlFont(Drawing::Font^ font)
 {
-	m_ControlsFont = font;
+	if (font == nullptr)
+		font = UIExtension::ControlFont();
 
-	if (m_ControlsFont != nullptr)
-	{
-		FormsUtil::SetFont(this, font);
+	FormsUtil::SetFont(this, font);
 
-		ToolBar->Items["toolstripFontComboBox"]->Font = m_ControlsFont;
-		Toolbars::FixupButtonSizes(ToolBar);
-	}
+	ToolBar->Items["toolstripFontComboBox"]->Font = font;
+	Toolbars::FixupButtonSizes(ToolBar);
 }
 
 void HtmlEditorControlEx::SetTranslator(Translator^ trans)
@@ -80,13 +76,10 @@ void HtmlEditorControlEx::InitializeComponentEx()
 	ToolBar->Renderer = m_ToolbarRenderer;
 	ContextMenu->Renderer = m_ToolbarRenderer;
 
-	if (m_ControlsFont != nullptr)
-	{
-		ToolBar->Font = m_ControlsFont;
-		ContextMenu->Font = m_ControlsFont;
+	ToolBar->Font = UIExtension::ControlFont();
+	ContextMenu->Font = UIExtension::ControlFont();
 
-		ToolBar->Items["toolstripFontComboBox"]->Font = m_ControlsFont;
-	}
+	ToolBar->Items["toolstripFontComboBox"]->Font = UIExtension::ControlFont();
 
 	if (DPIScaling::WantScaling())
 	{
@@ -157,7 +150,7 @@ DialogResult HtmlEditorControlEx::ShowDialog(Form^ dialog, Icon^ icon)
 
 void HtmlEditorControlEx::PreShowDialog(Form^ dialog, Icon^ icon)
 {
-	FormsUtil::SetFont(dialog, m_ControlsFont);
+	FormsUtil::SetFont(dialog, UIExtension::ControlFont());
 
 	// Add icon for identification
 	dialog->Icon = icon;
