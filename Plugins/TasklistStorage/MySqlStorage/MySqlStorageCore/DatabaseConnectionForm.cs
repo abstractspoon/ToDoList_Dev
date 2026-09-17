@@ -22,11 +22,11 @@ namespace MySqlStorage
 
 		// --------------------------------------------------------
 
-		public DatabaseConnectionForm(Translator trans,	Font ctrlsFont)
+		public DatabaseConnectionForm(Translator trans)
 		{
 			InitializeComponent();
 
-			FormsUtil.SetFont(this, ctrlsFont);
+			FormsUtil.SetFont(this, UIExtension.ControlFont());
 			trans.Translate(this);
 
 			m_Trans = trans;

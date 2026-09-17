@@ -20,13 +20,13 @@ namespace HTMLContentControl
 
 		// ------------------------------------------------------------------------
 
-        public HTMLPreferencesDlg(Font font, Translator trans)
+        public HTMLPreferencesDlg(Translator trans)
         {
 			m_Trans = trans;
 			
             InitializeComponent();
 
-			FormsUtil.SetFont(this, font);
+			FormsUtil.SetFont(this, UIExtension.ControlFont());
 			m_Trans.Translate(this);
 
 			OnEnableWatermark(null, null);

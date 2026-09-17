@@ -42,14 +42,14 @@ namespace WeekPlannerUIExtension
 
 		// ------------------------------------------------------------------------
 
-        public WeekPlannerPreferencesDlg(IWin32Window owner, Translator trans, Font font)
+        public WeekPlannerPreferencesDlg(IWin32Window owner, Translator trans)
         {
 			m_Trans = trans;
 			m_Owner = owner;
 			
             InitializeComponent();
 
-			FormsUtil.SetFont(this, font);
+			FormsUtil.SetFont(this, UIExtension.ControlFont());
 			m_Trans.Translate(this);
 
 			// Build 'slot minutes' combo

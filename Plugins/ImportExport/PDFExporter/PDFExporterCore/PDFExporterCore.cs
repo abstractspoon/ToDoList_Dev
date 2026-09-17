@@ -115,8 +115,6 @@ namespace PDFExporter
 				WatermarkImagePath = prefs.GetProfileString(sKey, "WatermarkImagePath", "")
 			};
 
-			m_Trans.Translate(optionsDlg);
-
 			if (!silent && (optionsDlg.ShowDialog() == DialogResult.Cancel))
 				return false;
 

@@ -32,6 +32,9 @@ namespace Abstractspoon
 		{
 			public ref class UIExtension
 			{
+			private:
+				static Drawing::Font^ s_ControlFont = nullptr;
+
 			public: 
 				// -----------------------------------------------
 
@@ -119,6 +122,8 @@ namespace Abstractspoon
 				static Windows::Forms::Cursor^ AppCursor(AppCursorType cursorType);
 				static Windows::Forms::Cursor^ OleDragCursor(OleDragCursorType cursorType);
 				static Windows::Forms::Cursor^ HandCursor();
+	
+				static Drawing::Font^ ControlFont();
 
 				static bool SaveImageToFile(Drawing::Bitmap^ image, String^ filepath);
 

@@ -34,7 +34,6 @@ namespace SpreadsheetContentControl
 	public class TDLGridEditorControl : ReoGridEditorControl
 	{
 		private UIThemeToolbarRenderer m_toolbarRenderer;
-		private Font m_ControlsFont;
 		private Translator m_Trans;
 
 		private Byte[] m_PrevContent;
@@ -66,13 +65,12 @@ namespace SpreadsheetContentControl
 
 		// --------------------------------------------
 
-		public TDLGridEditorControl(Font font, Translator trans)
+		public TDLGridEditorControl(Translator trans)
 		{
+			m_Trans = trans;
+
 			m_toolbarRenderer = new UIThemeToolbarRenderer();
 			m_toolbarRenderer.SetUITheme(new UITheme());
-
-			m_ControlsFont = font;
-			m_Trans = trans;
 
 			HyperlinkCell.LinkColor = HyperlinkCell.ActivateColor = HyperlinkCell.VisitedColor = SystemColors.HotTrack;
 
@@ -82,8 +80,8 @@ namespace SpreadsheetContentControl
 
 			TranslateUI();
 
-			Worksheet.DefaultFontName = m_ControlsFont.Name;
-			Worksheet.DefaultFontSize = m_ControlsFont.SizeInPoints;
+			Worksheet.DefaultFontName = UIExtension.ControlFont().Name;
+			Worksheet.DefaultFontSize = UIExtension.ControlFont().SizeInPoints;
 
 			GridControl.WorksheetInserted += (s, e) =>
 			{
@@ -596,24 +594,22 @@ namespace SpreadsheetContentControl
 			Toolbars.FixupButtonSizes(this.ToolBar);
 			Toolbars.FixupButtonSizes(this.FontBar);
 
-            if (m_ControlsFont != null)
-			{
-				this.MenuBar.Font = m_ControlsFont;
-				this.ToolBar.Font = m_ControlsFont;
-				this.StatusBar.Font = m_ControlsFont;
-				this.FontBar.Font = m_ControlsFont;
+			var controlFont = UIExtension.ControlFont();
 
-				// Toolbar drop items
-				Toolbars.SetFont(this.ToolBar.Items, m_ControlsFont);
+			this.MenuBar.Font = controlFont;
+			this.ToolBar.Font = controlFont;
+			this.StatusBar.Font = controlFont;
+			this.FontBar.Font = controlFont;
 
-				this.FontBar.Items["fontToolStripComboBox"].Font = m_ControlsFont;
-				this.FontBar.Items["fontSizeToolStripComboBox"].Font = m_ControlsFont;
+			Toolbars.SetFont(this.ToolBar.Items, controlFont);
 
-				this.RowContextMenu.Font = m_ControlsFont;
-				this.CellContextMenu.Font = m_ControlsFont;
-				this.HeaderContextMenu.Font = m_ControlsFont;
-				this.ColumnContextMenu.Font = m_ControlsFont;
-			}
+			this.FontBar.Items["fontToolStripComboBox"].Font = controlFont;
+			this.FontBar.Items["fontSizeToolStripComboBox"].Font = controlFont;
+
+			this.RowContextMenu.Font = controlFont;
+			this.CellContextMenu.Font = controlFont;
+			this.HeaderContextMenu.Font = controlFont;
+			this.ColumnContextMenu.Font = controlFont;
 
 			if (DPIScaling.WantScaling())
 			{
@@ -1225,7 +1221,7 @@ namespace SpreadsheetContentControl
 
 		protected override DialogResult ShowDialog(Form dialog)
 		{
-			FormsUtil.SetFont(dialog, m_ControlsFont);
+			FormsUtil.SetFont(dialog, UIExtension.ControlFont());
 
 			// Add icon for identification
 			dialog.Icon = SpreadsheetContentControl.Resource.Spreadsheet;

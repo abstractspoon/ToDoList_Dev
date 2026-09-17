@@ -18,6 +18,8 @@ namespace EvidenceBoardUIExtension
 		public EvidenceBoardEditLinkDlg(Translator trans, UserLink link, IEnumerable<string> userLinkTypes)
 		{
 			InitializeComponent();
+
+			FormsUtil.SetFont(this, UIExtension.ControlFont());
 			trans.Translate(this);
 
 			if (link == null)

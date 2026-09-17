@@ -15,7 +15,8 @@ namespace WeekPlannerUIExtension
 {
 	public class RenderHelper
 	{
-		private Font m_BaseFont, m_BoldFont, m_HourFont, m_MinuteFont;
+		private Font m_BaseFont = UIExtension.ControlFont();
+		private Font m_BoldFont, m_HourFont, m_MinuteFont;
 
 		enum DowNameStyle
 		{
@@ -46,18 +47,7 @@ namespace WeekPlannerUIExtension
 		public int TextPadding { get { return 2; } }
 		public int TextOffset { get { return 3; } }
 
-		public Font BaseFont
-		{
-			get
-			{
-				if (m_BaseFont == null)
-				{
-					m_BaseFont = new Font("Tahoma", 8.25f);
-				}
-
-				return m_BaseFont;
-			}
-		}
+		public Font BaseFont { get { return m_BaseFont;	} }
 
 		public void SetFont(IntPtr handle, String fontName, int fontSize, int daysWidth)
 		{

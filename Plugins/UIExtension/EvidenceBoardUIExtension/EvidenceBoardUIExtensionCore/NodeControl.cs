@@ -130,8 +130,7 @@ namespace EvidenceBoardUIExtension
 			m_InitialRadius = DefaultInitialRadius;
 			m_RadialIncrementOrSpacing = DefaultInitialRadius;
 			m_NodeSize = DefaultNodeSize;
-			m_TextFont = new Font("Tahoma", 8f);
-			m_BaseFontHeight = m_TextFont.Height;
+			m_BaseFontHeight = TextFont.Height;
 			m_SelectedNodes = new List<BaseNode>();
 			m_DragScroll = new DragScroller(this) { DragScrollMargin = (int)ScaleByDpi(20) };
 
@@ -165,7 +164,6 @@ namespace EvidenceBoardUIExtension
 			this.Name = "NodeControl";
 			this.Size = new System.Drawing.Size(516, 422);
 			this.ResumeLayout(false);
-
 		}
 
 		public bool HasBackgroundImage { get { return (m_BackgroundImage?.IsValid == true); } }
@@ -1118,7 +1116,7 @@ namespace EvidenceBoardUIExtension
 
 			graphics.FillRectangle(fill, rect);
 			graphics.DrawRectangle(border, rect);
-			graphics.DrawString(node.ToString(), m_TextFont, text, rect);
+			graphics.DrawString(node.ToString(), TextFont, text, rect);
 		}
 
 		protected void DrawExpansionButton(Graphics graphics, BaseNode node, Rectangle nodeRect)

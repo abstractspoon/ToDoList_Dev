@@ -290,6 +290,7 @@ TaskListView::TaskListView()
 	m_LabelTip = gcnew LabelTip(this);
 
 	MinTaskColumnWidth = -1;
+	Font = UIExtension::ControlFont();
 }
 
 void TaskListView::Initialize(Translator^ trans, UIExtension::TaskIcon^ taskIcons)

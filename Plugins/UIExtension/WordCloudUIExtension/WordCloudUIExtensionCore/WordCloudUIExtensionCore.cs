@@ -26,8 +26,6 @@ namespace WordCloudUIExtension
 
 	public class WordCloudUIExtensionCore : Panel, IUIExtension
 	{
-        private const string FontName = "Tahoma";
-
         private static int MinSplitWidth = DPIScaling.Scale(25 * 2);
 		private static int LabelTop = DPIScaling.Scale(2); 
 		private static int ComboTop = DPIScaling.Scale(20);
@@ -67,7 +65,6 @@ namespace WordCloudUIExtension
 		private ImageList m_TBImageList;
 		private UIThemeToolbarRenderer m_TBRenderer;
 
-		private Font m_ControlsFont;
 		private String m_UserIgnoreFilePath, m_LangIgnoreFilePath;
 		private Timer m_CommentsTimer;
 
@@ -82,7 +79,6 @@ namespace WordCloudUIExtension
 			m_Attrib = Task.Attribute.Title;
             m_ExcludedWords = new CommonWords(); // English by default
 
-			m_ControlsFont = new Font(FontName, 8, FontStyle.Regular);
 			m_TaskIcons = new UIExtension.TaskIcon(hwndParent);
 
 			m_CommentsTimer = new Timer();
@@ -646,6 +642,9 @@ namespace WordCloudUIExtension
 			CreateStyleCombo();
 			CreateToolbar();
 
+			FormsUtil.SetFont(this, UIExtension.ControlFont());
+            m_WordCloud.SetFont(Font.Name, 10); // default
+
 			Invalidate(true);
 		}
 
@@ -674,7 +673,6 @@ namespace WordCloudUIExtension
 			m_WordCloud.Size = new Size(100, 100);
 			m_WordCloud.Cursor = Cursors.Default;
 			m_WordCloud.LayoutType = Gma.CodeCloud.Controls.LayoutType.Spiral;
-            m_WordCloud.SetFont(FontName, 10); // default
 
 			this.Controls.Add(m_WordCloud);
 
@@ -686,7 +684,6 @@ namespace WordCloudUIExtension
 			m_TaskMatchesList = new TaskMatchesListView();
 			m_TaskMatchesList.Initialize(m_Trans, m_TaskIcons);
 
-			m_TaskMatchesList.Font = m_ControlsFont;
 			m_TaskMatchesList.Location = new Point(0, ComboTop);
 			m_TaskMatchesList.Size = new Size(MatchListDefaultWidth, 100);
 			m_TaskMatchesList.Cursor = Cursors.Default;
@@ -751,7 +748,6 @@ namespace WordCloudUIExtension
 			label.Size = new Size(ComboWidth, LabelHeight);
 			label.Text = labelText;
 			label.TextAlign = ContentAlignment.MiddleLeft;
-			label.Font = m_ControlsFont;
 
 			this.Controls.Add(label);
 			m_Trans.Translate(label);
@@ -769,7 +765,6 @@ namespace WordCloudUIExtension
 			combo.Size = new Size(ComboWidth, ComboHeight);
 			combo.DropDownStyle = ComboBoxStyle.DropDownList;
 			combo.DropDownHeight = 400;
-			combo.Font = m_ControlsFont;
 
 			this.Controls.Add(combo);
 			return combo;

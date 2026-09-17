@@ -15,10 +15,6 @@ namespace EisenhowerUIExtension
 {
 	public partial class EisenhowerUIExtensionCore : UserControl, IUIExtension
 	{
-		private const string FontName = "Tahoma";
-
-		// ------------------------------------------------
-
 		private string m_TypeID;
 		private string m_UiName;
 		private IntPtr m_HwndParent;
@@ -27,7 +23,6 @@ namespace EisenhowerUIExtension
 		private EisenhowerData m_Data;
 		private EisenhowerMatrices m_Matrices;
 		private UIExtension.TaskIcon m_TaskIcons;
-		private Font m_ControlsFont;
 		private UIThemeToolbarRenderer m_TBRenderer;
 		private UIExtension.IdleRedraw m_IdleTasks = new UIExtension.IdleRedraw();
 
@@ -64,7 +59,6 @@ namespace EisenhowerUIExtension
 			m_Trans = trans;
 			m_HwndParent = parentHandle;
 
-			m_ControlsFont = new Font(FontName, 8, FontStyle.Regular);
 			m_TaskIcons = new UIExtension.TaskIcon(parentHandle);
 			m_Data = new EisenhowerData(trans);
 			m_Matrices = new EisenhowerMatrices();
@@ -85,9 +79,9 @@ namespace EisenhowerUIExtension
 			m_OptionsCombo.Sorted = true;
 			m_OptionsCombo.DropDownClosed += new EventHandler(OnOptionsComboClosed);
 
+			FormsUtil.SetFont(this, UIExtension.ControlFont());
 			m_Trans.Translate(this);
 
-			FormsUtil.SetFont(this, m_ControlsFont);
 			EnableMatrixComboEvents(true);
 		}
 
