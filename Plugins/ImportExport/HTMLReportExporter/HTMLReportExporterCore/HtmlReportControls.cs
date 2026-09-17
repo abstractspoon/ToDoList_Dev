@@ -74,7 +74,7 @@ namespace HTMLReportExporter
 
 		// ---------------------------------------------------------------
 
-		protected HtmlReportControlBase() : base(null, null, true)
+		protected HtmlReportControlBase() : base(null, true)
 		{
 			InitializeComponentEx();
 		}
@@ -83,7 +83,7 @@ namespace HTMLReportExporter
 		{
 			base.SetControlFont(font);
 
-			this.ToolBar.Font = m_ControlsFont;
+			this.ToolBar.Font = font;
 
 			Toolbars.FixupButtonSizes(this.ToolBar);
 		}

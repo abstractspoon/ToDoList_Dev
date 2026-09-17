@@ -26,15 +26,17 @@ namespace WeekPlannerUIExtension
 		}
 
 		public WeekPlannerCreateTimeBlockDlg(IEnumerable<TaskItem> taskItems, 
-										 UIExtension.TaskIcon taskIcons, 
-										 WorkingWeek workWeek,
-										 bool isoDateTimes,
-										 uint taskId,
-										 TimeBlockSeriesAttributes attribs,
-										 Translator trans)
+											 UIExtension.TaskIcon taskIcons, 
+											 WorkingWeek workWeek,
+											 bool isoDateTimes,
+											 uint taskId,
+											 TimeBlockSeriesAttributes attribs,
+											 Translator trans)
 			:
 			this()
 		{
+			m_Trans = trans;
+
 			m_TaskCombo.Initialise(taskItems, taskIcons, taskId);
 			m_TaskCombo.SearchUpdated += (s, e) => ValidateInputs();
 			m_TaskCombo.SelectedIndexChanged += (s, e) => ValidateInputs();
@@ -44,7 +46,7 @@ namespace WeekPlannerUIExtension
 
 			m_Error.ForeColor = DrawingColor.GetErrorLabelTextColor(BackColor);
 
-			m_Trans = trans;
+			FormsUtil.SetFont(this, UIExtension.ControlFont());
 			m_Trans.Translate(this);
 
 			ValidateInputs();

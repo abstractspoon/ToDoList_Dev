@@ -14,8 +14,8 @@ using CustomComboBox;
 
 namespace HTMLContentControl
 {
-
 	[System.ComponentModel.DesignerCategory("")]
+
     class TDLHtmlEditorControl : HtmlEditorControlEx
     {
 		[DllImport("User32.dll")]
@@ -49,7 +49,7 @@ namespace HTMLContentControl
 
 		// ---------------------------------------------------------------
 
-		public TDLHtmlEditorControl(System.Drawing.Font font, Translator trans) : base(font, trans, false)
+		public TDLHtmlEditorControl(Translator trans) : base(trans, false)
         {
             m_TextChangeTimer = new Timer();
 
@@ -387,7 +387,7 @@ namespace HTMLContentControl
 							var popup = new PopupListBox();
 
 							popup.ListBox.Items.AddRange(items);
-							popup.ListBox.Font = m_ControlsFont;
+							popup.ListBox.Font = Font;
 
 							popup.Closed += new ToolStripDropDownClosedEventHandler(OnAttributeListBoxClosed);
 

@@ -1077,6 +1077,14 @@ Windows::Forms::Cursor^ UIExtension::HandCursor()
 	return gcnew Cursor(static_cast<IntPtr>(hCursor));
 }
 
+Drawing::Font^ UIExtension::ControlFont()
+{
+	if (s_ControlFont == nullptr)
+		s_ControlFont = gcnew Font("Tahoma", 8.25f, FontStyle::Regular);
+
+	return s_ControlFont;
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool UIExtension::SaveImageToFile(Bitmap^ image, String^ filepath)

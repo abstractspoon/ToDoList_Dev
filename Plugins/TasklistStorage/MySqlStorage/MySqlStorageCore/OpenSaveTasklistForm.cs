@@ -18,15 +18,13 @@ namespace MySqlStorage
 		TasklistConnectionInfo m_TasklistInfo;
 
 		Translator m_Trans;
-		Font m_ControlsFont;
 
 		// -----------------------------------------------------------------
 
 		public OpenSaveTasklistForm(MySqlConnection conn, 
 									TasklistConnectionInfo tasklistInfo, 
 									bool openTasklist,
-									Translator trans,
-									Font ctrlsFont)
+									Translator trans)
 		{
 			InitializeComponent();
 
@@ -34,7 +32,6 @@ namespace MySqlStorage
 			m_Connection = conn;
 			m_TasklistInfo = tasklistInfo;
 			m_Trans = trans;
-			m_ControlsFont = ctrlsFont;
 
 			if (m_OpenTasklist)
 			{
@@ -47,7 +44,7 @@ namespace MySqlStorage
 				Text = "Save Tasklist";
 			}
 
-			FormsUtil.SetFont(this, m_ControlsFont);
+			FormsUtil.SetFont(this, UIExtension.ControlFont());
 			m_Trans.Translate(this);
 
 			UpdateControlData();
@@ -125,7 +122,7 @@ namespace MySqlStorage
 
 		private void OnModifyDatabase(object sender, EventArgs e)
 		{
-			using (var dialog = new DatabaseConnectionForm(m_Trans, m_ControlsFont))
+			using (var dialog = new DatabaseConnectionForm(m_Trans))
 			{
 				// Hide ourselves
 				dialog.Shown += (s, e2) => { Visible = false; };
