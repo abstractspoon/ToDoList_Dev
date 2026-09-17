@@ -25,6 +25,7 @@ namespace PDFExporter
 
 			InitializeComponent();
 
+			FormsUtil.SetFont(this, UIExtension.ControlFont());
 			BuildFontCombo(fonts);
 			UpdateOKButton();
 		}
