@@ -212,7 +212,7 @@ namespace WordCloudUIExtension
 			if ((nextWord == -1) && (selWord > 0))
 				nextWord = FindWord(words, 0, startingWith);
 
-			if (nextWord == selWord)
+			if ((nextWord == -1) || (nextWord == selWord))
 				return false;
 
 			SelectedWord = words[nextWord].Text;

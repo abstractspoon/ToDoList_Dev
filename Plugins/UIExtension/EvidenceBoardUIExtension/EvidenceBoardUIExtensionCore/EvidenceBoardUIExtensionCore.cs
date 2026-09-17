@@ -16,16 +16,11 @@ namespace EvidenceBoardUIExtension
 	[System.ComponentModel.DesignerCategory("")]
 	public class EvidenceBoardUIExtensionCore : Panel, IUIExtension
     {
-        private const string FontName = "Tahoma";
-
-        // ----------------------------------------------------------------------------
-
         private IntPtr m_HwndParent = IntPtr.Zero;
         private String m_UiName;
 
         private Translator m_Trans;
         private UIExtension.TaskIcon m_TaskIcons;
-        private Font m_ControlsFont;
 
         private TDLNodeControl m_Control;
 		private EvidenceBoardPreferencesDlg m_PrefsDlg;
@@ -350,13 +345,11 @@ namespace EvidenceBoardUIExtension
         private void InitializeComponent()
         {
             m_TaskIcons = new UIExtension.TaskIcon(m_HwndParent);
-            m_ControlsFont = new Font(FontName, 8.25f);
 
-			m_PrefsDlg = new EvidenceBoardPreferencesDlg(this, m_Trans, m_ControlsFont);
+			m_PrefsDlg = new EvidenceBoardPreferencesDlg(this, m_Trans);
 
 			m_Control = new TDLNodeControl(m_Trans, m_TaskIcons);
 			m_Control.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right | AnchorStyles.Bottom;
-            m_Control.SetFont(FontName, 8);
 
 			if (VisualStyleRenderer.IsSupported)
                 m_Control.BorderStyle = BorderStyle.FixedSingle;
@@ -431,6 +424,7 @@ namespace EvidenceBoardUIExtension
 			InitialiseCtrl(m_DateSlider, m_ActiveDateRangeLabel, 250);
 			this.Controls.Add(m_DateSlider);
 
+			FormsUtil.SetFont(this, UIExtension.ControlFont());
 		}
 
 		void ShowDateSlider(bool show)
@@ -481,7 +475,6 @@ namespace EvidenceBoardUIExtension
 		{
 			var label = new Label();
 
-			label.Font = m_ControlsFont;
 			label.AutoSize = true;
 			label.Text = m_Trans.Translate(text, Translator.Type.Label);
 			label.ForeColor = SystemColors.WindowText;
@@ -496,7 +489,6 @@ namespace EvidenceBoardUIExtension
 
 		void InitialiseCtrl(Control ctrl, Label associatedLabel, int width)
 		{
-			ctrl.Font = m_ControlsFont;
 			ctrl.Width = width;
 
 			if (ctrl is RangeSliderCtrl)

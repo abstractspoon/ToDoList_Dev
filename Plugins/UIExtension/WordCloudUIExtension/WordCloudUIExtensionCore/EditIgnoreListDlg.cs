@@ -14,6 +14,8 @@ namespace WordCloudUIExtension
 
 			IgnoredWords.Text = File.ReadAllText(filePath);
 			IgnoredWords.SelectionStart = IgnoredWords.TextLength;
+
+			FormsUtil.SetFont(this, UIExtension.ControlFont());
 		}
 
 		public static bool DoEdit(Translator trans, string filePath)

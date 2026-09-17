@@ -12,20 +12,15 @@ using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
 namespace MindMapUIExtension
 {
-
 	[System.ComponentModel.DesignerCategory("")]
+
 	public class MindMapUIExtensionCore : Panel, IUIExtension
     {
-        private const string FontName = "Tahoma";
-
-        // ----------------------------------------------------------------------------
-
         private IntPtr m_HwndParent = IntPtr.Zero;
         private String m_TypeId, m_UiName;
 
         private Translator m_Trans;
         private UIExtension.TaskIcon m_TaskIcons;
-        private System.Drawing.Font m_ControlsFont;
 
         private TdlMindMapControl m_MindMap;
 
@@ -245,11 +240,9 @@ namespace MindMapUIExtension
         private void InitializeComponent()
         {
             m_TaskIcons = new UIExtension.TaskIcon(m_HwndParent);
-            m_ControlsFont = new Font(FontName, 8, FontStyle.Regular);
 
 			m_MindMap = new TdlMindMapControl(m_Trans, m_TaskIcons);
 			m_MindMap.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right | AnchorStyles.Bottom;
-            m_MindMap.Font = m_ControlsFont;
 
             if (VisualStyleRenderer.IsSupported)
                 m_MindMap.BorderStyle = BorderStyle.FixedSingle;
@@ -283,13 +276,14 @@ namespace MindMapUIExtension
 			
 			InitialiseCombo(m_OptionsCombo, m_OptionsLabel, 150);
 			this.Controls.Add(m_OptionsCombo);
+
+			FormsUtil.SetFont(this, UIExtension.ControlFont());
 		}
 
 		Label CreateLabel(string text, Control prevControl)
 		{
 			var label = new Label();
 
-			label.Font = m_ControlsFont;
 			label.Text = text;
 			label.AutoSize = true;
 			label.ForeColor = SystemColors.WindowText;
@@ -306,7 +300,6 @@ namespace MindMapUIExtension
 
 		void InitialiseCombo(Control combo, Label prevLabel, int width)
 		{
-			combo.Font = m_ControlsFont;
 			combo.Width = DPIScaling.Scale(width);
 			combo.Height = DPIScaling.Scale(21);
 			combo.Location = new Point(prevLabel.Right + 5, 4);

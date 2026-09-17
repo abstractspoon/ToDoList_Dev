@@ -36,6 +36,7 @@ namespace LoggedTimeUIExtension
 			this()
 		{
 			m_TaskItems = taskItems;
+			m_Trans = trans;
 
 			m_Attributes.Initialise(attrib, workWeek, isoDateTimes, false, false, trans);
 			m_Attributes.ChangeEvent += (s, e) => ValidateInputs();
@@ -47,7 +48,7 @@ namespace LoggedTimeUIExtension
 
 			m_Error.ForeColor = DrawingColor.GetErrorLabelTextColor(BackColor);
 
-			m_Trans = trans;
+			FormsUtil.SetFont(this, UIExtension.ControlFont());
 			m_Trans.Translate(this);
 
 			ValidateInputs();

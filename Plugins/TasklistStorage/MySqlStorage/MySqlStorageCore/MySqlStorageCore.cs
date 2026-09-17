@@ -14,16 +14,12 @@ namespace MySqlStorage
     public class MySqlStorageCore
     {
         private Translator m_Trans;
-        private Font m_ControlsFont;
-
-		private const string FontName = "Tahoma";
 
 		// ------------------------------------------------------------------
 
 		public MySqlStorageCore(Translator trans)
         {
             m_Trans = trans;
-			m_ControlsFont = new Font(FontName, 8.25f);
 
 			// Once only translation
 			ColumnInfo.PrimaryKey = trans.Translate(ColumnInfo.PrimaryKey, Translator.Type.Text);
@@ -44,7 +40,7 @@ namespace MySqlStorage
 					if (prompt || (details.Tasklist.Key == 0))
 					{
 						// Prompt for tasklist 
-						var dialog = new OpenSaveTasklistForm(conn, details, true, m_Trans, m_ControlsFont);
+						var dialog = new OpenSaveTasklistForm(conn, details, true, m_Trans);
 
 						if (dialog.ShowDialog() != DialogResult.OK)
 							return null;
@@ -103,7 +99,7 @@ namespace MySqlStorage
 
 					if (prompt || (details.Tasklist.Key == 0))
 					{
-						var dialog = new OpenSaveTasklistForm(conn, details, false, m_Trans, m_ControlsFont);
+						var dialog = new OpenSaveTasklistForm(conn, details, false, m_Trans);
 
 						if (dialog.ShowDialog() != DialogResult.OK)
 							return null;
@@ -170,7 +166,7 @@ namespace MySqlStorage
 
 		bool OpenConnection(MySqlConnection conn, ConnectionInfo connInfo)
 		{
-			using (var dialog = new DatabaseConnectionForm(m_Trans, m_ControlsFont))
+			using (var dialog = new DatabaseConnectionForm(m_Trans))
 			{
 				return dialog.OpenConnection(conn, connInfo, false);
 			}

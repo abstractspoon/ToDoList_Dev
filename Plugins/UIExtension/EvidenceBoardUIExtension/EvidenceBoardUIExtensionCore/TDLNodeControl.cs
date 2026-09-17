@@ -177,6 +177,7 @@ namespace EvidenceBoardUIExtension
 			DragDropChange += new NodeDragDropChangeEventHandler(OnDragDropNodes);
 			NodeSelectionChange += (s, ids) => { ClearUserLinkSelection(); };
 
+			Font = UIExtension.ControlFont(); // default
 			RebuildFonts();
 
 			base.AutoCalculateRadialIncrement = true;

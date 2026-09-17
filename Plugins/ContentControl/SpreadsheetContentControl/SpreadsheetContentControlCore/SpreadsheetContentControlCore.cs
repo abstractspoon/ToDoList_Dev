@@ -11,11 +11,11 @@ using Abstractspoon.Tdl.PluginHelpers;
 namespace SpreadsheetContentControl
 {
     [System.ComponentModel.DesignerCategory("")]
+
     public class SpreadsheetContentControlCore : System.Windows.Forms.UserControl, IContentControlWnd
     {
         private IntPtr m_HwndParent;
         private TDLGridEditorControl m_EditorControl;
-		private Font m_ControlsFont;
 		private Translator m_Trans;
 		private String m_TypeID;
 
@@ -26,7 +26,6 @@ namespace SpreadsheetContentControl
 			m_TypeID = typeId;
 			m_HwndParent = hwndParent;
 			m_Trans = trans;
-			m_ControlsFont = new Font("Tahoma", 8.25f);
 
 			// Handle the 3rd-party components embedded in the toolbar
 			unvell.UIControls.ColorPickerPanel.NoColor = trans.Translate("None", Translator.Type.Button);
@@ -143,7 +142,7 @@ namespace SpreadsheetContentControl
             this.ClientSize = new System.Drawing.Size(603, 716);
             this.Name = "SpreadsheetContentControlCore";
 
-			m_EditorControl = new TDLGridEditorControl(m_ControlsFont, m_Trans);
+			m_EditorControl = new TDLGridEditorControl(m_Trans);
 			m_EditorControl.Bounds = this.ClientRectangle;
 			m_EditorControl.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
             //m_EditorControl.BorderStyle = BorderStyle.FixedSingle;
