@@ -16,7 +16,6 @@ namespace SpreadsheetContentControl
     {
         private IntPtr m_HwndParent;
         private TDLGridEditorControl m_EditorControl;
-		private Font m_ControlsFont = UIExtension.ControlFont();
 		private Translator m_Trans;
 		private String m_TypeID;
 
@@ -143,7 +142,7 @@ namespace SpreadsheetContentControl
             this.ClientSize = new System.Drawing.Size(603, 716);
             this.Name = "SpreadsheetContentControlCore";
 
-			m_EditorControl = new TDLGridEditorControl(m_ControlsFont, m_Trans);
+			m_EditorControl = new TDLGridEditorControl(m_Trans);
 			m_EditorControl.Bounds = this.ClientRectangle;
 			m_EditorControl.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
             //m_EditorControl.BorderStyle = BorderStyle.FixedSingle;
