@@ -107,7 +107,7 @@ namespace HTMLReportExporter
 
         private void InitialiseFontAndColors()
         {
-            var controlsFont = UIExtension.AppFont();
+            var controlsFont = UIExtension.ControlFont();
 
             FormsUtil.SetFont(this, controlsFont);
 
