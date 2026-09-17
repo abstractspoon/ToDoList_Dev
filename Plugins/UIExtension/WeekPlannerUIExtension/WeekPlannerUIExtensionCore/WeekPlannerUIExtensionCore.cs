@@ -45,7 +45,6 @@ namespace WeekPlannerUIExtension
         private IIControls.ToolStripEx m_Toolbar;
 		private ImageList m_TBImageList;
 		private UIThemeToolbarRenderer m_ToolbarRenderer;
-		private Font m_ControlsFont = UIExtension.ControlFont();
 
 		private TimeBlockSeriesAttributes m_DefaultNewTimeBlockAttributes;
 		private TimeBlockSeriesAttributes.EditMask m_DefaultTimeBlockEditMask;
@@ -413,16 +412,17 @@ namespace WeekPlannerUIExtension
 
 		private void InitializeComponent()
 		{
-			m_PrefsDlg = new WeekPlannerPreferencesDlg(this, m_Trans, m_ControlsFont);
+			m_PrefsDlg = new WeekPlannerPreferencesDlg(this, m_Trans);
 			m_WorkWeek = new WorkingWeek();
 
 			CreateMonthYearCombos();
 			CreateToolbar();
 			CreateWeekLabel();
 			CreateSelectedTaskDates();
+			CreateDayView(); // Day view always comes last
 
-			// Day view always comes last
-			CreateDayView();
+			FormsUtil.SetFont(this, UIExtension.ControlFont());
+			m_WeekLabel.Font = new Font(Font.Name, 14);
 		}
 
 		private void CreateDayView()
@@ -444,7 +444,6 @@ namespace WeekPlannerUIExtension
 			m_DayView.MouseDown += new MouseEventHandler(OnDayViewMouseClick);
 
 			m_DayView.StartDate = DateTime.Now;
-			m_DayView.SetFont(m_ControlsFont.Name, 8); // Default font
 			m_WeekLabel.StartDate = m_DayView.StartDate;
 
             if (VisualStyleRenderer.IsSupported)
@@ -472,7 +471,6 @@ namespace WeekPlannerUIExtension
 		{
 			m_WeekLabel = new WeekLabel(m_Trans);
 
-			m_WeekLabel.Font = new Font(m_ControlsFont.Name, 14);
             m_WeekLabel.Location = new Point(m_Toolbar.Right + ControlSpacing, LabelTop);
             m_WeekLabel.Height = m_Toolbar.Height;
 			m_WeekLabel.TextAlign = System.Drawing.ContentAlignment.TopLeft;
@@ -487,7 +485,6 @@ namespace WeekPlannerUIExtension
 			m_SelectedTaskDatesLabel = new Label()
 			{
 				Text = m_Trans.Translate("Selected Task Date Range", Translator.Type.Label),
-				Font = m_ControlsFont,
 				BackColor = BackColor,
 				AutoSize = true
 			};
@@ -495,7 +492,6 @@ namespace WeekPlannerUIExtension
 			// Date range
 			m_SelectedTaskDates = new DateRangeLink()
 			{
-				Font = m_ControlsFont,
 				Width = 300,
 				BackColor = BackColor,
 				AutoSize = false
@@ -723,8 +719,6 @@ namespace WeekPlannerUIExtension
 																	series.Attributes, 
 																	m_DefaultTimeBlockEditMask,
 																	m_Trans);
-					FormsUtil.SetFont(dlg, m_ControlsFont);
-
 					if (dlg.ShowDialog() != DialogResult.OK)
 						return false;
 
@@ -795,9 +789,6 @@ namespace WeekPlannerUIExtension
 														m_SelectedTaskId,
 														attribs,
 														m_Trans);
-
-			FormsUtil.SetFont(dlg, m_ControlsFont);
-
 			m_DayView.ForceShowSelection = true;
 
 			var res = dlg.ShowDialog();
@@ -885,7 +876,6 @@ namespace WeekPlannerUIExtension
 		{
 			m_MonthCombo = new MonthComboBox();
 
-			m_MonthCombo.Font = m_ControlsFont;
             m_MonthCombo.Location = new Point(0, ComboTop);
             m_MonthCombo.Size = new Size(ComboWidth, ComboHeight);
 			m_MonthCombo.SelectedIndexChanged += new EventHandler(OnMonthYearSelChanged);
@@ -894,7 +884,6 @@ namespace WeekPlannerUIExtension
 
 			m_YearCombo = new YearComboBox();
 
-			m_YearCombo.Font = m_ControlsFont;
             m_YearCombo.Location = new Point(m_MonthCombo.Right + ControlSpacing, ComboTop);
             m_YearCombo.Size = new Size(ComboWidth, ComboHeight);
 			m_YearCombo.SelectedIndexChanged += new EventHandler(OnMonthYearSelChanged);
