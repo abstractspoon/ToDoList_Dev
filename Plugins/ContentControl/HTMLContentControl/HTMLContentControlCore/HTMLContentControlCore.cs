@@ -28,10 +28,6 @@ namespace HTMLContentControl
 		// For implementing static watermark images
 		static HashSet<HTMLContentControlCore> s_CoreList = new HashSet<HTMLContentControlCore>();
 
-		// --------------------------------------------------------------------------------------
-
-//		const int WM_ENABLE = 0x000A;
-
         // --------------------------------------------------------------------------------------
 
         public HTMLContentControlCore(String typeId, IntPtr hwndParent, Translator trans)
