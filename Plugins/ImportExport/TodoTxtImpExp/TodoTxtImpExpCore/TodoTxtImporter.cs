@@ -30,9 +30,9 @@ namespace TodoTxtImpExp
         {
 			// Possibly display a dialog to get input on how to 
 			// map the input attributes to ToDoList task attributes
-			var options = new TodoTxtImporterOptionsForm();
+			var options = new TodoTxtImporterOptionsForm(m_Trans);
 
-			if (options.ShowDialog() != DialogResult.OK)
+			if (options.ShowDialog(prefs, prefKey) != DialogResult.OK)
 				return false;
 
 			var srcTasks = new ToDoLib.TaskList(srcFilePath);
