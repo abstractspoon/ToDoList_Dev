@@ -20,6 +20,7 @@ namespace EvidenceBoardUIExtension
 			m_Attribs.Attributes = UserLinkAttributes.Defaults;
 			m_Attribs.UserLinkTypes = userLinkTypes;
 
+			FormsUtil.SetFont(this, UIExtension.ControlFont());
 			trans.Translate(this);
 		}
 

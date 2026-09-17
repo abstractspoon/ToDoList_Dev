@@ -21,7 +21,6 @@ namespace EvidenceBoardUIExtension
 
         private Translator m_Trans;
         private UIExtension.TaskIcon m_TaskIcons;
-		private Font m_ControlsFont = UIExtension.ControlFont();
 
         private TDLNodeControl m_Control;
 		private EvidenceBoardPreferencesDlg m_PrefsDlg;
@@ -347,11 +346,11 @@ namespace EvidenceBoardUIExtension
         {
             m_TaskIcons = new UIExtension.TaskIcon(m_HwndParent);
 
-			m_PrefsDlg = new EvidenceBoardPreferencesDlg(this, m_Trans, m_ControlsFont);
+			m_PrefsDlg = new EvidenceBoardPreferencesDlg(this, m_Trans);
 
 			m_Control = new TDLNodeControl(m_Trans, m_TaskIcons);
 			m_Control.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right | AnchorStyles.Bottom;
-            m_Control.SetFont(m_ControlsFont.Name, 8);
+            m_Control.SetFont(UIExtension.ControlFont().Name, 8);
 
 			if (VisualStyleRenderer.IsSupported)
                 m_Control.BorderStyle = BorderStyle.FixedSingle;
@@ -426,6 +425,7 @@ namespace EvidenceBoardUIExtension
 			InitialiseCtrl(m_DateSlider, m_ActiveDateRangeLabel, 250);
 			this.Controls.Add(m_DateSlider);
 
+			FormsUtil.SetFont(this, UIExtension.ControlFont());
 		}
 
 		void ShowDateSlider(bool show)
@@ -476,7 +476,6 @@ namespace EvidenceBoardUIExtension
 		{
 			var label = new Label();
 
-			label.Font = m_ControlsFont;
 			label.AutoSize = true;
 			label.Text = m_Trans.Translate(text, Translator.Type.Label);
 			label.ForeColor = SystemColors.WindowText;
@@ -491,7 +490,6 @@ namespace EvidenceBoardUIExtension
 
 		void InitialiseCtrl(Control ctrl, Label associatedLabel, int width)
 		{
-			ctrl.Font = m_ControlsFont;
 			ctrl.Width = width;
 
 			if (ctrl is RangeSliderCtrl)
