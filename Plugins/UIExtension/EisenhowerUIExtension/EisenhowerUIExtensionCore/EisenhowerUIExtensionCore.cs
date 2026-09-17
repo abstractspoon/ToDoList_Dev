@@ -23,7 +23,6 @@ namespace EisenhowerUIExtension
 		private EisenhowerData m_Data;
 		private EisenhowerMatrices m_Matrices;
 		private UIExtension.TaskIcon m_TaskIcons;
-		private Font m_ControlsFont = UIExtension.ControlFont();
 		private UIThemeToolbarRenderer m_TBRenderer;
 		private UIExtension.IdleRedraw m_IdleTasks = new UIExtension.IdleRedraw();
 
@@ -82,7 +81,7 @@ namespace EisenhowerUIExtension
 
 			m_Trans.Translate(this);
 
-			FormsUtil.SetFont(this, m_ControlsFont);
+			FormsUtil.SetFont(this, UIExtension.ControlFont());
 			EnableMatrixComboEvents(true);
 		}
 
