@@ -21,16 +21,16 @@ namespace TaskDatesUIExtension
 
 		// ---------------------------------------------
 
-		public TaskDatesPreferencesDlg(Translator trans, Font font)
+		public TaskDatesPreferencesDlg(Translator trans)
 		{
 			m_Trans = trans;
 
 			InitializeComponent();
 
-			m_Error.ForeColor = DrawingColor.GetErrorLabelTextColor(BackColor);
-
-			FormsUtil.SetFont(this, font);
+			FormsUtil.SetFont(this, UIExtension.ControlFont());
 			m_Trans.Translate(this);
+
+			m_Error.ForeColor = DrawingColor.GetErrorLabelTextColor(BackColor);
 		}
 
 		public IEnumerable<string> SelectedDateAttributeIds

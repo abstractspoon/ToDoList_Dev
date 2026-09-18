@@ -15,17 +15,12 @@ namespace TaskDatesUIExtension
 {
 	public partial class TaskDatesUIExtensionCore : UserControl, IUIExtension
 	{
-		private const string FontName = "Tahoma";
-
-		// ------------------------------------------------
-
 		private string m_TypeID;
 		private string m_UiName;
 		private IntPtr m_HwndParent;
 		private Translator m_Trans;
 
 		private UIExtension.TaskIcon m_TaskIcons;
-		private Font m_ControlsFont;
 		private UIThemeToolbarRenderer m_TBRenderer;
 		private TaskDatesPreferencesDlg m_PrefsDlg;
 
@@ -59,9 +54,8 @@ namespace TaskDatesUIExtension
 			m_Trans = trans;
 			m_HwndParent = parentHandle;
 
-			m_ControlsFont = new Font(FontName, 8, FontStyle.Regular);
 			m_TaskIcons = new UIExtension.TaskIcon(parentHandle);
-			m_PrefsDlg = new TaskDatesPreferencesDlg(trans, m_ControlsFont);
+			m_PrefsDlg = new TaskDatesPreferencesDlg(trans);
 
 			m_TBRenderer = new UIThemeToolbarRenderer();
 			m_Toolbar.Renderer = m_TBRenderer;
@@ -78,9 +72,8 @@ namespace TaskDatesUIExtension
 			m_OptionsCombo.Sorted = true;
 			m_OptionsCombo.DropDownClosed += new EventHandler(OnOptionsComboClosed);
 
+			FormsUtil.SetFont(this, UIExtension.ControlFont());
 			m_Trans.Translate(this);
-
-			FormsUtil.SetFont(this, m_ControlsFont);
 		}
 
 		public void UpdateTasks(TaskList tasks, UIExtension.UpdateType type)
