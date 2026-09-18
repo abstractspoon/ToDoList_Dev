@@ -116,7 +116,6 @@ void HostedCheckComboBox::Detach()
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
 	m_WndOfManagedHandle.Detach();
-	m_Combo.DestroyWindow();
 
 	delete this;
 }
