@@ -214,6 +214,19 @@ namespace EisenhowerUIExtension
 			}
 		}
 
+		public int CalcLabelDragImageWidth(ITaskBase task, Graphics graphics)
+		{
+			if ((task == null) || task.IsLocked)
+				return 0;
+
+			int labelWidth = TextRenderer.MeasureText(graphics, task.Title, GetFont(task, true)).Width;
+
+			if (ItemsHaveIcons)
+				labelWidth += TextIconOffset;
+
+			return labelWidth + (2 * LabelPadding);
+		}
+
 		// --------------------------------------------------------
 		// Message handlers
 
@@ -254,18 +267,23 @@ namespace EisenhowerUIExtension
 			return (m_Selected && base.IsItemSelected(lvItem));
 		}
 
-		public int CalcLabelDragImageWidth(ITaskBase task, Graphics graphics)
+		protected override void ResizeTaskColumnToFit(int width)
 		{
-			if ((task == null) || task.IsLocked)
-				return 0;
+			if (width <= 0)
+				width = ClientRectangle.Width;
 
-			int labelWidth = TextRenderer.MeasureText(graphics, task.Title, GetFont(task, true)).Width;
+			// There's a strange redraw bug I don't yet understand
+			// such that if, after a drag-drop operation, a scrollbar
+			// appears in the target pane all the items seem to 
+			// disappear but in fact are still present and reappear
+			// after a mouse-over.
+			// Until I figure it out, my FUDGE is to enaure that the
+			// column widths always take account of the scrollbar
+			// width even when it's not present.
+			if (!m_SavingToImage && !Win32.HasVScroll(Handle))
+				width -= SystemInformation.VerticalScrollBarWidth;
 
-			if (ItemsHaveIcons)
-				labelWidth += TextIconOffset;
-
-			return labelWidth + (2 * LabelPadding);
+			base.ResizeTaskColumnToFit(width);
 		}
-
 	}
 }
