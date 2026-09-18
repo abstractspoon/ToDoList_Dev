@@ -17,7 +17,7 @@ namespace WordCloudUIExtension
 		const int DefaultMaxTaskId = 100;
 
 		const int TitleCol = 0;
-		const int IdCol = 0;
+		const int IdCol = 1;
 
 		// -------------------------------------------------------------
 
