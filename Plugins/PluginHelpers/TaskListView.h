@@ -177,16 +177,15 @@ namespace Abstractspoon
 				Drawing::Rectangle CalcLabelRect(Windows::Forms::ListViewItem^ item, LabelExtents extents);
 				Drawing::Rectangle CalcCheckboxRect(Drawing::Rectangle labelRect);
 				Drawing::Rectangle CalcIconRect(Drawing::Rectangle labelRect);
+				Drawing::Color GetTextColor(ITaskBase^ task, bool selected);
+				Drawing::Color GetBackColor(ITaskBase^ task, int row);
+				Drawing::Font^ GetFont(ITaskBase^ task, bool title);
 
 				String^ Translate(String^ text, Translator::Type type);
 				bool IsTaskEditable(ITaskBase^ task) { return (!m_ReadOnly && (task != nullptr) && !task->IsLocked); }
 				int FindTask(String^ phrase, int startIndex, bool forward, bool caseSensitive, bool wholeWord, bool findReplace);
 				Windows::Forms::ListViewItem^ FindItem(UInt32 taskId);
-				Drawing::Color GetTextColor(ITaskBase^ task, bool selected);
-				Drawing::Color GetBackColor(ITaskBase^ task, int row);
-				Drawing::Font^ GetFont(ITaskBase^ task, bool title);
 				void CheckNotifySelectionChanged();
-				void ResizeTaskColumnToFit(int width);
 				int MapDisplayIndexToColumn(int index);
 
 				// Derived classes optionally override
@@ -194,6 +193,7 @@ namespace Abstractspoon
 				virtual bool IsItemSelected(Windows::Forms::ListViewItem^ lvItem) { return (!m_SavingToImage && lvItem->Selected); }
 				virtual Windows::Forms::VisualStyles::CheckBoxState GetTaskCheckboxState(ITaskBase^ task);
 				virtual Windows::Forms::TextFormatFlags GetTextAlignment(int column) { return Windows::Forms::TextFormatFlags::Left; }
+				virtual void ResizeTaskColumnToFit(int width);
 
 				property UIExtension::TaskIcon^ TaskIcons { UIExtension::TaskIcon^ get() { return m_TaskIcons; } }
 				property bool ItemsHaveIcons { bool get(); void set(bool value); };

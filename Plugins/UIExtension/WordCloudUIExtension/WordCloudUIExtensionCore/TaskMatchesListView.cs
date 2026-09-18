@@ -63,17 +63,17 @@ namespace WordCloudUIExtension
 
 		private void RefreshIDColumnWidth()
 		{
-			if (Columns.Count > 2)
-			{
-				using (var graphics = CreateGraphics())
-				{
-					int headerPadding = (int)(graphics.MeasureString("o", Font).Width); // Fudge
-					int headerWidth = (int)(graphics.MeasureString(Columns[IdCol].Text, Font).Width + (headerPadding * 2));
-					int maxItemWidth = (int)(graphics.MeasureString(m_MaxTaskId.ToString(), Font).Width + (2 * DPIScaling.Scale(2)));
+			if (Columns.Count < 2)
+				return;
 
-					Columns[IdCol].Width = Math.Max(headerWidth, maxItemWidth);
-					Columns[TitleCol].Width = (ClientRectangle.Width - Columns[IdCol].Width - 2);
-				}
+			using (var graphics = CreateGraphics())
+			{
+				int headerPadding = (int)(graphics.MeasureString("o", Font).Width); // Fudge
+				int headerWidth = (int)(graphics.MeasureString(Columns[IdCol].Text, Font).Width + (headerPadding * 2));
+				int maxItemWidth = (int)(graphics.MeasureString(m_MaxTaskId.ToString(), Font).Width + (2 * DPIScaling.Scale(2)));
+
+				Columns[IdCol].Width = Math.Max(headerWidth, maxItemWidth);
+				Columns[TitleCol].Width = (ClientRectangle.Width - Columns[IdCol].Width - 2);
 			}
 		}
 

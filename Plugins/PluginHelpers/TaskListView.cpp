@@ -1573,9 +1573,6 @@ void TaskListView::ResizeTaskColumnToFit(int width)
 	// Resize first column to fill remaining width
 	int otherColsWidth = 0;
 	
-	if (!m_SavingToImage)
-		otherColsWidth = (Win32::HasVScroll(Handle) ? 0 : SystemInformation::VerticalScrollBarWidth);
-
 	for (int i = 1; i < Columns->Count; i++)
 		otherColsWidth += Columns[i]->Width;
 
