@@ -62,6 +62,7 @@ namespace TaskDatesUIExtension
 			Toolbars.FixupButtonSizes(m_Toolbar);
 
 			m_TaskDatesCtrl.Initialize(trans, m_TaskIcons);
+			m_TaskDatesCtrl.GroupBy = Task.Attribute.Priority;
 
 			m_TaskDatesCtrl.EditTaskDone    += new EditTaskCompletionEventHandler(OnTaskDatesCtrlEditTaskDone);
 			m_TaskDatesCtrl.EditTaskIcon    += new EditTaskIconEventHandler(OnTaskDatesCtrlEditTaskIcon);

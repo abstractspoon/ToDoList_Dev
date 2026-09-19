@@ -9,17 +9,20 @@ namespace TaskDatesUIExtension
 {
 	public class TaskItems : Dictionary<uint, TaskItem>
 	{
-		public HashSet<uint> Update(TaskList tasks, UIExtension.UpdateType type, IEnumerable<TaskAttributeItem> availAttribs)
+		public HashSet<uint> Update(TaskList tasks, 
+									UIExtension.UpdateType type, 
+									IEnumerable<TaskAttributeItem> availAttribs,
+									IEnumerable<Task.Attribute> groupAttribIds)
 		{
 			switch (type)
 			{
 			case UIExtension.UpdateType.All:
 				Clear();
-				return Update(tasks, availAttribs);
+				return Update(tasks, availAttribs, groupAttribIds);
 
 			case UIExtension.UpdateType.Edit:
 			case UIExtension.UpdateType.New:
-				return Update(tasks, availAttribs);
+				return Update(tasks, availAttribs, groupAttribIds);
 
 			case UIExtension.UpdateType.Delete:
 				return RemoveDeletedTasks(tasks);
@@ -47,16 +50,33 @@ namespace TaskDatesUIExtension
 			return taskItem;
 		}
 
+		public HashSet<string> GetGroupValues(Task.Attribute attribId)
+		{
+			var groupVals = new HashSet<string>();
+
+			foreach (var task in Values)
+				groupVals.Add(task.GetGroupValue(attribId));
+
+			return groupVals;
+		}
+
 		// ---------------------------------
 
-		private HashSet<uint> Update(TaskList tasks, IEnumerable<TaskAttributeItem> dateAttribs)
+		private HashSet<uint> Update(TaskList tasks, 
+									 IEnumerable<TaskAttributeItem> dateAttribs, 
+									 IEnumerable<Task.Attribute> groupAttribIds)
 		{
 			var modifiedTaskIds = new HashSet<uint>();
 
 			Task task = tasks.GetFirstTask();
 
-			while (task.IsValid() && ProcessTaskUpdate(task, dateAttribs, modifiedTaskIds))
+			while (task.IsValid())
+			{
+				if (!ProcessTaskUpdate(task, dateAttribs, groupAttribIds, modifiedTaskIds))
+					break;
+
 				task = task.GetNextTask();
+			}
 
 			return modifiedTaskIds;
 		}
@@ -79,7 +99,10 @@ namespace TaskDatesUIExtension
 			return deletedTaskIds;
 		}
 
-		private bool ProcessTaskUpdate(Task task, IEnumerable<TaskAttributeItem> availAttribs, HashSet<uint> modifiedTaskIds)
+		private bool ProcessTaskUpdate(Task task, 
+									   IEnumerable<TaskAttributeItem> availAttribs,
+									   IEnumerable<Task.Attribute> groupAttribIds,
+									   HashSet<uint> modifiedTaskIds)
 		{
 			if (!task.IsValid())
 				return false;
@@ -87,7 +110,7 @@ namespace TaskDatesUIExtension
 			uint taskId = task.GetID();
 			var item = GetItem(taskId, true);
 
-			if (!item.ProcessTaskUpdate(task, availAttribs))
+			if (!item.ProcessTaskUpdate(task, availAttribs, groupAttribIds))
 				return false;
 
 			modifiedTaskIds?.Add(taskId);
@@ -97,7 +120,7 @@ namespace TaskDatesUIExtension
 
 			while (subtask.IsValid())
 			{
-				ProcessTaskUpdate(subtask, availAttribs, modifiedTaskIds); // RECURSIVE CALL
+				ProcessTaskUpdate(subtask, availAttribs, groupAttribIds, modifiedTaskIds); // RECURSIVE CALL
 				subtask = subtask.GetNextTask();
 			}
 
@@ -114,7 +137,7 @@ namespace TaskDatesUIExtension
 
 		// -----------------------------------------------------------------
 
-		public TaskItem(String title, uint id)
+		public TaskItem(string title, uint id)
 		{
 			m_Attribs = new TaskItemAttributes(title, id);
 			m_Dates = new TaskItemDates();
@@ -125,15 +148,22 @@ namespace TaskDatesUIExtension
 			get	{ return m_Dates.Values; }
 		}
 
+		public string GetGroupValue(Task.Attribute attribId)
+		{
+			return m_Attribs.GetGroupValue(attribId);
+		}
+
 		public DateTime GetDate(string attribId)
 		{
 			var date = m_Dates.GetItem(attribId);
 			return ((date != null) ? date.Date : TaskItemDate.NullDate);
 		}
 
-		public bool ProcessTaskUpdate(Task task, IEnumerable<TaskAttributeItem> availAttribs)
+		public bool ProcessTaskUpdate(Task task, 
+									  IEnumerable<TaskAttributeItem> availAttribs, 
+									  IEnumerable<Task.Attribute> groupAttribIds)
 		{
-			if (!m_Attribs.ProcessTaskUpdate(task))
+			if (!m_Attribs.ProcessTaskUpdate(task, groupAttribIds))
 				return false;
 
 			// Date Attributes
@@ -158,8 +188,12 @@ namespace TaskDatesUIExtension
 
 	public class TaskItemAttributes
 	{
-		public String Title { get; private set; }
-		public String Position { get; private set; }
+		private Dictionary<Task.Attribute, string> m_GroupValues;
+
+		// ------------------------------------------
+
+		public string Title { get; private set; }
+		public string Position { get; private set; }
 		public uint Id { get; private set; }
 		public Color TextColor { get; private set; }
 		public bool HasIcon { get; private set; }
@@ -168,14 +202,16 @@ namespace TaskDatesUIExtension
 		public bool IsDone { get; private set; }
 		public bool IsGoodAsDone { get; private set; }
 
-		public TaskItemAttributes(String title, uint id)
+		public TaskItemAttributes(string title, uint id)
 		{
 			Title = title;
 			Id = id;
 			TextColor = Color.Empty;
+
+			m_GroupValues = new Dictionary<Task.Attribute, string>();
 		}
 
-		public bool ProcessTaskUpdate(Task task)
+		public bool ProcessTaskUpdate(Task task, IEnumerable<Task.Attribute> groupAttribIds)
 		{
 			if (task.GetID() != Id)
 				return false;
@@ -201,7 +237,22 @@ namespace TaskDatesUIExtension
 				IsGoodAsDone = task.IsGoodAsDone();
 			}
 
+			// Group attributes stored as strings only
+			foreach (var attribId in groupAttribIds)
+			{
+				if (task.IsAttributeAvailable(attribId))
+					m_GroupValues[attribId] = task.GetAttributeValue(attribId, true, true);
+			}
+
 			return true;
+		}
+
+		public string GetGroupValue(Task.Attribute attribId)
+		{
+			string value = null;
+			m_GroupValues?.TryGetValue(attribId, out value);
+
+			return (value ?? string.Empty);
 		}
 	}
 
@@ -263,25 +314,25 @@ namespace TaskDatesUIExtension
 
 	public class TaskItemDate : ITaskBase
 	{
-		private TaskItemAttributes m_Attrib;
+		private TaskItemAttributes m_TaskAttribs;
 
 		// -----------------------------------------------------------------
 
 		// ITaskBase
-		public String Title		{ get { return m_Attrib.Title; } }
-		public String Position	{ get { return m_Attrib.Position; } }
-		public uint Id			{ get { return m_Attrib.Id; } }
-		public Color TextColor	{ get { return m_Attrib.TextColor; } }
-		public bool HasIcon		{ get { return m_Attrib.HasIcon; } }
-		public bool IsParent	{ get { return m_Attrib.IsParent; } }
-		public bool IsLocked	{ get { return m_Attrib.IsLocked; } }
-		public bool IsDone		{ get { return m_Attrib.IsDone; } }
+		public string Title		{ get { return m_TaskAttribs.Title; } }
+		public string Position	{ get { return m_TaskAttribs.Position; } }
+		public uint Id			{ get { return m_TaskAttribs.Id; } }
+		public Color TextColor	{ get { return m_TaskAttribs.TextColor; } }
+		public bool HasIcon		{ get { return m_TaskAttribs.HasIcon; } }
+		public bool IsParent	{ get { return m_TaskAttribs.IsParent; } }
+		public bool IsLocked	{ get { return m_TaskAttribs.IsLocked; } }
+		public bool IsDone		{ get { return m_TaskAttribs.IsDone; } }
 
 		// local
-		public bool IsGoodAsDone { get { return m_Attrib.IsGoodAsDone; } }
+		public bool IsGoodAsDone { get { return m_TaskAttribs.IsGoodAsDone; } }
 
 		public DateTime Date = NullDate;
-		public String AttributeId { get; private set; }
+		public string AttributeId { get; private set; }
 
 		// -----------------------------------------------------------------
 
@@ -289,11 +340,11 @@ namespace TaskDatesUIExtension
 
 		// -----------------------------------------------------------------
 
-		public TaskItemDate(string attribId, TaskItemAttributes attrib)
+		public TaskItemDate(string attribId, TaskItemAttributes taskAttribs)
 		{
 			AttributeId = attribId;
 
-			m_Attrib = attrib;
+			m_TaskAttribs = taskAttribs;
 		}
 
 		public string FormatDate(bool iso)
@@ -319,6 +370,11 @@ namespace TaskDatesUIExtension
 			get { return (Date != NullDate); }
 		}
 
+		public string GetGroupValue(Task.Attribute attribId)
+		{
+			return m_TaskAttribs.GetGroupValue(attribId);
+		}
+
 		public static int CompareDates(TaskItemDate date1, TaskItemDate date2, bool ascending)
 		{
 			if (ascending)
@@ -326,6 +382,22 @@ namespace TaskDatesUIExtension
 
 			// else
 			return DateTime.Compare(date2.Date, date1.Date);
+		}
+	}
+
+	///////////////////////////////////////////////////////////////////////////
+
+	public class TaskItemGroup
+	{
+		public string Title { get; private set; }
+		public string Value { get; private set; }
+
+		// -----------------------------------------------------------------
+
+		public TaskItemGroup(string title, string value)
+		{
+			Title = title;
+			Value = value;
 		}
 	}
 }

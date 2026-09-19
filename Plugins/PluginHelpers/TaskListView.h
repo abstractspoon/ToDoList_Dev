@@ -187,6 +187,7 @@ namespace Abstractspoon
 				Windows::Forms::ListViewItem^ FindItem(UInt32 taskId);
 				void CheckNotifySelectionChanged();
 				int MapDisplayIndexToColumn(int index);
+				void DrawGroupHeader(Drawing::Graphics^ g, String^ text, Drawing::Rectangle rect);
 
 				// Derived classes optionally override
 				virtual bool TaskMatches(ITaskBase^ task, String^ phrase, bool caseSensitive, bool wholeWord, bool findReplace);

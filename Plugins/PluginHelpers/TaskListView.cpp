@@ -695,7 +695,7 @@ bool TaskListView::HitTest(Drawing::Point ptScreen, UIExtension::HitTest^ hitTes
 	if (htInfo == nullptr)
 		return false;
 
-	if (htInfo->Item == nullptr)
+	if ((htInfo->Item == nullptr) || !(ISTYPE(htInfo->Item->Tag, ITaskBase)))
 	{
 		hitTest->result = UIExtension::HitTestResult::Tasklist;
 	}
@@ -1083,6 +1083,19 @@ int TaskListView::MapDisplayIndexToColumn(int index)
 	return -1;
 }
 
+void TaskListView::DrawGroupHeader(Drawing::Graphics^ g, String^ text, Drawing::Rectangle rect)
+{
+	CDC* pDC = CDC::FromHandle(Win32::GetHdc(g->GetHdc()));
+	CRect rRow(rect.Left, rect.Top, rect.Right, rect.Bottom);
+	
+	GraphicsMisc::DrawGroupHeaderRow(pDC, Win32::GetHwnd(Handle), rRow, (LPCWSTR)MS(text));
+
+	if (!m_GridlineColor.IsEmpty)
+		GraphicsMisc::DrawHorzLine(pDC, rRow.left, rRow.right, rRow.bottom, DrawingColor::ToRgb(m_GridlineColor));
+
+	g->ReleaseHdc();
+}
+
 void TaskListView::OnDrawItem(DrawListViewItemEventArgs^ e)
 {
 	e->DrawDefault = false;
@@ -1090,9 +1103,12 @@ void TaskListView::OnDrawItem(DrawListViewItemEventArgs^ e)
 	if (e->Item == nullptr)
 		return;
 
-	// Background color full width
 	auto task = ASTYPE(e->Item->Tag, ITaskBase);
 
+	if (task == nullptr)
+		return;
+
+	// Background color full width
 	auto backColor = GetBackColor(task, e->Item->Index);
 	auto itemRect = e->Item->Bounds;
 

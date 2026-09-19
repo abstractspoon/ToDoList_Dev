@@ -37,7 +37,7 @@ namespace TaskDatesUIExtension
 		// --------------------------------------------------------
 
 		private TaskItems m_TaskItems = new TaskItems();
-		private ItemDateComparer m_Comparer = new ItemDateComparer();
+		private ItemDateComparer m_Comparer = new ItemDateComparer(Task.Attribute.Unknown);
 		private TaskDatesOption m_Options = TaskDatesOption.None;
 		private UIExtension.IdleRedraw m_IdleTasks = new UIExtension.IdleRedraw();
 
@@ -45,7 +45,9 @@ namespace TaskDatesUIExtension
 		private int[] m_ColValueMaxCharWidth	= new int[6] { -1, -1, -1, -1, -1, -1 };
 
 		private bool m_IsoDates;
+		private Task.Attribute m_GroupBy = Task.Attribute.Unknown;
 
+		private Dictionary<Task.Attribute, string> m_MapGroupAttribIdToLabel;
 		private Dictionary<string, string> m_MapDateAttribIdToLabel;
 		private List<TaskAttributeItem> m_DateAttributeTypes;
 		private List<TaskAttributeItem> m_OffsetAttributeTypes;
@@ -72,6 +74,12 @@ namespace TaskDatesUIExtension
 		public new void Initialize(Translator trans, UIExtension.TaskIcon taskIcons)
 		{
 			base.Initialize(trans, taskIcons, m_Comparer);
+
+			// Create Groups
+			m_MapGroupAttribIdToLabel = new Dictionary<Task.Attribute, string>();
+
+			m_MapGroupAttribIdToLabel[Task.Attribute.Priority] = trans.Translate("Priority", Translator.Type.Text);
+			// TODO
 
 			// Add columns
 			Columns.Add(trans.Translate("Title",  Translator.Type.Header), 0, HorizontalAlignment.Left);
@@ -103,7 +111,7 @@ namespace TaskDatesUIExtension
 			var state = BeginUpdate();
 
 			var availAttribs = tasks.GetAvailableAttributes();
-			var modIds = m_TaskItems.Update(tasks, type, availAttribs);
+			var modIds = m_TaskItems.Update(tasks, type, availAttribs, m_MapGroupAttribIdToLabel.Keys);
 
 			switch (type)
 			{
@@ -123,12 +131,17 @@ namespace TaskDatesUIExtension
 			}
 
 			RefreshColumnWidths();
+
+			if (availAttribs.Find(a => (a.AttributeId == m_GroupBy)) != null)
+				RebuildGroupHeaders();
+
 			EndUpdate(state, selDates);
 
 			// For reasons I don't yet understand, invalidation after a 
 			// task update does NOT ALWAYS result in a subsequent repaint
 			// so we solve it with a delayed-redraw
 			m_IdleTasks.Redraw();
+
 		}
 
 		public bool WantTaskUpdate(Task.Attribute attribId)
@@ -145,6 +158,7 @@ namespace TaskDatesUIExtension
 			case Task.Attribute.Position:
 			case Task.Attribute.Icon:
 			case Task.Attribute.Color:
+			case Task.Attribute.Priority:
 				return true;
 			}
 
@@ -330,8 +344,113 @@ namespace TaskDatesUIExtension
 			get { return m_OffsetAttributeTypes; }
 		}
 
+		public Task.Attribute GroupBy
+		{
+			get { return m_GroupBy; }
+			set
+			{
+				if (value != m_GroupBy)
+				{
+					m_GroupBy = value;
+					ListViewItemSorter = null;
+
+					RebuildGroupHeaders();
+					ListViewItemSorter = m_Comparer = new ItemDateComparer(m_GroupBy);
+				}
+			}
+		}
+
 		// --------------------------------------------------------
 		// Message handlers
+
+		private void RebuildGroupHeaders()
+		{
+			if (Items.Count == 0)
+				return;
+
+			// Remove existing headers
+			int item = Items.Count;
+
+			while (item-- > 0)
+			{
+				if (Items[item].Tag is TaskItemGroup)
+					Items.RemoveAt(item);
+			}
+
+			// Re-add as required
+			if (m_GroupBy == Task.Attribute.Priority)
+			{
+				// Create the groups
+				AddTaskItemGroup("Priority: <none>", "");
+
+				for (int i = 0; i < 11; i++)
+					AddTaskItemGroup(string.Format("Priority: {0}", i), i.ToString());
+			}
+			else
+			{
+				// TODO
+			}
+
+		}
+
+		private void AddTaskItemGroup(string title, string value)
+		{
+			var group = new TaskItemGroup(title, value);
+
+			var lvi = Items.Add(group.Title);
+			lvi.Tag = group;
+		}
+
+		protected override void WndProc(ref Message m)
+		{
+			base.WndProc(ref m);
+
+			const int WM_HSCROLL = 0x0114;
+
+			switch (m.Msg)
+			{
+			case WM_HSCROLL:
+				RedrawGroupHeaders();
+				break;
+			}
+		}
+
+		private void RedrawGroupHeaders()
+		{
+			if (IsGrouped)
+			{
+				int item = Items.Count;
+				var clientRect = ClientRectangle;
+
+				while (item-- > 0)
+				{
+					var lvi = Items[item];
+
+					if (lvi.Tag is TaskItemGroup)
+					{
+						if (clientRect.IntersectsWith(lvi.Bounds))
+							Invalidate(lvi.Bounds, false);
+					}
+				}
+			}
+		}
+
+		private bool IsGrouped { get { return (m_GroupBy != Task.Attribute.Unknown); } }
+
+		protected override void OnDrawItem(DrawListViewItemEventArgs e)
+		{
+			if (e.Item.Tag is TaskItemGroup)
+			{
+				// Handle ourselves
+				var group = (e.Item.Tag as TaskItemGroup);
+
+				DrawGroupHeader(e.Graphics, group.Title, e.Bounds);
+				return;
+			}
+			
+			// else
+			base.OnDrawItem(e);
+		}
 
 		private static String GetDateKey(TaskItemDate date)
 		{
@@ -751,8 +870,58 @@ namespace TaskDatesUIExtension
 
 		class ItemDateComparer : DefaultItemComparer
 		{
+			private Task.Attribute m_GroupBy = Task.Attribute.Unknown;
+
+			public ItemDateComparer(Task.Attribute groupBy)
+			{
+				m_GroupBy = groupBy;
+			}
+
+			private string GetItemGroupValue(ListViewItem lvi)
+			{
+				if (lvi.Tag is TaskItemGroup)
+					return (lvi.Tag as TaskItemGroup).Value;
+
+				// else
+				return (lvi.Tag as TaskItemDate).GetGroupValue(m_GroupBy);
+			}
+
 			protected override int CompareItems(ListViewItem lvi1, ListViewItem lvi2)
 			{
+				if (m_GroupBy != Task.Attribute.Unknown)
+				{
+					String task1Text = GetItemGroupValue(lvi1);
+					String task2Text = GetItemGroupValue(lvi2);
+
+					int nCompare = StringUtil.NaturalCompare(task1Text, task2Text);
+
+					if (nCompare == 0) // Same group
+					{
+						// Always sort the group header item higher
+						if (lvi1.Tag is TaskItemGroup)
+							return -1;
+
+						if (lvi2.Tag is TaskItemGroup)
+							return 1;
+					}
+					else  // different groups
+					{
+// 						// 'sort <none> below' has no effect without 'sort ascending'
+// 						if (m_bSortNoneGroupBelow && m_bSortGroupsAscending)
+// 						{
+// 							if (sTask1Text.IsEmpty())
+// 								return 1;
+// 
+// 							if (sTask2Text.IsEmpty())
+// 								return -1;
+// 						}
+
+						return nCompare;
+					}
+
+// 					return (m_bSortGroupsAscending ? nCompare : -nCompare);
+				}
+
 				switch (Column)
 				{
 				case TaskDatesControl.DateCol:
