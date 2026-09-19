@@ -60,7 +60,7 @@ namespace EisenhowerUIExtension
 
 		public bool SetTaskValues(uint taskId, string xValue, string yValue)
 		{
-			var lvItem = FindItem(taskId);
+			var lvItem = FindTaskItem(taskId);
 			return SetTaskValues(lvItem, xValue, yValue);
 		}
 

@@ -184,7 +184,7 @@ namespace Abstractspoon
 				String^ Translate(String^ text, Translator::Type type);
 				bool IsTaskEditable(ITaskBase^ task) { return (!m_ReadOnly && (task != nullptr) && !task->IsLocked); }
 				int FindTask(String^ phrase, int startIndex, bool forward, bool caseSensitive, bool wholeWord, bool findReplace);
-				Windows::Forms::ListViewItem^ FindItem(UInt32 taskId);
+				Windows::Forms::ListViewItem^ FindTaskItem(UInt32 taskId);
 				void CheckNotifySelectionChanged();
 				int MapDisplayIndexToColumn(int index);
 				void DrawGroupHeader(Drawing::Graphics^ g, String^ text, Drawing::Rectangle rect);

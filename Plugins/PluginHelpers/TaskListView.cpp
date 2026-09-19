@@ -378,7 +378,7 @@ ListViewItem^ TaskListView::AddTask(ITaskBase^ task, String^ key)
 
 bool TaskListView::RemoveTask(UInt32 taskId)
 {
-	auto lvItem = FindItem(taskId);
+	auto lvItem = FindTaskItem(taskId);
 
 	if (lvItem == nullptr)
 		return false;
@@ -446,7 +446,7 @@ UInt32 TaskListView::GetNextTaskId(int index, bool next, bool topLevel)
 
 bool TaskListView::HasTaskId(UInt32 taskId)
 {
-	return (FindItem(taskId) != nullptr);
+	return (FindTaskItem(taskId) != nullptr);
 }
 
 ITaskBase^ TaskListView::GetTask(int index)
@@ -482,7 +482,7 @@ bool TaskListView::SelectTasks(IList<UInt32>^ taskIds)
 
 	for each(auto taskId in taskIds)
 	{
-		ListViewItem^ lvItem = FindItem(taskId);
+		ListViewItem^ lvItem = FindTaskItem(taskId);
 
 		if (lvItem == nullptr)
 			return false;
@@ -582,7 +582,7 @@ Drawing::Rectangle TaskListView::SelectedTaskLabelRect::get()
 
 Drawing::Rectangle TaskListView::GetTaskLabelRect(UInt32 taskId)
 {
-	auto item = FindItem(taskId);
+	auto item = FindTaskItem(taskId);
 
 	if (item == nullptr)
 		return Drawing::Rectangle::Empty;
@@ -591,7 +591,7 @@ Drawing::Rectangle TaskListView::GetTaskLabelRect(UInt32 taskId)
 	return CalcLabelRect(item, TaskListView::LabelExtents::TitleColumn);
 }
 
-ListViewItem^ TaskListView::FindItem(UInt32 taskId)
+ListViewItem^ TaskListView::FindTaskItem(UInt32 taskId)
 {
 	for each(ListViewItem^ lvItem in Items)
 	{
