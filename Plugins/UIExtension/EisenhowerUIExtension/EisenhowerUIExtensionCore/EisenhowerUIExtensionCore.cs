@@ -428,7 +428,7 @@ namespace EisenhowerUIExtension
 			m_EisenhowerCtrl.Bounds = rCtrl;
 		}
 
-		private bool OnEisenhowerCtrlEditTaskDone(object sender, ITaskBase task)
+		private bool OnEisenhowerCtrlEditTaskDone(object sender, IListViewTask task)
 		{
 			var notify = new UIExtension.ParentNotify(m_HwndParent);
 
@@ -436,13 +436,13 @@ namespace EisenhowerUIExtension
 									(task.IsDone ? DateTime.MinValue : DateTime.Now));
 		}
 
-		private bool OnEisenhowerCtrlEditTaskIcon(object sender, ITaskBase task)
+		private bool OnEisenhowerCtrlEditTaskIcon(object sender, IListViewTask task)
 		{
 			var notify = new UIExtension.ParentNotify(m_HwndParent);
 			return notify.NotifyEditIcon();
 		}
 
-		private bool OnEisenhowerCtrlEditTaskLabel(object sender, ITaskBase task)
+		private bool OnEisenhowerCtrlEditTaskLabel(object sender, IListViewTask task)
 		{
 			var notify = new UIExtension.ParentNotify(m_HwndParent);
 			return notify.NotifyEditLabel();

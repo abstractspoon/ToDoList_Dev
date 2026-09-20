@@ -52,7 +52,7 @@ namespace EisenhowerUIExtension
 			}
 		}
 
-		public bool AddTask(ITaskBase task, string xValue, string yValue)
+		public bool AddTask(IListViewTask task, string xValue, string yValue)
 		{
 			var lvItem = AddTask(task);
 			return SetTaskValues(lvItem, xValue, yValue);
@@ -214,7 +214,7 @@ namespace EisenhowerUIExtension
 			}
 		}
 
-		public int CalcLabelDragImageWidth(ITaskBase task, Graphics graphics)
+		public int CalcLabelDragImageWidth(IListViewTask task, Graphics graphics)
 		{
 			if ((task == null) || task.IsLocked)
 				return 0;
@@ -232,7 +232,7 @@ namespace EisenhowerUIExtension
 
 		private int HeaderPadding { get { return (6 * LabelPadding); } }
 
-		protected override CheckBoxState GetTaskCheckboxState(ITaskBase task)
+		protected override CheckBoxState GetTaskCheckboxState(IListViewTask task)
 		{
 			if (m_ShowMixedCompletionState)
 			{
