@@ -20,14 +20,24 @@ namespace Abstractspoon
 	{
 		namespace PluginHelpers
 		{
-			public delegate bool EditTaskLabelEventHandler(Object^ sender, ITaskBase^ task);
-			public delegate bool EditTaskIconEventHandler(Object^ sender, ITaskBase^ task);
-			public delegate bool EditTaskCompletionEventHandler(Object^ sender, ITaskBase^ task);
-			public delegate bool IsTaskDraggableEventHandler(Object^ sender, ITaskBase^ task);
+			public interface class IListViewTask : ITaskBase
+			{
+			public:
+				virtual property bool IsLocked	{ bool get(); }
+				virtual property bool IsParent	{ bool get(); }
+				virtual property bool IsDone	{ bool get(); }
+			};
+			
+			// ---------------------------------------------
+
+			public delegate bool EditTaskLabelEventHandler(Object^ sender, IListViewTask^ task);
+			public delegate bool EditTaskIconEventHandler(Object^ sender, IListViewTask^ task);
+			public delegate bool EditTaskCompletionEventHandler(Object^ sender, IListViewTask^ task);
+			public delegate bool IsTaskDraggableEventHandler(Object^ sender, IListViewTask^ task);
 
 			// ---------------------------------------------
 
-			// Forward declaration
+			// Forward declarations
 			ref class HeaderControl;
 
 			// ---------------------------------------------
@@ -39,10 +49,10 @@ namespace Abstractspoon
 
 				void Initialize(Translator^ trans, UIExtension::TaskIcon^ taskIcons);
 
-				Windows::Forms::ListViewItem^ AddTask(ITaskBase^ base);
+				Windows::Forms::ListViewItem^ AddTask(IListViewTask^ base);
 				bool RemoveTask(UInt32 taskId);
 
-				ITaskBase^ GetTask(int index);
+				IListViewTask^ GetTask(int index);
 				bool HitTest(Drawing::Point ptScreen, UIExtension::HitTest^ hitTest);
 				UInt32 GetTaskId(int index);
 				UInt32 GetTaskIdEx(UIExtension::GetTask getTask, bool fromSelTask);
@@ -62,7 +72,7 @@ namespace Abstractspoon
 
 				property UInt32 SelectedTaskId { UInt32 get(); }
 				property String^ SelectedTaskTitle { String^ get(); }
-				property ITaskBase^ SelectedTask { ITaskBase^ get(); }
+				property IListViewTask^ SelectedTask { IListViewTask^ get(); }
 
 				property int SelectionCount { int get(); }
 				property bool HasSelection { bool get(); }
@@ -149,16 +159,16 @@ namespace Abstractspoon
 				Drawing::Rectangle CalcIconRect(Drawing::Rectangle labelRect);
 
 				String^ Translate(String^ text, Translator::Type type);
-				bool IsTaskEditable(ITaskBase^ task) { return (!m_ReadOnly && (task != nullptr) && !task->IsLocked); }
+				bool IsTaskEditable(IListViewTask^ task) { return (!m_ReadOnly && (task != nullptr) && !task->IsLocked); }
 				int FindTask(String^ phrase, int startIndex, bool forward, bool caseSensitive, bool wholeWord, bool findReplace);
 				Windows::Forms::ListViewItem^ FindItem(UInt32 taskId);
-				Drawing::Color GetTextColor(ITaskBase^ task, bool selected);
-				Drawing::Color GetBackColor(ITaskBase^ task, int row);
-				Drawing::Font^ GetFont(ITaskBase^ task, bool title);
+				Drawing::Color GetTextColor(IListViewTask^ task, bool selected);
+				Drawing::Color GetBackColor(IListViewTask^ task, int row);
+				Drawing::Font^ GetFont(IListViewTask^ task, bool title);
 
 				// Derived classes optionally override
-				virtual bool TaskMatches(ITaskBase^ task, String^ phrase, bool caseSensitive, bool wholeWord, bool findReplace);
-				virtual Windows::Forms::VisualStyles::CheckBoxState GetTaskCheckboxState(ITaskBase^ task);
+				virtual bool TaskMatches(IListViewTask^ task, String^ phrase, bool caseSensitive, bool wholeWord, bool findReplace);
+				virtual Windows::Forms::VisualStyles::CheckBoxState GetTaskCheckboxState(IListViewTask^ task);
 				virtual bool IsItemSelected(Windows::Forms::ListViewItem^ lvItem) { return (!m_SavingToImage && lvItem->Selected); }
 				virtual void ResizeTaskColumnToFit(int width);
 

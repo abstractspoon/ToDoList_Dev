@@ -101,7 +101,7 @@ namespace WordCloudUIExtension
 			}
 		}
 
-		protected override CheckBoxState GetTaskCheckboxState(ITaskBase task)
+		protected override CheckBoxState GetTaskCheckboxState(IListViewTask task)
 		{
 			if (m_ShowMixedCompletionState)
 			{
@@ -198,7 +198,7 @@ namespace WordCloudUIExtension
 			return someUpdated;
 		}
 
-		protected override bool TaskMatches(ITaskBase task, String phrase, bool caseSensitive, bool wholeWord, bool findReplace)
+		protected override bool TaskMatches(IListViewTask task, String phrase, bool caseSensitive, bool wholeWord, bool findReplace)
 		{
 			var item = (task as CloudTaskItem);
 

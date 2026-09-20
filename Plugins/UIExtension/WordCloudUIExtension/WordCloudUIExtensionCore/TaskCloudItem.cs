@@ -12,7 +12,7 @@ using Gma.CodeCloud.Controls.TextAnalyses.Blacklist;
 
 namespace WordCloudUIExtension
 {
-	public class CloudTaskItem : ITaskBase
+	public class CloudTaskItem : IListViewTask
 	{
 		public CloudTaskItem(uint id)
 		{
@@ -25,14 +25,14 @@ namespace WordCloudUIExtension
 			return Title;
 		}
         
-		// ITaskBase --------------------------------------
+		// IListViewTask --------------------------------------
 		public uint Id				{ get; private set; }
-		public String Title			{ get; set; }
-		public bool HasIcon			{ get; set; }
-		public bool IsLocked		{ get; set; }
-		public bool IsParent		{ get; set; }
-		public Color TextColor		{ get; set; }
-		public String Position		{ get; set; }
+		public String Title			{ get; private set; }
+		public bool HasIcon			{ get; private set; }
+		public bool IsLocked		{ get; private set; }
+		public bool IsParent		{ get; private set; }
+		public Color TextColor		{ get; private set; }
+		public String Position		{ get; private set; }
         public bool IsDone			{ get { return (DoneDate != String.Empty); } }
 
 		// Local attributes -------------------------------

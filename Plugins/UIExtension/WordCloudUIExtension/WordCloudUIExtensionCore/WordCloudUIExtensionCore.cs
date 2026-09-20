@@ -1082,7 +1082,7 @@ namespace WordCloudUIExtension
 				NotifyParentSelChange(selTaskId);
 		}
 
-        private bool OnTaskMatchesEditTaskDone(object sender, ITaskBase task)
+        private bool OnTaskMatchesEditTaskDone(object sender, IListViewTask task)
         {
             var notify = new UIExtension.ParentNotify(m_HwndParent);
 
@@ -1090,14 +1090,14 @@ namespace WordCloudUIExtension
 									(task.IsDone ? DateTime.MinValue : DateTime.Now));
 		}
 
-		private bool OnTaskMatchesEditTaskIcon(object sender, ITaskBase task)
+		private bool OnTaskMatchesEditTaskIcon(object sender, IListViewTask task)
         {
             var notify = new UIExtension.ParentNotify(m_HwndParent);
 
             return notify.NotifyEditIcon();
         }
 
-        private bool OnTaskMatchesEditTaskLabel(object sender, ITaskBase task)
+        private bool OnTaskMatchesEditTaskLabel(object sender, IListViewTask task)
         {
             var notify = new UIExtension.ParentNotify(m_HwndParent);
 

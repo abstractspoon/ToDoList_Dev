@@ -312,7 +312,7 @@ void TaskListView::SizeTaskColumnToFit::set(bool value)
 	}
 }
 
-ListViewItem^ TaskListView::AddTask(ITaskBase^ task)
+ListViewItem^ TaskListView::AddTask(IListViewTask^ task)
 {
 	if (Items->Count == 0)
 		ItemsHaveIcons = false;
@@ -381,7 +381,7 @@ UInt32 TaskListView::GetNextTaskId(int index, bool next, bool topLevel)
 {
 	// Don't pre-validate 'index'; it's allowed to be just
 	// beyond or before the item range
-	ITaskBase^ task = nullptr;
+	IListViewTask^ task = nullptr;
 
 	do 
 	{
@@ -404,12 +404,12 @@ bool TaskListView::HasTaskId(UInt32 taskId)
 	return (FindItem(taskId) != nullptr);
 }
 
-ITaskBase^ TaskListView::GetTask(int index)
+IListViewTask^ TaskListView::GetTask(int index)
 {
 	if ((index < 0) || (index > LastIndex))
 		return nullptr;
 
-	return ASTYPE(Items[index]->Tag, ITaskBase);
+	return ASTYPE(Items[index]->Tag, IListViewTask);
 }
 
 UInt32 TaskListView::GetTaskId(int index)
@@ -503,7 +503,7 @@ String^ TaskListView::SelectedTaskTitle::get()
 	return (selTask == nullptr ? String::Empty : selTask->Title);
 }
 
-ITaskBase^ TaskListView::SelectedTask::get()
+IListViewTask^ TaskListView::SelectedTask::get()
 {
 	Debug::Assert((MultiSelect == false) || (SelectionCount <= 1));
 
@@ -511,7 +511,7 @@ ITaskBase^ TaskListView::SelectedTask::get()
 		return nullptr;
 
 	// else 
-	return ASTYPE(SelectedItems[0]->Tag, ITaskBase);
+	return ASTYPE(SelectedItems[0]->Tag, IListViewTask);
 }
 
 Drawing::Rectangle TaskListView::SelectedTaskLabelRect::get()
@@ -540,7 +540,7 @@ ListViewItem^ TaskListView::FindItem(UInt32 taskId)
 {
 	for each(ListViewItem^ lvItem in Items)
 	{
-		auto task = ASTYPE(lvItem->Tag, ITaskBase);
+		auto task = ASTYPE(lvItem->Tag, IListViewTask);
 
 		if ((task != nullptr) && (task->Id == taskId))
 			return lvItem;
@@ -596,7 +596,7 @@ int TaskListView::GetRequiredWidthForImage()
 	{
 		for each(ListViewItem^ lvi in Items)
 		{
-			int textWidth = TextRenderer::MeasureText(graphics, lvi->Text, GetFont(ASTYPE(lvi->Tag, ITaskBase), true)).Width;
+			int textWidth = TextRenderer::MeasureText(graphics, lvi->Text, GetFont(ASTYPE(lvi->Tag, IListViewTask), true)).Width;
 			reqWidth = Math::Max(reqWidth, textWidth);
 		}
 
@@ -644,7 +644,7 @@ bool TaskListView::HitTest(Drawing::Point ptScreen, UIExtension::HitTest^ hitTes
 	else
 	{
 		hitTest->result = UIExtension::HitTestResult::Task;
-		hitTest->taskId = ASTYPE(htInfo->Item->Tag, ITaskBase)->Id;
+		hitTest->taskId = ASTYPE(htInfo->Item->Tag, IListViewTask)->Id;
 
  		if (htInfo->Location == ListViewHitTestLocations::Label)
 		{
@@ -681,7 +681,7 @@ LabelTipInfo^ TaskListView::ToolHitTest(Drawing::Point ptScreen)
 	if (!labelRect.Contains(pt))
 		return nullptr;
 
-	auto task = ASTYPE(lvHit->Item->Tag, ITaskBase);
+	auto task = ASTYPE(lvHit->Item->Tag, IListViewTask);
 
 	if (task == nullptr)
 		return nullptr;
@@ -750,7 +750,7 @@ Drawing::Rectangle TaskListView::CalcLabelRect(ListViewItem^ item, TaskListView:
 	case TaskListView::LabelExtents::TitleTextOnly:
 		{
 			auto graphics = Graphics::FromHwnd(Handle);
-			textRect.Width = (int)graphics->MeasureString(item->Text, GetFont(ASTYPE(item->Tag, ITaskBase), true)).Width;
+			textRect.Width = (int)graphics->MeasureString(item->Text, GetFont(ASTYPE(item->Tag, IListViewTask), true)).Width;
 		}
 		break;
 
@@ -928,7 +928,7 @@ void TaskListView::OnDrawItem(DrawListViewItemEventArgs^ e)
 		return;
 
 	// Background color full width
-	auto task = ASTYPE(e->Item->Tag, ITaskBase);
+	auto task = ASTYPE(e->Item->Tag, IListViewTask);
 
 	auto backColor = GetBackColor(task, e->Item->Index);
 	auto itemRect = e->Item->Bounds;
@@ -1023,7 +1023,7 @@ void TaskListView::OnDrawItem(DrawListViewItemEventArgs^ e)
 	}
 }
 
-Drawing::Font^ TaskListView::GetFont(ITaskBase^ task, bool title)
+Drawing::Font^ TaskListView::GetFont(IListViewTask^ task, bool title)
 {
 	if (title)
 	{
@@ -1042,7 +1042,7 @@ Drawing::Font^ TaskListView::GetFont(ITaskBase^ task, bool title)
 	return Font;
 }
 
-Drawing::Color TaskListView::GetTextColor(ITaskBase^ task, bool selected)
+Drawing::Color TaskListView::GetTextColor(IListViewTask^ task, bool selected)
 {
 	if (selected)
 	{
@@ -1060,7 +1060,7 @@ Drawing::Color TaskListView::GetTextColor(ITaskBase^ task, bool selected)
 	return SystemColors::WindowText;
 }
 
-Drawing::Color TaskListView::GetBackColor(ITaskBase^ task, int row)
+Drawing::Color TaskListView::GetBackColor(IListViewTask^ task, int row)
 {
 	if (!task->TextColor.IsEmpty && TaskColorIsBackground)
 		return task->TextColor;
@@ -1106,7 +1106,7 @@ void TaskListView::WndProc(Message% m)
 			}
 			else
 			{
-				auto task = ASTYPE(lvHit->Tag, ITaskBase);
+				auto task = ASTYPE(lvHit->Tag, IListViewTask);
 
 				if (CalcCheckboxRect(lvHit->Bounds).Contains(pos))
 				{
@@ -1152,7 +1152,7 @@ void TaskListView::WndProc(Message% m)
 			{
 				Debug::Assert(lvHit->Selected);
 
-				auto task = ASTYPE(lvHit->Tag, ITaskBase);
+				auto task = ASTYPE(lvHit->Tag, IListViewTask);
 
 				if (IsTaskEditable(task) && GetTaskLabelRect(task->Id).Contains(pos))
 					EditTaskLabel(this, task);
@@ -1221,7 +1221,7 @@ void TaskListView::OnMouseMove(MouseEventArgs^ e)
 
 	if (lvHit != nullptr)
 	{
-		auto task = ASTYPE(lvHit->Tag, ITaskBase);
+		auto task = ASTYPE(lvHit->Tag, IListViewTask);
 
 		if (task != nullptr)
 		{
@@ -1254,7 +1254,7 @@ void TaskListView::OnMouseMove(MouseEventArgs^ e)
 void TaskListView::OnItemDrag(ItemDragEventArgs^ e)
 {
 	auto item = ASTYPE(e->Item, ListViewItem);
-	auto task = ASTYPE(item->Tag, ITaskBase);
+	auto task = ASTYPE(item->Tag, IListViewTask);
 
 	if (task == nullptr)
 		return;
@@ -1283,7 +1283,7 @@ void TaskListView::OnBeforeLabelEdit(LabelEditEventArgs^ e)
 
 	if (CalcLabelRect(Items[e->Item], TaskListView::LabelExtents::TitleTextOnly).Contains(mousePos))
 	{
-		auto task = ASTYPE(Items[e->Item]->Tag, ITaskBase);
+		auto task = ASTYPE(Items[e->Item]->Tag, IListViewTask);
 
 		if (task != nullptr)
 			EditTaskLabel(this, task);
@@ -1387,12 +1387,12 @@ int TaskListView::FindTask(String^ phrase, int startIndex, bool forward, bool ca
 	return -1; // no match
 }
 
-bool TaskListView::TaskMatches(ITaskBase^ task, String^ phrase, bool caseSensitive, bool wholeWord, bool /*findReplace*/)
+bool TaskListView::TaskMatches(IListViewTask^ task, String^ phrase, bool caseSensitive, bool wholeWord, bool /*findReplace*/)
 {
 	return ((task != nullptr) && StringUtil::Find(task->Title, phrase, caseSensitive, wholeWord));
 }
 
-CheckBoxState TaskListView::GetTaskCheckboxState(ITaskBase^ task)
+CheckBoxState TaskListView::GetTaskCheckboxState(IListViewTask^ task)
 {
 	return (task->IsDone ? CheckBoxState::CheckedNormal : CheckBoxState::UncheckedNormal);
 }

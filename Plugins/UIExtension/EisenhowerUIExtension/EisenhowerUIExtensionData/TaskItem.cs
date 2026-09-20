@@ -7,21 +7,21 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 namespace EisenhowerUIExtension
 {
-	public class TaskItem : ITaskBase
+	public class TaskItem : IListViewTask
 	{
 		// ITaskBase
-		public String Title { get; private set; }
-		public String Position { get; private set; }
-		public uint Id { get; private set; }
-		public Color TextColor { get; private set; }
-		public bool HasIcon { get; private set; }
-		public bool IsParent { get; private set; }
-		public bool IsLocked { get; private set; }
-		public bool IsDone { get; private set; }
-
+		public uint Id				{ get; private set; }
+		public String Title			{ get; private set; }
+		public String Position		{ get; private set; }
+		public Color TextColor		{ get; private set; }
+		public bool HasIcon			{ get; private set; }
+		public bool IsParent		{ get; private set; }
+		public bool IsLocked		{ get; private set; }
+		public bool IsDone			{ get; private set; }
+	
 		// Local
-		public bool IsFlagged { get; private set; }
-		public bool IsPartlyDone { get; private set; }
+		public bool IsFlagged		{ get; private set; }
+		public bool IsPartlyDone	{ get; private set; }
 
 		// -----------------------------------------------------------------
 

@@ -42,9 +42,6 @@ public:
 	virtual property String^ Title { String^ get()		{ return m_ITask->Title; }; }
 	virtual property String^ Position { String^ get()	{ return m_ITask->Position; } }
 	virtual property bool HasIcon { bool get()			{ return m_ITask->HasIcon; } }
-	virtual property bool IsLocked { bool get()			{ return m_ITask->IsLocked; } }
-	virtual property bool IsParent { bool get()			{ return m_ITask->IsParent; } }
-	virtual property bool IsDone { bool get()			{ return m_ITask->IsDone; } }
 
 	virtual property Drawing::Color TextColor { Drawing::Color get() { return m_ITask->TextColor; } }
 
