@@ -52,7 +52,13 @@ namespace WordCloudUIExtension
 		public List<String> Tags;
         public bool IsPartlyDone;
 
-        public bool SetDone(bool done)
+		// IListViewTask		
+		public string GetGroupValue(object groupById)
+		{
+			return string.Empty;
+		}
+
+		public bool SetDone(bool done)
         {
 			if (done == IsDone)
 				return false;

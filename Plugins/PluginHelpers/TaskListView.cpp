@@ -206,10 +206,27 @@ namespace Abstractspoon
 	}
 }
 
-String^ TaskListView::GetItemGroupValue(Windows::Forms::ListViewItem^ lvi)
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+public ref class TaskItemGroup
 {
-	return String::Empty;
-}
+public:
+	TaskItemGroup(String^ title, String^ value)
+	{
+		if (title != nullptr)
+			m_Title = title;
+
+		if (value != nullptr)
+			m_Value = value;
+	}
+
+	property String^ Title { String^ get() { return m_Title; } }
+	property String^ Value { String^ get() { return m_Value; } }
+
+private:
+	String^ m_Title;
+	String^ m_Value;
+};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -240,6 +257,20 @@ void TaskListView::DefaultItemComparer::Ascending::set(bool ascending)
 	m_Ascending = ascending;
 }
 
+String^ TaskListView::DefaultItemComparer::GetItemGroupValue(Windows::Forms::ListViewItem^ lvi)
+{
+	auto listView = ASTYPE(lvi->ListView, TaskListView);
+
+	if (listView->IsGroupItem(lvi))
+		return ASTYPE(lvi->Tag, TaskItemGroup)->Value;
+
+	if (listView->IsTaskItem(lvi))
+		return ASTYPE(lvi->Tag, IListViewTask)->GetGroupValue(listView->m_GroupById);
+
+	// else
+	return String::Empty;
+}
+
 int TaskListView::DefaultItemComparer::Compare(Object^ x, Object^ y)
 {
 	if (m_Column == -1)
@@ -252,8 +283,8 @@ int TaskListView::DefaultItemComparer::Compare(Object^ x, Object^ y)
 
 	if (listView->GroupingEnabled)
 	{
-		auto task1Text = listView->GetItemGroupValue(lvi1);
-		auto task2Text = listView->GetItemGroupValue(lvi2);
+		auto task1Text = GetItemGroupValue(lvi1);
+		auto task2Text = GetItemGroupValue(lvi2);
 
 		int nCompare = StringUtil::NaturalCompare(task1Text, task2Text);
 
@@ -268,20 +299,20 @@ int TaskListView::DefaultItemComparer::Compare(Object^ x, Object^ y)
 		}
 		else  // different groups
 		{
-			// 						// 'sort <none> below' has no effect without 'sort ascending'
-			// 						if (m_bSortNoneGroupBelow && m_bSortGroupsAscending)
-			// 						{
-			// 							if (sTask1Text.IsEmpty())
-			// 								return 1;
+			// // 'sort <none> below' has no effect without 'sort ascending'
+			// if (m_bSortNoneGroupBelow && m_bSortGroupsAscending)
+			// {
+			// 	if (sTask1Text.IsEmpty())
+			// 		return 1;
 			// 
-			// 							if (sTask2Text.IsEmpty())
-			// 								return -1;
-			// 						}
+			// 	if (sTask2Text.IsEmpty())
+			// 		return -1;
+			// }
 
 			return nCompare;
 		}
 
-		// 					return (m_bSortGroupsAscending ? nCompare : -nCompare);
+		// return (m_bSortGroupsAscending ? nCompare : -nCompare);
 	}
 
 	return CompareItems(lvi1, lvi2);
@@ -329,7 +360,7 @@ TaskListView::TaskListView()
 	m_SizeTaskColumnToFit(false),
 	m_ReadOnly(false),
 	m_SavingToImage(false),
-	m_GroupingEnabled(false),
+	m_GroupById(nullptr),
 	m_CheckBoxSize(-1)
 {
 	m_LabelTip = gcnew LabelTip(this);
@@ -432,11 +463,13 @@ bool TaskListView::RemoveTask(UInt32 taskId)
 	return true;
 }
 
-ListViewItem^ TaskListView::AddGroup(IListViewGroup^ group)
+ListViewItem^ TaskListView::AddGroup(String^ title, String^ value)
 {
-	GroupingEnabled = true;
+	Debug::Assert(GroupingEnabled);
 
-	auto lvi = Items->Add(group->Title);
+	auto group = gcnew TaskItemGroup(title, value);
+
+	auto lvi = Items->Add(title);
 	lvi->Tag = group;
 
 	return lvi;
@@ -449,7 +482,7 @@ int TaskListView::RemoveAllGroups()
 
 	while (item-- > 0)
 	{
-		if (ISTYPE(Items[item]->Tag, IListViewGroup))
+		if (ISTYPE(Items[item]->Tag, TaskItemGroup))
 		{
 			Items->RemoveAt(item);
 			numRemoved++;
@@ -993,16 +1026,16 @@ void TaskListView::ReadOnly::set(bool value)
 
 bool TaskListView::GroupingEnabled::get()
 {
-	return m_GroupingEnabled;
+	return (m_GroupById != nullptr);
 }
 
-void TaskListView::GroupingEnabled::set(bool value)
+void TaskListView::EnableGrouping(Object^ groupById)
 {
-	if (m_GroupingEnabled != value)
+	if (m_GroupById != groupById)
 	{
-		m_GroupingEnabled = value;
+		m_GroupById = groupById;
 
-		if (!value)
+		if (groupById == nullptr)
 			RemoveAllGroups();
 	}
 }
@@ -1193,7 +1226,7 @@ void TaskListView::OnDrawItem(DrawListViewItemEventArgs^ e)
 
 	if (IsGroupItem(e->Item))
 	{
-		DrawGroupHeader(e->Graphics, ASTYPE(e->Item->Tag, IListViewGroup)->Title, e->Bounds);
+		DrawGroupHeader(e->Graphics, ASTYPE(e->Item->Tag, TaskItemGroup)->Title, e->Bounds);
 		return;
 	}
 
@@ -1349,7 +1382,7 @@ bool TaskListView::IsTaskItem(Windows::Forms::ListViewItem^ lvi)
 
 bool TaskListView::IsGroupItem(Windows::Forms::ListViewItem^ lvi)
 {
-	return ((lvi != nullptr) && ISTYPE(lvi->Tag, IListViewGroup));
+	return ((lvi != nullptr) && ISTYPE(lvi->Tag, TaskItemGroup));
 }
 
 void TaskListView::WndProc(Message% m)

@@ -26,12 +26,8 @@ namespace Abstractspoon
 				virtual property bool IsLocked	{ bool get(); }
 				virtual property bool IsParent	{ bool get(); }
 				virtual property bool IsDone	{ bool get(); }
-			};
-
-			public interface class IListViewGroup
-			{
-			public:
-				virtual property String^ Title	{ String^ get(); }
+				
+				virtual String^ GetGroupValue(Object^ groupById);
 			};
 
 			// ---------------------------------------------
@@ -71,7 +67,8 @@ namespace Abstractspoon
 				Windows::Forms::ListViewItem^ AddTask(IListViewTask^ base);
 				Windows::Forms::ListViewItem^ AddTask(IListViewTask^ task, String^ key);
 
-				Windows::Forms::ListViewItem^ AddGroup(IListViewGroup^ group);
+				void EnableGrouping(Object^ groupById);
+				Windows::Forms::ListViewItem^ AddGroup(String^ title, String^ value);
 				int RemoveAllGroups();
 
 				bool HitTest(Drawing::Point ptScreen, UIExtension::HitTest^ hitTest);
@@ -111,7 +108,7 @@ namespace Abstractspoon
 				property bool EnableHeaderTracking { bool get(); void set(bool value); }
 				property bool SizeTaskColumnToFit { bool get(); void set(bool value); }
 				property bool ReadOnly { bool get(); void set(bool value); }
-				property bool GroupingEnabled { bool get(); void set(bool value); }
+				property bool GroupingEnabled { bool get(); }
 
 				property int MinTaskColumnWidth;
 
@@ -164,9 +161,9 @@ namespace Abstractspoon
 				bool m_SizeTaskColumnToFit;
 				bool m_ReadOnly;
 				bool m_SavingToImage;
-				bool m_GroupingEnabled;
 
 				int m_CheckBoxSize;
+				Object^ m_GroupById;
 
 			protected:
 				void WndProc(Windows::Forms::Message% m) override;
@@ -219,7 +216,6 @@ namespace Abstractspoon
 				virtual bool IsItemSelected(Windows::Forms::ListViewItem^ lvItem) { return (!m_SavingToImage && lvItem->Selected); }
 				virtual Windows::Forms::TextFormatFlags GetTextAlignment(int column) { return Windows::Forms::TextFormatFlags::Left; }
 				virtual void ResizeTaskColumnToFit(int width);
-				virtual String^ GetItemGroupValue(Windows::Forms::ListViewItem^ lvi); // for sorting group headers
 
 				property UIExtension::TaskIcon^ TaskIcons { UIExtension::TaskIcon^ get() { return m_TaskIcons; } }
 				property bool ItemsHaveIcons { bool get(); void set(bool value); };
@@ -248,6 +244,9 @@ namespace Abstractspoon
 				protected:
 					virtual int CompareItems(Windows::Forms::ListViewItem^ lvi1,
 											 Windows::Forms::ListViewItem^ lvi2);
+
+					String^ GetItemGroupValue(Windows::Forms::ListViewItem^ lvi);
+
 				private:
 					int m_Column;
 					bool m_Ascending;

@@ -372,9 +372,9 @@ namespace TaskDatesUIExtension
 			get { return (Date != NullDate); }
 		}
 
-		public string GetGroupValue(Task.Attribute attribId)
+		public string GetGroupValue(object groupById)
 		{
-			return m_TaskAttribs.GetGroupValue(attribId);
+			return m_TaskAttribs.GetGroupValue((Task.Attribute)groupById);
 		}
 
 		public static int CompareDates(TaskItemDate date1, TaskItemDate date2, bool ascending)
@@ -388,22 +388,5 @@ namespace TaskDatesUIExtension
 	}
 
 	///////////////////////////////////////////////////////////////////////////
-
-	public class TaskItemGroup : IListViewGroup
-	{
-		// IGroupBase
-		public string Title { get; private set; }
-
-		// Local
-		public string Value { get; private set; }
-
-		// -----------------------------------------------------------------
-
-		public TaskItemGroup(string title, string value)
-		{
-			Title = title;
-			Value = value;
-		}
-	}
 }
 

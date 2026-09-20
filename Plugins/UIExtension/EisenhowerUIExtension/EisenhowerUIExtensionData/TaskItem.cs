@@ -20,7 +20,7 @@ namespace EisenhowerUIExtension
 		public bool IsParent		{ get; private set; }
 		public bool IsLocked		{ get; private set; }
 		public bool IsDone			{ get; private set; }
-	
+
 		// Local
 		public bool IsFlagged		{ get; private set; }
 		public bool IsPartlyDone	{ get; private set; }
@@ -38,6 +38,12 @@ namespace EisenhowerUIExtension
 			IsParent = false;
             IsPartlyDone = false;
 			IsLocked = false;
+		}
+
+		// IListViewTask		
+		public string GetGroupValue(object groupById)
+		{
+			return string.Empty;
 		}
 
 		public override string ToString() 

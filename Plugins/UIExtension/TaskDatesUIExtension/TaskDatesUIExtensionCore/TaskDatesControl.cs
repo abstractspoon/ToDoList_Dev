@@ -354,7 +354,9 @@ namespace TaskDatesUIExtension
 					m_GroupBy = value;
 					ListViewItemSorter = null;
 
+					EnableGrouping(m_GroupBy);
 					RebuildGroupHeaders();
+
 					ListViewItemSorter = m_Comparer;
 				}
 			}
@@ -372,16 +374,31 @@ namespace TaskDatesUIExtension
 			RemoveAllGroups();
 
 			// Re-add as required
-			var values = m_TaskItems.GetGroupValues(m_GroupBy);
+			string attribName;
 
-			string attribName, emptyVal = "<none>"; // TODO
-			m_MapGroupAttribIdToLabel.TryGetValue(m_GroupBy, out attribName);
-
-			foreach (var v in values)
+			if (m_MapGroupAttribIdToLabel.TryGetValue(m_GroupBy, out attribName))
 			{
-				string value = (string.IsNullOrEmpty(v) ? emptyVal : v);
-				AddGroup(new TaskItemGroup(string.Format("{0}: {1}", attribName, value), v));
+				var values = m_TaskItems.GetGroupValues(m_GroupBy);
+
+				foreach (var v in values)
+				{
+					string value = (string.IsNullOrEmpty(v) ? GetAttributeNone(m_GroupBy) : v);
+					AddGroup(string.Format("{0}: {1}", attribName, value), v);
+				}
 			}
+		}
+
+		private string GetAttributeNone(Task.Attribute attribId)
+		{
+			switch (attribId)
+			{
+			case Task.Attribute.AllocatedTo:
+			case Task.Attribute.AllocatedBy:
+				return m_Trans.Translate("<nobody>", Translator.Type.Text);
+			}
+
+			// All else
+			return m_Trans.Translate("<none>", Translator.Type.Text);
 		}
 
 		private static String GetDateKey(TaskItemDate date)
@@ -796,15 +813,6 @@ namespace TaskDatesUIExtension
 			}
 
 			Columns[col].Width = colWidth;
-		}
-
-		protected override string GetItemGroupValue(ListViewItem lvi)
-		{
-			if (lvi.Tag is TaskItemGroup)
-				return (lvi.Tag as TaskItemGroup).Value;
-
-			// else
-			return (lvi.Tag as TaskItemDate).GetGroupValue(m_GroupBy);
 		}
 
 		////////////////////////////////////////////////////////////////
