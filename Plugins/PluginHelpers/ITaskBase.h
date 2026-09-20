@@ -34,6 +34,15 @@ namespace Abstractspoon
 			
 			//////////////////////////////////////////////////////////////
 			
+			// Required interface for TaskListView groups
+			public interface class IGroupBase
+			{
+			public:
+				virtual property String^ Title { String^ get(); }
+			};
+			
+			//////////////////////////////////////////////////////////////
+			
 			[ExtensionAttribute]
 			public ref class ITaskBaseExt abstract sealed 
 			{

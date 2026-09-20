@@ -52,9 +52,12 @@ namespace Abstractspoon
 				void Initialize(Translator^ trans, UIExtension::TaskIcon^ taskIcons);
 				void Initialize(Translator^ trans, UIExtension::TaskIcon^ taskIcons, IItemComparer^ comparer);
 
-				Windows::Forms::ListViewItem^ AddTask(ITaskBase^ base);
-				Windows::Forms::ListViewItem^ AddTask(ITaskBase^ base, String^ key);
+				Windows::Forms::ListViewItem^ AddTask(ITaskBase^ task);
+				Windows::Forms::ListViewItem^ AddTask(ITaskBase^ task, String^ key);
 				bool RemoveTask(UInt32 taskId);
+
+				Windows::Forms::ListViewItem^ AddGroup(IGroupBase^ group);
+				int RemoveAllGroups();
 
 				ITaskBase^ GetTask(int index);
 				bool HitTest(Drawing::Point ptScreen, UIExtension::HitTest^ hitTest);
@@ -92,6 +95,7 @@ namespace Abstractspoon
 				property bool EnableHeaderTracking { bool get(); void set(bool value); }
 				property bool SizeTaskColumnToFit { bool get(); void set(bool value); }
 				property bool ReadOnly { bool get(); void set(bool value); }
+				property bool GroupingEnabled { bool get(); void set(bool value); }
 
 				property int MinTaskColumnWidth;
 
@@ -144,6 +148,7 @@ namespace Abstractspoon
 				bool m_SizeTaskColumnToFit;
 				bool m_ReadOnly;
 				bool m_SavingToImage;
+				bool m_GroupingEnabled;
 
 				int m_CheckBoxSize;
 
@@ -188,6 +193,9 @@ namespace Abstractspoon
 				void CheckNotifySelectionChanged();
 				int MapDisplayIndexToColumn(int index);
 				void DrawGroupHeader(Drawing::Graphics^ g, String^ text, Drawing::Rectangle rect);
+				bool IsTaskItem(Windows::Forms::ListViewItem^ lvi);
+				bool IsGroupItem(Windows::Forms::ListViewItem^ lvi);
+				void RedrawGroupHeaders();
 
 				// Derived classes optionally override
 				virtual bool TaskMatches(ITaskBase^ task, String^ phrase, bool caseSensitive, bool wholeWord, bool findReplace);
@@ -195,6 +203,7 @@ namespace Abstractspoon
 				virtual Windows::Forms::VisualStyles::CheckBoxState GetTaskCheckboxState(ITaskBase^ task);
 				virtual Windows::Forms::TextFormatFlags GetTextAlignment(int column) { return Windows::Forms::TextFormatFlags::Left; }
 				virtual void ResizeTaskColumnToFit(int width);
+				virtual String^ GetItemGroupValue(Windows::Forms::ListViewItem^ lvi); // for sorting group headers
 
 				property UIExtension::TaskIcon^ TaskIcons { UIExtension::TaskIcon^ get() { return m_TaskIcons; } }
 				property bool ItemsHaveIcons { bool get(); void set(bool value); };

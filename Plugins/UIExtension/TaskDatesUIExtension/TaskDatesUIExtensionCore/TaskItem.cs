@@ -387,9 +387,12 @@ namespace TaskDatesUIExtension
 
 	///////////////////////////////////////////////////////////////////////////
 
-	public class TaskItemGroup
+	public class TaskItemGroup : IGroupBase
 	{
+		// IGroupBase
 		public string Title { get; private set; }
+
+		// Local
 		public string Value { get; private set; }
 
 		// -----------------------------------------------------------------

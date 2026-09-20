@@ -37,7 +37,7 @@ namespace TaskDatesUIExtension
 		// --------------------------------------------------------
 
 		private TaskItems m_TaskItems = new TaskItems();
-		private ItemDateComparer m_Comparer = new ItemDateComparer(Task.Attribute.Unknown);
+		private ItemDateComparer m_Comparer = new ItemDateComparer();
 		private TaskDatesOption m_Options = TaskDatesOption.None;
 		private UIExtension.IdleRedraw m_IdleTasks = new UIExtension.IdleRedraw();
 
@@ -355,7 +355,7 @@ namespace TaskDatesUIExtension
 					ListViewItemSorter = null;
 
 					RebuildGroupHeaders();
-					ListViewItemSorter = m_Comparer = new ItemDateComparer(m_GroupBy);
+					ListViewItemSorter = m_Comparer;
 				}
 			}
 		}
@@ -369,87 +369,19 @@ namespace TaskDatesUIExtension
 				return;
 
 			// Remove existing headers
-			int item = Items.Count;
-
-			while (item-- > 0)
-			{
-				if (Items[item].Tag is TaskItemGroup)
-					Items.RemoveAt(item);
-			}
+			RemoveAllGroups();
 
 			// Re-add as required
-			if (m_GroupBy == Task.Attribute.Priority)
+			var values = m_TaskItems.GetGroupValues(m_GroupBy);
+
+			string attribName, emptyVal = "<none>"; // TODO
+			m_MapGroupAttribIdToLabel.TryGetValue(m_GroupBy, out attribName);
+
+			foreach (var v in values)
 			{
-				// Create the groups
-				AddTaskItemGroup("Priority: <none>", "");
-
-				for (int i = 0; i < 11; i++)
-					AddTaskItemGroup(string.Format("Priority: {0}", i), i.ToString());
+				string value = (string.IsNullOrEmpty(v) ? emptyVal : v);
+				AddGroup(new TaskItemGroup(string.Format("{0}: {1}", attribName, value), v));
 			}
-			else
-			{
-				// TODO
-			}
-
-		}
-
-		private void AddTaskItemGroup(string title, string value)
-		{
-			var group = new TaskItemGroup(title, value);
-
-			var lvi = Items.Add(group.Title);
-			lvi.Tag = group;
-		}
-
-		protected override void WndProc(ref Message m)
-		{
-			base.WndProc(ref m);
-
-			const int WM_HSCROLL = 0x0114;
-
-			switch (m.Msg)
-			{
-			case WM_HSCROLL:
-				RedrawGroupHeaders();
-				break;
-			}
-		}
-
-		private void RedrawGroupHeaders()
-		{
-			if (IsGrouped)
-			{
-				int item = Items.Count;
-				var clientRect = ClientRectangle;
-
-				while (item-- > 0)
-				{
-					var lvi = Items[item];
-
-					if (lvi.Tag is TaskItemGroup)
-					{
-						if (clientRect.IntersectsWith(lvi.Bounds))
-							Invalidate(lvi.Bounds, false);
-					}
-				}
-			}
-		}
-
-		private bool IsGrouped { get { return (m_GroupBy != Task.Attribute.Unknown); } }
-
-		protected override void OnDrawItem(DrawListViewItemEventArgs e)
-		{
-			if (e.Item.Tag is TaskItemGroup)
-			{
-				// Handle ourselves
-				var group = (e.Item.Tag as TaskItemGroup);
-
-				DrawGroupHeader(e.Graphics, group.Title, e.Bounds);
-				return;
-			}
-			
-			// else
-			base.OnDrawItem(e);
 		}
 
 		private static String GetDateKey(TaskItemDate date)
@@ -866,62 +798,21 @@ namespace TaskDatesUIExtension
 			Columns[col].Width = colWidth;
 		}
 
+		protected override string GetItemGroupValue(ListViewItem lvi)
+		{
+			if (lvi.Tag is TaskItemGroup)
+				return (lvi.Tag as TaskItemGroup).Value;
+
+			// else
+			return (lvi.Tag as TaskItemDate).GetGroupValue(m_GroupBy);
+		}
+
 		////////////////////////////////////////////////////////////////
 
 		class ItemDateComparer : DefaultItemComparer
 		{
-			private Task.Attribute m_GroupBy = Task.Attribute.Unknown;
-
-			public ItemDateComparer(Task.Attribute groupBy)
-			{
-				m_GroupBy = groupBy;
-			}
-
-			private string GetItemGroupValue(ListViewItem lvi)
-			{
-				if (lvi.Tag is TaskItemGroup)
-					return (lvi.Tag as TaskItemGroup).Value;
-
-				// else
-				return (lvi.Tag as TaskItemDate).GetGroupValue(m_GroupBy);
-			}
-
 			protected override int CompareItems(ListViewItem lvi1, ListViewItem lvi2)
 			{
-				if (m_GroupBy != Task.Attribute.Unknown)
-				{
-					String task1Text = GetItemGroupValue(lvi1);
-					String task2Text = GetItemGroupValue(lvi2);
-
-					int nCompare = StringUtil.NaturalCompare(task1Text, task2Text);
-
-					if (nCompare == 0) // Same group
-					{
-						// Always sort the group header item higher
-						if (lvi1.Tag is TaskItemGroup)
-							return -1;
-
-						if (lvi2.Tag is TaskItemGroup)
-							return 1;
-					}
-					else  // different groups
-					{
-// 						// 'sort <none> below' has no effect without 'sort ascending'
-// 						if (m_bSortNoneGroupBelow && m_bSortGroupsAscending)
-// 						{
-// 							if (sTask1Text.IsEmpty())
-// 								return 1;
-// 
-// 							if (sTask2Text.IsEmpty())
-// 								return -1;
-// 						}
-
-						return nCompare;
-					}
-
-// 					return (m_bSortGroupsAscending ? nCompare : -nCompare);
-				}
-
 				switch (Column)
 				{
 				case TaskDatesControl.DateCol:
