@@ -27,7 +27,13 @@ namespace Abstractspoon
 				virtual property bool IsParent	{ bool get(); }
 				virtual property bool IsDone	{ bool get(); }
 			};
-			
+
+			public interface class IListViewGroup
+			{
+			public:
+				virtual property String^ Title	{ String^ get(); }
+			};
+
 			// ---------------------------------------------
 
 			public delegate bool EditTaskLabelEventHandler(Object^ sender, IListViewTask^ task);
@@ -64,15 +70,13 @@ namespace Abstractspoon
 
 				Windows::Forms::ListViewItem^ AddTask(IListViewTask^ base);
 				Windows::Forms::ListViewItem^ AddTask(IListViewTask^ task, String^ key);
-				bool RemoveTask(UInt32 taskId);
 
-				Windows::Forms::ListViewItem^ AddGroup(IGroupBase^ group);
+				Windows::Forms::ListViewItem^ AddGroup(IListViewGroup^ group);
 				int RemoveAllGroups();
 
-				IListViewTask^ GetTask(int index);
-				bool RemoveTask(UInt32 taskId);
-
 				bool HitTest(Drawing::Point ptScreen, UIExtension::HitTest^ hitTest);
+				bool RemoveTask(UInt32 taskId);
+				IListViewTask^ GetTask(int index);
 				UInt32 GetTaskId(int index);
 				UInt32 GetTaskIdEx(UIExtension::GetTask getTask, bool fromSelTask);
 				UInt32 GetNextTaskId(int index, bool next, bool topLevel);
@@ -96,7 +100,7 @@ namespace Abstractspoon
 				property int SelectionCount { int get(); }
 				property bool HasSelection { bool get(); }
 				property IList<UInt32>^ SelectedTaskIds { IList<UInt32>^ get(); }
-				property IList<ITaskBase^>^ SelectedTasks { IList<ITaskBase^>^ get(); }
+				property IList<IListViewTask^>^ SelectedTasks { IList<IListViewTask^>^ get(); }
 
 				property bool TaskColorIsBackground { bool get(); void set(bool value); }
 				property bool ShowParentsAsFolders { bool get(); void set(bool value); }
@@ -213,7 +217,6 @@ namespace Abstractspoon
 				virtual bool TaskMatches(IListViewTask^ task, String^ phrase, bool caseSensitive, bool wholeWord, bool findReplace);
 				virtual Windows::Forms::VisualStyles::CheckBoxState GetTaskCheckboxState(IListViewTask^ task);
 				virtual bool IsItemSelected(Windows::Forms::ListViewItem^ lvItem) { return (!m_SavingToImage && lvItem->Selected); }
-				virtual Windows::Forms::VisualStyles::CheckBoxState GetTaskCheckboxState(IListViewTask^ task);
 				virtual Windows::Forms::TextFormatFlags GetTextAlignment(int column) { return Windows::Forms::TextFormatFlags::Left; }
 				virtual void ResizeTaskColumnToFit(int width);
 				virtual String^ GetItemGroupValue(Windows::Forms::ListViewItem^ lvi); // for sorting group headers

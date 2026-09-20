@@ -402,7 +402,7 @@ ListViewItem^ TaskListView::AddTask(IListViewTask^ task)
 	return AddTask(task, String::Empty);
 }
 
-ListViewItem^ TaskListView::AddTask(ITaskBase^ task, String^ key)
+ListViewItem^ TaskListView::AddTask(IListViewTask^ task, String^ key)
 {
 	if (Items->Count == 0)
 		ItemsHaveIcons = false;
@@ -432,7 +432,7 @@ bool TaskListView::RemoveTask(UInt32 taskId)
 	return true;
 }
 
-ListViewItem^ TaskListView::AddGroup(IGroupBase^ group)
+ListViewItem^ TaskListView::AddGroup(IListViewGroup^ group)
 {
 	GroupingEnabled = true;
 
@@ -449,7 +449,7 @@ int TaskListView::RemoveAllGroups()
 
 	while (item-- > 0)
 	{
-		if (ISTYPE(Items[item]->Tag, IGroupBase))
+		if (ISTYPE(Items[item]->Tag, IListViewGroup))
 		{
 			Items->RemoveAt(item);
 			numRemoved++;
@@ -608,9 +608,9 @@ IList<UInt32>^ TaskListView::SelectedTaskIds::get()
 	return taskIds;
 }
 
-IList<ITaskBase^>^ TaskListView::SelectedTasks::get()
+IList<IListViewTask^>^ TaskListView::SelectedTasks::get()
 {
-	auto tasks = gcnew List<ITaskBase^>();
+	auto tasks = gcnew List<IListViewTask^>();
 
 	for each (int index in SelectedIndices)
 		tasks->Add(GetTask(index));
@@ -767,7 +767,7 @@ bool TaskListView::HitTest(Drawing::Point ptScreen, UIExtension::HitTest^ hitTes
 	if (htInfo == nullptr)
 		return false;
 
-	if ((htInfo->Item == nullptr) || !(ISTYPE(htInfo->Item->Tag, ITaskBase)))
+	if ((htInfo->Item == nullptr) || !IsTaskItem(htInfo->Item))
 	{
 		hitTest->result = UIExtension::HitTestResult::Tasklist;
 	}
@@ -1193,7 +1193,7 @@ void TaskListView::OnDrawItem(DrawListViewItemEventArgs^ e)
 
 	if (IsGroupItem(e->Item))
 	{
-		DrawGroupHeader(e->Graphics, ASTYPE(e->Item->Tag, IGroupBase)->Title, e->Bounds);
+		DrawGroupHeader(e->Graphics, ASTYPE(e->Item->Tag, IListViewGroup)->Title, e->Bounds);
 		return;
 	}
 
@@ -1344,12 +1344,12 @@ Drawing::Color TaskListView::GetBackColor(IListViewTask^ task, int row)
 
 bool TaskListView::IsTaskItem(Windows::Forms::ListViewItem^ lvi)
 {
-	return ((lvi != nullptr) && ISTYPE(lvi->Tag, ITaskBase));
+	return ((lvi != nullptr) && ISTYPE(lvi->Tag, IListViewTask));
 }
 
 bool TaskListView::IsGroupItem(Windows::Forms::ListViewItem^ lvi)
 {
-	return ((lvi != nullptr) && ISTYPE(lvi->Tag, IGroupBase));
+	return ((lvi != nullptr) && ISTYPE(lvi->Tag, IListViewGroup));
 }
 
 void TaskListView::WndProc(Message% m)

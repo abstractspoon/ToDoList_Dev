@@ -23,15 +23,6 @@ namespace Abstractspoon
 
 				virtual property Drawing::Color TextColor { Drawing::Color get(); }
 			};
-
-			//////////////////////////////////////////////////////////////
-			
-			// Required interface for TaskListView groups
-			public interface class IGroupBase
-			{
-			public:
-				virtual property String^ Title { String^ get(); }
-			};
 			
 			//////////////////////////////////////////////////////////////
 			

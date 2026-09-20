@@ -270,7 +270,7 @@ namespace TaskDatesUIExtension
 			m_TaskDatesCtrl.Bounds = rCtrl;
 		}
 
-		private bool OnTaskDatesCtrlEditTaskDone(object sender, ITaskBase task)
+		private bool OnTaskDatesCtrlEditTaskDone(object sender, IListViewTask task)
 		{
 			var notify = new UIExtension.ParentNotify(m_HwndParent);
 
@@ -278,13 +278,13 @@ namespace TaskDatesUIExtension
 									(task.IsDone ? DateTime.MinValue : DateTime.Now));
 		}
 
-		private bool OnTaskDatesCtrlEditTaskIcon(object sender, ITaskBase task)
+		private bool OnTaskDatesCtrlEditTaskIcon(object sender, IListViewTask task)
 		{
 			var notify = new UIExtension.ParentNotify(m_HwndParent);
 			return notify.NotifyEditIcon();
 		}
 
-		private bool OnTaskDatesCtrlEditTaskLabel(object sender, ITaskBase task)
+		private bool OnTaskDatesCtrlEditTaskLabel(object sender, IListViewTask task)
 		{
 			var notify = new UIExtension.ParentNotify(m_HwndParent);
 			return notify.NotifyEditLabel();

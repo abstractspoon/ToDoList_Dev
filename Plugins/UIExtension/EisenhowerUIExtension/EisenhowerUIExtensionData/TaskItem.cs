@@ -15,6 +15,8 @@ namespace EisenhowerUIExtension
 		public String Position		{ get; private set; }
 		public Color TextColor		{ get; private set; }
 		public bool HasIcon			{ get; private set; }
+
+		// IListViewTask		
 		public bool IsParent		{ get; private set; }
 		public bool IsLocked		{ get; private set; }
 		public bool IsDone			{ get; private set; }

@@ -401,7 +401,7 @@ namespace TaskDatesUIExtension
 			return lvi[0];
 		}
 
-		private void EndUpdate(TaskListView.UpdateState state, IList<ITaskBase> selDates)
+		private void EndUpdate(TaskListView.UpdateState state, IList<IListViewTask> selDates)
 		{
 			// We handle restoring selection because our base class
 			// expects item Ids to all be unique

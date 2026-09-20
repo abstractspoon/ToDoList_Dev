@@ -312,7 +312,7 @@ namespace TaskDatesUIExtension
 
 	///////////////////////////////////////////////////////////////////////////
 
-	public class TaskItemDate : ITaskBase
+	public class TaskItemDate : IListViewTask
 	{
 		private TaskItemAttributes m_TaskAttribs;
 
@@ -324,6 +324,8 @@ namespace TaskDatesUIExtension
 		public uint Id			{ get { return m_TaskAttribs.Id; } }
 		public Color TextColor	{ get { return m_TaskAttribs.TextColor; } }
 		public bool HasIcon		{ get { return m_TaskAttribs.HasIcon; } }
+
+		// IListViewTask
 		public bool IsParent	{ get { return m_TaskAttribs.IsParent; } }
 		public bool IsLocked	{ get { return m_TaskAttribs.IsLocked; } }
 		public bool IsDone		{ get { return m_TaskAttribs.IsDone; } }
@@ -387,7 +389,7 @@ namespace TaskDatesUIExtension
 
 	///////////////////////////////////////////////////////////////////////////
 
-	public class TaskItemGroup : IGroupBase
+	public class TaskItemGroup : IListViewGroup
 	{
 		// IGroupBase
 		public string Title { get; private set; }
