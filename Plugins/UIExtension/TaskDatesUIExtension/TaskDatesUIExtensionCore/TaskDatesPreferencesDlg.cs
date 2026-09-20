@@ -84,6 +84,14 @@ namespace TaskDatesUIExtension
 
 			// TODO
 		}
+
+		private void OnMouseUpDateAttribListBox(object sender, MouseEventArgs e)
+		{
+			bool enableOK = (m_VisibleDateListBox.CheckedItems.Count > 0);
+
+			m_Error.Visible = !enableOK;
+			m_OK.Enabled = enableOK;
+		}
 	}
 }
 

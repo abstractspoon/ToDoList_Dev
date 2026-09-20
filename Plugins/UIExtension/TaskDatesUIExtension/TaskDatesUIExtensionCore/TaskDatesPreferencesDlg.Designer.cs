@@ -123,6 +123,7 @@
 			this.m_VisibleDateListBox.Size = new System.Drawing.Size(374, 96);
 			this.m_VisibleDateListBox.Sorted = true;
 			this.m_VisibleDateListBox.TabIndex = 5;
+			this.m_VisibleDateListBox.MouseUp += new System.Windows.Forms.MouseEventHandler(this.OnMouseUpDateAttribListBox);
 			// 
 			// TaskDatesPreferencesDlg
 			// 
