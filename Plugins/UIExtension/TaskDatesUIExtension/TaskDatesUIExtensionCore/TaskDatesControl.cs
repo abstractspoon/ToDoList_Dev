@@ -50,7 +50,6 @@ namespace TaskDatesUIExtension
 		private Dictionary<string, string> m_MapDateAttribIdToLabel;
 		private List<TaskAttributeItem> m_DateAttributeTypes;
 		private List<TaskAttributeItem> m_OffsetAttributeTypes;
-		private List<TaskAttributeItem> m_GroupAttributeTypes;
 		private string m_OffsetAttributeId;
 		private HashSet<string> m_VisibleDateAttributeIds;
 
@@ -645,15 +644,16 @@ namespace TaskDatesUIExtension
 
 				// and the offset attributes
 				m_OffsetAttributeTypes.Clear();
-				m_OffsetAttributeTypes.AddRange(m_DateAttributeTypes.Where(a => a.IsCustom()));
 
-				m_OffsetAttributeTypes.Insert(0, new TaskAttributeItem()
+				m_OffsetAttributeTypes.Add(new TaskAttributeItem()
 				{
 					Label = m_Trans.Translate("Today", Translator.Type.ComboBox),
 					AttributeId = Task.Attribute.CustomAttribute,
 					CustomAttributeId = TaskDatesControl.TodayAttributeId,
 					CustomAttributeType = CustomAttributeDefinition.Attribute.Date,
 				});
+
+				m_OffsetAttributeTypes.AddRange(m_DateAttributeTypes.Where(a => a.IsCustom()));
 			}
 		}
 
