@@ -743,7 +743,13 @@ namespace WeekPlannerUIExtension
 				// Scroll to the first 'in-day' appointment
 				foreach (var appt in m_MatchingAppts)
 				{
-					if (!IsLongAppt(appt) && EnsureVisible(appt, false))
+					if (IsLongAppt(appt))
+						continue;
+
+					if (!IsItemWithinRange(appt, StartDate, EndDate))
+						continue;
+
+					if (EnsureVisible(appt, false))
 						break;
 				}
 			}
@@ -1476,6 +1482,12 @@ namespace WeekPlannerUIExtension
 					}
 				}
 			}
+
+			// Make sure to always include the currently selected 
+			// appointment even when it's not in view. 
+			if ((selAppt != null) && (m_MatchingAppts.Find(a => (a.Id == selAppt.Id)) == null))
+				m_MatchingAppts.Add(selAppt);
+
 			m_MatchingAppts.Sort((a, b) => TaskItem.CompareDates(a, b));
 
 			// Restore the previously selected item
