@@ -102,9 +102,12 @@ namespace TaskDatesUIExtension
 			UpdateToolbarButtonStates();
 		}
 
-		public bool WantTaskUpdate(Task.Attribute attrib)
+		public bool WantTaskUpdate(Task.Attribute attribId)
 		{
-			return m_TaskDatesCtrl.WantTaskUpdate(attrib);
+			if (m_TaskDatesCtrl.WantTaskUpdate(attribId))
+				return true;
+
+			return m_GroupAttribIds.Contains(attribId);
 		}
 
 		public bool SelectTask(uint taskId)
@@ -216,12 +219,21 @@ namespace TaskDatesUIExtension
 		{
 			m_PrefsDlg.SavePreferences(prefs, key);
 			m_TaskDatesCtrl.SavePreferences(prefs, key);
+
+			prefs.WriteProfileEnum<TaskDatesOption>(key, "Options", m_OptionsCombo.SelectedOptions);
+			prefs.WriteProfileEnum<Task.Attribute>(key, "GroupBy", m_GroupByCombo.SelectedGroupId);
 		}
 
 		public void LoadPreferences(Preferences prefs, String key, bool appOnly)
 		{
 			if (!appOnly)
 			{
+				m_OptionsCombo.SelectedOptions = prefs.GetProfileEnum<TaskDatesOption>(key, "Options", TaskDatesOption.None);
+				m_GroupByCombo.SelectedGroupId = prefs.GetProfileEnum<Task.Attribute>(key, "GroupBy", Task.Attribute.Unknown);
+
+				m_TaskDatesCtrl.Options = m_OptionsCombo.SelectedOptions;
+				m_TaskDatesCtrl.GroupBy = m_GroupByCombo.SelectedGroup;
+
 				m_PrefsDlg.LoadPreferences(prefs, key);
 
 				m_TaskDatesCtrl.SetVisibleDateAttributeTypes(m_PrefsDlg.SelectedDateAttributeIds);
@@ -229,7 +241,6 @@ namespace TaskDatesUIExtension
 			}
 
  			m_TaskDatesCtrl.LoadPreferences(prefs, key, appOnly);
- 			m_OptionsCombo.SelectedOptions = m_TaskDatesCtrl.Options;
 		}
 
 		public new bool Focused

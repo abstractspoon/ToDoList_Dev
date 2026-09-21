@@ -245,7 +245,6 @@ namespace TaskDatesUIExtension
 
 			if (!appOnly)
 			{
-				m_Options = prefs.GetProfileEnum<TaskDatesOption>(key, "Options", TaskDatesOption.None);
 				m_Comparer.Column = prefs.GetProfileInt(key, "SortColumn", DateCol);
 				m_Comparer.Ascending = prefs.GetProfileBool(key, "SortAscending", false); // most recent at the top
 			}
@@ -253,7 +252,6 @@ namespace TaskDatesUIExtension
 
 		public void SavePreferences(Preferences prefs, String key)
 		{
-			prefs.WriteProfileEnum<TaskDatesOption>(key, "Options", m_Options);
 			prefs.WriteProfileInt(key, "SortColumn", m_Comparer.Column);
 			prefs.WriteProfileBool(key, "SortAscending", m_Comparer.Ascending);
 		}
