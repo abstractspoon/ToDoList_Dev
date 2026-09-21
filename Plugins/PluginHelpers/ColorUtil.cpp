@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "ColorUtil.h"
+#include "Win32.h"
 
 #include <Shared\GraphicsMisc.h>
 
@@ -169,6 +170,14 @@ Drawing::Color ColorUtil::DrawingColor::Copy(Drawing::Color color)
 float ColorUtil::DrawingColor::CalculateColorDifference(Drawing::Color color1, Drawing::Color color2)
 {
 	return (float)RGBX::CalcColorDifference(ToRgb(color1), ToRgb(color2));
+}
+
+Drawing::Color ColorUtil::DrawingColor::GetColorAtPoint(Drawing::Graphics^ g, int x, int y)
+{
+	COLORREF rgb = ::GetPixel(Win32::GetHdc(g->GetHdc()), x, y);
+	g->ReleaseHdc();
+
+	return DrawingColor::ToColor(rgb);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
