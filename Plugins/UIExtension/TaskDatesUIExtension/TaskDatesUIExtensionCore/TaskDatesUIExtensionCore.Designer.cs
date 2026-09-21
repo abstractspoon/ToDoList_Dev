@@ -35,7 +35,7 @@
 			this.m_Toolbar = new System.Windows.Forms.ToolStrip();
 			this.toolStripPreferencesBtn = new System.Windows.Forms.ToolStripButton();
 			this.toolStripHelpBtn = new System.Windows.Forms.ToolStripButton();
-			this.m_GroupByCombo = new System.Windows.Forms.ComboBox();
+			this.m_GroupByCombo = new TaskDatesUIExtension.GroupAttributeComboBox();
 			this.m_OptionsCombo = new TaskDatesUIExtension.TaskDatesOptionsComboBox();
 			this.m_TaskDatesCtrl = new TaskDatesUIExtension.TaskDatesControl();
 			this.m_Toolbar.SuspendLayout();
@@ -156,7 +156,7 @@
 
 		private TaskDatesControl m_TaskDatesCtrl;
 		private System.Windows.Forms.ToolTip m_Tooltip;
-		private System.Windows.Forms.ComboBox m_GroupByCombo;
+		private GroupAttributeComboBox m_GroupByCombo;
 		private System.Windows.Forms.Label m_GroupByLabel;
 		private TaskDatesOptionsComboBox m_OptionsCombo;
 		private System.Windows.Forms.Label m_OptionsLabel;

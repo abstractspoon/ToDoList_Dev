@@ -45,12 +45,12 @@ namespace TaskDatesUIExtension
 		private int[] m_ColValueMaxCharWidth	= new int[6] { -1, -1, -1, -1, -1, -1 };
 
 		private bool m_IsoDates;
-		private Task.Attribute m_GroupBy = Task.Attribute.Unknown;
+		private TaskAttributeItem m_GroupBy;
 
-		private Dictionary<Task.Attribute, string> m_MapGroupAttribIdToLabel;
 		private Dictionary<string, string> m_MapDateAttribIdToLabel;
 		private List<TaskAttributeItem> m_DateAttributeTypes;
 		private List<TaskAttributeItem> m_OffsetAttributeTypes;
+		private List<TaskAttributeItem> m_GroupAttributeTypes;
 		private string m_OffsetAttributeId;
 		private HashSet<string> m_VisibleDateAttributeIds;
 
@@ -75,12 +75,6 @@ namespace TaskDatesUIExtension
 		{
 			base.Initialize(trans, taskIcons, m_Comparer);
 
-			// Create Groups
-			m_MapGroupAttribIdToLabel = new Dictionary<Task.Attribute, string>();
-
-			m_MapGroupAttribIdToLabel[Task.Attribute.Priority] = trans.Translate("Priority", Translator.Type.Text);
-			// TODO
-
 			// Add columns
 			Columns.Add(trans.Translate("Title",  Translator.Type.Header), 0, HorizontalAlignment.Left);
 			Columns.Add(trans.Translate("Id",     Translator.Type.Header), 0, HorizontalAlignment.Right);
@@ -103,7 +97,7 @@ namespace TaskDatesUIExtension
 			};
 		}
 
-		public void UpdateTasks(TaskList tasks, UIExtension.UpdateType type)
+		public void UpdateTasks(TaskList tasks, UIExtension.UpdateType type, List<Task.Attribute> groupAttribIds)
 		{
 			// We handle restoring selection because our base class
 			// expects item Ids to all be unique
@@ -111,7 +105,7 @@ namespace TaskDatesUIExtension
 			var state = BeginUpdate();
 
 			var availAttribs = tasks.GetAvailableAttributes();
-			var modIds = m_TaskItems.Update(tasks, type, availAttribs, m_MapGroupAttribIdToLabel.Keys);
+			var modIds = m_TaskItems.Update(tasks, type, availAttribs, groupAttribIds);
 
 			switch (type)
 			{
@@ -132,7 +126,7 @@ namespace TaskDatesUIExtension
 
 			RefreshColumnWidths();
 
-			if (availAttribs.Find(a => (a.AttributeId == m_GroupBy)) != null)
+			if (availAttribs.Find(a => (a.AttributeId == m_GroupBy?.AttributeId)) != null)
 				RebuildGroupHeaders();
 
 			EndUpdate(state, selDates);
@@ -344,20 +338,24 @@ namespace TaskDatesUIExtension
 			get { return m_OffsetAttributeTypes; }
 		}
 
-		public Task.Attribute GroupBy
+		public TaskAttributeItem GroupBy
 		{
 			get { return m_GroupBy; }
 			set
 			{
-				if (value != m_GroupBy)
+				if (m_GroupBy != value)
 				{
 					m_GroupBy = value;
-					ListViewItemSorter = null;
 
-					EnableGrouping(m_GroupBy);
-					RebuildGroupHeaders();
+					{
+						var selTasks = SelectedTasks;
+						var state = BeginUpdate();
 
-					ListViewItemSorter = m_Comparer;
+						EnableGrouping(m_GroupBy?.AttributeId);
+						RebuildGroupHeaders();
+
+						EndUpdate(state, selTasks);
+					}
 				}
 			}
 		}
@@ -374,16 +372,14 @@ namespace TaskDatesUIExtension
 			RemoveAllGroups();
 
 			// Re-add as required
-			string attribName;
-
-			if (m_MapGroupAttribIdToLabel.TryGetValue(m_GroupBy, out attribName))
+			if (m_GroupBy != null)
 			{
-				var values = m_TaskItems.GetGroupValues(m_GroupBy);
+				var values = m_TaskItems.GetGroupValues(m_GroupBy.AttributeId);
 
 				foreach (var v in values)
 				{
-					string value = (string.IsNullOrEmpty(v) ? GetAttributeNone(m_GroupBy) : v);
-					AddGroup(string.Format("{0}: {1}", attribName, value), v);
+					string value = (string.IsNullOrEmpty(v) ? GetAttributeNone(m_GroupBy.AttributeId) : v);
+					AddGroup(string.Format("{0}: {1}", m_GroupBy.Label, value), v);
 				}
 			}
 		}

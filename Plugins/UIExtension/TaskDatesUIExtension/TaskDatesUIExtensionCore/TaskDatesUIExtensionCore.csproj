@@ -74,6 +74,12 @@
     <Compile Include="DateAttributeCheckListBox.Designer.cs">
       <DependentUpon>DateAttributeCheckListBox.cs</DependentUpon>
     </Compile>
+    <Compile Include="GroupAttributeComboBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="GroupAttributeComboBox.Designer.cs">
+      <DependentUpon>GroupAttributeComboBox.cs</DependentUpon>
+    </Compile>
     <Compile Include="OffsetAttributeComboBox.cs">
       <SubType>Component</SubType>
     </Compile>

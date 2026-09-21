@@ -24,6 +24,8 @@ namespace TaskDatesUIExtension
 		private UIThemeToolbarRenderer m_TBRenderer;
 		private TaskDatesPreferencesDlg m_PrefsDlg;
 
+		private readonly List<Task.Attribute> m_GroupAttribIds;
+
 		// ------------------------------------------------
 
 		public TaskDatesUIExtensionCore(string typeID, string uiName, IntPtr parentHandle, Translator trans)
@@ -61,17 +63,30 @@ namespace TaskDatesUIExtension
 			m_Toolbar.Renderer = m_TBRenderer;
 			Toolbars.FixupButtonSizes(m_Toolbar);
 
-			m_TaskDatesCtrl.Initialize(trans, m_TaskIcons);
-			m_TaskDatesCtrl.GroupBy = Task.Attribute.Priority;
+			m_OptionsCombo.Sorted = true;
+			m_OptionsCombo.Initialise(trans);
+			m_OptionsCombo.DropDownClosed += new EventHandler(OnOptionsComboClosed);
 
+			m_GroupAttribIds = new List<Task.Attribute>()
+			{
+				Task.Attribute.Priority,
+				Task.Attribute.AllocatedBy,
+				Task.Attribute.AllocatedTo,
+				Task.Attribute.Category,
+				Task.Attribute.Tags,
+				Task.Attribute.Status,
+				Task.Attribute.ExternalId,
+			};
+
+			m_GroupByCombo.Sorted = true;
+			m_GroupByCombo.Initialise(m_GroupAttribIds, m_Trans);
+			m_GroupByCombo.DropDownClosed += new EventHandler(OnGroupsComboClosed);
+
+			m_TaskDatesCtrl.Initialize(trans, m_TaskIcons);
 			m_TaskDatesCtrl.EditTaskDone    += new EditTaskCompletionEventHandler(OnTaskDatesCtrlEditTaskDone);
 			m_TaskDatesCtrl.EditTaskIcon    += new EditTaskIconEventHandler(OnTaskDatesCtrlEditTaskIcon);
 			m_TaskDatesCtrl.EditTaskLabel   += new EditTaskLabelEventHandler(OnTaskDatesCtrlEditTaskLabel);
 			m_TaskDatesCtrl.SelectionChange += new SelectionChangeEventHandler(OnTaskDatesCtrlSelectionChange);
-
-			m_OptionsCombo.Initialise(trans);
-			m_OptionsCombo.Sorted = true;
-			m_OptionsCombo.DropDownClosed += new EventHandler(OnOptionsComboClosed);
 
 			FormsUtil.SetFont(this, UIExtension.ControlFont());
 			m_Trans.Translate(this);
@@ -79,7 +94,10 @@ namespace TaskDatesUIExtension
 
 		public void UpdateTasks(TaskList tasks, UIExtension.UpdateType type)
 		{
-			m_TaskDatesCtrl.UpdateTasks(tasks, type);
+			m_TaskDatesCtrl.UpdateTasks(tasks, type, m_GroupAttribIds);
+
+			// Restore previous grouping
+			// TODO
 
 			UpdateToolbarButtonStates();
 		}
@@ -299,6 +317,11 @@ namespace TaskDatesUIExtension
 		private void OnOptionsComboClosed(object sender, EventArgs e)
 		{
 			m_TaskDatesCtrl.Options = m_OptionsCombo.SelectedOptions;
+		}
+
+		private void OnGroupsComboClosed(object sender, EventArgs e)
+		{
+			m_TaskDatesCtrl.GroupBy = m_GroupByCombo.SelectedGroup;
 		}
 
 		private void UpdateToolbarButtonStates()
