@@ -735,17 +735,26 @@ namespace TaskDatesUIExtension
 
 		private string FormatDate(TaskItemDate date)
 		{
+			if (!date.DateIsSet)
+				return string.Empty;
+
 			return date.FormatDate(m_IsoDates);
 		}
 
 		private string FormatWeekNumber(TaskItemDate date)
 		{
+			if (!date.DateIsSet)
+				return string.Empty;
+
 			// Place year first for sorting
 			return string.Format("{0}.{1}", date.Date.Year, DateUtil.WeekOfYear(date.Date));
 		}
 
 		private string FormatDateOffset(TaskItemDate date)
 		{
+			if (!date.DateIsSet)
+				return string.Empty;
+
 			if (m_OffsetAttributeId == TodayAttributeId)
 				return date.FormatOffset(DateTime.Today);
 
