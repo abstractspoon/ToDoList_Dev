@@ -377,6 +377,11 @@ namespace WeekPlannerUIExtension
 					m_TaskItems.TreatOverdueTasksAsDueToday = value;
 
 					RebuildMatchingAppointments();
+
+					// If we're switching out of this mode
+					// make sure the selected task is visible
+					if (!m_TreatOverdueTasksAsDueToday)
+						EnsureSelectionVisible(true);
 				}
 			}
 		}
