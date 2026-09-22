@@ -45,12 +45,13 @@ namespace TaskDatesUIExtension
 		private int[] m_ColValueMaxCharWidth	= new int[6] { -1, -1, -1, -1, -1, -1 };
 
 		private bool m_IsoDates;
-		private TaskAttributeItem m_GroupBy;
+		private bool m_SelectionEventsEnabled = true;
 
 		private Dictionary<string, string> m_MapDateAttribIdToLabel;
 		private List<TaskAttributeItem> m_DateAttributeTypes;
 		private List<TaskAttributeItem> m_OffsetAttributeTypes;
 		private string m_OffsetAttributeId;
+		private TaskAttributeItem m_GroupBy;
 		private HashSet<string> m_VisibleDateAttributeIds;
 
 		// --------------------------------------------------------
@@ -90,9 +91,12 @@ namespace TaskDatesUIExtension
 
 			base.SelectionChange += (s, e) => 
 			{
-				// Forward only unique task IDs
-				var selTaskIds = new HashSet<uint>(base.SelectedTaskIds).ToList<uint>();
-				SelectionChange?.Invoke(this, selTaskIds);
+				if (m_SelectionEventsEnabled)
+				{
+					// Forward only unique task IDs
+					var selTaskIds = new HashSet<uint>(base.SelectedTaskIds).ToList<uint>();
+					SelectionChange?.Invoke(this, selTaskIds);
+				}
 			};
 		}
 
@@ -411,7 +415,14 @@ namespace TaskDatesUIExtension
 			return lvi[0];
 		}
 
-		private void EndUpdate(TaskListView.UpdateState state, IList<IListViewTask> selDates)
+		private new UpdateState BeginUpdate()
+		{
+			m_SelectionEventsEnabled = false;
+
+			return base.BeginUpdate();
+		}
+
+		private void EndUpdate(UpdateState state, IList<IListViewTask> selDates)
 		{
 			// We handle restoring selection because our base class
 			// expects item Ids to all be unique
@@ -432,6 +443,8 @@ namespace TaskDatesUIExtension
 			state.TopItem = FindItem(state.TopItem?.Tag as TaskItemDate);
 
 			base.EndUpdate(state);
+
+			m_SelectionEventsEnabled = true;
 
 			if (SelectionCount != selDates.Count())
 				SelectionChange?.Invoke(this, SelectedTaskIds);
