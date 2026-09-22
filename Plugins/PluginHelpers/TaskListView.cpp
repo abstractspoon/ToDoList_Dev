@@ -636,7 +636,10 @@ IList<UInt32>^ TaskListView::SelectedTaskIds::get()
 	auto taskIds = gcnew List<UInt32>();
 
 	for each (int index in SelectedIndices)
-		taskIds->Add(GetTaskId(index));
+	{
+		if (IsTaskItem(Items[index]))
+			taskIds->Add(GetTaskId(index));
+	}
 
 	return taskIds;
 }
@@ -646,7 +649,10 @@ IList<IListViewTask^>^ TaskListView::SelectedTasks::get()
 	auto tasks = gcnew List<IListViewTask^>();
 
 	for each (int index in SelectedIndices)
-		tasks->Add(GetTask(index));
+	{
+		if (IsTaskItem(Items[index]))
+			tasks->Add(GetTask(index));
+	}
 
 	return tasks;
 }
