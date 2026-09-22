@@ -54,6 +54,9 @@ namespace Abstractspoon
 					static Drawing::Color FromHtml(String^ color);
 					static bool Equals(Drawing::Color color1, Drawing::Color color2);
 					static Drawing::Color Copy(Drawing::Color color);
+
+					static Drawing::Color GetColorAtPoint(Drawing::Graphics^ g, int x, int y);
+
 				};
 
 				float GetLuminance(COLORREF rgbColor);

@@ -28,19 +28,20 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(EisenhowerPreferencesDlg));
 			this.m_OK = new System.Windows.Forms.Button();
 			this.m_Cancel = new System.Windows.Forms.Button();
 			this.m_Error = new System.Windows.Forms.Label();
 			this.m_SetupListCtrl = new EisenhowerUIExtension.EisenhowerMatrixSetupListCtrl();
-			this.groupBox1 = new System.Windows.Forms.GroupBox();
+			this.panel1 = new System.Windows.Forms.Panel();
+			this.label1 = new System.Windows.Forms.Label();
+			this.panel1.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// m_OK
 			// 
 			this.m_OK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.m_OK.DialogResult = System.Windows.Forms.DialogResult.OK;
-			this.m_OK.Location = new System.Drawing.Point(338, 258);
+			this.m_OK.Location = new System.Drawing.Point(333, 259);
 			this.m_OK.Name = "m_OK";
 			this.m_OK.Size = new System.Drawing.Size(75, 23);
 			this.m_OK.TabIndex = 3;
@@ -51,7 +52,7 @@
 			// 
 			this.m_Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.m_Cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-			this.m_Cancel.Location = new System.Drawing.Point(419, 258);
+			this.m_Cancel.Location = new System.Drawing.Point(416, 259);
 			this.m_Cancel.Name = "m_Cancel";
 			this.m_Cancel.Size = new System.Drawing.Size(75, 23);
 			this.m_Cancel.TabIndex = 4;
@@ -74,37 +75,52 @@
 			this.m_SetupListCtrl.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-			this.m_SetupListCtrl.Location = new System.Drawing.Point(23, 30);
+			this.m_SetupListCtrl.Location = new System.Drawing.Point(12, 27);
 			this.m_SetupListCtrl.Name = "m_SetupListCtrl";
-			this.m_SetupListCtrl.Size = new System.Drawing.Size(458, 203);
+			this.m_SetupListCtrl.Size = new System.Drawing.Size(455, 193);
 			this.m_SetupListCtrl.TabIndex = 0;
 			this.m_SetupListCtrl.Text = "eisenhowerSetupListCtrl1";
 			// 
-			// groupBox1
+			// panel1
 			// 
-			this.groupBox1.Location = new System.Drawing.Point(10, 8);
-			this.groupBox1.Name = "groupBox1";
-			this.groupBox1.Size = new System.Drawing.Size(484, 241);
-			this.groupBox1.TabIndex = 24;
-			this.groupBox1.TabStop = false;
-			this.groupBox1.Text = "Matrix Setup";
+			this.panel1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.panel1.BackColor = System.Drawing.SystemColors.Window;
+			this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+			this.panel1.Controls.Add(this.label1);
+			this.panel1.Controls.Add(this.m_SetupListCtrl);
+			this.panel1.Location = new System.Drawing.Point(10, 12);
+			this.panel1.Name = "panel1";
+			this.panel1.Size = new System.Drawing.Size(480, 235);
+			this.panel1.TabIndex = 5;
+			// 
+			// label1
+			// 
+			this.label1.AutoSize = true;
+			this.label1.Location = new System.Drawing.Point(12, 8);
+			this.label1.Name = "label1";
+			this.label1.Size = new System.Drawing.Size(66, 13);
+			this.label1.TabIndex = 1;
+			this.label1.Text = "Matrix Setup";
 			// 
 			// EisenhowerPreferencesDlg
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(502, 289);
-			this.Controls.Add(this.m_SetupListCtrl);
+			this.ClientSize = new System.Drawing.Size(501, 290);
+			this.Controls.Add(this.panel1);
 			this.Controls.Add(this.m_Error);
 			this.Controls.Add(this.m_OK);
 			this.Controls.Add(this.m_Cancel);
-			this.Controls.Add(this.groupBox1);
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-			this.Icon = Properties.Resources.Eisenhower;
+			this.Icon = global::EisenhowerUIExtension.Properties.Resources.Eisenhower;
 			this.Name = "EisenhowerPreferencesDlg";
 			this.ShowInTaskbar = false;
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
 			this.Text = "Decision Matrix Preferences";
+			this.panel1.ResumeLayout(false);
+			this.panel1.PerformLayout();
 			this.ResumeLayout(false);
 
 		}
@@ -115,6 +131,7 @@
 		private System.Windows.Forms.Button m_OK;
 		private System.Windows.Forms.Button m_Cancel;
 		private System.Windows.Forms.Label m_Error;
-		private System.Windows.Forms.GroupBox groupBox1;
+		private System.Windows.Forms.Panel panel1;
+		private System.Windows.Forms.Label label1;
 	}
 }

@@ -1182,6 +1182,13 @@ namespace WeekPlannerUIExtension
 			var appt = apptView.Appointment;
 			var fontStyle = GetTaskFontStyle(appt);
 
+			if ((appt is TaskTimeBlock) && !WantDrawAppointmentSelected(appt))
+			{
+				// Time blocks are drawn with a transparent background
+				// making the unselected text background color not easily determined
+				backColor = DrawingColor.GetColorAtPoint(g, rect.X + 10, rect.Y + 10);
+			}
+
 			m_RenderHelper.DrawItemText(g, appt.Title, rect, textColor, backColor, fontStyle, apptView.IsLong);
 		}
 

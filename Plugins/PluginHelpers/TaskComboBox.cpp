@@ -82,16 +82,11 @@ void TaskComboBox::Initialise(IEnumerable<ITaskBase^>^ taskItems,
 {
 	m_TaskIcons = taskIcons;
 
-	if (noneTask != nullptr)
-	{
-		auto wrap = gcnew ComboTask(noneTask);
-		Items->Add(wrap);
-
-		m_NoneTask = wrap;
-	}
-
 	auto sortedTasks = Enumerable::ToList(taskItems);
 	sortedTasks->Sort(gcnew TaskPosComparer());
+
+	if (noneTask != nullptr)
+		sortedTasks->Insert(0, noneTask);
 
 	for each(auto task in sortedTasks)
 	{
@@ -100,6 +95,9 @@ void TaskComboBox::Initialise(IEnumerable<ITaskBase^>^ taskItems,
 
 		if (task->Id == selTaskId)
 			SelectIndex(Items->Count - 1);
+
+		if (noneTask && (task->Id == noneTask->Id))
+			m_NoneTask = wrap;
 	}
 	m_OrgSelectedIndex = SelectedIndex;
 
