@@ -81,6 +81,7 @@ namespace TaskDatesUIExtension
 			m_GroupByCombo.Sorted = true;
 			m_GroupByCombo.Initialise(m_GroupAttribIds, m_Trans);
 			m_GroupByCombo.DropDownClosed += new EventHandler(OnGroupsComboClosed);
+			m_GroupByCombo.SelectedIndexChanged += new EventHandler(OnGroupsComboSelChange);
 
 			m_TaskDatesCtrl.Initialize(trans, m_TaskIcons);
 			m_TaskDatesCtrl.EditTaskDone    += new EditTaskCompletionEventHandler(OnTaskDatesCtrlEditTaskDone);
@@ -333,6 +334,12 @@ namespace TaskDatesUIExtension
 		private void OnGroupsComboClosed(object sender, EventArgs e)
 		{
 			m_TaskDatesCtrl.GroupBy = m_GroupByCombo.SelectedGroup;
+		}
+
+		private void OnGroupsComboSelChange(object sender, EventArgs e)
+		{
+			if (!m_GroupByCombo.DroppedDown)
+				m_TaskDatesCtrl.GroupBy = m_GroupByCombo.SelectedGroup;
 		}
 
 		private void UpdateToolbarButtonStates()
