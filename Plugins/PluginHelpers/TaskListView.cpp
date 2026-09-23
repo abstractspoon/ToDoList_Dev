@@ -933,7 +933,7 @@ void TaskListView::OnDrawItem(DrawListViewItemEventArgs^ e)
 	auto backColor = GetBackColor(task, e->Item->Index);
 	auto itemRect = e->Item->Bounds;
 
-	e->Graphics->FillRectangle(gcnew SolidBrush(backColor), 0, itemRect.Top + 1, Width, itemRect.Height - 1);
+	e->Graphics->FillRectangle(gcnew SolidBrush(backColor), 0, itemRect.Top, Width, itemRect.Height);
 
 	// Horizontal grid line full width
 	Pen^ gridPen = nullptr;
