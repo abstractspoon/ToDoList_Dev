@@ -95,10 +95,13 @@ namespace TaskDatesUIExtension
 
 		public void UpdateTasks(TaskList tasks, UIExtension.UpdateType type)
 		{
-			m_TaskDatesCtrl.UpdateTasks(tasks, type, m_GroupAttribIds);
+			{
+				Cursor = Cursors.WaitCursor;
 
-			// Restore previous grouping
-			// TODO
+				m_TaskDatesCtrl.UpdateTasks(tasks, type, m_GroupAttribIds);
+
+				Cursor = Cursors.Default;
+			}
 
 			UpdateToolbarButtonStates();
 		}
@@ -328,18 +331,26 @@ namespace TaskDatesUIExtension
 
 		private void OnOptionsComboClosed(object sender, EventArgs e)
 		{
+			Cursor = Cursors.WaitCursor;
+
 			m_TaskDatesCtrl.Options = m_OptionsCombo.SelectedOptions;
+
+			Cursor = Cursors.Default;
 		}
 
 		private void OnGroupsComboClosed(object sender, EventArgs e)
 		{
+			Cursor = Cursors.WaitCursor;
+
 			m_TaskDatesCtrl.GroupBy = m_GroupByCombo.SelectedGroup;
+
+			Cursor = Cursors.Default;
 		}
 
 		private void OnGroupsComboSelChange(object sender, EventArgs e)
 		{
 			if (!m_GroupByCombo.DroppedDown)
-				m_TaskDatesCtrl.GroupBy = m_GroupByCombo.SelectedGroup;
+				OnGroupsComboClosed(sender, e);
 		}
 
 		private void UpdateToolbarButtonStates()
