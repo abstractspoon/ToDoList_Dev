@@ -45,12 +45,13 @@ namespace TaskDatesUIExtension
 		private int[] m_ColValueMaxCharWidth	= new int[6] { -1, -1, -1, -1, -1, -1 };
 
 		private bool m_IsoDates;
-
-		private Dictionary<string, string> m_MapDateAttribIdToLabel;
-		private List<TaskAttributeItem> m_DateAttributeTypes;
-		private List<TaskAttributeItem> m_OffsetAttributeTypes;
 		private string m_OffsetAttributeId;
 		private TaskAttributeItem m_GroupBy;
+
+		private Dictionary<string, string> m_MapDateAttribIdToLabel;
+		private Dictionary<string, ListViewItem> m_MapDateKeyToLVItem;
+		private List<TaskAttributeItem> m_DateAttributeTypes;
+		private List<TaskAttributeItem> m_OffsetAttributeTypes;
 		private HashSet<string> m_VisibleDateAttributeIds;
 
 		// --------------------------------------------------------
@@ -400,14 +401,10 @@ namespace TaskDatesUIExtension
 
 		private ListViewItem FindItem(TaskItemDate date)
 		{
-			var lvi = Items.Find(GetDateKey(date as TaskItemDate), false);
+			ListViewItem lvi;
+			m_MapDateKeyToLVItem.TryGetValue(GetDateKey(date), out lvi);
 
-			if (lvi?.Count() == 0)
-				return null;
-
-			// else
-			Debug.Assert(lvi.Count() == 1);
-			return lvi[0];
+			return lvi;
 		}
 
 		private void EndUpdate(UpdateState state, IList<IListViewTask> selDates)
@@ -428,7 +425,8 @@ namespace TaskDatesUIExtension
 			}
 
 			// Enure the top item exists in the list
-			state.TopItem = FindItem(state.TopItem?.Tag as TaskItemDate);
+			if (state.TopItem != null)
+				state.TopItem = FindItem(state.TopItem?.Tag as TaskItemDate);
 
 			base.EndUpdate(state);
 
@@ -491,9 +489,13 @@ namespace TaskDatesUIExtension
 
 				while (i-- > 0)
 				{
-					if (!WantShowDate((GetTask(i) as TaskItemDate)))
+					var date = (GetTask(i) as TaskItemDate);
+
+					if ((date != null) && !WantShowDate(date))
 					{
+						m_MapDateKeyToLVItem.Remove(GetDateKey(date));
 						Items.RemoveAt(i);
+
 						numChanges++;
 					}
 				}
@@ -552,6 +554,8 @@ namespace TaskDatesUIExtension
 		{
 			base.Items.Clear();
 
+			m_MapDateKeyToLVItem = new Dictionary<string, ListViewItem>();
+
 			foreach (var item in m_TaskItems.Values)
 			{
 				foreach (var date in item.Dates)
@@ -566,13 +570,17 @@ namespace TaskDatesUIExtension
 		{
 			Debug.Assert(WantShowDate(date));
 
-			if (Items.Find(GetDateKey(date), false)?.Count() != 0)
+			var key = GetDateKey(date);
+
+			if (m_MapDateKeyToLVItem.ContainsKey(key))
 				return false;
 
-			var lvi = AddTask(date, GetDateKey(date));
+			var lvi = AddTask(date, key);
 
 			if (lvi == null)
 				return false;
+
+			m_MapDateKeyToLVItem[key] = lvi;
 
 			string dateType;
 
