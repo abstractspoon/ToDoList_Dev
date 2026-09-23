@@ -361,6 +361,7 @@ TaskListView::TaskListView()
 	m_ReadOnly(false),
 	m_SavingToImage(false),
 	m_GroupById(nullptr),
+	m_Updating(false),
 	m_CheckBoxSize(-1)
 {
 	m_LabelTip = gcnew LabelTip(this);
@@ -1115,6 +1116,8 @@ TaskListView::UpdateState^ TaskListView::BeginUpdate()
 
 	ListViewItemSorter = nullptr;
 	ListView::BeginUpdate(); // => SetRedraw(FALSE)
+
+	m_Updating = true;
 	
 	return state;
 }
@@ -1146,6 +1149,8 @@ void TaskListView::EndUpdate(UpdateState^ state)
 	}
 
 	ListView::EndUpdate(); // => SetRedraw(TRUE)
+
+	m_Updating = false;
 
 	if (selChange)
 		SelectionChange(this, SelectedTaskIds);
@@ -1180,16 +1185,20 @@ void TaskListView::CheckNotifySelectionChanged()
 {
 	// Don't forward selection changes if:
 
-	// 1. Bounds selecting
+	// 1. Updating
+	if (m_Updating)
+		return;
+
+	// 2. Bounds selecting
 	if (IsBoundSelecting)
 		return;
 
-	// 2. Nothing is selected and the control key is NOT pressed
+	// 3. Nothing is selected and the control key is NOT pressed
 	//    ie. It's not a deliberate deselection
 	if ((SelectionCount == 0) && !ModifierKeys.HasFlag(Keys::Control))
 		return;
 
-	// 3. During keyboard navigation
+	// 4. During keyboard navigation
 	if (Win32::IsCursorKeyPressed(true, false))
 		return;
 

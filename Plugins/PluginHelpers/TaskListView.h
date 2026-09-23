@@ -142,6 +142,7 @@ namespace Abstractspoon
 
 			private:
 				HeaderControl^ m_HeaderCtrl;
+				bool m_Updating;
 
 			protected:
 				Translator^ m_Trans;

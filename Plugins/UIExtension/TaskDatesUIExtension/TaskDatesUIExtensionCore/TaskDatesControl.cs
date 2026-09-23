@@ -45,7 +45,6 @@ namespace TaskDatesUIExtension
 		private int[] m_ColValueMaxCharWidth	= new int[6] { -1, -1, -1, -1, -1, -1 };
 
 		private bool m_IsoDates;
-		private bool m_SelectionEventsEnabled = true;
 
 		private Dictionary<string, string> m_MapDateAttribIdToLabel;
 		private List<TaskAttributeItem> m_DateAttributeTypes;
@@ -91,12 +90,9 @@ namespace TaskDatesUIExtension
 
 			base.SelectionChange += (s, e) => 
 			{
-				if (m_SelectionEventsEnabled)
-				{
-					// Forward only unique task IDs
-					var selTaskIds = new HashSet<uint>(base.SelectedTaskIds).ToList<uint>();
-					SelectionChange?.Invoke(this, selTaskIds);
-				}
+				// Forward only unique task IDs
+				var selTaskIds = new HashSet<uint>(base.SelectedTaskIds).ToList<uint>();
+				SelectionChange?.Invoke(this, selTaskIds);
 			};
 		}
 
@@ -138,7 +134,6 @@ namespace TaskDatesUIExtension
 			// task update does NOT ALWAYS result in a subsequent repaint
 			// so we solve it with a delayed-redraw
 			m_IdleTasks.Redraw();
-
 		}
 
 		public bool WantTaskUpdate(Task.Attribute attribId)
@@ -415,13 +410,6 @@ namespace TaskDatesUIExtension
 			return lvi[0];
 		}
 
-		private new UpdateState BeginUpdate()
-		{
-			m_SelectionEventsEnabled = false;
-
-			return base.BeginUpdate();
-		}
-
 		private void EndUpdate(UpdateState state, IList<IListViewTask> selDates)
 		{
 			// We handle restoring selection because our base class
@@ -443,8 +431,6 @@ namespace TaskDatesUIExtension
 			state.TopItem = FindItem(state.TopItem?.Tag as TaskItemDate);
 
 			base.EndUpdate(state);
-
-			m_SelectionEventsEnabled = true;
 
 			if (SelectionCount != selDates.Count())
 				SelectionChange?.Invoke(this, SelectedTaskIds);
