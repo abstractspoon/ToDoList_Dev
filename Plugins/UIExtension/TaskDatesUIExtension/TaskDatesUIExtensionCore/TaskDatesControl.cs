@@ -732,8 +732,7 @@ namespace TaskDatesUIExtension
 			if (!date.DateIsSet)
 				return string.Empty;
 
-			// Place year first for sorting
-			return string.Format("{0}.{1}", date.Date.Year, DateUtil.WeekOfYear(date.Date));
+			return string.Format("{0} ({1})", DateUtil.WeekOfYear(date.Date), date.Date.Year);
 		}
 
 		private string FormatDateOffset(TaskItemDate date)
@@ -826,6 +825,7 @@ namespace TaskDatesUIExtension
 				switch (Column)
 				{
 				case TaskDatesControl.DateCol:
+				case TaskDatesControl.WeekCol:
 					return TaskItemDate.CompareDates((lvi1.Tag as TaskItemDate), (lvi2.Tag as TaskItemDate), Ascending);
 
 				case TaskDatesControl.OffsetCol:
