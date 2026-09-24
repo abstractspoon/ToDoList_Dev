@@ -64,6 +64,12 @@
     <Compile Include="TodoTxtImporterOptionsForm.Designer.cs">
       <DependentUpon>TodoTxtImporterOptionsForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="TodoTxtExporterOptionsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="TodoTxtExporterOptionsForm.Designer.cs">
+      <DependentUpon>TodoTxtExporterOptionsForm.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\PluginHelpers\PluginHelpers.vcxproj">
@@ -75,6 +81,9 @@
     <EmbeddedResource Include="Properties\Resources.resx" />
     <EmbeddedResource Include="TodoTxtImporterOptionsForm.resx">
       <DependentUpon>TodoTxtImporterOptionsForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="TodoTxtExporterOptionsForm.resx">
+      <DependentUpon>TodoTxtExporterOptionsForm.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

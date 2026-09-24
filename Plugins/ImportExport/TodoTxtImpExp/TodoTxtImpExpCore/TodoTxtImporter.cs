@@ -26,60 +26,64 @@ namespace TodoTxtImpExp
             m_Trans = trans;
         }
 
-		public bool Import(string srcFilePath, TaskList destTaskFile, uint flags, Preferences prefs, string prefKey)
+		public bool Import(string srcFilePath, TaskList destTaskFile, bool silent, Preferences prefs, string prefKey)
         {
-			// Possibly display a dialog to get input on how to 
-			// map the input attributes to ToDoList task attributes
 			var options = new TodoTxtImporterOptionsForm(m_Trans);
 
 			if (options.ShowDialog(prefs, prefKey) != DialogResult.OK)
 				return false;
-
-			var srcTasks = new ToDoLib.TaskList(srcFilePath);
-
-			// Retrieve globals
-			var priorityMap = CreatePriorityMapping(srcTasks);
-
-			// Create any parent tasks, mapped by name
-			var parentMap = CreateParentTasks(srcTasks, destTaskFile, options);
-
-			// Process the tasks
-			foreach (var srcTask in srcTasks.Tasks)
+			try
 			{
-				Task destTask;
+				var srcTasks = new ToDoLib.TaskList(srcFilePath);
 
-				if (srcTask.Projects.Count > 0)
+				// Retrieve globals
+				var priorityMap = CreatePriorityMapping(srcTasks);
+
+				// Create any parent tasks, mapped by name
+				var parentMap = CreateParentTasks(srcTasks, destTaskFile, options);
+
+				// Process the tasks
+				foreach (var srcTask in srcTasks.Tasks)
 				{
-					// Create 'real' subtask from 'Primary project'
-					Task destParentTask;
+					Task destTask;
 
-					if (parentMap.TryGetValue(srcTask.PrimaryProject, out destParentTask))
+					if (srcTask.Projects.Count > 0)
 					{
-						destTask = destParentTask.NewSubtask(srcTask.Body);
-						ImportTaskAttributes(srcTask, destTask, options, priorityMap);
+						// Create 'real' subtask from 'Primary project'
+						Task destParentTask;
 
-						// For any other projects create references to this 'real' subtask
-						foreach (var project in srcTask.Projects)
+						if (parentMap.TryGetValue(srcTask.PrimaryProject, out destParentTask))
 						{
-							if (project != srcTask.PrimaryProject)
-							{
-								if (parentMap.TryGetValue(project, out destParentTask))
-								{
-									var refTask = destParentTask.NewSubtask(srcTask.Body);
-									refTask.SetReferenceID(destTask.GetID());
+							destTask = destParentTask.NewSubtask(srcTask.Body);
+							ImportTaskAttributes(srcTask, destTask, options, priorityMap);
 
-									// Reference task gets its attributes from 'real' task
+							// For any other projects create references to this 'real' subtask
+							foreach (var project in srcTask.Projects)
+							{
+								if (project != srcTask.PrimaryProject)
+								{
+									if (parentMap.TryGetValue(project, out destParentTask))
+									{
+										var refTask = destParentTask.NewSubtask(srcTask.Body);
+										refTask.SetReferenceID(destTask.GetID());
+
+										// Reference task gets its attributes from 'real' task
+									}
 								}
 							}
+
+							continue;
 						}
-
-						continue;
 					}
-				}
 
-				// All else
-				destTask = destTaskFile.NewTask(srcTask.Body);
-				ImportTaskAttributes(srcTask, destTask, options, priorityMap);
+					// All else
+					destTask = destTaskFile.NewTask(srcTask.Body);
+					ImportTaskAttributes(srcTask, destTask, options, priorityMap);
+				}
+			}
+			catch (Exception e)
+			{
+				return false;
 			}
 
 			return true;
