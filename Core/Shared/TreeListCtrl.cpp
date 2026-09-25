@@ -342,6 +342,7 @@ CTreeListCtrl::CTreeListCtrl(CTreeDragDropRenderer* pAltRenderer, int nMinLabelW
 	m_crBkgnd(GetSysColor(COLOR_3DFACE)),
 	m_bMovingItem(FALSE),
 	m_bBoundSelecting(FALSE),
+	m_bAutoFitSplitter(TRUE),
 	m_bReadOnly(FALSE),
 	m_nMinTreeTitleColumnWidth(-1),
 	m_tsh(m_tree, m_list),
@@ -481,6 +482,8 @@ int CTreeListCtrl::CalcSplitPosToFitListColumns(int nAvailWidth) const
 
 void CTreeListCtrl::AdjustSplitterToFitListColumns()
 {
+	m_bAutoFitSplitter = TRUE;
+
 	CRect rClient;
 	GetClientRect(rClient);
 
@@ -495,6 +498,8 @@ void CTreeListCtrl::AdjustSplitterToFitListColumns()
 
 void CTreeListCtrl::AdjustSplitterToFitTreeColumns()
 {
+	m_bAutoFitSplitter = FALSE;
+
 	int nTreeWidth = m_treeHeader.CalcTotalItemWidth();
 	int nNewSplitPos = CalcSplitPosFromTreeWidth(max(MIN_TREE_WIDTH, nTreeWidth));
 
@@ -694,22 +699,16 @@ void CTreeListCtrl::Resize(int cx, int cy)
 
 	if (cx && cy)
 	{
-		int nCurWidth = GetBoundingWidth();
+		OnResize(cx, cy); // For derived classes to override
 
-		OnResize(cx, cy);
-
-		if (m_treeHeader.GetItemCount())
-		{
-			int nNewWidth = GetBoundingWidth();
-
-			if (nNewWidth != nCurWidth)
-				UpdateColumnWidths((nNewWidth > nCurWidth) ? UTWA_WIDER : UTWA_NARROWER);
-		}
+		if (m_bAutoFitSplitter)
+			AdjustSplitterToFitListColumns();
 	}
 }
 
 void CTreeListCtrl::OnResize(int cx, int cy)
 {
+	// Default implementation
 	CTreeListSyncer::Resize(CRect(0, 0, cx, cy), GetSplitPos());
 }
 
@@ -1866,12 +1865,23 @@ void CTreeListCtrl::RecalcTreeColumnsToFit(BOOL bForce)
 		RecalcTreeColumnWidth(nCol, &dc, bForce);
 }
 
+void CTreeListCtrl::SetAutoFitSplitter(BOOL bAutoFit)
+{
+	if (Misc::StatesDiffer(bAutoFit, m_bAutoFitSplitter))
+	{
+		m_bAutoFitSplitter = bAutoFit;
+
+		if (bAutoFit)
+			AdjustSplitterToFitListColumns();
+	}
+}
+
 void CTreeListCtrl::OnNotifySplitterChange(int nSplitPos)
 {
 	CTreeListSyncer::OnNotifySplitterChange(nSplitPos);
 
-	if (m_tree.GetCount() == 0)
-		return;
+	if (IsSplitting() || IsHeaderTracking(m_hwndPrimaryHeader))
+		m_bAutoFitSplitter = FALSE;
 
 	// Adjust 'Title' column to suit unless it's the title column we are actively tracking
 	if (!IsHeaderTracking(m_hwndPrimaryHeader, 0))

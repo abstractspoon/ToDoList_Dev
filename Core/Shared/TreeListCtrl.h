@@ -180,6 +180,8 @@ public:
 	BOOL SetTrackedTreeColumns(const CIntArray& aTracked);
 	void GetTreeTrackedColumns(CIntArray& aTracked) const;
 	void SetTreeColumnVisibility(const CDWordArray& aColumnVis);
+	BOOL GetAutoFitSplitter() const { return m_bAutoFitSplitter; }
+	void SetAutoFitSplitter(BOOL bAutoFit = TRUE);
 
 	BOOL SaveToImage(CBitmap& bmImage, COLORREF crDivider = CLR_NONE);
 	BOOL SaveToImage(CBitmap& bmImage, int nFrom, int nTo, COLORREF crDivider = CLR_NONE);
@@ -207,7 +209,6 @@ protected:
 
 	COLORREF m_crAltLine, m_crGridLine, m_crBkgnd;
 	BOOL m_bMovingItem;
-	BOOL m_bBoundSelecting;
 	BOOL m_bReadOnly;
 
 	CTreeListSelectionHelper m_tsh;
@@ -220,6 +221,10 @@ protected:
 	const int MIN_LABEL_WIDTH;
 
 	const static int IMAGE_SIZE;
+
+private:
+	BOOL m_bAutoFitSplitter;
+	BOOL m_bBoundSelecting;
 
 protected:
 	BOOL PreTranslateMessage(MSG* pMsg);

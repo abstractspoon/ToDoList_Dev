@@ -231,6 +231,9 @@ void CWorkloadWnd::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 	SaveColumnState(pPrefs, (sKey + _T("\\TreeWidths")), aTreeWidths);
 	SaveColumnState(pPrefs, (sKey + _T("\\TreeTracked")), aTreeTracked);
 
+	// Splitter
+	pPrefs->WriteProfileInt(sKey, _T("AutoFitSplitter"), m_ctrlWorkload.GetAutoFitSplitter());
+
 	m_dlgPrefs.SavePreferences(pPrefs, sKey);
 }
 
@@ -365,7 +368,10 @@ void CWorkloadWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 		{
 			m_ctrlWorkload.SetTrackedTreeColumns(aTreeTracked);
 		}
-		
+
+		// Splitter
+		m_ctrlWorkload.SetAutoFitSplitter(pPrefs->GetProfileInt(sKey, _T("AutoFitSplitter"), TRUE));
+
 		if (GetSafeHwnd())
 			UpdateData(FALSE);
 	}
