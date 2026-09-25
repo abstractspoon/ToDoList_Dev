@@ -411,7 +411,7 @@ void CGanttCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate)
 				ScrollToToday();
 		}
 		EnableResync(TRUE, m_tree);
-		UpdateColumnWidths(UTWA_ANY);
+		UpdateTreeColumnWidths();
 		UpdateWindow();
 		break;
 		

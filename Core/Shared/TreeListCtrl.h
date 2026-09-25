@@ -301,16 +301,6 @@ protected:
 	virtual BOOL DoSaveToImage(CBitmap& bmImage, int nFrom, int nTo, COLORREF crDivider);
 	virtual void ExpandItem(HTREEITEM hti, BOOL bExpand = TRUE, BOOL bAndChildren = FALSE);
 
-	enum UPDATETITLEWIDTHACTION 
-	{ 
-		UTWA_ANY, 
-		UTWA_EXPAND, 
-		UTWA_COLLAPSE,
-		UTWA_WIDER,	// OnSize
-		UTWA_NARROWER,	// OnSize
-	};
-	virtual BOOL UpdateListColumnWidths(CDC* /*pDC*/, UPDATETITLEWIDTHACTION /*nAction*/) { return FALSE; }
-
 	void DrawSplitBar(CDC* pDC, const CRect& rSplitter, COLORREF crSplitBar);
 	void DrawVertItemDivider(CDC* pDC, const CRect& rItem, BOOL bSelected, COLORREF crDiv = CLR_NONE) const;
 	void DrawHorzItemDivider(CDC* pDC, const CRect& rItem) const;
@@ -333,8 +323,7 @@ protected:
 	void HandleTabKey(HWND hWnd);
 
 	void Resize(int cx = 0, int cy = 0);
-	void UpdateColumnWidths(UPDATETITLEWIDTHACTION nAction);
-	BOOL UpdateTreeColumnWidths(CDC* pDC, UPDATETITLEWIDTHACTION nAction);
+	BOOL UpdateTreeColumnWidths(BOOL bExpand = -1);
 	int RecalcTreeColumnWidth(int nCol, CDC* pDC, BOOL bForce);
 	int CalcMaxListColumnsWidth() const;
 	int CalcTreeColumnWidth(int nCol, CDC* pDC) const;
@@ -383,7 +372,7 @@ protected:
 	static BOOL HasColor(COLORREF color) { return (color != CLR_NONE); }
 	static COLORREF GetColor(COLORREF crBase, double dLighter, BOOL bSelected);
 	static int Compare(const CString& sText1, const CString& sText2);
-	static BOOL WantTitleWidthUpdate(int nOldWidth, int nNewWidth, UPDATETITLEWIDTHACTION nAction);
+	static BOOL WantTitleWidthUpdate(int nOldWidth, int nNewWidth, BOOL bExpand);
 	static BOOL GetTreeIconRect(const CRect& rLabel, CRect& rIcon);
 
 };

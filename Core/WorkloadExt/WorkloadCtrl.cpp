@@ -461,6 +461,7 @@ void CWorkloadCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpda
 
 			UnlockWindowUpdate();
 			EnableResync(TRUE, m_tree);
+			UpdateTreeColumnWidths();
 		}
 		break;
 
@@ -476,7 +477,6 @@ void CWorkloadCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpda
 		return;
 	}
 
-	UpdateColumnWidths(UTWA_ANY);
 }
 
 void CWorkloadCtrl::PreFixVScrollSyncBug()
