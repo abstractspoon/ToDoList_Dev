@@ -4425,9 +4425,11 @@ void CGanttCtrl::RecalcListColumnsToFit()
 {
 	// list columns (except first dummy column)
 	int nNumCols = GetRequiredListColumnCount();
+
+	int nColWidth = GetColumnWidth();
 	
 	for (int nCol = 1; nCol <= nNumCols; nCol++)
-		m_listHeader.SetItemWidth(nCol, GetColumnWidth());
+		m_listHeader.SetItemWidth(nCol, nColWidth);
 }
 
 int CGanttCtrl::CalcTreeColumnTextWidth(int nCol, CDC* pDC) const
@@ -4708,7 +4710,7 @@ void CGanttCtrl::CalcMinMonthWidths()
 				
 				for (int nMonth = 1; nMonth <= 12; nMonth += 3)
 				{
-					CString sText = FormatHeaderText(nDisplay, 1, 2025);
+					CString sText = FormatHeaderText(nDisplay, nMonth, 2025);
 					
 					int nWidth = dcClient.GetTextExtent(sText).cx;
 					nMinTextWidth = max(nWidth, nMinTextWidth);
@@ -4726,7 +4728,7 @@ void CGanttCtrl::CalcMinMonthWidths()
 				
 				for (int nMonth = 1; nMonth <= 12; nMonth++)
 				{
-					CString sText = FormatHeaderText(nDisplay, 1, 2025);
+					CString sText = FormatHeaderText(nDisplay, nMonth, 2025);
 					
 					int nTextWidth = dcClient.GetTextExtent(sText).cx;
 					nMinTextWidth = max(nTextWidth, nMinTextWidth);
