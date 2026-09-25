@@ -270,10 +270,7 @@ BOOL CWorkloadCtrl::SelectTasks(const CDWordArray& aTaskIDs)
 		HTREEITEM hti = m_tree.GetItem(aTaskIDs[nID]);
 
 		if (!hti)
-		{
-			ASSERT(0);
 			return FALSE;
-		}
 
 		selection.AddTail(hti);
 	}

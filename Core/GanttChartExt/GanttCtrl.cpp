@@ -225,10 +225,7 @@ BOOL CGanttCtrl::SelectTasks(const CDWordArray& aTaskIDs)
 		HTREEITEM hti = m_tree.GetItem(aTaskIDs[nID]);
 
 		if (!hti)
-		{
-			ASSERT(0);
 			return FALSE;
-		}
 
 		selection.AddTail(hti);
 	}
@@ -405,10 +402,10 @@ void CGanttCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate)
 			SetExpandedState(aExpanded);
 			SelectTasks(aSelTaskIDs);
 
-			if (aSelTaskIDs.GetSize())
-				ScrollToSelectedTask();
-			else
+			if (TSH().IsEmpty())
 				ScrollToToday();
+			else
+				ScrollToSelectedTask();
 		}
 		EnableResync(TRUE, m_tree);
 		UpdateTreeColumnWidths();
