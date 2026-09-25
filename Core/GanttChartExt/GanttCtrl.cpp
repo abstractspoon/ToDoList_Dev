@@ -454,6 +454,9 @@ void CGanttCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate)
 	}
 
 	InitItemHeights();
+
+	if (GetAutoFitSplitter())
+		AdjustSplitterToFitListColumns();
 }
 
 void CGanttCtrl::PreFixVScrollSyncBug()
@@ -1058,16 +1061,15 @@ BOOL CGanttCtrl::SetActiveDateRange(const GANTTDATERANGE& dtRange)
 	CHoldRedraw hr(m_list);
 
 	if (m_dtDataRange == dtRange)
-	{
 		m_dtActiveRange.Reset();
-	}
 	else
-	{
 		m_dtActiveRange.Set(dtRange);
-	}
 
 	ValidateMonthDisplay();
 	UpdateListColumns();
+
+	if (GetAutoFitSplitter())
+		AdjustSplitterToFitListColumns();
 
 	return TRUE;
 }
@@ -1853,8 +1855,6 @@ BOOL CGanttCtrl::OnHeaderDblClkDivider(NMHEADER* pHDN)
 
 		if (nCol > 0) // first column always zero width
 			m_listHeader.SetItemWidth(nCol, GetColumnWidth());
-
-		return TRUE; // no default handling
 	}
 
 	return CTreeListCtrl::OnHeaderDblClkDivider(pHDN);
@@ -4355,7 +4355,10 @@ BOOL CGanttCtrl::ZoomTo(GTLC_MONTH_DISPLAY nNewDisplay, int nNewMonthWidth)
 		m_nMonthWidth = (int)GetMonthWidth(nNewColWidth);
 	}
 
-	RefreshSize();
+	if (GetAutoFitSplitter())
+		AdjustSplitterToFitListColumns();
+	else
+		RefreshSize();
 
 	// restore scroll-pos
 	if (bRestorePos)

@@ -456,7 +456,7 @@ void CWorkloadCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpda
 			SetExpandedState(aExpanded);
 			SelectTasks(aSelTaskIDs);
 
-			if (aSelTaskIDs.GetSize())
+			if (!TSH().IsEmpty())
 				ScrollToSelectedTask();
 
 			UnlockWindowUpdate();
@@ -476,7 +476,9 @@ void CWorkloadCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpda
 		ASSERT(0);
 		return;
 	}
-
+	
+	if (GetAutoFitSplitter())
+		AdjustSplitterToFitListColumns();
 }
 
 void CWorkloadCtrl::PreFixVScrollSyncBug()

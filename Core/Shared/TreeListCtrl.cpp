@@ -892,6 +892,11 @@ BOOL CTreeListCtrl::OnHeaderDblClkDivider(NMHEADER* pHDN)
 
 		return TRUE;
 	}
+	else if (pHDN->hdr.hwndFrom == m_listHeader)
+	{
+		if (m_bAutoFitSplitter)
+			AdjustSplitterToFitListColumns();
+	}
 
 	return FALSE;
 }
@@ -1212,6 +1217,11 @@ LRESULT CTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 
 					case HDN_ITEMCLICK:
 						OnListHeaderClick((NMHEADER*)pNMHDR);
+						break;
+
+					case HDN_ENDTRACK:
+						if (m_bAutoFitSplitter)
+							AdjustSplitterToFitListColumns();
 						break;
 					}
 					return lr;
