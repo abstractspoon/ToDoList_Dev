@@ -8,6 +8,7 @@
 
 #include <shared\Clipboard.h>
 #include <shared\Misc.h>
+#include <shared\FileMisc.h>
 #include <shared\GraphicsMisc.h>
 #include <shared\CopyWndContents.h>
 
@@ -384,12 +385,13 @@ void TaskListView::Initialize(Translator^ trans, UIExtension::TaskIcon^ taskIcon
 	FullRowSelect = true;
 	HideSelection = false;
 	OwnerDraw = true;
-	Sorting = SortOrder::Ascending;
+	Sorting = SortOrder::None;
 	HeaderStyle = ColumnHeaderStyle::Clickable;
 	DoubleBuffered = true;
 	HotTracking = false;
 	HoverSelection = false;
 	ListViewItemSorter = comparer;
+	CheckBoxes = false;
 }
 
 void TaskListView::OnHandleCreated(EventArgs^ e)
@@ -1113,6 +1115,7 @@ TaskListView::UpdateState^ TaskListView::BeginUpdate()
 	state->SelectedTaskIds = SelectedTaskIds;
 	state->TopItem = TopItem;
 	state->Sorter = ListViewItemSorter;
+	state->StartTick = ::GetTickCount();
 
 	ListViewItemSorter = nullptr;
 	ListView::BeginUpdate(); // => SetRedraw(FALSE)
@@ -1147,6 +1150,11 @@ void TaskListView::EndUpdate(UpdateState^ state)
 
 		SelectTasks(state->SelectedTaskIds);
 	}
+
+#if _DEBUG
+	FileMisc::EnableLogging(TRUE);
+	FileMisc::LogText(L"TaskListView update took %ld ms", (::GetTickCount() - state->StartTick));
+#endif
 
 	ListView::EndUpdate(); // => SetRedraw(TRUE)
 

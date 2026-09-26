@@ -135,6 +135,9 @@ namespace Abstractspoon
 					System::Collections::IComparer^ Sorter;
 					Windows::Forms::ListViewItem^ TopItem;
 					IList<UInt32>^ SelectedTaskIds;
+#if _DEBUG
+					UInt32 StartTick;
+#endif
 				};
 
 				UpdateState^ BeginUpdate();
