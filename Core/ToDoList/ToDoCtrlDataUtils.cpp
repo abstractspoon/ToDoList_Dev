@@ -276,6 +276,10 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 	if (bIsDone && query.bIgnoreDone)
 		return FALSE;
 
+	// Special case: Ignore overdue tasks
+	if (!bIsDone && query.bIgnoreOverDue && m_calculator.IsTaskOverDue(pTDI, pTDS))
+		return FALSE;
+
 	// Special case: Only one rule
 	int nNumRules = query.aRules.GetSize();
 
