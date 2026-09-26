@@ -209,6 +209,9 @@ void CGanttChartWnd::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 	SaveColumnState(pPrefs, (sKey + _T("\\TreeTracked")), aTreeTracked);
 	SaveColumnState(pPrefs, (sKey + _T("\\ListTracked")), aListTracked);
 
+	// Splitter
+	pPrefs->WriteProfileInt(sKey, _T("AutoFitSplitter"), m_ctrlGantt.GetAutoFitSplitter());
+
 	// Active date range
 	GANTTDATERANGE dtRange;
 
@@ -366,6 +369,9 @@ void CGanttChartWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, 
 		{
 			m_ctrlGantt.SetTrackedColumns(aTreeTracked, aListTracked);
 		}
+
+		// Splitter
+		m_ctrlGantt.SetAutoFitSplitter(pPrefs->GetProfileInt(sKey, _T("AutoFitSplitter"), TRUE));
 
 		// Active range
 		m_dtPrevActiveRange.Reset();

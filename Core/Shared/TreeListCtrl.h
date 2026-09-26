@@ -180,6 +180,8 @@ public:
 	BOOL SetTrackedTreeColumns(const CIntArray& aTracked);
 	void GetTreeTrackedColumns(CIntArray& aTracked) const;
 	void SetTreeColumnVisibility(const CDWordArray& aColumnVis);
+	BOOL GetAutoFitSplitter() const { return m_bAutoFitSplitter; }
+	void SetAutoFitSplitter(BOOL bAutoFit = TRUE);
 
 	BOOL SaveToImage(CBitmap& bmImage, COLORREF crDivider = CLR_NONE);
 	BOOL SaveToImage(CBitmap& bmImage, int nFrom, int nTo, COLORREF crDivider = CLR_NONE);
@@ -207,7 +209,6 @@ protected:
 
 	COLORREF m_crAltLine, m_crGridLine, m_crBkgnd;
 	BOOL m_bMovingItem;
-	BOOL m_bBoundSelecting;
 	BOOL m_bReadOnly;
 
 	CTreeListSelectionHelper m_tsh;
@@ -220,6 +221,10 @@ protected:
 	const int MIN_LABEL_WIDTH;
 
 	const static int IMAGE_SIZE;
+
+private:
+	BOOL m_bAutoFitSplitter;
+	BOOL m_bBoundSelecting;
 
 protected:
 	BOOL PreTranslateMessage(MSG* pMsg);
@@ -296,16 +301,6 @@ protected:
 	virtual BOOL DoSaveToImage(CBitmap& bmImage, int nFrom, int nTo, COLORREF crDivider);
 	virtual void ExpandItem(HTREEITEM hti, BOOL bExpand = TRUE, BOOL bAndChildren = FALSE);
 
-	enum UPDATETITLEWIDTHACTION 
-	{ 
-		UTWA_ANY, 
-		UTWA_EXPAND, 
-		UTWA_COLLAPSE,
-		UTWA_WIDER,	// OnSize
-		UTWA_NARROWER,	// OnSize
-	};
-	virtual BOOL UpdateListColumnWidths(CDC* /*pDC*/, UPDATETITLEWIDTHACTION /*nAction*/) { return FALSE; }
-
 	void DrawSplitBar(CDC* pDC, const CRect& rSplitter, COLORREF crSplitBar);
 	void DrawVertItemDivider(CDC* pDC, const CRect& rItem, BOOL bSelected, COLORREF crDiv = CLR_NONE) const;
 	void DrawHorzItemDivider(CDC* pDC, const CRect& rItem) const;
@@ -328,8 +323,7 @@ protected:
 	void HandleTabKey(HWND hWnd);
 
 	void Resize(int cx = 0, int cy = 0);
-	void UpdateColumnWidths(UPDATETITLEWIDTHACTION nAction);
-	BOOL UpdateTreeColumnWidths(CDC* pDC, UPDATETITLEWIDTHACTION nAction);
+	BOOL UpdateTreeColumnWidths(BOOL bExpand = -1);
 	int RecalcTreeColumnWidth(int nCol, CDC* pDC, BOOL bForce);
 	int CalcMaxListColumnsWidth() const;
 	int CalcTreeColumnWidth(int nCol, CDC* pDC) const;
@@ -378,7 +372,7 @@ protected:
 	static BOOL HasColor(COLORREF color) { return (color != CLR_NONE); }
 	static COLORREF GetColor(COLORREF crBase, double dLighter, BOOL bSelected);
 	static int Compare(const CString& sText1, const CString& sText2);
-	static BOOL WantTitleWidthUpdate(int nOldWidth, int nNewWidth, UPDATETITLEWIDTHACTION nAction);
+	static BOOL WantTitleWidthUpdate(int nOldWidth, int nNewWidth, BOOL bExpand);
 	static BOOL GetTreeIconRect(const CRect& rLabel, CRect& rIcon);
 
 };

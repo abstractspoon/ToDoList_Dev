@@ -270,10 +270,7 @@ BOOL CWorkloadCtrl::SelectTasks(const CDWordArray& aTaskIDs)
 		HTREEITEM hti = m_tree.GetItem(aTaskIDs[nID]);
 
 		if (!hti)
-		{
-			ASSERT(0);
 			return FALSE;
-		}
 
 		selection.AddTail(hti);
 	}
@@ -456,11 +453,12 @@ void CWorkloadCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpda
 			SetExpandedState(aExpanded);
 			SelectTasks(aSelTaskIDs);
 
-			if (aSelTaskIDs.GetSize())
+			if (!TSH().IsEmpty())
 				ScrollToSelectedTask();
 
 			UnlockWindowUpdate();
 			EnableResync(TRUE, m_tree);
+			UpdateTreeColumnWidths();
 		}
 		break;
 
@@ -475,8 +473,9 @@ void CWorkloadCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpda
 		ASSERT(0);
 		return;
 	}
-
-	UpdateColumnWidths(UTWA_ANY);
+	
+	if (GetAutoFitSplitter())
+		AdjustSplitterToFitListColumns();
 }
 
 void CWorkloadCtrl::PreFixVScrollSyncBug()

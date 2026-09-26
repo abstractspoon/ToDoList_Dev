@@ -225,10 +225,7 @@ BOOL CGanttCtrl::SelectTasks(const CDWordArray& aTaskIDs)
 		HTREEITEM hti = m_tree.GetItem(aTaskIDs[nID]);
 
 		if (!hti)
-		{
-			ASSERT(0);
 			return FALSE;
-		}
 
 		selection.AddTail(hti);
 	}
@@ -405,13 +402,13 @@ void CGanttCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate)
 			SetExpandedState(aExpanded);
 			SelectTasks(aSelTaskIDs);
 
-			if (aSelTaskIDs.GetSize())
-				ScrollToSelectedTask();
-			else
+			if (TSH().IsEmpty())
 				ScrollToToday();
+			else
+				ScrollToSelectedTask();
 		}
 		EnableResync(TRUE, m_tree);
-		UpdateColumnWidths(UTWA_ANY);
+		UpdateTreeColumnWidths();
 		UpdateWindow();
 		break;
 		
@@ -454,6 +451,9 @@ void CGanttCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate)
 	}
 
 	InitItemHeights();
+
+	if (GetAutoFitSplitter())
+		AdjustSplitterToFitListColumns();
 }
 
 void CGanttCtrl::PreFixVScrollSyncBug()
@@ -1058,16 +1058,15 @@ BOOL CGanttCtrl::SetActiveDateRange(const GANTTDATERANGE& dtRange)
 	CHoldRedraw hr(m_list);
 
 	if (m_dtDataRange == dtRange)
-	{
 		m_dtActiveRange.Reset();
-	}
 	else
-	{
 		m_dtActiveRange.Set(dtRange);
-	}
 
 	ValidateMonthDisplay();
 	UpdateListColumns();
+
+	if (GetAutoFitSplitter())
+		AdjustSplitterToFitListColumns();
 
 	return TRUE;
 }
@@ -1853,8 +1852,6 @@ BOOL CGanttCtrl::OnHeaderDblClkDivider(NMHEADER* pHDN)
 
 		if (nCol > 0) // first column always zero width
 			m_listHeader.SetItemWidth(nCol, GetColumnWidth());
-
-		return TRUE; // no default handling
 	}
 
 	return CTreeListCtrl::OnHeaderDblClkDivider(pHDN);
@@ -4355,7 +4352,10 @@ BOOL CGanttCtrl::ZoomTo(GTLC_MONTH_DISPLAY nNewDisplay, int nNewMonthWidth)
 		m_nMonthWidth = (int)GetMonthWidth(nNewColWidth);
 	}
 
-	RefreshSize();
+	if (GetAutoFitSplitter())
+		AdjustSplitterToFitListColumns();
+	else
+		RefreshSize();
 
 	// restore scroll-pos
 	if (bRestorePos)
@@ -4425,9 +4425,11 @@ void CGanttCtrl::RecalcListColumnsToFit()
 {
 	// list columns (except first dummy column)
 	int nNumCols = GetRequiredListColumnCount();
+
+	int nColWidth = GetColumnWidth();
 	
 	for (int nCol = 1; nCol <= nNumCols; nCol++)
-		m_listHeader.SetItemWidth(nCol, GetColumnWidth());
+		m_listHeader.SetItemWidth(nCol, nColWidth);
 }
 
 int CGanttCtrl::CalcTreeColumnTextWidth(int nCol, CDC* pDC) const
@@ -4708,7 +4710,7 @@ void CGanttCtrl::CalcMinMonthWidths()
 				
 				for (int nMonth = 1; nMonth <= 12; nMonth += 3)
 				{
-					CString sText = FormatHeaderText(nDisplay, 1, 2025);
+					CString sText = FormatHeaderText(nDisplay, nMonth, 2025);
 					
 					int nWidth = dcClient.GetTextExtent(sText).cx;
 					nMinTextWidth = max(nWidth, nMinTextWidth);
@@ -4726,7 +4728,7 @@ void CGanttCtrl::CalcMinMonthWidths()
 				
 				for (int nMonth = 1; nMonth <= 12; nMonth++)
 				{
-					CString sText = FormatHeaderText(nDisplay, 1, 2025);
+					CString sText = FormatHeaderText(nDisplay, nMonth, 2025);
 					
 					int nTextWidth = dcClient.GetTextExtent(sText).cx;
 					nMinTextWidth = max(nTextWidth, nMinTextWidth);
