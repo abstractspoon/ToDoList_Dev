@@ -49,7 +49,7 @@ namespace TaskDatesUIExtension
 		private TaskAttributeItem m_GroupBy;
 
 		private Dictionary<string, string> m_MapDateAttribIdToLabel;
-		private Dictionary<string, ListViewItem> m_MapDateKeyToLVItem;
+		private Dictionary<TaskItemDate, ListViewItem> m_MapDateToLVItem;
 		private List<TaskAttributeItem> m_DateAttributeTypes;
 		private List<TaskAttributeItem> m_OffsetAttributeTypes;
 		private HashSet<string> m_VisibleDateAttributeIds;
@@ -394,15 +394,10 @@ namespace TaskDatesUIExtension
 			return m_Trans.Translate("<none>", Translator.Type.Text);
 		}
 
-		private static String GetDateKey(TaskItemDate date)
-		{
-			return string.Format("{0}.{1}", date?.Id, date?.AttributeId);
-		}
-
 		private ListViewItem FindItem(TaskItemDate date)
 		{
 			ListViewItem lvi;
-			m_MapDateKeyToLVItem.TryGetValue(GetDateKey(date), out lvi);
+			m_MapDateToLVItem.TryGetValue(date, out lvi);
 
 			return lvi;
 		}
@@ -493,7 +488,7 @@ namespace TaskDatesUIExtension
 
 					if ((date != null) && !WantShowDate(date))
 					{
-						m_MapDateKeyToLVItem.Remove(GetDateKey(date));
+						m_MapDateToLVItem.Remove(date);
 						Items.RemoveAt(i);
 
 						numChanges++;
@@ -554,7 +549,7 @@ namespace TaskDatesUIExtension
 		{
 			base.Items.Clear();
 
-			m_MapDateKeyToLVItem = new Dictionary<string, ListViewItem>();
+			m_MapDateToLVItem = new Dictionary<TaskItemDate, ListViewItem>();
 
 			foreach (var item in m_TaskItems.Values)
 			{
@@ -570,17 +565,15 @@ namespace TaskDatesUIExtension
 		{
 			Debug.Assert(WantShowDate(date));
 
-			var key = GetDateKey(date);
-
-			if (m_MapDateKeyToLVItem.ContainsKey(key))
+			if (m_MapDateToLVItem.ContainsKey(date))
 				return false;
 
-			var lvi = AddTask(date, key);
+			var lvi = AddTask(date);
 
 			if (lvi == null)
 				return false;
 
-			m_MapDateKeyToLVItem[key] = lvi;
+			m_MapDateToLVItem[date] = lvi;
 
 			string dateType;
 
@@ -685,14 +678,17 @@ namespace TaskDatesUIExtension
 
 				foreach (var date in item.Dates)
 				{
+					var lvi = FindItem(date);
+
 					if (!WantShowDate(date))
 					{
-						Items.RemoveByKey(GetDateKey(date));
+						if (lvi != null)
+							Items.Remove(lvi);
+
 						continue;
 					}
 
-					var lvi = FindItem(date);
-
+					// else
 					if (lvi == null)
 					{
 						AddDateToListView(date);
