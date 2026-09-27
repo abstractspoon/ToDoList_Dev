@@ -367,8 +367,12 @@ namespace TaskDatesUIExtension
 			if (m_PrefsDlg.ShowDialog(m_TaskDatesCtrl.DateAttributeTypes,
 									  m_TaskDatesCtrl.OffsetAttributeTypes) == DialogResult.OK)
 			{
+				Cursor = Cursors.WaitCursor;
+
 				m_TaskDatesCtrl.SetVisibleDateAttributeTypes(m_PrefsDlg.SelectedDateAttributeIds);
 				m_TaskDatesCtrl.SetOffsetAttribute(m_PrefsDlg.SelectedOffsetAttributeId);
+
+				Cursor = Cursors.Default;
 			}
 		}
 
