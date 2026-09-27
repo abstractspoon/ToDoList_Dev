@@ -377,6 +377,12 @@ namespace TaskDatesUIExtension
 			return m_TaskAttribs.GetGroupValue((Task.Attribute)groupById);
 		}
 
+		public bool HasGroupValue(object groupById)
+		{
+			var value = m_TaskAttribs.GetGroupValue((Task.Attribute)groupById);
+			return !string.IsNullOrEmpty(value);
+		}
+
 		public static int CompareDates(TaskItemDate date1, TaskItemDate date2, bool ascending)
 		{
 			if (ascending)

@@ -300,20 +300,19 @@ int TaskListView::DefaultItemComparer::Compare(Object^ x, Object^ y)
 		}
 		else  // different groups
 		{
-			// // 'sort <none> below' has no effect without 'sort ascending'
-			// if (m_bSortNoneGroupBelow && m_bSortGroupsAscending)
-			// {
-			// 	if (sTask1Text.IsEmpty())
-			// 		return 1;
-			// 
-			// 	if (sTask2Text.IsEmpty())
-			// 		return -1;
-			// }
+			// 'sort <none> below' has no effect without 'sort ascending'
+			// because '<none>' will already be at the bottom
+			if (SortNoneGroupBelow && SortGroupsAscending)
+			{
+				if (String::IsNullOrEmpty(task1Text))
+					return 1;
 
-			return nCompare;
+				if (String::IsNullOrEmpty(task2Text))
+					return -1;
+			}
 		}
 
-		// return (m_bSortGroupsAscending ? nCompare : -nCompare);
+		return (SortGroupsAscending ? nCompare : -nCompare);
 	}
 
 	return CompareItems(lvi1, lvi2);
@@ -493,6 +492,25 @@ int TaskListView::RemoveAllGroups()
 	}
 
 	return numRemoved;
+}
+
+bool TaskListView::RemoveGroup(String^ value)
+{
+	int item = Items->Count;
+
+	while (item-- > 0)
+	{
+		auto group = ASTYPE(Items[item]->Tag, TaskItemGroup);
+
+		if ((group != nullptr) && (group->Value == value))
+		{
+			Items->RemoveAt(item);
+			return true;
+		}
+	}
+
+	// Not found
+	return false;
 }
 
 UInt32 TaskListView::GetTaskIdEx(UIExtension::GetTask getTask, bool fromSelTask)

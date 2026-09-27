@@ -69,6 +69,7 @@ namespace Abstractspoon
 
 				void EnableGrouping(Object^ groupById);
 				Windows::Forms::ListViewItem^ AddGroup(String^ title, String^ value);
+				bool RemoveGroup(String^ value);
 				int RemoveAllGroups();
 
 				bool HitTest(Drawing::Point ptScreen, UIExtension::HitTest^ hitTest);
@@ -244,6 +245,9 @@ namespace Abstractspoon
 					// IItemComparer
 					virtual property int Column { int get(); void set(int col); }
 					virtual property bool Ascending { bool get(); void set(bool ascending); }
+					
+					bool SortNoneGroupBelow = false;
+					bool SortGroupsAscending = false;
 
 				protected:
 					virtual int CompareItems(Windows::Forms::ListViewItem^ lvi1,

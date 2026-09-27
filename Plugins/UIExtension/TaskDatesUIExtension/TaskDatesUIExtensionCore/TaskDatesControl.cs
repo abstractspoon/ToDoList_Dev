@@ -15,10 +15,13 @@ namespace TaskDatesUIExtension
 	[Flags]
 	public enum TaskDatesOption
 	{
-		None				= 0x00,
-		HideParentTasks		= 0x01,
-		HideCompletedTasks	= 0x02,
-		HideNullDates		= 0x04,
+		None					= 0x00,
+		HideParentTasks			= 0x01,
+		HideCompletedTasks		= 0x02,
+		HideNullDates			= 0x04,
+		HideNoneGroup			= 0x08,
+		SortNoneGroupBelow		= 0x10,
+		SortGroupsAscending		= 0x20,
 	}
 
 	// --------------------------------------------
@@ -38,7 +41,8 @@ namespace TaskDatesUIExtension
 
 		const TaskDatesOption VisibilityOptions = (TaskDatesOption.HideParentTasks |
 												   TaskDatesOption.HideCompletedTasks |
-												   TaskDatesOption.HideNullDates);
+												   TaskDatesOption.HideNullDates |
+												   TaskDatesOption.HideNoneGroup);
 
 		// --------------------------------------------------------
 
@@ -51,6 +55,7 @@ namespace TaskDatesUIExtension
 		private int[] m_ColValueMaxCharWidth	= new int[6] { -1, -1, -1, -1, -1, -1 };
 
 		private bool m_IsoDates;
+		private bool m_HasNoneGroup;
 		private string m_OffsetAttributeId;
 		private TaskAttributeItem m_GroupBy;
 
@@ -176,11 +181,22 @@ namespace TaskDatesUIExtension
 			{
 				if (value != m_Options)
 				{
-					var changedOptions = ((m_Options ^ value) & VisibilityOptions);
+					var changedOptions = (m_Options ^ value);
 					m_Options = value;
 
-					if (RefreshListViewItemVisibility(changedOptions) > 0)
+					m_Comparer.SortGroupsAscending = m_Options.HasFlag(TaskDatesOption.SortGroupsAscending);
+					m_Comparer.SortNoneGroupBelow = m_Options.HasFlag(TaskDatesOption.SortNoneGroupBelow);
+
+					if (RefreshListViewItemVisibility(changedOptions & VisibilityOptions) > 0)
+					{
 						RefreshColumnWidths();
+					}
+					else if (IsGrouping && 
+							 (changedOptions.HasFlag(TaskDatesOption.SortGroupsAscending) ||
+							  changedOptions.HasFlag(TaskDatesOption.SortNoneGroupBelow)))
+					{
+						Sort();
+					}
 				}
 			}
 		}
@@ -366,6 +382,16 @@ namespace TaskDatesUIExtension
 		// --------------------------------------------------------
 		// Message handlers
 
+		private bool IsGrouping { get { return (m_GroupBy != null); } }
+
+		private void AddGroup(string value)
+		{
+			if (string.IsNullOrEmpty(value))
+				AddGroup(string.Format("{0}: {1}", m_GroupBy.Label, GetAttributeNone(m_GroupBy.AttributeId)), value);
+			else 
+				AddGroup(string.Format("{0}: {1}", m_GroupBy.Label, value), value);
+		}
+
 		private void RebuildGroupHeaders()
 		{
 			if (Items.Count == 0)
@@ -375,15 +401,18 @@ namespace TaskDatesUIExtension
 			RemoveAllGroups();
 
 			// Re-add as required
-			if (m_GroupBy != null)
+			if (IsGrouping)
 			{
 				var values = m_TaskItems.GetGroupValues(m_GroupBy.AttributeId);
 
-				foreach (var v in values)
-				{
-					string value = (string.IsNullOrEmpty(v) ? GetAttributeNone(m_GroupBy.AttributeId) : v);
-					AddGroup(string.Format("{0}: {1}", m_GroupBy.Label, value), v);
-				}
+				foreach (var value in values)
+					AddGroup(value);
+
+				m_HasNoneGroup = values.Contains(string.Empty);
+			}
+			else
+			{
+				m_HasNoneGroup = false;
 			}
 		}
 
@@ -402,6 +431,9 @@ namespace TaskDatesUIExtension
 
 		private ListViewItem FindItem(TaskItemDate date)
 		{
+			if (date == null)
+				return null;
+
 			ListViewItem lvi;
 			m_MapDateToLVItem.TryGetValue(date, out lvi);
 
@@ -440,10 +472,10 @@ namespace TaskDatesUIExtension
 			if (changedOptions == TaskDatesOption.None)
 				return 0;
 
-			var allOptions = (TaskDatesOption[])Enum.GetValues(typeof(TaskDatesOption));
+			var options = (TaskDatesOption[])Enum.GetValues(typeof(TaskDatesOption));
 			bool checkHide = false, checkShow = false;
 
-			foreach (var option in allOptions)
+			foreach (var option in options)
 			{
 				if (changedOptions.HasFlag(option))
 				{
@@ -452,6 +484,14 @@ namespace TaskDatesUIExtension
 					checkShow |= !hasHideOption;
 					checkHide |= hasHideOption;
 				}
+			}
+
+			if (IsGrouping && changedOptions.HasFlag(TaskDatesOption.HideNoneGroup) && m_HasNoneGroup)
+			{
+				if (m_Options.HasFlag(TaskDatesOption.HideNoneGroup))
+					RemoveGroup(string.Empty);
+				else
+					AddGroup(string.Empty);
 			}
 
 			return RefreshListViewItemVisibility(checkHide, checkShow);
@@ -534,6 +574,9 @@ namespace TaskDatesUIExtension
 				return false;
 
 			if (m_Options.HasFlag(TaskDatesOption.HideNullDates) && !date.DateIsSet)
+				return false;
+
+			if (m_Options.HasFlag(TaskDatesOption.HideNoneGroup) && IsGrouping && !date.HasGroupValue(m_GroupBy.AttributeId))
 				return false;
 
 			return true;
