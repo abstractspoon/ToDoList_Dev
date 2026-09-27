@@ -36,6 +36,12 @@ namespace TaskDatesUIExtension
 
 		// --------------------------------------------------------
 
+		const TaskDatesOption VisibilityOptions = (TaskDatesOption.HideParentTasks |
+												   TaskDatesOption.HideCompletedTasks |
+												   TaskDatesOption.HideNullDates);
+
+		// --------------------------------------------------------
+
 		private TaskItems m_TaskItems = new TaskItems();
 		private ItemDateComparer m_Comparer = new ItemDateComparer();
 		private TaskDatesOption m_Options = TaskDatesOption.None;
@@ -170,7 +176,7 @@ namespace TaskDatesUIExtension
 			{
 				if (value != m_Options)
 				{
-					var changedOptions = (m_Options ^ value);
+					var changedOptions = ((m_Options ^ value) & VisibilityOptions);
 					m_Options = value;
 
 					if (RefreshListViewItemVisibility(changedOptions) > 0)
