@@ -15,6 +15,10 @@ namespace TaskDatesUIExtension
 {
 	public partial class TaskDatesUIExtensionCore : UserControl, IUIExtension
 	{
+		const TaskDatesOption DefaultOptions = (TaskDatesOption.HideCompletedTasks | TaskDatesOption.HideNullDates);
+
+		// ------------------------------------------------
+
 		private string m_TypeID;
 		private string m_UiName;
 		private IntPtr m_HwndParent;
@@ -232,7 +236,7 @@ namespace TaskDatesUIExtension
 		{
 			if (!appOnly)
 			{
-				m_OptionsCombo.SelectedOptions = prefs.GetProfileEnum<TaskDatesOption>(key, "Options", TaskDatesOption.None);
+				m_OptionsCombo.SelectedOptions = prefs.GetProfileEnum<TaskDatesOption>(key, "Options", DefaultOptions);
 				m_GroupByCombo.SelectedGroupId = prefs.GetProfileEnum<Task.Attribute>(key, "GroupBy", Task.Attribute.Unknown);
 
 				m_TaskDatesCtrl.Options = m_OptionsCombo.SelectedOptions;
