@@ -50,12 +50,25 @@ namespace TaskDatesUIExtension
 			return taskItem;
 		}
 
-		public HashSet<string> GetGroupValues(Task.Attribute attribId)
+		public HashSet<string> GetGroupValues(Task.Attribute attribId, bool excDone, bool excParent, bool excNone)
 		{
 			var groupVals = new HashSet<string>();
 
 			foreach (var task in Values)
-				groupVals.Add(task.GetGroupValue(attribId));
+			{
+				if (excDone && (task.Attributes.IsDone || task.Attributes.IsGoodAsDone))
+					continue;
+
+				if (excParent && task.Attributes.IsParent)
+					continue;
+
+				var value = task.GetGroupValue(attribId);
+
+				if (excNone && string.IsNullOrEmpty(value))
+					continue;
+
+				groupVals.Add(value);
+			}
 
 			return groupVals;
 		}
@@ -146,6 +159,11 @@ namespace TaskDatesUIExtension
 		public IEnumerable<TaskItemDate> Dates
 		{
 			get	{ return m_Dates.Values; }
+		}
+
+		public TaskItemAttributes Attributes
+		{
+			get { return m_Attribs; }
 		}
 
 		public string GetGroupValue(Task.Attribute attribId)

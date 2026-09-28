@@ -55,7 +55,6 @@ namespace TaskDatesUIExtension
 		private int[] m_ColValueMaxCharWidth	= new int[6] { -1, -1, -1, -1, -1, -1 };
 
 		private bool m_IsoDates;
-		private bool m_HasNoneGroup;
 		private string m_OffsetAttributeId;
 		private TaskAttributeItem m_GroupBy;
 
@@ -403,16 +402,12 @@ namespace TaskDatesUIExtension
 			// Re-add as required
 			if (IsGrouping)
 			{
-				var values = m_TaskItems.GetGroupValues(m_GroupBy.AttributeId);
-
+				var values = m_TaskItems.GetGroupValues(m_GroupBy.AttributeId, 
+														m_Options.HasFlag(TaskDatesOption.HideCompletedTasks), 
+														m_Options.HasFlag(TaskDatesOption.HideParentTasks),
+														m_Options.HasFlag(TaskDatesOption.HideNoneGroup));
 				foreach (var value in values)
 					AddGroup(value);
-
-				m_HasNoneGroup = values.Contains(string.Empty);
-			}
-			else
-			{
-				m_HasNoneGroup = false;
 			}
 		}
 
@@ -486,14 +481,6 @@ namespace TaskDatesUIExtension
 				}
 			}
 
-			if (IsGrouping && changedOptions.HasFlag(TaskDatesOption.HideNoneGroup) && m_HasNoneGroup)
-			{
-				if (m_Options.HasFlag(TaskDatesOption.HideNoneGroup))
-					RemoveGroup(string.Empty);
-				else
-					AddGroup(string.Empty);
-			}
-
 			return RefreshListViewItemVisibility(checkHide, checkShow);
 		}
 
@@ -556,6 +543,7 @@ namespace TaskDatesUIExtension
 					}
 				}
 			}
+			RebuildGroupHeaders();
 
 			EndUpdate(state, selTasks);
 
