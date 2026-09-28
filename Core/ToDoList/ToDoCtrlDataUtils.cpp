@@ -5060,15 +5060,15 @@ BOOL CTDCTaskExporter::ExportAllTaskAttributes(const TODOITEM* pTDI, const TODOS
 	tasks.SetTaskPosition(hTask, m_formatter.GetTaskPosition(pTDS));
 
 	// dynamically calculated attributes
-	int nHighestPriority = m_calculator.GetTaskPriority(pTDI, pTDS, FALSE); 
+	int nPriority = m_calculator.GetTaskPriority(pTDI, pTDS, FALSE); 
 
-	if (nHighestPriority > pTDI->nPriority)
-		tasks.SetTaskHighestPriority(hTask, nHighestPriority);
+	if (nPriority != pTDI->nPriority)
+		tasks.SetTaskHighestPriority(hTask, nPriority);
 
-	int nHighestRisk = m_calculator.GetTaskRisk(pTDI, pTDS);
+	int nRisk = m_calculator.GetTaskRisk(pTDI, pTDS);
 
-	if (nHighestRisk > pTDI->nRisk)
-		tasks.SetTaskHighestRisk(hTask, nHighestRisk);
+	if (nRisk != pTDI->nRisk)
+		tasks.SetTaskHighestRisk(hTask, nRisk);
 
 	// calculated percent
 	int nPercent = m_calculator.GetTaskPercentDone(pTDI, pTDS);
@@ -5125,7 +5125,7 @@ BOOL CTDCTaskExporter::ExportAllTaskAttributes(const TODOITEM* pTDI, const TODOS
 	tasks.SetTaskTextColor(hTask, GetTaskTextColor(pTDI, pTDS));
 
 	// priority color
-	tasks.SetTaskPriorityColor(hTask, GetPriorityColor(nHighestPriority));
+	tasks.SetTaskPriorityColor(hTask, GetPriorityColor(nPriority));
 
 	// subtask related
 	tasks.SetTaskGoodAsDone(hTask, m_calculator.IsTaskDone(pTDI, pTDS));
@@ -5237,8 +5237,8 @@ BOOL CTDCTaskExporter::ExportMatchingTaskAttributes(const TODOITEM* pTDI, const 
 		}
 	}
 
-	// highest priority, because we need it further down
-	int nHighestPriority = m_calculator.GetTaskPriority(pTDI, pTDS, FALSE);
+	// Calculated priority, because we need it further down
+	int nPriority = m_calculator.GetTaskPriority(pTDI, pTDS, FALSE);
 
 	if (!(bTitleOnly || bTitleCommentsOnly))
 	{
@@ -5301,18 +5301,18 @@ BOOL CTDCTaskExporter::ExportMatchingTaskAttributes(const TODOITEM* pTDI, const 
 		{
 			tasks.SetTaskPriority(hTask, pTDI->nPriority);
 
-			if (nHighestPriority > pTDI->nPriority)
-				tasks.SetTaskHighestPriority(hTask, nHighestPriority);
+			if (nPriority != pTDI->nPriority)
+				tasks.SetTaskHighestPriority(hTask, nPriority);
 		}
 
 		if (filter.WantAttribute(TDCA_RISK))
 		{
 			tasks.SetTaskRisk(hTask, pTDI->nRisk);
 
-			int nHighestRisk = m_calculator.GetTaskRisk(pTDI, pTDS);
+			int nRisk = m_calculator.GetTaskRisk(pTDI, pTDS);
 
-			if (nHighestRisk > pTDI->nRisk)
-				tasks.SetTaskHighestRisk(hTask, nHighestRisk);
+			if (nRisk > pTDI->nRisk)
+				tasks.SetTaskHighestRisk(hTask, nRisk);
 		}
 
 		// percent done
@@ -5490,7 +5490,7 @@ BOOL CTDCTaskExporter::ExportMatchingTaskAttributes(const TODOITEM* pTDI, const 
 	tasks.SetTaskTextColor(hTask, GetTaskTextColor(pTDI, pTDS));
 
 	// priority color
-	tasks.SetTaskPriorityColor(hTask, GetPriorityColor(nHighestPriority));
+	tasks.SetTaskPriorityColor(hTask, GetPriorityColor(nPriority));
 
 	return TRUE;
 }
