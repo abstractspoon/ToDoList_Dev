@@ -6,9 +6,10 @@ using System.Windows.Forms;
 
 using Abstractspoon.Tdl.PluginHelpers;
 
+///////////////////////////////////////////////////////////////////////
+
 namespace TodoTxtImpExp
 {
-	using ParentMapping = Dictionary<string, Task>;
 	using PriorityMapping = Dictionary<string, byte>;
 
        // ----------------------------------------------------------
@@ -17,11 +18,6 @@ namespace TodoTxtImpExp
 
     public class TodoTxtImporter
     {
-		const string ProjectsCustAttribId = "CUST_TDT_PROJECTS";
-		const string ContextsCustAttribId = "CUST_TDT_CONTEXTS";
-
-        // ----------------------------------------------------------
-
 		private Translator m_Trans;
 
         // ----------------------------------------------------------
@@ -33,21 +29,21 @@ namespace TodoTxtImpExp
 
 		public bool Import(string srcFilePath, TaskList destTaskFile, bool silent, Preferences prefs, string prefKey)
         {
-			var options = new TodoTxtImporterOptionsForm(m_Trans);
+			var options = new TodoTxtImporterOptionsForm(destTaskFile, m_Trans);
 
 			if (options.ShowDialog(prefs, prefKey) != DialogResult.OK)
 				return false;
 			
 			try
 			{
+				if (options.ImportProjectsAsCustom)
+					destTaskFile.AddCustomListAttribute(options.ImportProjectsAsCustomId, "Projects", "Projects");
+
+				if (options.ImportContextsAsCustom)
+					destTaskFile.AddCustomListAttribute(options.ImportContextsAsCustomId, "Contexts", "Contexts");
+
 				var srcTasks = new ToDoLib.TaskList(srcFilePath);
 				var priorityMap = CreatePriorityMapping(srcTasks);
-
-				if (options.ImportProjectAsCustom)
-					destTaskFile.AddCustomListAttribute(ProjectsCustAttribId, "Projects", "Projects");
-
-				if (options.ImportContextAsCustom)
-					destTaskFile.AddCustomListAttribute(ContextsCustAttribId, "Contexts", "Contexts");
 
 				// Process the tasks
 				foreach (var srcTask in srcTasks.Tasks)
@@ -95,15 +91,15 @@ namespace TodoTxtImpExp
 			// Contexts
 			var contexts = srcTask.Contexts.ConvertAll(context => context.Substring(1));
 
-			if (options.ImportContextAsCustom)
+			if (options.ImportContextsAsCustom)
 			{
-				destTask.SetCustomAttributeValue(ContextsCustAttribId, string.Join("\n", contexts));
+				destTask.SetCustomAttributeValue(options.ImportContextsAsCustomId, string.Join("\n", contexts));
 			}
 			else
 			{
 				foreach (var context in contexts)
 				{
-					if (options.ImportContextAsCategory)
+					if (options.ImportContextsAsCategory)
 						destTask.AddCategory(context);
 					else
 						destTask.AddTag(context);
@@ -113,15 +109,15 @@ namespace TodoTxtImpExp
 			// Projects
 			var projects = srcTask.Projects.ConvertAll(project => project.Substring(1));
 
-			if (options.ImportProjectAsCustom)
+			if (options.ImportProjectsAsCustom)
 			{
-				destTask.SetCustomAttributeValue(ProjectsCustAttribId, string.Join("\n", projects));
+				destTask.SetCustomAttributeValue(options.ImportContextsAsCustomId, string.Join("\n", projects));
 			}
 			else
 			{
 				foreach (var project in srcTask.Projects)
 				{
-					if (options.ImportProjectAsCategory)
+					if (options.ImportProjectsAsCategory)
 						destTask.AddCategory(project);
 					else
 						destTask.AddTag(project);
