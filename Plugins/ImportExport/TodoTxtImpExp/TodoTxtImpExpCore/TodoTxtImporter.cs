@@ -115,7 +115,7 @@ namespace TodoTxtImpExp
 			}
 			else
 			{
-				foreach (var project in srcTask.Projects)
+				foreach (var project in projects)
 				{
 					if (options.ImportProjectsAsCategory)
 						destTask.AddCategory(project);
