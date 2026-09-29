@@ -230,43 +230,55 @@ BOOL CKanbanColumnCtrl::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 	if (m_tooltip.GetSafeHwnd())
 		m_tooltip.Pop();
 
-	// Two bugs in Windows 7
-	if ((COSVersion() < OSV_WIN8) && (GetStyle() & WS_VSCROLL))
+	if (Misc::HasFlag(GetStyle(), WS_VSCROLL))
 	{
-		CRect rClient, rItem;
-		GetClientRect(rClient);
-
-		HTREEITEM htiLast = m_tch.GetLastVisibleItem();
-		CTreeCtrl::GetItemRect(htiLast, rItem, FALSE);
-
-		BOOL bAtBottom = (rItem.bottom < rClient.bottom);
-
-		// 1. Mouse-wheeling past the bottom of the tree causes
-		//    considerable flickering
-		if (bAtBottom)
+		// Two bugs in Windows 7
+		if (COSVersion() < OSV_WIN8)
 		{
-			// 2. Sometimes this also breaks mouse-wheeling up
-			//    until the scrollbar is manually adjusted
-			BOOL bScrollUp = (zDelta > 0);
+			CRect rClient, rItem;
+			GetClientRect(rClient);
 
-			if (bScrollUp)
+			HTREEITEM htiLast = m_tch.GetLastVisibleItem();
+			CTreeCtrl::GetItemRect(htiLast, rItem, FALSE);
+
+			BOOL bAtBottom = (rItem.bottom < rClient.bottom);
+
+			// 1. Mouse-wheeling past the bottom of the tree causes
+			//    considerable flickering
+			if (bAtBottom)
 			{
-				HTREEITEM hti = GetFirstVisibleItem();
+				// 2. Sometimes this also breaks mouse-wheeling up
+				//    until the scrollbar is manually adjusted
+				BOOL bScrollUp = (zDelta > 0);
 
-				// Shift up 2 ITEMS to get past the 'problem zone'
-				HTREEITEM htiPrev = GetPrevVisibleItem(hti);
-
-				if (htiPrev)
+				if (bScrollUp)
 				{
-					hti = htiPrev;
-					htiPrev = GetPrevVisibleItem(hti);
-					
-					SelectSetFirstVisible(htiPrev ? htiPrev : hti);
-				}
-			}
+					HTREEITEM hti = GetFirstVisibleItem();
 
-			return TRUE;
+					// Shift up 2 ITEMS to get past the 'problem zone'
+					HTREEITEM htiPrev = GetPrevVisibleItem(hti);
+
+					if (htiPrev)
+					{
+						hti = htiPrev;
+						htiPrev = GetPrevVisibleItem(hti);
+
+						SelectSetFirstVisible(htiPrev ? htiPrev : hti);
+					}
+				}
+
+				return TRUE;
+			}
 		}
+	}
+	else if (GetFocus() == this)
+	{
+		ASSERT(!Misc::HasFlag(GetStyle(), WS_HSCROLL)); // TVS_NOHSCROLL
+
+		// When we HAVE the focus but NEITHER vert NOR horz scrollbars               
+		// windows will not forward this to parent so we must do it ourselves
+		GetParent()->SendMessage(WM_MOUSEWHEEL, MAKEWPARAM(nFlags, zDelta), MAKELPARAM(pt.x, pt.y));
+		return TRUE;
 	}
 
 	return CTreeCtrl::OnMouseWheel(nFlags, zDelta, pt);

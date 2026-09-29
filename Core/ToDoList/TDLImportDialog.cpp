@@ -549,7 +549,7 @@ CTDLImportToPage::CTDLImportToPage(BOOL bReadonlyTasklist, BOOL bTasklistHasSele
 	CPreferences prefs;
 
 	if (!m_bReadonlyTasklist)
-		m_nImportTo = prefs.GetProfileEnum(PREFSKEY, _T("ImportToWhere"), ACTIVETASKLIST);
+		m_nImportTo = prefs.GetProfileEnum(PREFSKEY, _T("ImportTo"), ACTIVETASKLIST);
 
 	m_nActiveTasklistPos = prefs.GetProfileInt(PREFSKEY, _T("TasklistPos"), SELECTEDTASK);
 
@@ -668,8 +668,9 @@ void CTDLImportToPage::OnOK()
 	CCmdNotifyPropertyPage::OnOK();
 
 	CPreferences prefs;
+	ASSERT(m_nImportTo >= 0);
 
-	prefs.WriteProfileInt(PREFSKEY, _T("ImportToWhere"), m_nImportTo);
+	prefs.WriteProfileInt(PREFSKEY, _T("ImportTo"), m_nImportTo);
 	prefs.WriteProfileInt(PREFSKEY, _T("TasklistPos"), m_nActiveTasklistPos);
 }
 

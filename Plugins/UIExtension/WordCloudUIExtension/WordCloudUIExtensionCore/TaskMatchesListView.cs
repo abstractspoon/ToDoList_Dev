@@ -61,17 +61,17 @@ namespace WordCloudUIExtension
 
 		private void RefreshIDColumnWidth()
 		{
-			if (Columns.Count > 2)
-			{
-				using (var graphics = CreateGraphics())
-				{
-					int headerPadding = (int)(graphics.MeasureString("o", Font).Width); // Fudge
-					int headerWidth = (int)(graphics.MeasureString(Columns[1].Text, Font).Width + (headerPadding * 2));
-					int maxItemWidth = (int)(graphics.MeasureString(m_MaxTaskId.ToString(), Font).Width + (2 * DPIScaling.Scale(2)));
+			if (Columns.Count < 2)
+				return;
 
-					Columns[1].Width = Math.Max(headerWidth, maxItemWidth);
-					Columns[0].Width = (ClientRectangle.Width - Columns[1].Width - 2);
-				}
+			using (var graphics = CreateGraphics())
+			{
+				int headerPadding = (int)(graphics.MeasureString("o", Font).Width); // Fudge
+				int headerWidth = (int)(graphics.MeasureString(Columns[1].Text, Font).Width + (headerPadding * 2));
+				int maxItemWidth = (int)(graphics.MeasureString(m_MaxTaskId.ToString(), Font).Width + (2 * DPIScaling.Scale(2)));
+
+				Columns[1].Width = Math.Max(headerWidth, maxItemWidth);
+				Columns[0].Width = (ClientRectangle.Width - Columns[1].Width - 2);
 			}
 		}
 
@@ -101,7 +101,7 @@ namespace WordCloudUIExtension
 			}
 		}
 
-		protected override CheckBoxState GetTaskCheckboxState(ITaskBase task)
+		protected override CheckBoxState GetTaskCheckboxState(IListViewTask task)
 		{
 			if (m_ShowMixedCompletionState)
 			{
@@ -198,7 +198,7 @@ namespace WordCloudUIExtension
 			return someUpdated;
 		}
 
-		protected override bool TaskMatches(ITaskBase task, String phrase, bool caseSensitive, bool wholeWord, bool findReplace)
+		protected override bool TaskMatches(IListViewTask task, String phrase, bool caseSensitive, bool wholeWord, bool findReplace)
 		{
 			var item = (task as CloudTaskItem);
 

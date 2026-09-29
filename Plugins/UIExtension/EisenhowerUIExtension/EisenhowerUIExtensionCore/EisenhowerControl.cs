@@ -693,22 +693,22 @@ namespace EisenhowerUIExtension
 
 		// Message handlers --------------------------------
 
-		private bool OnPaneEditTaskDone(object sender, ITaskBase task)
+		private bool OnPaneEditTaskDone(object sender, IListViewTask task)
 		{
 			return (bool)EditTaskDone?.Invoke(sender, task);
 		}
 
-		private bool OnPaneEditTaskIcon(object sender, ITaskBase task)
+		private bool OnPaneEditTaskIcon(object sender, IListViewTask task)
 		{
 			return (bool)EditTaskIcon?.Invoke(sender, task);
 		}
 
-		private bool OnPaneEditTaskLabel(object sender, ITaskBase task)
+		private bool OnPaneEditTaskLabel(object sender, IListViewTask task)
 		{
 			return (bool)EditTaskLabel?.Invoke(sender, task);
 		}
 
-		private bool OnPaneIsTaskDraggable(object sender, ITaskBase task)
+		private bool OnPaneIsTaskDraggable(object sender, IListViewTask task)
 		{
 			if (task.IsParent)
 			{
@@ -1127,7 +1127,7 @@ namespace EisenhowerUIExtension
 			}
 		}
 
-		private bool IsTaskDroppable(ITaskBase task, EisenhowerPane srcPane, EisenhowerPane destPane)
+		private bool IsTaskDroppable(IListViewTask task, EisenhowerPane srcPane, EisenhowerPane destPane)
 		{
 			if ((task == null) || task.IsLocked)
 				return false;

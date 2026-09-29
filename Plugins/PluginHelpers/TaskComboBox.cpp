@@ -42,9 +42,6 @@ public:
 	virtual property String^ Title { String^ get()		{ return m_ITask->Title; }; }
 	virtual property String^ Position { String^ get()	{ return m_ITask->Position; } }
 	virtual property bool HasIcon { bool get()			{ return m_ITask->HasIcon; } }
-	virtual property bool IsLocked { bool get()			{ return m_ITask->IsLocked; } }
-	virtual property bool IsParent { bool get()			{ return m_ITask->IsParent; } }
-	virtual property bool IsDone { bool get()			{ return m_ITask->IsDone; } }
 
 	virtual property Drawing::Color TextColor { Drawing::Color get() { return m_ITask->TextColor; } }
 
@@ -85,16 +82,11 @@ void TaskComboBox::Initialise(IEnumerable<ITaskBase^>^ taskItems,
 {
 	m_TaskIcons = taskIcons;
 
-	if (noneTask != nullptr)
-	{
-		auto wrap = gcnew ComboTask(noneTask);
-		Items->Add(wrap);
-
-		m_NoneTask = wrap;
-	}
-
 	auto sortedTasks = Enumerable::ToList(taskItems);
 	sortedTasks->Sort(gcnew TaskPosComparer());
+
+	if (noneTask != nullptr)
+		sortedTasks->Insert(0, noneTask);
 
 	for each(auto task in sortedTasks)
 	{
@@ -103,6 +95,9 @@ void TaskComboBox::Initialise(IEnumerable<ITaskBase^>^ taskItems,
 
 		if (task->Id == selTaskId)
 			SelectIndex(Items->Count - 1);
+
+		if (noneTask && (task->Id == noneTask->Id))
+			m_NoneTask = wrap;
 	}
 	m_OrgSelectedIndex = SelectedIndex;
 

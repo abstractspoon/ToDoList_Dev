@@ -525,7 +525,7 @@ namespace EisenhowerUIExtension
 			ResizeList();
 		}
 
-		private bool OnListEditTaskDone(object sender, ITaskBase task)
+		private bool OnListEditTaskDone(object sender, IListViewTask task)
 		{
 			if (m_ReadOnly)
 				return false;
@@ -533,7 +533,7 @@ namespace EisenhowerUIExtension
 			return (bool)EditTaskDone?.Invoke(sender, task);
 		}
 
-		private bool OnListEditTaskIcon(object sender, ITaskBase task)
+		private bool OnListEditTaskIcon(object sender, IListViewTask task)
 		{
 			if (m_ReadOnly)
 				return false;
@@ -541,7 +541,7 @@ namespace EisenhowerUIExtension
 			return (bool)EditTaskIcon?.Invoke(this, task);
 		}
 
-		private bool OnListEditTaskLabel(object sender, ITaskBase task)
+		private bool OnListEditTaskLabel(object sender, IListViewTask task)
 		{
 			if (m_ReadOnly)
 				return false;
@@ -549,7 +549,7 @@ namespace EisenhowerUIExtension
 			return (bool)EditTaskLabel?.Invoke(this, task);
 		}
 
-		private bool OnListIsTaskDraggable(object sender, ITaskBase task)
+		private bool OnListIsTaskDraggable(object sender, IListViewTask task)
 		{
 			if (m_Matrix.XVariable.ReadOnly && m_Matrix.YVariable.ReadOnly)
 				return false;

@@ -4109,7 +4109,7 @@ int CTDLTaskCtrlBase::CalcSplitterPosToFitListColumns() const
 	CWnd::GetClientRect(rClient);
 
 	int nNewSplitPos = 0;
-	int nColsWidth = ((rLast.right - rFirst.left) + 10);
+	int nColsWidth = ((rLast.right - rFirst.left) + LV_COLPADDING);
 
 	if (IsRight(m_lcColumns))
 	{
@@ -4274,20 +4274,18 @@ LRESULT CTDLTaskCtrlBase::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 			{
 				LPNMHDR pNMHDR = (LPNMHDR)lp;
 				HWND hwnd = pNMHDR->hwndFrom;
+				ASSERT(hwnd == m_hdrColumns);
 				
 				switch (pNMHDR->code)
 				{
 				case NM_RCLICK:
-					// headers don't generate their own WM_CONTEXTMENU
-					if (hwnd == m_hdrColumns)
 					{
-						// pass on to parent
+						// headers don't generate their own WM_CONTEXTMENU
 						::SendMessage(GetHwnd(), WM_CONTEXTMENU, (WPARAM)hwnd, ::GetMessagePos());
 					}
 					break;
 
 				case HDN_DIVIDERDBLCLICK:
-					if (hwnd == m_hdrColumns)
 					{
 						// resize just that column
 						int nItem = ((NMHEADER*)pNMHDR)->iItem;
@@ -4301,17 +4299,22 @@ LRESULT CTDLTaskCtrlBase::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 							GetColumnTaskIDs(aTaskIDs);
 
 							int nColWidth = CalcColumnWidth(nItem, &dc, aTaskIDs);
-							
-							m_hdrColumns.SetItemWidth(nItem, nColWidth);
-							m_hdrColumns.SetItemTracked(nItem, FALSE); // width now auto-calc'ed
-							
 							dc.SelectObject(hOldFont);
+
+							if (nColWidth != m_hdrColumns.GetItemWidth(nItem))
+							{
+								m_hdrColumns.SetItemWidth(nItem, nColWidth);
+
+								if (m_bAutoFitSplitter)
+									AdjustSplitterToFitAttributeColumns();
+							}
+
+							m_hdrColumns.SetItemTracked(nItem, FALSE); // width now auto-calc'ed
 						}
-						return 0L;
 					}
+					return 0L;
 
 				case HDN_ITEMCLICK:
-					if (hwnd == m_hdrColumns)
 					{
 						NMHEADER* pHDN = (NMHEADER*)pNMHDR;
 
@@ -4320,8 +4323,12 @@ LRESULT CTDLTaskCtrlBase::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 						{
 							OnHeaderClick(GetColumnID(pHDN->iItem));
 						}
-						return 0L;
 					}
+					return 0L;
+
+				case HDN_ENDTRACK:
+					if (m_bAutoFitSplitter)
+						AdjustSplitterToFitAttributeColumns();
 					break;
 				}
 			}

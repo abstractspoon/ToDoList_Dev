@@ -44,6 +44,7 @@
 			// m_MatricesLabel
 			// 
 			this.m_MatricesLabel.AutoSize = true;
+			this.m_MatricesLabel.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.m_MatricesLabel.Location = new System.Drawing.Point(-3, 3);
 			this.m_MatricesLabel.Name = "m_MatricesLabel";
 			this.m_MatricesLabel.Size = new System.Drawing.Size(47, 13);
@@ -53,6 +54,7 @@
 			// m_OptionsLabel
 			// 
 			this.m_OptionsLabel.AutoSize = true;
+			this.m_OptionsLabel.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.m_OptionsLabel.Location = new System.Drawing.Point(223, 3);
 			this.m_OptionsLabel.Name = "m_OptionsLabel";
 			this.m_OptionsLabel.Size = new System.Drawing.Size(43, 13);
@@ -70,7 +72,7 @@
 			this.m_Toolbar.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.Flow;
 			this.m_Toolbar.Location = new System.Drawing.Point(391, 16);
 			this.m_Toolbar.Name = "m_Toolbar";
-			this.m_Toolbar.Size = new System.Drawing.Size(78, 23);
+			this.m_Toolbar.Size = new System.Drawing.Size(47, 23);
 			this.m_Toolbar.TabIndex = 28;
 			this.m_Toolbar.Text = "toolStrip1";
 			// 
