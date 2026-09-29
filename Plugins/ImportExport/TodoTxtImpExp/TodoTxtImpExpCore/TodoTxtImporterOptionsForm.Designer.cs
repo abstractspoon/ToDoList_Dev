@@ -33,12 +33,13 @@
 			this.m_ContextAsTagBtn = new System.Windows.Forms.RadioButton();
 			this.m_ProjectAsCategoryBtn = new System.Windows.Forms.RadioButton();
 			this.m_ProjectAsTagBtn = new System.Windows.Forms.RadioButton();
-			this.m_ProjectAsParentTaskBtn = new System.Windows.Forms.RadioButton();
+			this.m_ProjectAsCustomBtn = new System.Windows.Forms.RadioButton();
 			this.m_OK = new System.Windows.Forms.Button();
 			this.m_Cancel = new System.Windows.Forms.Button();
 			this.m_ContextGroup = new System.Windows.Forms.GroupBox();
 			this.m_ProjectGroup = new System.Windows.Forms.GroupBox();
 			this.panel1 = new System.Windows.Forms.Panel();
+			this.m_ContextAsCustomBtn = new System.Windows.Forms.RadioButton();
 			this.m_ContextGroup.SuspendLayout();
 			this.m_ProjectGroup.SuspendLayout();
 			this.panel1.SuspendLayout();
@@ -55,13 +56,11 @@
 			// m_ContextAsCategoryBtn
 			// 
 			this.m_ContextAsCategoryBtn.AutoSize = true;
-			this.m_ContextAsCategoryBtn.Checked = true;
 			this.m_ContextAsCategoryBtn.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.m_ContextAsCategoryBtn.Location = new System.Drawing.Point(15, 19);
 			this.m_ContextAsCategoryBtn.Name = "m_ContextAsCategoryBtn";
 			this.m_ContextAsCategoryBtn.Size = new System.Drawing.Size(75, 17);
 			this.m_ContextAsCategoryBtn.TabIndex = 1;
-			this.m_ContextAsCategoryBtn.TabStop = true;
 			this.m_ContextAsCategoryBtn.Text = "Categories";
 			this.m_ContextAsCategoryBtn.UseVisualStyleBackColor = true;
 			// 
@@ -98,24 +97,24 @@
 			this.m_ProjectAsTagBtn.Text = "Tags";
 			this.m_ProjectAsTagBtn.UseVisualStyleBackColor = true;
 			// 
-			// m_ProjectAsParentTaskBtn
+			// m_ProjectAsCustomBtn
 			// 
-			this.m_ProjectAsParentTaskBtn.AutoSize = true;
-			this.m_ProjectAsParentTaskBtn.Checked = true;
-			this.m_ProjectAsParentTaskBtn.ForeColor = System.Drawing.SystemColors.WindowText;
-			this.m_ProjectAsParentTaskBtn.Location = new System.Drawing.Point(14, 65);
-			this.m_ProjectAsParentTaskBtn.Name = "m_ProjectAsParentTaskBtn";
-			this.m_ProjectAsParentTaskBtn.Size = new System.Drawing.Size(88, 17);
-			this.m_ProjectAsParentTaskBtn.TabIndex = 1;
-			this.m_ProjectAsParentTaskBtn.TabStop = true;
-			this.m_ProjectAsParentTaskBtn.Text = "Parent Tasks";
-			this.m_ProjectAsParentTaskBtn.UseVisualStyleBackColor = true;
+			this.m_ProjectAsCustomBtn.AutoSize = true;
+			this.m_ProjectAsCustomBtn.Checked = true;
+			this.m_ProjectAsCustomBtn.ForeColor = System.Drawing.SystemColors.WindowText;
+			this.m_ProjectAsCustomBtn.Location = new System.Drawing.Point(14, 65);
+			this.m_ProjectAsCustomBtn.Name = "m_ProjectAsCustomBtn";
+			this.m_ProjectAsCustomBtn.Size = new System.Drawing.Size(101, 17);
+			this.m_ProjectAsCustomBtn.TabIndex = 1;
+			this.m_ProjectAsCustomBtn.TabStop = true;
+			this.m_ProjectAsCustomBtn.Text = "Custom attribute";
+			this.m_ProjectAsCustomBtn.UseVisualStyleBackColor = true;
 			// 
 			// m_OK
 			// 
 			this.m_OK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.m_OK.DialogResult = System.Windows.Forms.DialogResult.OK;
-			this.m_OK.Location = new System.Drawing.Point(154, 219);
+			this.m_OK.Location = new System.Drawing.Point(154, 248);
 			this.m_OK.Name = "m_OK";
 			this.m_OK.Size = new System.Drawing.Size(75, 23);
 			this.m_OK.TabIndex = 2;
@@ -126,7 +125,7 @@
 			// 
 			this.m_Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.m_Cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-			this.m_Cancel.Location = new System.Drawing.Point(236, 219);
+			this.m_Cancel.Location = new System.Drawing.Point(236, 248);
 			this.m_Cancel.Name = "m_Cancel";
 			this.m_Cancel.Size = new System.Drawing.Size(75, 23);
 			this.m_Cancel.TabIndex = 2;
@@ -137,10 +136,11 @@
 			// 
 			this.m_ContextGroup.Controls.Add(this.m_ContextAsCategoryBtn);
 			this.m_ContextGroup.Controls.Add(this.m_ContextAsTagBtn);
+			this.m_ContextGroup.Controls.Add(this.m_ContextAsCustomBtn);
 			this.m_ContextGroup.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.m_ContextGroup.Location = new System.Drawing.Point(12, 112);
 			this.m_ContextGroup.Name = "m_ContextGroup";
-			this.m_ContextGroup.Size = new System.Drawing.Size(271, 69);
+			this.m_ContextGroup.Size = new System.Drawing.Size(271, 96);
 			this.m_ContextGroup.TabIndex = 3;
 			this.m_ContextGroup.TabStop = false;
 			this.m_ContextGroup.Text = "Import \'Contexts\' as";
@@ -149,7 +149,7 @@
 			// 
 			this.m_ProjectGroup.Controls.Add(this.m_ProjectAsCategoryBtn);
 			this.m_ProjectGroup.Controls.Add(this.m_ProjectAsTagBtn);
-			this.m_ProjectGroup.Controls.Add(this.m_ProjectAsParentTaskBtn);
+			this.m_ProjectGroup.Controls.Add(this.m_ProjectAsCustomBtn);
 			this.m_ProjectGroup.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.m_ProjectGroup.Location = new System.Drawing.Point(13, 8);
 			this.m_ProjectGroup.Name = "m_ProjectGroup";
@@ -160,6 +160,9 @@
 			// 
 			// panel1
 			// 
+			this.panel1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this.panel1.BackColor = System.Drawing.SystemColors.Window;
 			this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
 			this.panel1.Controls.Add(this.m_ProjectGroup);
@@ -167,15 +170,27 @@
 			this.panel1.Controls.Add(this.label1);
 			this.panel1.Location = new System.Drawing.Point(12, 13);
 			this.panel1.Name = "panel1";
-			this.panel1.Size = new System.Drawing.Size(298, 195);
+			this.panel1.Size = new System.Drawing.Size(298, 223);
 			this.panel1.TabIndex = 5;
+			// 
+			// m_ContextAsCustomBtn
+			// 
+			this.m_ContextAsCustomBtn.AutoSize = true;
+			this.m_ContextAsCustomBtn.Checked = true;
+			this.m_ContextAsCustomBtn.ForeColor = System.Drawing.SystemColors.WindowText;
+			this.m_ContextAsCustomBtn.Location = new System.Drawing.Point(15, 65);
+			this.m_ContextAsCustomBtn.Name = "m_ContextAsCustomBtn";
+			this.m_ContextAsCustomBtn.Size = new System.Drawing.Size(101, 17);
+			this.m_ContextAsCustomBtn.TabIndex = 1;
+			this.m_ContextAsCustomBtn.Text = "Custom attribute";
+			this.m_ContextAsCustomBtn.UseVisualStyleBackColor = true;
 			// 
 			// TodoTxtImporterOptionsForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.CancelButton = this.m_Cancel;
-			this.ClientSize = new System.Drawing.Size(322, 250);
+			this.ClientSize = new System.Drawing.Size(322, 279);
 			this.Controls.Add(this.m_Cancel);
 			this.Controls.Add(this.m_OK);
 			this.Controls.Add(this.panel1);
@@ -204,11 +219,12 @@
 		private System.Windows.Forms.RadioButton m_ContextAsTagBtn;
 		private System.Windows.Forms.RadioButton m_ProjectAsCategoryBtn;
 		private System.Windows.Forms.RadioButton m_ProjectAsTagBtn;
-		private System.Windows.Forms.RadioButton m_ProjectAsParentTaskBtn;
+		private System.Windows.Forms.RadioButton m_ProjectAsCustomBtn;
 		private System.Windows.Forms.Button m_OK;
 		private System.Windows.Forms.Button m_Cancel;
 		private System.Windows.Forms.GroupBox m_ContextGroup;
 		private System.Windows.Forms.GroupBox m_ProjectGroup;
 		private System.Windows.Forms.Panel panel1;
+		private System.Windows.Forms.RadioButton m_ContextAsCustomBtn;
 	}
 }

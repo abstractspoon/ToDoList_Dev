@@ -46,7 +46,7 @@ namespace TodoTxtImpExp
 
 				destTasks.Save(destFilePath);
 			}
-			catch (Exception e)
+			catch (Exception /*e*/)
 			{
 				return false;
 			}

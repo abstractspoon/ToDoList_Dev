@@ -28,7 +28,7 @@ namespace TodoTxtImpExp
 			m_ContextAsTagBtn.Checked			= prefs.GetProfileBool(prefKey, "ImportContextAsTag", false);
 			m_ProjectAsCategoryBtn.Checked		= prefs.GetProfileBool(prefKey, "ImporProjectAsCategoryt", false);
 			m_ProjectAsTagBtn.Checked			= prefs.GetProfileBool(prefKey, "ImportProjectAsTag", false);
-			m_ProjectAsParentTaskBtn.Checked	= prefs.GetProfileBool(prefKey, "ImportProjectAsParentTask", true);
+			m_ProjectAsCustomBtn.Checked	= prefs.GetProfileBool(prefKey, "ImportProjectAsParentTask", true);
 
 			var res = base.ShowDialog();
 
@@ -39,7 +39,7 @@ namespace TodoTxtImpExp
 				prefs.WriteProfileBool(prefKey, "ImportContextAsTag", m_ContextAsTagBtn.Checked);
 				prefs.WriteProfileBool(prefKey, "ImporProjectAsCategoryt", m_ProjectAsCategoryBtn.Checked);
 				prefs.WriteProfileBool(prefKey, "ImportProjectAsTag", m_ProjectAsTagBtn.Checked);
-				prefs.WriteProfileBool(prefKey, "ImportProjectAsParentTask", m_ProjectAsParentTaskBtn.Checked);
+				prefs.WriteProfileBool(prefKey, "ImportProjectAsParentTask", m_ProjectAsCustomBtn.Checked);
 			}
 
 			return res;
@@ -50,6 +50,6 @@ namespace TodoTxtImpExp
 
 		public bool ImportProjectAsCategory		{ get { return m_ProjectAsCategoryBtn.Checked; } }
 		public bool ImportProjectAsTag			{ get { return m_ProjectAsTagBtn.Checked; } }
-		public bool ImportProjectAsParentTask	{ get { return m_ProjectAsParentTaskBtn.Checked; } }
+		public bool ImportProjectAsParentTask	{ get { return m_ProjectAsCustomBtn.Checked; } }
 	}
 }

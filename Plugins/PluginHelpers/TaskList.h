@@ -350,6 +350,7 @@ namespace Abstractspoon
 				Task^ NewTask(String^ sTitle);
 
 				bool AddCustomAttribute(String^ sID, String^ sLabel, String^ sColumn);
+				bool AddCustomListAttribute(String^ sID, String^ sLabel, String^ sColumn);
 				bool SetMetaData(String^ sKey, String^ sValue);
 				bool ClearMetaData(String^ sKey);
 				
