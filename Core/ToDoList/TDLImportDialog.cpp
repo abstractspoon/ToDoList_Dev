@@ -170,7 +170,9 @@ CString CTDLImportDialog::GetCurrentImporterFilter() const
 void CTDLImportDialog::OnOK()
 {
 	CTDLDialog::OnOK();
+	m_ppHost.OnOK();
 
+	// Save state
 	CPreferences prefs;
 
 	prefs.WriteProfileInt(m_sPrefsKey, _T("ImportOption"), m_pageFrom.GetImportFromText());
