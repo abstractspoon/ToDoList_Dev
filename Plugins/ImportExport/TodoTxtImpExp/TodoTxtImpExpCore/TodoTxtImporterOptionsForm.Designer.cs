@@ -34,8 +34,8 @@
 			this.panel1 = new System.Windows.Forms.Panel();
 			this.label2 = new System.Windows.Forms.Label();
 			this.label3 = new System.Windows.Forms.Label();
-			this.m_ProjectsAttribCombo = new TodoTxtAttributeComboBox();
-			this.m_ContextsAttribCombo = new TodoTxtAttributeComboBox();
+			this.m_ProjectsAttribCombo = new TodoTxtImporterAttributeComboBox();
+			this.m_ContextsAttribCombo = new TodoTxtImporterAttributeComboBox();
 			this.panel1.SuspendLayout();
 			this.SuspendLayout();
 			// 
@@ -151,8 +151,8 @@
 		private System.Windows.Forms.Button m_OK;
 		private System.Windows.Forms.Button m_Cancel;
 		private System.Windows.Forms.Panel panel1;
-		private TodoTxtAttributeComboBox m_ContextsAttribCombo;
-		private TodoTxtAttributeComboBox m_ProjectsAttribCombo;
+		private TodoTxtImporterAttributeComboBox m_ContextsAttribCombo;
+		private TodoTxtImporterAttributeComboBox m_ProjectsAttribCombo;
 		private System.Windows.Forms.Label label3;
 		private System.Windows.Forms.Label label2;
 	}

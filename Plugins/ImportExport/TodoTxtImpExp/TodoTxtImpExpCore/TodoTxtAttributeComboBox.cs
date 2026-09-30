@@ -13,11 +13,6 @@ namespace TodoTxtImpExp
 {
 	public partial class TodoTxtAttributeComboBox : ComboBox
 	{
-		public const string ProjectsCustAttribId = "CUST_TDT_PROJECTS";
-		public const string ContextsCustAttribId = "CUST_TDT_CONTEXTS";
-
-		// ----------------------------------------------------------
-
 		public TodoTxtAttributeComboBox()
 		{
 			InitializeComponent();
@@ -30,39 +25,53 @@ namespace TodoTxtImpExp
 			InitializeComponent();
 		}
 
-		public void Populate(bool importing, TaskList tasks, Translator trans)
+		public void Populate(IEnumerable<TaskAttributeItem> availAttribs,
+							 IEnumerable<CustomAttributeDefinition> customAttribs, Translator trans)
 		{
+			BeginUpdate();
 			Items.Clear();
 
-			foreach (var attrib in tasks.GetAvailableAttributes(trans))
+			var comboAttribs = new List<TaskAttributeItem>();
+
+			// Built-in attributes
+			foreach (var attrib in availAttribs)
 			{
 				switch (attrib.AttributeId)
 				{
-				case Task.Attribute.Category:
 				case Task.Attribute.Tags:
-					Items.Add(attrib);
-					break;
-
-				case Task.Attribute.CustomAttribute:
-					if (attrib.CustomAttributeType == CustomAttributeDefinition.Attribute.String)
-					{
-						// TODO
-						Items.Add(attrib);
-					}
+				case Task.Attribute.Category:
+					Items.Add(new TaskAttributeItem() { AttributeId = attrib.AttributeId, Label = attrib.Label });
 					break;
 				}
 			}
+
+			// Custom string-list attributes
+			foreach (var custAttrib in customAttribs)
+			{
+				Debug.Assert(custAttrib.AttributeType == CustomAttributeDefinition.Attribute.String);
+
+				if ((custAttrib.ListType == CustomAttributeDefinition.List.AutoMulti) ||
+					(custAttrib.ListType == CustomAttributeDefinition.List.FixedMulti))
+				{
+					Items.Add(new TaskAttributeItem()
+					{
+						AttributeId = Task.Attribute.CustomAttribute,
+						CustomAttributeId = custAttrib.Id,
+						Label = string.Format(trans.Translate("{0} (Custom)", Translator.Type.Text), custAttrib.Label)
+					});
+				}
+			}
+
+			EndUpdate();
 		}
 
-		public bool SelectedAttributeIsTags		{ get { return (SelectedAttributeId == Task.Attribute.Tags); } }
-		public bool SelectedAttributeIsCategory { get { return (SelectedAttributeId == Task.Attribute.Category); } }
-		public bool SelectedAttributeIsCustom	{ get { return (SelectedAttributeId == Task.Attribute.CustomAttribute); } }
+		public Task.Attribute SelectedAttributeId { get { return (SelectedAttribute?.AttributeId ?? Task.Attribute.Unknown); } }
 
 		public string SelectedAttributeCustomId
 		{
 			get
 			{
-				if (!SelectedAttributeIsCustom)
+				if (SelectedAttributeId != Task.Attribute.CustomAttribute)
 					return string.Empty;
 
 				// else 
@@ -70,9 +79,28 @@ namespace TodoTxtImpExp
 			}
 		}
 
+		public bool SelectAttribute(Task.Attribute attribId, string custAttribId = "")
+		{
+			foreach (var item in Items)
+			{
+				var taskAttrib = (item as TaskAttributeItem);
+
+				if (attribId == taskAttrib.AttributeId)
+				{
+					if ((attribId != Task.Attribute.CustomAttribute) ||
+						(custAttribId == taskAttrib.CustomAttributeId))
+					{
+						SelectedItem = item;
+						return true;
+					}
+				}
+			}
+
+			return false;
+		}
+
 		// ----------------------------------------------------------------
 
 		TaskAttributeItem SelectedAttribute { get { return (SelectedItem as TaskAttributeItem); } }
-		Task.Attribute SelectedAttributeId { get { return (SelectedAttribute?.AttributeId ?? Task.Attribute.Unknown); } }
 	}
 }

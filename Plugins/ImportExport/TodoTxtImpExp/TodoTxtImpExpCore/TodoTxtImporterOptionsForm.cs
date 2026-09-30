@@ -27,9 +27,11 @@ namespace TodoTxtImpExp
 			FormsUtil.SetFont(this, UIExtension.ControlFont());
 			trans.Translate(this);
 
-			// combo items are pre-translated
-			m_ContextsAttribCombo.Populate(true, tasks, trans);
-			m_ProjectsAttribCombo.Populate(true, tasks, trans);
+			var availAttribs = tasks.GetAvailableAttributes(trans);
+			var customAttribs = tasks.GetCustomAttributes(CustomAttributeDefinition.Attribute.String);
+
+			m_ContextsAttribCombo.Populate(availAttribs, customAttribs, "Context", "CUST_TDT_CONTEXTS", trans);
+			m_ProjectsAttribCombo.Populate(availAttribs, customAttribs, "Project", "CUST_TDT_PROJECTS", trans);
 		}
 
 		public DialogResult ShowDialog(Preferences prefs, string prefKey)
@@ -61,16 +63,37 @@ namespace TodoTxtImpExp
 			return res;
 		}
 
-		public bool ImportContextsAsTags		{ get { return m_ContextsAttribCombo.SelectedAttributeIsTags; } }
-		public bool ImportContextsAsCategory	{ get { return m_ContextsAttribCombo.SelectedAttributeIsCategory; } }
-		public bool ImportContextsAsCustom		{ get { return m_ContextsAttribCombo.SelectedAttributeIsCustom; } }
+		public bool ImportContextsAsTags		{ get { return (m_ContextsAttribCombo.SelectedAttributeId == Task.Attribute.Tags); } }
+		public bool ImportContextsAsCategory	{ get { return (m_ContextsAttribCombo.SelectedAttributeId == Task.Attribute.Category); } }
+		public bool ImportContextsAsCustom		{ get { return !string.IsNullOrEmpty(ImportContextsAsCustomId); } }
 
 		public string ImportContextsAsCustomId	{ get { return m_ContextsAttribCombo.SelectedAttributeCustomId; } }
 
-		public bool ImportProjectsAsTags		{ get { return m_ProjectsAttribCombo.SelectedAttributeIsTags; } }
-		public bool ImportProjectsAsCategory	{ get { return m_ProjectsAttribCombo.SelectedAttributeIsCategory; } }
-		public bool ImportProjectsAsCustom		{ get { return m_ProjectsAttribCombo.SelectedAttributeIsCustom; } }
+		public bool ImportProjectsAsTags		{ get { return (m_ProjectsAttribCombo.SelectedAttributeId == Task.Attribute.Tags); } }
+		public bool ImportProjectsAsCategory	{ get { return (m_ProjectsAttribCombo.SelectedAttributeId == Task.Attribute.Category); } }
+		public bool ImportProjectsAsCustom		{ get { return !string.IsNullOrEmpty(ImportProjectsAsCustomId); } }
 
 		public string ImportProjectsAsCustomId	{ get { return m_ProjectsAttribCombo.SelectedAttributeCustomId; } }
 	}
+
+	/////////////////////////////////////////////////////////////////
+
+	class TodoTxtImporterAttributeComboBox : TodoTxtAttributeComboBox
+	{
+		public void Populate(IEnumerable<TaskAttributeItem> availAttribs,
+							 IEnumerable<CustomAttributeDefinition> customAttribs,
+							 string newCustAttribLabel, string newCustAttribId, Translator trans)
+		{
+			base.Populate(availAttribs, customAttribs, trans);
+
+			// Add the relevant 'new' custom attribute
+			Items.Add(new TaskAttributeItem()
+			{
+				AttributeId = Task.Attribute.CustomAttribute,
+				CustomAttributeId = newCustAttribId,
+				Label = string.Format(trans.Translate("{0} (Custom)", Translator.Type.Text), trans.Translate(newCustAttribLabel, Translator.Type.ComboBox))
+			});
+		}
+	}
+
 }
