@@ -116,9 +116,6 @@ copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\Core\ToDoList\unicode_$(Con
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="icon1.ico" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\TodoTxtImpExpCore\TodoTxtImpExpCore.csproj">
       <Project>{ded36cae-36e0-4e6b-b3ac-7300e62118d8}</Project>
     </ProjectReference>
