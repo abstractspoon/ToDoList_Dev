@@ -13,43 +13,64 @@ namespace TodoTxtImpExp
 {
 	public partial class TodoTxtExporterOptionsForm : Form
 	{
-		public TodoTxtExporterOptionsForm(Translator trans)
+		const Task.Attribute DefaultProjectsAttribId = Task.Attribute.Tags;
+		const Task.Attribute DefaultContextsAttribId = Task.Attribute.Category;
+
+		// ------------------------------------------------------
+
+		public TodoTxtExporterOptionsForm(TaskList tasks, Translator trans)
 		{
 			InitializeComponent();
 
 			FormsUtil.SetFont(this, UIExtension.ControlFont());
 			trans.Translate(this);
+
+			var availAttribs = tasks.GetAvailableAttributes(trans);
+			var customAttribs = tasks.GetCustomAttributes(CustomAttributeDefinition.Attribute.String);
+
+			m_ContextsAttribCombo.Populate(availAttribs, customAttribs, trans);
+			m_ProjectsAttribCombo.Populate(availAttribs, customAttribs, trans);
 		}
 
 		public DialogResult ShowDialog(Preferences prefs, string prefKey)
 		{
 			// Restore previous state
-			m_ContextAsCategoryBtn.Checked		= prefs.GetProfileBool(prefKey, "ImportContextAsCategory", true);
-			m_ContextAsTagBtn.Checked			= prefs.GetProfileBool(prefKey, "ImportContextAsTag", false);
-			m_ProjectAsCategoryBtn.Checked		= prefs.GetProfileBool(prefKey, "ImporProjectAsCategoryt", false);
-			m_ProjectAsTagBtn.Checked			= prefs.GetProfileBool(prefKey, "ImportProjectAsTag", false);
-			m_ProjectAsCustomBtn.Checked	= prefs.GetProfileBool(prefKey, "ImportProjectAsParentTask", true);
+			var contextsAttribId = prefs.GetProfileEnum(prefKey, "ExportContextAsAttrib", DefaultContextsAttribId);
+			var contextsCustAttribId = prefs.GetProfileString(prefKey, "ExportContextAsCustomId", string.Empty);
+
+			if (!m_ContextsAttribCombo.SelectAttribute(contextsAttribId, contextsCustAttribId))
+				m_ContextsAttribCombo.SelectAttribute(DefaultContextsAttribId);
+
+			var projectsAttribId = prefs.GetProfileEnum(prefKey, "ExportProjectAsAttrib", DefaultProjectsAttribId);
+			var projectsCustAttribId = prefs.GetProfileString(prefKey, "ExportProjectAsCustomId", string.Empty);
+
+			if (!m_ProjectsAttribCombo.SelectAttribute(projectsAttribId, projectsCustAttribId))
+				m_ProjectsAttribCombo.SelectAttribute(DefaultProjectsAttribId);
 
 			var res = base.ShowDialog();
 
 			if (res == DialogResult.OK)
 			{
 				// Save state
-				prefs.WriteProfileBool(prefKey, "ImportContextAsCategory", m_ContextAsCategoryBtn.Checked);
-				prefs.WriteProfileBool(prefKey, "ImportContextAsTag", m_ContextAsTagBtn.Checked);
-				prefs.WriteProfileBool(prefKey, "ImporProjectAsCategoryt", m_ProjectAsCategoryBtn.Checked);
-				prefs.WriteProfileBool(prefKey, "ImportProjectAsTag", m_ProjectAsTagBtn.Checked);
-				prefs.WriteProfileBool(prefKey, "ImportProjectAsParentTask", m_ProjectAsCustomBtn.Checked);
+				prefs.WriteProfileEnum(prefKey, "ExportContextAsAttrib", m_ContextsAttribCombo.SelectedAttributeId);
+				prefs.WriteProfileEnum(prefKey, "ExportProjectAsAttrib", m_ProjectsAttribCombo.SelectedAttributeId);
+				prefs.WriteProfileString(prefKey, "ExportContextAsCustomId", ExportContextsAsCustomId);
+				prefs.WriteProfileString(prefKey, "ExportProjectAsCustomId", ExportProjectsAsCustomId);
 			}
 
 			return res;
 		}
 
-		public bool ImportContextAsCategory		{ get { return m_ContextAsCategoryBtn.Checked; } }
-		public bool ImportContextAsTag			{ get { return m_ContextAsTagBtn.Checked; } }
+		public bool ExportContextsAsTags		{ get { return (m_ContextsAttribCombo.SelectedAttributeId == Task.Attribute.Tags); } }
+		public bool ExportContextsAsCategory	{ get { return (m_ContextsAttribCombo.SelectedAttributeId == Task.Attribute.Category); } }
+		public bool ExportContextsAsCustom		{ get { return !string.IsNullOrEmpty(ExportContextsAsCustomId); } }
 
-		public bool ImportProjectAsCategory		{ get { return m_ProjectAsCategoryBtn.Checked; } }
-		public bool ImportProjectAsTag			{ get { return m_ProjectAsTagBtn.Checked; } }
-		public bool ImportProjectAsParentTask	{ get { return m_ProjectAsCustomBtn.Checked; } }
+		public string ExportContextsAsCustomId	{ get { return m_ContextsAttribCombo.SelectedAttributeCustomId; } }
+
+		public bool ExportProjectsAsTags		{ get { return (m_ProjectsAttribCombo.SelectedAttributeId == Task.Attribute.Tags); } }
+		public bool ExportProjectsAsCategory	{ get { return (m_ProjectsAttribCombo.SelectedAttributeId == Task.Attribute.Category); } }
+		public bool ExportProjectsAsCustom		{ get { return !string.IsNullOrEmpty(ExportProjectsAsCustomId); } }
+
+		public string ExportProjectsAsCustomId	{ get { return m_ProjectsAttribCombo.SelectedAttributeCustomId; } }
 	}
 }

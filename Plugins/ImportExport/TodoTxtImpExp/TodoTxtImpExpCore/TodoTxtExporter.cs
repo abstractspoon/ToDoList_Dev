@@ -22,7 +22,7 @@ namespace TodoTxtImpExp
 
         public bool Export(TaskList srcTasks, string destFilePath, bool silent, Preferences prefs, string prefKey)
         {
-			var options = new TodoTxtExporterOptionsForm(m_Trans);
+			var options = new TodoTxtExporterOptionsForm(srcTasks, m_Trans);
 
 			if (options.ShowDialog(prefs, prefKey) != DialogResult.OK)
 				return false;
@@ -70,8 +70,13 @@ namespace TodoTxtImpExp
 			var destTask = new ToDoLib.Task(priority, projects, contexts, body, dueDate, completed, thresholdDate)
 			{
 				// Creation Date
+                // TODO
+
 				// Primary Context
+                // TODO
+
 				// Primary Project
+                // TODO
 			};
 
             // Export task's children

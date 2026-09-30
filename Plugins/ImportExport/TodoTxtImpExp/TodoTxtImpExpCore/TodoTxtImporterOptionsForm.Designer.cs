@@ -32,10 +32,10 @@
 			this.m_OK = new System.Windows.Forms.Button();
 			this.m_Cancel = new System.Windows.Forms.Button();
 			this.panel1 = new System.Windows.Forms.Panel();
-			this.label2 = new System.Windows.Forms.Label();
+			this.m_ContextsAttribCombo = new TodoTxtImpExp.TodoTxtImporterAttributeComboBox();
+			this.m_ProjectsAttribCombo = new TodoTxtImpExp.TodoTxtImporterAttributeComboBox();
 			this.label3 = new System.Windows.Forms.Label();
-			this.m_ProjectsAttribCombo = new TodoTxtImporterAttributeComboBox();
-			this.m_ContextsAttribCombo = new TodoTxtImporterAttributeComboBox();
+			this.label2 = new System.Windows.Forms.Label();
 			this.panel1.SuspendLayout();
 			this.SuspendLayout();
 			// 
@@ -86,23 +86,14 @@
 			this.panel1.Size = new System.Drawing.Size(298, 84);
 			this.panel1.TabIndex = 5;
 			// 
-			// label2
+			// m_ContextsAttribCombo
 			// 
-			this.label2.AutoSize = true;
-			this.label2.Location = new System.Drawing.Point(15, 14);
-			this.label2.Name = "label2";
-			this.label2.Size = new System.Drawing.Size(104, 13);
-			this.label2.TabIndex = 1;
-			this.label2.Text = "Import \'Projeccts\' as ";
-			// 
-			// label3
-			// 
-			this.label3.AutoSize = true;
-			this.label3.Location = new System.Drawing.Point(15, 49);
-			this.label3.Name = "label3";
-			this.label3.Size = new System.Drawing.Size(101, 13);
-			this.label3.TabIndex = 1;
-			this.label3.Text = "Import \'Contexts\' as ";
+			this.m_ContextsAttribCombo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.m_ContextsAttribCombo.FormattingEnabled = true;
+			this.m_ContextsAttribCombo.Location = new System.Drawing.Point(163, 46);
+			this.m_ContextsAttribCombo.Name = "m_ContextsAttribCombo";
+			this.m_ContextsAttribCombo.Size = new System.Drawing.Size(121, 21);
+			this.m_ContextsAttribCombo.TabIndex = 2;
 			// 
 			// m_ProjectsAttribCombo
 			// 
@@ -113,14 +104,23 @@
 			this.m_ProjectsAttribCombo.Size = new System.Drawing.Size(121, 21);
 			this.m_ProjectsAttribCombo.TabIndex = 2;
 			// 
-			// m_ContextsAttribCombo
+			// label3
 			// 
-			this.m_ContextsAttribCombo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-			this.m_ContextsAttribCombo.FormattingEnabled = true;
-			this.m_ContextsAttribCombo.Location = new System.Drawing.Point(163, 46);
-			this.m_ContextsAttribCombo.Name = "m_ContextsAttribCombo";
-			this.m_ContextsAttribCombo.Size = new System.Drawing.Size(121, 21);
-			this.m_ContextsAttribCombo.TabIndex = 2;
+			this.label3.AutoSize = true;
+			this.label3.Location = new System.Drawing.Point(15, 49);
+			this.label3.Name = "label3";
+			this.label3.Size = new System.Drawing.Size(96, 13);
+			this.label3.TabIndex = 1;
+			this.label3.Text = "Import \'Contexts\' to";
+			// 
+			// label2
+			// 
+			this.label2.AutoSize = true;
+			this.label2.Location = new System.Drawing.Point(15, 14);
+			this.label2.Name = "label2";
+			this.label2.Size = new System.Drawing.Size(93, 13);
+			this.label2.TabIndex = 1;
+			this.label2.Text = "Import \'Projects\' to";
 			// 
 			// TodoTxtImporterOptionsForm
 			// 
