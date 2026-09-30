@@ -15,6 +15,11 @@ namespace TodoTxtImpExp
 {
 	public partial class TodoTxtImporterOptionsForm : Form
 	{
+		const Task.Attribute DefaultProjectsAttribId = Task.Attribute.Tags;
+		const Task.Attribute DefaultContextsAttribId = Task.Attribute.Category;
+
+		// ------------------------------------------------------
+
 		public TodoTxtImporterOptionsForm(TaskList tasks, Translator trans)
 		{
 			InitializeComponent();
@@ -30,25 +35,27 @@ namespace TodoTxtImpExp
 		public DialogResult ShowDialog(Preferences prefs, string prefKey)
 		{
 			// Restore previous state
-// 			m_ContextAsTagBtn.Checked		= prefs.GetProfileBool(prefKey, "ImportContextAsTag", false);
-// 			m_ContextAsCustomBtn.Checked	= prefs.GetProfileBool(prefKey,	"ImportContextAsCustom", true);
-// 			m_ContextAsCategoryBtn.Checked	= prefs.GetProfileBool(prefKey, "ImportContextAsCategory", false);
-// 
-// 			m_ProjectAsTagBtn.Checked		= prefs.GetProfileBool(prefKey, "ImportProjectAsTag", false);
-// 			m_ProjectAsCustomBtn.Checked	= prefs.GetProfileBool(prefKey, "ImportProjectAsCustom", true);
-// 			m_ProjectAsCategoryBtn.Checked	= prefs.GetProfileBool(prefKey, "ImportProjectAsCategory", false);
+			var contextsAttribId = prefs.GetProfileEnum(prefKey, "ImportContextAsAttrib", DefaultContextsAttribId);
+			var contextsCustAttribId = prefs.GetProfileString(prefKey, "ImportContextAsCustomId", string.Empty);
+
+			if (!m_ContextsAttribCombo.SelectAttribute(contextsAttribId, contextsCustAttribId))
+				m_ContextsAttribCombo.SelectAttribute(DefaultContextsAttribId);
+
+			var projectsAttribId = prefs.GetProfileEnum(prefKey, "ImportProjectAsAttrib", DefaultProjectsAttribId);
+			var projectsCustAttribId = prefs.GetProfileString(prefKey, "ImportProjectAsCustomId", string.Empty);
+
+			if (!m_ProjectsAttribCombo.SelectAttribute(projectsAttribId, projectsCustAttribId))
+				m_ProjectsAttribCombo.SelectAttribute(DefaultProjectsAttribId);
 
 			var res = base.ShowDialog();
 
 			if (res == DialogResult.OK)
 			{
 				// Save state
-// 				prefs.WriteProfileBool(prefKey, "ImportContextAsTag", m_ContextAsTagBtn.Checked);
-// 				prefs.WriteProfileBool(prefKey, "ImportContextAsCustom", m_ContextAsCustomBtn.Checked);
-// 				prefs.WriteProfileBool(prefKey, "ImportContextAsCategory", m_ContextAsCategoryBtn.Checked);
-// 				prefs.WriteProfileBool(prefKey, "ImportProjectAsTag", m_ProjectAsTagBtn.Checked);
-// 				prefs.WriteProfileBool(prefKey, "ImportProjectAsCustom", m_ProjectAsCustomBtn.Checked);
-// 				prefs.WriteProfileBool(prefKey, "ImportProjectAsCategory", m_ProjectAsCategoryBtn.Checked);
+				prefs.WriteProfileEnum(prefKey, "ImportContextAsAttrib", m_ContextsAttribCombo.SelectedAttributeId);
+				prefs.WriteProfileEnum(prefKey, "ImportProjectAsAttrib", m_ProjectsAttribCombo.SelectedAttributeId);
+				prefs.WriteProfileString(prefKey, "ImportContextAsCustomId", ImportContextsAsCustomId);
+				prefs.WriteProfileString(prefKey, "ImportProjectAsCustomId", ImportProjectsAsCustomId);
 			}
 
 			return res;
