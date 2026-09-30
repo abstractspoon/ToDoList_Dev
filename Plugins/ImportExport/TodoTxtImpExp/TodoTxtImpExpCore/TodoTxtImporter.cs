@@ -111,7 +111,7 @@ namespace TodoTxtImpExp
 
 			if (options.ImportProjectsAsCustom)
 			{
-				destTask.SetCustomAttributeValue(options.ImportContextsAsCustomId, string.Join("\n", projects));
+				destTask.SetCustomAttributeValue(options.ImportProjectsAsCustomId, string.Join("\n", projects));
 			}
 			else
 			{
