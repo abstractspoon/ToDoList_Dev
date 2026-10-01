@@ -36,14 +36,14 @@ namespace TodoTxtImpExp
 		public DialogResult ShowDialog(Preferences prefs, string prefKey)
 		{
 			// Restore previous state
-			var contextsAttribId = prefs.GetProfileEnum(prefKey, "ExportContextAsAttrib", DefaultContextsAttribId);
-			var contextsCustAttribId = prefs.GetProfileString(prefKey, "ExportContextAsCustomId", string.Empty);
+			var contextsAttribId = prefs.GetProfileEnum(prefKey, "ExportContextsFromAttrib", DefaultContextsAttribId);
+			var contextsCustAttribId = prefs.GetProfileString(prefKey, "ExportContextsFromCustomId", string.Empty);
 
 			if (!m_ContextsAttribCombo.SelectAttribute(contextsAttribId, contextsCustAttribId))
 				m_ContextsAttribCombo.SelectAttribute(DefaultContextsAttribId);
 
-			var projectsAttribId = prefs.GetProfileEnum(prefKey, "ExportProjectAsAttrib", DefaultProjectsAttribId);
-			var projectsCustAttribId = prefs.GetProfileString(prefKey, "ExportProjectAsCustomId", string.Empty);
+			var projectsAttribId = prefs.GetProfileEnum(prefKey, "ExportProjectsFromAttrib", DefaultProjectsAttribId);
+			var projectsCustAttribId = prefs.GetProfileString(prefKey, "ExportProjectsFromCustomId", string.Empty);
 
 			if (!m_ProjectsAttribCombo.SelectAttribute(projectsAttribId, projectsCustAttribId))
 				m_ProjectsAttribCombo.SelectAttribute(DefaultProjectsAttribId);
@@ -53,25 +53,25 @@ namespace TodoTxtImpExp
 			if (res == DialogResult.OK)
 			{
 				// Save state
-				prefs.WriteProfileEnum(prefKey, "ExportContextAsAttrib", m_ContextsAttribCombo.SelectedAttributeId);
-				prefs.WriteProfileEnum(prefKey, "ExportProjectAsAttrib", m_ProjectsAttribCombo.SelectedAttributeId);
-				prefs.WriteProfileString(prefKey, "ExportContextAsCustomId", ExportContextsAsCustomId);
-				prefs.WriteProfileString(prefKey, "ExportProjectAsCustomId", ExportProjectsAsCustomId);
+				prefs.WriteProfileEnum(prefKey, "ExportContextsFromAttrib", m_ContextsAttribCombo.SelectedAttributeId);
+				prefs.WriteProfileEnum(prefKey, "ExportProjectsFromAttrib", m_ProjectsAttribCombo.SelectedAttributeId);
+				prefs.WriteProfileString(prefKey, "ExportContextsFromCustomId", ExportContextsFromCustomId);
+				prefs.WriteProfileString(prefKey, "ExportProjectsFromCustomId", ExportProjectsFromCustomId);
 			}
 
 			return res;
 		}
 
-		public bool ExportContextsAsTags		{ get { return (m_ContextsAttribCombo.SelectedAttributeId == Task.Attribute.Tags); } }
-		public bool ExportContextsAsCategory	{ get { return (m_ContextsAttribCombo.SelectedAttributeId == Task.Attribute.Category); } }
-		public bool ExportContextsAsCustom		{ get { return !string.IsNullOrEmpty(ExportContextsAsCustomId); } }
+		public bool ExportContextsFromTags			{ get { return (m_ContextsAttribCombo.SelectedAttributeId == Task.Attribute.Tags); } }
+		public bool ExportContextsFromCategory		{ get { return (m_ContextsAttribCombo.SelectedAttributeId == Task.Attribute.Category); } }
+		public bool ExportContextsFromCustom		{ get { return !string.IsNullOrEmpty(ExportContextsFromCustomId); } }
 
-		public string ExportContextsAsCustomId	{ get { return m_ContextsAttribCombo.SelectedAttributeCustomId; } }
+		public string ExportContextsFromCustomId	{ get { return m_ContextsAttribCombo.SelectedAttributeCustomId; } }
 
-		public bool ExportProjectsAsTags		{ get { return (m_ProjectsAttribCombo.SelectedAttributeId == Task.Attribute.Tags); } }
-		public bool ExportProjectsAsCategory	{ get { return (m_ProjectsAttribCombo.SelectedAttributeId == Task.Attribute.Category); } }
-		public bool ExportProjectsAsCustom		{ get { return !string.IsNullOrEmpty(ExportProjectsAsCustomId); } }
+		public bool ExportProjectsFromTags			{ get { return (m_ProjectsAttribCombo.SelectedAttributeId == Task.Attribute.Tags); } }
+		public bool ExportProjectsFromCategory		{ get { return (m_ProjectsAttribCombo.SelectedAttributeId == Task.Attribute.Category); } }
+		public bool ExportProjectsFromCustom		{ get { return !string.IsNullOrEmpty(ExportProjectsFromCustomId); } }
 
-		public string ExportProjectsAsCustomId	{ get { return m_ProjectsAttribCombo.SelectedAttributeCustomId; } }
+		public string ExportProjectsFromCustomId	{ get { return m_ProjectsAttribCombo.SelectedAttributeCustomId; } }
 	}
 }

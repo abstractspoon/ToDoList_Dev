@@ -36,11 +36,11 @@ namespace TodoTxtImpExp
 			
 			try
 			{
-				if (options.ImportProjectsAsCustom)
-					destTaskFile.AddCustomListAttribute(options.ImportProjectsAsCustomId, "Projects", "Projects");
+				if (options.ImportProjectsToCustom)
+					destTaskFile.AddCustomListAttribute(options.ImportProjectsToCustomId, "Projects", "Projects");
 
-				if (options.ImportContextsAsCustom)
-					destTaskFile.AddCustomListAttribute(options.ImportContextsAsCustomId, "Contexts", "Contexts");
+				if (options.ImportContextsToCustom)
+					destTaskFile.AddCustomListAttribute(options.ImportContextsToCustomId, "Contexts", "Contexts");
 
 				var srcTasks = new ToDoLib.TaskList(srcFilePath);
 				var priorityMap = CreatePriorityMapping(srcTasks);
@@ -91,15 +91,15 @@ namespace TodoTxtImpExp
 			// Contexts
 			var contexts = srcTask.Contexts.ConvertAll(context => context.Substring(1));
 
-			if (options.ImportContextsAsCustom)
+			if (options.ImportContextsToCustom)
 			{
-				destTask.SetCustomAttributeValue(options.ImportContextsAsCustomId, string.Join("\n", contexts));
+				destTask.SetCustomAttributeValue(options.ImportContextsToCustomId, string.Join("\n", contexts));
 			}
 			else
 			{
 				foreach (var context in contexts)
 				{
-					if (options.ImportContextsAsCategory)
+					if (options.ImportContextsToCategory)
 						destTask.AddCategory(context);
 					else
 						destTask.AddTag(context);
@@ -109,15 +109,15 @@ namespace TodoTxtImpExp
 			// Projects
 			var projects = srcTask.Projects.ConvertAll(project => project.Substring(1));
 
-			if (options.ImportProjectsAsCustom)
+			if (options.ImportProjectsToCustom)
 			{
-				destTask.SetCustomAttributeValue(options.ImportProjectsAsCustomId, string.Join("\n", projects));
+				destTask.SetCustomAttributeValue(options.ImportProjectsToCustomId, string.Join("\n", projects));
 			}
 			else
 			{
 				foreach (var project in projects)
 				{
-					if (options.ImportProjectsAsCategory)
+					if (options.ImportProjectsToCategory)
 						destTask.AddCategory(project);
 					else
 						destTask.AddTag(project);
