@@ -1,9 +1,12 @@
 ﻿
 using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
 using System.Windows.Forms;
+
 using Abstractspoon.Tdl.PluginHelpers;
+
+////////////////////////////////////////////////////////////////////////////
 
 namespace TodoTxtImpExp
 {
@@ -57,27 +60,21 @@ namespace TodoTxtImpExp
         protected bool ExportTask(Task srcTask, ToDoLib.TaskList destTasks, TodoTxtExporterOptionsForm options)
         {
             // Process task's own attributes
-			var priority = new string((char)('A' + (srcTask.GetPriority(false) - 10)), 1);
-			var projects = new List<string>();
-			var contexts = srcTask.GetCategory();
-			contexts.AddRange(srcTask.GetTag());
-
-			var body = srcTask.GetTitle();
-			var dueDate = srcTask.GetDueDateString(false);
-			var completed = srcTask.IsDone();
-			var thresholdDate = srcTask.GetStartDateString(false);
-
-			var destTask = new ToDoLib.Task(priority, projects, contexts, body, dueDate, completed, thresholdDate)
+			destTasks.Tasks.Add(new ToDoLib.Task()
 			{
-				// Creation Date
-                // TODO
+				Body = srcTask.GetTitle(),
+				Completed = srcTask.IsDone(),
 
-				// Primary Context
-                // TODO
+				Priority = FormatPriority(srcTask.GetPriority(false)),
 
-				// Primary Project
-                // TODO
-			};
+				CompletedDate = FormatDate(srcTask.GetDoneDate()),
+				DueDate = FormatDate(srcTask.GetDueDate(false)),
+				ThresholdDate = FormatDate(srcTask.GetStartDate(false)),
+				CreationDate = FormatDate(srcTask.GetCreationDate()),
+
+				Projects = FormatProjects(srcTask, options),
+				Contexts = FormatContexts(srcTask, options),
+			});
 
             // Export task's children
             Task subtask = srcTask.GetFirstSubtask();
@@ -97,5 +94,71 @@ namespace TodoTxtImpExp
         }
 
         // ----------------------------------------------------------
-    }
+
+		static string FormatDate(DateTime date)
+		{
+			if (date == DateTime.MinValue)
+				return string.Empty;
+
+			return date.ToString("yyyy-MM-dd");
+		}
+
+		static string FormatPriority(int priority)
+		{
+			if (priority < 0)
+				return string.Empty;
+
+			return string.Format("({0})", (char)('A' + (10 - priority)));
+		}
+
+		static List<string> FormatProjects(Task srcTask, TodoTxtExporterOptionsForm options)
+		{
+			List<string> projects = null;
+
+			if (options.ExportProjectsFromCategory)
+			{
+				projects = srcTask.GetCategory();
+			}
+			else if (options.ExportProjectsFromTags)
+			{
+				projects = srcTask.GetTag();
+			}
+			else if (options.ExportProjectsFromCustom)
+			{
+				var attribValues = srcTask.GetCustomAttributeValue(options.ExportProjectsFromCustomId, false);
+				projects = attribValues.Split('\n').ToList();
+			}
+			else
+			{
+				projects = new List<string>();
+			}
+
+			return projects.ConvertAll(c => ("+" + c));
+		}
+
+		static List<string> FormatContexts(Task srcTask, TodoTxtExporterOptionsForm options)
+		{
+			List<string> contexts = null;
+
+			if (options.ExportContextsFromCategory)
+			{
+				contexts = srcTask.GetCategory();
+			}
+			else if (options.ExportContextsFromTags)
+			{
+				contexts = srcTask.GetTag();
+			}
+			else if (options.ExportContextsFromCustom)
+			{
+				var attribValues = srcTask.GetCustomAttributeValue(options.ExportContextsFromCustomId, false);
+				contexts = attribValues.Split('\n').ToList();
+			}
+			else
+			{
+				contexts = new List<string>();
+			}
+
+			return contexts.ConvertAll(c => ("@" + c));
+		}
+	}
 }
