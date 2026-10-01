@@ -7,13 +7,14 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
+using UIComponents;
 using Abstractspoon.Tdl.PluginHelpers;
 
 ///////////////////////////////////////////////////////////////////////
 
 namespace TodoTxtImpExp
 {
-	public partial class TodoTxtImporterOptionsForm : Form
+	public partial class TodoTxtImporterOptionsForm : PreferencesFormBase
 	{
 		const Task.Attribute DefaultProjectsAttribId = Task.Attribute.Tags;
 		const Task.Attribute DefaultContextsAttribId = Task.Attribute.Category;
