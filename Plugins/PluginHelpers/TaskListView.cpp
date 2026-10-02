@@ -209,10 +209,10 @@ namespace Abstractspoon
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-public ref class TaskItemGroup
+public ref class GroupHeaderItem
 {
 public:
-	TaskItemGroup(String^ title, String^ value)
+	GroupHeaderItem(String^ title, String^ value)
 	{
 		if (title != nullptr)
 			m_Title = title;
@@ -262,8 +262,8 @@ String^ TaskListView::DefaultItemComparer::GetItemGroupValue(Windows::Forms::Lis
 {
 	auto listView = ASTYPE(lvi->ListView, TaskListView);
 
-	if (listView->IsGroupItem(lvi))
-		return ASTYPE(lvi->Tag, TaskItemGroup)->Value;
+	if (listView->IsGroupHeaderItem(lvi))
+		return ASTYPE(lvi->Tag, GroupHeaderItem)->Value;
 
 	if (listView->IsTaskItem(lvi))
 		return ASTYPE(lvi->Tag, IListViewTask)->GetGroupValue(listView->m_GroupById);
@@ -292,10 +292,10 @@ int TaskListView::DefaultItemComparer::Compare(Object^ x, Object^ y)
 		if (nCompare == 0) // Same group
 		{
 			// Always sort the group header item higher
-			if (listView->IsGroupItem(lvi1))
+			if (listView->IsGroupHeaderItem(lvi1))
 				return -1;
 
-			if (listView->IsGroupItem(lvi2))
+			if (listView->IsGroupHeaderItem(lvi2))
 				return 1;
 		}
 		else  // different groups
@@ -469,7 +469,7 @@ ListViewItem^ TaskListView::AddGroup(String^ title, String^ value)
 {
 	Debug::Assert(GroupingEnabled);
 
-	auto group = gcnew TaskItemGroup(title, value);
+	auto group = gcnew GroupHeaderItem(title, value);
 
 	auto lvi = Items->Add(title);
 	lvi->Tag = group;
@@ -484,7 +484,7 @@ int TaskListView::RemoveAllGroups()
 
 	while (item-- > 0)
 	{
-		if (ISTYPE(Items[item]->Tag, TaskItemGroup))
+		if (ISTYPE(Items[item]->Tag, GroupHeaderItem))
 		{
 			Items->RemoveAt(item);
 			numRemoved++;
@@ -500,7 +500,7 @@ bool TaskListView::RemoveGroup(String^ value)
 
 	while (item-- > 0)
 	{
-		auto group = ASTYPE(Items[item]->Tag, TaskItemGroup);
+		auto group = ASTYPE(Items[item]->Tag, GroupHeaderItem);
 
 		if ((group != nullptr) && (group->Value == value))
 		{
@@ -1265,9 +1265,9 @@ void TaskListView::OnDrawItem(DrawListViewItemEventArgs^ e)
 	if (e->Item == nullptr)
 		return;
 
-	if (IsGroupItem(e->Item))
+	if (IsGroupHeaderItem(e->Item))
 	{
-		DrawGroupHeader(e->Graphics, ASTYPE(e->Item->Tag, TaskItemGroup)->Title, e->Bounds);
+		DrawGroupHeader(e->Graphics, ASTYPE(e->Item->Tag, GroupHeaderItem)->Title, e->Bounds);
 		return;
 	}
 
@@ -1421,9 +1421,9 @@ bool TaskListView::IsTaskItem(Windows::Forms::ListViewItem^ lvi)
 	return ((lvi != nullptr) && ISTYPE(lvi->Tag, IListViewTask));
 }
 
-bool TaskListView::IsGroupItem(Windows::Forms::ListViewItem^ lvi)
+bool TaskListView::IsGroupHeaderItem(Windows::Forms::ListViewItem^ lvi)
 {
-	return ((lvi != nullptr) && ISTYPE(lvi->Tag, TaskItemGroup));
+	return ((lvi != nullptr) && ISTYPE(lvi->Tag, GroupHeaderItem));
 }
 
 void TaskListView::WndProc(Message% m)
@@ -1459,7 +1459,7 @@ void TaskListView::WndProc(Message% m)
 					return; // We handled it
 				}
 			}
-			else if (IsGroupItem(lvHit))
+			else if (IsGroupHeaderItem(lvHit))
 			{
 				// Prevent selection change
 				return;
@@ -1577,7 +1577,7 @@ void TaskListView::RedrawGroupHeaders()
 	{
 		auto lvi = Items[item];
 
-		if (IsGroupItem(lvi))
+		if (IsGroupHeaderItem(lvi))
 		{
 			if (clientRect.IntersectsWith(lvi->Bounds))
 				Invalidate(lvi->Bounds, false);

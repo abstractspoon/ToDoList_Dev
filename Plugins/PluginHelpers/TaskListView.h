@@ -212,7 +212,7 @@ namespace Abstractspoon
 				int MapDisplayIndexToColumn(int index);
 				void DrawGroupHeader(Drawing::Graphics^ g, String^ text, Drawing::Rectangle rect);
 				bool IsTaskItem(Windows::Forms::ListViewItem^ lvi);
-				bool IsGroupItem(Windows::Forms::ListViewItem^ lvi);
+				bool IsGroupHeaderItem(Windows::Forms::ListViewItem^ lvi);
 				void RedrawGroupHeaders();
 
 				// Derived classes optionally override
