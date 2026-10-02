@@ -118,7 +118,7 @@
 			this.Icon = global::EisenhowerUIExtension.Properties.Resources.Eisenhower;
 			this.Name = "EisenhowerPreferencesDlg";
 			this.ShowInTaskbar = false;
-			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
 			this.Text = "Decision Matrix Preferences";
 			this.panel1.ResumeLayout(false);
 			this.panel1.PerformLayout();

@@ -214,6 +214,7 @@ namespace Abstractspoon
 				bool AddFileLink(String^ sFileLink);
 
 				bool SetColor(UInt32 color);
+				bool SetReferenceID(UInt32 id);
 				bool SetPriority(Byte nPriority);
 				bool SetRisk(Byte Risk);
 
@@ -297,6 +298,8 @@ namespace Abstractspoon
 				String^ Id;
 				String^ Label;
 				String^ ListData; // \n delimited
+
+				String^ ToString() override { return Label; }
 			};
 
 			////////////////////////////////////////////////////////////////////////////////////////////////
@@ -308,6 +311,8 @@ namespace Abstractspoon
 				TaskAttributeItem(TaskAttributeItem^ attrib);
 
 				bool IsCustom();
+
+				String^ ToString() override { return Label; }
 
 			public:
 				String^ Label;
@@ -349,6 +354,7 @@ namespace Abstractspoon
 				Task^ NewTask(String^ sTitle);
 
 				bool AddCustomAttribute(String^ sID, String^ sLabel, String^ sColumn);
+				bool AddCustomListAttribute(String^ sID, String^ sLabel, String^ sColumn);
 				bool SetMetaData(String^ sKey, String^ sValue);
 				bool ClearMetaData(String^ sKey);
 				

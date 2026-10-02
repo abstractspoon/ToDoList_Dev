@@ -3903,7 +3903,7 @@ void CTaskFile::AddTaskIDs(HTASKITEM hTask, BOOL bIncParents, CDWordArray& aTask
 	AddTaskIDs(GetNextTask(hTask), bIncParents, aTaskIDs);
 }
 
-BOOL CTaskFile::SetTaskReferenceID(HTASKITEM hTask, unsigned long nRefID)
+bool CTaskFile::SetTaskReferenceID(HTASKITEM hTask, unsigned long nRefID)
 {
 	return SetTaskULong(hTask, TDL_TASKREFID, nRefID);
 }
