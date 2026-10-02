@@ -7,12 +7,14 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
+using UIComponents;
+
 using Abstractspoon.Tdl.PluginHelpers;
 using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
 namespace TaskDatesUIExtension
 {
-	public partial class TaskDatesPreferencesDlg : Form
+	public partial class TaskDatesPreferencesDlg : PreferencesFormBase
 	{
 		private Translator m_Trans;
 
