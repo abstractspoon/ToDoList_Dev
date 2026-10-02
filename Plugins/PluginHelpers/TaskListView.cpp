@@ -1559,6 +1559,66 @@ void TaskListView::WndProc(Message% m)
 		if (GroupingEnabled)
 			RedrawGroupHeaders();
 		break;
+
+	case WM_KEYDOWN:
+		// Leapfrog group headers with simple navigation
+		if (GroupingEnabled && (ModifierKeys == Keys::None))
+		{
+			if (FocusedItem != nullptr)
+			{
+				switch (m.WParam.ToInt32())
+				{
+				case VK_UP:
+				case VK_PRIOR:
+				case VK_HOME:
+					// If we are already on item 1 and moving 'up'
+					// then we eat the message because we are guaranteed
+					// to hit the first group header which causes a flicker
+					// when we subsequently fix it up.
+					if (FocusedItem->Index == 1)
+						return;
+				}
+			}
+
+			// else do default and then fix it up as necessary
+			ListView::WndProc(m);
+			
+			if (IsGroupHeaderItem(FocusedItem))
+			{
+				int selIndex = FocusedItem->Index;
+
+				switch (m.WParam.ToInt32())
+				{
+				case VK_DOWN:
+				case VK_NEXT:
+					// group header can never be last item so we can always go down
+					selIndex++;
+					break;
+
+				case VK_END:
+					// This should be impossible because group header can never be last item
+					ASSERT(0);
+					break;
+
+				case VK_UP:
+				case VK_PRIOR:
+				case VK_HOME:
+					if (selIndex == 0)
+						selIndex++;
+					else
+						selIndex--;
+					break;
+				}
+				FocusedItem = Items[selIndex];
+
+				SelectedIndices->Clear();
+				SelectedIndices->Add(selIndex);
+
+				//CheckNotifySelectionChanged();
+			}
+			return;
+		}
+		break;
 	}
 
 	// else default handling
