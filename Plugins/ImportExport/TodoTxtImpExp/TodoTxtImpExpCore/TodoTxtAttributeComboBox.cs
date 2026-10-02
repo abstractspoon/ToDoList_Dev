@@ -50,8 +50,7 @@ namespace TodoTxtImpExp
 			{
 				Debug.Assert(custAttrib.AttributeType == CustomAttributeDefinition.Attribute.String);
 
-				if ((custAttrib.ListType == CustomAttributeDefinition.List.AutoMulti) ||
-					(custAttrib.ListType == CustomAttributeDefinition.List.FixedMulti))
+				if (custAttrib.ListType != CustomAttributeDefinition.List.None)
 				{
 					Items.Add(new TaskAttributeItem()
 					{

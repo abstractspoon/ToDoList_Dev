@@ -126,7 +126,7 @@ namespace TodoTxtImpExp
 			else if (options.ExportProjectsFromCustom)
 			{
 				var attribValues = srcTask.GetCustomAttributeValue(options.ExportProjectsFromCustomId, false);
-				projects = attribValues.Split('\n').ToList();
+				projects = attribValues.Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries).ToList();
 			}
 			else
 			{
@@ -151,7 +151,7 @@ namespace TodoTxtImpExp
 			else if (options.ExportContextsFromCustom)
 			{
 				var attribValues = srcTask.GetCustomAttributeValue(options.ExportContextsFromCustomId, false);
-				contexts = attribValues.Split('\n').ToList();
+				contexts = attribValues.Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries).ToList();
 			}
 			else
 			{
