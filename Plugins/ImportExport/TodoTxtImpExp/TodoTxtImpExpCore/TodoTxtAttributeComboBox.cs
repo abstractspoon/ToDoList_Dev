@@ -31,8 +31,6 @@ namespace TodoTxtImpExp
 			BeginUpdate();
 			Items.Clear();
 
-			var comboAttribs = new List<TaskAttributeItem>();
-
 			// Built-in attributes
 			foreach (var attrib in availAttribs)
 			{

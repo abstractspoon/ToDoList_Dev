@@ -39,10 +39,7 @@ namespace TodoTxtImpExp
 				while (srcTask.IsValid())
 				{
 					if (!ExportTask(srcTask, destTasks, options))
-					{
-						// Decide whether to stop or not
-						// TODO
-					}
+						break;
 
 					srcTask = srcTask.GetNextTask();
 				}
@@ -59,7 +56,10 @@ namespace TodoTxtImpExp
 
         protected bool ExportTask(Task srcTask, ToDoLib.TaskList destTasks, TodoTxtExporterOptionsForm options)
         {
-            // Process task's own attributes
+			if (srcTask == null)
+				return false;
+
+            // Task attributes
 			destTasks.Tasks.Add(new ToDoLib.Task()
 			{
 				Body = srcTask.GetTitle(),
@@ -76,16 +76,13 @@ namespace TodoTxtImpExp
 				Contexts = FormatContexts(srcTask, options),
 			});
 
-            // Export task's children
+            // Subtasks
             Task subtask = srcTask.GetFirstSubtask();
 
             while (subtask.IsValid())
             {
                 if (!ExportTask(subtask, destTasks, options)) // RECURSIVE CALL
-                {
-                    // Decide whether to stop or not
-                    // TODO
-                }
+					break;
 
                 subtask = subtask.GetNextTask();
             }
