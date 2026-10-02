@@ -315,8 +315,6 @@ namespace Abstractspoon
 
 				bool IsCustom();
 
-				String^ ToString() override { return Label; }
-
 			public:
 				String^ Label;
 				Task::Attribute AttributeId;
