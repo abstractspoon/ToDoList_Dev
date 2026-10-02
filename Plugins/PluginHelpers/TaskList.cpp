@@ -1133,7 +1133,12 @@ Task^ TaskList::NewTask(String^ sTitle)
 
 bool TaskList::AddCustomAttribute(String^ sID, String^ sLabel, String^ sColumn)
 {
-	return (m_pTaskList ? m_pTaskList->AddCustomAttribute(MS(sID), MS(sLabel), MS(sColumn)) : false);
+	return (m_pTaskList ? m_pTaskList->AddCustomAttribute(MS(sID), MS(sLabel), MS(sColumn), false) : false);
+}
+
+bool TaskList::AddCustomListAttribute(String^ sID, String^ sLabel, String^ sColumn)
+{
+	return (m_pTaskList ? m_pTaskList->AddCustomAttribute(MS(sID), MS(sLabel), MS(sColumn), true) : false);
 }
 
 bool TaskList::SetMetaData(String^ sKey, String^ sValue)
@@ -1158,7 +1163,7 @@ bool TaskList::ClearMetaData(String^ sKey)
 
 Task^ Task::NewSubtask(String^ sTitle)
 {
-	HTASKITEM hTask = (m_pTaskList ? m_pTaskList->NewTask(MS(sTitle), nullptr, 0) : nullptr);
+	HTASKITEM hTask = (m_pTaskList ? m_pTaskList->NewTask(MS(sTitle), m_hTask, 0) : nullptr);
 
 	return gcnew Task(m_pTaskList, hTask);
 }
@@ -1236,6 +1241,11 @@ bool Task::AddFileLink(String^ sFileLink)
 bool Task::SetColor(UInt32 color)
 {
 	return SETTASKVAL(SetTaskColor, color);
+}
+
+bool Task::SetReferenceID(UInt32 id)
+{
+	return SETTASKVAL(SetTaskReferenceID, id);
 }
 
 bool Task::SetPriority(Byte nPriority)

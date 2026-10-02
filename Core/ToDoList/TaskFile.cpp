@@ -1880,7 +1880,7 @@ BOOL CTaskFile::MergeTaskAttributes(HTASKITEM hSrcTask, TODOITEM& tdiDest, const
 BOOL CTaskFile::MergeTaskAttributes(HTASKITEM hSrcTask, TODOITEM& tdiDest, const CTDCAttributeMap& mapAttribs, 
 									const CTDCCustomAttribDefinitionArray& aCustAttribs, DWORD dwFlags, bool bCalc) const
 {
-	ASSERT(m_mapReadableAttrib.GetCount() == 0);
+	ASSERT(!m_mapReadableAttrib.GetCount() || m_mapReadableAttrib.HasOnly(TDCA_ALL));
 
 	tdiDest.dwTaskRefID = GetTaskReferenceID(hSrcTask);
 
@@ -3903,7 +3903,7 @@ void CTaskFile::AddTaskIDs(HTASKITEM hTask, BOOL bIncParents, CDWordArray& aTask
 	AddTaskIDs(GetNextTask(hTask), bIncParents, aTaskIDs);
 }
 
-BOOL CTaskFile::SetTaskReferenceID(HTASKITEM hTask, unsigned long nRefID)
+bool CTaskFile::SetTaskReferenceID(HTASKITEM hTask, unsigned long nRefID)
 {
 	return SetTaskULong(hTask, TDL_TASKREFID, nRefID);
 }

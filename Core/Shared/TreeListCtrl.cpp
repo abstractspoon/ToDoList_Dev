@@ -342,6 +342,7 @@ CTreeListCtrl::CTreeListCtrl(CTreeDragDropRenderer* pAltRenderer, int nMinLabelW
 	m_crBkgnd(GetSysColor(COLOR_3DFACE)),
 	m_bMovingItem(FALSE),
 	m_bBoundSelecting(FALSE),
+	m_bAutoFitSplitter(TRUE),
 	m_bReadOnly(FALSE),
 	m_nMinTreeTitleColumnWidth(-1),
 	m_tsh(m_tree, m_list),
@@ -481,6 +482,8 @@ int CTreeListCtrl::CalcSplitPosToFitListColumns(int nAvailWidth) const
 
 void CTreeListCtrl::AdjustSplitterToFitListColumns()
 {
+	m_bAutoFitSplitter = TRUE;
+
 	CRect rClient;
 	GetClientRect(rClient);
 
@@ -495,6 +498,8 @@ void CTreeListCtrl::AdjustSplitterToFitListColumns()
 
 void CTreeListCtrl::AdjustSplitterToFitTreeColumns()
 {
+	m_bAutoFitSplitter = FALSE;
+
 	int nTreeWidth = m_treeHeader.CalcTotalItemWidth();
 	int nNewSplitPos = CalcSplitPosFromTreeWidth(max(MIN_TREE_WIDTH, nTreeWidth));
 
@@ -694,22 +699,16 @@ void CTreeListCtrl::Resize(int cx, int cy)
 
 	if (cx && cy)
 	{
-		int nCurWidth = GetBoundingWidth();
+		OnResize(cx, cy); // For derived classes to override
 
-		OnResize(cx, cy);
-
-		if (m_treeHeader.GetItemCount())
-		{
-			int nNewWidth = GetBoundingWidth();
-
-			if (nNewWidth != nCurWidth)
-				UpdateColumnWidths((nNewWidth > nCurWidth) ? UTWA_WIDER : UTWA_NARROWER);
-		}
+		if (m_bAutoFitSplitter)
+			AdjustSplitterToFitListColumns();
 	}
 }
 
 void CTreeListCtrl::OnResize(int cx, int cy)
 {
+	// Default implementation
 	CTreeListSyncer::Resize(CRect(0, 0, cx, cy), GetSplitPos());
 }
 
@@ -806,7 +805,7 @@ void CTreeListCtrl::ExpandItem(HTREEITEM hti, BOOL bExpand, BOOL bAndChildren)
 	}
 	m_tree.EnsureVisible(hti);
 
-	UpdateColumnWidths(bExpand ? UTWA_EXPAND : UTWA_COLLAPSE);
+	UpdateTreeColumnWidths(bExpand);
 }
 
 BOOL CTreeListCtrl::CanExpandItem(HTREEITEM hti, BOOL bExpand) const
@@ -892,6 +891,11 @@ BOOL CTreeListCtrl::OnHeaderDblClkDivider(NMHEADER* pHDN)
 		}
 
 		return TRUE;
+	}
+	else if (pHDN->hdr.hwndFrom == m_listHeader)
+	{
+		if (m_bAutoFitSplitter)
+			AdjustSplitterToFitListColumns();
 	}
 
 	return FALSE;
@@ -1144,7 +1148,7 @@ LRESULT CTreeListCtrl::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 				if (!m_bMovingItem)
 				{
 					LPNMTREEVIEW pNMTV = (LPNMTREEVIEW)pNMHDR;
-					UpdateColumnWidths((pNMTV->action == TVE_EXPAND) ? UTWA_EXPAND : UTWA_COLLAPSE);
+					UpdateTreeColumnWidths(pNMTV->action == TVE_EXPAND);
 				}
 				break;
 			}
@@ -1213,6 +1217,11 @@ LRESULT CTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 
 					case HDN_ITEMCLICK:
 						OnListHeaderClick((NMHEADER*)pNMHDR);
+						break;
+
+					case HDN_ENDTRACK:
+						if (m_bAutoFitSplitter)
+							AdjustSplitterToFitListColumns();
 						break;
 					}
 					return lr;
@@ -1866,12 +1875,23 @@ void CTreeListCtrl::RecalcTreeColumnsToFit(BOOL bForce)
 		RecalcTreeColumnWidth(nCol, &dc, bForce);
 }
 
+void CTreeListCtrl::SetAutoFitSplitter(BOOL bAutoFit)
+{
+	if (Misc::StatesDiffer(bAutoFit, m_bAutoFitSplitter))
+	{
+		m_bAutoFitSplitter = bAutoFit;
+
+		if (bAutoFit)
+			AdjustSplitterToFitListColumns();
+	}
+}
+
 void CTreeListCtrl::OnNotifySplitterChange(int nSplitPos)
 {
 	CTreeListSyncer::OnNotifySplitterChange(nSplitPos);
 
-	if (m_tree.GetCount() == 0)
-		return;
+	if (IsSplitting() || IsHeaderTracking(m_hwndPrimaryHeader))
+		m_bAutoFitSplitter = FALSE;
 
 	// Adjust 'Title' column to suit unless it's the title column we are actively tracking
 	if (!IsHeaderTracking(m_hwndPrimaryHeader, 0))
@@ -2108,12 +2128,14 @@ void CTreeListCtrl::DrawVertItemDivider(CDC* pDC, const CRect& rItem, BOOL bSele
 	pDC->SetBkColor(crOld);
 }
 
-BOOL CTreeListCtrl::UpdateTreeColumnWidths(CDC* pDC, UPDATETITLEWIDTHACTION nAction)
+BOOL CTreeListCtrl::UpdateTreeColumnWidths(BOOL bExpand)
 {
 	if (!m_tree.GetCount() || !m_treeHeader.GetItemCount())
 		return FALSE;
 
 	// Recalculate all but the title column
+	CClientDC dc(&m_tree);
+
 	int nNumCols = m_treeHeader.GetItemCount();
 	BOOL bChange = FALSE;
 
@@ -2121,7 +2143,7 @@ BOOL CTreeListCtrl::UpdateTreeColumnWidths(CDC* pDC, UPDATETITLEWIDTHACTION nAct
 	{
 		int nCurWidth = m_treeHeader.GetItemWidth(nCol);
 
-		if (RecalcTreeColumnWidth(nCol, pDC, FALSE) != nCurWidth)
+		if (RecalcTreeColumnWidth(nCol, &dc, FALSE) != nCurWidth)
 			bChange = TRUE;
 	}
 
@@ -2134,7 +2156,7 @@ BOOL CTreeListCtrl::UpdateTreeColumnWidths(CDC* pDC, UPDATETITLEWIDTHACTION nAct
 	int nMaxListColsWidth = CalcMaxListColumnsWidth();
 
 	int nCurTitleWidth = m_treeHeader.GetItemWidth(0);
-	int nMinTitleWidth = CalcTreeTitleColumnWidth(pDC, FALSE);
+	int nMinTitleWidth = CalcTreeTitleColumnWidth(&dc, FALSE);
 	int nNewTitleWidth = nCurTitleWidth;
 
 	// Reduce the width of the title column only if the columns do not have enough space
@@ -2147,7 +2169,7 @@ BOOL CTreeListCtrl::UpdateTreeColumnWidths(CDC* pDC, UPDATETITLEWIDTHACTION nAct
 	else if (nCurListColsWidth > nMaxListColsWidth)
 	{
 		// Increase the width of the title column only if it does not have enough space
-		int nMaxTitleWidth = CalcTreeTitleColumnWidth(pDC, TRUE);
+		int nMaxTitleWidth = CalcTreeTitleColumnWidth(&dc, TRUE);
 
 		if (nCurTitleWidth < nMaxTitleWidth)
 		{
@@ -2167,52 +2189,29 @@ BOOL CTreeListCtrl::UpdateTreeColumnWidths(CDC* pDC, UPDATETITLEWIDTHACTION nAct
 	// Always update so we don't have to recalculate it during header column drag
 	m_nMinTreeTitleColumnWidth = nMinTitleWidth;
 
-	if (WantTitleWidthUpdate(nCurTitleWidth, nNewTitleWidth, nAction))
+	if (WantTitleWidthUpdate(nCurTitleWidth, nNewTitleWidth, bExpand))
 	{
 		m_treeHeader.SetItemWidth(0, nNewTitleWidth);
-		return TRUE;
+		bChange  = TRUE;
 	}
 
-	// else
+	PostResize();
 	return bChange;
 }
 
-BOOL CTreeListCtrl::WantTitleWidthUpdate(int nOldWidth, int nNewWidth, UPDATETITLEWIDTHACTION nAction)
+BOOL CTreeListCtrl::WantTitleWidthUpdate(int nOldWidth, int nNewWidth, BOOL bExpand)
 {
 	if (nNewWidth == nOldWidth)
 		return FALSE;
 
-	switch (nAction)
-	{
-	case UTWA_ANY:
+	if (bExpand == -1)
 		return TRUE;
 
-	case UTWA_EXPAND:	
+	if (bExpand)
 		return (nNewWidth > nOldWidth);
 
-	case UTWA_COLLAPSE: 
-		return (nNewWidth < nOldWidth);
-
-	case UTWA_WIDER:
-		return (nNewWidth > nOldWidth);
-
-	case UTWA_NARROWER:
-		// Can cause list horz scrollbar to flicker on and off
-		return FALSE;
-	}
-
-	ASSERT(0);
-	return FALSE;
-}
-
-void CTreeListCtrl::UpdateColumnWidths(UPDATETITLEWIDTHACTION nAction)
-{
-	CClientDC dcList(&m_list), dcTree(&m_tree);
-
-	UpdateListColumnWidths(&dcList, nAction);
-	UpdateTreeColumnWidths(&dcTree, nAction);
-	
-	PostResize();
+	// Collapse
+	return (nNewWidth < nOldWidth);
 }
 
 int CTreeListCtrl::RecalcTreeColumnWidth(int nCol, CDC* pDC, BOOL bForce)
