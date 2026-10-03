@@ -26,9 +26,8 @@
         /// Required method for Designer support - do not modify
         /// the contents of this method with the code editor.
         /// </summary>
-        private void InitializeComponent()
+        private new void InitializeComponent()
         {
-			this.panel1 = new Abstractspoon.Tdl.PluginHelpers.PanelEx();
 			this.label1 = new System.Windows.Forms.Label();
 			this.m_SlotMinuteCombo = new System.Windows.Forms.ComboBox();
 			this.label2 = new System.Windows.Forms.Label();
@@ -46,35 +45,36 @@
 			this.m_HideTasksSpanningDays = new System.Windows.Forms.CheckBox();
 			this.m_ShowFutureOccurrences = new System.Windows.Forms.CheckBox();
 			this.m_LegacyScrollbars = new System.Windows.Forms.CheckBox();
-			this.BtnCancel = new System.Windows.Forms.Button();
-			this.BtnOK = new System.Windows.Forms.Button();
-			this.panel1.SuspendLayout();
+			this.m_Panel.SuspendLayout();
 			this.groupBox1.SuspendLayout();
 			this.SuspendLayout();
 			// 
-			// panel1
+			// m_Cancel
 			// 
-			this.panel1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-			this.panel1.AutoScroll = true;
-			this.panel1.BackColor = System.Drawing.SystemColors.Window;
-			this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-			this.panel1.Controls.Add(this.label1);
-			this.panel1.Controls.Add(this.m_SlotMinuteCombo);
-			this.panel1.Controls.Add(this.label2);
-			this.panel1.Controls.Add(this.m_MinSlotHeightCombo);
-			this.panel1.Controls.Add(this.m_DisplayDiscontinuous);
-			this.panel1.Controls.Add(this.m_ShowActiveToday);
-			this.panel1.Controls.Add(this.m_ShowWorkingHoursOnly);
-			this.panel1.Controls.Add(this.m_TreatOverdueTasksAsDueToday);
-			this.panel1.Controls.Add(this.groupBox1);
-			this.panel1.Controls.Add(this.m_LegacyScrollbars);
-			this.panel1.Location = new System.Drawing.Point(9, 10);
-			this.panel1.Margin = new System.Windows.Forms.Padding(0);
-			this.panel1.Name = "panel1";
-			this.panel1.Size = new System.Drawing.Size(515, 288);
-			this.panel1.TabIndex = 2;
+			this.m_Cancel.Location = new System.Drawing.Point(457, 311);
+			// 
+			// m_OK
+			// 
+			this.m_OK.Location = new System.Drawing.Point(376, 311);
+			// 
+			// m_Error
+			// 
+			this.m_Error.Location = new System.Drawing.Point(9, 301);
+			this.m_Error.Size = new System.Drawing.Size(361, 38);
+			// 
+			// m_Panel
+			// 
+			this.m_Panel.Controls.Add(this.label1);
+			this.m_Panel.Controls.Add(this.m_SlotMinuteCombo);
+			this.m_Panel.Controls.Add(this.label2);
+			this.m_Panel.Controls.Add(this.m_MinSlotHeightCombo);
+			this.m_Panel.Controls.Add(this.m_DisplayDiscontinuous);
+			this.m_Panel.Controls.Add(this.m_ShowActiveToday);
+			this.m_Panel.Controls.Add(this.m_ShowWorkingHoursOnly);
+			this.m_Panel.Controls.Add(this.m_TreatOverdueTasksAsDueToday);
+			this.m_Panel.Controls.Add(this.groupBox1);
+			this.m_Panel.Controls.Add(this.m_LegacyScrollbars);
+			this.m_Panel.Size = new System.Drawing.Size(518, 287);
 			// 
 			// label1
 			// 
@@ -276,48 +276,17 @@
 			this.m_LegacyScrollbars.Text = "Use legacy scrollbar positioning";
 			this.m_LegacyScrollbars.UseVisualStyleBackColor = true;
 			// 
-			// BtnCancel
-			// 
-			this.BtnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-			this.BtnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-			this.BtnCancel.Location = new System.Drawing.Point(449, 310);
-			this.BtnCancel.Name = "BtnCancel";
-			this.BtnCancel.Size = new System.Drawing.Size(75, 23);
-			this.BtnCancel.TabIndex = 1;
-			this.BtnCancel.Text = "Cancel";
-			this.BtnCancel.UseVisualStyleBackColor = true;
-			// 
-			// BtnOK
-			// 
-			this.BtnOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-			this.BtnOK.DialogResult = System.Windows.Forms.DialogResult.OK;
-			this.BtnOK.Location = new System.Drawing.Point(367, 310);
-			this.BtnOK.Margin = new System.Windows.Forms.Padding(0);
-			this.BtnOK.Name = "BtnOK";
-			this.BtnOK.Size = new System.Drawing.Size(75, 23);
-			this.BtnOK.TabIndex = 0;
-			this.BtnOK.Text = "OK";
-			this.BtnOK.UseVisualStyleBackColor = true;
-			// 
 			// WeekPlannerPreferencesDlg
 			// 
-			this.AcceptButton = this.BtnOK;
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(534, 342);
-			this.Controls.Add(this.panel1);
-			this.Controls.Add(this.BtnOK);
-			this.Controls.Add(this.BtnCancel);
-			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+			this.ClientSize = new System.Drawing.Size(542, 344);
 			this.Icon = global::WeekPlannerUIExtension.Properties.Resources.WeekPlanner;
-			this.MaximizeBox = false;
-			this.MinimizeBox = false;
 			this.Name = "WeekPlannerPreferencesDlg";
 			this.Padding = new System.Windows.Forms.Padding(10);
-			this.ShowInTaskbar = false;
 			this.Text = "Week Planner Preferences";
-			this.panel1.ResumeLayout(false);
-			this.panel1.PerformLayout();
+			this.m_Panel.ResumeLayout(false);
+			this.m_Panel.PerformLayout();
 			this.groupBox1.ResumeLayout(false);
 			this.groupBox1.PerformLayout();
 			this.ResumeLayout(false);
@@ -326,9 +295,6 @@
 
         #endregion
 
-        private Abstractspoon.Tdl.PluginHelpers.PanelEx panel1;
-        private System.Windows.Forms.Button BtnCancel;
-        private System.Windows.Forms.Button BtnOK;
         private System.Windows.Forms.CheckBox m_HideTasksWithoutTimes;
 		private System.Windows.Forms.CheckBox m_HideTasksSpanningWeekends;
 		private System.Windows.Forms.CheckBox m_HideTasksSpanningDays;
