@@ -113,7 +113,7 @@ void PreferencesFormBase::OnPaint(PaintEventArgs^ e)
 {
 	Form::OnPaint(e);
 
-	auto pen = gcnew Pen(Color::FromArgb(192, 192, 192));
+	auto penColor = Color::FromArgb(160, 160, 160); // To Match app
 	auto rect = m_Panel->Bounds;
 
 	rect.X--;
@@ -121,7 +121,7 @@ void PreferencesFormBase::OnPaint(PaintEventArgs^ e)
 	rect.Y--;
 	rect.Height++;
 	
-	e->Graphics->DrawRectangle(pen, rect);
+	e->Graphics->DrawRectangle(gcnew Pen(penColor), rect);
 }
 
 void PreferencesFormBase::OnSizeChanged(EventArgs^ e)
