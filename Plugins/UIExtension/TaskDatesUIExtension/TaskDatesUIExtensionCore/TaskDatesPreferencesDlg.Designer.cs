@@ -26,9 +26,8 @@
 		/// Required method for Designer support - do not modify
 		/// the contents of this method with the code editor.
 		/// </summary>
-		private void InitializeComponent()
+		private new void InitializeComponent()
 		{
-			this.m_Error = new System.Windows.Forms.Label();
 			this.label1 = new System.Windows.Forms.Label();
 			this.label2 = new System.Windows.Forms.Label();
 			this.m_OffsetDateComboBox = new TaskDatesUIExtension.OffsetAttributeComboBox();
@@ -38,11 +37,17 @@
 			// 
 			// m_Cancel
 			// 
-			this.m_Cancel.Location = new System.Drawing.Point(335, 193);
+			this.m_Cancel.Location = new System.Drawing.Point(338, 194);
 			// 
 			// m_OK
 			// 
-			this.m_OK.Location = new System.Drawing.Point(254, 193);
+			this.m_OK.Location = new System.Drawing.Point(257, 194);
+			// 
+			// m_Error
+			// 
+			this.m_Error.Location = new System.Drawing.Point(9, 184);
+			this.m_Error.Size = new System.Drawing.Size(242, 38);
+			this.m_Error.Text = "No attributes are selected";
 			// 
 			// m_Panel
 			// 
@@ -50,19 +55,7 @@
 			this.m_Panel.Controls.Add(this.m_OffsetDateComboBox);
 			this.m_Panel.Controls.Add(this.m_VisibleDateListBox);
 			this.m_Panel.Controls.Add(this.label2);
-			this.m_Panel.Size = new System.Drawing.Size(399, 172);
-			// 
-			// m_Error
-			// 
-			this.m_Error.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-			this.m_Error.ForeColor = System.Drawing.Color.Red;
-			this.m_Error.Location = new System.Drawing.Point(7, 161);
-			this.m_Error.Name = "m_Error";
-			this.m_Error.Size = new System.Drawing.Size(206, 23);
-			this.m_Error.TabIndex = 2;
-			this.m_Error.Text = "No attributes are selected";
-			this.m_Error.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-			this.m_Error.Visible = false;
+			this.m_Panel.Size = new System.Drawing.Size(399, 170);
 			// 
 			// label1
 			// 
@@ -109,16 +102,11 @@
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(420, 225);
-			this.Controls.Add(this.m_Error);
+			this.ClientSize = new System.Drawing.Size(423, 227);
 			this.Icon = global::TaskDatesUIExtension.Properties.Resources.TaskDates;
 			this.Name = "TaskDatesPreferencesDlg";
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
 			this.Text = "Task Dates Preferences";
-			this.Controls.SetChildIndex(this.m_Error, 0);
-			this.Controls.SetChildIndex(this.m_Panel, 0);
-			this.Controls.SetChildIndex(this.m_Cancel, 0);
-			this.Controls.SetChildIndex(this.m_OK, 0);
 			this.m_Panel.ResumeLayout(false);
 			this.m_Panel.PerformLayout();
 			this.ResumeLayout(false);
@@ -127,7 +115,6 @@
 
 		#endregion
 
-		private System.Windows.Forms.Label m_Error;
 		private DateAttributeCheckListBox m_VisibleDateListBox;
 		private System.Windows.Forms.Label label1;
 		private System.Windows.Forms.Label label2;
