@@ -26,7 +26,7 @@
 		/// Required method for Designer support - do not modify
 		/// the contents of this method with the code editor.
 		/// </summary>
-		private void InitializeComponent()
+		private new void InitializeComponent()
 		{
 			this.label3 = new System.Windows.Forms.Label();
 			this.label2 = new System.Windows.Forms.Label();
@@ -37,11 +37,16 @@
 			// 
 			// m_Cancel
 			// 
-			this.m_Cancel.Location = new System.Drawing.Point(234, 101);
+			this.m_Cancel.Location = new System.Drawing.Point(236, 105);
 			// 
 			// m_OK
 			// 
-			this.m_OK.Location = new System.Drawing.Point(153, 101);
+			this.m_OK.Location = new System.Drawing.Point(155, 105);
+			// 
+			// m_Error
+			// 
+			this.m_Error.Location = new System.Drawing.Point(9, 95);
+			this.m_Error.Size = new System.Drawing.Size(140, 38);
 			// 
 			// m_Panel
 			// 
@@ -49,7 +54,7 @@
 			this.m_Panel.Controls.Add(this.m_ProjectsAttribCombo);
 			this.m_Panel.Controls.Add(this.label3);
 			this.m_Panel.Controls.Add(this.label2);
-			this.m_Panel.Size = new System.Drawing.Size(298, 81);
+			this.m_Panel.Size = new System.Drawing.Size(297, 81);
 			// 
 			// label3
 			// 
@@ -91,10 +96,9 @@
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(319, 133);
+			this.ClientSize = new System.Drawing.Size(321, 138);
 			this.Icon = global::TodoTxtImpExp.Properties.Resources.TodoTxt;
 			this.Name = "TodoTxtImporterOptionsForm";
-			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
 			this.Text = "todo.txt Importer Options";
 			this.m_Panel.ResumeLayout(false);
 			this.m_Panel.PerformLayout();

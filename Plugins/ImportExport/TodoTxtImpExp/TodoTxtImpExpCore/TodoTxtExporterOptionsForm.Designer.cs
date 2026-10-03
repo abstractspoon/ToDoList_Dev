@@ -26,7 +26,7 @@
 		/// Required method for Designer support - do not modify
 		/// the contents of this method with the code editor.
 		/// </summary>
-		private void InitializeComponent()
+		private new void InitializeComponent()
 		{
 			this.components = new System.ComponentModel.Container();
 			this.m_ContextsAttribCombo = new TodoTxtImpExp.TodoTxtAttributeComboBox(this.components);
@@ -38,11 +38,16 @@
 			// 
 			// m_Cancel
 			// 
-			this.m_Cancel.Location = new System.Drawing.Point(232, 101);
+			this.m_Cancel.Location = new System.Drawing.Point(236, 105);
 			// 
 			// m_OK
 			// 
-			this.m_OK.Location = new System.Drawing.Point(151, 101);
+			this.m_OK.Location = new System.Drawing.Point(155, 105);
+			// 
+			// m_Error
+			// 
+			this.m_Error.Location = new System.Drawing.Point(9, 95);
+			this.m_Error.Size = new System.Drawing.Size(140, 38);
 			// 
 			// m_Panel
 			// 
@@ -50,7 +55,7 @@
 			this.m_Panel.Controls.Add(this.m_ProjectsAttribCombo);
 			this.m_Panel.Controls.Add(this.label3);
 			this.m_Panel.Controls.Add(this.label2);
-			this.m_Panel.Size = new System.Drawing.Size(296, 80);
+			this.m_Panel.Size = new System.Drawing.Size(297, 81);
 			// 
 			// m_ContextsAttribCombo
 			// 
@@ -92,10 +97,9 @@
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(317, 133);
+			this.ClientSize = new System.Drawing.Size(321, 138);
 			this.Icon = global::TodoTxtImpExp.Properties.Resources.TodoTxt;
 			this.Name = "TodoTxtExporterOptionsForm";
-			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
 			this.Text = "todo.txt Emporter Options";
 			this.m_Panel.ResumeLayout(false);
 			this.m_Panel.PerformLayout();
