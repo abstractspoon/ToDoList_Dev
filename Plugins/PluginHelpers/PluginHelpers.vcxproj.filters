@@ -132,6 +132,9 @@
     <ClInclude Include="CheckListBox.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="PreferencesFormBase.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -240,6 +243,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="CheckListBox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PreferencesFormBase.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

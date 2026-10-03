@@ -15,7 +15,7 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 namespace PDFExporter
 {
-	public partial class PDFExporterOptionsForm : Form
+	public partial class PDFExporterOptionsForm : PreferencesFormBase
 	{
 		private Translator m_Trans;
 
@@ -170,9 +170,9 @@ namespace PDFExporter
 		private void UpdateOKButton()
 		{
 			if (UseOtherFont)
-				btnOK.Enabled = File.Exists(OtherFontFile);
+				m_OK.Enabled = File.Exists(OtherFontFile);
 			else
-				btnOK.Enabled = !string.IsNullOrWhiteSpace(InstalledFont);
+				m_OK.Enabled = !string.IsNullOrWhiteSpace(InstalledFont);
 		}
 
 		private void OnBrowseWatermarkImage(object sender, EventArgs e)
