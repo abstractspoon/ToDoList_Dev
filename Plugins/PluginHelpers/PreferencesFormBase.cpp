@@ -1,6 +1,7 @@
 ﻿
 #include "stdafx.h"
 #include "PreferencesFormBase.h"
+#include "ColorUtil.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -10,12 +11,15 @@ using namespace System::Windows::Forms;
 using namespace System::IO;
 
 using namespace Abstractspoon::Tdl::PluginHelpers;
+using namespace Abstractspoon::Tdl::PluginHelpers::ColorUtil;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 PreferencesFormBase::PreferencesFormBase() : m_OK(nullptr), m_Cancel(nullptr), m_Panel(nullptr)
 {
 	InitializeComponent();
+
+	m_Error->ForeColor = DrawingColor::GetErrorLabelTextColor(BackColor);
 }
 
 void PreferencesFormBase::InitializeComponent()
