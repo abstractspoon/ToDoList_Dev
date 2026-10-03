@@ -29,8 +29,6 @@ namespace TaskDatesUIExtension
 
 			FormsUtil.SetFont(this, UIExtension.ControlFont());
 			m_Trans.Translate(this);
-
-			m_Error.ForeColor = DrawingColor.GetErrorLabelTextColor(BackColor);
 		}
 
 		public IEnumerable<string> SelectedDateAttributeIds
@@ -87,10 +85,7 @@ namespace TaskDatesUIExtension
 
 		private void OnMouseUpDateAttribListBox(object sender, MouseEventArgs e)
 		{
-			bool enableOK = (m_VisibleDateListBox.CheckedItems.Count > 0);
-
-			m_Error.Visible = !enableOK;
-			m_OK.Enabled = enableOK;
+			EnableOK(m_VisibleDateListBox.CheckedItems.Count > 0);
 		}
 	}
 }
