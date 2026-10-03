@@ -101,14 +101,6 @@ void PreferencesFormBase::InitializeComponent()
 	ResumeLayout(false);
 }
 
-void PreferencesFormBase::WndProc(Message% m)
-{
-	// TODO
-
-	Form::WndProc(m);
-}
-
-
 void PreferencesFormBase::OnPaint(PaintEventArgs^ e)
 {
 	Form::OnPaint(e);

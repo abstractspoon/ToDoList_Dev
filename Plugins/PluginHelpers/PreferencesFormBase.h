@@ -29,7 +29,6 @@ namespace Abstractspoon
 				PanelEx^  m_Panel;
 
 			protected:
-				virtual void WndProc(Windows::Forms::Message% m) override;
 				virtual void OnPaint(Windows::Forms::PaintEventArgs^ e) override;
 				virtual void OnSizeChanged(EventArgs^ e) override;
 
