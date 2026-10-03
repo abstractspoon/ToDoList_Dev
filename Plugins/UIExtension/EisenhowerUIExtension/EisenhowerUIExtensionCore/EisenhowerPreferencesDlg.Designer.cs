@@ -43,9 +43,9 @@
 			// 
 			// m_Error
 			// 
-			this.m_Error.Text = "One or more rows is incomplete";
 			this.m_Error.Location = new System.Drawing.Point(9, 247);
 			this.m_Error.Size = new System.Drawing.Size(322, 38);
+			this.m_Error.Text = "One or more rows is incomplete";
 			// 
 			// m_Panel
 			// 
@@ -61,7 +61,7 @@
 			this.m_SetupListCtrl.Location = new System.Drawing.Point(12, 27);
 			this.m_SetupListCtrl.Name = "m_SetupListCtrl";
 			this.m_SetupListCtrl.Size = new System.Drawing.Size(455, 193);
-			this.m_SetupListCtrl.TabIndex = 0;
+			this.m_SetupListCtrl.TabIndex = 1;
 			this.m_SetupListCtrl.Text = "eisenhowerSetupListCtrl1";
 			// 
 			// label1
@@ -71,7 +71,7 @@
 			this.label1.Location = new System.Drawing.Point(12, 8);
 			this.label1.Name = "label1";
 			this.label1.Size = new System.Drawing.Size(66, 13);
-			this.label1.TabIndex = 1;
+			this.label1.TabIndex = 0;
 			this.label1.Text = "Matrix Setup";
 			// 
 			// EisenhowerPreferencesDlg

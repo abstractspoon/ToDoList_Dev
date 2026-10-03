@@ -106,7 +106,7 @@
 			this.m_ShowWorkingHoursOnly.Location = new System.Drawing.Point(13, 66);
 			this.m_ShowWorkingHoursOnly.Name = "m_ShowWorkingHoursOnly";
 			this.m_ShowWorkingHoursOnly.Size = new System.Drawing.Size(138, 17);
-			this.m_ShowWorkingHoursOnly.TabIndex = 7;
+			this.m_ShowWorkingHoursOnly.TabIndex = 4;
 			this.m_ShowWorkingHoursOnly.Text = "Hide non-working hours";
 			this.m_ShowWorkingHoursOnly.UseVisualStyleBackColor = true;
 			// 
@@ -117,7 +117,7 @@
 			this.m_LegacyScrollbars.Location = new System.Drawing.Point(13, 89);
 			this.m_LegacyScrollbars.Name = "m_LegacyScrollbars";
 			this.m_LegacyScrollbars.Size = new System.Drawing.Size(174, 17);
-			this.m_LegacyScrollbars.TabIndex = 9;
+			this.m_LegacyScrollbars.TabIndex = 5;
 			this.m_LegacyScrollbars.Text = "Use legacy scrollbar positioning";
 			this.m_LegacyScrollbars.UseVisualStyleBackColor = true;
 			// 

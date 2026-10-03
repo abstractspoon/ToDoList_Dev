@@ -62,8 +62,8 @@
 			// 
 			// m_Panel
 			// 
-			this.m_Panel.Controls.Add(this.groupBox3);
 			this.m_Panel.Controls.Add(this.groupBox1);
+			this.m_Panel.Controls.Add(this.groupBox3);
 			this.m_Panel.Controls.Add(this.groupBox2);
 			this.m_Panel.Size = new System.Drawing.Size(444, 311);
 			// 
@@ -77,7 +77,7 @@
 			this.comboInstalledFont.Name = "comboInstalledFont";
 			this.comboInstalledFont.Size = new System.Drawing.Size(232, 21);
 			this.comboInstalledFont.Sorted = true;
-			this.comboInstalledFont.TabIndex = 3;
+			this.comboInstalledFont.TabIndex = 1;
 			// 
 			// btnBrowseOtherFont
 			// 
@@ -86,7 +86,7 @@
 			this.btnBrowseOtherFont.Margin = new System.Windows.Forms.Padding(0);
 			this.btnBrowseOtherFont.Name = "btnBrowseOtherFont";
 			this.btnBrowseOtherFont.Size = new System.Drawing.Size(30, 22);
-			this.btnBrowseOtherFont.TabIndex = 6;
+			this.btnBrowseOtherFont.TabIndex = 4;
 			this.btnBrowseOtherFont.Text = "...";
 			this.btnBrowseOtherFont.UseVisualStyleBackColor = true;
 			this.btnBrowseOtherFont.Click += new System.EventHandler(this.OnBrowseOtherFont);
@@ -97,23 +97,23 @@
 			this.editOtherFont.Location = new System.Drawing.Point(28, 89);
 			this.editOtherFont.Name = "editOtherFont";
 			this.editOtherFont.Size = new System.Drawing.Size(344, 20);
-			this.editOtherFont.TabIndex = 5;
+			this.editOtherFont.TabIndex = 3;
 			this.editOtherFont.WordWrap = false;
 			this.editOtherFont.TextChanged += new System.EventHandler(this.OnOtherFontChanged);
 			// 
 			// groupBox1
 			// 
 			this.groupBox1.BackColor = System.Drawing.SystemColors.Window;
-			this.groupBox1.Controls.Add(this.radioOtherFont);
 			this.groupBox1.Controls.Add(this.radioInstalledFont);
-			this.groupBox1.Controls.Add(this.btnBrowseOtherFont);
-			this.groupBox1.Controls.Add(this.editOtherFont);
+			this.groupBox1.Controls.Add(this.radioOtherFont);
 			this.groupBox1.Controls.Add(this.comboInstalledFont);
+			this.groupBox1.Controls.Add(this.editOtherFont);
+			this.groupBox1.Controls.Add(this.btnBrowseOtherFont);
 			this.groupBox1.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.groupBox1.Location = new System.Drawing.Point(13, 8);
 			this.groupBox1.Name = "groupBox1";
 			this.groupBox1.Size = new System.Drawing.Size(418, 125);
-			this.groupBox1.TabIndex = 8;
+			this.groupBox1.TabIndex = 0;
 			this.groupBox1.TabStop = false;
 			this.groupBox1.Text = "Content Font";
 			// 
@@ -124,7 +124,7 @@
 			this.radioOtherFont.Location = new System.Drawing.Point(10, 67);
 			this.radioOtherFont.Name = "radioOtherFont";
 			this.radioOtherFont.Size = new System.Drawing.Size(72, 17);
-			this.radioOtherFont.TabIndex = 9;
+			this.radioOtherFont.TabIndex = 2;
 			this.radioOtherFont.Text = "&Other font";
 			this.radioOtherFont.UseVisualStyleBackColor = true;
 			this.radioOtherFont.CheckedChanged += new System.EventHandler(this.OnChangeFontType);
@@ -137,7 +137,7 @@
 			this.radioInstalledFont.Location = new System.Drawing.Point(10, 20);
 			this.radioInstalledFont.Name = "radioInstalledFont";
 			this.radioInstalledFont.Size = new System.Drawing.Size(85, 17);
-			this.radioInstalledFont.TabIndex = 8;
+			this.radioInstalledFont.TabIndex = 0;
 			this.radioInstalledFont.TabStop = true;
 			this.radioInstalledFont.Text = "&Installed font";
 			this.radioInstalledFont.UseVisualStyleBackColor = true;
@@ -147,13 +147,13 @@
 			// 
 			this.groupBox2.BackColor = System.Drawing.SystemColors.Window;
 			this.groupBox2.Controls.Add(this.checkWatermarkImage);
-			this.groupBox2.Controls.Add(this.btnBrowseWatermarkImage);
 			this.groupBox2.Controls.Add(this.editWatermarkImage);
+			this.groupBox2.Controls.Add(this.btnBrowseWatermarkImage);
 			this.groupBox2.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.groupBox2.Location = new System.Drawing.Point(13, 217);
 			this.groupBox2.Name = "groupBox2";
 			this.groupBox2.Size = new System.Drawing.Size(418, 82);
-			this.groupBox2.TabIndex = 9;
+			this.groupBox2.TabIndex = 2;
 			this.groupBox2.TabStop = false;
 			this.groupBox2.Text = "Watermark";
 			// 
@@ -164,7 +164,7 @@
 			this.checkWatermarkImage.Location = new System.Drawing.Point(10, 25);
 			this.checkWatermarkImage.Name = "checkWatermarkImage";
 			this.checkWatermarkImage.Size = new System.Drawing.Size(212, 17);
-			this.checkWatermarkImage.TabIndex = 7;
+			this.checkWatermarkImage.TabIndex = 0;
 			this.checkWatermarkImage.Text = "&Display an image behind content pages";
 			this.checkWatermarkImage.UseVisualStyleBackColor = true;
 			this.checkWatermarkImage.CheckedChanged += new System.EventHandler(this.OnCheckChangeWatermark);
@@ -176,7 +176,7 @@
 			this.btnBrowseWatermarkImage.Margin = new System.Windows.Forms.Padding(0);
 			this.btnBrowseWatermarkImage.Name = "btnBrowseWatermarkImage";
 			this.btnBrowseWatermarkImage.Size = new System.Drawing.Size(30, 22);
-			this.btnBrowseWatermarkImage.TabIndex = 6;
+			this.btnBrowseWatermarkImage.TabIndex = 2;
 			this.btnBrowseWatermarkImage.Text = "...";
 			this.btnBrowseWatermarkImage.UseVisualStyleBackColor = true;
 			this.btnBrowseWatermarkImage.Click += new System.EventHandler(this.OnBrowseWatermarkImage);
@@ -188,20 +188,20 @@
 			this.editWatermarkImage.Location = new System.Drawing.Point(29, 47);
 			this.editWatermarkImage.Name = "editWatermarkImage";
 			this.editWatermarkImage.Size = new System.Drawing.Size(344, 20);
-			this.editWatermarkImage.TabIndex = 5;
+			this.editWatermarkImage.TabIndex = 1;
 			this.editWatermarkImage.WordWrap = false;
 			this.editWatermarkImage.TextChanged += new System.EventHandler(this.OnOtherFontChanged);
 			// 
 			// groupBox3
 			// 
 			this.groupBox3.BackColor = System.Drawing.SystemColors.Window;
-			this.groupBox3.Controls.Add(this.radioApplyFontAsReq);
 			this.groupBox3.Controls.Add(this.radioApplyFontToAll);
+			this.groupBox3.Controls.Add(this.radioApplyFontAsReq);
 			this.groupBox3.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.groupBox3.Location = new System.Drawing.Point(13, 139);
 			this.groupBox3.Name = "groupBox3";
 			this.groupBox3.Size = new System.Drawing.Size(418, 72);
-			this.groupBox3.TabIndex = 10;
+			this.groupBox3.TabIndex = 1;
 			this.groupBox3.TabStop = false;
 			this.groupBox3.Text = "Font Options";
 			// 
@@ -212,7 +212,7 @@
 			this.radioApplyFontAsReq.Location = new System.Drawing.Point(10, 43);
 			this.radioApplyFontAsReq.Name = "radioApplyFontAsReq";
 			this.radioApplyFontAsReq.Size = new System.Drawing.Size(205, 17);
-			this.radioApplyFontAsReq.TabIndex = 0;
+			this.radioApplyFontAsReq.TabIndex = 1;
 			this.radioApplyFontAsReq.Text = "Only apply font to unformatted content";
 			this.radioApplyFontAsReq.UseVisualStyleBackColor = true;
 			// 

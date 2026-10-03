@@ -51,14 +51,14 @@
 			this.m_TypeCombo.Location = new System.Drawing.Point(111, 80);
 			this.m_TypeCombo.Name = "m_TypeCombo";
 			this.m_TypeCombo.Size = new System.Drawing.Size(173, 21);
-			this.m_TypeCombo.TabIndex = 16;
+			this.m_TypeCombo.TabIndex = 11;
 			// 
 			// m_TextBox
 			// 
 			this.m_TextBox.Location = new System.Drawing.Point(111, 56);
 			this.m_TextBox.Name = "m_TextBox";
 			this.m_TextBox.Size = new System.Drawing.Size(173, 20);
-			this.m_TextBox.TabIndex = 15;
+			this.m_TextBox.TabIndex = 8;
 			// 
 			// m_ThicknessCombo
 			// 
@@ -72,7 +72,7 @@
 			this.m_ThicknessCombo.Location = new System.Drawing.Point(111, 31);
 			this.m_ThicknessCombo.Name = "m_ThicknessCombo";
 			this.m_ThicknessCombo.Size = new System.Drawing.Size(173, 21);
-			this.m_ThicknessCombo.TabIndex = 14;
+			this.m_ThicknessCombo.TabIndex = 5;
 			// 
 			// m_ArrowsLabel
 			// 
@@ -81,7 +81,7 @@
 			this.m_ArrowsLabel.Location = new System.Drawing.Point(0, 108);
 			this.m_ArrowsLabel.Name = "m_ArrowsLabel";
 			this.m_ArrowsLabel.Size = new System.Drawing.Size(39, 13);
-			this.m_ArrowsLabel.TabIndex = 9;
+			this.m_ArrowsLabel.TabIndex = 12;
 			this.m_ArrowsLabel.Text = "&Arrows";
 			// 
 			// m_TypeLabel
@@ -91,7 +91,7 @@
 			this.m_TypeLabel.Location = new System.Drawing.Point(0, 83);
 			this.m_TypeLabel.Name = "m_TypeLabel";
 			this.m_TypeLabel.Size = new System.Drawing.Size(31, 13);
-			this.m_TypeLabel.TabIndex = 10;
+			this.m_TypeLabel.TabIndex = 9;
 			this.m_TypeLabel.Text = "&Type";
 			// 
 			// m_ThicknessLabel
@@ -101,7 +101,7 @@
 			this.m_ThicknessLabel.Location = new System.Drawing.Point(0, 33);
 			this.m_ThicknessLabel.Name = "m_ThicknessLabel";
 			this.m_ThicknessLabel.Size = new System.Drawing.Size(56, 13);
-			this.m_ThicknessLabel.TabIndex = 12;
+			this.m_ThicknessLabel.TabIndex = 3;
 			this.m_ThicknessLabel.Text = "T&hickness";
 			// 
 			// m_ColorLabel
@@ -111,7 +111,7 @@
 			this.m_ColorLabel.Location = new System.Drawing.Point(0, 9);
 			this.m_ColorLabel.Name = "m_ColorLabel";
 			this.m_ColorLabel.Size = new System.Drawing.Size(37, 13);
-			this.m_ColorLabel.TabIndex = 13;
+			this.m_ColorLabel.TabIndex = 0;
 			this.m_ColorLabel.Text = "&Colour";
 			// 
 			// m_ColorButton
@@ -121,7 +121,7 @@
 			this.m_ColorButton.Location = new System.Drawing.Point(209, 3);
 			this.m_ColorButton.Name = "m_ColorButton";
 			this.m_ColorButton.Size = new System.Drawing.Size(75, 23);
-			this.m_ColorButton.TabIndex = 8;
+			this.m_ColorButton.TabIndex = 2;
 			this.m_ColorButton.Text = "Set...";
 			this.m_ColorButton.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
 			this.m_ColorButton.UseVisualStyleBackColor = true;
@@ -136,7 +136,7 @@
 			this.m_ColorCheckBox.Margin = new System.Windows.Forms.Padding(2);
 			this.m_ColorCheckBox.Name = "m_ColorCheckBox";
 			this.m_ColorCheckBox.Size = new System.Drawing.Size(56, 17);
-			this.m_ColorCheckBox.TabIndex = 18;
+			this.m_ColorCheckBox.TabIndex = 1;
 			this.m_ColorCheckBox.Text = "&Colour";
 			this.m_ColorCheckBox.UseVisualStyleBackColor = true;
 			// 
@@ -150,7 +150,7 @@
 			this.m_ThicknessCheckBox.Margin = new System.Windows.Forms.Padding(2);
 			this.m_ThicknessCheckBox.Name = "m_ThicknessCheckBox";
 			this.m_ThicknessCheckBox.Size = new System.Drawing.Size(75, 17);
-			this.m_ThicknessCheckBox.TabIndex = 19;
+			this.m_ThicknessCheckBox.TabIndex = 4;
 			this.m_ThicknessCheckBox.Text = "T&hickness";
 			this.m_ThicknessCheckBox.UseVisualStyleBackColor = true;
 			// 
@@ -164,7 +164,7 @@
 			this.m_TextCheckBox.Margin = new System.Windows.Forms.Padding(2);
 			this.m_TextCheckBox.Name = "m_TextCheckBox";
 			this.m_TextCheckBox.Size = new System.Drawing.Size(52, 17);
-			this.m_TextCheckBox.TabIndex = 20;
+			this.m_TextCheckBox.TabIndex = 7;
 			this.m_TextCheckBox.Text = "&Label";
 			this.m_TextCheckBox.UseVisualStyleBackColor = true;
 			// 
@@ -178,7 +178,7 @@
 			this.m_TypeCheckBox.Margin = new System.Windows.Forms.Padding(2);
 			this.m_TypeCheckBox.Name = "m_TypeCheckBox";
 			this.m_TypeCheckBox.Size = new System.Drawing.Size(50, 17);
-			this.m_TypeCheckBox.TabIndex = 21;
+			this.m_TypeCheckBox.TabIndex = 10;
 			this.m_TypeCheckBox.Text = "&Type";
 			this.m_TypeCheckBox.UseVisualStyleBackColor = true;
 			// 
@@ -192,7 +192,7 @@
 			this.m_ArrowsCheckBox.Margin = new System.Windows.Forms.Padding(2);
 			this.m_ArrowsCheckBox.Name = "m_ArrowsCheckBox";
 			this.m_ArrowsCheckBox.Size = new System.Drawing.Size(58, 17);
-			this.m_ArrowsCheckBox.TabIndex = 22;
+			this.m_ArrowsCheckBox.TabIndex = 13;
 			this.m_ArrowsCheckBox.Text = "&Arrows";
 			this.m_ArrowsCheckBox.UseVisualStyleBackColor = true;
 			// 
@@ -203,7 +203,7 @@
 			this.m_TextLabel.Location = new System.Drawing.Point(0, 58);
 			this.m_TextLabel.Name = "m_TextLabel";
 			this.m_TextLabel.Size = new System.Drawing.Size(33, 13);
-			this.m_TextLabel.TabIndex = 11;
+			this.m_TextLabel.TabIndex = 6;
 			this.m_TextLabel.Text = "&Label";
 			// 
 			// m_ArrowsCombo
@@ -214,27 +214,27 @@
 			this.m_ArrowsCombo.Name = "m_ArrowsCombo";
 			this.m_ArrowsCombo.SelectedOption = EvidenceBoardUIExtension.UserLinkAttributes.EndArrows.None;
 			this.m_ArrowsCombo.Size = new System.Drawing.Size(173, 21);
-			this.m_ArrowsCombo.TabIndex = 17;
+			this.m_ArrowsCombo.TabIndex = 14;
 			// 
 			// EvidenceBoardLinkAttributesPage
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.Controls.Add(this.m_ArrowsCombo);
-			this.Controls.Add(this.m_TypeCombo);
-			this.Controls.Add(this.m_TextBox);
-			this.Controls.Add(this.m_ThicknessCombo);
-			this.Controls.Add(this.m_ArrowsLabel);
-			this.Controls.Add(this.m_TypeLabel);
-			this.Controls.Add(this.m_TextLabel);
-			this.Controls.Add(this.m_ThicknessLabel);
 			this.Controls.Add(this.m_ColorLabel);
-			this.Controls.Add(this.m_ColorButton);
 			this.Controls.Add(this.m_ColorCheckBox);
+			this.Controls.Add(this.m_ColorButton);
+			this.Controls.Add(this.m_ThicknessLabel);
 			this.Controls.Add(this.m_ThicknessCheckBox);
+			this.Controls.Add(this.m_ThicknessCombo);
+			this.Controls.Add(this.m_TextLabel);
 			this.Controls.Add(this.m_TextCheckBox);
+			this.Controls.Add(this.m_TextBox);
+			this.Controls.Add(this.m_TypeLabel);
 			this.Controls.Add(this.m_TypeCheckBox);
+			this.Controls.Add(this.m_TypeCombo);
+			this.Controls.Add(this.m_ArrowsLabel);
 			this.Controls.Add(this.m_ArrowsCheckBox);
+			this.Controls.Add(this.m_ArrowsCombo);
 			this.Name = "EvidenceBoardLinkAttributesPage";
 			this.Size = new System.Drawing.Size(286, 130);
 			this.ResumeLayout(false);

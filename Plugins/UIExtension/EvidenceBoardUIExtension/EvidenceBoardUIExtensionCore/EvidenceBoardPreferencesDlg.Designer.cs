@@ -54,11 +54,11 @@
 			// 
 			// m_Panel
 			// 
-			this.m_Panel.Controls.Add(this.label2);
-			this.m_Panel.Controls.Add(this.label1);
-			this.m_Panel.Controls.Add(this.m_ParentLinkColor);
-			this.m_Panel.Controls.Add(this.m_DependsLinkColor);
 			this.m_Panel.Controls.Add(this.groupBox1);
+			this.m_Panel.Controls.Add(this.label1);
+			this.m_Panel.Controls.Add(this.m_DependsLinkColor);
+			this.m_Panel.Controls.Add(this.label2);
+			this.m_Panel.Controls.Add(this.m_ParentLinkColor);
 			this.m_Panel.Size = new System.Drawing.Size(334, 241);
 			// 
 			// label2
@@ -78,7 +78,7 @@
 			this.label1.Location = new System.Drawing.Point(9, 184);
 			this.label1.Name = "label1";
 			this.label1.Size = new System.Drawing.Size(100, 13);
-			this.label1.TabIndex = 2;
+			this.label1.TabIndex = 1;
 			this.label1.Text = "Dependency colour";
 			// 
 			// m_ParentLinkColor
@@ -88,7 +88,7 @@
 			this.m_ParentLinkColor.Location = new System.Drawing.Point(234, 207);
 			this.m_ParentLinkColor.Name = "m_ParentLinkColor";
 			this.m_ParentLinkColor.Size = new System.Drawing.Size(75, 23);
-			this.m_ParentLinkColor.TabIndex = 1;
+			this.m_ParentLinkColor.TabIndex = 3;
 			this.m_ParentLinkColor.Text = "Set...";
 			this.m_ParentLinkColor.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
 			this.m_ParentLinkColor.UseVisualStyleBackColor = true;
@@ -100,7 +100,7 @@
 			this.m_DependsLinkColor.Location = new System.Drawing.Point(234, 179);
 			this.m_DependsLinkColor.Name = "m_DependsLinkColor";
 			this.m_DependsLinkColor.Size = new System.Drawing.Size(75, 23);
-			this.m_DependsLinkColor.TabIndex = 1;
+			this.m_DependsLinkColor.TabIndex = 2;
 			this.m_DependsLinkColor.Text = "Set...";
 			this.m_DependsLinkColor.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
 			this.m_DependsLinkColor.UseVisualStyleBackColor = true;
