@@ -26,11 +26,8 @@
 		/// Required method for Designer support - do not modify
 		/// the contents of this method with the code editor.
 		/// </summary>
-		private void InitializeComponent()
+		private new void InitializeComponent()
 		{
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(PDFExporterOptionsForm));
-			this.btnOK = new System.Windows.Forms.Button();
-			this.btnCancel = new System.Windows.Forms.Button();
 			this.comboInstalledFont = new System.Windows.Forms.ComboBox();
 			this.btnBrowseOtherFont = new System.Windows.Forms.Button();
 			this.editOtherFont = new System.Windows.Forms.TextBox();
@@ -44,34 +41,31 @@
 			this.groupBox3 = new System.Windows.Forms.GroupBox();
 			this.radioApplyFontAsReq = new System.Windows.Forms.RadioButton();
 			this.radioApplyFontToAll = new System.Windows.Forms.RadioButton();
-			this.panel1 = new System.Windows.Forms.Panel();
+			this.m_Panel.SuspendLayout();
 			this.groupBox1.SuspendLayout();
 			this.groupBox2.SuspendLayout();
 			this.groupBox3.SuspendLayout();
-			this.panel1.SuspendLayout();
 			this.SuspendLayout();
 			// 
-			// btnOK
+			// m_Cancel
 			// 
-			this.btnOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-			this.btnOK.DialogResult = System.Windows.Forms.DialogResult.OK;
-			this.btnOK.Location = new System.Drawing.Point(304, 338);
-			this.btnOK.Name = "btnOK";
-			this.btnOK.Size = new System.Drawing.Size(75, 23);
-			this.btnOK.TabIndex = 0;
-			this.btnOK.Text = "OK";
-			this.btnOK.UseVisualStyleBackColor = true;
+			this.m_Cancel.Location = new System.Drawing.Point(383, 335);
 			// 
-			// btnCancel
+			// m_OK
 			// 
-			this.btnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-			this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-			this.btnCancel.Location = new System.Drawing.Point(385, 338);
-			this.btnCancel.Name = "btnCancel";
-			this.btnCancel.Size = new System.Drawing.Size(75, 23);
-			this.btnCancel.TabIndex = 1;
-			this.btnCancel.Text = "Cancel";
-			this.btnCancel.UseVisualStyleBackColor = true;
+			this.m_OK.Location = new System.Drawing.Point(302, 335);
+			// 
+			// m_Error
+			// 
+			this.m_Error.Location = new System.Drawing.Point(9, 325);
+			this.m_Error.Size = new System.Drawing.Size(287, 38);
+			// 
+			// m_Panel
+			// 
+			this.m_Panel.Controls.Add(this.groupBox3);
+			this.m_Panel.Controls.Add(this.groupBox1);
+			this.m_Panel.Controls.Add(this.groupBox2);
+			this.m_Panel.Size = new System.Drawing.Size(444, 311);
 			// 
 			// comboInstalledFont
 			// 
@@ -235,49 +229,27 @@
 			this.radioApplyFontToAll.Text = "Apply font to all content";
 			this.radioApplyFontToAll.UseVisualStyleBackColor = true;
 			// 
-			// panel1
-			// 
-			this.panel1.BackColor = System.Drawing.SystemColors.Window;
-			this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-			this.panel1.Controls.Add(this.groupBox3);
-			this.panel1.Controls.Add(this.groupBox1);
-			this.panel1.Controls.Add(this.groupBox2);
-			this.panel1.ForeColor = System.Drawing.SystemColors.ControlText;
-			this.panel1.Location = new System.Drawing.Point(12, 13);
-			this.panel1.Name = "panel1";
-			this.panel1.Size = new System.Drawing.Size(447, 313);
-			this.panel1.TabIndex = 11;
-			// 
 			// PDFExporterOptionsForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.CancelButton = this.btnCancel;
-			this.ClientSize = new System.Drawing.Size(472, 371);
-			this.Controls.Add(this.btnCancel);
-			this.Controls.Add(this.btnOK);
-			this.Controls.Add(this.panel1);
-			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-			this.Icon = Properties.Resources.PDFExporter;
+			this.ClientSize = new System.Drawing.Size(468, 368);
+			this.Icon = global::PDFExporter.Properties.Resources.PDFExporter;
 			this.Name = "PDFExporterOptionsForm";
-			this.ShowInTaskbar = false;
-			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
 			this.Text = "PDF Tree View Options";
+			this.m_Panel.ResumeLayout(false);
 			this.groupBox1.ResumeLayout(false);
 			this.groupBox1.PerformLayout();
 			this.groupBox2.ResumeLayout(false);
 			this.groupBox2.PerformLayout();
 			this.groupBox3.ResumeLayout(false);
 			this.groupBox3.PerformLayout();
-			this.panel1.ResumeLayout(false);
 			this.ResumeLayout(false);
 
 		}
 
 		#endregion
 
-		private System.Windows.Forms.Button btnOK;
-		private System.Windows.Forms.Button btnCancel;
 		private System.Windows.Forms.ComboBox comboInstalledFont;
 		private System.Windows.Forms.Button btnBrowseOtherFont;
 		private System.Windows.Forms.TextBox editOtherFont;
@@ -291,6 +263,5 @@
 		private System.Windows.Forms.RadioButton radioApplyFontToAll;
 		private System.Windows.Forms.RadioButton radioOtherFont;
 		private System.Windows.Forms.RadioButton radioInstalledFont;
-		private System.Windows.Forms.Panel panel1;
 	}
 }
