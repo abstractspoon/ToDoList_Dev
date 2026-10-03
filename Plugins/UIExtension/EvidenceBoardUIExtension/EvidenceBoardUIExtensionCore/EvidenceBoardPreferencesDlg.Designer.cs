@@ -26,41 +26,40 @@
         /// Required method for Designer support - do not modify
         /// the contents of this method with the code editor.
         /// </summary>
-        private void InitializeComponent()
+        private new void InitializeComponent()
         {
 			EvidenceBoardUIExtension.UserLinkAttributes userLinkAttributes1 = new EvidenceBoardUIExtension.UserLinkAttributes();
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(EvidenceBoardPreferencesDlg));
-			this.panel1 = new Abstractspoon.Tdl.PluginHelpers.PanelEx();
 			this.label2 = new System.Windows.Forms.Label();
 			this.label1 = new System.Windows.Forms.Label();
 			this.m_ParentLinkColor = new UIComponents.ColorButton();
 			this.m_DependsLinkColor = new UIComponents.ColorButton();
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
 			this.m_DefaultAttribs = new EvidenceBoardUIExtension.EvidenceBoardLinkAttributesPage();
-			this.BtnCancel = new System.Windows.Forms.Button();
-			this.BtnOK = new System.Windows.Forms.Button();
-			this.panel1.SuspendLayout();
+			this.m_Panel.SuspendLayout();
 			this.groupBox1.SuspendLayout();
 			this.SuspendLayout();
 			// 
-			// panel1
+			// m_Cancel
 			// 
-			this.panel1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-			this.panel1.AutoScroll = true;
-			this.panel1.BackColor = System.Drawing.SystemColors.Window;
-			this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-			this.panel1.Controls.Add(this.label2);
-			this.panel1.Controls.Add(this.label1);
-			this.panel1.Controls.Add(this.m_ParentLinkColor);
-			this.panel1.Controls.Add(this.m_DependsLinkColor);
-			this.panel1.Controls.Add(this.groupBox1);
-			this.panel1.Location = new System.Drawing.Point(9, 10);
-			this.panel1.Margin = new System.Windows.Forms.Padding(0);
-			this.panel1.Name = "panel1";
-			this.panel1.Size = new System.Drawing.Size(501, 250);
-			this.panel1.TabIndex = 2;
+			this.m_Cancel.Location = new System.Drawing.Point(273, 265);
+			// 
+			// m_OK
+			// 
+			this.m_OK.Location = new System.Drawing.Point(192, 265);
+			// 
+			// m_Error
+			// 
+			this.m_Error.Location = new System.Drawing.Point(9, 255);
+			this.m_Error.Size = new System.Drawing.Size(177, 38);
+			// 
+			// m_Panel
+			// 
+			this.m_Panel.Controls.Add(this.groupBox1);
+			this.m_Panel.Controls.Add(this.label1);
+			this.m_Panel.Controls.Add(this.m_DependsLinkColor);
+			this.m_Panel.Controls.Add(this.label2);
+			this.m_Panel.Controls.Add(this.m_ParentLinkColor);
+			this.m_Panel.Size = new System.Drawing.Size(334, 241);
 			// 
 			// label2
 			// 
@@ -79,7 +78,7 @@
 			this.label1.Location = new System.Drawing.Point(9, 184);
 			this.label1.Name = "label1";
 			this.label1.Size = new System.Drawing.Size(100, 13);
-			this.label1.TabIndex = 2;
+			this.label1.TabIndex = 1;
 			this.label1.Text = "Dependency colour";
 			// 
 			// m_ParentLinkColor
@@ -89,7 +88,7 @@
 			this.m_ParentLinkColor.Location = new System.Drawing.Point(234, 207);
 			this.m_ParentLinkColor.Name = "m_ParentLinkColor";
 			this.m_ParentLinkColor.Size = new System.Drawing.Size(75, 23);
-			this.m_ParentLinkColor.TabIndex = 1;
+			this.m_ParentLinkColor.TabIndex = 3;
 			this.m_ParentLinkColor.Text = "Set...";
 			this.m_ParentLinkColor.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
 			this.m_ParentLinkColor.UseVisualStyleBackColor = true;
@@ -101,7 +100,7 @@
 			this.m_DependsLinkColor.Location = new System.Drawing.Point(234, 179);
 			this.m_DependsLinkColor.Name = "m_DependsLinkColor";
 			this.m_DependsLinkColor.Size = new System.Drawing.Size(75, 23);
-			this.m_DependsLinkColor.TabIndex = 1;
+			this.m_DependsLinkColor.TabIndex = 2;
 			this.m_DependsLinkColor.Text = "Set...";
 			this.m_DependsLinkColor.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
 			this.m_DependsLinkColor.UseVisualStyleBackColor = true;
@@ -112,7 +111,7 @@
 			this.groupBox1.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.groupBox1.Location = new System.Drawing.Point(12, 12);
 			this.groupBox1.Name = "groupBox1";
-			this.groupBox1.Size = new System.Drawing.Size(473, 161);
+			this.groupBox1.Size = new System.Drawing.Size(309, 161);
 			this.groupBox1.TabIndex = 0;
 			this.groupBox1.TabStop = false;
 			this.groupBox1.Text = "Default Connection Attributes";
@@ -129,48 +128,17 @@
 			this.m_DefaultAttribs.Size = new System.Drawing.Size(287, 131);
 			this.m_DefaultAttribs.TabIndex = 0;
 			// 
-			// BtnCancel
-			// 
-			this.BtnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-			this.BtnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-			this.BtnCancel.Location = new System.Drawing.Point(435, 272);
-			this.BtnCancel.Name = "BtnCancel";
-			this.BtnCancel.Size = new System.Drawing.Size(75, 23);
-			this.BtnCancel.TabIndex = 1;
-			this.BtnCancel.Text = "Cancel";
-			this.BtnCancel.UseVisualStyleBackColor = true;
-			// 
-			// BtnOK
-			// 
-			this.BtnOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-			this.BtnOK.DialogResult = System.Windows.Forms.DialogResult.OK;
-			this.BtnOK.Location = new System.Drawing.Point(353, 272);
-			this.BtnOK.Margin = new System.Windows.Forms.Padding(0);
-			this.BtnOK.Name = "BtnOK";
-			this.BtnOK.Size = new System.Drawing.Size(75, 23);
-			this.BtnOK.TabIndex = 0;
-			this.BtnOK.Text = "OK";
-			this.BtnOK.UseVisualStyleBackColor = true;
-			// 
 			// EvidenceBoardPreferencesDlg
 			// 
-			this.AcceptButton = this.BtnOK;
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(520, 304);
-			this.Controls.Add(this.BtnOK);
-			this.Controls.Add(this.BtnCancel);
-			this.Controls.Add(this.panel1);
-			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-			this.Icon = Properties.Resources.EvidenceBoard;
-			this.MaximizeBox = false;
-			this.MinimizeBox = false;
+			this.ClientSize = new System.Drawing.Size(358, 298);
+			this.Icon = global::EvidenceBoardUIExtension.Properties.Resources.EvidenceBoard;
 			this.Name = "EvidenceBoardPreferencesDlg";
 			this.Padding = new System.Windows.Forms.Padding(10);
-			this.ShowInTaskbar = false;
 			this.Text = "Evidence Board Preferences";
-			this.panel1.ResumeLayout(false);
-			this.panel1.PerformLayout();
+			this.m_Panel.ResumeLayout(false);
+			this.m_Panel.PerformLayout();
 			this.groupBox1.ResumeLayout(false);
 			this.ResumeLayout(false);
 
@@ -178,9 +146,6 @@
 
         #endregion
 
-        private Abstractspoon.Tdl.PluginHelpers.PanelEx panel1;
-        private System.Windows.Forms.Button BtnCancel;
-        private System.Windows.Forms.Button BtnOK;
 		private System.Windows.Forms.GroupBox groupBox1;
 		private EvidenceBoardLinkAttributesPage m_DefaultAttribs;
 		private UIComponents.ColorButton m_DependsLinkColor;

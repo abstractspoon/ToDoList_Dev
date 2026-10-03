@@ -12,7 +12,7 @@ using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
 namespace EisenhowerUIExtension
 {
-	public partial class EisenhowerPreferencesDlg : Form
+	public partial class EisenhowerPreferencesDlg : PreferencesFormBase
 	{
 		private Translator m_Trans;
 
@@ -35,7 +35,6 @@ namespace EisenhowerUIExtension
 			InitializeComponent();
 
 			m_SetupListCtrl.ChangeEvent += (s, e) => OnMatrixSetupChange(e);
-			m_Error.ForeColor = DrawingColor.GetErrorLabelTextColor(BackColor);
 
 			FormsUtil.SetFont(this, UIExtension.ControlFont());
 			m_Trans.Translate(this);

@@ -147,6 +147,7 @@ copy $(SolutionDir)$(ConfigurationName)\Microsoft.VisualStudio.OLE.Interop.dll "
     <ClInclude Include="OutlookUtil.h" />
     <ClInclude Include="PluginHelpers.h" />
     <ClInclude Include="GeometryUtil.h" />
+    <ClInclude Include="PreferencesFormBase.h"/>
     <ClInclude Include="RangeSliderCtrl.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="RichTextBoxEx.h" />
@@ -186,6 +187,7 @@ copy $(SolutionDir)$(ConfigurationName)\Microsoft.VisualStudio.OLE.Interop.dll "
     <ClCompile Include="OutlookUtil.cpp" />
     <ClCompile Include="PluginHelpers.cpp" />
     <ClCompile Include="GeometryUtil.cpp" />
+    <ClCompile Include="PreferencesFormBase.cpp" />
     <ClCompile Include="RangeSliderCtrl.cpp" />
     <ClCompile Include="RichTextBoxEx.cpp" />
     <ClCompile Include="stdafx.cpp">
@@ -218,6 +220,7 @@ copy $(SolutionDir)$(ConfigurationName)\Microsoft.VisualStudio.OLE.Interop.dll "
     <Reference Include="PresentationCore" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Security" />
     <Reference Include="System.Windows.Forms" />

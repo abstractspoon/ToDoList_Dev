@@ -11,7 +11,7 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 namespace WeekPlannerUIExtension
 {
-    partial class WeekPlannerPreferencesDlg : Form
+    partial class WeekPlannerPreferencesDlg : PreferencesFormBase
     {
 		private Translator m_Trans;
 		private IWin32Window m_Owner;

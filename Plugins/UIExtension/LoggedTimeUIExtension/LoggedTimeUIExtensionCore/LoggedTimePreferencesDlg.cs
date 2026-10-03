@@ -11,7 +11,7 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 namespace LoggedTimeUIExtension
 {
-    partial class LoggedTimePreferencesDlg : Form
+    partial class LoggedTimePreferencesDlg : PreferencesFormBase
     {
 		private Translator m_Trans;
 		private IWin32Window m_Owner;
