@@ -12,7 +12,7 @@ using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
 namespace EisenhowerUIExtension
 {
-	public partial class EisenhowerPreferencesDlg : Form
+	public partial class EisenhowerPreferencesDlg : PreferencesFormBase
 	{
 		private Translator m_Trans;
 
