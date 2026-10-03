@@ -11,7 +11,7 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 namespace EvidenceBoardUIExtension
 {
-    partial class EvidenceBoardPreferencesDlg : Form
+    partial class EvidenceBoardPreferencesDlg : PreferencesFormBase
     {
 		private Translator m_Trans;
 		private IWin32Window m_Owner;
