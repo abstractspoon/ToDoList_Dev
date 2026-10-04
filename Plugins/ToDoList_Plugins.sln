@@ -272,6 +272,7 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TaskDatesUIExtensionBridge", "UIExtension\TaskDatesUIExtension\TaskDatesUIExtensionBridge\TaskDatesUIExtensionBridge.vcxproj", "{1BAD62D0-5F35-4B1A-BDA7-F1A2C10AC877}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaskDatesUIExtensionCore", "UIExtension\TaskDatesUIExtension\TaskDatesUIExtensionCore\TaskDatesUIExtensionCore.csproj", "{3FC06E3F-B94E-4088-9638-39F7406376B2}"
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TodoTxtImpExp", "TodoTxtImpExp", "{4D009570-5F61-4AE1-A3C1-75D5ADF5A6D2}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TodoTxtImpExpBridge", "ImportExport\TodoTxtImpExp\TodoTxtImpExpBridge\TodoTxtImpExpBridge.vcxproj", "{EEE3E597-D0EB-4520-8177-2EC5AC97E999}"

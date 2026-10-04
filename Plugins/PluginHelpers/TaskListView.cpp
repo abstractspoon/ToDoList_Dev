@@ -1133,7 +1133,9 @@ TaskListView::UpdateState^ TaskListView::BeginUpdate()
 	state->SelectedTaskIds = SelectedTaskIds;
 	state->TopItem = TopItem;
 	state->Sorter = ListViewItemSorter;
+#if _DEBUG
 	state->StartTick = ::GetTickCount();
+#endif
 
 	ListViewItemSorter = nullptr;
 	ListView::BeginUpdate(); // => SetRedraw(FALSE)
