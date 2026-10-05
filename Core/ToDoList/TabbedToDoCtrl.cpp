@@ -598,12 +598,12 @@ void CTabbedToDoCtrl::LoadState()
 	CPreferences prefs;
 	CString sKey = GetPreferencesKey(); // no subkey
 
+	// Restore tab visibility first
 	RestoreHiddenExtensions(prefs, sKey);
-	RestoreTabViewOrder(prefs, sKey);
+	RestoreListViewState(prefs, sKey); // list handles its own visibility
 
-	// Restore list view after hidden extensions
-	// because it handles its own visibility
-	RestoreListViewState(prefs, sKey);
+	// Then tab order
+	RestoreTabViewOrder(prefs, sKey);
 
 	// Last active view
 	FTC_VIEW nCurView = GetActiveTaskView();
