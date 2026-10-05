@@ -244,6 +244,7 @@ bool CEisenhowerUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAP
 				return UIExtension::SaveImageToFile(image, imagePath);
 			}
 		}
+		break;
 
 	case IUI_SCROLLTOSELECTEDTASK:
 		return m_wnd->ScrollToSelectedTask();

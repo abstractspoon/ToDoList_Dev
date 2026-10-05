@@ -233,6 +233,7 @@ bool CWordCloudUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPP
 				return UIExtension::SaveImageToFile(image, imagePath);
 			}
 		}
+		break;
 
 	case IUI_SCROLLTOSELECTEDTASK:
 		return m_wnd->ScrollToSelectedTask();

@@ -288,6 +288,7 @@ bool CMindMapUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCO
 				return UIExtension::SaveImageToFile(image, imagePath);
 			}
 		}
+		break;
 
 	case IUI_SCROLLTOSELECTEDTASK:
 		return m_wnd->ScrollToSelectedTask();
