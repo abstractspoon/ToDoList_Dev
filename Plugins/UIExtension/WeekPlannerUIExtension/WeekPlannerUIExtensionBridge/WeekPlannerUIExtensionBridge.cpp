@@ -30,8 +30,6 @@ using namespace Abstractspoon::Tdl::PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-const LPCWSTR WEEKPLANNER_OLDGUID = L"4CBCF4EA-7B02-41E1-BE65-3E03025E1FFE";
-
 const LPCWSTR WEEKPLANNER_GUID = L"AD05F169-0203-4962-92CD-6E28F8E1A35B";
 const LPCWSTR WEEKPLANNER_NAME = L"Week Planner";
 
@@ -360,28 +358,12 @@ void CWeekPlannerUIExtensionBridgeWindow::SavePreferences(IPreferences* pPrefs, 
 	msclr::auto_gcroot<String^> key = gcnew String(szKey);
 
 	m_wnd->SavePreferences(prefs.get(), key.get());
-
-	// Delete old settings
-	if (m_hasOldSettings)
-	{
-		auto oldKey = key->Replace(gcnew String(WEEKPLANNER_GUID), gcnew String(WEEKPLANNER_OLDGUID));
-		prefs->DeleteProfileSection(oldKey, true);
-	}
 }
 
 void CWeekPlannerUIExtensionBridgeWindow::LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey, bool bAppOnly)
 {
 	msclr::auto_gcroot<Preferences^> prefs = gcnew Preferences(pPrefs);
 	msclr::auto_gcroot<String^> key = gcnew String(szKey);
-
-	// Backwards compatibility because of TypeID change
-	auto oldKey = key->Replace(gcnew String(WEEKPLANNER_GUID), gcnew String(WEEKPLANNER_OLDGUID));
-	
-	if (prefs->HasProfileSection(oldKey))
-	{
-		m_hasOldSettings = true;
-		key = oldKey;
-	}
 	
 	m_wnd->LoadPreferences(prefs.get(), key.get(), bAppOnly);
 }
