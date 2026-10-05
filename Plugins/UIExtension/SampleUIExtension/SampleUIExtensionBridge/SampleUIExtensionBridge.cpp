@@ -97,16 +97,15 @@ CSampleUIExtensionBridgeWindow::CSampleUIExtensionBridgeWindow()
 BOOL CSampleUIExtensionBridgeWindow::Create(UINT nCtrlID, DWORD nStyle, 
 	long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent)
 {
-	m_source = gcnew System::Windows::Interop::HwndSource(
-		CS_VREDRAW | CS_HREDRAW,
-		nStyle,
-		0,
-		nLeft,
-		nTop,
-		nWidth,
-		nHeight,
-		"",
-		System::IntPtr(hwndParent));
+	m_source = gcnew System::Windows::Interop::HwndSource(CS_VREDRAW | CS_HREDRAW,
+														  nStyle,
+														  0,
+														  nLeft,
+														  nTop,
+														  nWidth,
+														  nHeight,
+														  "",
+														  System::IntPtr(hwndParent));
 
 	if (m_source->Handle != IntPtr::Zero)
 	{

@@ -152,13 +152,13 @@ bool CLoggedTimeUIExtensionBridgeWindow::WantTaskUpdate(TDC_ATTRIBUTE nAttribID)
 
 bool CLoggedTimeUIExtensionBridgeWindow::ProcessMessage(MSG* pMsg)
 {
-	return m_wnd->ProcessMessage(IntPtr(pMsg->hwnd), 
-		pMsg->message, 
-		pMsg->wParam, 
-		pMsg->lParam, 
-		pMsg->time, 
-		pMsg->pt.x,
-		pMsg->pt.y);
+	return m_wnd->ProcessMessage(IntPtr(pMsg->hwnd),
+								 pMsg->message,
+								 pMsg->wParam,
+								 pMsg->lParam,
+								 pMsg->time,
+								 pMsg->pt.x,
+								 pMsg->pt.y);
 }
 
 bool CLoggedTimeUIExtensionBridgeWindow::DoIdleProcessing()

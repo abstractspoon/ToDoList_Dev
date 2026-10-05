@@ -105,8 +105,9 @@ BOOL CWordCloudUIExtensionBridgeWindow::Create(UINT nCtrlID, DWORD nStyle,
 	auto trans = gcnew Translator(m_pTT);
 	auto typeID = gcnew String(WORDCLOUD_GUID);
 	auto uiName = gcnew String(WORDCLOUD_NAME);
+	auto parent = static_cast<IntPtr>(hwndParent);
 
-	m_wnd = gcnew WordCloudUIExtensionCore(typeID, uiName, static_cast<IntPtr>(hwndParent), trans);
+	m_wnd = gcnew WordCloudUIExtensionCore(typeID, uiName, parent, trans);
 
 	HWND hWnd = GetHwnd();
 
@@ -173,13 +174,13 @@ bool CWordCloudUIExtensionBridgeWindow::PrepareNewTask(ITaskList* pTask) const
 
 bool CWordCloudUIExtensionBridgeWindow::ProcessMessage(MSG* pMsg)
 {
-	return m_wnd->ProcessMessage(IntPtr(pMsg->hwnd), 
-		pMsg->message, 
-		pMsg->wParam, 
-		pMsg->lParam, 
-		pMsg->time, 
-		pMsg->pt.x,
-		pMsg->pt.y);
+	return m_wnd->ProcessMessage(IntPtr(pMsg->hwnd),
+								 pMsg->message,
+								 pMsg->wParam,
+								 pMsg->lParam,
+								 pMsg->time,
+								 pMsg->pt.x,
+								 pMsg->pt.y);
 }
 
 bool CWordCloudUIExtensionBridgeWindow::DoIdleProcessing()

@@ -173,13 +173,13 @@ bool CWeekPlannerUIExtensionBridgeWindow::PrepareNewTask(ITaskList* pTask) const
 
 bool CWeekPlannerUIExtensionBridgeWindow::ProcessMessage(MSG* pMsg)
 {
-	return m_wnd->ProcessMessage(IntPtr(pMsg->hwnd), 
-		pMsg->message, 
-		pMsg->wParam, 
-		pMsg->lParam, 
-		pMsg->time, 
-		pMsg->pt.x,
-		pMsg->pt.y);
+	return m_wnd->ProcessMessage(IntPtr(pMsg->hwnd),
+								 pMsg->message,
+								 pMsg->wParam,
+								 pMsg->lParam,
+								 pMsg->time,
+								 pMsg->pt.x,
+								 pMsg->pt.y);
 }
 
 bool CWeekPlannerUIExtensionBridgeWindow::DoIdleProcessing()
