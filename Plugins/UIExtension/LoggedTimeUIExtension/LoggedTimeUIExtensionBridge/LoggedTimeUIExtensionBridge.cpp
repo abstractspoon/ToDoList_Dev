@@ -3,7 +3,6 @@
 
 #include <unknwn.h>
 #include <tchar.h>
-#include <msclr\auto_gcroot.h>
 
 #include "stdafx.h" 
 #include "LoggedTimeUIExtensionBridge.h"
@@ -26,6 +25,7 @@ using namespace System::Runtime::InteropServices;
 using namespace System::Drawing;
 
 using namespace LoggedTimeUIExtension;
+
 using namespace Abstractspoon::Tdl::PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -102,11 +102,12 @@ CLoggedTimeUIExtensionBridgeWindow::CLoggedTimeUIExtensionBridgeWindow(ITransTex
 BOOL CLoggedTimeUIExtensionBridgeWindow::Create(UINT nCtrlID, DWORD nStyle, 
 	long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent)
 {
-	msclr::auto_gcroot<Translator^> trans = gcnew Translator(m_pTT);
-	msclr::auto_gcroot<String^> typeID = gcnew String(TIMELOG_GUID);
-	msclr::auto_gcroot<String^> uiName = gcnew String(TIMELOG_NAME);
+	auto trans = gcnew Translator(m_pTT);
+	auto typeID = gcnew String(TIMELOG_GUID);
+	auto uiName = gcnew String(TIMELOG_NAME);
+	auto parent = static_cast<IntPtr>(hwndParent);
 
-	m_wnd = gcnew LoggedTimeUIExtension::LoggedTimeUIExtensionCore(typeID.get(), uiName.get(), static_cast<IntPtr>(hwndParent), trans.get());
+	m_wnd = gcnew LoggedTimeUIExtensionCore(typeID, uiName, parent, trans);
 
 	HWND hWnd = GetHwnd();
 
@@ -139,9 +140,9 @@ LPCWSTR CLoggedTimeUIExtensionBridgeWindow::GetTypeID() const
 
 void CLoggedTimeUIExtensionBridgeWindow::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate)
 {
-	msclr::auto_gcroot<TaskList^> tasks = gcnew TaskList(pTasks);
+	auto tasks = gcnew TaskList(pTasks);
 
-	m_wnd->UpdateTasks(tasks.get(), UIExtension::MapUpdateType(nUpdate));
+	m_wnd->UpdateTasks(tasks, UIExtension::MapUpdateType(nUpdate));
 }
 
 bool CLoggedTimeUIExtensionBridgeWindow::WantTaskUpdate(TDC_ATTRIBUTE nAttribID) const
@@ -151,13 +152,13 @@ bool CLoggedTimeUIExtensionBridgeWindow::WantTaskUpdate(TDC_ATTRIBUTE nAttribID)
 
 bool CLoggedTimeUIExtensionBridgeWindow::ProcessMessage(MSG* pMsg)
 {
-	return m_wnd->ProcessMessage(IntPtr(pMsg->hwnd), 
-		pMsg->message, 
-		pMsg->wParam, 
-		pMsg->lParam, 
-		pMsg->time, 
-		pMsg->pt.x,
-		pMsg->pt.y);
+	return m_wnd->ProcessMessage(IntPtr(pMsg->hwnd),
+								 pMsg->message,
+								 pMsg->wParam,
+								 pMsg->lParam,
+								 pMsg->time,
+								 pMsg->pt.x,
+								 pMsg->pt.y);
 }
 
 bool CLoggedTimeUIExtensionBridgeWindow::DoIdleProcessing()
@@ -179,9 +180,8 @@ bool CLoggedTimeUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAP
 
 			if (image != nullptr)
 			{
-				msclr::auto_gcroot<String^> sImagePath = gcnew String(pData->szFilePath);
-
-				return UIExtension::SaveImageToFile(image, sImagePath.get());
+				auto imagePath = gcnew String(pData->szFilePath);
+				return UIExtension::SaveImageToFile(image, imagePath);
 			}
 		}
  		break;
@@ -214,9 +214,9 @@ bool CLoggedTimeUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd, co
 
 void CLoggedTimeUIExtensionBridgeWindow::SetUITheme(const UITHEME* pTheme)
 {
-	msclr::auto_gcroot<UITheme^> theme = gcnew UITheme(pTheme);
+	auto theme = gcnew UITheme(pTheme);
 
-	m_wnd->SetUITheme(theme.get());
+	m_wnd->SetUITheme(theme);
 }
 
 void CLoggedTimeUIExtensionBridgeWindow::SetTaskFont(HFONT hFont)
@@ -236,18 +236,18 @@ HWND CLoggedTimeUIExtensionBridgeWindow::GetHwnd() const
 
 void CLoggedTimeUIExtensionBridgeWindow::SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const
 {
-	msclr::auto_gcroot<Preferences^> prefs = gcnew Preferences(pPrefs);
-	msclr::auto_gcroot<String^> key = gcnew String(szKey);
+	auto prefs = gcnew Preferences(pPrefs);
+	auto key = gcnew String(szKey);
 
-	m_wnd->SavePreferences(prefs.get(), key.get());
+	m_wnd->SavePreferences(prefs, key);
 }
 
 void CLoggedTimeUIExtensionBridgeWindow::LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey, bool bAppOnly)
 {
-	msclr::auto_gcroot<Preferences^> prefs = gcnew Preferences(pPrefs);
-	msclr::auto_gcroot<String^> key = gcnew String(szKey);
+	auto prefs = gcnew Preferences(pPrefs);
+	auto key = gcnew String(szKey);
 
-	m_wnd->LoadPreferences(prefs.get(), key.get(), bAppOnly);
+	m_wnd->LoadPreferences(prefs, key, bAppOnly);
 }
 
 bool CLoggedTimeUIExtensionBridgeWindow::ShowContextMenu(POINT ptScreen)

@@ -3,7 +3,6 @@
 
 #include <unknwn.h>
 #include <tchar.h>
-#include <msclr\auto_gcroot.h>
 
 #include "stdafx.h"
 #include "resource.h"
@@ -26,6 +25,7 @@ using namespace System::Collections::Generic;
 using namespace System::Runtime::InteropServices;
 
 using namespace MindMapUIExtension;
+
 using namespace Abstractspoon::Tdl::PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -101,11 +101,12 @@ CMindMapUIExtensionBridgeWindow::CMindMapUIExtensionBridgeWindow(ITransText* pTT
 BOOL CMindMapUIExtensionBridgeWindow::Create(UINT nCtrlID, DWORD nStyle, 
 	long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent)
 {
-	msclr::auto_gcroot<Translator^> trans = gcnew Translator(m_pTT);
-	msclr::auto_gcroot<String^> typeID = gcnew String(MINDMAP_GUID);
-	msclr::auto_gcroot<String^> uiName = gcnew String(MINDMAP_NAME);
+	auto trans = gcnew Translator(m_pTT);
+	auto typeID = gcnew String(MINDMAP_GUID);
+	auto uiName = gcnew String(MINDMAP_NAME);
+	auto parent = static_cast<IntPtr>(hwndParent);
 
-	m_wnd = gcnew MindMapUIExtension::MindMapUIExtensionCore(typeID.get(), uiName.get(), static_cast<IntPtr>(hwndParent), trans.get());
+	m_wnd = gcnew MindMapUIExtensionCore(typeID, uiName, parent, trans);
 
 	HWND hWnd = GetHwnd();
 
@@ -143,7 +144,7 @@ bool CMindMapUIExtensionBridgeWindow::SelectTask(DWORD dwTaskID, bool /*bTaskLin
 
 bool CMindMapUIExtensionBridgeWindow::SelectTasks(const DWORD* pdwTaskIDs, int nTaskCount)
 {
-	array<UInt32>^ taskIDs = gcnew array<UInt32>(nTaskCount);
+	auto taskIDs = gcnew array<UInt32>(nTaskCount);
 
 	for (int i = 0; i < nTaskCount; i++)
 		taskIDs[i] = pdwTaskIDs[i];
@@ -153,9 +154,9 @@ bool CMindMapUIExtensionBridgeWindow::SelectTasks(const DWORD* pdwTaskIDs, int n
 
 void CMindMapUIExtensionBridgeWindow::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate)
 {
-	msclr::auto_gcroot<TaskList^> tasks = gcnew TaskList(pTasks);
+	auto tasks = gcnew TaskList(pTasks);
 
-	m_wnd->UpdateTasks(tasks.get(), UIExtension::MapUpdateType(nUpdate));
+	m_wnd->UpdateTasks(tasks, UIExtension::MapUpdateType(nUpdate));
 }
 
 bool CMindMapUIExtensionBridgeWindow::WantTaskUpdate(TDC_ATTRIBUTE nAttribID) const
@@ -165,20 +166,20 @@ bool CMindMapUIExtensionBridgeWindow::WantTaskUpdate(TDC_ATTRIBUTE nAttribID) co
 
 bool CMindMapUIExtensionBridgeWindow::PrepareNewTask(ITaskList* pTask) const
 {
-	msclr::auto_gcroot<TaskList^> task = gcnew TaskList(pTask);
+	auto task = gcnew TaskList(pTask);
 
-	return m_wnd->PrepareNewTask(task.get()->GetFirstTask());
+	return m_wnd->PrepareNewTask(task->GetFirstTask());
 }
 
 bool CMindMapUIExtensionBridgeWindow::ProcessMessage(MSG* pMsg)
 {
-	return m_wnd->ProcessMessage(IntPtr(pMsg->hwnd), 
-										pMsg->message, 
-										pMsg->wParam, 
-										pMsg->lParam, 
-										pMsg->time, 
-										pMsg->pt.x,
-										pMsg->pt.y);
+	return m_wnd->ProcessMessage(IntPtr(pMsg->hwnd),
+								 pMsg->message,
+								 pMsg->wParam,
+								 pMsg->lParam,
+								 pMsg->time,
+								 pMsg->pt.x,
+								 pMsg->pt.y);
 }
 
 void CMindMapUIExtensionBridgeWindow::FilterToolTipMessage(MSG* pMsg)
@@ -282,11 +283,11 @@ bool CMindMapUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCO
 
 			if (image != nullptr)
 			{
-				msclr::auto_gcroot<String^> sImagePath = gcnew String(pData->szFilePath);
-
-				return UIExtension::SaveImageToFile(image, sImagePath.get());
+				auto imagePath = gcnew String(pData->szFilePath);
+				return UIExtension::SaveImageToFile(image, imagePath);
 			}
 		}
+		break;
 
 	case IUI_SCROLLTOSELECTEDTASK:
 		return m_wnd->ScrollToSelectedTask();
@@ -396,9 +397,9 @@ bool CMindMapUIExtensionBridgeWindow::HitTest(POINT ptScreen, IUIHITTEST& hitTes
 
 void CMindMapUIExtensionBridgeWindow::SetUITheme(const UITHEME* pTheme)
 {
-	msclr::auto_gcroot<UITheme^> theme = gcnew UITheme(pTheme);
+	auto theme = gcnew UITheme(pTheme);
 
-	m_wnd->SetUITheme(theme.get());
+	m_wnd->SetUITheme(theme);
 }
 
 void CMindMapUIExtensionBridgeWindow::SetReadOnly(bool bReadOnly)
@@ -418,17 +419,17 @@ HWND CMindMapUIExtensionBridgeWindow::GetHwnd() const
 
 void CMindMapUIExtensionBridgeWindow::SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const
 {
-	msclr::auto_gcroot<Preferences^> prefs = gcnew Preferences(pPrefs);
-	msclr::auto_gcroot<String^> key = gcnew String(szKey);
+	auto prefs = gcnew Preferences(pPrefs);
+	auto key = gcnew String(szKey);
 
-	m_wnd->SavePreferences(prefs.get(), key.get());
+	m_wnd->SavePreferences(prefs, key);
 }
 
 void CMindMapUIExtensionBridgeWindow::LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey, bool bAppOnly)
 {
-	msclr::auto_gcroot<Preferences^> prefs = gcnew Preferences(pPrefs);
-	msclr::auto_gcroot<String^> key = gcnew String(szKey);
+	auto prefs = gcnew Preferences(pPrefs);
+	auto key = gcnew String(szKey);
 
-	m_wnd->LoadPreferences(prefs.get(), key.get(), bAppOnly);
+	m_wnd->LoadPreferences(prefs, key, bAppOnly);
 }
 
