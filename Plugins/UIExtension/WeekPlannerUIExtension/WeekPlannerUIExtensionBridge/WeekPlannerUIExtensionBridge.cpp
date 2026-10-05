@@ -25,6 +25,7 @@ using namespace System::Runtime::InteropServices;
 using namespace System::Drawing;
 
 using namespace WeekPlannerUIExtension;
+
 using namespace Abstractspoon::Tdl::PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////

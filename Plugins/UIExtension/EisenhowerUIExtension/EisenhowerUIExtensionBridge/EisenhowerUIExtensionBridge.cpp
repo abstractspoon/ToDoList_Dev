@@ -25,6 +25,7 @@ using namespace System::Collections::Generic;
 using namespace System::Runtime::InteropServices;
 
 using namespace EisenhowerUIExtension;
+
 using namespace Abstractspoon::Tdl::PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////

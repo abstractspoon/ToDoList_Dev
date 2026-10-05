@@ -22,9 +22,9 @@ using namespace System;
 using namespace System::Collections::Generic;
 using namespace System::Runtime::InteropServices;
 
-using namespace Abstractspoon::Tdl::PluginHelpers;
-
 using namespace JSONExporterPlugin;
+
+using namespace Abstractspoon::Tdl::PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 

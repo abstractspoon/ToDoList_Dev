@@ -24,6 +24,7 @@ using namespace System::Collections::Generic;
 using namespace System::Runtime::InteropServices;
 
 using namespace MySqlStorage;
+
 using namespace Abstractspoon::Tdl::PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////

@@ -19,10 +19,11 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-using namespace SpreadsheetContentControl;
 using namespace System;
 using namespace System::Collections::Generic;
 using namespace System::Runtime::InteropServices;
+
+using namespace SpreadsheetContentControl;
 
 using namespace Abstractspoon::Tdl::PluginHelpers;
 
