@@ -21,10 +21,11 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-using namespace MDContentControl;
 using namespace System;
 using namespace System::Collections::Generic;
 using namespace System::Runtime::InteropServices;
+
+using namespace MDContentControl;
 
 using namespace Abstractspoon::Tdl::PluginHelpers;
 
@@ -88,25 +89,26 @@ IContentControl* CMDContentBridge::CreateCtrl(unsigned short nCtrlID, unsigned l
 
 void CMDContentBridge::SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const
 {
-	pPrefs->WriteProfileInt(szKey, _T("InlineSpellChecking"), MDContentControl::MDContentControlCore::InlineSpellChecking);
+	pPrefs->WriteProfileInt(szKey, _T("InlineSpellChecking"), MDContentControlCore::InlineSpellChecking);
 }
 
 void CMDContentBridge::LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey, bool bAppOnly)
 {
 	if (!bAppOnly)
-		MDContentControl::MDContentControlCore::InlineSpellChecking = (pPrefs->GetProfileInt(szKey, _T("InlineSpellChecking"), FALSE) != FALSE);
+		MDContentControlCore::InlineSpellChecking = (pPrefs->GetProfileInt(szKey, _T("InlineSpellChecking"), FALSE) != FALSE);
 }
 
 // returns the length of the html or zero if not supported
 int CMDContentBridge::ConvertToHtml(const unsigned char* pContent, int nLength,
 	LPCWSTR szCharSet, LPWSTR& szHtml, LPCWSTR szImageDir)
 {
-	cli::array<Byte>^ content = gcnew cli::array<Byte>(nLength);
+	auto content = gcnew cli::array<Byte>(nLength);
+	auto imageDir = gcnew String(szImageDir);
 
 	for (int i = 0; i < nLength; i++)
 		content[i] = pContent[i];
 
-	String^ html = MDContentControlCore::ConvertToHtml(content, gcnew String(szImageDir));
+	String^ html = MDContentControlCore::ConvertToHtml(content, imageDir);
 
 	if (String::IsNullOrWhiteSpace(html))
 		return 0;
@@ -145,8 +147,10 @@ CMDContentControlBridge::~CMDContentControlBridge()
 BOOL CMDContentControlBridge::Create(UINT nCtrlID, DWORD nStyle, 
 	long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent)
 {
-	msclr::auto_gcroot<Translator^> trans = gcnew Translator(m_pTT);
-	m_wnd = gcnew MDContentControl::MDContentControlCore(static_cast<IntPtr>(hwndParent), trans.get());
+	auto trans = gcnew Translator(m_pTT);
+	auto parent = static_cast<IntPtr>(hwndParent);
+
+	m_wnd = gcnew MDContentControlCore(parent, trans);
 
 	HWND hWnd = GetHwnd();
 
@@ -167,7 +171,7 @@ BOOL CMDContentControlBridge::Create(UINT nCtrlID, DWORD nStyle,
 
 int CMDContentControlBridge::GetContent(unsigned char* pContent) const
 {
-	cli::array<Byte>^ content = m_wnd->GetContent();
+	auto content = m_wnd->GetContent();
 	int nLength = content->Length;
 
 	if (pContent && nLength)
@@ -181,7 +185,7 @@ int CMDContentControlBridge::GetContent(unsigned char* pContent) const
 
 bool CMDContentControlBridge::SetContent(const unsigned char* pContent, int nLength, bool bResetSelection)
 {
-	cli::array<Byte>^ content = gcnew cli::array<Byte>(nLength);
+	auto content = gcnew cli::array<Byte>(nLength);
 
 	for (int i = 0; i < nLength; i++)
 		content[i] = pContent[i];
@@ -210,16 +214,16 @@ int CMDContentControlBridge::GetTextContent(LPWSTR szContent, int nLength) const
 
 bool CMDContentControlBridge::SetTextContent(LPCWSTR szContent, bool bResetSelection)
 {
-	msclr::auto_gcroot<String^> content = gcnew String(szContent);
+	auto content = gcnew String(szContent);
 
-	return m_wnd->SetTextContent(content.get(), bResetSelection);
+	return m_wnd->SetTextContent(content, bResetSelection);
 }
 
 bool CMDContentControlBridge::InsertTextContent(LPCWSTR szContent, bool bAtEnd)
 {
-	msclr::auto_gcroot<String^> content = gcnew String(szContent);
+	auto content = gcnew String(szContent);
 
-	return m_wnd->InsertTextContent(content.get(), bAtEnd);
+	return m_wnd->InsertTextContent(content, bAtEnd);
 }
 
 bool CMDContentControlBridge::DoIdleProcessing() 
@@ -265,6 +269,7 @@ ISpellCheck* CMDContentControlBridge::GetSpellCheckInterface()
 		m_pSpellCheck = new CRichEditSpellCheck();
 
 	m_pSpellCheck->Initialise(Win32::GetHwnd(m_wnd->SpellCheckHandle));
+
 	return m_pSpellCheck;
 }
 
@@ -290,10 +295,16 @@ void CMDContentControlBridge::SetContentFont(HFONT hFont)
 
 void CMDContentControlBridge::SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const
 {
-	m_wnd->SavePreferences(gcnew Preferences(pPrefs), gcnew String(szKey));
+	auto prefs = gcnew Preferences(pPrefs);
+	auto key = gcnew String(szKey);
+
+	m_wnd->SavePreferences(prefs, key);
 }
 
 void CMDContentControlBridge::LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey, bool bAppOnly)
 {
-	m_wnd->LoadPreferences(gcnew Preferences(pPrefs), gcnew String(szKey), bAppOnly);
+	auto prefs = gcnew Preferences(pPrefs);
+	auto key = gcnew String(szKey);
+
+	m_wnd->LoadPreferences(prefs, key, bAppOnly);
 }

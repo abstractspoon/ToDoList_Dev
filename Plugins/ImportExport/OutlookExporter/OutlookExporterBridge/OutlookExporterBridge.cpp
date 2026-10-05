@@ -80,15 +80,18 @@ LPCWSTR COutlookExporterBridge::GetTypeID() const
 IIMPORTEXPORT_RESULT COutlookExporterBridge::Export(const ITaskList* pSrcTaskFile, LPCWSTR szDestFilePath, DWORD dwFlags, IPreferences* pPrefs, LPCWSTR szKey)
 {
 	// call into out sibling C# module to do the actual work
-	msclr::auto_gcroot<Preferences^> prefs = gcnew Preferences(pPrefs);
-	msclr::auto_gcroot<TaskList^> srcTasks = gcnew TaskList(pSrcTaskFile);
-	msclr::auto_gcroot<Translator^> trans = gcnew Translator(m_pTT);
-	msclr::auto_gcroot<OutlookExporterCore^> expCore = gcnew OutlookExporterCore(trans.get());
+	auto prefs = gcnew Preferences(pPrefs);
+	auto key = gcnew String(szKey);
+	auto srcTasks = gcnew TaskList(pSrcTaskFile);
+	auto trans = gcnew Translator(m_pTT);
+	auto destPath = gcnew String(szDestFilePath);
+
+	auto exporter = gcnew OutlookExporterCore(trans);
 	
 	// do the export
 	bool bSilent = ((dwFlags & IIEF_SILENT) != 0);
 
-	if (expCore->Export(srcTasks.get(), gcnew String(szDestFilePath), bSilent, prefs.get(), gcnew String(szKey)))
+	if (exporter->Export(srcTasks, destPath, bSilent, prefs, key))
 		return IIER_SUCCESS;
 
 	return IIER_OTHER;

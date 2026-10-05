@@ -71,25 +71,26 @@ bool CMySqlStorageBridge::RetrieveTasklist(ITS_TASKLISTINFO* pFInfo, ITaskList* 
 	if (pFInfo->szPassword[0] == 0)
 		lstrcpy(pFInfo->szPassword, szCachedPassword);
 
-	msclr::auto_gcroot<String^> tasklistId = gcnew String(pFInfo->szTasklistID);
-	msclr::auto_gcroot<String^> password = gcnew String(pFInfo->szPassword);
-	msclr::auto_gcroot<String^> destPath = Path::GetTempFileName();
+	auto tasklistId = gcnew String(pFInfo->szTasklistID);
+	auto password = gcnew String(pFInfo->szPassword);
+	auto destPath = Path::GetTempFileName();
 
-	msclr::auto_gcroot<Preferences^> prefs = gcnew Preferences(pPrefs);
-	msclr::auto_gcroot<Translator^> trans = gcnew Translator(m_pTT);
-	msclr::auto_gcroot<MySqlStorageCore^> mysql = gcnew MySqlStorageCore(trans.get());
+	auto prefs = gcnew Preferences(pPrefs);
+	auto key = gcnew String(szKey);
+	auto trans = gcnew Translator(m_pTT);
+	auto mysql = gcnew MySqlStorageCore(trans);
 	
-	msclr::auto_gcroot<TasklistConnectionInfo^> info = mysql->RetrieveTasklist(tasklistId.get(),
-																			   password.get(),
-																			   destPath.get(),
-																			   bPrompt,
-																			   prefs.get(),
-																			   gcnew String(szKey));
-	if (info.get() == nullptr)
+	auto info = mysql->RetrieveTasklist(tasklistId,
+										password,
+										destPath,
+										bPrompt,
+										prefs,
+										key);
+	if (info == nullptr)
 		return false;
 
-	CopyInfo(info.get(), pFInfo);
-	lstrcpy(pFInfo->szLocalFileName, MarshalledString(destPath.get()));
+	CopyInfo(info, pFInfo);
+	lstrcpy(pFInfo->szLocalFileName, MarshalledString(destPath));
 
 	// Cache the password for next time
 	lstrcpy(szCachedPassword, pFInfo->szPassword);
@@ -102,28 +103,29 @@ bool CMySqlStorageBridge::StoreTasklist(ITS_TASKLISTINFO* pFInfo, const ITaskLis
 	if (pFInfo->szPassword[0] == 0)
 		lstrcpy(pFInfo->szPassword, szCachedPassword);
 
-	msclr::auto_gcroot<String^> tasklistId = gcnew String(pFInfo->szTasklistID);
-	msclr::auto_gcroot<String^> tasklistName = gcnew String(pFInfo->szTasklistName);
-	msclr::auto_gcroot<String^> password = gcnew String(pFInfo->szPassword);
-	msclr::auto_gcroot<String^> srcPath = gcnew String(pFInfo->szLocalFileName);
+	auto tasklistId = gcnew String(pFInfo->szTasklistID);
+	auto tasklistName = gcnew String(pFInfo->szTasklistName);
+	auto password = gcnew String(pFInfo->szPassword);
+	auto srcPath = gcnew String(pFInfo->szLocalFileName);
 
-	msclr::auto_gcroot<TaskList^> srcTasks = gcnew TaskList(pSrcTaskFile);
-	msclr::auto_gcroot<Preferences^> prefs = gcnew Preferences(pPrefs);
-	msclr::auto_gcroot<Translator^> trans = gcnew Translator(m_pTT);
-	msclr::auto_gcroot<MySqlStorageCore^> mysql = gcnew MySqlStorageCore(trans.get());
+	auto srcTasks = gcnew TaskList(pSrcTaskFile);
+	auto prefs = gcnew Preferences(pPrefs);
+	auto key = gcnew String(szKey);
+	auto trans = gcnew Translator(m_pTT);
+	auto mysql = gcnew MySqlStorageCore(trans);
 
-	msclr::auto_gcroot<TasklistConnectionInfo^> info = mysql->StoreTasklist(tasklistId.get(),
-																			tasklistName.get(),
-																			password.get(),
-																			srcPath.get(),
-																			bPrompt,
-																			prefs.get(),
-																			gcnew String(szKey));
-	if (info.get() == nullptr)
+	auto info = mysql->StoreTasklist(tasklistId,
+									 tasklistName,
+									 password,
+									 srcPath,
+									 bPrompt,
+									 prefs,
+									 key);
+	if (info == nullptr)
 		return false;
 
-	CopyInfo(info.get(), pFInfo);
-	lstrcpy(pFInfo->szLocalFileName, MarshalledString(srcPath.get()));
+	CopyInfo(info, pFInfo);
+	lstrcpy(pFInfo->szLocalFileName, MarshalledString(srcPath));
 
 	// Cache the password for next time
 	lstrcpy(szCachedPassword, pFInfo->szPassword);
