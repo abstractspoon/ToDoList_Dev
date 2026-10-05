@@ -6,7 +6,6 @@
 
 #include <unknwn.h>
 #include <tchar.h>
-#include <msclr\auto_gcroot.h>
 
 #include <Interfaces\ITasklist.h>
 #include <Interfaces\ITransText.h>
