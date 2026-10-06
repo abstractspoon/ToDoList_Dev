@@ -376,10 +376,10 @@ namespace TaskDatesUIExtension
 			return string.Empty;
 		}
 
-		public string FormatOffset(DateTime from)
+		public string FormatOffsetFromToday()
 		{
-			if (DateIsSet && (from != NullDate))
-				return from.Subtract(Date.Date).Days.ToString();
+			if (DateIsSet)
+				return Date.Date.Subtract(DateTime.Today.Date).Days.ToString();
 
 			// else
 			return string.Empty;

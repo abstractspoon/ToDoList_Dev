@@ -55,18 +55,12 @@ namespace TaskDatesUIExtension
 		private int[] m_ColValueMaxCharWidth	= new int[6] { -1, -1, -1, -1, -1, -1 };
 
 		private bool m_IsoDates;
-		private string m_OffsetAttributeId;
 		private TaskAttributeItem m_GroupBy;
 
 		private Dictionary<string, string> m_MapDateAttribIdToLabel;
 		private Dictionary<TaskItemDate, ListViewItem> m_MapDateToLVItem;
 		private List<TaskAttributeItem> m_DateAttributeTypes;
-		private List<TaskAttributeItem> m_OffsetAttributeTypes;
 		private HashSet<string> m_VisibleDateAttributeIds;
-
-		// --------------------------------------------------------
-
-		public const string TodayAttributeId = "___TODAY___";
 
 		// --------------------------------------------------------
 
@@ -214,17 +208,6 @@ namespace TaskDatesUIExtension
 			}
 		}
 
-		public void SetOffsetAttribute(string attribId)
-		{
-			if (attribId != m_OffsetAttributeId)
-			{
-				m_OffsetAttributeId = attribId;
-
-				if (m_TaskItems.Count > 0)
-					RefreshListViewDateOffsets();
-			}
-		}
-
 		public void SetUITheme(UITheme theme)
 		{
 			// TODO
@@ -349,11 +332,6 @@ namespace TaskDatesUIExtension
 		public IEnumerable<TaskAttributeItem> DateAttributeTypes
 		{
 			get { return m_DateAttributeTypes; }
-		}
-
-		public IEnumerable<TaskAttributeItem> OffsetAttributeTypes
-		{
-			get { return m_OffsetAttributeTypes; }
 		}
 
 		public TaskAttributeItem GroupBy
@@ -639,7 +617,6 @@ namespace TaskDatesUIExtension
 			if (m_DateAttributeTypes == null)
 			{
 				m_DateAttributeTypes = new List<TaskAttributeItem>();
-				m_OffsetAttributeTypes = new List<TaskAttributeItem>();
 				m_MapDateAttribIdToLabel = new Dictionary<string, string>();
 
 				m_DateAttributeTypes.Add(MakeAttribute(Task.Attribute.CreationDate, "Created"));
@@ -678,19 +655,6 @@ namespace TaskDatesUIExtension
 
 				foreach (var attrib in m_DateAttributeTypes)
 					m_MapDateAttribIdToLabel[attrib.GetId()] = attrib.Label;
-
-				// and the offset attributes
-				m_OffsetAttributeTypes.Clear();
-
-				m_OffsetAttributeTypes.Add(new TaskAttributeItem()
-				{
-					Label = m_Trans.Translate("Today", Translator.Type.ComboBox),
-					AttributeId = Task.Attribute.CustomAttribute,
-					CustomAttributeId = TaskDatesControl.TodayAttributeId,
-					CustomAttributeType = CustomAttributeDefinition.Attribute.Date,
-				});
-
-				m_OffsetAttributeTypes.AddRange(m_DateAttributeTypes.Where(a => a.IsCustom()));
 			}
 		}
 
@@ -778,20 +742,7 @@ namespace TaskDatesUIExtension
 
 		private string FormatDateOffset(TaskItemDate date)
 		{
-			if (!date.DateIsSet)
-				return string.Empty;
-
-			if (m_OffsetAttributeId == TodayAttributeId)
-				return date.FormatOffset(DateTime.Today);
-
-			//if (m_OffsetAttributeId == ???)
-			//	return ...
-
-			if (m_OffsetAttributeId == date.AttributeId)
-				return (date.DateIsSet ? "0" : string.Empty);
-
-			var task = m_TaskItems.GetItem(date.Id);
-			return date.FormatOffset(task.GetDate(m_OffsetAttributeId));
+			return (date?.FormatOffsetFromToday() ?? String.Empty);
 		}
 
 		private void RefreshListViewDateOffsets()

@@ -245,7 +245,6 @@ namespace TaskDatesUIExtension
 				m_PrefsDlg.LoadPreferences(prefs, key);
 
 				m_TaskDatesCtrl.SetVisibleDateAttributeTypes(m_PrefsDlg.SelectedDateAttributeIds);
-				m_TaskDatesCtrl.SetOffsetAttribute(m_PrefsDlg.SelectedOffsetAttributeId);
 			}
 
  			m_TaskDatesCtrl.LoadPreferences(prefs, key, appOnly);
@@ -364,13 +363,11 @@ namespace TaskDatesUIExtension
 
 		private void OnPreferences(object sender, EventArgs e)
 		{
-			if (m_PrefsDlg.ShowDialog(m_TaskDatesCtrl.DateAttributeTypes,
-									  m_TaskDatesCtrl.OffsetAttributeTypes) == DialogResult.OK)
+			if (m_PrefsDlg.ShowDialog(m_TaskDatesCtrl.DateAttributeTypes) == DialogResult.OK)
 			{
 				Cursor = Cursors.WaitCursor;
 
 				m_TaskDatesCtrl.SetVisibleDateAttributeTypes(m_PrefsDlg.SelectedDateAttributeIds);
-				m_TaskDatesCtrl.SetOffsetAttribute(m_PrefsDlg.SelectedOffsetAttributeId);
 
 				Cursor = Cursors.Default;
 			}
