@@ -598,12 +598,12 @@ void CTabbedToDoCtrl::LoadState()
 	CPreferences prefs;
 	CString sKey = GetPreferencesKey(); // no subkey
 
+	// Restore tab visibility first
 	RestoreHiddenExtensions(prefs, sKey);
-	RestoreTabViewOrder(prefs, sKey);
+	RestoreListViewState(prefs, sKey); // list handles its own visibility
 
-	// Restore list view after hidden extensions
-	// because it handles its own visibility
-	RestoreListViewState(prefs, sKey);
+	// Then tab order
+	RestoreTabViewOrder(prefs, sKey);
 
 	// Last active view
 	FTC_VIEW nCurView = GetActiveTaskView();
@@ -6601,13 +6601,7 @@ void CTabbedToDoCtrl::SyncListSelectionToTree(BOOL bEnsureSelection)
 
 	BOOL bSelChange = FALSE;
 	
-	// optimisation when all items selected
-	if (TSH().GetCount() == m_taskTree.GetItemCount())
-	{
-		m_taskList.SelectAll();
-		bSelChange = (m_taskList.GetItemCount() != m_taskTree.GetItemCount());
-	}
-	else if (m_taskList.GetItemCount())
+	if (m_taskList.GetItemCount())
 	{
 		// save current states
 		TDCSELECTIONCACHE cacheList, cacheTree;
@@ -6619,10 +6613,16 @@ void CTabbedToDoCtrl::SyncListSelectionToTree(BOOL bEnsureSelection)
 			cacheTree.dwFirstVisibleTaskID = 0;
 			bSelChange = TRUE;
 
-			if (m_taskList.RestoreSelection(cacheTree, bEnsureSelection))
+			BOOL bResyncTreeSel = FALSE;
+
+			// optimisation when all items selected
+			if (TSH().GetCount() == m_taskTree.GetItemCount())
+				bResyncTreeSel = m_taskList.SelectAll();
+			else 
+				bResyncTreeSel = m_taskList.RestoreSelection(cacheTree, bEnsureSelection);
+
+			if (bResyncTreeSel)			
 			{
-				// now check that the tree is correctly synced with us
-				// but only if we have something selected
 				CacheListSelection(cacheList);
 
 				if (!cacheList.SelectionMatches(cacheTree))

@@ -7,7 +7,6 @@
 
 #include <unknwn.h>
 #include <tchar.h>
-#include <msclr\auto_gcroot.h>
 
 #include <Interfaces\ITransText.h>
 #include <Interfaces\UITheme.h>
@@ -20,10 +19,11 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-using namespace HTMLContentControl;
 using namespace System;
 using namespace System::Collections::Generic;
 using namespace System::Runtime::InteropServices;
+
+using namespace HTMLContentControl;
 
 using namespace Abstractspoon::Tdl::PluginHelpers;
 
@@ -142,10 +142,11 @@ CHTMLContentControlBridge::CHTMLContentControlBridge(ITransText* pTT)
 BOOL CHTMLContentControlBridge::Create(UINT nCtrlID, DWORD nStyle, 
 	long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent)
 {
-	msclr::auto_gcroot<Translator^> trans = gcnew Translator(m_pTT);
-	msclr::auto_gcroot<String^> typeID = gcnew String(HTML_GUID);
+	auto trans = gcnew Translator(m_pTT);
+	auto typeID = gcnew String(HTML_GUID);
+	auto parent = static_cast<IntPtr>(hwndParent);
 
-	m_wnd = gcnew HTMLContentControl::HTMLContentControlCore(typeID.get(), static_cast<IntPtr>(hwndParent), trans.get());
+	m_wnd = gcnew HTMLContentControlCore(typeID, parent, trans);
 
 	HWND hWnd = GetHwnd();
 
@@ -164,7 +165,7 @@ BOOL CHTMLContentControlBridge::Create(UINT nCtrlID, DWORD nStyle,
 
 int CHTMLContentControlBridge::GetContent(unsigned char* pContent) const
 {
-	cli::array<Byte>^ content = m_wnd->GetContent();
+	auto content = m_wnd->GetContent();
 	int nLength = content->Length;
 
 	if (pContent && nLength)
@@ -178,7 +179,7 @@ int CHTMLContentControlBridge::GetContent(unsigned char* pContent) const
 
 bool CHTMLContentControlBridge::SetContent(const unsigned char* pContent, int nLength, bool bResetSelection)
 {
-	cli::array<Byte>^ content = gcnew cli::array<Byte>(nLength);
+	auto content = gcnew cli::array<Byte>(nLength);
 
 	for (int i = 0; i < nLength; i++)
 		content[i] = pContent[i];
@@ -188,10 +189,10 @@ bool CHTMLContentControlBridge::SetContent(const unsigned char* pContent, int nL
 
 bool CHTMLContentControlBridge::FindReplaceAll(LPCWSTR szFind, LPCWSTR szReplace, bool bCaseSensitive, bool bWholeWord)
 {
-	msclr::auto_gcroot<String^> find = gcnew String(szFind);
-	msclr::auto_gcroot<String^> replace = gcnew String(szReplace);
+	auto find = gcnew String(szFind);
+	auto replace = gcnew String(szReplace);
 
-	return (m_wnd->FindReplaceAll(find.get(), replace.get(), bWholeWord, bCaseSensitive) > 0);
+	return (m_wnd->FindReplaceAll(find, replace, bWholeWord, bCaseSensitive) > 0);
 }
 
 LPCWSTR CHTMLContentControlBridge::GetTypeID() const
@@ -216,16 +217,16 @@ int CHTMLContentControlBridge::GetTextContent(LPWSTR szContent, int nLength) con
 
 bool CHTMLContentControlBridge::SetTextContent(LPCWSTR szContent, bool bResetSelection)
 {
-	msclr::auto_gcroot<String^> content = gcnew String(szContent);
+	auto content = gcnew String(szContent);
 
-	return m_wnd->SetTextContent(content.get(), bResetSelection);
+	return m_wnd->SetTextContent(content, bResetSelection);
 }
 
 bool CHTMLContentControlBridge::InsertTextContent(LPCWSTR szContent, bool bAtEnd)
 {
-	msclr::auto_gcroot<String^> content = gcnew String(szContent);
+	auto content = gcnew String(szContent);
 
-	return m_wnd->InsertTextContent(content.get(), bAtEnd);
+	return m_wnd->InsertTextContent(content, bAtEnd);
 }
 
 void CHTMLContentControlBridge::SetReadOnly(bool bReadOnly)
@@ -271,9 +272,9 @@ bool CHTMLContentControlBridge::Redo()
 
 void CHTMLContentControlBridge::SetUITheme(const UITHEME* pTheme)
 {
-	msclr::auto_gcroot<UITheme^> theme = gcnew UITheme(pTheme);
+	auto theme = gcnew UITheme(pTheme);
 
-	m_wnd->SetUITheme(theme.get());
+	m_wnd->SetUITheme(theme);
 }
 
 void CHTMLContentControlBridge::SetContentFont(HFONT hFont)
@@ -283,16 +284,16 @@ void CHTMLContentControlBridge::SetContentFont(HFONT hFont)
 
 void CHTMLContentControlBridge::SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const
 {
-	msclr::auto_gcroot<Preferences^> prefs = gcnew Preferences(pPrefs);
-	msclr::auto_gcroot<String^> key = gcnew String(szKey);
+	auto prefs = gcnew Preferences(pPrefs);
+	auto key = gcnew String(szKey);
 
-	m_wnd->SavePreferences(prefs.get(), key.get());
+	m_wnd->SavePreferences(prefs, key);
 }
 
 void CHTMLContentControlBridge::LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey, bool bAppOnly)
 {
-	msclr::auto_gcroot<Preferences^> prefs = gcnew Preferences(pPrefs);
-	msclr::auto_gcroot<String^> key = gcnew String(szKey);
+	auto prefs = gcnew Preferences(pPrefs);
+	auto key = gcnew String(szKey);
 
-	m_wnd->LoadPreferences(prefs.get(), key.get(), bAppOnly);
+	m_wnd->LoadPreferences(prefs, key, bAppOnly);
 }

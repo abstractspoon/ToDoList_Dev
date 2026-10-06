@@ -666,14 +666,13 @@ BOOL CTDLViewTabControl::OnEraseBkgnd(CDC* pDC)
 
 int CTDLViewTabControl::GetViewOrder(CTDCViewArray& aViewOrder) const
 {
-	aViewOrder.RemoveAll();
+	int nNumTabs = GetItemCount();
+	aViewOrder.SetSize(nNumTabs);
 
-	int nTab = GetItemCount();
+	for (int nTab = 0; nTab < nNumTabs; nTab++)
+		aViewOrder[nTab] = GetTabView(nTab);
 
-	while (nTab--)
-		aViewOrder.InsertAt(0, GetTabView(nTab));
-
-	return aViewOrder.GetSize();
+	return nNumTabs;
 }
 
 void CTDLViewTabControl::SetViewOrder(const CTDCViewArray& aViewOrder)

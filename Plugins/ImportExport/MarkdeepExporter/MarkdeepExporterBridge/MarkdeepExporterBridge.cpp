@@ -7,7 +7,6 @@
 
 #include <unknwn.h>
 #include <tchar.h>
-#include <msclr\auto_gcroot.h>
 
 #include <Interfaces\ITasklist.h>
 #include <Interfaces\ITransText.h>
@@ -19,10 +18,12 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-using namespace MarkdeepExporter;
 using namespace System;
 using namespace System::Collections::Generic;
 using namespace System::Runtime::InteropServices;
+
+using namespace MarkdeepExporter;
+
 using namespace Abstractspoon::Tdl::PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -80,17 +81,19 @@ LPCWSTR CMarkdeepExporterBridge::GetTypeID() const
 IIMPORTEXPORT_RESULT CMarkdeepExporterBridge::Export(const ITaskList* pSrcTaskFile, LPCWSTR szDestFilePath, DWORD dwFlags, IPreferences* pPrefs, LPCWSTR szKey)
 {
 	// call into out sibling C# module to do the actual work
-	msclr::auto_gcroot<Preferences^> prefs = gcnew Preferences(pPrefs);
-	msclr::auto_gcroot<TaskList^> srcTasks = gcnew TaskList(pSrcTaskFile);
-	msclr::auto_gcroot<Translator^> trans = gcnew Translator(m_pTT);
-	msclr::auto_gcroot<String^> typeID = gcnew String(MARKDEEPEXPORTER_GUID);
+	auto prefs = gcnew Preferences(pPrefs);
+	auto key = gcnew String(szKey);
+	auto srcTasks = gcnew TaskList(pSrcTaskFile);
+	auto trans = gcnew Translator(m_pTT);
+	auto typeID = gcnew String(MARKDEEPEXPORTER_GUID);
+	auto destPath = gcnew String(szDestFilePath);
 
-	msclr::auto_gcroot<MarkdeepExporterCore^> expCore = gcnew MarkdeepExporterCore(typeID.get(), trans.get());
+	auto exporter = gcnew MarkdeepExporterCore(typeID, trans);
 
 	// do the export
 	bool bSilent = ((dwFlags & IIEF_SILENT) != 0);
 
-	if (expCore->Export(srcTasks.get(), gcnew String(szDestFilePath), bSilent, prefs.get(), gcnew String(szKey)))
+	if (exporter->Export(srcTasks, destPath, bSilent, prefs, key))
 		return IIER_SUCCESS;
 
 	return IIER_OTHER;
@@ -99,17 +102,19 @@ IIMPORTEXPORT_RESULT CMarkdeepExporterBridge::Export(const ITaskList* pSrcTaskFi
 IIMPORTEXPORT_RESULT CMarkdeepExporterBridge::Export(const IMultiTaskList* pSrcTaskFile, LPCWSTR szDestFilePath, DWORD dwFlags, IPreferences* pPrefs, LPCWSTR szKey)
 {
 	// call into out sibling C# module to do the actual work
-	msclr::auto_gcroot<Preferences^> prefs = gcnew Preferences(pPrefs);
-	msclr::auto_gcroot<MultiTaskList^> srcTasks = gcnew MultiTaskList(pSrcTaskFile);
-	msclr::auto_gcroot<Translator^> trans = gcnew Translator(m_pTT);
-	msclr::auto_gcroot<String^> typeID = gcnew String(MARKDEEPEXPORTER_GUID);
+	auto prefs = gcnew Preferences(pPrefs);
+	auto key = gcnew String(szKey);
+	auto srcTasks = gcnew MultiTaskList(pSrcTaskFile);
+	auto trans = gcnew Translator(m_pTT);
+	auto typeID = gcnew String(MARKDEEPEXPORTER_GUID);
+	auto destPath = gcnew String(szDestFilePath);
 
-	msclr::auto_gcroot<MarkdeepExporterCore^> expCore = gcnew MarkdeepExporterCore(typeID.get(), trans.get());
+	auto exporter = gcnew MarkdeepExporterCore(typeID, trans);
 
 	// do the export
 	bool bSilent = ((dwFlags & IIEF_SILENT) != 0);
 
-	if (expCore->Export(srcTasks.get(), gcnew String(szDestFilePath), bSilent, prefs.get(), gcnew String(szKey)))
+	if (exporter->Export(srcTasks, destPath, bSilent, prefs, key))
 		return IIER_SUCCESS;
 
 	return IIER_OTHER;

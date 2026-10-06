@@ -3,7 +3,6 @@
 
 #include <unknwn.h>
 #include <tchar.h>
-#include <msclr\auto_gcroot.h>
 
 #include "stdafx.h" 
 #include "WeekPlannerUIExtensionBridge.h"
@@ -26,11 +25,10 @@ using namespace System::Runtime::InteropServices;
 using namespace System::Drawing;
 
 using namespace WeekPlannerUIExtension;
+
 using namespace Abstractspoon::Tdl::PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
-
-const LPCWSTR WEEKPLANNER_OLDGUID = L"4CBCF4EA-7B02-41E1-BE65-3E03025E1FFE";
 
 const LPCWSTR WEEKPLANNER_GUID = L"AD05F169-0203-4962-92CD-6E28F8E1A35B";
 const LPCWSTR WEEKPLANNER_NAME = L"Week Planner";
@@ -103,11 +101,12 @@ CWeekPlannerUIExtensionBridgeWindow::CWeekPlannerUIExtensionBridgeWindow(ITransT
 BOOL CWeekPlannerUIExtensionBridgeWindow::Create(UINT nCtrlID, DWORD nStyle, 
 	long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent)
 {
-	msclr::auto_gcroot<Translator^> trans = gcnew Translator(m_pTT);
-	msclr::auto_gcroot<String^> typeID = gcnew String(WEEKPLANNER_GUID);
-	msclr::auto_gcroot<String^> uiName = gcnew String(WEEKPLANNER_NAME);
+	auto trans = gcnew Translator(m_pTT);
+	auto typeID = gcnew String(WEEKPLANNER_GUID);
+	auto uiName = gcnew String(WEEKPLANNER_NAME);
+	auto parent = static_cast<IntPtr>(hwndParent);
 
-	m_wnd = gcnew WeekPlannerUIExtensionCore(typeID.get(), uiName.get(), static_cast<IntPtr>(hwndParent), trans.get());
+	m_wnd = gcnew WeekPlannerUIExtensionCore(typeID, uiName, parent, trans);
 
 	HWND hWnd = GetHwnd();
 
@@ -145,7 +144,7 @@ bool CWeekPlannerUIExtensionBridgeWindow::SelectTask(DWORD dwTaskID, bool /*bTas
 
 bool CWeekPlannerUIExtensionBridgeWindow::SelectTasks(const DWORD* pdwTaskIDs, int nTaskCount)
 {
-	array<UInt32>^ taskIDs = gcnew array<UInt32>(nTaskCount);
+	auto taskIDs = gcnew array<UInt32>(nTaskCount);
 
 	for (int i = 0; i < nTaskCount; i++)
 		taskIDs[i] = pdwTaskIDs[i];
@@ -155,9 +154,9 @@ bool CWeekPlannerUIExtensionBridgeWindow::SelectTasks(const DWORD* pdwTaskIDs, i
 
 void CWeekPlannerUIExtensionBridgeWindow::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate)
 {
-	msclr::auto_gcroot<TaskList^> tasks = gcnew TaskList(pTasks);
+	auto tasks = gcnew TaskList(pTasks);
 
-	m_wnd->UpdateTasks(tasks.get(), UIExtension::MapUpdateType(nUpdate));
+	m_wnd->UpdateTasks(tasks, UIExtension::MapUpdateType(nUpdate));
 }
 
 bool CWeekPlannerUIExtensionBridgeWindow::WantTaskUpdate(TDC_ATTRIBUTE nAttribID) const
@@ -167,20 +166,20 @@ bool CWeekPlannerUIExtensionBridgeWindow::WantTaskUpdate(TDC_ATTRIBUTE nAttribID
 
 bool CWeekPlannerUIExtensionBridgeWindow::PrepareNewTask(ITaskList* pTask) const
 {
-	msclr::auto_gcroot<TaskList^> task = gcnew TaskList(pTask);
+	auto task = gcnew TaskList(pTask);
 
-	return m_wnd->PrepareNewTask(task.get()->GetFirstTask());
+	return m_wnd->PrepareNewTask(task->GetFirstTask());
 }
 
 bool CWeekPlannerUIExtensionBridgeWindow::ProcessMessage(MSG* pMsg)
 {
-	return m_wnd->ProcessMessage(IntPtr(pMsg->hwnd), 
-		pMsg->message, 
-		pMsg->wParam, 
-		pMsg->lParam, 
-		pMsg->time, 
-		pMsg->pt.x,
-		pMsg->pt.y);
+	return m_wnd->ProcessMessage(IntPtr(pMsg->hwnd),
+								 pMsg->message,
+								 pMsg->wParam,
+								 pMsg->lParam,
+								 pMsg->time,
+								 pMsg->pt.x,
+								 pMsg->pt.y);
 }
 
 bool CWeekPlannerUIExtensionBridgeWindow::DoIdleProcessing()
@@ -229,9 +228,8 @@ bool CWeekPlannerUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, IUIA
 
 			if (image != nullptr)
 			{
-				msclr::auto_gcroot<String^> sImagePath = gcnew String(pData->szFilePath);
-
-				return UIExtension::SaveImageToFile(image, sImagePath.get());
+				auto imagePath = gcnew String(pData->szFilePath);
+				return UIExtension::SaveImageToFile(image, imagePath);
 			}
 		}
 		break;
@@ -334,9 +332,9 @@ bool CWeekPlannerUIExtensionBridgeWindow::ShowContextMenu(POINT ptScreen)
 
 void CWeekPlannerUIExtensionBridgeWindow::SetUITheme(const UITHEME* pTheme)
 {
-	msclr::auto_gcroot<UITheme^> theme = gcnew UITheme(pTheme);
+	auto theme = gcnew UITheme(pTheme);
 
-	m_wnd->SetUITheme(theme.get());
+	m_wnd->SetUITheme(theme);
 }
 
 void CWeekPlannerUIExtensionBridgeWindow::SetTaskFont(HFONT hFont)
@@ -356,33 +354,17 @@ HWND CWeekPlannerUIExtensionBridgeWindow::GetHwnd() const
 
 void CWeekPlannerUIExtensionBridgeWindow::SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const
 {
-	msclr::auto_gcroot<Preferences^> prefs = gcnew Preferences(pPrefs);
-	msclr::auto_gcroot<String^> key = gcnew String(szKey);
+	auto prefs = gcnew Preferences(pPrefs);
+	auto key = gcnew String(szKey);
 
-	m_wnd->SavePreferences(prefs.get(), key.get());
-
-	// Delete old settings
-	if (m_hasOldSettings)
-	{
-		auto oldKey = key->Replace(gcnew String(WEEKPLANNER_GUID), gcnew String(WEEKPLANNER_OLDGUID));
-		prefs->DeleteProfileSection(oldKey, true);
-	}
+	m_wnd->SavePreferences(prefs, key);
 }
 
 void CWeekPlannerUIExtensionBridgeWindow::LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey, bool bAppOnly)
 {
-	msclr::auto_gcroot<Preferences^> prefs = gcnew Preferences(pPrefs);
-	msclr::auto_gcroot<String^> key = gcnew String(szKey);
-
-	// Backwards compatibility because of TypeID change
-	auto oldKey = key->Replace(gcnew String(WEEKPLANNER_GUID), gcnew String(WEEKPLANNER_OLDGUID));
+	auto prefs = gcnew Preferences(pPrefs);
+	auto key = gcnew String(szKey);
 	
-	if (prefs->HasProfileSection(oldKey))
-	{
-		m_hasOldSettings = true;
-		key = oldKey;
-	}
-	
-	m_wnd->LoadPreferences(prefs.get(), key.get(), bAppOnly);
+	m_wnd->LoadPreferences(prefs, key, bAppOnly);
 }
 

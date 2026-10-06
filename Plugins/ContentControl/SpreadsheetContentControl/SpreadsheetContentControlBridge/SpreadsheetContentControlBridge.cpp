@@ -7,7 +7,6 @@
 
 #include <unknwn.h>
 #include <tchar.h>
-#include <msclr\auto_gcroot.h>
 
 #include <Interfaces\ITransText.h>
 #include <Interfaces\IPreferences.h>
@@ -20,10 +19,11 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-using namespace SpreadsheetContentControl;
 using namespace System;
 using namespace System::Collections::Generic;
 using namespace System::Runtime::InteropServices;
+
+using namespace SpreadsheetContentControl;
 
 using namespace Abstractspoon::Tdl::PluginHelpers;
 
@@ -121,10 +121,11 @@ CSpreadsheetContentControlBridge::CSpreadsheetContentControlBridge(ITransText* p
 BOOL CSpreadsheetContentControlBridge::Create(UINT nCtrlID, DWORD nStyle, 
 	long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent)
 {
-	msclr::auto_gcroot<Translator^> trans = gcnew Translator(m_pTT);
-	msclr::auto_gcroot<String^> typeID = gcnew String(SPREADSHEET_GUID);
+	auto trans = gcnew Translator(m_pTT);
+	auto typeID = gcnew String(SPREADSHEET_GUID);
+	auto parent = static_cast<IntPtr>(hwndParent);
 
-	m_wnd = gcnew SpreadsheetContentControlCore(typeID.get(), static_cast<IntPtr>(hwndParent), trans.get());
+	m_wnd = gcnew SpreadsheetContentControlCore(typeID, parent, trans);
 
 	HWND hWnd = GetHwnd();
 
@@ -148,7 +149,7 @@ int CSpreadsheetContentControlBridge::GetContent(unsigned char* pContent) const
 		// Caller is just requesting length but it's inefficient
 		// for us to request the full content just for its length
 		// so we cache it for the subsequent actual content request
-		cli::array<Byte>^ content = m_wnd->GetContent();
+		auto content = m_wnd->GetContent();
 		int nLength = content->Length;
 
 		m_lastRequestedContent = gcnew cli::array<unsigned char>(nLength);
@@ -177,7 +178,7 @@ int CSpreadsheetContentControlBridge::GetContent(unsigned char* pContent) const
 
 bool CSpreadsheetContentControlBridge::SetContent(const unsigned char* pContent, int nLength, bool bResetSelection)
 {
-	cli::array<Byte>^ content = gcnew cli::array<Byte>(nLength);
+	auto content = gcnew cli::array<Byte>(nLength);
 
 	for (int i = 0; i < nLength; i++)
 		content[i] = pContent[i];
@@ -207,24 +208,24 @@ int CSpreadsheetContentControlBridge::GetTextContent(LPWSTR szContent, int nLeng
 
 bool CSpreadsheetContentControlBridge::SetTextContent(LPCWSTR szContent, bool bResetSelection)
 {
-	msclr::auto_gcroot<String^> content = gcnew String(szContent);
+	auto content = gcnew String(szContent);
 
-	return m_wnd->SetTextContent(content.get(), bResetSelection);
+	return m_wnd->SetTextContent(content, bResetSelection);
 }
 
 bool CSpreadsheetContentControlBridge::FindReplaceAll(LPCWSTR szFind, LPCWSTR szReplace, bool bCaseSensitive, bool bWholeWord)
 {
-	msclr::auto_gcroot<String^> find = gcnew String(szFind);
-	msclr::auto_gcroot<String^> replace = gcnew String(szReplace);
+	auto find = gcnew String(szFind);
+	auto replace = gcnew String(szReplace);
 
-	return (m_wnd->FindReplaceAll(find.get(), replace.get(), bWholeWord, bCaseSensitive) > 0);
+	return (m_wnd->FindReplaceAll(find, replace, bWholeWord, bCaseSensitive) > 0);
 }
 
 bool CSpreadsheetContentControlBridge::InsertTextContent(LPCWSTR szContent, bool bAtEnd)
 {
-	msclr::auto_gcroot<String^> content = gcnew String(szContent);
+	auto content = gcnew String(szContent);
 
-	return m_wnd->InsertTextContent(content.get(), bAtEnd);
+	return m_wnd->InsertTextContent(content, bAtEnd);
 }
 
 void CSpreadsheetContentControlBridge::SetReadOnly(bool bReadOnly)
@@ -270,9 +271,9 @@ bool CSpreadsheetContentControlBridge::Redo()
 
 void CSpreadsheetContentControlBridge::SetUITheme(const UITHEME* pTheme)
 {
-	msclr::auto_gcroot<UITheme^> theme = gcnew UITheme(pTheme);
+	auto theme = gcnew UITheme(pTheme);
 
-	m_wnd->SetUITheme(theme.get());
+	m_wnd->SetUITheme(theme);
 }
 
 void CSpreadsheetContentControlBridge::SetContentFont(HFONT hFont)
@@ -282,16 +283,16 @@ void CSpreadsheetContentControlBridge::SetContentFont(HFONT hFont)
 
 void CSpreadsheetContentControlBridge::SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const
 {
-	msclr::auto_gcroot<Preferences^> prefs = gcnew Preferences(pPrefs);
-	msclr::auto_gcroot<String^> key = gcnew String(szKey);
+	auto prefs = gcnew Preferences(pPrefs);
+	auto key = gcnew String(szKey);
 
-	m_wnd->SavePreferences(prefs.get(), key.get());
+	m_wnd->SavePreferences(prefs, key);
 }
 
 void CSpreadsheetContentControlBridge::LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey, bool bAppOnly)
 {
-	msclr::auto_gcroot<Preferences^> prefs = gcnew Preferences(pPrefs);
-	msclr::auto_gcroot<String^> key = gcnew String(szKey);
+	auto prefs = gcnew Preferences(pPrefs);
+	auto key = gcnew String(szKey);
 
-	m_wnd->LoadPreferences(prefs.get(), key.get(), bAppOnly);
+	m_wnd->LoadPreferences(prefs, key, bAppOnly);
 }
