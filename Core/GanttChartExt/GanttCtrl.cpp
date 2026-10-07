@@ -2332,12 +2332,22 @@ CString CGanttCtrl::GetTreeItemColumnText(const GANTTITEM& gi, GTLC_COLUMN nCol)
 			break;
 			
 		case GTLCC_STARTDATE:
+			{
+				COleDateTime dtStart, dtUnused;
+				GetTaskStartEndDates(gi, dtStart, dtUnused);
+
+				if (CDateHelper::IsDateSet(dtStart))
+					sItem = FormatDate(dtStart);
+			}
+			break;
+
 		case GTLCC_DUEDATE:
 			{
-				COleDateTime dtStart, dtDue;
-				GetTaskStartEndDates(gi, dtStart, dtDue);
+				COleDateTime dtUnused, dtDue;
+				GetTaskStartEndDates(gi, dtUnused, dtDue);
 
-				sItem = FormatDate((nCol == GTLCC_STARTDATE) ? dtStart : dtDue);
+				if (CDateHelper::IsDateSet(dtDue))
+					sItem = FormatDate(dtDue);
 			}
 			break;
 

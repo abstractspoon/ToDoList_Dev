@@ -4124,7 +4124,7 @@ UINT CToDoCtrlData::SetNewTaskDependencyStartDate(DWORD dwTaskID, const COleDate
 	// bump the due date too if present but before
 	// we set the start date
 	COleDateTime dtStart(dtNewStart); // start can change too
-	COleDateTime dtNewDue;
+	COleDateTime dtNewDue = CDateHelper::NullDate();
 
 	UINT nAdjusted = ADJUSTED_NONE;
 
