@@ -786,7 +786,7 @@ LRESULT CCalendarWnd::OnBigCalendarNotifyDateChange(WPARAM wp, LPARAM /*lp*/)
 
 	if (notify->sCustAttribID.IsEmpty())
 	{
-		COleDateTime dtStart, dtDue;
+		CNullOleDateTime dtStart, dtDue;
 
 		if (m_BigCalendar.GetSelectedTaskDates(dtStart, dtDue))
 		{
@@ -857,7 +857,7 @@ void CCalendarWnd::OnCancel()
 void CCalendarWnd::UpdateSelectedTaskDates()
 {
 	CString sSelectedTaskDates;
-	COleDateTime dtStart, dtDue;
+	CNullOleDateTime dtStart, dtDue;
 	
 	if (m_BigCalendar.GetSelectedTaskDates(dtStart, dtDue))
 	{

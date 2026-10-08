@@ -1666,7 +1666,7 @@ void CDueDoneDatesMinMaxGraph::BuildGraph(const CStatsItemCalculator& calculator
 
 		for (int nItem = nFrom; nItem <= nTo; nItem++)
 		{
-			COleDateTime dtDue, dtDone;
+			CNullOleDateTime dtDue, dtDone;
 
 			if (calculator.GetItemDueDoneDates(nItem, dtDue, dtDone))
 			{
@@ -1692,7 +1692,7 @@ CString CDueDoneDatesMinMaxGraph::GetTooltip(const CStatsItemCalculator& calcula
 
 	if (!sTitle.IsEmpty())
 	{
-		COleDateTime dtDue, dtDone;
+		CNullOleDateTime dtDue, dtDone;
 		calculator.GetItemDueDoneDates(nItem, dtDue, dtDone);
 
 		sTooltip.Format(CEnString(IDS_TOOLTIP_DUEDONEDATES), sTitle, dtDue.Format(VAR_DATEVALUEONLY), dtDone.Format(VAR_DATEVALUEONLY));

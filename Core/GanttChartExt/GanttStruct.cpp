@@ -292,7 +292,7 @@ BOOL GANTTITEM::operator!=(const GANTTITEM& gi) const
 
 void GANTTITEM::MinMaxDates(const GANTTITEM& giOther, BOOL bCalcParentDates, BOOL bCalcMissingStart, BOOL bCalcMissingDue)
 {
-	COleDateTime dtStart, dtEnd;
+	CNullOleDateTime dtStart, dtEnd;
 	giOther.GetStartEndDates(bCalcParentDates, bCalcMissingStart, bCalcMissingDue, dtStart, dtEnd);
 
 	dtMinMaxRange.Add(dtStart, dtEnd);
@@ -699,9 +699,7 @@ BOOL CGanttItemMap::IsItemDependentOn(const GANTTITEM& gi, DWORD dwOtherID) cons
 
 COleDateTime CGanttItemMap::CalcMaxDependencyDate(const GANTTITEM& gi) const
 {
-	COleDateTime dtMax;
-	CDateHelper::ClearDate(dtMax);
-
+	CNullOleDateTime dtMax;
 	int nDepend = gi.aDependIDs.GetSize();
 
 	while (nDepend--)
@@ -737,7 +735,7 @@ void CGanttItemMap::CalcDateRange(BOOL bCalcParentDates, BOOL bCalcMissingStart,
 
 		if (pGI)
 		{
-			COleDateTime dtStart, dtEnd;
+			CNullOleDateTime dtStart, dtEnd;
 			pGI->GetStartEndDates(bCalcParentDates, bCalcMissingStart, bCalcMissingDue, dtStart, dtEnd);
 
 			dtRange.Add(dtStart, dtEnd);

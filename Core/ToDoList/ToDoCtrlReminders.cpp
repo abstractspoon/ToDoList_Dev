@@ -409,11 +409,11 @@ BOOL CToDoCtrlReminders::UpdateModifiedTasks(const CFilteredToDoCtrl* pTDC, cons
 				}
 			}
 
-			COleDateTime dtRem;
-
 			// If the reminder date without snooze is in the future,
 			// or the reminder is no longer valid, then clear the 
 			// snooze and remove the reminder from the list
+			CNullOleDateTime dtRem;
+
 			if (!rem.GetReminderDate(dtRem, FALSE) || (dtRem > dtNow))
 			{
 				rem.dDaysSnooze = 0.0;
@@ -835,7 +835,7 @@ void CToDoCtrlReminders::DoSnoozeReminder(const TDCREMINDER& rem)
 		{
 			// in case the user didn't handle the notification immediately 
 			// we soak up any additional elapsed time in the 'snooze'
-			COleDateTime dtRem;
+			CNullOleDateTime dtRem;
 			VERIFY(remExist.GetReminderDate(dtRem, FALSE)); // exclude current snooze
 
 			remExist.dDaysSnooze = (dNow - dtRem.m_dt);

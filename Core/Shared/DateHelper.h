@@ -24,6 +24,16 @@ typedef __int64 time64_t;
 
 //////////////////////////////////////////////////////////////////////
 
+class CNullOleDateTime : public COleDateTime
+{
+public:
+	// Minimal interface
+	CNullOleDateTime();
+	COleDateTime& operator=(const COleDateTime& other);
+};
+
+//////////////////////////////////////////////////////////////////////
+
 class COleDateTimeRange
 {
 public:

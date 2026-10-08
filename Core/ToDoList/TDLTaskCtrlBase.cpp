@@ -1521,7 +1521,7 @@ int CTDLTaskCtrlBase::CompareTasks(LPARAM lParam1,
 	}
 	else if (sort.IsSortingBy(TDCC_REMINDER))
 	{
-		COleDateTime dtRem1, dtRem2;
+		CNullOleDateTime dtRem1, dtRem2;
 
 		BOOL bHasReminder1 = GetTaskReminder(dwTaskID1, dtRem1);
 		BOOL bHasReminder2 = GetTaskReminder(dwTaskID2, dtRem2);

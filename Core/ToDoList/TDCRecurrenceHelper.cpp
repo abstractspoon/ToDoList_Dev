@@ -30,7 +30,7 @@ CTDCRecurrenceHelper::CTDCRecurrenceHelper(const TODOITEM& tdi) : m_tdi(tdi)
 
 BOOL CTDCRecurrenceHelper::CalcNextOccurrence(COleDateTimeRange& dtOccur) const
 {
-	COleDateTime dtNext;
+	CNullOleDateTime dtNext;
 	BOOL bDue = FALSE;
 
 	if (!CalcNextOccurrence(dtNext, bDue))
@@ -157,7 +157,7 @@ int CTDCRecurrenceHelper::CalcNextOccurrences(const COleDateTimeRange& dtRange, 
 
 int CTDCRecurrenceHelper::CalcNextOccurrences(const COleDateTimeRange& dtRange, CArray<double, double&>& aDates) const
 {
-	COleDateTime dtFrom;
+	CNullOleDateTime dtFrom;
 
 	if (!GetFromDate(dtFrom))
 		return 0;
@@ -217,7 +217,7 @@ BOOL CTDCRecurrenceHelper::CalcNextOccurrence(const COleDateTime& dtNext, COleDa
 
 int CTDCRecurrenceHelper::CalcDaysToNextOccurrence(const COleDateTime& dtNext) const
 {
-	COleDateTime dtFrom;
+	CNullOleDateTime dtFrom;
 
 	if (!GetFromDate(dtFrom))
 		return 0;

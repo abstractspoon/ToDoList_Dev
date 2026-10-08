@@ -456,7 +456,7 @@ int CRecurrence::CalcNextOccurrences(const COleDateTime& dtPrev, const COleDateT
 	// Take a copy of ourselves because we need to able
 	// to modify the remaining recurrence count
 	CRecurrence tr(*this);
-	COleDateTime dtNext;
+	CNullOleDateTime dtNext;
 
 	// Move to start of range
 	if (!tr.GetNextOccurence(dtPrev, dtNext))

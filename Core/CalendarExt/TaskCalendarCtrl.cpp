@@ -2041,7 +2041,7 @@ DWORD CTaskCalendarCtrl::HitTestTask(const CPoint& ptClient, TCC_HITTEST& nHit, 
 			}
 			else // check for closeness to ends
 			{
-				COleDateTime dtHit;
+				CNullOleDateTime dtHit;
 				VERIFY(GetDateFromPoint(ptClient, dtHit));
 
 				double dDateTol = CalcDateDragTolerance();
@@ -2096,13 +2096,13 @@ BOOL CTaskCalendarCtrl::HitTestTaskIconRect(const TASKCALITEM* pTCI, const CRect
 	// 2. If the task starts late in the day, The icon may bridge a day-boundary
 
 	// We solve this by doing our calculations in 'date units'
-	COleDateTime dt1, dt2;
+	CNullOleDateTime dt1, dt2;
 	VERIFY(GetDateFromPoint(rIcon.TopLeft(), dt1));
 	VERIFY(GetDateFromPoint(rIcon.BottomRight(), dt2));
 
 	double dIconWidthInDays = (dt2.m_dt - dt1.m_dt);
 
-	COleDateTime dtClient;
+	CNullOleDateTime dtClient;
 	VERIFY(GetDateFromPoint(ptClient, dtClient));
 
 	// Test for cursor being between the task (start date) and (start date + icon width)
@@ -3273,7 +3273,7 @@ BOOL CTaskCalendarCtrl::GetDateFromPoint(const CPoint& ptCursor, COleDateTime& d
 		VERIFY(GetGridCellRect(nRow, nCol, rCell));
 
 		double dTime = ((ptCursor.x - rCell.left) / (double)rCell.Width());
-		date = pCell->date.m_dt + dTime;
+		date = COleDateTime(pCell->date.m_dt + dTime);
 
 		return TRUE;
 	}

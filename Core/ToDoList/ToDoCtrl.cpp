@@ -2250,7 +2250,7 @@ BOOL CToDoCtrl::SetSelectedTaskCompletion(const TDCTASKCOMPLETION& task, BOOL bA
 		// Post-processing for recurring tasks
 		if (bReuse)
 		{
-			COleDateTime dtNext;
+			CNullOleDateTime dtNext;
 			BOOL bDueDate = TRUE;
 
 			VERIFY(m_data.GetNextTaskOccurrence(dwTaskID, dtNext, bDueDate));
@@ -2307,7 +2307,7 @@ LRESULT CToDoCtrl::OnRecreateRecurringTask(WPARAM /*wParam*/, LPARAM lParam)
 			DWORD dwTaskID = m_aRecreateTaskIDs[nTask];
 
 			// next occurrence can fail if we've run out of occurrences
-			COleDateTime dtNext;
+			CNullOleDateTime dtNext;
 			BOOL bDueDate = TRUE;
 
 			if (!m_data.GetNextTaskOccurrence(dwTaskID, dtNext, bDueDate))

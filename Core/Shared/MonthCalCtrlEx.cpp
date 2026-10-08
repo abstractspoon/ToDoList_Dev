@@ -134,7 +134,7 @@ const CRect& CMonthCalCtrlEx::GetWeekNumbersRect()
 
 BOOL CMonthCalCtrlEx::IsMonthView() const
 {
-	COleDateTime dtStart, dtEnd;
+	CNullOleDateTime dtStart, dtEnd;
 	GetMonthRange(dtStart, dtEnd, GMR_VISIBLE);
 
 	COleDateTimeSpan dtSpan = (dtEnd - dtStart);
@@ -165,7 +165,7 @@ void CMonthCalCtrlEx::DrawWeekNumbers(CDC* pDC)
 		if (!CRect().IntersectRect(rWeekNumbers, rClip))
 			return;
 
-		COleDateTime dtStart, dtEnd;
+		CNullOleDateTime dtStart, dtEnd;
 		GetMonthRange(dtStart, dtEnd, GMR_DAYSTATE);
 
 		pDC->FillSolidRect(rWeekNumbers, GetSysColor(COLOR_WINDOW));

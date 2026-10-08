@@ -2014,7 +2014,7 @@ LRESULT CGanttCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 
 					// work out where we are going to scroll to after the zoom
 					DWORD dwScrollID = 0;
-					COleDateTime dtScroll;
+					CNullOleDateTime dtScroll;
 
 					// centre on the mouse if over the list
 					if (hRealWnd == m_list)
@@ -3803,8 +3803,7 @@ void CGanttCtrl::DrawGanttBar(CDC* pDC, const CRect& rMonth, int nMonth, int nYe
 			// Calculate the % completion date
 			double dTaskPercent = (gi.nPercent / 100.0);
 
-			COleDateTime dtPercentDone;
-			dtPercentDone.m_dt = (dtStart.m_dt + ((dtDue.m_dt - dtStart.m_dt) * dTaskPercent));
+			COleDateTime dtPercentDone(dtStart.m_dt + ((dtDue.m_dt - dtStart.m_dt) * dTaskPercent));
 
 			if (dtPercentDone <= dtMonthStart)
 			{
@@ -3869,7 +3868,7 @@ void CGanttCtrl::DrawGanttParentEnds(CDC* pDC, const GANTTITEM& gi, const CRect&
 	if (HasOption(GTLCF_DISPLAYPARENTROLLUPS) && !TCH().IsItemExpanded(GetTreeItem(gi.dwTaskID)))
 		return;
 
-	COleDateTime dtStart, dtDue;
+	CNullOleDateTime dtStart, dtDue;
 	GetTaskStartEndDates(gi, dtStart, dtDue);
 
 	BOOL bDrawStart = (dtStart >= dtMonthStart);
@@ -3922,7 +3921,7 @@ void CGanttCtrl::DrawGanttDone(CDC* pDC, const CRect& rMonth, int nMonth, int nY
 	if (!gi.HasDoneDate(HasOption(GTLCF_CALCPARENTDATES)) || gi.IsMilestone(m_sMilestoneTag))
 		return;
 
-	COleDateTime dtMonthStart, dtMonthEnd;
+	CNullOleDateTime dtMonthStart, dtMonthEnd;
 
 	if (!GetMonthDates(nMonth, nYear, dtMonthStart, dtMonthEnd))
 		return;
@@ -3999,7 +3998,7 @@ BOOL CGanttCtrl::CalcMilestoneRect(const GANTTITEM& gi, const CRect& rMonth, CRe
 
 	rMilestone = rMonth;
 
-	COleDateTime dtDue;
+	CNullOleDateTime dtDue;
 	
 	if (gi.bParent && HasOption(GTLCF_CALCPARENTDATES))
 		dtDue = gi.dtMinMaxRange.GetEnd();
@@ -4026,7 +4025,7 @@ BOOL CGanttCtrl::CalcMilestoneRect(const GANTTITEM& gi, const CRect& rMonth, CRe
 
 int CGanttCtrl::GetBestTextPos(const GANTTITEM& gi, const CRect& rMonth) const
 {
-	COleDateTime dtDue;
+	CNullOleDateTime dtDue;
 	
 	if (gi.bParent && HasOption(GTLCF_CALCPARENTDATES))
 		dtDue = gi.dtMinMaxRange.GetEnd();
@@ -4035,7 +4034,7 @@ int CGanttCtrl::GetBestTextPos(const GANTTITEM& gi, const CRect& rMonth) const
 
 	if (!CDateHelper::IsDateSet(dtDue))
 	{
-		COleDateTime dtUnused;
+		CNullOleDateTime dtUnused;
 		GetTaskStartEndDates(gi, dtUnused, dtDue);
 
 		if (!CDateHelper::IsDateSet(dtDue))
@@ -4069,7 +4068,7 @@ BOOL CGanttCtrl::DrawToday(CDC* pDC, const CRect& rMonth, int nMonth, int nYear,
 	if (m_crToday == CLR_NONE)
 		return TRUE; // so we don't keep trying to draw it
 
-	COleDateTime dtMonthStart, dtMonthEnd;
+	CNullOleDateTime dtMonthStart, dtMonthEnd;
 
 	if (!GetMonthDates(nMonth, nYear, dtMonthStart, dtMonthEnd))
 		return FALSE;
@@ -4334,7 +4333,7 @@ BOOL CGanttCtrl::ZoomTo(GTLC_MONTH_DISPLAY nNewDisplay, int nNewMonthWidth)
 	CRect rClient;
 	GetClientRect(rClient);
 
-	COleDateTime dtPos;
+	CNullOleDateTime dtPos;
 	BOOL bRestorePos = GetDateFromScrolledPos((m_list.GetScrollPos(SB_HORZ) + (rClient.Width() / 2)), dtPos);
 
 	// always cancel any ongoing operation
@@ -4611,7 +4610,7 @@ void CGanttCtrl::UpdateListColumns(int nWidth)
 	// cache the scrolled position
 	int nScrollPos = m_list.GetScrollPos(SB_HORZ);
 
-	COleDateTime dtPos;
+	CNullOleDateTime dtPos;
 	BOOL bRestorePos = GetDateFromScrolledPos(nScrollPos, dtPos);
 
 	if (nWidth == -1)
@@ -4872,7 +4871,7 @@ int CGanttCtrl::CompareTasks(DWORD dwTaskID1, DWORD dwTaskID2, const GANTTSORTCO
 
 		case GTLCC_STARTDATE:
 			{
-				COleDateTime dtStart1, dtStart2, dtUnused;
+				CNullOleDateTime dtStart1, dtStart2, dtUnused;
 
 				GetTaskStartEndDates(*pGI1, dtStart1, dtUnused);
 				GetTaskStartEndDates(*pGI2, dtStart2, dtUnused);
@@ -4883,7 +4882,7 @@ int CGanttCtrl::CompareTasks(DWORD dwTaskID1, DWORD dwTaskID2, const GANTTSORTCO
 
 		case GTLCC_DUEDATE:
 			{
-				COleDateTime dtDue1, dtDue2, dtUnused;
+				CNullOleDateTime dtDue1, dtDue2, dtUnused;
 
 				GetTaskStartEndDates(*pGI1, dtUnused, dtDue1);
 				GetTaskStartEndDates(*pGI2, dtUnused, dtDue2);
@@ -4960,7 +4959,7 @@ void CGanttCtrl::ScrollToTask(DWORD dwTaskID)
 	GANTTDATERANGE dtVis;
 	VERIFY(GetVisibleDateRange(dtVis));
 
-	COleDateTime dtStart, dtDue;
+	CNullOleDateTime dtStart, dtDue;
 	
 	if (GetTaskStartEndDates(*pGI, dtStart, dtDue))
 	{
@@ -5016,7 +5015,7 @@ BOOL CGanttCtrl::GetVisibleDateRange(GANTTDATERANGE& dtRange) const
 
 		rList.OffsetRect(m_list.GetScrollPos(SB_HORZ), 0);
 
-		COleDateTime dtStart, dtEnd;
+		CNullOleDateTime dtStart, dtEnd;
 
 		if (GetDateFromScrolledPos(rList.left, dtStart) &&
 			GetDateFromScrolledPos(rList.right - 1, dtEnd))
@@ -5296,7 +5295,7 @@ BOOL CGanttCtrl::PrepareNewTask(ITaskList* pTaskList) const
 		const GANTTITEM* pGIParent = NULL;
 		GET_GI_RET(dwSelTaskID, pGIParent, false);
 
-		COleDateTime dtParentStart, dtUnused;
+		CNullOleDateTime dtParentStart, dtUnused;
 
 		if (GetTaskStartEndDates(*pGIParent, dtParentStart, dtUnused))
 			dtStart = dtParentStart;
@@ -5396,7 +5395,7 @@ DWORD CGanttCtrl::ListHitTestTask(const CPoint& point, BOOL bScreen, GTLC_HITTES
 	GANTTITEM* pGI = NULL;
 	GET_GI_RET(dwTaskID, pGI, 0);
 	
-	COleDateTime dtStart, dtEnd;
+	CNullOleDateTime dtStart, dtEnd;
 	
 	if (!GetTaskStartEndDates(*pGI, dtStart, dtEnd))
 		return 0;
@@ -5597,7 +5596,7 @@ BOOL CGanttCtrl::StartDragging(const CPoint& ptCursor)
 		m_barDragInfo.aGIPreDrag.Add(*pGI);
 
 		// Ensure the gantt item has valid dates for dragging
-		COleDateTime dtStart, dtDue;
+		CNullOleDateTime dtStart, dtDue;
 		GetTaskStartEndDates(*pGI, dtStart, dtDue);
 	
 		if (!pGI->HasDueDate())
@@ -5636,7 +5635,7 @@ BOOL CGanttCtrl::StartDragging(const CPoint& ptCursor)
 			GANTTITEM* pGIHit = m_data.GetItem(dwHitTaskID, TRUE);
 			ASSERT(pGIHit);
 
-			COleDateTime dtStart, dtDue;
+			CNullOleDateTime dtStart, dtDue;
 			GetTaskStartEndDates(*pGIHit, dtStart, dtDue);
 
 			if (nDragging == GTLCD_START)
@@ -5663,7 +5662,7 @@ BOOL CGanttCtrl::UpdateDragging(const CPoint& ptCursor)
 		return FALSE;
 
 	CPoint ptDrag(ptCursor);
-	COleDateTime dtDrag;
+	CNullOleDateTime dtDrag;
 
 	if (ValidateDragPoint(ptDrag) && GetDateFromPoint(ptDrag, dtDrag))
 	{
@@ -5685,7 +5684,7 @@ BOOL CGanttCtrl::UpdateDragging(const CPoint& ptCursor)
 
 		while (nTask--)
 		{
-			COleDateTime dtOrgStart, dtOrgEnd;
+			CNullOleDateTime dtOrgStart, dtOrgEnd;
 			const GANTTITEM& giPreDrag = m_barDragInfo.aGIPreDrag[nTask];
 
 			VERIFY(GetTaskStartEndDates(giPreDrag, dtOrgStart, dtOrgEnd));
@@ -5693,7 +5692,7 @@ BOOL CGanttCtrl::UpdateDragging(const CPoint& ptCursor)
 			GANTTITEM* pGI = NULL;
 			GET_GI_RET(giPreDrag.dwTaskID, pGI, FALSE);
 
-			COleDateTime dtCurStart, dtCurEnd;
+			CNullOleDateTime dtCurStart, dtCurEnd;
 			VERIFY(GetTaskStartEndDates(*pGI, dtCurStart, dtCurEnd));
 
 			switch (m_barDragInfo.nDragMode)
@@ -6209,7 +6208,7 @@ BOOL CGanttCtrl::SaveToImage(CBitmap& bmImage)
 	COleDateTime dtFrom = CDateHelper::GetStartOfMonth(ActiveDateRange().GetStart());
 	COleDateTime dtTo = CDateHelper::GetEndOfMonth(ActiveDateRange().GetEnd());
  
-	COleDateTime dtStart, dtEnd;
+	CNullOleDateTime dtStart, dtEnd;
 	
 	VERIFY(GetListColumnDate(1, dtStart));
 	VERIFY(GetListColumnDate(m_listHeader.GetItemCount() - 1, dtEnd, TRUE));

@@ -4124,7 +4124,7 @@ UINT CToDoCtrlData::SetNewTaskDependencyStartDate(DWORD dwTaskID, const COleDate
 	// bump the due date too if present but before
 	// we set the start date
 	COleDateTime dtStart(dtNewStart); // start can change too
-	COleDateTime dtNewDue = CDateHelper::NullDate();
+	CNullOleDateTime dtNewDue;
 
 	UINT nAdjusted = ADJUSTED_NONE;
 
@@ -4179,7 +4179,7 @@ BOOL CToDoCtrlData::CalcTaskDependencyStartDate(DWORD dwTaskID, TDC_DATE nDate, 
 
 		if (depend.IsLocal())
 		{
-			COleDateTime dtStart;
+			CNullOleDateTime dtStart;
 
 			if (CalcTaskDependencyStartDate(dwTaskID, depend, nDate, dtStart))
 				VERIFY(CDateHelper::Max(dtNewStart, dtStart));
@@ -4192,7 +4192,7 @@ BOOL CToDoCtrlData::CalcTaskDependencyStartDate(DWORD dwTaskID, TDC_DATE nDate, 
 UINT CToDoCtrlData::UpdateTaskLocalDependencyDates(DWORD dwTaskID, TDC_DATE nDate)
 {
 	// calculate the latest start date possible for this task's dependencies
-	COleDateTime dtNewStart;
+	CNullOleDateTime dtNewStart;
 
 	if (CalcTaskDependencyStartDate(dwTaskID, nDate, dtNewStart))
 		return SetNewTaskDependencyStartDate(dwTaskID, dtNewStart);

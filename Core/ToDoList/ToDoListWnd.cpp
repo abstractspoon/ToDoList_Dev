@@ -4486,7 +4486,7 @@ TDC_FILE CToDoListWnd::DelayOpenTaskList(LPCTSTR szFilePath)
 	// if this is a 'special' temp file then assume TDL automatically
 	// named it when handling WM_ENDSESSION. 
 	BOOL bDelayLoad = !IsEndSessionFilePath(sFilePath);
-	COleDateTime dtEarliest;
+	CNullOleDateTime dtEarliest;
 
 	if (bDelayLoad)
 		bDelayLoad = pTDC->DelayLoad(sFilePath, dtEarliest);
@@ -12434,7 +12434,7 @@ void CToDoListWnd::OnToolsAnalyseLoggedTime()
 			DWORD dwLastErr = 0;
 			SetLastError(0);
 
-			COleDateTime dtFrom, dtTo;
+			CNullOleDateTime dtFrom, dtTo;
 
 			if (dialog.GetDateRange(dtFrom, dtTo))
 			{
@@ -13408,7 +13408,7 @@ LRESULT CToDoListWnd::OnToDoCtrlGetTaskReminder(WPARAM wParam, LPARAM lParam)
 	if (nRem == -1)
 		return 0;
 
-	COleDateTime dtRem;
+	CNullOleDateTime dtRem;
 
 	if (!m_dlgReminders.GetReminderDate(nRem, dtRem))
 		return -1; // means the task's start/due date has not yet been set

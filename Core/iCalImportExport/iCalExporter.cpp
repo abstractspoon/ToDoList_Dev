@@ -166,12 +166,10 @@ BOOL CiCalExporter::GetTaskDates(const ITASKLISTBASE* pTasks, HTASKITEM hTask,
 	else
 		CDateHelper::ClearDate(dtDue);
 
-	COleDateTime dtDone;
+	CNullOleDateTime dtDone;
 
 	if (pTasks->GetTaskDoneDate64(hTask, tDone))
 		dtDone = CDateHelper::GetDate(tDone);
-	else
-		CDateHelper::ClearDate(dtDone);
 
 	if (pTasks->GetTaskPercentDone(hTask, FALSE) < 100)
 		dtEnd = dtDue;
@@ -213,7 +211,7 @@ int CiCalExporter::ExportTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, cons
 	CString sUID = FormatUID(fileOut.GetFilePath(), pTasks->GetTaskID(hTask));
 		
 	// tasks must have a start date or a due date or both
-	COleDateTime dtStart, dtDue, dtEnd;
+	CNullOleDateTime dtStart, dtDue, dtEnd;
 
 	if (GetTaskDates(pTasks, hTask, dtStart, dtEnd, dtDue))
 	{

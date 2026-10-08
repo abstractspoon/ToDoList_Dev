@@ -34,6 +34,18 @@ const double START_OF_DAY = ONE_SECOND;
 
 //////////////////////////////////////////////////////////////////////
 
+CNullOleDateTime::CNullOleDateTime() : COleDateTime()
+{
+	CDateHelper::ClearDate(*this);
+}
+
+COleDateTime& CNullOleDateTime::operator=(const COleDateTime& other) 
+{ 
+	return COleDateTime::operator=(other); 
+}
+
+//////////////////////////////////////////////////////////////////////
+
 COleDateTimeRange::COleDateTimeRange()
 {
 	Reset();
@@ -661,7 +673,7 @@ BOOL CDateHelper::IsValidDayOfMonth(OLE_DAYOFWEEK nDOW, int nWhich, int nMonth)
 
 BOOL CDateHelper::DecodeDate(const CString& sDate, double& date, BOOL bAndTime)
 {
-	COleDateTime dt;
+	CNullOleDateTime dt;
 
 	if (DecodeDate(sDate, dt, bAndTime))
 	{
@@ -812,7 +824,7 @@ BOOL CDateHelper::DecodeRelativeDate(LPCTSTR szDate, COleDateTime& date, BOOL bM
 
 BOOL CDateHelper::IsValidRelativeDate(LPCTSTR szDate, BOOL bMustHaveSign)
 {
-	COleDateTime dtUnused;
+	CNullOleDateTime dtUnused;
 	CTwentyFourSevenWeek week;
 
 	return CDateHelper(week).DecodeRelativeDate(szDate, dtUnused, bMustHaveSign);
@@ -937,7 +949,7 @@ BOOL CDateHelper::DecodeDate(const CString& sDate, time_t& date, BOOL bAndTime)
 
 BOOL CDateHelper::DecodeDate(const CString& sDate, time64_t& date, BOOL bAndTime)
 {
-	COleDateTime dt;
+	CNullOleDateTime dt;
 
 	if (!DecodeDate(sDate, dt, bAndTime))
 		return FALSE;
@@ -2335,7 +2347,7 @@ COleDateTime CDateHelper::GetNearestEpoch(const COleDateTime& date, int nEpochLe
 	COleDateTime dtThisEpoch = GetStartOfEpoch(date, nEpochLen, bZeroBased);
 	COleDateTime dtNextEpoch = (GetEndOfEpoch(date, nEpochLen, bZeroBased).m_dt + 1.0);
 
-	COleDateTime dtNearest;
+	CNullOleDateTime dtNearest;
 
 	if ((date - dtThisEpoch) < (dtNextEpoch - date))
 		dtNearest = dtThisEpoch;
@@ -2383,7 +2395,7 @@ COleDateTime CDateHelper::GetNearestMonth(const COleDateTime& date, int nInterva
 	COleDateTime dtMonth = GetDateFromMonths(nNumMonths);
 	COleDateTime dtNextMonth = GetDateFromMonths(nNumMonths + nInterval);;
 
-	COleDateTime dtNearestMonth;
+	CNullOleDateTime dtNearestMonth;
 
 	if ((date - dtMonth) < (dtNextMonth - date))
 		dtNearestMonth = dtMonth;

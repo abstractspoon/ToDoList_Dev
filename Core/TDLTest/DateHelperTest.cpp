@@ -54,7 +54,7 @@ void CDateHelperTest::TestDecodeDate()
 
 	// empty string -> Null date
 	{
-		COleDateTime dtNull;
+		CNullOleDateTime dtNull;
 		ExpectFalse(CDateHelper::DecodeDate(_T(""), dtNull, TRUE));
 		ExpectTrue(dtNull == CDateHelper::NullDate());
 	}
@@ -63,7 +63,7 @@ void CDateHelperTest::TestDecodeDate()
 	{
 		CString sNow = CDateHelper::FormatDate(dtNow, DHFD_TIME);
 
-		COleDateTime dtCheck;
+		CNullOleDateTime dtCheck;
 		ExpectTrue(CDateHelper::DecodeDate(sNow, dtCheck, TRUE));
 		ExpectEQ(dtCheck, dtNow, DATE_TOL);
 
@@ -75,7 +75,7 @@ void CDateHelperTest::TestDecodeDate()
 	{
 		CString sNow = CDateHelper::FormatDate(dtNow);
 
-		COleDateTime dtCheck;
+		CNullOleDateTime dtCheck;
 		ExpectTrue(CDateHelper::DecodeDate(sNow, dtCheck, TRUE));
 		ExpectEQ(dtCheck.m_dt, (double)(int)dtNow.m_dt);
 
@@ -87,7 +87,7 @@ void CDateHelperTest::TestDecodeDate()
 	{
 		CString sNow = CDateHelper::FormatDate(dtNow, DHFD_ISO | DHFD_TIME);
 
-		COleDateTime dtCheck;
+		CNullOleDateTime dtCheck;
 		ExpectTrue(CDateHelper::DecodeDate(sNow, dtCheck, TRUE));
 		ExpectEQ(dtCheck, dtNow, DATE_TOL);
 
@@ -99,7 +99,7 @@ void CDateHelperTest::TestDecodeDate()
 	{
 		CString sNow = CDateHelper::FormatDate(dtNow, DHFD_ISO);
 
-		COleDateTime dtCheck;
+		CNullOleDateTime dtCheck;
 		ExpectTrue(CDateHelper::DecodeDate(sNow, dtCheck, TRUE));
 		ExpectEQ(dtCheck.m_dt, (double)(int)dtNow.m_dt);
 
@@ -462,7 +462,7 @@ void CDateHelperTest::Test64BitDates()
 	{
 #ifndef _DEBUG // because CDateHelper will assert on Null dates
 
-		COleDateTime dtNull(CDateHelper::NullDate());
+		CNullOleDateTime dtNull;
 
 		time64_t tNull;
 		ExpectFalse(CDateHelper::GetTimeT64(dtNull, tNull));
@@ -547,7 +547,7 @@ void CDateHelperTest::TestOffsetDate(const CDateHelper& dh, int nDir, BOOL bPres
 
 		// Date (CDateHelper will intentionally assert the Null dates)
 #ifndef _DEBUG
-		COleDateTime dtNull(CDateHelper::NullDate());
+		CNullOleDateTime dtNull;
 		ExpectFalse(CDateHelper::IsDateSet(dtNull));
 
 		ExpectFalse(dh.OffsetDate(dtNull, 10, DHU_DAYS, bPreserveEndOfMonth));

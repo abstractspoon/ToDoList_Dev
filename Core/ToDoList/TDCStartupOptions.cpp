@@ -704,7 +704,7 @@ void CTDCStartupOptions::ParseTime(const CEnCommandLineInfo& cmdInfo,
 		}
 		else // actual time
 		{ 
-			COleDateTime dtTime;
+			CNullOleDateTime dtTime;
 
 			if (dtTime.ParseDateTime(sValue, VAR_TIMEVALUEONLY))
 				dTime.SetValue(Misc::Format(dtTime.m_dt)); // fraction of a day
