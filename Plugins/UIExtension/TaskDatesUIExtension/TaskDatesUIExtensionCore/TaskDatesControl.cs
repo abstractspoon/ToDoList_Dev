@@ -55,6 +55,7 @@ namespace TaskDatesUIExtension
 		private int[] m_ColValueMaxCharWidth	= new int[6] { -1, -1, -1, -1, -1, -1 };
 
 		private bool m_IsoDates;
+		private bool m_ShowWeekday;
 		private TaskAttributeItem m_GroupBy;
 
 		private Dictionary<string, string> m_MapDateAttribIdToLabel;
@@ -228,9 +229,13 @@ namespace TaskDatesUIExtension
 
 		public void LoadPreferences(Preferences prefs, String key, bool appOnly)
 		{
-			// App settings
-			ShowIsoDates(prefs.GetProfileBool("Preferences", "DisplayDatesInISO", false));
+			if (!appOnly)
+			{
+				m_Comparer.Column = prefs.GetProfileInt(key, "SortColumn", DateCol);
+				m_Comparer.Ascending = prefs.GetProfileBool(key, "SortAscending", false); // most recent at the top
+			}
 
+			// App settings
 			TaskColorIsBackground = prefs.GetProfileBool("Preferences", "ColorTaskBackground", false);
 			ShowParentsAsFolders = prefs.GetProfileBool("Preferences", "ShowParentsAsFolders", false);
 			ShowLabelTips = (false == prefs.GetProfileBool("Preferences", "ShowInfoTips", false));
@@ -246,10 +251,28 @@ namespace TaskDatesUIExtension
 			else
 				GridlineColor = Color.Empty;
 
-			if (!appOnly)
+			// Date format changes
+			bool wantDow = prefs.GetProfileBool("Preferences", "ShowWeekdayInDates", false);
+			bool wantIso = prefs.GetProfileBool("Preferences", "DisplayDatesInISO", false);
+
+			if ((wantIso != m_IsoDates) || (wantDow != m_ShowWeekday))
 			{
-				m_Comparer.Column = prefs.GetProfileInt(key, "SortColumn", DateCol);
-				m_Comparer.Ascending = prefs.GetProfileBool(key, "SortAscending", false); // most recent at the top
+				bool recalcColWidth = (wantDow != m_ShowWeekday);
+
+				m_IsoDates = wantIso;
+				m_ShowWeekday = wantDow;
+
+				if (recalcColWidth)
+					m_ColValueMaxCharWidth[DateCol] = -1;
+
+				foreach (ListViewItem lvi in Items)
+					SetItemValue(lvi, DateCol, FormatDate(lvi.Tag as TaskItemDate));
+
+				if (recalcColWidth)
+				{
+					using (var graphics = Graphics.FromHwnd(Handle))
+						RefreshColumnWidth(DateCol, graphics);
+				}
 			}
 		}
 
@@ -726,15 +749,15 @@ namespace TaskDatesUIExtension
 
 		private string FormatDate(TaskItemDate date)
 		{
-			if (!date.DateIsSet)
+			if ((date == null) || !date.DateIsSet)
 				return string.Empty;
 
-			return date.FormatDate(m_IsoDates);
+			return date.FormatDate(m_IsoDates, m_ShowWeekday);
 		}
 
 		private string FormatWeekNumber(TaskItemDate date)
 		{
-			if (!date.DateIsSet)
+			if ((date == null) || !date.DateIsSet)
 				return string.Empty;
 
 			return string.Format("{0} ({1})", DateUtil.WeekOfYear(date.Date), date.Date.Year);
@@ -749,17 +772,6 @@ namespace TaskDatesUIExtension
 		{
 			foreach (ListViewItem lvi in Items)
 				SetItemValue(lvi, OffsetCol, FormatDateOffset(lvi.Tag as TaskItemDate));
-		}
-
-		private void ShowIsoDates(bool iso)
-		{
-			if (iso != m_IsoDates)
-			{
-				m_IsoDates = iso;
-
-				foreach (ListViewItem lvi in Items)
-					SetItemValue(lvi, DateCol, (lvi.Tag as TaskItemDate).FormatDate(m_IsoDates));
-			}
 		}
 
 		protected void SetItemValue(ListViewItem lvi, int column, string value)

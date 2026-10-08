@@ -367,13 +367,17 @@ namespace TaskDatesUIExtension
 			m_TaskAttribs = taskAttribs;
 		}
 
-		public string FormatDate(bool iso)
+		public string FormatDate(bool iso, bool dow)
 		{
-			if (DateIsSet)
-				return (iso ? Date.ToString("yyyy-MM-dd") : Date.ToShortDateString());
+			if (!DateIsSet)
+				return string.Empty;
 
-			// else
-			return string.Empty;
+			var date = (iso ? Date.ToString("yyyy-MM-dd") : Date.ToShortDateString());
+
+			if (dow)
+				date = Date.ToString("ddd" + " " + date);
+
+			return date;
 		}
 
 		public string FormatOffsetFromToday()
