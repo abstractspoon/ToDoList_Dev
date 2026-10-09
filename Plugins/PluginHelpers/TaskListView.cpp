@@ -286,9 +286,9 @@ int TaskListView::DefaultItemComparer::Compare(Object^ x, Object^ y)
 				if (String::IsNullOrEmpty(task2Text))
 					return -1;
 			}
-		}
 
-		return (SortGroupsAscending ? nCompare : -nCompare);
+			return (SortGroupsAscending ? nCompare : -nCompare);
+		}
 	}
 
 	return CompareItems(lvi1, lvi2);
