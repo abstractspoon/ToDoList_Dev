@@ -179,6 +179,7 @@ namespace Abstractspoon
 				void OnItemDrag(Windows::Forms::ItemDragEventArgs^ e) override;
 				void OnItemSelectionChanged(Windows::Forms::ListViewItemSelectionChangedEventArgs^ e) override;
 				void OnKeyUp(Windows::Forms::KeyEventArgs^ e) override;
+				void OnColumnClick(Windows::Forms::ColumnClickEventArgs^ e) override;
 
 				void OnGotFocus(EventArgs^ e) override;
 				void OnLostFocus(EventArgs^ e) override;

@@ -44,7 +44,6 @@ namespace Abstractspoon
 					auto header = IntPtr(::SendMessage(Win32::GetHwnd(m_List->Handle), LVM_GETHEADER, 0, 0));
 					AssignHandle(header);
 
-					list->ColumnClick += gcnew ColumnClickEventHandler(this, &HeaderControl::OnColumnClick);
 					list->DrawColumnHeader += gcnew DrawListViewColumnHeaderEventHandler(this, &HeaderControl::OnDrawColumnHeader);
 					list->ColumnWidthChanging += gcnew ColumnWidthChangingEventHandler(this, &HeaderControl::OnColumnWidthChanging);
 				}
@@ -70,29 +69,6 @@ namespace Abstractspoon
 				ListView^ m_List;
 
 			protected:
-				void OnColumnClick(Object^ sender, ColumnClickEventArgs^ e)
-				{
-					Debug::Assert(sender == m_List);
-
-					auto sorter = ASTYPE(m_List->ListViewItemSorter, TaskListView::IItemComparer);
-
-					if (sorter != nullptr)
-					{
-						if (e->Column != sorter->Column)
-						{
-							sorter->Column = e->Column;
-							sorter->Ascending = true;
-						}
-						else
-						{
-							sorter->Ascending = !sorter->Ascending;
-						}
-
-						Redraw();
-						m_List->Sort();
-					}
-				}
-
 				void OnDrawColumnHeader(Object^ sender, DrawListViewColumnHeaderEventArgs^ e)
 				{
 					Debug::Assert(sender == m_List);
@@ -391,6 +367,27 @@ void TaskListView::Initialize(Translator^ trans, UIExtension::TaskIcon^ taskIcon
 	HoverSelection = false;
 	ListViewItemSorter = comparer;
 	CheckBoxes = false;
+}
+
+void TaskListView::OnColumnClick(ColumnClickEventArgs^ e)
+{
+	auto sorter = ASTYPE(ListViewItemSorter, TaskListView::IItemComparer);
+
+	if (sorter != nullptr)
+	{
+		if (e->Column != sorter->Column)
+		{
+			sorter->Column = e->Column;
+			sorter->Ascending = true;
+		}
+		else
+		{
+			sorter->Ascending = !sorter->Ascending;
+		}
+
+		m_HeaderCtrl->Redraw();
+		Sort();
+	}
 }
 
 void TaskListView::OnHandleCreated(EventArgs^ e)
