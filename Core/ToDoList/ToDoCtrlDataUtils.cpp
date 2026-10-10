@@ -5542,7 +5542,7 @@ void CTDCTaskExporter::ExportMatchingTaskCustomAttributes(const TODOITEM* pTDI, 
 
 void CTDCTaskExporter::ExportCalculatedTaskCustomAttribute(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, CTaskFile& tasks, HTASKITEM hTask) const
 {
-	if (attribDef.bEnabled && (attribDef.IsAggregated() || attribDef.IsDataType(TDCCA_CALCULATION)))
+	if (attribDef.bEnabled && (attribDef.IsDataType(TDCCA_CALCULATION) || attribDef.IsAggregated()))
 	{
 		double dValue = 0.0;
 		TDC_UNITS nUnits = m_calculator.GetTaskCustomAttributeUnits(pTDI, pTDS, attribDef);
@@ -6691,8 +6691,11 @@ CString CTDCTaskColumnSizer::GetLongestValue(const TDCCUSTOMATTRIBUTEDEFINITION&
 
 	if (sLongest.IsEmpty())
 	{
-		if (attribDef.SupportsFeature(TDCCAF_HIDEZERO) && !attribDef.HasFeature(TDCCAF_HIDEZERO))
+		if (CAD(AttributeSupportsFeature(attribDef, TDCCAF_HIDEZERO)) && 
+			!CAD(AttributeHasFeature(attribDef, TDCCAF_HIDEZERO)))
+		{
 			sLongest = attribDef.FormatData(TDCCADATA(), FALSE);
+		}
 	}
 
 	return sLongest;
@@ -6711,7 +6714,8 @@ BOOL CTDCTaskColumnSizer::GetLongestAggregatedValue(const TDCCUSTOMATTRIBUTEDEFI
 	case TDCCA_DOUBLE:
 	case TDCCA_FRACTION:
 	case TDCCA_INTEGER:
-		if (attribDef.HasFeature(TDCCAF_ACCUMULATE) || attribDef.HasFeature(TDCCAF_MAXIMIZE))
+		if (CAD(AttributeHasFeature(attribDef, TDCCAF_ACCUMULATE)) || 
+			CAD(AttributeHasFeature(attribDef, TDCCAF_MAXIMIZE)))
 		{
 			double dBiggest = 0;
 
