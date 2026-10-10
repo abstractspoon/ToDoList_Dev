@@ -7,22 +7,38 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 namespace TaskDatesUIExtension
 {
+	public static class MyExtensions
+	{
+		public static string AttributeKey(this TaskAttributeItem attrib)
+		{
+			if (attrib == null)
+				return string.Empty;
+
+			if (attrib.IsCustom())
+				return attrib.CustomAttributeId;
+
+			return attrib.AttributeId.ToString();
+		}
+	}
+
+	///////////////////////////////////////////////////////////////////
+
 	public class TaskItems : Dictionary<uint, TaskItem>
 	{
 		public HashSet<uint> Update(TaskList tasks, 
 									UIExtension.UpdateType type, 
 									IEnumerable<TaskAttributeItem> availAttribs,
-									IEnumerable<Task.Attribute> groupAttribIds)
+									IEnumerable<TaskAttributeItem> groupAttribs)
 		{
 			switch (type)
 			{
 			case UIExtension.UpdateType.All:
 				Clear();
-				return Update(tasks, availAttribs, groupAttribIds);
+				return Update(tasks, availAttribs, groupAttribs);
 
 			case UIExtension.UpdateType.Edit:
 			case UIExtension.UpdateType.New:
-				return Update(tasks, availAttribs, groupAttribIds);
+				return Update(tasks, availAttribs, groupAttribs);
 
 			case UIExtension.UpdateType.Delete:
 				return RemoveDeletedTasks(tasks);
@@ -50,7 +66,7 @@ namespace TaskDatesUIExtension
 			return taskItem;
 		}
 
-		public HashSet<string> GetGroupValues(Task.Attribute attribId, bool excDone, bool excParent, bool excNone)
+		public HashSet<string> GetGroupValues(TaskAttributeItem attrib, bool excDone, bool excParent, bool excNone)
 		{
 			var groupVals = new HashSet<string>();
 
@@ -62,7 +78,7 @@ namespace TaskDatesUIExtension
 				if (excParent && task.Attributes.IsParent)
 					continue;
 
-				var value = task.GetGroupValue(attribId);
+				var value = task.GetGroupValue(attrib);
 
 				if (excNone && string.IsNullOrEmpty(value))
 					continue;
@@ -77,7 +93,7 @@ namespace TaskDatesUIExtension
 
 		private HashSet<uint> Update(TaskList tasks, 
 									 IEnumerable<TaskAttributeItem> dateAttribs, 
-									 IEnumerable<Task.Attribute> groupAttribIds)
+									 IEnumerable<TaskAttributeItem> groupAttribs)
 		{
 			var modifiedTaskIds = new HashSet<uint>();
 
@@ -85,7 +101,7 @@ namespace TaskDatesUIExtension
 
 			while (task.IsValid())
 			{
-				if (!ProcessTaskUpdate(task, dateAttribs, groupAttribIds, modifiedTaskIds))
+				if (!ProcessTaskUpdate(task, dateAttribs, groupAttribs, modifiedTaskIds))
 					break;
 
 				task = task.GetNextTask();
@@ -114,7 +130,7 @@ namespace TaskDatesUIExtension
 
 		private bool ProcessTaskUpdate(Task task, 
 									   IEnumerable<TaskAttributeItem> availAttribs,
-									   IEnumerable<Task.Attribute> groupAttribIds,
+									   IEnumerable<TaskAttributeItem> groupAttribs,
 									   HashSet<uint> modifiedTaskIds)
 		{
 			if (!task.IsValid())
@@ -123,7 +139,7 @@ namespace TaskDatesUIExtension
 			uint taskId = task.GetID();
 			var item = GetItem(taskId, true);
 
-			if (!item.ProcessTaskUpdate(task, availAttribs, groupAttribIds))
+			if (!item.ProcessTaskUpdate(task, availAttribs, groupAttribs))
 				return false;
 
 			modifiedTaskIds?.Add(taskId);
@@ -133,7 +149,7 @@ namespace TaskDatesUIExtension
 
 			while (subtask.IsValid())
 			{
-				ProcessTaskUpdate(subtask, availAttribs, groupAttribIds, modifiedTaskIds); // RECURSIVE CALL
+				ProcessTaskUpdate(subtask, availAttribs, groupAttribs, modifiedTaskIds); // RECURSIVE CALL
 				subtask = subtask.GetNextTask();
 			}
 
@@ -166,9 +182,9 @@ namespace TaskDatesUIExtension
 			get { return m_Attribs; }
 		}
 
-		public string GetGroupValue(Task.Attribute attribId)
+		public string GetGroupValue(TaskAttributeItem attrib)
 		{
-			return m_Attribs.GetGroupValue(attribId);
+			return m_Attribs.GetGroupValue(attrib);
 		}
 
 		public DateTime GetDate(string attribId)
@@ -179,9 +195,9 @@ namespace TaskDatesUIExtension
 
 		public bool ProcessTaskUpdate(Task task, 
 									  IEnumerable<TaskAttributeItem> availAttribs, 
-									  IEnumerable<Task.Attribute> groupAttribIds)
+									  IEnumerable<TaskAttributeItem> groupAttribs)
 		{
-			if (!m_Attribs.ProcessTaskUpdate(task, groupAttribIds))
+			if (!m_Attribs.ProcessTaskUpdate(task, groupAttribs))
 				return false;
 
 			// Date Attributes
@@ -206,7 +222,7 @@ namespace TaskDatesUIExtension
 
 	public class TaskItemAttributes
 	{
-		private Dictionary<Task.Attribute, string> m_GroupValues;
+		private Dictionary<string, string> m_GroupValues;
 
 		// ------------------------------------------
 
@@ -226,10 +242,10 @@ namespace TaskDatesUIExtension
 			Id = id;
 			TextColor = Color.Empty;
 
-			m_GroupValues = new Dictionary<Task.Attribute, string>();
+			m_GroupValues = new Dictionary<string, string>();
 		}
 
-		public bool ProcessTaskUpdate(Task task, IEnumerable<Task.Attribute> groupAttribIds)
+		public bool ProcessTaskUpdate(Task task, IEnumerable<TaskAttributeItem> groupAttribs)
 		{
 			if (task.GetID() != Id)
 				return false;
@@ -256,19 +272,31 @@ namespace TaskDatesUIExtension
 			}
 
 			// Group attributes stored as strings only
-			foreach (var attribId in groupAttribIds)
+			foreach (var attrib in groupAttribs)
 			{
-				if (task.IsAttributeAvailable(attribId))
-					m_GroupValues[attribId] = task.GetAttributeValue(attribId, true, true);
+				var attribId = attrib.AttributeId;
+				var groupKey = attrib.AttributeKey();
+
+				switch (attribId)
+				{
+				case Task.Attribute.CustomAttribute:
+					m_GroupValues[groupKey] = task.GetCustomAttributeValue(groupKey, true);
+					break;
+
+				default:
+					if (task.IsAttributeAvailable(attribId))
+						m_GroupValues[groupKey] = task.GetAttributeValue(attribId, true, true);
+					break;
+				}
 			}
 
 			return true;
 		}
 
-		public string GetGroupValue(Task.Attribute attribId)
+		public string GetGroupValue(TaskAttributeItem attrib)
 		{
 			string value = null;
-			m_GroupValues?.TryGetValue(attribId, out value);
+			m_GroupValues?.TryGetValue(attrib.AttributeKey(), out value);
 
 			return (value ?? string.Empty);
 		}
@@ -396,12 +424,12 @@ namespace TaskDatesUIExtension
 
 		public string GetGroupValue(object groupById)
 		{
-			return m_TaskAttribs.GetGroupValue((Task.Attribute)groupById);
+			return m_TaskAttribs.GetGroupValue(groupById as TaskAttributeItem);
 		}
 
 		public bool HasGroupValue(object groupById)
 		{
-			var value = m_TaskAttribs.GetGroupValue((Task.Attribute)groupById);
+			var value = m_TaskAttribs.GetGroupValue(groupById as TaskAttributeItem);
 			return !string.IsNullOrEmpty(value);
 		}
 

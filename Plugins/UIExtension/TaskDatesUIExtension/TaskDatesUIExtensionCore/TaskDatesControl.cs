@@ -102,7 +102,7 @@ namespace TaskDatesUIExtension
 			};
 		}
 
-		public void UpdateTasks(TaskList tasks, UIExtension.UpdateType type, List<Task.Attribute> groupAttribIds)
+		public void UpdateTasks(TaskList tasks, UIExtension.UpdateType type, List<TaskAttributeItem> groupAttribs)
 		{
 			// We handle restoring selection because our base class
 			// expects item Ids to all be unique
@@ -110,7 +110,7 @@ namespace TaskDatesUIExtension
 			var state = BeginUpdate();
 
 			var availAttribs = tasks.GetAvailableAttributes();
-			var modIds = m_TaskItems.Update(tasks, type, availAttribs, groupAttribIds);
+			var modIds = m_TaskItems.Update(tasks, type, availAttribs, groupAttribs);
 
 			switch (type)
 			{
@@ -156,7 +156,6 @@ namespace TaskDatesUIExtension
 			case Task.Attribute.Position:
 			case Task.Attribute.Icon:
 			case Task.Attribute.Color:
-			case Task.Attribute.Priority:
 				return true;
 			}
 
@@ -366,15 +365,13 @@ namespace TaskDatesUIExtension
 				{
 					m_GroupBy = value;
 
-					{
-						var selTasks = SelectedTasks;
-						var state = BeginUpdate();
+					var selTasks = SelectedTasks;
+					var state = BeginUpdate();
 
-						EnableGrouping(m_GroupBy?.AttributeId);
-						RebuildGroupHeaders();
+					EnableGrouping(m_GroupBy);
+					RebuildGroupHeaders();
 
-						EndUpdate(state, selTasks);
-					}
+					EndUpdate(state, selTasks);
 				}
 			}
 		}
@@ -403,7 +400,7 @@ namespace TaskDatesUIExtension
 			// Re-add as required
 			if (IsGrouping)
 			{
-				var values = m_TaskItems.GetGroupValues(m_GroupBy.AttributeId, 
+				var values = m_TaskItems.GetGroupValues(m_GroupBy, 
 														m_Options.HasFlag(TaskDatesOption.HideCompletedTasks), 
 														m_Options.HasFlag(TaskDatesOption.HideParentTasks),
 														m_Options.HasFlag(TaskDatesOption.HideNoneGroup));

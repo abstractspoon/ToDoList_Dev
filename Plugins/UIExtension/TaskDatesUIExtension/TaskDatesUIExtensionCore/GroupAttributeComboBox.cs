@@ -14,7 +14,37 @@ namespace TaskDatesUIExtension
 {
 	public partial class GroupAttributeComboBox : ComboBox
 	{
-		private TaskAttributeItem m_NoneAttrib;
+		class ComboItem
+		{
+			public TaskAttributeItem Attribute { get; private set; }
+			private string m_Text;
+
+			public ComboItem(TaskAttributeItem attrib, Translator trans)
+			{
+				Attribute = attrib;
+
+				switch (attrib.AttributeId)
+				{
+				case Task.Attribute.Unknown:
+					m_Text = string.Format(trans.Translate("<none>", Translator.Type.ComboBox));
+					break;
+
+				case Task.Attribute.CustomAttribute:
+					m_Text = string.Format(trans.Translate("{0} (Custom)", Translator.Type.ComboBox), attrib.Label);
+					break;
+
+				default:
+					m_Text = attrib.Label;
+					break;
+				}
+			}
+
+			public override string ToString() { return m_Text; }
+		}
+
+		// ----------------------------------------------
+
+		private ComboItem m_NoneAttrib;
 
 		// ----------------------------------------------
 
@@ -30,51 +60,42 @@ namespace TaskDatesUIExtension
 			InitializeComponent();
 		}
 
-		public void Initialise(IEnumerable<Task.Attribute> attribIds, Translator trans)
+		public void Initialise(IEnumerable<TaskAttributeItem> attribs, Translator trans)
 		{
-			if (Items.Count == 0)
+			if (m_NoneAttrib == null)
 			{
-				m_NoneAttrib = new TaskAttributeItem()
-				{
-					AttributeId = Task.Attribute.Unknown,
-					Label = trans.Translate("<none>", Translator.Type.ComboBox)
-				};
-
-				Items.Add(m_NoneAttrib);
-
-				// The supplied list
-				foreach (var attribId in attribIds)
-				{
-					Items.Add(new TaskAttributeItem()
-					{
-						AttributeId = attribId,
-						Label = TaskList.GetAttributeName(attribId, trans)
-					});
-				}
-
-				SelectedItem = m_NoneAttrib;
+				var noneAttrib = new TaskAttributeItem() { AttributeId = Task.Attribute.Unknown };
+				m_NoneAttrib = new ComboItem(noneAttrib, trans);
 			}
+
+			object selItem = (SelectedItem ?? m_NoneAttrib);
+
+			Items.Clear();
+			Items.Add(m_NoneAttrib);
+
+			if (attribs?.Count() > 0)
+			{
+				foreach (var attrib in attribs)
+					Items.Add(new ComboItem(attrib, trans));
+			}
+
+			if (!Items.Contains(selItem))
+				selItem = m_NoneAttrib;
+
+			SelectedItem = selItem;
 		}
 
-		public Task.Attribute SelectedGroupId
+		public string SelectedGroupByKey
 		{
-			get
-			{
-				var selAttrib = (SelectedItem as TaskAttributeItem);
-
-				if (selAttrib == null)
-					return Task.Attribute.Unknown;
-
-				return selAttrib.AttributeId;
-			}
+			get	{ return SelectedGroupBy?.AttributeKey(); }
 
 			set
 			{
-				if (value != Task.Attribute.Unknown)
+				if (!string.IsNullOrEmpty(value))
 				{
 					foreach (var obj in Items)
 					{
-						if ((obj as TaskAttributeItem).AttributeId == value)
+						if ((obj as ComboItem)?.Attribute.AttributeKey() == value)
 						{
 							SelectedItem = obj;
 							return;
@@ -87,17 +108,17 @@ namespace TaskDatesUIExtension
 			}
 		}
 
-		public TaskAttributeItem SelectedGroup
+		public TaskAttributeItem SelectedGroupBy
 		{
 			get
 			{
-				var selAttrib = (SelectedItem as TaskAttributeItem);
+				var selItem = (SelectedItem as ComboItem);
 
-				if (selAttrib?.AttributeId != Task.Attribute.Unknown)
-					return selAttrib;
+				if ((selItem == null) || (selItem.Attribute.AttributeId == Task.Attribute.Unknown))
+					return null;
 
 				// else
-				return null;
+				return selItem.Attribute;
 			}
 
 			set

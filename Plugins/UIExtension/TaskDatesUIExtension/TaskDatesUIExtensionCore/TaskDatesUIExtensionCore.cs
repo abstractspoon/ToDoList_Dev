@@ -17,6 +17,17 @@ namespace TaskDatesUIExtension
 	{
 		const TaskDatesOption DefaultOptions = (TaskDatesOption.HideCompletedTasks | TaskDatesOption.HideNullDates);
 
+		readonly static List<Task.Attribute> DefaultGroupAttribIds = new List<Task.Attribute>()
+		{
+			Task.Attribute.Priority,
+			Task.Attribute.AllocatedBy,
+			Task.Attribute.AllocatedTo,
+			Task.Attribute.Category,
+			Task.Attribute.Tags,
+			Task.Attribute.Status,
+			Task.Attribute.ExternalId,
+		};
+
 		// ------------------------------------------------
 
 		private string m_TypeID;
@@ -28,7 +39,7 @@ namespace TaskDatesUIExtension
 		private UIThemeToolbarRenderer m_TBRenderer;
 		private TaskDatesPreferencesDlg m_PrefsDlg;
 
-		private readonly List<Task.Attribute> m_GroupAttribIds;
+		private string m_PrevGroupByKey;
 
 		// ------------------------------------------------
 
@@ -71,19 +82,8 @@ namespace TaskDatesUIExtension
 			m_OptionsCombo.Initialise(trans);
 			m_OptionsCombo.DropDownClosed += new EventHandler(OnOptionsComboClosed);
 
-			m_GroupAttribIds = new List<Task.Attribute>()
-			{
-				Task.Attribute.Priority,
-				Task.Attribute.AllocatedBy,
-				Task.Attribute.AllocatedTo,
-				Task.Attribute.Category,
-				Task.Attribute.Tags,
-				Task.Attribute.Status,
-				Task.Attribute.ExternalId,
-			};
-
 			m_GroupByCombo.Sorted = true;
-			m_GroupByCombo.Initialise(m_GroupAttribIds, m_Trans);
+			//m_GroupByCombo.Initialise(null, m_Trans);
 			m_GroupByCombo.DropDownClosed += new EventHandler(OnGroupsComboClosed);
 			m_GroupByCombo.SelectedIndexChanged += new EventHandler(OnGroupsComboSelChange);
 
@@ -102,7 +102,17 @@ namespace TaskDatesUIExtension
 			{
 				Cursor = Cursors.WaitCursor;
 
-				m_TaskDatesCtrl.UpdateTasks(tasks, type, m_GroupAttribIds);
+				var groupAttribs = GetGroupByAttributes(tasks);
+				m_GroupByCombo.Initialise(groupAttribs, m_Trans);
+
+				if (m_PrevGroupByKey != null)
+				{
+					m_GroupByCombo.SelectedGroupByKey = m_PrevGroupByKey;
+					m_PrevGroupByKey = null;
+				}
+
+				m_TaskDatesCtrl.GroupBy = m_GroupByCombo.SelectedGroupBy;
+				m_TaskDatesCtrl.UpdateTasks(tasks, type, groupAttribs);
 
 				Cursor = Cursors.Default;
 			}
@@ -115,7 +125,7 @@ namespace TaskDatesUIExtension
 			if (m_TaskDatesCtrl.WantTaskUpdate(attribId))
 				return true;
 
-			return m_GroupAttribIds.Contains(attribId);
+			return DefaultGroupAttribIds.Contains(attribId);
 		}
 
 		public bool SelectTask(uint taskId)
@@ -229,7 +239,7 @@ namespace TaskDatesUIExtension
 			m_TaskDatesCtrl.SavePreferences(prefs, key);
 
 			prefs.WriteProfileEnum<TaskDatesOption>(key, "Options", m_OptionsCombo.SelectedOptions);
-			prefs.WriteProfileEnum<Task.Attribute>(key, "GroupBy", m_GroupByCombo.SelectedGroupId);
+			prefs.WriteProfileString(key, "GroupBy", m_GroupByCombo.SelectedGroupByKey);
 		}
 
 		public void LoadPreferences(Preferences prefs, String key, bool appOnly)
@@ -237,10 +247,10 @@ namespace TaskDatesUIExtension
 			if (!appOnly)
 			{
 				m_OptionsCombo.SelectedOptions = prefs.GetProfileEnum<TaskDatesOption>(key, "Options", DefaultOptions);
-				m_GroupByCombo.SelectedGroupId = prefs.GetProfileEnum<Task.Attribute>(key, "GroupBy", Task.Attribute.Unknown);
+				m_PrevGroupByKey = prefs.GetProfileString(key, "GroupBy", string.Empty);
 
 				m_TaskDatesCtrl.Options = m_OptionsCombo.SelectedOptions;
-				m_TaskDatesCtrl.GroupBy = m_GroupByCombo.SelectedGroup;
+				m_TaskDatesCtrl.GroupBy = m_GroupByCombo.SelectedGroupBy;
 
 				m_PrefsDlg.LoadPreferences(prefs, key);
 
@@ -345,7 +355,7 @@ namespace TaskDatesUIExtension
 		{
 			Cursor = Cursors.WaitCursor;
 
-			m_TaskDatesCtrl.GroupBy = m_GroupByCombo.SelectedGroup;
+			m_TaskDatesCtrl.GroupBy = m_GroupByCombo.SelectedGroupBy;
 
 			Cursor = Cursors.Default;
 		}
@@ -354,6 +364,33 @@ namespace TaskDatesUIExtension
 		{
 			if (!m_GroupByCombo.DroppedDown)
 				OnGroupsComboClosed(sender, e);
+		}
+
+		private List<TaskAttributeItem> GetGroupByAttributes(TaskList tasks)
+		{
+			var attribs = new List<TaskAttributeItem>();
+
+			// Default attribs
+			foreach (var attribId in DefaultGroupAttribIds)
+			{
+				attribs.Add(new TaskAttributeItem()
+				{
+					AttributeId = attribId,
+					Label = TaskList.GetAttributeName(attribId, m_Trans)
+				});
+			}
+
+			// Custom attrib
+			foreach (var attrib in tasks?.GetAvailableAttributes())
+			{
+				if ((attrib.AttributeId == Task.Attribute.CustomAttribute) &&
+					(attrib.CustomAttributeType == CustomAttributeDefinition.Attribute.String))
+				{
+					attribs.Add(attrib);
+				}
+			}
+
+			return attribs;
 		}
 
 		private void UpdateToolbarButtonStates()
