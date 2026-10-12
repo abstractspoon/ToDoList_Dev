@@ -67,7 +67,6 @@ namespace Abstractspoon
 					auto header = IntPtr(::SendMessage(Win32::GetHwnd(m_List->Handle), LVM_GETHEADER, 0, 0));
 					AssignHandle(header);
 
-					list->ColumnClick += gcnew ColumnClickEventHandler(this, &HeaderControl::OnColumnClick);
 					list->DrawColumnHeader += gcnew DrawListViewColumnHeaderEventHandler(this, &HeaderControl::OnDrawColumnHeader);
 					list->ColumnWidthChanging += gcnew ColumnWidthChangingEventHandler(this, &HeaderControl::OnColumnWidthChanging);
 				}
@@ -166,35 +165,6 @@ namespace Abstractspoon
 					}
 				}
 
-				void OnColumnClick(Object^ sender, ColumnClickEventArgs^ e)
-				{
-					Debug::Assert(sender == m_List);
-
-					auto sorter = ASTYPE(m_List->ListViewItemSorter, DefaultItemComparer);
-
-					if (sorter == nullptr)
-					{
-						if (m_List->ListViewItemSorter != nullptr)
-							return; // not 'our' sorter
-
-						// else 
-						sorter = gcnew DefaultItemComparer(e->Column, true);
-					}
-					else if (e->Column != sorter->Column)
-					{
-						sorter = gcnew DefaultItemComparer(e->Column, true);
-
-						// Clear the previous sort arrow
-						::InvalidateRect(Win32::GetHwnd(Handle), NULL, FALSE);
-					}
-					else
-					{
-						sorter = gcnew DefaultItemComparer(e->Column, !sorter->Ascending);
-					}
-
-					m_List->ListViewItemSorter = sorter;
-				}
-
 				void OnColumnWidthChanging(Object^ sender, ColumnWidthChangingEventArgs^ e)
 				{
 					Debug::Assert(sender == m_List);
@@ -268,11 +238,40 @@ void TaskListView::Initialize(Translator^ trans, UIExtension::TaskIcon^ taskIcon
 	FullRowSelect = true;
 	HideSelection = false;
 	OwnerDraw = true;
-	Sorting = SortOrder::Ascending;
+	Sorting = SortOrder::None;
 	HeaderStyle = ColumnHeaderStyle::Clickable;
 	DoubleBuffered = true;
 	HotTracking = false;
 	HoverSelection = false;
+	ListViewItemSorter = gcnew DefaultItemComparer();
+	CheckBoxes = false;
+}
+
+void TaskListView::OnColumnClick(ColumnClickEventArgs^ e)
+{
+	auto sorter = ASTYPE(ListViewItemSorter, DefaultItemComparer);
+
+	if (sorter == nullptr)
+	{
+		if (ListViewItemSorter != nullptr)
+			return; // not 'our' sorter
+
+					// else 
+		sorter = gcnew DefaultItemComparer(e->Column, true);
+	}
+	else if (e->Column != sorter->Column)
+	{
+		sorter = gcnew DefaultItemComparer(e->Column, true);
+
+		// Clear the previous sort arrow
+		::InvalidateRect(Win32::GetHwnd(Handle), NULL, FALSE);
+	}
+	else
+	{
+		sorter = gcnew DefaultItemComparer(e->Column, !sorter->Ascending);
+	}
+
+	ListViewItemSorter = sorter;
 }
 
 void TaskListView::OnHandleCreated(EventArgs^ e)

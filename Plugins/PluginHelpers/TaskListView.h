@@ -137,6 +137,7 @@ namespace Abstractspoon
 				void OnBeforeLabelEdit(Windows::Forms::LabelEditEventArgs^ e) override;
 				void OnDrawItem(Windows::Forms::DrawListViewItemEventArgs^ e) override;
 				void OnItemDrag(Windows::Forms::ItemDragEventArgs^ e) override;
+				void OnColumnClick(Windows::Forms::ColumnClickEventArgs^ e) override;
 
 				void OnGotFocus(EventArgs^ e) override;
 				void OnLostFocus(EventArgs^ e) override;
