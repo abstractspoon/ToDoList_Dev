@@ -5188,9 +5188,16 @@ BOOL CToDoCtrl::IsNewTaskMod(const CTDCAttributeMap& mapAttribIDs, const CDWordA
 
 BOOL CToDoCtrl::IsNewTaskTitleEditMod(const CTDCAttributeMap& mapAttribIDs, const CDWordArray& aModTaskIDs) const
 {
-	return (mapAttribIDs.HasOnly(TDCA_TASKNAME) &&
-			(aModTaskIDs.GetSize() == 1) &&
-			(aModTaskIDs[0] == m_dwLastAddedID));
+	if (aModTaskIDs.GetSize() != 1)
+		return FALSE;
+
+	if (aModTaskIDs[0] != m_dwLastAddedID)
+		return FALSE;
+
+	return ((mapAttribIDs.GetCount() == 3) &&
+			 mapAttribIDs.Has(TDCA_TASKNAME) &&
+			 mapAttribIDs.Has(TDCA_LASTMODBY) &&
+			 mapAttribIDs.Has(TDCA_LASTMODDATE));
 }
 
 void CToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const CDWordArray& aModTaskIDs, BOOL bAllowResort)
