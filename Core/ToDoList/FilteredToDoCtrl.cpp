@@ -901,11 +901,11 @@ BOOL CFilteredToDoCtrl::CanCreateNewTask(TDC_INSERTWHERE nInsertWhere) const
 	return CTabbedToDoCtrl::CanCreateNewTask(nInsertWhere);
 }
 
-void CFilteredToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const CDWordArray& aModTaskIDs, BOOL bAllowResort)
+void CFilteredToDoCtrl::SetModified(const TDCNOTIFYMOD& mod, BOOL bAllowResort)
 {
 	BOOL bTreeRefiltered = FALSE, bListRefiltered = FALSE;
 
-	if (ModsNeedRefilter(mapAttribIDs, aModTaskIDs))
+	if (ModsNeedRefilter(mod.mapAttribIDs, mod.aTaskIDs))
 	{
 		// This will also refresh the list view if it is active
 		RefreshFilter(FALSE);
@@ -920,15 +920,15 @@ void CFilteredToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const 
 	CAutoFlag af(m_bIgnoreListRebuild, bListRefiltered);
 	CAutoFlag af2(m_bIgnoreExtensionUpdate, bTreeRefiltered);
 
-	CTabbedToDoCtrl::SetModified(mapAttribIDs, aModTaskIDs, bAllowResort);
+	CTabbedToDoCtrl::SetModified(mod, bAllowResort);
 
-	if ((bListRefiltered || bTreeRefiltered) && mapAttribIDs.Has(TDCA_UNDO) && aModTaskIDs.GetSize())
+	if ((bListRefiltered || bTreeRefiltered) && mod.mapAttribIDs.Has(TDCA_UNDO) && mod.aTaskIDs.GetSize())
 	{
 		// Restore the selection at the time of the undo if possible
 		TDCSELECTIONCACHE cache;
 		CacheTreeSelection(cache);
 		
-		if (!SelectTasks(aModTaskIDs))
+		if (!SelectTasks(mod.aTaskIDs))
 			RestoreTreeSelection(cache);
 
 		SyncActiveViewSelectionToTree();

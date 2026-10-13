@@ -225,7 +225,7 @@ protected:
 protected:
 	const TDSORT& GetSort() const;
 
-	virtual void SetModified(const CTDCAttributeMap& mapAttribIDs, const CDWordArray& aModTaskIDs, BOOL bAllowResort);
+	virtual void SetModified(const TDCNOTIFYMOD& mod, BOOL bAllowResort);
 	virtual void ReposTaskCtrl(const CRect& rTasks);
 	virtual DWORD SetStyle(TDC_STYLE nStyle, BOOL bOn);
 	virtual void ShowTaskCtrl(BOOL bShow);
@@ -260,7 +260,7 @@ protected:
 	BOOL ModAffectsAggregatedAttributes(TDC_ATTRIBUTE nAttribID) const;
 	BOOL ModAffectsAggregatedAttributes(const CTDCAttributeMap& mapAttribIDs) const;
 	BOOL WantUpdateInheritedAttibutes(const CTDCAttributeMap& mapAttribIDs) const;
-	void UpdateListView(const CTDCAttributeMap& mapAttribIDs, const CDWordArray& aModTaskIDs, BOOL bAllowResort);
+	void UpdateListView(const TDCNOTIFYMOD& mod, BOOL bAllowResort);
 	void UpdateSortStates(const CTDCAttributeMap& mapAttribIDs, BOOL bAllowResort);
 	void BuildListGroupByCombo();
 	void ResortList(BOOL bAllowToggle = FALSE);

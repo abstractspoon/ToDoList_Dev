@@ -349,6 +349,10 @@ TDCITEMCOLORS::TDCITEMCOLORS()
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
+TDCNOTIFYMOD::TDCNOTIFYMOD()
+{
+}
+
 TDCNOTIFYMOD::TDCNOTIFYMOD(const CTDCAttributeMap& attribIDs, const CDWordArray& taskIDs) 
 	: 
 	mapAttribIDs(attribIDs)

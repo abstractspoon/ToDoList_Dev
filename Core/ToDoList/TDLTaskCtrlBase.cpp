@@ -4755,20 +4755,20 @@ BOOL CTDLTaskCtrlBase::ItemColumnSupportsClickHandling(int nItem, TDC_COLUMN nCo
 	return FALSE;
 }
 
-void CTDLTaskCtrlBase::SetModified(const CTDCAttributeMap& mapAttribIDs, BOOL bAllowResort)
+void CTDLTaskCtrlBase::SetModified(const TDCNOTIFYMOD& mod, BOOL bAllowResort)
 {
-	if (AttribsMatchSort(mapAttribIDs))
+	if (AttribsMatchSort(mod.mapAttribIDs))
 		m_sort.bModSinceLastSort = TRUE;
 
 	// Recalc or redraw columns as required
-	BOOL bRedrawCols = FALSE, bRedrawTasks = ModsCauseTaskTextColorChange(mapAttribIDs);
+	BOOL bRedrawCols = FALSE, bRedrawTasks = ModsCauseTaskTextColorChange(mod.mapAttribIDs);
 	
 	CTDCColumnIDMap aColIDs;
-	POSITION pos = mapAttribIDs.GetStartPosition();
+	POSITION pos = mod.mapAttribIDs.GetStartPosition();
 
 	while (pos)
 	{
-		TDC_ATTRIBUTE nAttribID = mapAttribIDs.GetNext(pos);
+		TDC_ATTRIBUTE nAttribID = mod.mapAttribIDs.GetNext(pos);
 		TDC_COLUMN nColID = TDC::MapAttributeToColumn(nAttribID);
 
 		switch (nAttribID)
@@ -4953,7 +4953,7 @@ void CTDLTaskCtrlBase::SetModified(const CTDCAttributeMap& mapAttribIDs, BOOL bA
 		}
 	}
 
-	if (bAllowResort && ModsNeedResort(mapAttribIDs))
+	if (bAllowResort && ModsNeedResort(mod.mapAttribIDs))
 	{
 		Resort();
 	}

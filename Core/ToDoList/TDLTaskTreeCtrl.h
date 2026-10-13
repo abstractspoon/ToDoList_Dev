@@ -152,7 +152,7 @@ public:
 	void DeleteAll();
 	void DeselectAll();
 	BOOL PreTranslateMessage(MSG* pMsg);
-	void SetModified(const CTDCAttributeMap& attribIDs, BOOL bAllowResort);
+	void SetModified(const TDCNOTIFYMOD& mod, BOOL bAllowResort);
 
 	void OnStylesUpdated(const CTDCStyleMap& styles, BOOL bAllowResort);
 	void OnBeginRebuild();

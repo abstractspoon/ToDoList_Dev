@@ -197,7 +197,7 @@ public:
 	virtual void Resort(BOOL bAllowToggle = FALSE);
 	virtual BOOL ModsNeedResort(const CTDCAttributeMap& attribIDs) const;
 
-	void SetModified(const CTDCAttributeMap& attribIDs, BOOL bAllowResort);
+	void SetModified(const TDCNOTIFYMOD& mod, BOOL bAllowResort);
 	void SetAlternateLineColor(COLORREF crAltLine);
 	void SetGridlineColor(COLORREF crGridLine);
 	void SetSplitBarColor(COLORREF crSplitBar) { CTreeListSyncer::SetSplitBarColor(crSplitBar); }

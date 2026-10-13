@@ -812,17 +812,17 @@ CString CTDLTaskListCtrl::GetGroupByColumnName() const
 	return _T("");
 }
 
-void CTDLTaskListCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, BOOL bAllowResort)
+void CTDLTaskListCtrl::SetModified(const TDCNOTIFYMOD& mod, BOOL bAllowResort)
 {
 	if (IsGrouped())
 	{
-		BOOL bUpdateGroups = (mapAttribIDs.Has(TDCA_UNDO) ||
-							  mapAttribIDs.Has(TDCA_ALL) ||
-							  mapAttribIDs.Has(TDCA_PASTE) ||
-							  mapAttribIDs.Has(TDCA_DELETE) ||
-							  mapAttribIDs.Has(TDCA_ARCHIVE) ||
-							  mapAttribIDs.Has(TDCA_MERGE) ||
-							  TDSORTCOLUMN(m_nGroupBy).Matches(mapAttribIDs, m_styles, m_aCustomAttribDefs));
+		BOOL bUpdateGroups = (mod.mapAttribIDs.Has(TDCA_UNDO) ||
+							  mod.mapAttribIDs.Has(TDCA_ALL) ||
+							  mod.mapAttribIDs.Has(TDCA_PASTE) ||
+							  mod.mapAttribIDs.Has(TDCA_DELETE) ||
+							  mod.mapAttribIDs.Has(TDCA_ARCHIVE) ||
+							  mod.mapAttribIDs.Has(TDCA_MERGE) ||
+							  TDSORTCOLUMN(m_nGroupBy).Matches(mod.mapAttribIDs, m_styles, m_aCustomAttribDefs));
 
 		if (bUpdateGroups)
 		{
@@ -833,7 +833,7 @@ void CTDLTaskListCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, BOOL bA
 		}
 	}
 
-	CTDLTaskCtrlBase::SetModified(mapAttribIDs, bAllowResort);
+	CTDLTaskCtrlBase::SetModified(mod, bAllowResort);
 }
 
 void CTDLTaskListCtrl::Resort(BOOL bAllowToggle)

@@ -102,7 +102,7 @@ public:
 	void GetWindowRect(CRect& rWindow) const { CWnd::GetWindowRect(rWindow); }
 	void DeleteAll();
 	void RemoveDeletedItems();
-	void SetModified(const CTDCAttributeMap& mapAttribIDs, BOOL bAllowResort);
+	void SetModified(const TDCNOTIFYMOD& mod, BOOL bAllowResort);
 
 	BOOL SetGroupBy(TDC_COLUMN nGroupBy, BOOL bSortGroupsAscending = -1, BOOL bSortNoneGroupBelow = -1);
 	BOOL CanGroupBy(TDC_COLUMN nGroupBy, BOOL bCheckVisibility) const;
