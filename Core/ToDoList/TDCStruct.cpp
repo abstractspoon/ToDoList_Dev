@@ -349,22 +349,9 @@ TDCITEMCOLORS::TDCITEMCOLORS()
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
-TDCNOTIFYMOD::TDCNOTIFYMOD(TDC_ATTRIBUTE nAttribID) 
-	: 
-	mapAttrib(nAttribID) 
-{
-}
-
-TDCNOTIFYMOD::TDCNOTIFYMOD(TDC_ATTRIBUTE nAttribID, const CDWordArray& taskIDs) 
-	: 
-	mapAttrib(nAttribID)
-{
-	aTaskIDs.Copy(taskIDs);
-}
-
 TDCNOTIFYMOD::TDCNOTIFYMOD(const CTDCAttributeMap& attribIDs, const CDWordArray& taskIDs) 
 	: 
-	mapAttrib(attribIDs)
+	mapAttribIDs(attribIDs)
 {
 	aTaskIDs.Copy(taskIDs);
 }
