@@ -3669,20 +3669,22 @@ void CTabbedToDoCtrl::SetModified(const TDCNOTIFYMOD& mod, BOOL bNewSingleTask, 
 		break;
 
 	case FTCV_TASKLIST:
-		UpdateListView(mod, bAllowResort);
+		{
+			UpdateListView(mod, bAllowResort);
 
-		if (bNewTaskTitleEdit)
-		{
-			UpdateExtensionViews(TDCNOTIFYMOD(TDCA_NEWTASK, mod.aTaskIDs));
-		}
-		else if (!bNewSingleTask)
-		{
-			UpdateExtensionViews(TDCNOTIFYMOD(mapExtAttribIDs, mod.aTaskIDs));
-		}
-		else
-		{
-			// Ensure new task is selected for label editing
-			SelectTask(mod.aTaskIDs[0], FALSE);
+			if (bNewTaskTitleEdit)
+			{
+				UpdateExtensionViews(TDCNOTIFYMOD(TDCA_NEWTASK, mod.aTaskIDs));
+			}
+			else if (!bNewSingleTask)
+			{
+				UpdateExtensionViews(TDCNOTIFYMOD(mapExtAttribIDs, mod.aTaskIDs));
+			}
+			else
+			{
+				// Ensure new task is selected for label editing
+				SelectTask(mod.aTaskIDs[0], FALSE);
+			}
 		}
 		break;
 
@@ -3702,20 +3704,22 @@ void CTabbedToDoCtrl::SetModified(const TDCNOTIFYMOD& mod, BOOL bNewSingleTask, 
 	case FTCV_UIEXTENSION14:
 	case FTCV_UIEXTENSION15:
 	case FTCV_UIEXTENSION16:
-		UpdateExtensionViews(TDCNOTIFYMOD(mapExtAttribIDs, mod.aTaskIDs));
+		{
+			UpdateExtensionViews(TDCNOTIFYMOD(mapExtAttribIDs, mod.aTaskIDs));
 
-		if (bNewTaskTitleEdit)
-		{
-			UpdateListView(TDCNOTIFYMOD(TDCA_NEWTASK, mod.aTaskIDs), FALSE);
-		}
-		else if (!bNewSingleTask)
-		{
-			UpdateListView(mod, FALSE);
-		}
-		else
-		{
-			// Ensure new task is selected for label editing
-			SelectTask(mod.aTaskIDs[0], FALSE);
+			if (bNewTaskTitleEdit)
+			{
+				UpdateListView(TDCNOTIFYMOD(TDCA_NEWTASK, mod.aTaskIDs), FALSE);
+			}
+			else if (!bNewSingleTask)
+			{
+				UpdateListView(mod, FALSE);
+			}
+			else
+			{
+				// Ensure new task is selected for label editing
+				SelectTask(mod.aTaskIDs[0], FALSE);
+			}
 		}
 		break;
 	}
