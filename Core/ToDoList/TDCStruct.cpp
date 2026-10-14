@@ -353,6 +353,13 @@ TDCNOTIFYMOD::TDCNOTIFYMOD()
 {
 }
 
+TDCNOTIFYMOD::TDCNOTIFYMOD(TDC_ATTRIBUTE nAttribID)
+	:
+	mapAttribIDs(nAttribID)
+{
+
+}
+
 TDCNOTIFYMOD::TDCNOTIFYMOD(const CTDCAttributeMap& attribIDs, const CDWordArray& taskIDs) 
 	: 
 	mapAttribIDs(attribIDs)

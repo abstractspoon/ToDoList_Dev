@@ -5009,9 +5009,9 @@ BOOL CTDLTaskCtrlBase::ModsCauseTaskTextColorChange(const CTDCAttributeMap& mapA
 	return FALSE;
 }
 
-BOOL CTDLTaskCtrlBase::ModCausesTaskTextColorChange(TDC_ATTRIBUTE nModType) const
+BOOL CTDLTaskCtrlBase::ModCausesTaskTextColorChange(TDC_ATTRIBUTE nAttribID) const
 {
-	switch (nModType)
+	switch (nAttribID)
 	{
 	case TDCA_COLOR:
 		return !HasStyle(TDCS_COLORTEXTBYPRIORITY) &&
@@ -5025,7 +5025,7 @@ BOOL CTDLTaskCtrlBase::ModCausesTaskTextColorChange(TDC_ATTRIBUTE nModType) cons
 	case TDCA_VERSION:
 	case TDCA_EXTERNALID:
 	case TDCA_TAGS:
-		return (HasStyle(TDCS_COLORTEXTBYATTRIBUTE) && (GetColorByAttribute() == nModType));
+		return (HasStyle(TDCS_COLORTEXTBYATTRIBUTE) && (GetColorByAttribute() == nAttribID));
 
 	case TDCA_DONEDATE:
 		return HasColor(m_crDone);

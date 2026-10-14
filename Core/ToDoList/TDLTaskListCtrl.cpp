@@ -841,20 +841,24 @@ void CTDLTaskListCtrl::Resort(BOOL bAllowToggle)
 	// Base class will reject a resort if the sorting is 
 	// set to TDCC_NONE but we need it for the grouping
 	if (IsGrouped() && !IsSorting())
+	{
 		DoSort();
-	else
-		CTDLTaskCtrlBase::Resort(bAllowToggle);
+		return;
+	}
+
+	//else
+	CTDLTaskCtrlBase::Resort(bAllowToggle);
 }
 
-BOOL CTDLTaskListCtrl::ModsNeedResort(const CTDCAttributeMap& attribIDs) const
+BOOL CTDLTaskListCtrl::ModsNeedResort(const CTDCAttributeMap& mapAttribIDs) const
 {
 	// Note: we bypass the check of 'Resort On Mod' because
 	// we must resort if grouping is to work 
-	if (IsGrouped() && attribIDs.Has(TDC::MapColumnToAttribute(m_nGroupBy)))
+	if (IsGrouped() && mapAttribIDs.Has(TDC::MapColumnToAttribute(m_nGroupBy)))
 		return TRUE;
 
 	// else
-	return CTDLTaskCtrlBase::ModsNeedResort(attribIDs);
+	return CTDLTaskCtrlBase::ModsNeedResort(mapAttribIDs);
 }
 
 BOOL CTDLTaskListCtrl::PrepareSort(TDSORTPARAMS& ss) const

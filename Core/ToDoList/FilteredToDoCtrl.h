@@ -103,7 +103,7 @@ protected:
 	void OnTimerNow();
 
 protected:
-	BOOL ModsNeedRefilter(const CTDCAttributeMap& attribIDs, const CDWordArray& aModTaskIDs) const;
+	BOOL ModsNeedRefilter(const TDCNOTIFYMOD& mod) const;
 	BOOL ModNeedsRefilter(TDC_ATTRIBUTE nAttribID, const CDWordArray& aModTaskIDs) const;
 	BOOL StyleChangesNeedRefilter(const CTDCStyleMap& styles) const;
 
