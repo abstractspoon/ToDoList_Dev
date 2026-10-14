@@ -225,7 +225,7 @@ protected:
 protected:
 	const TDSORT& GetSort() const;
 
-	virtual void SetModified(const TDCNOTIFYMOD& mod, BOOL bAllowResort);
+	virtual void SetModified(const TDCNOTIFYMOD& mod, BOOL bNewSingleTask = FALSE, BOOL bNewTaskTitleEdit = FALSE, BOOL bAllowResort = TRUE);
 	virtual void ReposTaskCtrl(const CRect& rTasks);
 	virtual DWORD SetStyle(TDC_STYLE nStyle, BOOL bOn);
 	virtual void ShowTaskCtrl(BOOL bShow);

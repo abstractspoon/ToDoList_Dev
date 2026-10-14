@@ -1900,7 +1900,7 @@ BOOL CToDoCtrl::OffsetSelectedTaskDates(const CTDCDateSet& mapDates, CStringSet&
 	if (!mod.aTaskIDs.GetSize())
 		return FALSE;
 
-	SetModified(mod, TRUE);
+	SetModified(mod);
 	UpdateControls(FALSE); // don't update comments
 
 	return TRUE;
@@ -5175,31 +5175,17 @@ void CToDoCtrl::SetModified(TDC_ATTRIBUTE nAttribID, const CDWordArray& aModTask
 	TDCNOTIFYMOD mod(nAttribID, aModTaskIDs);
 	m_taskTree.GetAttributesAffectedByMod(nAttribID, mod.mapAttribIDs);
 	
+	BOOL bNewSingleTask = ((nAttribID == TDCA_NEWTASK) && (aModTaskIDs.GetSize() == 1));
+	BOOL bNewTaskTitleEdit = ((nAttribID == TDCA_TASKNAME) && (aModTaskIDs.GetSize() == 1) && (aModTaskIDs[0] == m_dwLastAddedID));
+
 	// Don't allow sorting during find/replace operation because
 	// it messes up the order of the items	
-	SetModified(mod, !m_findReplace.IsReplacing());
+	BOOL bAllowSort = !m_findReplace.IsReplacing();
+
+	SetModified(mod, bNewSingleTask, bNewTaskTitleEdit, bAllowSort);
 }
 
-BOOL CToDoCtrl::IsNewTaskMod(const CTDCAttributeMap& mapAttribIDs, const CDWordArray& aModTaskIDs) const
-{
-	return (mapAttribIDs.HasOnly(TDCA_NEWTASK) && (aModTaskIDs.GetSize() == 1));
-}
-
-BOOL CToDoCtrl::IsNewTaskTitleEditMod(const CTDCAttributeMap& mapAttribIDs, const CDWordArray& aModTaskIDs) const
-{
-	if (aModTaskIDs.GetSize() != 1)
-		return FALSE;
-
-	if (aModTaskIDs[0] != m_dwLastAddedID)
-		return FALSE;
-
-	return ((mapAttribIDs.GetCount() == 3) &&
-			 mapAttribIDs.Has(TDCA_TASKNAME) &&
-			 mapAttribIDs.Has(TDCA_LASTMODBY) &&
-			 mapAttribIDs.Has(TDCA_LASTMODDATE));
-}
-
-void CToDoCtrl::SetModified(const TDCNOTIFYMOD& mod, BOOL bAllowResort)
+void CToDoCtrl::SetModified(const TDCNOTIFYMOD& mod, BOOL bNewSingleTask, BOOL bNewTaskTitleEdit, BOOL bAllowResort)
 {
 	ASSERT(mod.aTaskIDs.GetSize() || 
 		   mod.mapAttribIDs.HasOnly(TDCA_CUSTOMATTRIB_DEFS) ||
@@ -5222,13 +5208,10 @@ void CToDoCtrl::SetModified(const TDCNOTIFYMOD& mod, BOOL bAllowResort)
 	
 	// For new tasks we want to do as little processing as possible 
 	// so as not to delay the appearance of the title edit field.
-	BOOL bNewTask = IsNewTaskMod(mod.mapAttribIDs, mod.aTaskIDs);
-	BOOL bNewTaskTitleEdit = IsNewTaskTitleEditMod(mod.mapAttribIDs, mod.aTaskIDs);
-
 	if (bNewTaskTitleEdit || mod.mapAttribIDs.Has(TDCA_PASTE))
 		m_taskTree.SetLargestTaskID(m_dwNextUniqueID);
 
-	if (!bNewTask)
+	if (!bNewSingleTask)
 		m_taskTree.SetModified(mod, bAllowResort);
 
 	//TDCNOTIFYMOD mod(mapAttribIDs, aModTaskIDs);
@@ -6431,7 +6414,7 @@ BOOL CToDoCtrl::PasteAttributeColumnValues(TDC_COLUMN nToColID, BOOL bSelectedTa
 	}
 
 	if (aModTaskIDs.GetSize())
-		SetModified(TDCNOTIFYMOD(TDC::MapColumnToAttribute(nToColID), aModTaskIDs), TRUE);
+		SetModified(TDCNOTIFYMOD(TDC::MapColumnToAttribute(nToColID), aModTaskIDs));
 
 	return TRUE;
 }

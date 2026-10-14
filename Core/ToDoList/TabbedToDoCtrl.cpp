@@ -2319,9 +2319,7 @@ LRESULT CTabbedToDoCtrl::OnUIExtModifySelectedTask(WPARAM wParam, LPARAM lParam)
 		// to notify everyone that there have been changes
 		if (aModTaskIDs.GetSize())
 		{
-			ASSERT(mapModAttribs.GetCount());
-
-			SetModified(TDCNOTIFYMOD(mapModAttribs, aModTaskIDs), TRUE);
+			SetModified(TDCNOTIFYMOD(mapModAttribs, aModTaskIDs));
 			UpdateControls(FALSE);
 		}
 		else
@@ -3638,16 +3636,16 @@ void CTabbedToDoCtrl::SetListViewNeedFontUpdate(BOOL bUpdate)
 		pVData->bNeedFontUpdate = bUpdate;
 }
 
-void CTabbedToDoCtrl::SetModified(const TDCNOTIFYMOD& mod, BOOL bAllowResort)
+void CTabbedToDoCtrl::SetModified(const TDCNOTIFYMOD& mod, BOOL bNewSingleTask, BOOL bNewTaskTitleEdit, BOOL bAllowResort)
 {
-	CToDoCtrl::SetModified(mod, (bAllowResort && InTreeView()));
+	CToDoCtrl::SetModified(mod, bNewSingleTask, bNewTaskTitleEdit, (bAllowResort && InTreeView()));
 
 	// For new tasks we want to do as little processing as possible 
 	// so as not to delay the appearance of the title edit field.
 	// So, we don't update 'other' views until we receive a successful 
 	// title edit notification unless they are the active view
-	BOOL bNewSingleTask = IsNewTaskMod(mod.mapAttribIDs, mod.aTaskIDs);
-	BOOL bNewTaskTitleEdit = IsNewTaskTitleEditMod(mod.mapAttribIDs, mod.aTaskIDs);
+// 	BOOL bNewSingleTask = IsNewTaskMod(mod.mapAttribIDs, mod.aTaskIDs);
+// 	BOOL bNewTaskTitleEdit = IsNewTaskTitleEditMod(mod.mapAttribIDs, mod.aTaskIDs);
 
 	if (bNewTaskTitleEdit || mod.mapAttribIDs.Has(TDCA_PASTE))
 		m_taskList.SetLargestTaskID(m_dwNextUniqueID);
