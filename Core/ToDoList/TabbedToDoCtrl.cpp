@@ -3644,9 +3644,6 @@ void CTabbedToDoCtrl::SetModified(const TDCNOTIFYMOD& mod, BOOL bNewSingleTask, 
 	// so as not to delay the appearance of the title edit field.
 	// So, we don't update 'other' views until we receive a successful 
 	// title edit notification unless they are the active view
-// 	BOOL bNewSingleTask = IsNewTaskMod(mod.mapAttribIDs, mod.aTaskIDs);
-// 	BOOL bNewTaskTitleEdit = IsNewTaskTitleEditMod(mod.mapAttribIDs, mod.aTaskIDs);
-
 	if (bNewTaskTitleEdit || mod.mapAttribIDs.Has(TDCA_PASTE))
 		m_taskList.SetLargestTaskID(m_dwNextUniqueID);
 
