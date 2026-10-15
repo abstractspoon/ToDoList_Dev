@@ -5214,7 +5214,7 @@ void CToDoCtrl::SetModified(const TDCNOTIFYMOD& mod, BOOL bNewSingleTask, BOOL b
 	if (!bNewSingleTask)
 		m_taskTree.SetModified(mod, bAllowResort);
 
-	//TDCNOTIFYMOD mod(mapAttribIDs, aModTaskIDs);
+	// Notify main window
 	GetParent()->SendMessage(WM_TDCN_MODIFY, (WPARAM)GetSafeHwnd(), (LPARAM)&mod);
 
 	// if this was the project name being edited make sure
