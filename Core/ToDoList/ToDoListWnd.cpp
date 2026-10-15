@@ -1170,10 +1170,10 @@ BOOL CToDoListWnd::InitTabCtrl()
 {
 	UINT nFlags = (WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN | 
 				   TCS_HOTTRACK | TCS_TABS | TCS_SINGLELINE | 
-				   TCS_RIGHTJUSTIFY | TCS_TOOLTIPS | TCS_SCROLLOPPOSITE);
+				   TCS_RIGHTJUSTIFY | TCS_TOOLTIPS);
 
 	if (Prefs().GetStackTabbarItems())
-		nFlags |= TCS_MULTILINE;
+		nFlags |= (TCS_MULTILINE | TCS_SCROLLOPPOSITE);
 
 	if (!m_tabCtrl.Create(nFlags, CRect(0, 0, 10, 10), this, IDC_TABCONTROL))
 		return FALSE;
@@ -5287,13 +5287,12 @@ BOOL CToDoListWnd::DoPreferences(int nInitPage, UINT nInitCtrlID)
 			m_tabCtrl.ModifyFlags(TCE_CLOSEBUTTON, 0);
 
 		BOOL bResizeDlg = (oldPrefs.GetAutoHideTabbar() != newPrefs.GetAutoHideTabbar());
+		BOOL bStackTabbar = newPrefs.GetStackTabbarItems();
 		
-		if (oldPrefs.GetStackTabbarItems() != newPrefs.GetStackTabbarItems())
+		if (oldPrefs.GetStackTabbarItems() != bStackTabbar)
 		{
-			BOOL bStackTabbar = newPrefs.GetStackTabbarItems();
-			
+			CDialogHelper::SetStyle(&m_tabCtrl, (TCS_MULTILINE | TCS_SCROLLOPPOSITE), bStackTabbar);
 			bResizeDlg = TRUE;
-			m_tabCtrl.ModifyStyle(bStackTabbar ? 0 : TCS_MULTILINE, bStackTabbar ? TCS_MULTILINE : 0);
 		}
 		else
 		{
