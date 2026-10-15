@@ -1256,7 +1256,7 @@ BOOL CFilteredToDoCtrl::FindNewNowFilterTasks(const TODOSTRUCTURE* pTDS, const S
 	return FALSE;
 }
 
-BOOL CFilteredToDoCtrl::GetAllTasksForExtensionViewUpdate(const CTDCAttributeMap& mapAttrib, CTaskFile& tasks) const
+BOOL CFilteredToDoCtrl::GetAllTasksForExtensionViewUpdate(const CTDCAttributeMap& mapAttribIDs, CTaskFile& tasks) const
 {
 	if (m_bIgnoreExtensionUpdate)
 	{
@@ -1270,8 +1270,8 @@ BOOL CFilteredToDoCtrl::GetAllTasksForExtensionViewUpdate(const CTDCAttributeMap
 
 		if (CTabbedToDoCtrl::GetAllTasks(tasks))
 		{
-			AddGlobalsToTaskFile(tasks, mapAttrib);
-			tasks.SetAvailableAttributes(mapAttrib);
+			AddGlobalsToTaskFile(tasks, mapAttribIDs);
+			tasks.SetAvailableAttributes(mapAttribIDs);
 			
 			return TRUE;
 		}
@@ -1281,7 +1281,7 @@ BOOL CFilteredToDoCtrl::GetAllTasksForExtensionViewUpdate(const CTDCAttributeMap
 	}
 
 	// else
-	return CTabbedToDoCtrl::GetAllTasksForExtensionViewUpdate(mapAttrib, tasks);
+	return CTabbedToDoCtrl::GetAllTasksForExtensionViewUpdate(mapAttribIDs, tasks);
 }
 
 void CFilteredToDoCtrl::SetColumnFieldVisibility(const TDCCOLEDITFILTERVISIBILITY& vis)

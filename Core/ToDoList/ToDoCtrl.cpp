@@ -3926,17 +3926,17 @@ int CToDoCtrl::OnToolHitTest(CPoint point, TOOLINFO * pTI) const
 	}
 	else if (HasStyle(TDCS_SHOWINFOTIPS) && (hitTest.nColumnID == TDCC_CLIENT))
 	{
-		CTDCAttributeMap mapAttrib;
-		TDC::MapColumnsToAttributes(m_visColEdit.GetVisibleColumns(), mapAttrib);
+		CTDCAttributeMap mapAttribIDs;
+		TDC::MapColumnsToAttributes(m_visColEdit.GetVisibleColumns(), mapAttribIDs);
 
 		// Always add path for context
-		mapAttrib.Add(TDCA_PATH);
+		mapAttribIDs.Add(TDCA_PATH);
 
 		if (nMaxState == TDCMS_NORMAL)
-			mapAttrib.Add(TDCA_COMMENTS);
+			mapAttribIDs.Add(TDCA_COMMENTS);
 
 		sTip = m_infoTip.FormatTip(hitTest.dwTaskID,
-								   mapAttrib,
+								   mapAttribIDs,
 								   m_nMaxInfotipCommentsLength,
 								   m_sCompletionStatus);
 	}
@@ -5212,7 +5212,7 @@ void CToDoCtrl::SetModified(const TDCNOTIFYMOD& mod, BOOL bNewSingleTask, BOOL b
 		m_taskTree.SetLargestTaskID(m_dwNextUniqueID);
 
 	if (!bNewSingleTask)
-		m_taskTree.SetModified(mod, bAllowResort);
+		m_taskTree.SetModified(mod.mapAttribIDs, bAllowResort);
 
 	// Notify main window
 	GetParent()->SendMessage(WM_TDCN_MODIFY, (WPARAM)GetSafeHwnd(), (LPARAM)&mod);

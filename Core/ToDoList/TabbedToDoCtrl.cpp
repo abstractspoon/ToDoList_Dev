@@ -1282,10 +1282,10 @@ int CTabbedToDoCtrl::GetTasks(CTaskFile& tasks, FTC_VIEW nView, const TDCGETTASK
 	return 0;
 }
 
-BOOL CTabbedToDoCtrl::GetAllTasksForExtensionViewUpdate(const CTDCAttributeMap& mapAttrib, CTaskFile& tasks) const
+BOOL CTabbedToDoCtrl::GetAllTasksForExtensionViewUpdate(const CTDCAttributeMap& mapAttribIDs, CTaskFile& tasks) const
 {
 	TDCGETTASKS filter;
-	filter.mapAttribs.Copy(mapAttrib);
+	filter.mapAttribs.Copy(mapAttribIDs);
 
 	GetTasks(tasks, FTCV_TASKTREE, filter);
 
@@ -1350,7 +1350,7 @@ HTASKITEM CTabbedToDoCtrl::AddTreeItemToTaskFile(HTREEITEM hti, CTaskFile& tasks
 }
 
 
-int CTabbedToDoCtrl::GetSelectedTasksForExtensionViewUpdate(const CTDCAttributeMap& mapAttrib, 
+int CTabbedToDoCtrl::GetSelectedTasksForExtensionViewUpdate(const CTDCAttributeMap& mapAttribIDs, 
 															DWORD dwFlags, CTaskFile& tasks) const
 {
 	TDCGETTASKS filter;
@@ -1360,15 +1360,15 @@ int CTabbedToDoCtrl::GetSelectedTasksForExtensionViewUpdate(const CTDCAttributeM
 	GetAllExtensionViewsWantedAttributes(mapAllAttribIDs);
 
 	// Special cases
-	if (mapAttrib.HasAttribOrAll(TDCA_NEWTASK))
+	if (mapAttribIDs.HasAttribOrAll(TDCA_NEWTASK))
 	{
-		ASSERT(mapAttrib.HasOnly(TDCA_NEWTASK) || mapAttrib.HasOnly(TDCA_ALL));
+		ASSERT(mapAttribIDs.HasOnly(TDCA_NEWTASK) || mapAttribIDs.HasOnly(TDCA_ALL));
 
 		filter.mapAttribs.Copy(mapAllAttribIDs);
 	}
 	else
 	{
-		VERIFY(mapAttrib.GetIntersection(mapAllAttribIDs, filter.mapAttribs));
+		VERIFY(mapAttribIDs.GetIntersection(mapAllAttribIDs, filter.mapAttribs));
 	}
 
 	// Note: GetSelectedTask can legitimately return no tasks
@@ -1379,10 +1379,10 @@ int CTabbedToDoCtrl::GetSelectedTasksForExtensionViewUpdate(const CTDCAttributeM
 		PrepareTaskfileForTasks(tasks, filter);
 	}
 
-	if (mapAttrib.IsEmpty() || mapAttrib.Has(TDCA_NEWTASK))
+	if (mapAttribIDs.IsEmpty() || mapAttribIDs.Has(TDCA_NEWTASK))
 		AddGlobalsToTaskFile(tasks, TDCA_ALL);
 	else
-		AddGlobalsToTaskFile(tasks, mapAttrib);
+		AddGlobalsToTaskFile(tasks, mapAttribIDs);
 
 	return tasks.GetTaskCount();
 }
@@ -4291,14 +4291,14 @@ BOOL CTabbedToDoCtrl::ModAffectsAggregatedAttributes(TDC_ATTRIBUTE nAttribID) co
 	return FALSE;
 }
 
-void CTabbedToDoCtrl::AddGlobalsToTaskFile(CTaskFile& tasks, const CTDCAttributeMap& mapAttrib) const
+void CTabbedToDoCtrl::AddGlobalsToTaskFile(CTaskFile& tasks, const CTDCAttributeMap& mapAttribIDs) const
 {
 	TDCAUTOLISTDATA tld;
-	POSITION pos = mapAttrib.GetStartPosition();
+	POSITION pos = mapAttribIDs.GetStartPosition();
 	
 	while (pos)
 	{
-		TDC_ATTRIBUTE nAttribID = mapAttrib.GetNext(pos);
+		TDC_ATTRIBUTE nAttribID = mapAttribIDs.GetNext(pos);
 		GetAutoListData(nAttribID, tld);
 	}
 	
