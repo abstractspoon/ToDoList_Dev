@@ -3773,8 +3773,6 @@ LRESULT CToDoListWnd::OnToDoCtrlNotifyMod(WPARAM wp, LPARAM lp)
 {
 	ASSERT(wp && lp);
 
-	const TDCNOTIFYMOD* pMod = (TDCNOTIFYMOD*)lp;
-
 	int nTDC = m_mgrToDoCtrls.FindToDoCtrl((HWND)wp);
 
 	if (nTDC == -1)
@@ -3783,22 +3781,24 @@ LRESULT CToDoListWnd::OnToDoCtrlNotifyMod(WPARAM wp, LPARAM lp)
 		return 0L;
 	}
 
+	const TDCNOTIFYMOD* pMod = (TDCNOTIFYMOD*)lp;
+
 	CFilteredToDoCtrl& tdc = GetToDoCtrl(nTDC);
 	int nSelCount = tdc.GetSelectedTaskCount();
 
-	if (pMod->mapAttrib.Has(TDCA_PROJECTNAME))
+	if (pMod->mapAttribIDs.Has(TDCA_PROJECTNAME))
 	{
 		if (Prefs().GetKeepTabsOrdered())
 			m_idleTasks.RefreshTabOrder();
 	}
 
-	if (pMod->mapAttrib.Has(TDCA_DUEDATE) || 
-		pMod->mapAttrib.Has(TDCA_DONEDATE))
+	if (pMod->mapAttribIDs.Has(TDCA_DUEDATE) ||
+		pMod->mapAttribIDs.Has(TDCA_DONEDATE))
 	{
 		RefreshTasklistDueItemStatus(nTDC);
 	}
 
-	if (pMod->mapAttrib.Has(TDCA_CUSTOMATTRIB_DEFS))
+	if (pMod->mapAttribIDs.Has(TDCA_CUSTOMATTRIB_DEFS))
 	{
 		// Ignore modification callback if it came from us
 		if (m_bSettingAttribDefs)
@@ -3808,25 +3808,25 @@ LRESULT CToDoListWnd::OnToDoCtrlNotifyMod(WPARAM wp, LPARAM lp)
 			UpdateFindDialogCustomAttributes(&tdc);
 	}
 
-	if (pMod->mapAttrib.Has(TDCA_ICON))
+	if (pMod->mapAttribIDs.Has(TDCA_ICON))
 	{
 		InvalidateChild(&m_dlgReminders, FALSE);
 		InvalidateChild(&m_dlgFindTasks, FALSE);
 	}
 
-	if (pMod->mapAttrib.Has(TDCA_PASTE))
+	if (pMod->mapAttribIDs.Has(TDCA_PASTE))
 		m_idleTasks.UpdateAutoListData();
 
 	// If this is a 'new task' notification pass it on to the time-tracker 
 	// immediately because its correct working depends on always being up to date
-	if (pMod->mapAttrib.Has(TDCA_NEWTASK))
-		UpdateTimeTrackerTasks(FALSE, pMod->mapAttrib);
+	if (pMod->mapAttribIDs.Has(TDCA_NEWTASK))
+		UpdateTimeTrackerTasks(FALSE, pMod->mapAttribIDs);
 	else
-		m_idleTasks.UpdateTimeTrackerTasks(FALSE, pMod->mapAttrib);
+		m_idleTasks.UpdateTimeTrackerTasks(FALSE, pMod->mapAttribIDs);
 
-	m_idleTasks.UpdateStatusBar(pMod->mapAttrib);
+	m_idleTasks.UpdateStatusBar(pMod->mapAttribIDs);
 
-	if (m_dlgReminders.UpdateModifiedTasks(&tdc, pMod->aTaskIDs, pMod->mapAttrib))
+	if (m_dlgReminders.UpdateModifiedTasks(&tdc, pMod->aTaskIDs, pMod->mapAttribIDs))
 		tdc.RefreshReminders();
 
 	if (nTDC == GetSelToDoCtrl())

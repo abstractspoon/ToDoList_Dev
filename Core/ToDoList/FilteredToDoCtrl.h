@@ -103,11 +103,11 @@ protected:
 	void OnTimerNow();
 
 protected:
-	BOOL ModsNeedRefilter(const CTDCAttributeMap& attribIDs, const CDWordArray& aModTaskIDs) const;
+	BOOL ModsNeedRefilter(const TDCNOTIFYMOD& mod) const;
 	BOOL ModNeedsRefilter(TDC_ATTRIBUTE nAttribID, const CDWordArray& aModTaskIDs) const;
 	BOOL StyleChangesNeedRefilter(const CTDCStyleMap& styles) const;
 
-	virtual void SetModified(const CTDCAttributeMap& attribIDs, const CDWordArray& aModTaskIDs, BOOL bAllowResort);
+	virtual void SetModified(const TDCNOTIFYMOD& mod, BOOL bNewSingleTask, BOOL bNewTaskTitleEdit, BOOL bAllowResort);
 	virtual BOOL LoadTasks(const CTaskFile& tasks);
 	virtual BOOL RemoveArchivedTask(DWORD dwTaskID);
 	virtual BOOL CopySelectedTasks() const;
