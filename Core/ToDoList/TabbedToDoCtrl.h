@@ -258,8 +258,8 @@ protected:
 	void LoadState();
 	void SaveState();
 	BOOL ModAffectsAggregatedAttributes(TDC_ATTRIBUTE nAttribID) const;
-	BOOL ModAffectsAggregatedAttributes(const TDCNOTIFYMOD& mod) const;
-	BOOL WantUpdateInheritedAttibutes(const TDCNOTIFYMOD& mod) const;
+	BOOL ModAffectsAggregatedAttributes(const CTDCAttributeMap& mapAttribIDs) const;
+	BOOL WantUpdateInheritedAttibutes(const CTDCAttributeMap& mapAttribIDs) const;
 	void UpdateListView(const TDCNOTIFYMOD& mod, BOOL bAllowResort);
 	void UpdateSortStates(const CTDCAttributeMap& mapAttribIDs, BOOL bAllowResort);
 	void BuildListGroupByCombo();
@@ -306,10 +306,10 @@ protected:
 	BOOL GetExtensionWnd(FTC_VIEW nView, IUIExtensionWindow*& pExtWnd, TDCEXTVIEWDATA*& pData) const;
 	BOOL HasAnyExtensionViews() const;
 	BOOL AnyExtensionViewWantsChange(TDC_ATTRIBUTE nAttribID) const;
+	BOOL AnyExtensionViewWantsChanges(const CTDCAttributeMap& mapAttribIDs) const;
 	BOOL GetExtensionViewsWantedChanges(const CTDCAttributeMap& mapAttribIDs, CTDCAttributeMap& mapAttribsWanted) const;
+	BOOL ExtensionViewWantsChanges(int nExt, const CTDCAttributeMap& mapAttribIDs) const;
 	BOOL GetExtensionViewWantedChanges(int nExt, const CTDCAttributeMap& mapAttribIDs, CTDCAttributeMap& mapAttribsWanted) const;
-	BOOL AnyExtensionViewWantsChanges(const TDCNOTIFYMOD& mod) const;
-	BOOL ExtensionViewWantsChanges(int nExt, const TDCNOTIFYMOD& mod) const;
 	BOOL ExtensionViewWantsChange(int nExt, TDC_ATTRIBUTE nAttribID) const;
 	BOOL AllExtensionViewsNeedFullUpdate() const;
 	void BeginExtensionProgress(const TDCEXTVIEWDATA* pData, UINT nMsg = 0);

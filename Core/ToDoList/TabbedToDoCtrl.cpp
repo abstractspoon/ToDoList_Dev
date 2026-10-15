@@ -3807,7 +3807,7 @@ void CTabbedToDoCtrl::UpdateListView(const TDCNOTIFYMOD& mod, BOOL bAllowResort)
 	}
 
 	if (bInListView || !pVData->bNeedFullTaskUpdate)
-		m_taskList.SetModified(mod, (bInListView && bAllowResort));
+		m_taskList.SetModified(mod.mapAttribIDs, (bInListView && bAllowResort));
 }
 
 int CTabbedToDoCtrl::PopulateExtensionViewAttributes(const IUIExtensionWindow* pExtWnd, TDCEXTVIEWDATA* pData)
@@ -4133,7 +4133,7 @@ void CTabbedToDoCtrl::UpdateExtensionViewsSelection(const TDCNOTIFYMOD& mod)
 	{
 		// We don't need to proceed if no extension wants 
 		// any of the changes
-		if (!AnyExtensionViewWantsChanges(mod))
+		if (!AnyExtensionViewWantsChanges(mod.mapAttribIDs))
 			return;
 
 		// Include parents if this is an undo 
@@ -4142,7 +4142,7 @@ void CTabbedToDoCtrl::UpdateExtensionViewsSelection(const TDCNOTIFYMOD& mod)
  		ASSERT(!mod.mapAttribIDs.Has(TDCA_ALL) || mod.mapAttribIDs.HasOnly(TDCA_ALL));
 
 		if (mod.mapAttribIDs.HasAttribOrAll(TDCA_COLOR) ||
-			ModAffectsAggregatedAttributes(mod))
+			ModAffectsAggregatedAttributes(mod.mapAttribIDs))
 		{
 			dwFlags |= TDCGSTF_ALLPARENTS;
 		}
@@ -4150,7 +4150,7 @@ void CTabbedToDoCtrl::UpdateExtensionViewsSelection(const TDCNOTIFYMOD& mod)
 		// DONT include subtasks UNLESS the completion date
 		// has changed OR this is an inherited attribute
 		if (!mod.mapAttribIDs.HasAttribOrAll(TDCA_DONEDATE) &&
-			!WantUpdateInheritedAttibutes(mod))
+			!WantUpdateInheritedAttibutes(mod.mapAttribIDs))
 		{
 			dwFlags |= TDCGSTF_NOTSUBTASKS;
 		}
@@ -4226,26 +4226,26 @@ void CTabbedToDoCtrl::UpdateExtensionViewsSelection(const TDCNOTIFYMOD& mod)
 #endif
 }
 
-BOOL CTabbedToDoCtrl::ModAffectsAggregatedAttributes(const TDCNOTIFYMOD& mod) const
+BOOL CTabbedToDoCtrl::ModAffectsAggregatedAttributes(const CTDCAttributeMap& mapAttribIDs) const
 {
-	POSITION pos = mod.mapAttribIDs.GetStartPosition();
+	POSITION pos = mapAttribIDs.GetStartPosition();
 
 	while (pos)
 	{
-		if (ModAffectsAggregatedAttributes(mod.mapAttribIDs.GetNext(pos)))
+		if (ModAffectsAggregatedAttributes(mapAttribIDs.GetNext(pos)))
 			return TRUE;
 	}
 
 	return FALSE;
 }
 
-BOOL CTabbedToDoCtrl::WantUpdateInheritedAttibutes(const TDCNOTIFYMOD& mod) const
+BOOL CTabbedToDoCtrl::WantUpdateInheritedAttibutes(const CTDCAttributeMap& mapAttribIDs) const
 {
-	POSITION pos = mod.mapAttribIDs.GetStartPosition();
+	POSITION pos = mapAttribIDs.GetStartPosition();
 
 	while (pos)
 	{
-		if (m_data.WantUpdateInheritedAttibute(mod.mapAttribIDs.GetNext(pos)))
+		if (m_data.WantUpdateInheritedAttibute(mapAttribIDs.GetNext(pos)))
 			return TRUE;
 	}
 
@@ -4306,11 +4306,11 @@ void CTabbedToDoCtrl::AddGlobalsToTaskFile(CTaskFile& tasks, const CTDCAttribute
 		tasks.SetAutoListData(tld);
 }
 
-BOOL CTabbedToDoCtrl::ExtensionViewWantsChanges(int nExt, const TDCNOTIFYMOD& mod) const
+BOOL CTabbedToDoCtrl::ExtensionViewWantsChanges(int nExt, const CTDCAttributeMap& mapAttribIDs) const
 {
 	CTDCAttributeMap mapUnused;
 
-	return (GetExtensionViewWantedChanges(nExt, mod.mapAttribIDs, mapUnused) > 0);
+	return (GetExtensionViewWantedChanges(nExt, mapAttribIDs, mapUnused) > 0);
 }
 
 int CTabbedToDoCtrl::GetExtensionViewWantedChanges(int nExt, const CTDCAttributeMap& mapAttribIDs, CTDCAttributeMap& mapAttribsWanted) const
@@ -4426,11 +4426,11 @@ BOOL CTabbedToDoCtrl::AnyExtensionViewWantsChange(TDC_ATTRIBUTE nAttribID) const
 	return FALSE;
 }
 
-BOOL CTabbedToDoCtrl::AnyExtensionViewWantsChanges(const TDCNOTIFYMOD& mod) const
+BOOL CTabbedToDoCtrl::AnyExtensionViewWantsChanges(const CTDCAttributeMap& mapAttribIDs) const
 {
 	CTDCAttributeMap mapUnused;
 
-	return (GetExtensionViewsWantedChanges(mod.mapAttribIDs, mapUnused) > 0);
+	return (GetExtensionViewsWantedChanges(mapAttribIDs, mapUnused) > 0);
 }
 
 int CTabbedToDoCtrl::GetExtensionViewsWantedChanges(const CTDCAttributeMap& mapAttribIDs, CTDCAttributeMap& mapAttribsWanted) const

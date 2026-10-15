@@ -2331,42 +2331,42 @@ void CTDLTaskTreeCtrl::RefreshItemBoldState(HTREEITEM hti, BOOL bAndChildren)
 	}
 }
 
-void CTDLTaskTreeCtrl::SetModified(const TDCNOTIFYMOD& mod, BOOL bAllowResort)
+void CTDLTaskTreeCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, BOOL bAllowResort)
 {
-	ASSERT (!mod.mapAttribIDs.Has(TDCA_POSITION));
+	ASSERT (!mapAttribIDs.Has(TDCA_POSITION));
 
-	if (mod.mapAttribIDs.Has(TDCA_NEWTASK))
+	if (mapAttribIDs.Has(TDCA_NEWTASK))
 	{
 		// Already handled in InsertTreeItem
 		ASSERT(m_mapTaskIDToHTI.GetCount() == (int)m_tcTasks.GetCount());
 	}
 
-	if (mod.mapAttribIDs.Has(TDCA_UNDO) ||
-		mod.mapAttribIDs.Has(TDCA_PASTE) ||
-		mod.mapAttribIDs.Has(TDCA_POSITION_DIFFERENTPARENT))
+	if (mapAttribIDs.Has(TDCA_UNDO) ||
+		mapAttribIDs.Has(TDCA_PASTE) ||
+		mapAttribIDs.Has(TDCA_POSITION_DIFFERENTPARENT))
 	{
 		ASSERT(m_mapTaskIDToHTI.GetCount() == (int)m_tcTasks.GetCount());
 		RefreshItemBoldState();
 	}
 
-	if (mod.mapAttribIDs.Has(TDCA_DELETE) ||
-		mod.mapAttribIDs.Has(TDCA_ARCHIVE))
+	if (mapAttribIDs.Has(TDCA_DELETE) ||
+		mapAttribIDs.Has(TDCA_ARCHIVE))
 	{
 		ASSERT(m_mapTaskIDToHTI.GetCount() >= (int)m_tcTasks.GetCount());
 	}
 	
-	if (bAllowResort && ModsNeedResort(mod.mapAttribIDs))
+	if (bAllowResort && ModsNeedResort(mapAttribIDs))
 	{
 		// if parent state is not calculated from its subtask values
 		// we can do an optimised sort of just the affected branches
-		if (!ModsRequireFullResort(mod.mapAttribIDs))
+		if (!ModsRequireFullResort(mapAttribIDs))
 		{
 			ResortSelectedTaskParents();
 			bAllowResort = FALSE;
 		}
 	}
 
-	CTDLTaskCtrlBase::SetModified(mod, bAllowResort);
+	CTDLTaskCtrlBase::SetModified(mapAttribIDs, bAllowResort);
 }
 
 BOOL CTDLTaskTreeCtrl::ModsRequireFullResort(const CTDCAttributeMap& mapAttribIDs) const
