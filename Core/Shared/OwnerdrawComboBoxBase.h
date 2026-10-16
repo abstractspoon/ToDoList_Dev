@@ -105,7 +105,7 @@ protected:
 
 	virtual UINT GetEllipsisStyle() const { return DT_END_ELLIPSIS; }
 	virtual int GetMaxDropWidth() const { return -1; } // no limit
-	virtual int GetExtraListboxWidth() const { return 0; }
+	virtual int GetExtraListboxWidth() const;
 	virtual int CalcMinItemHeight(BOOL bList) const;
 	virtual BOOL IsSelectableItem(int nItem) const;
 

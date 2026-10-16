@@ -57,6 +57,8 @@ void CTDLFindTaskAttributeComboBox::BuildCombo()
 		nItem = InsertString(3, CEnString(IDS_ATTRIBUTES));
 		SetHeadingItem(nItem);
 	}
+
+	CDialogHelper::RefreshMaxDropWidth(*this);
 }
 
 BOOL CTDLFindTaskAttributeComboBox::WantAttribute(TDC_ATTRIBUTE nAttribID) const

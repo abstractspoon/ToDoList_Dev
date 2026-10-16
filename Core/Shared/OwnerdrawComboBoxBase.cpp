@@ -391,6 +391,14 @@ void COwnerdrawComboBoxBase::RefreshDropWidth(BOOL bRecalc)
 	SetDroppedWidth(max(nDefaultWidth, nReqWidth));
 }
 
+int COwnerdrawComboBoxBase::GetExtraListboxWidth() const
+{
+	if (m_nNumHeadings)
+		return m_nItemIndentBelowHeadings;
+
+	return 0;
+}
+
 LRESULT COwnerdrawComboBoxBase::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 {
 	if (GetEdit() == hRealWnd)
