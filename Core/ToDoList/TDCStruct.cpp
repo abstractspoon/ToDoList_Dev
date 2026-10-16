@@ -349,22 +349,20 @@ TDCITEMCOLORS::TDCITEMCOLORS()
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
-TDCNOTIFYMOD::TDCNOTIFYMOD(TDC_ATTRIBUTE nAttribID) 
-	: 
-	mapAttrib(nAttribID) 
+TDCNOTIFYMOD::TDCNOTIFYMOD()
 {
 }
 
-TDCNOTIFYMOD::TDCNOTIFYMOD(TDC_ATTRIBUTE nAttribID, const CDWordArray& taskIDs) 
-	: 
-	mapAttrib(nAttribID)
+TDCNOTIFYMOD::TDCNOTIFYMOD(TDC_ATTRIBUTE nAttribID)
+	:
+	mapAttribIDs(nAttribID)
 {
-	aTaskIDs.Copy(taskIDs);
+
 }
 
 TDCNOTIFYMOD::TDCNOTIFYMOD(const CTDCAttributeMap& attribIDs, const CDWordArray& taskIDs) 
 	: 
-	mapAttrib(attribIDs)
+	mapAttribIDs(attribIDs)
 {
 	aTaskIDs.Copy(taskIDs);
 }
@@ -1141,16 +1139,11 @@ BOOL SEARCHPARAM::SetCustomAttribute(TDC_ATTRIBUTE nAttribID, const CString& sID
 	nAttribType = nType;
 	sCustAttribID = sID;
 
-	// handle relative dates
+	// Date relativity
 	switch (nAttribType)
 	{
-	case FT_DATE:
-		SetRelativeDate(FALSE);
-		break;
-
-	case FT_DATERELATIVE:
-		SetRelativeDate(TRUE);
-		break;
+	case FT_DATE:			bRelativeDate = FALSE;	break;
+	case FT_DATERELATIVE:	bRelativeDate = TRUE;	break;
 	}
 
 	ValidateOperator();
@@ -1485,7 +1478,9 @@ BOOL SEARCHPARAM::SetFlags(DWORD flags)
 	{
 	case FT_DATE:
 	case FT_DATERELATIVE:
-		return SetRelativeDate((BOOL)flags);
+		bRelativeDate = (BOOL)flags;
+		nAttribType = (bRelativeDate ? FT_DATERELATIVE : FT_DATE);
+		return TRUE;
 
 	case FT_TIMEPERIOD:
 		return SetTimeUnits((TDC_UNITS)flags);
@@ -1512,19 +1507,9 @@ BOOL SEARCHPARAM::SetRelativeDate(BOOL bRelative)
 	switch (GetAttributeType())
 	{
 	case FT_DATE:
-		if (bRelative)
-		{
-			bRelativeDate = TRUE;
-			nAttribType = FT_DATERELATIVE;
-		}
-		return TRUE;
-
 	case FT_DATERELATIVE:
-		if (!bRelative)
-		{
-			bRelativeDate = FALSE;
-			nAttribType = FT_DATE;
-		}
+		bRelativeDate = bRelative;
+		nAttribType = (bRelative ? FT_DATERELATIVE : FT_DATE);
 		return TRUE;
 	}
 

@@ -901,11 +901,11 @@ BOOL CFilteredToDoCtrl::CanCreateNewTask(TDC_INSERTWHERE nInsertWhere) const
 	return CTabbedToDoCtrl::CanCreateNewTask(nInsertWhere);
 }
 
-void CFilteredToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const CDWordArray& aModTaskIDs, BOOL bAllowResort)
+void CFilteredToDoCtrl::SetModified(const TDCNOTIFYMOD& mod, BOOL bNewSingleTask, BOOL bNewTaskTitleEdit, BOOL bAllowResort)
 {
 	BOOL bTreeRefiltered = FALSE, bListRefiltered = FALSE;
 
-	if (ModsNeedRefilter(mapAttribIDs, aModTaskIDs))
+	if (ModsNeedRefilter(mod))
 	{
 		// This will also refresh the list view if it is active
 		RefreshFilter(FALSE);
@@ -920,15 +920,15 @@ void CFilteredToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const 
 	CAutoFlag af(m_bIgnoreListRebuild, bListRefiltered);
 	CAutoFlag af2(m_bIgnoreExtensionUpdate, bTreeRefiltered);
 
-	CTabbedToDoCtrl::SetModified(mapAttribIDs, aModTaskIDs, bAllowResort);
+	CTabbedToDoCtrl::SetModified(mod, bNewSingleTask, bNewTaskTitleEdit, bAllowResort);
 
-	if ((bListRefiltered || bTreeRefiltered) && mapAttribIDs.Has(TDCA_UNDO) && aModTaskIDs.GetSize())
+	if ((bListRefiltered || bTreeRefiltered) && mod.mapAttribIDs.Has(TDCA_UNDO) && mod.aTaskIDs.GetSize())
 	{
 		// Restore the selection at the time of the undo if possible
 		TDCSELECTIONCACHE cache;
 		CacheTreeSelection(cache);
 		
-		if (!SelectTasks(aModTaskIDs))
+		if (!SelectTasks(mod.aTaskIDs))
 			RestoreTreeSelection(cache);
 
 		SyncActiveViewSelectionToTree();
@@ -948,16 +948,16 @@ void CFilteredToDoCtrl::EndTimeTracking(BOOL bAllowConfirm, BOOL bNotify)
 	}
 }
 
-BOOL CFilteredToDoCtrl::ModsNeedRefilter(const CTDCAttributeMap& mapAttribIDs, const CDWordArray& aModTaskIDs) const
+BOOL CFilteredToDoCtrl::ModsNeedRefilter(const TDCNOTIFYMOD& mod) const
 {
 	if (!m_filter.HasAnyFilter())
 		return FALSE;
 
-	POSITION pos = mapAttribIDs.GetStartPosition();
+	POSITION pos = mod.mapAttribIDs.GetStartPosition();
 
 	while (pos)
 	{
-		if (ModNeedsRefilter(mapAttribIDs.GetNext(pos), aModTaskIDs))
+		if (ModNeedsRefilter(mod.mapAttribIDs.GetNext(pos), mod.aTaskIDs))
 			return TRUE;
 	}
 
@@ -1056,7 +1056,7 @@ BOOL CFilteredToDoCtrl::StyleChangesNeedRefilter(const CTDCStyleMap& styles) con
 	if (!HasAnyFilter())
 		return FALSE;
 
-	CTDCAttributeMap mapAttribAffected;
+	TDCNOTIFYMOD mod;
 	POSITION pos = styles.GetStartPosition();
 
 	while (pos)
@@ -1066,64 +1066,64 @@ BOOL CFilteredToDoCtrl::StyleChangesNeedRefilter(const CTDCStyleMap& styles) con
 		case TDCS_NODUEDATEISDUETODAYORSTART:
 		case TDCS_USEEARLIESTDUEDATE:
 		case TDCS_USELATESTDUEDATE:
-			mapAttribAffected.Add(TDCA_DUEDATE);
+			mod.mapAttribIDs.Add(TDCA_DUEDATE);
 			break;
 
 		case TDCS_USEEARLIESTSTARTDATE:
 		case TDCS_USELATESTSTARTDATE:
-			mapAttribAffected.Add(TDCA_STARTDATE);
+			mod.mapAttribIDs.Add(TDCA_STARTDATE);
 			break;
 
 		case TDCS_DUEHAVEHIGHESTPRIORITY:
 		case TDCS_DONEHAVELOWESTPRIORITY:
 		case TDCS_USEHIGHESTPRIORITY:
 		case TDCS_INCLUDEDONEINPRIORITYCALC:
-			mapAttribAffected.Add(TDCA_PRIORITY);
+			mod.mapAttribIDs.Add(TDCA_PRIORITY);
 			break;
 
 		case TDCS_DONEHAVELOWESTRISK:
 		case TDCS_USEHIGHESTRISK:
 		case TDCS_INCLUDEDONEINRISKCALC:
-			mapAttribAffected.Add(TDCA_RISK);
+			mod.mapAttribIDs.Add(TDCA_RISK);
 			break;
 
 		case TDCS_TREATSUBCOMPLETEDASDONE:
 			{
-				mapAttribAffected.Add(TDCA_DONEDATE);
+				mod.mapAttribIDs.Add(TDCA_DONEDATE);
 
 				if (styles.HasStyle(TDCS_DONEHAVELOWESTPRIORITY) || 
 					styles.HasStyle(TDCS_INCLUDEDONEINPRIORITYCALC))
 				{
-					mapAttribAffected.Add(TDCA_PRIORITY);
+					mod.mapAttribIDs.Add(TDCA_PRIORITY);
 				}
 
 				if (styles.HasStyle(TDCS_DONEHAVELOWESTRISK) ||
 					styles.HasStyle(TDCS_INCLUDEDONEINRISKCALC))
 				{
-					mapAttribAffected.Add(TDCA_PRIORITY);
+					mod.mapAttribIDs.Add(TDCA_PRIORITY);
 				}
 
 				if (styles.HasStyle(TDCS_INCLUDEDONEINAVERAGECALC))
 				{
-					mapAttribAffected.Add(TDCA_PERCENT);
+					mod.mapAttribIDs.Add(TDCA_PERCENT);
 				}
 			}
 			break;
 
 		case TDCS_USEPERCENTDONEINTIMEEST:
-			mapAttribAffected.Add(TDCA_TIMEESTIMATE);
+			mod.mapAttribIDs.Add(TDCA_TIMEESTIMATE);
 			break;
 
 		case TDCS_INCLUDEDONEINAVERAGECALC:
 		case TDCS_WEIGHTPERCENTCALCBYNUMSUB:
 		case TDCS_AVERAGEPERCENTSUBCOMPLETION:
 		case TDCS_AUTOCALCPERCENTDONE:
-			mapAttribAffected.Add(TDCA_PERCENT);
+			mod.mapAttribIDs.Add(TDCA_PERCENT);
 			break;
 		}
 	}
 	
-	return ModsNeedRefilter(mapAttribAffected, CDWordArray());
+	return ModsNeedRefilter(mod);
 }
 
 void CFilteredToDoCtrl::Sort(TDC_COLUMN nBy, BOOL bAllowToggle)
@@ -1256,7 +1256,7 @@ BOOL CFilteredToDoCtrl::FindNewNowFilterTasks(const TODOSTRUCTURE* pTDS, const S
 	return FALSE;
 }
 
-BOOL CFilteredToDoCtrl::GetAllTasksForExtensionViewUpdate(const CTDCAttributeMap& mapAttrib, CTaskFile& tasks) const
+BOOL CFilteredToDoCtrl::GetAllTasksForExtensionViewUpdate(const CTDCAttributeMap& mapAttribIDs, CTaskFile& tasks) const
 {
 	if (m_bIgnoreExtensionUpdate)
 	{
@@ -1270,8 +1270,8 @@ BOOL CFilteredToDoCtrl::GetAllTasksForExtensionViewUpdate(const CTDCAttributeMap
 
 		if (CTabbedToDoCtrl::GetAllTasks(tasks))
 		{
-			AddGlobalsToTaskFile(tasks, mapAttrib);
-			tasks.SetAvailableAttributes(mapAttrib);
+			AddGlobalsToTaskFile(tasks, mapAttribIDs);
+			tasks.SetAvailableAttributes(mapAttribIDs);
 			
 			return TRUE;
 		}
@@ -1281,7 +1281,7 @@ BOOL CFilteredToDoCtrl::GetAllTasksForExtensionViewUpdate(const CTDCAttributeMap
 	}
 
 	// else
-	return CTabbedToDoCtrl::GetAllTasksForExtensionViewUpdate(mapAttrib, tasks);
+	return CTabbedToDoCtrl::GetAllTasksForExtensionViewUpdate(mapAttribIDs, tasks);
 }
 
 void CFilteredToDoCtrl::SetColumnFieldVisibility(const TDCCOLEDITFILTERVISIBILITY& vis)

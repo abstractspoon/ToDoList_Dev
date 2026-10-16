@@ -1282,10 +1282,10 @@ int CTabbedToDoCtrl::GetTasks(CTaskFile& tasks, FTC_VIEW nView, const TDCGETTASK
 	return 0;
 }
 
-BOOL CTabbedToDoCtrl::GetAllTasksForExtensionViewUpdate(const CTDCAttributeMap& mapAttrib, CTaskFile& tasks) const
+BOOL CTabbedToDoCtrl::GetAllTasksForExtensionViewUpdate(const CTDCAttributeMap& mapAttribIDs, CTaskFile& tasks) const
 {
 	TDCGETTASKS filter;
-	filter.mapAttribs.Copy(mapAttrib);
+	filter.mapAttribs.Copy(mapAttribIDs);
 
 	GetTasks(tasks, FTCV_TASKTREE, filter);
 
@@ -1350,7 +1350,7 @@ HTASKITEM CTabbedToDoCtrl::AddTreeItemToTaskFile(HTREEITEM hti, CTaskFile& tasks
 }
 
 
-int CTabbedToDoCtrl::GetSelectedTasksForExtensionViewUpdate(const CTDCAttributeMap& mapAttrib, 
+int CTabbedToDoCtrl::GetSelectedTasksForExtensionViewUpdate(const CTDCAttributeMap& mapAttribIDs, 
 															DWORD dwFlags, CTaskFile& tasks) const
 {
 	TDCGETTASKS filter;
@@ -1360,15 +1360,15 @@ int CTabbedToDoCtrl::GetSelectedTasksForExtensionViewUpdate(const CTDCAttributeM
 	GetAllExtensionViewsWantedAttributes(mapAllAttribIDs);
 
 	// Special cases
-	if (mapAttrib.HasAttribOrAll(TDCA_NEWTASK))
+	if (mapAttribIDs.HasAttribOrAll(TDCA_NEWTASK))
 	{
-		ASSERT(mapAttrib.HasOnly(TDCA_NEWTASK) || mapAttrib.HasOnly(TDCA_ALL));
+		ASSERT(mapAttribIDs.HasOnly(TDCA_NEWTASK) || mapAttribIDs.HasOnly(TDCA_ALL));
 
 		filter.mapAttribs.Copy(mapAllAttribIDs);
 	}
 	else
 	{
-		VERIFY(mapAttrib.GetIntersection(mapAllAttribIDs, filter.mapAttribs));
+		VERIFY(mapAttribIDs.GetIntersection(mapAllAttribIDs, filter.mapAttribs));
 	}
 
 	// Note: GetSelectedTask can legitimately return no tasks
@@ -1379,10 +1379,10 @@ int CTabbedToDoCtrl::GetSelectedTasksForExtensionViewUpdate(const CTDCAttributeM
 		PrepareTaskfileForTasks(tasks, filter);
 	}
 
-	if (mapAttrib.IsEmpty() || mapAttrib.Has(TDCA_NEWTASK))
+	if (mapAttribIDs.IsEmpty() || mapAttribIDs.Has(TDCA_NEWTASK))
 		AddGlobalsToTaskFile(tasks, TDCA_ALL);
 	else
-		AddGlobalsToTaskFile(tasks, mapAttrib);
+		AddGlobalsToTaskFile(tasks, mapAttribIDs);
 
 	return tasks.GetTaskCount();
 }
@@ -2319,9 +2319,7 @@ LRESULT CTabbedToDoCtrl::OnUIExtModifySelectedTask(WPARAM wParam, LPARAM lParam)
 		// to notify everyone that there have been changes
 		if (aModTaskIDs.GetSize())
 		{
-			ASSERT(mapModAttribs.GetCount());
-
-			SetModified(mapModAttribs, aModTaskIDs, TRUE);
+			SetModified(TDCNOTIFYMOD(mapModAttribs, aModTaskIDs));
 			UpdateControls(FALSE);
 		}
 		else
@@ -3638,23 +3636,20 @@ void CTabbedToDoCtrl::SetListViewNeedFontUpdate(BOOL bUpdate)
 		pVData->bNeedFontUpdate = bUpdate;
 }
 
-void CTabbedToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const CDWordArray& aModTaskIDs, BOOL bAllowResort)
+void CTabbedToDoCtrl::SetModified(const TDCNOTIFYMOD& mod, BOOL bNewSingleTask, BOOL bNewTaskTitleEdit, BOOL bAllowResort)
 {
-	CToDoCtrl::SetModified(mapAttribIDs, aModTaskIDs, (bAllowResort && InTreeView()));
+	CToDoCtrl::SetModified(mod, bNewSingleTask, bNewTaskTitleEdit, (bAllowResort && InTreeView()));
 
 	// For new tasks we want to do as little processing as possible 
 	// so as not to delay the appearance of the title edit field.
 	// So, we don't update 'other' views until we receive a successful 
 	// title edit notification unless they are the active view
-	BOOL bNewSingleTask = IsNewTaskMod(mapAttribIDs, aModTaskIDs);
-	BOOL bNewTaskTitleEdit = IsNewTaskTitleEditMod(mapAttribIDs, aModTaskIDs);
-
-	if (bNewTaskTitleEdit || mapAttribIDs.Has(TDCA_PASTE))
+	if (bNewTaskTitleEdit || mod.mapAttribIDs.Has(TDCA_PASTE))
 		m_taskList.SetLargestTaskID(m_dwNextUniqueID);
 
 	// For custom attributes we always update the extensions
 	// with ALL custom attribute values
-	CTDCAttributeMap mapExtAttribIDs(mapAttribIDs);
+	CTDCAttributeMap mapExtAttribIDs(mod.mapAttribIDs);
 	PrepareAttributesForExtensionViewUpdate(mapExtAttribIDs);
 
 	switch (GetActiveTaskView())
@@ -3663,31 +3658,33 @@ void CTabbedToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const CD
 	case FTCV_UNSET:
 		if (bNewTaskTitleEdit)
 		{
-			UpdateListView(TDCA_NEWTASK, aModTaskIDs, FALSE);
-			UpdateExtensionViews(TDCA_NEWTASK, aModTaskIDs);
+			UpdateListView(TDCNOTIFYMOD(TDCA_NEWTASK, mod.aTaskIDs), FALSE);
+			UpdateExtensionViews(TDCNOTIFYMOD(TDCA_NEWTASK, mod.aTaskIDs));
 		}
 		else if (!bNewSingleTask)
 		{
-			UpdateListView(mapAttribIDs, aModTaskIDs, FALSE);
-			UpdateExtensionViews(mapExtAttribIDs, aModTaskIDs);
+			UpdateListView(mod, FALSE);
+			UpdateExtensionViews(TDCNOTIFYMOD(mapExtAttribIDs, mod.aTaskIDs));
 		}
 		break;
 
 	case FTCV_TASKLIST:
-		UpdateListView(mapAttribIDs, aModTaskIDs, bAllowResort);
+		{
+			UpdateListView(mod, bAllowResort);
 
-		if (bNewTaskTitleEdit)
-		{
-			UpdateExtensionViews(TDCA_NEWTASK, aModTaskIDs);
-		}
-		else if (!bNewSingleTask)
-		{
-			UpdateExtensionViews(mapExtAttribIDs, aModTaskIDs);
-		}
-		else
-		{
-			// Ensure new task is selected for label editing
-			SelectTask(aModTaskIDs[0], FALSE);
+			if (bNewTaskTitleEdit)
+			{
+				UpdateExtensionViews(TDCNOTIFYMOD(TDCA_NEWTASK, mod.aTaskIDs));
+			}
+			else if (!bNewSingleTask)
+			{
+				UpdateExtensionViews(TDCNOTIFYMOD(mapExtAttribIDs, mod.aTaskIDs));
+			}
+			else
+			{
+				// Ensure new task is selected for label editing
+				SelectTask(mod.aTaskIDs[0], FALSE);
+			}
 		}
 		break;
 
@@ -3707,28 +3704,30 @@ void CTabbedToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const CD
 	case FTCV_UIEXTENSION14:
 	case FTCV_UIEXTENSION15:
 	case FTCV_UIEXTENSION16:
-		UpdateExtensionViews(mapExtAttribIDs, aModTaskIDs);
+		{
+			UpdateExtensionViews(TDCNOTIFYMOD(mapExtAttribIDs, mod.aTaskIDs));
 
-		if (bNewTaskTitleEdit)
-		{
-			UpdateListView(TDCA_NEWTASK, aModTaskIDs, FALSE);
-		}
-		else if (!bNewSingleTask)
-		{
-			UpdateListView(mapAttribIDs, aModTaskIDs, FALSE);
-		}
-		else
-		{
-			// Ensure new task is selected for label editing
-			SelectTask(aModTaskIDs[0], FALSE);
+			if (bNewTaskTitleEdit)
+			{
+				UpdateListView(TDCNOTIFYMOD(TDCA_NEWTASK, mod.aTaskIDs), FALSE);
+			}
+			else if (!bNewSingleTask)
+			{
+				UpdateListView(mod, FALSE);
+			}
+			else
+			{
+				// Ensure new task is selected for label editing
+				SelectTask(mod.aTaskIDs[0], FALSE);
+			}
 		}
 		break;
 	}
 
-	UpdateSortStates(mapAttribIDs, bAllowResort);
+	UpdateSortStates(mod.mapAttribIDs, bAllowResort);
 }
 
-void CTabbedToDoCtrl::UpdateListView(const CTDCAttributeMap& mapAttribIDs, const CDWordArray& aModTaskIDs, BOOL bAllowResort)
+void CTabbedToDoCtrl::UpdateListView(const TDCNOTIFYMOD& mod, BOOL bAllowResort)
 {
 	// Don't do anything if we are not active and we are waiting
 	// for a full task update
@@ -3738,14 +3737,14 @@ void CTabbedToDoCtrl::UpdateListView(const CTDCAttributeMap& mapAttribIDs, const
 	if (!bInListView && pVData->bNeedFullTaskUpdate)
 		return;
 
-	if (mapAttribIDs.Has(TDCA_NEWTASK) || 
-		mapAttribIDs.Has(TDCA_PASTE))
+	if (mod.mapAttribIDs.Has(TDCA_NEWTASK) || 
+		mod.mapAttribIDs.Has(TDCA_PASTE))
 	{
 		m_taskList.SetLargestTaskID(m_dwNextUniqueID);
 	}
 
-	if (mapAttribIDs.Has(TDCA_DELETE) ||
-		mapAttribIDs.Has(TDCA_ARCHIVE))
+	if (mod.mapAttribIDs.Has(TDCA_DELETE) ||
+		mod.mapAttribIDs.Has(TDCA_ARCHIVE))
 	{
 		// Deletion operations are fairly quick so we do those 
 		// even if the List View is not active
@@ -3763,9 +3762,9 @@ void CTabbedToDoCtrl::UpdateListView(const CTDCAttributeMap& mapAttribIDs, const
 			m_taskList.DeleteAll();
 		}
 	}
-	else if (mapAttribIDs.Has(TDCA_NEWTASK) && aModTaskIDs.GetSize())
+	else if (mod.mapAttribIDs.Has(TDCA_NEWTASK) && mod.aTaskIDs.GetSize())
 	{
-		DWORD dwTaskID = aModTaskIDs[0];
+		DWORD dwTaskID = mod.aTaskIDs[0];
 		ASSERT(dwTaskID);
 
 		int nPos = m_taskList.GetSelectedItem();
@@ -3781,9 +3780,9 @@ void CTabbedToDoCtrl::UpdateListView(const CTDCAttributeMap& mapAttribIDs, const
 				SyncListSelectionToTree(TRUE);
 		}
 	}
-	else if (mapAttribIDs.Has(TDCA_NEWTASK) ||
-			 mapAttribIDs.Has(TDCA_UNDO) ||
-			 mapAttribIDs.Has(TDCA_PASTE))
+	else if (mod.mapAttribIDs.Has(TDCA_NEWTASK) ||
+			 mod.mapAttribIDs.Has(TDCA_UNDO) ||
+			 mod.mapAttribIDs.Has(TDCA_PASTE))
 	{
 		if (bInListView)
 		{
@@ -3795,7 +3794,7 @@ void CTabbedToDoCtrl::UpdateListView(const CTDCAttributeMap& mapAttribIDs, const
 			pVData->bNeedFullTaskUpdate = TRUE;
 		}
 	}
-	else if (mapAttribIDs.Has(TDCA_POSITION_DIFFERENTPARENT) && (m_dwListOptions != 0))
+	else if (mod.mapAttribIDs.Has(TDCA_POSITION_DIFFERENTPARENT) && (m_dwListOptions != 0))
 	{
 		ASSERT (!bInListView);
 
@@ -3808,7 +3807,7 @@ void CTabbedToDoCtrl::UpdateListView(const CTDCAttributeMap& mapAttribIDs, const
 	}
 
 	if (bInListView || !pVData->bNeedFullTaskUpdate)
-		m_taskList.SetModified(mapAttribIDs, (bInListView && bAllowResort));
+		m_taskList.SetModified(mod.mapAttribIDs, (bInListView && bAllowResort));
 }
 
 int CTabbedToDoCtrl::PopulateExtensionViewAttributes(const IUIExtensionWindow* pExtWnd, TDCEXTVIEWDATA* pData)
@@ -3872,63 +3871,63 @@ int CTabbedToDoCtrl::GetAllExtensionViewsWantedAttributes(CTDCAttributeMap& mapA
 	return mapAttribIDs.GetCount();
 }
 
-void CTabbedToDoCtrl::UpdateExtensionViews(const CTDCAttributeMap& mapAttribIDs, const CDWordArray& aModTaskIDs)
+void CTabbedToDoCtrl::UpdateExtensionViews(const TDCNOTIFYMOD& mod)
 {
-	if (!HasAnyExtensionViews() || mapAttribIDs.Has(TDCA_NONE))
+	if (!HasAnyExtensionViews() || mod.mapAttribIDs.Has(TDCA_NONE))
 		return;
 
 	FTC_VIEW nCurView = GetActiveTaskView();
 
-	if (mapAttribIDs.Has(TDCA_NEWTASK))
+	if (mod.mapAttribIDs.Has(TDCA_NEWTASK))
 	{
 		// If only a single task was created then treat it like an edit
-		if (aModTaskIDs.GetSize() == 1)
+		if (mod.aTaskIDs.GetSize() == 1)
 		{
-			UpdateExtensionViewsSelection(mapAttribIDs);
+			UpdateExtensionViewsSelection(mod);
 
 			// Make sure any new dependencies and date updates 
 			// get passed on too
-			if (m_data.TaskHasDependents(aModTaskIDs[0]))
+			if (m_data.TaskHasDependents(mod.aTaskIDs[0]))
 			{
 				CTDCAttributeMap mapDepAttribIDs;
 				m_taskTree.GetAttributesAffectedByMod(TDCA_DEPENDENCY, mapDepAttribIDs);
 
-				UpdateExtensionViewsSelection(mapDepAttribIDs);
+				UpdateExtensionViewsSelection(TDCNOTIFYMOD(mapDepAttribIDs, mod.aTaskIDs));
 			}
 		}
 		else
 		{
-			UpdateExtensionViewsTasks(mapAttribIDs);
+			UpdateExtensionViewsTasks(mod);
 		}
 	}
-	else if (mapAttribIDs.Has(TDCA_DELETE) ||
-			 mapAttribIDs.Has(TDCA_UNDO) ||
-			 mapAttribIDs.Has(TDCA_PASTE) ||
-			 mapAttribIDs.Has(TDCA_MERGE) ||
-			 mapAttribIDs.Has(TDCA_ARCHIVE))
+	else if (mod.mapAttribIDs.Has(TDCA_DELETE) ||
+			 mod.mapAttribIDs.Has(TDCA_UNDO) ||
+			 mod.mapAttribIDs.Has(TDCA_PASTE) ||
+			 mod.mapAttribIDs.Has(TDCA_MERGE) ||
+			 mod.mapAttribIDs.Has(TDCA_ARCHIVE))
 	{
 		// Entire refresh of the current view and mark the others as needing updates
-		UpdateExtensionViewsTasks(mapAttribIDs);
+		UpdateExtensionViewsTasks(mod);
 	}
-	else if (mapAttribIDs.Has(TDCA_POSITION) ||
-			 mapAttribIDs.Has(TDCA_POSITION_SAMEPARENT) ||
-			 mapAttribIDs.Has(TDCA_POSITION_DIFFERENTPARENT))
+	else if (mod.mapAttribIDs.Has(TDCA_POSITION) ||
+			 mod.mapAttribIDs.Has(TDCA_POSITION_SAMEPARENT) ||
+			 mod.mapAttribIDs.Has(TDCA_POSITION_DIFFERENTPARENT))
 	{
-		if (!mapAttribIDs.HasOnly(m_nExtModifyingAttrib))
+		if (!mod.mapAttribIDs.HasOnly(m_nExtModifyingAttrib))
 		{
-			UpdateExtensionViewsTasks(mapAttribIDs);
+			UpdateExtensionViewsTasks(mod);
 		}
 	}
-	else if (mapAttribIDs.Has(TDCA_PROJECTNAME))
+	else if (mod.mapAttribIDs.Has(TDCA_PROJECTNAME))
 	{
 		UpdateExtensionViewsProjectName();
 	}
-	else if (mapAttribIDs.Has(TDCA_ENCRYPT) || 
-			 mapAttribIDs.Has(TDCA_METADATA))
+	else if (mod.mapAttribIDs.Has(TDCA_ENCRYPT) ||
+			 mod.mapAttribIDs.Has(TDCA_METADATA))
 	{
 		// do nothing
 	}
-	else if (mapAttribIDs.HasOnly(TDCA_ALL))
+	else if (mod.mapAttribIDs.HasOnly(TDCA_ALL))
 	{
 		// If this is an UNDO then our base class will have pre-selected
 		// the previously selected tasks (ie. aModTaskIDs) BUT if our current
@@ -3941,13 +3940,13 @@ void CTabbedToDoCtrl::UpdateExtensionViews(const CTDCAttributeMap& mapAttribIDs,
 		m_taskTree.GetSelectedTaskIDs(aSelTaskIDs, TRUE);
 
 		// Does it match the modified tasks
-		BOOL bFixupSelection = !Misc::MatchAll(aModTaskIDs, aSelTaskIDs);
+		BOOL bFixupSelection = !Misc::MatchAll(mod.aTaskIDs, aSelTaskIDs);
 
 		if (bFixupSelection)
-			m_taskTree.SelectTasks(aModTaskIDs);
+			m_taskTree.SelectTasks(mod.aTaskIDs);
 
 		// Do the update
-		UpdateExtensionViewsSelection(mapAttribIDs);
+		UpdateExtensionViewsSelection(mod);
 
 		// restore the previous selection if required
 		if (bFixupSelection)
@@ -3955,7 +3954,7 @@ void CTabbedToDoCtrl::UpdateExtensionViews(const CTDCAttributeMap& mapAttribIDs,
 	}
 	else // all else -> Just selected tasks
 	{
-		UpdateExtensionViewsSelection(mapAttribIDs);
+		UpdateExtensionViewsSelection(mod);
 	}
 }
 
@@ -4025,23 +4024,23 @@ void CTabbedToDoCtrl::UpdateExtensionViewsProjectName()
 	}
 }
 
-void CTabbedToDoCtrl::UpdateExtensionViewsTasks(const CTDCAttributeMap& mapAttribIDs)
+void CTabbedToDoCtrl::UpdateExtensionViewsTasks(const TDCNOTIFYMOD& mod)
 {
 	// Sanity checks
 	ASSERT(HasAnyExtensionViews());
 
-	ASSERT(mapAttribIDs.HasOnly(TDCA_DELETE) ||
-		   mapAttribIDs.HasOnly(TDCA_UNDO) ||
-		   mapAttribIDs.HasOnly(TDCA_PASTE) ||
-		   mapAttribIDs.HasOnly(TDCA_NEWTASK) ||
-		   mapAttribIDs.HasOnly(TDCA_MERGE) ||
-		   mapAttribIDs.HasOnly(TDCA_ARCHIVE) ||
-		   mapAttribIDs.HasOnly(TDCA_CUSTOMATTRIB_ALL) ||
-		   mapAttribIDs.HasOnly(TDCA_PROJECTNAME) ||
-		   mapAttribIDs.HasOnly(TDCA_ENCRYPT) ||
-		   mapAttribIDs.HasOnly(TDCA_POSITION) ||
-		   mapAttribIDs.HasOnly(TDCA_POSITION_SAMEPARENT) ||
-		   mapAttribIDs.HasOnly(TDCA_POSITION_DIFFERENTPARENT));
+	ASSERT(mod.mapAttribIDs.HasOnly(TDCA_DELETE) ||
+		   mod.mapAttribIDs.HasOnly(TDCA_UNDO) ||
+		   mod.mapAttribIDs.HasOnly(TDCA_PASTE) ||
+		   mod.mapAttribIDs.HasOnly(TDCA_NEWTASK) ||
+		   mod.mapAttribIDs.HasOnly(TDCA_MERGE) ||
+		   mod.mapAttribIDs.HasOnly(TDCA_ARCHIVE) ||
+		   mod.mapAttribIDs.HasOnly(TDCA_CUSTOMATTRIB_ALL) ||
+		   mod.mapAttribIDs.HasOnly(TDCA_PROJECTNAME) ||
+		   mod.mapAttribIDs.HasOnly(TDCA_ENCRYPT) ||
+		   mod.mapAttribIDs.HasOnly(TDCA_POSITION) ||
+		   mod.mapAttribIDs.HasOnly(TDCA_POSITION_SAMEPARENT) ||
+		   mod.mapAttribIDs.HasOnly(TDCA_POSITION_DIFFERENTPARENT));
 
 	FTC_VIEW nView = GetActiveTaskView();
 
@@ -4052,7 +4051,7 @@ void CTabbedToDoCtrl::UpdateExtensionViewsTasks(const CTDCAttributeMap& mapAttri
 
 		if (pVData && pExtWnd)
 		{
-			IUI_UPDATETYPE nUpdate = TDC::MapAttributesToIUIUpdateType(mapAttribIDs);
+			IUI_UPDATETYPE nUpdate = TDC::MapAttributesToIUIUpdateType(mod.mapAttribIDs);
 
 			CTaskFile tasks;
 			BOOL bUpdateView = GetAllTasksForExtensionViewUpdate(pVData->mapWantedAttrib, tasks);
@@ -4060,7 +4059,9 @@ void CTabbedToDoCtrl::UpdateExtensionViewsTasks(const CTDCAttributeMap& mapAttri
 			// Special case: we've just deleted the last task or
 			// just undone the first new task
 			if (!bUpdateView)
-				bUpdateView = (!m_taskTree.GetItemCount() && (mapAttribIDs.Has(TDCA_DELETE) || mapAttribIDs.Has(TDCA_UNDO)));
+			{
+				bUpdateView = (!m_taskTree.GetItemCount() && (mod.mapAttribIDs.Has(TDCA_DELETE) || mod.mapAttribIDs.Has(TDCA_UNDO)));
+			}
 
 			if (bUpdateView)
 			{
@@ -4074,7 +4075,7 @@ void CTabbedToDoCtrl::UpdateExtensionViewsTasks(const CTDCAttributeMap& mapAttri
 				// The only reason we DON't resync the selection is if we've just deleted
 				// a task, resulting in no selection, but we know that another task selection
 				// is pending because there are still tasks in the tree
-				if (mapAttribIDs.Has(TDCA_DELETE) && !GetSelectedTaskID() && m_taskTree.GetItemCount())
+				if (mod.mapAttribIDs.Has(TDCA_DELETE) && !GetSelectedTaskID() && m_taskTree.GetItemCount())
 				{
 					// do nothing
 				}
@@ -4092,21 +4093,21 @@ void CTabbedToDoCtrl::UpdateExtensionViewsTasks(const CTDCAttributeMap& mapAttri
 	SetExtensionsNeedTaskUpdate(TRUE, nView);
 }
 
-void CTabbedToDoCtrl::UpdateExtensionViewsSelection(const CTDCAttributeMap& mapAttribIDs)
+void CTabbedToDoCtrl::UpdateExtensionViewsSelection(const TDCNOTIFYMOD& mod)
 {
 	// Sanity checks
 	ASSERT(HasAnyExtensionViews());
 
-	ASSERT(!mapAttribIDs.Has(TDCA_DELETE) &&
-			!mapAttribIDs.Has(TDCA_UNDO) &&
-			!mapAttribIDs.Has(TDCA_PASTE) &&
-			!mapAttribIDs.Has(TDCA_MERGE) &&
-			!mapAttribIDs.Has(TDCA_ARCHIVE) &&
-			!mapAttribIDs.Has(TDCA_PROJECTNAME) &&
-			!mapAttribIDs.Has(TDCA_ENCRYPT) &&
-			!mapAttribIDs.Has(TDCA_POSITION) &&
-			!mapAttribIDs.Has(TDCA_POSITION_SAMEPARENT) &&
-			!mapAttribIDs.Has(TDCA_POSITION_DIFFERENTPARENT));
+	ASSERT(!mod.mapAttribIDs.Has(TDCA_DELETE) &&
+			!mod.mapAttribIDs.Has(TDCA_UNDO) &&
+			!mod.mapAttribIDs.Has(TDCA_PASTE) &&
+			!mod.mapAttribIDs.Has(TDCA_MERGE) &&
+			!mod.mapAttribIDs.Has(TDCA_ARCHIVE) &&
+			!mod.mapAttribIDs.Has(TDCA_PROJECTNAME) &&
+			!mod.mapAttribIDs.Has(TDCA_ENCRYPT) &&
+			!mod.mapAttribIDs.Has(TDCA_POSITION) &&
+			!mod.mapAttribIDs.Has(TDCA_POSITION_SAMEPARENT) &&
+			!mod.mapAttribIDs.Has(TDCA_POSITION_DIFFERENTPARENT));
 
 	// If all extension views require a full task update
 	// then we've nothing to do
@@ -4120,7 +4121,7 @@ void CTabbedToDoCtrl::UpdateExtensionViewsSelection(const CTDCAttributeMap& mapA
 	DWORD dwFlags = TDCGSTF_RESOLVEREFERENCES;
 	IUI_UPDATETYPE nUpdate = IUI_EDIT; // default
 	
-	if (mapAttribIDs.Has(TDCA_NEWTASK))
+	if (mod.mapAttribIDs.Has(TDCA_NEWTASK))
 	{
 		// Always include parent chain and subtasks
 		dwFlags |= TDCGSTF_ALLPARENTS;
@@ -4132,43 +4133,43 @@ void CTabbedToDoCtrl::UpdateExtensionViewsSelection(const CTDCAttributeMap& mapA
 	{
 		// We don't need to proceed if no extension wants 
 		// any of the changes
-		if (!AnyExtensionViewWantsChanges(mapAttribIDs))
+		if (!AnyExtensionViewWantsChanges(mod.mapAttribIDs))
 			return;
 
 		// Include parents if this is an undo 
 		// OR there is a colour change
 		// OR a calculated attribute change
- 		ASSERT(!mapAttribIDs.Has(TDCA_ALL) || mapAttribIDs.HasOnly(TDCA_ALL));
+ 		ASSERT(!mod.mapAttribIDs.Has(TDCA_ALL) || mod.mapAttribIDs.HasOnly(TDCA_ALL));
 
-		if (mapAttribIDs.HasAttribOrAll(TDCA_COLOR) || 
-			ModAffectsAggregatedAttributes(mapAttribIDs))
+		if (mod.mapAttribIDs.HasAttribOrAll(TDCA_COLOR) ||
+			ModAffectsAggregatedAttributes(mod.mapAttribIDs))
 		{
 			dwFlags |= TDCGSTF_ALLPARENTS;
 		}
 
 		// DONT include subtasks UNLESS the completion date
 		// has changed OR this is an inherited attribute
-		if (!mapAttribIDs.HasAttribOrAll(TDCA_DONEDATE) && 
-			!WantUpdateInheritedAttibutes(mapAttribIDs))
+		if (!mod.mapAttribIDs.HasAttribOrAll(TDCA_DONEDATE) &&
+			!WantUpdateInheritedAttibutes(mod.mapAttribIDs))
 		{
 			dwFlags |= TDCGSTF_NOTSUBTASKS;
 		}
 
 		// Include references to selected tasks if a 
 		// 'Reference-specific' colour is not set
-		if (mapAttribIDs.HasAttribOrAll(TDCA_COLOR) && 
+		if (mod.mapAttribIDs.HasAttribOrAll(TDCA_COLOR) &&
 			!m_taskTree.HasReferenceTaskColor())
 		{
 			dwFlags |= TDCGSTF_APPENDREFERENCES;
 		}
 	
-		if (mapAttribIDs.HasAttribOrAll(TDCA_DEPENDENCY))
+		if (mod.mapAttribIDs.HasAttribOrAll(TDCA_DEPENDENCY))
 			dwFlags |= TDCGSTF_LOCALDEPENDENTS;
 	}
 
 	// Get the tasks for the update
 	CTaskFile tasks;
-	GetSelectedTasksForExtensionViewUpdate(mapAttribIDs, dwFlags, tasks);
+	GetSelectedTasksForExtensionViewUpdate(mod.mapAttribIDs, dwFlags, tasks);
 	
 	// refresh all extensions 
 	int nExt = m_aExtViews.GetSize(), nNumUpdated = 0;
@@ -4179,7 +4180,7 @@ void CTabbedToDoCtrl::UpdateExtensionViewsSelection(const CTDCAttributeMap& mapA
 		TDCEXTVIEWDATA* pVData = GetViewData(nExtView);
 		ASSERT(pVData);
 
-		if (pVData && pVData->WantAnyAttribute(mapAttribIDs))
+		if (pVData && pVData->WantAnyAttribute(mod.mapAttribIDs))
 		{
 			IUIExtensionWindow* pExtWnd = m_aExtViews[nExt];
 
@@ -4203,7 +4204,7 @@ void CTabbedToDoCtrl::UpdateExtensionViewsSelection(const CTDCAttributeMap& mapA
 #ifdef _DEBUG
 	CString sAttrib;
 
-	switch (mapAttribIDs.GetCount())
+	switch (mod.mapAttribIDs.GetCount())
 	{
 	case 0:
 		ASSERT(0);
@@ -4211,8 +4212,8 @@ void CTabbedToDoCtrl::UpdateExtensionViewsSelection(const CTDCAttributeMap& mapA
 
 	case 1:
 		{
-			POSITION pos = mapAttribIDs.GetStartPosition();
-			sAttrib = TDC::GetAttributeLabel(mapAttribIDs.GetNext(pos));
+			POSITION pos = mod.mapAttribIDs.GetStartPosition();
+			sAttrib = TDC::GetAttributeLabel(mod.mapAttribIDs.GetNext(pos));
 		}
 		break;
 
@@ -4290,14 +4291,14 @@ BOOL CTabbedToDoCtrl::ModAffectsAggregatedAttributes(TDC_ATTRIBUTE nAttribID) co
 	return FALSE;
 }
 
-void CTabbedToDoCtrl::AddGlobalsToTaskFile(CTaskFile& tasks, const CTDCAttributeMap& mapAttrib) const
+void CTabbedToDoCtrl::AddGlobalsToTaskFile(CTaskFile& tasks, const CTDCAttributeMap& mapAttribIDs) const
 {
 	TDCAUTOLISTDATA tld;
-	POSITION pos = mapAttrib.GetStartPosition();
+	POSITION pos = mapAttribIDs.GetStartPosition();
 	
 	while (pos)
 	{
-		TDC_ATTRIBUTE nAttribID = mapAttrib.GetNext(pos);
+		TDC_ATTRIBUTE nAttribID = mapAttribIDs.GetNext(pos);
 		GetAutoListData(nAttribID, tld);
 	}
 	
@@ -4305,23 +4306,23 @@ void CTabbedToDoCtrl::AddGlobalsToTaskFile(CTaskFile& tasks, const CTDCAttribute
 		tasks.SetAutoListData(tld);
 }
 
-BOOL CTabbedToDoCtrl::ExtensionViewWantsChanges(int nExt, const CTDCAttributeMap& mapAttrib) const
+BOOL CTabbedToDoCtrl::ExtensionViewWantsChanges(int nExt, const CTDCAttributeMap& mapAttribIDs) const
 {
 	CTDCAttributeMap mapUnused;
 
-	return (GetExtensionViewWantedChanges(nExt, mapAttrib, mapUnused) > 0);
+	return (GetExtensionViewWantedChanges(nExt, mapAttribIDs, mapUnused) > 0);
 }
 
-int CTabbedToDoCtrl::GetExtensionViewWantedChanges(int nExt, const CTDCAttributeMap& mapAttrib, CTDCAttributeMap& mapAttribsWanted) const
+int CTabbedToDoCtrl::GetExtensionViewWantedChanges(int nExt, const CTDCAttributeMap& mapAttribIDs, CTDCAttributeMap& mapAttribsWanted) const
 {
-	ASSERT (!mapAttrib.IsEmpty());
+	ASSERT (!mapAttribIDs.IsEmpty());
 	mapAttribsWanted.RemoveAll();
 
-	POSITION pos = mapAttrib.GetStartPosition();
+	POSITION pos = mapAttribIDs.GetStartPosition();
 	
 	while (pos)
 	{
-		TDC_ATTRIBUTE nAttribID = mapAttrib.GetNext(pos);
+		TDC_ATTRIBUTE nAttribID = mapAttribIDs.GetNext(pos);
 
 		if (ExtensionViewWantsChange(nExt, nAttribID))
 			mapAttribsWanted.Add(nAttribID);
@@ -4425,20 +4426,20 @@ BOOL CTabbedToDoCtrl::AnyExtensionViewWantsChange(TDC_ATTRIBUTE nAttribID) const
 	return FALSE;
 }
 
-BOOL CTabbedToDoCtrl::AnyExtensionViewWantsChanges(const CTDCAttributeMap& mapAttrib) const
+BOOL CTabbedToDoCtrl::AnyExtensionViewWantsChanges(const CTDCAttributeMap& mapAttribIDs) const
 {
 	CTDCAttributeMap mapUnused;
 
-	return (GetExtensionViewsWantedChanges(mapAttrib, mapUnused) > 0);
+	return (GetExtensionViewsWantedChanges(mapAttribIDs, mapUnused) > 0);
 }
 
-int CTabbedToDoCtrl::GetExtensionViewsWantedChanges(const CTDCAttributeMap& mapAttrib, CTDCAttributeMap& mapAttribsWanted) const
+int CTabbedToDoCtrl::GetExtensionViewsWantedChanges(const CTDCAttributeMap& mapAttribIDs, CTDCAttributeMap& mapAttribsWanted) const
 {
-	ASSERT (!mapAttrib.IsEmpty());
+	ASSERT (!mapAttribIDs.IsEmpty());
 	mapAttribsWanted.RemoveAll();
 
 	// Mandate lock state changes
-	if (mapAttrib.Has(TDCA_LOCK))
+	if (mapAttribIDs.Has(TDCA_LOCK))
 	{
 		mapAttribsWanted.Add(TDCA_LOCK);
 		return TRUE;
@@ -4449,7 +4450,7 @@ int CTabbedToDoCtrl::GetExtensionViewsWantedChanges(const CTDCAttributeMap& mapA
 
 	while (nExt--)
 	{
-		if (GetExtensionViewWantedChanges(nExt, mapAttrib, mapExtAttribsWanted))
+		if (GetExtensionViewWantedChanges(nExt, mapAttribIDs, mapExtAttribsWanted))
 			mapAttribsWanted.Append(mapExtAttribsWanted);
 	}
 

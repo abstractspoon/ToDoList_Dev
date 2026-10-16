@@ -1837,12 +1837,11 @@ BOOL CToDoCtrl::OffsetSelectedTaskDates(const CTDCDateSet& mapDates, CStringSet&
 
 	IMPLEMENT_DATA_UNDO_EDIT(m_data);
 
+	TDCNOTIFYMOD mod;
+
 	// remove duplicate subtasks if we're going to be processing subtasks anyway
 	CHTIList htiSel;
 	TSH().CopySelection(htiSel, offset.bAndSubtasks);
-
-	CDWordArray aModTaskIDs;
-	CTDCAttributeMap mapAttribs;
 
 	// Default date attributes
 	POSITION pos = mapDates.GetStartPosition();
@@ -1864,9 +1863,9 @@ BOOL CToDoCtrl::OffsetSelectedTaskDates(const CTDCDateSet& mapDates, CStringSet&
 			if (nRes == SET_CHANGE)
 			{
 				TDC_ATTRIBUTE nAttribID = TDC::MapDateToAttribute(nDate);
-				m_taskTree.GetAttributesAffectedByMod(nAttribID, mapAttribs);
+				m_taskTree.GetAttributesAffectedByMod(nAttribID, mod.mapAttribIDs);
 
-				aModTaskIDs.Append(aSelModTaskIDs);
+				mod.aTaskIDs.Append(aSelModTaskIDs);
 			}
 		}
 	}
@@ -1890,18 +1889,18 @@ BOOL CToDoCtrl::OffsetSelectedTaskDates(const CTDCDateSet& mapDates, CStringSet&
 													   aSelModTaskIDs);
 			if (nRes == SET_CHANGE)
 			{
-				mapAttribs.Add(TDCA_CUSTOMATTRIB);
-				aModTaskIDs.Append(aSelModTaskIDs);
+				mod.mapAttribIDs.Add(TDCA_CUSTOMATTRIB);
+				mod.aTaskIDs.Append(aSelModTaskIDs);
 			}
 		}
 	}
 
-	Misc::RemoveDuplicates(aModTaskIDs);
+	Misc::RemoveDuplicates(mod.aTaskIDs);
 
-	if (!aModTaskIDs.GetSize())
+	if (!mod.aTaskIDs.GetSize())
 		return FALSE;
 
-	SetModified(mapAttribs, aModTaskIDs, TRUE);
+	SetModified(mod);
 	UpdateControls(FALSE); // don't update comments
 
 	return TRUE;
@@ -3927,17 +3926,17 @@ int CToDoCtrl::OnToolHitTest(CPoint point, TOOLINFO * pTI) const
 	}
 	else if (HasStyle(TDCS_SHOWINFOTIPS) && (hitTest.nColumnID == TDCC_CLIENT))
 	{
-		CTDCAttributeMap mapAttrib;
-		TDC::MapColumnsToAttributes(m_visColEdit.GetVisibleColumns(), mapAttrib);
+		CTDCAttributeMap mapAttribIDs;
+		TDC::MapColumnsToAttributes(m_visColEdit.GetVisibleColumns(), mapAttribIDs);
 
 		// Always add path for context
-		mapAttrib.Add(TDCA_PATH);
+		mapAttribIDs.Add(TDCA_PATH);
 
 		if (nMaxState == TDCMS_NORMAL)
-			mapAttrib.Add(TDCA_COMMENTS);
+			mapAttribIDs.Add(TDCA_COMMENTS);
 
 		sTip = m_infoTip.FormatTip(hitTest.dwTaskID,
-								   mapAttrib,
+								   mapAttribIDs,
 								   m_nMaxInfotipCommentsLength,
 								   m_sCompletionStatus);
 	}
@@ -5173,49 +5172,35 @@ BOOL CToDoCtrl::IsPristine() const
 
 void CToDoCtrl::SetModified(TDC_ATTRIBUTE nAttribID, const CDWordArray& aModTaskIDs)
 {
-	CTDCAttributeMap mapAttribIDs;
-	m_taskTree.GetAttributesAffectedByMod(nAttribID, mapAttribIDs);
+	TDCNOTIFYMOD mod(nAttribID, aModTaskIDs);
+	m_taskTree.GetAttributesAffectedByMod(nAttribID, mod.mapAttribIDs);
 	
+	BOOL bNewSingleTask = ((nAttribID == TDCA_NEWTASK) && (aModTaskIDs.GetSize() == 1));
+	BOOL bNewTaskTitleEdit = ((nAttribID == TDCA_TASKNAME) && (aModTaskIDs.GetSize() == 1) && (aModTaskIDs[0] == m_dwLastAddedID));
+
 	// Don't allow sorting during find/replace operation because
 	// it messes up the order of the items	
-	SetModified(mapAttribIDs, aModTaskIDs, !m_findReplace.IsReplacing());
+	BOOL bAllowSort = !m_findReplace.IsReplacing();
+
+	SetModified(mod, bNewSingleTask, bNewTaskTitleEdit, bAllowSort);
 }
 
-BOOL CToDoCtrl::IsNewTaskMod(const CTDCAttributeMap& mapAttribIDs, const CDWordArray& aModTaskIDs) const
+void CToDoCtrl::SetModified(const TDCNOTIFYMOD& mod, BOOL bNewSingleTask, BOOL bNewTaskTitleEdit, BOOL bAllowResort)
 {
-	return (mapAttribIDs.HasOnly(TDCA_NEWTASK) && (aModTaskIDs.GetSize() == 1));
-}
-
-BOOL CToDoCtrl::IsNewTaskTitleEditMod(const CTDCAttributeMap& mapAttribIDs, const CDWordArray& aModTaskIDs) const
-{
-	if (aModTaskIDs.GetSize() != 1)
-		return FALSE;
-
-	if (aModTaskIDs[0] != m_dwLastAddedID)
-		return FALSE;
-
-	return ((mapAttribIDs.GetCount() == 3) &&
-			 mapAttribIDs.Has(TDCA_TASKNAME) &&
-			 mapAttribIDs.Has(TDCA_LASTMODBY) &&
-			 mapAttribIDs.Has(TDCA_LASTMODDATE));
-}
-
-void CToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const CDWordArray& aModTaskIDs, BOOL bAllowResort)
-{
-	ASSERT(aModTaskIDs.GetSize() || 
-		   mapAttribIDs.HasOnly(TDCA_CUSTOMATTRIB_DEFS) ||
-		   mapAttribIDs.HasOnly(TDCA_PASTE) ||
-		   mapAttribIDs.HasOnly(TDCA_PROJECTNAME) || 
-		   mapAttribIDs.HasOnly(TDCA_UNDO) ||
-		   mapAttribIDs.HasOnly(TDCA_POSITION_SAMEPARENT) ||
-		   mapAttribIDs.HasOnly(TDCA_POSITION_DIFFERENTPARENT));
+	ASSERT(mod.aTaskIDs.GetSize() || 
+		   mod.mapAttribIDs.HasOnly(TDCA_CUSTOMATTRIB_DEFS) ||
+		   mod.mapAttribIDs.HasOnly(TDCA_PASTE) ||
+		   mod.mapAttribIDs.HasOnly(TDCA_PROJECTNAME) || 
+		   mod.mapAttribIDs.HasOnly(TDCA_UNDO) ||
+		   mod.mapAttribIDs.HasOnly(TDCA_POSITION_SAMEPARENT) ||
+		   mod.mapAttribIDs.HasOnly(TDCA_POSITION_DIFFERENTPARENT));
 
 	if (IsReadOnly())
 		return;
 	
 	SetModified(TRUE);
 
-	if (mapAttribIDs.Has(TDCA_PASTE))
+	if (mod.mapAttribIDs.Has(TDCA_PASTE))
 	{
 		m_ctrlAttributes.SetAutoListData(TDCA_ALL, m_tldAll);
 		UpdateAutoListData();
@@ -5223,30 +5208,27 @@ void CToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const CDWordAr
 	
 	// For new tasks we want to do as little processing as possible 
 	// so as not to delay the appearance of the title edit field.
-	BOOL bNewTask = IsNewTaskMod(mapAttribIDs, aModTaskIDs);
-	BOOL bNewTaskTitleEdit = IsNewTaskTitleEditMod(mapAttribIDs, aModTaskIDs);
-
-	if (bNewTaskTitleEdit || mapAttribIDs.Has(TDCA_PASTE))
+	if (bNewTaskTitleEdit || mod.mapAttribIDs.Has(TDCA_PASTE))
 		m_taskTree.SetLargestTaskID(m_dwNextUniqueID);
 
-	if (!bNewTask)
-		m_taskTree.SetModified(mapAttribIDs, bAllowResort);
+	if (!bNewSingleTask)
+		m_taskTree.SetModified(mod.mapAttribIDs, bAllowResort);
 
-	TDCNOTIFYMOD mod(mapAttribIDs, aModTaskIDs);
+	// Notify main window
 	GetParent()->SendMessage(WM_TDCN_MODIFY, (WPARAM)GetSafeHwnd(), (LPARAM)&mod);
 
 	// if this was the project name being edited make sure
 	// the focus is set back to the name
-	if (mapAttribIDs.Has(TDCA_PROJECTNAME))
+	if (mod.mapAttribIDs.Has(TDCA_PROJECTNAME))
 	{
 		GetDlgItem(IDC_PROJECTNAME)->SetFocus();
 	}
-	else if (m_ctrlAttributes.IsAnyTaskSelected(aModTaskIDs))
+	else if (m_ctrlAttributes.IsAnyTaskSelected(mod.aTaskIDs))
 	{
-		m_idleTasks.RefreshAttributeValues(mapAttribIDs);
+		m_idleTasks.RefreshAttributeValues(mod.mapAttribIDs);
 	}
 
-	if (mapAttribIDs.Has(TDCA_LOCK))
+	if (mod.mapAttribIDs.Has(TDCA_LOCK))
 		EnableDisableComments();
 }
 
@@ -6432,7 +6414,7 @@ BOOL CToDoCtrl::PasteAttributeColumnValues(TDC_COLUMN nToColID, BOOL bSelectedTa
 	}
 
 	if (aModTaskIDs.GetSize())
-		SetModified(TDC::MapColumnToAttribute(nToColID), aModTaskIDs, TRUE);
+		SetModified(TDCNOTIFYMOD(TDC::MapColumnToAttribute(nToColID), aModTaskIDs));
 
 	return TRUE;
 }

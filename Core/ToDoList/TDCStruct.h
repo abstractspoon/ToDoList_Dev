@@ -147,11 +147,11 @@ struct TDCITEMCOLORS
 
 struct TDCNOTIFYMOD
 {
+	TDCNOTIFYMOD();
 	TDCNOTIFYMOD(TDC_ATTRIBUTE nAttribID);
-	TDCNOTIFYMOD(TDC_ATTRIBUTE nAttribID, const CDWordArray& taskIDs);
 	TDCNOTIFYMOD(const CTDCAttributeMap& attribIDs, const CDWordArray& taskIDs);
 	
-	CTDCAttributeMap mapAttrib;
+	CTDCAttributeMap mapAttribIDs;
 	CDWordArray aTaskIDs;
 };
 
