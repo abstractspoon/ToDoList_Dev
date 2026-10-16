@@ -473,6 +473,8 @@ int CTDLFindResultsListCtrl::AddResult(const SEARCHRESULT& result, const CFilter
 
 BOOL CTDLFindResultsListCtrl::AddHeaderRow(LPCTSTR szText)
 {
+	EnableGroupView();
+
 	return GetGrouping().InsertGroupHeader(-1, ++m_nCurGroupID, szText);
 }
 
