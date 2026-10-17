@@ -59,7 +59,7 @@ CTDLFindTasksDlg::CTDLFindTasksDlg(const CContentMgr& mgrContent)
 	CRuntimeDlg(), 
 	m_bSplitting(FALSE),
 	m_bInitializing(FALSE),
-	m_bAllTasklists(FALSE),
+	m_nSourceTasklists(FTS_ACTIVETASKLIST),
 	m_nDockPos(DMP_UNDOCKED),
 	m_sizeDocked(0, 0), 
 	m_sizeDockedMax(0, 0),
@@ -95,8 +95,9 @@ void CTDLFindTasksDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_TASKLISTOPTIONS, m_cbTasklists);
 	DDX_Control(pDX, IDC_FINDLIST, m_lcFindSetup);
 	DDX_Control(pDX, IDC_RESULTS, m_lcResults);
-	DDX_CBIndex(pDX, IDC_TASKLISTOPTIONS, m_bAllTasklists);
 	DDX_Text(pDX, IDC_RESULTSLABEL, m_sResultsLabel);
+
+	DDX_CBData(pDX, m_cbTasklists, m_nSourceTasklists, FTS_ACTIVETASKLIST);
 }
 
 IMPLEMENT_DYNAMIC(CTDLFindTasksDlg, CRuntimeDlg)
@@ -107,7 +108,7 @@ BEGIN_MESSAGE_MAP(CTDLFindTasksDlg, CRuntimeDlg)
 	ON_BN_CLICKED(IDC_SELECTALL, OnSelectall)
 	ON_CBN_EDITCHANGE(IDC_SEARCHLIST, OnEditchangeSearchlist)
 	ON_CBN_SELCHANGE(IDC_SEARCHLIST, OnSelchangeSearchlist)
-	ON_CBN_SELCHANGE(IDC_TASKLISTOPTIONS, OnSelchangeTasklistoptions)
+	ON_CBN_SELCHANGE(IDC_TASKLISTOPTIONS, OnSelchangeTasklistSource)
 	ON_CBN_SELCHANGE(IDC_INCLUDE, OnSelchangeInclude)
 	ON_COMMAND(ID_DOCKBELOW, OnDockbelow)
 	ON_COMMAND(ID_DOCKLEFT, OnDockleft)
@@ -198,8 +199,9 @@ BOOL CTDLFindTasksDlg::OnInitDialog()
 
 void CTDLFindTasksDlg::BuildOptionCombos()
 {
-	CDialogHelper::AddStringT(m_cbTasklists, IDS_FIND_ACTIVETASKLIST, FALSE);
-	CDialogHelper::AddStringT(m_cbTasklists, IDS_FIND_ALLTASKLISTS, TRUE);
+	CDialogHelper::AddStringT(m_cbTasklists, IDS_FIND_ACTIVETASKLIST, FTS_ACTIVETASKLIST);
+	CDialogHelper::AddStringT(m_cbTasklists, IDS_FIND_ALLTASKLISTS, FTS_ALLTASKLISTS);
+	CDialogHelper::AddStringT(m_cbTasklists, IDS_FIND_LOADEDTASKLISTS, FTS_LOADEDTASKLISTS);
 	
 	CDialogHelper::AddStringT(m_cbInclude, IDS_FIND_INCLUDEDONE, FI_COMPLETED);
 	CDialogHelper::AddStringT(m_cbInclude, IDS_FIND_INCLUDEPARENTS, FI_PARENT);
@@ -461,13 +463,16 @@ void CTDLFindTasksDlg::LoadSettings()
 {
 	CPreferences prefs;
 
-	m_bAllTasklists = prefs.GetProfileInt(_T("FindTasks"), _T("SearchAllTaskLists"), FALSE);
+	// Backwards compatibility
+	BOOL bAllTasklists = prefs.GetProfileInt(_T("FindTasks"), _T("SearchAllTaskLists"), -1);
+
+	if (bAllTasklists == -1)
+		m_nSourceTasklists = prefs.GetProfileEnum(_T("FindTasks"), _T("SourceTaskLists"), FTS_ACTIVETASKLIST);
+	else
+		m_nSourceTasklists = (bAllTasklists ? FTS_ALLTASKLISTS : FTS_ACTIVETASKLIST);
 
 	// update list ctrl
-	if (m_bAllTasklists)
-		m_lcFindSetup.SetCustomAttributes(m_aAllTDCAttribDefs);
-	else
-		m_lcFindSetup.SetCustomAttributes(m_aActiveTDCAttribDefs);
+	OnSelchangeTasklistSource();
 
 	// results column widths
 	CIntArray aWidths;
@@ -587,29 +592,53 @@ BOOL CTDLFindTasksDlg::Show(BOOL bShow)
 	return TRUE;
 }
 
-void CTDLFindTasksDlg::SetCustomAttributes(const CTDCCustomAttribDefinitionArray& aActiveTasklistAttribDefs,
-											const CTDCCustomAttribDefinitionArray& aAllTasklistsAttribDefs)
+void CTDLFindTasksDlg::SetCustomAttributes(const CTDCCustomAttribDefinitionArray& aActiveAttribDefs,
+										   const CTDCCustomAttribDefinitionArray& aAllAttribDefs,
+										   const CTDCCustomAttribDefinitionArray& aLoadedAttribDefs)
 {
-	m_aActiveTDCAttribDefs.Copy(aActiveTasklistAttribDefs); // always
-	m_aAllTDCAttribDefs.Copy(aAllTasklistsAttribDefs); // always
+	m_aActiveAttribDefs.Copy(aActiveAttribDefs);
+	m_aAllAttribDefs.Copy(aAllAttribDefs);
+	m_aLoadedAttribDefs.Copy(aLoadedAttribDefs);
 
 	// update list ctrl
-	if (m_bAllTasklists)
-		m_lcFindSetup.SetCustomAttributes(aAllTasklistsAttribDefs);
-	else
-		m_lcFindSetup.SetCustomAttributes(aActiveTasklistAttribDefs);
+	switch (m_nSourceTasklists)
+	{
+	case FTS_ACTIVETASKLIST:
+		m_lcFindSetup.SetCustomAttributes(aActiveAttribDefs);
+		break;
+
+	case FTS_ALLTASKLISTS:
+		m_lcFindSetup.SetCustomAttributes(aAllAttribDefs);
+		break;
+
+	case FTS_LOADEDTASKLISTS:
+		m_lcFindSetup.SetCustomAttributes(aLoadedAttribDefs);
+		break;
+	}
 }
 
-void CTDLFindTasksDlg::SetAttributeListData(const TDCAUTOLISTDATA& tldActive, const TDCAUTOLISTDATA& tldAll, TDC_ATTRIBUTE nAttribID)
+void CTDLFindTasksDlg::SetAttributeListData(TDC_ATTRIBUTE nAttribID, const TDCAUTOLISTDATA& tldActive, 
+											const TDCAUTOLISTDATA& tldAll, const TDCAUTOLISTDATA& tldLoaded)
 {
 	m_tldActive.Copy(tldActive, nAttribID);
 	m_tldAll.Copy(tldAll, nAttribID);
+	m_tldLoaded.Copy(tldLoaded, nAttribID);
 
 	// update list ctrl
-	if (m_bAllTasklists)
-		m_lcFindSetup.SetAttributeListData(tldAll, nAttribID);
-	else
-		m_lcFindSetup.SetAttributeListData(tldActive, nAttribID);
+	switch (m_nSourceTasklists)
+	{
+	case FTS_ACTIVETASKLIST:
+		m_lcFindSetup.SetAttributeListData(m_tldActive, nAttribID);
+		break;
+
+	case FTS_ALLTASKLISTS:
+		m_lcFindSetup.SetAttributeListData(m_tldAll, nAttribID);
+		break;
+
+	case FTS_LOADEDTASKLISTS:
+		m_lcFindSetup.SetAttributeListData(m_tldLoaded, nAttribID);
+		break;
+	}
 }
 
 void CTDLFindTasksDlg::SetActiveTasklist(const CString& sTasklist, BOOL bWantDefaultIcons)
@@ -688,12 +717,12 @@ void CTDLFindTasksDlg::AddResults(const CFilteredToDoCtrl* pTDC, const CResultAr
 	}
 }
 
-BOOL CTDLFindTasksDlg::GetSearchAllTasklists()
+TDC_FINDTASKSOURCE CTDLFindTasksDlg::GetSourceTasklists()
 {
 	if (!m_bInitializing && GetSafeHwnd())
 		UpdateData();
 	
-	return m_bAllTasklists;
+	return m_nSourceTasklists;
 }
 
 BOOL CTDLFindTasksDlg::GetSearchIncludesCompletedTasks(LPCTSTR szName) const
@@ -767,10 +796,20 @@ int CTDLFindTasksDlg::GetSearchParams(SEARCHPARAMS& params)
 		params.bIgnoreDone = FALSE;
 
 	// associated custom attribute defs
-	if (m_bAllTasklists)
-		params.aAttribDefs.Copy(m_aAllTDCAttribDefs);
-	else
-		params.aAttribDefs.Copy(m_aActiveTDCAttribDefs);
+	switch (m_nSourceTasklists)
+	{
+	case FTS_ACTIVETASKLIST:
+		params.aAttribDefs.Copy(m_aActiveAttribDefs);
+		break;
+
+	case FTS_ALLTASKLISTS:
+		params.aAttribDefs.Copy(m_aAllAttribDefs);
+		break;
+
+	case FTS_LOADEDTASKLISTS:
+		params.aAttribDefs.Copy(m_aLoadedAttribDefs);
+		break;
+	}
 
 	return params.aRules.GetSize();
 }
@@ -781,15 +820,25 @@ int CTDLFindTasksDlg::GetSearchParams(LPCTSTR szName, SEARCHPARAMS& params) cons
 
 	if (LoadSearch(szName, params.aRules, bWantDone, bWantParents, bWantFilteredOut))
 	{
-		// associated custom attribute defs
-		if (m_bAllTasklists)
-			params.aAttribDefs.Copy(m_aAllTDCAttribDefs);
-		else
-			params.aAttribDefs.Copy(m_aActiveTDCAttribDefs);
-
 		params.bIgnoreOverDue = FALSE;
 		params.bIgnoreDone = !bWantDone;
 		params.bIgnoreFilteredOut = !IncludeOptionIsChecked(FI_FILTEREDOUT);
+
+		// associated custom attribute defs
+		switch (m_nSourceTasklists)
+		{
+		case FTS_ACTIVETASKLIST:
+			params.aAttribDefs.Copy(m_aActiveAttribDefs);
+			break;
+
+		case FTS_ALLTASKLISTS:
+			params.aAttribDefs.Copy(m_aAllAttribDefs);
+			break;
+
+		case FTS_LOADEDTASKLISTS:
+			params.aAttribDefs.Copy(m_aLoadedAttribDefs);
+			break;
+		}
 
 		return params.aRules.GetSize();
 	}
@@ -1127,7 +1176,8 @@ void CTDLFindTasksDlg::SaveSettings()
 
 	CPreferences prefs;
 
-	prefs.WriteProfileInt(_T("FindTasks"), _T("SearchAllTaskLists"), m_bAllTasklists);
+	prefs.DeleteProfileEntry(_T("FindTasks"), _T("SearchAllTaskLists"));
+	prefs.WriteProfileInt(_T("FindTasks"), _T("SourceTaskLists"), m_nSourceTasklists);
 
 	// include settings
 	prefs.WriteProfileInt(_T("FindTasks"), _T("IncludeDoneTasks"), IncludeOptionIsChecked(FI_COMPLETED));
@@ -1523,7 +1573,7 @@ BOOL CTDLFindTasksDlg::LoadSearch(LPCTSTR szName, CSearchParamArray& aRules, BOO
 		CString sRule = Misc::MakeKey(_T("\\Rule%d"), nRule, sKey);
 		
 		// try active tasklist custom attributes
-		if (!CTDCSearchParamHelper::LoadRule(prefs, sRule, m_aActiveTDCAttribDefs, rule))
+		if (!CTDCSearchParamHelper::LoadRule(prefs, sRule, m_aActiveAttribDefs, rule))
 		{
 			// if that failed and it was not a custom ID then 
 			// treat it as a dodgy rule
@@ -1533,7 +1583,7 @@ BOOL CTDLFindTasksDlg::LoadSearch(LPCTSTR szName, CSearchParamArray& aRules, BOO
 			}
 
 			// retry with all available custom attributes
-			CTDCSearchParamHelper::LoadRule(prefs, sRule, m_aAllTDCAttribDefs, rule);
+			CTDCSearchParamHelper::LoadRule(prefs, sRule, m_aAllAttribDefs, rule);
 		}
 		
 		aRules.Add(rule);
@@ -1864,20 +1914,27 @@ void CTDLFindTasksDlg::OnApplyasfilter()
 	GetParent()->SendMessage(WM_FTD_APPLYASFILTER, 0, (LPARAM)(LPCTSTR)m_sActiveSearch);
 }
 
-void CTDLFindTasksDlg::OnSelchangeTasklistoptions() 
+void CTDLFindTasksDlg::OnSelchangeTasklistSource() 
 {
 	UpdateData();
 
 	// update list ctrl
-	if (m_bAllTasklists)
+	switch (m_nSourceTasklists)
 	{
-		m_lcFindSetup.SetCustomAttributes(m_aAllTDCAttribDefs);
-		m_lcFindSetup.SetAttributeListData(m_tldAll, TDCA_ALL);
-	}
-	else
-	{
-		m_lcFindSetup.SetCustomAttributes(m_aActiveTDCAttribDefs);
+	case FTS_ACTIVETASKLIST:
+		m_lcFindSetup.SetCustomAttributes(m_aActiveAttribDefs);
 		m_lcFindSetup.SetAttributeListData(m_tldActive, TDCA_ALL);
+		break;
+
+	case FTS_ALLTASKLISTS:
+		m_lcFindSetup.SetCustomAttributes(m_aAllAttribDefs);
+		m_lcFindSetup.SetAttributeListData(m_tldAll, TDCA_ALL);
+		break;
+
+	case FTS_LOADEDTASKLISTS:
+		m_lcFindSetup.SetCustomAttributes(m_aLoadedAttribDefs);
+		m_lcFindSetup.SetAttributeListData(m_tldLoaded, TDCA_ALL);
+		break;
 	}
 }
 

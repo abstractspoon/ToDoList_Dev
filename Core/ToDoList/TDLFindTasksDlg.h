@@ -34,6 +34,13 @@ enum DM_POS
 	DMP_BELOW,
 };
 
+enum TDC_FINDTASKSOURCE
+{
+	FTS_ACTIVETASKLIST,
+	FTS_ALLTASKLISTS,
+	FTS_LOADEDTASKLISTS,
+};
+
 /////////////////////////////////////////////////////////////////////////////
 // CTDLFindTasksDlg dialog
 
@@ -49,7 +56,6 @@ public:
 	BOOL Show(BOOL bShow = TRUE);
 	void RefreshSearch();
 
-	BOOL GetSearchAllTasklists();
 	BOOL GetSearchIncludesCompletedTasks(LPCTSTR szName) const;
 	BOOL SetSearchIncludesCompletedTasks(LPCTSTR szName, BOOL bIncDone);
 
@@ -57,6 +63,7 @@ public:
 	int GetSearchParams(TDCADVANCEDFILTER& filter);
 	int GetSearchParams(LPCTSTR szName, TDCADVANCEDFILTER& filter) const;
 
+	TDC_FINDTASKSOURCE GetSourceTasklists() /*const*/;
 	CString GetActiveSearch() const { return m_sActiveSearch; }
 	int GetSavedSearches(CStringArray& aNames) const;
 
@@ -72,8 +79,14 @@ public:
 	void DeleteAllResults();
 
 	void SetCustomAttributes(const CTDCCustomAttribDefinitionArray& aActiveTasklistAttribDefs,
-							const CTDCCustomAttribDefinitionArray& aAllTasklistsAttribDefs);
-	void SetAttributeListData(const TDCAUTOLISTDATA& tldActive, const TDCAUTOLISTDATA& tldAll, TDC_ATTRIBUTE nAttribID);
+							 const CTDCCustomAttribDefinitionArray& aAllTasklistsAttribDefs,
+							 const CTDCCustomAttribDefinitionArray& aLoadedTasklistsAttribDefs);
+
+	void SetAttributeListData(TDC_ATTRIBUTE nAttribID,
+							  const TDCAUTOLISTDATA& tldActive, 
+							  const TDCAUTOLISTDATA& tldAll, 
+							  const TDCAUTOLISTDATA& tldLoaded);
+
 	void SetActiveTasklist(const CString& sTasklist, BOOL bWantDefaultIcons);
 
 	void SetStrikeThroughCompletedTasks(BOOL bStrikeThru);
@@ -101,17 +114,17 @@ protected:
 	CToolbarHelper m_tbHelper;
 
 	int m_nCurSel;
-	int	m_bAllTasklists;
 	BOOL m_bInitializing;
 	BOOL m_bSplitting;
 	DM_POS m_nDockPos;
+	TDC_FINDTASKSOURCE m_nSourceTasklists;
 
 	CEnString m_sResultsLabel;
 	CString m_sActiveSearch;
 
 	CStringArray m_aSavedSearches;
-	CTDCCustomAttribDefinitionArray m_aActiveTDCAttribDefs, m_aAllTDCAttribDefs;
-	TDCAUTOLISTDATA m_tldActive, m_tldAll;
+	CTDCCustomAttribDefinitionArray m_aActiveAttribDefs, m_aAllAttribDefs, m_aLoadedAttribDefs;
+	TDCAUTOLISTDATA m_tldActive, m_tldAll, m_tldLoaded;
 
 	CUIThemeFile m_theme;
 	CBrush m_brBkgnd;
@@ -157,7 +170,7 @@ protected:
 	afx_msg void OnNewSearch();
 	afx_msg void OnSaveSearch();
 	afx_msg void OnSelchangeSearchlist();
-	afx_msg void OnSelchangeTasklistoptions();
+	afx_msg void OnSelchangeTasklistSource();
 	afx_msg void OnSelchangeInclude();
 	afx_msg void OnSelectall();
 	afx_msg void OnSize(UINT nType, int cx, int cy);

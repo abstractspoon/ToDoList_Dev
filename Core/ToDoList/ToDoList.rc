@@ -6066,6 +6066,7 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
+    IDS_FIND_LOADEDTASKLISTS "All loaded tasklists"
     IDS_EDIT_VALUEVARIES    "<value varies>"
     IDS_ATTRIBTIP_TIMEOFDAY "Time of day"
     IDS_ATTRIBTIP_DEFCOLOR  "Default colour"
