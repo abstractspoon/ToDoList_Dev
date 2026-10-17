@@ -1942,7 +1942,6 @@
 #define IDS_OK                          50993
 #define IDS_CANCEL                      50994
 #define IDS_ENABLEENCRYPTION            50995
-#define IDS_SELECTENCRYPTED             50996
 #define IDS_TDC_COLUMN_POS              50997
 #define IDS_TDLBC_TITLE                 50998
 #define IDS_ED_CONFIRMEXPORTPATHMULTI   50999

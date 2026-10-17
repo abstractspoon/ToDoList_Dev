@@ -716,7 +716,7 @@ BOOL CToDoCtrlMgr::VerifyPassword(int nIndex, BOOL bForce) const
 		return TRUE;
 
 	// else
-	return tdc.VerifyPassword(CEnString().Format(IDS_SELECTENCRYPTED, GetFriendlyProjectName(nIndex)));
+	return tdc.VerifyPassword(CEnString().Format(IDS_ENCRYPTEDFILE, GetFriendlyProjectName(nIndex)));
 }
 
 TDCM_DUESTATUS CToDoCtrlMgr::GetDueItemStatus(int nIndex) const
