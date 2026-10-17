@@ -466,10 +466,10 @@ void CTDLFindTasksDlg::LoadSettings()
 	// Backwards compatibility
 	BOOL bAllTasklists = prefs.GetProfileInt(_T("FindTasks"), _T("SearchAllTaskLists"), -1);
 
-	if (bAllTasklists == -1)
-		m_nSourceTasklists = prefs.GetProfileEnum(_T("FindTasks"), _T("SourceTaskLists"), FTS_ACTIVETASKLIST);
-	else
+	if (bAllTasklists != -1)
 		m_nSourceTasklists = (bAllTasklists ? FTS_ALLTASKLISTS : FTS_ACTIVETASKLIST);
+	else
+		m_nSourceTasklists = prefs.GetProfileEnum(_T("FindTasks"), _T("SourceTaskLists"), FTS_ACTIVETASKLIST);
 
 	// update list ctrl
 	OnSelchangeTasklistSource();
