@@ -716,7 +716,7 @@ BOOL CToDoCtrlMgr::VerifyPassword(int nIndex, BOOL bForce) const
 		return TRUE;
 
 	// else
-	return tdc.VerifyPassword(CEnString().Format(IDS_SELECTENCRYPTED, GetFriendlyProjectName(nIndex)));
+	return tdc.VerifyPassword(CEnString().Format(IDS_ENCRYPTEDFILE, GetFriendlyProjectName(nIndex)));
 }
 
 TDCM_DUESTATUS CToDoCtrlMgr::GetDueItemStatus(int nIndex) const
@@ -1170,30 +1170,37 @@ BOOL CToDoCtrlMgr::AreToDoCtrlsSortedByName() const
 	return TRUE;
 }
 
-void CToDoCtrlMgr::GetAutoListData(TDCAUTOLISTDATA& tldActive, TDCAUTOLISTDATA& tldAll, TDC_ATTRIBUTE nAttribID) const
+void CToDoCtrlMgr::GetActiveAutoListData(TDC_ATTRIBUTE nAttribID, TDCAUTOLISTDATA& tld) const
 {
-	tldActive.RemoveAll(nAttribID);
-	tldAll.RemoveAll(nAttribID);
+	GetToDoCtrl(GetSelToDoCtrl()).GetAutoListData(nAttribID, tld);
+}
 
-	int nActive = GetSelToDoCtrl(), nTDC = GetCount();
+void CToDoCtrlMgr::GetAllAutoListData(TDC_ATTRIBUTE nAttribID, BOOL bIncDelayLoaded, TDCAUTOLISTDATA& tld) const
+{
+	tld.RemoveAll(nAttribID);
+
+	int nTDC = GetCount();
 
 	while (nTDC--)
 	{
-		const CFilteredToDoCtrl& tdc = GetToDoCtrl(nTDC);
-
-		if (nTDC == nActive)
+		if (bIncDelayLoaded || IsLoaded(nTDC))
 		{
-			tdc.GetAutoListData(nAttribID, tldActive);
-			tldAll.AppendUnique(tldActive, nAttribID);
-		}
-		else
-		{
-			TDCAUTOLISTDATA tld;
+			TDCAUTOLISTDATA temp;
+			GetToDoCtrl(nTDC).GetAutoListData(nAttribID, temp);
 
-			tdc.GetAutoListData(nAttribID, tld);
-			tldAll.AppendUnique(tld, nAttribID);
+			tld.AppendUnique(temp, nAttribID);
 		}
 	}
+}
+
+void CToDoCtrlMgr::GetAllAutoListData(TDC_ATTRIBUTE nAttribID, TDCAUTOLISTDATA& tld) const
+{
+	GetAllAutoListData(nAttribID, TRUE, tld);
+}
+
+void CToDoCtrlMgr::GetLoadedAutoListData(TDC_ATTRIBUTE nAttribID, TDCAUTOLISTDATA& tld) const
+{
+	GetAllAutoListData(nAttribID, FALSE, tld);
 }
 
 CString CToDoCtrlMgr::UpdateTabItemText(int nIndex)
@@ -1517,15 +1524,28 @@ void CToDoCtrlMgr::PreparePopupMenu(CMenu& menu, UINT nID1, int nMax) const
 		menu.RemoveMenu(nID1 + nTDC, MF_BYCOMMAND);
 }
 
-int CToDoCtrlMgr::GetAllCustomAttributeDefinitions(CTDCCustomAttribDefinitionArray& aAttribDefs) const
+int CToDoCtrlMgr::GetAllCustomAttributeDefinitions(CTDCCustomAttribDefinitionArray& aAttribDefs, BOOL bIncDelayLoaded) const
 {
 	aAttribDefs.RemoveAll();
 	int nTDC = GetCount();
 
 	while (nTDC--)
-		aAttribDefs.Append(GetToDoCtrl(nTDC).GetCustomAttributeDefs());
+	{
+		if (bIncDelayLoaded || IsLoaded(nTDC))
+			aAttribDefs.Append(GetToDoCtrl(nTDC).GetCustomAttributeDefs());
+	}
 
 	return aAttribDefs.GetSize();
+}
+
+int CToDoCtrlMgr::GetAllCustomAttributeDefinitions(CTDCCustomAttribDefinitionArray& aAttribDefs) const
+{
+	return GetAllCustomAttributeDefinitions(aAttribDefs, FALSE);
+}
+
+int CToDoCtrlMgr::GetLoadedCustomAttributeDefinitions(CTDCCustomAttribDefinitionArray& aAttribDefs) const
+{
+	return GetAllCustomAttributeDefinitions(aAttribDefs, TRUE);
 }
 
 BOOL CToDoCtrlMgr::AnyHasCustomAttributeFeature(DWORD dwFeature) const

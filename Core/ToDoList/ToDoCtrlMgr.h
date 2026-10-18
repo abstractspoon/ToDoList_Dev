@@ -120,14 +120,16 @@ public:
 	BOOL MoveToDoCtrl(int nFrom, int nTo);
 	BOOL CanMoveToDoCtrl(int nFrom, int nTo) const;
 
-	int SortToDoCtrlsByName();
-	void GetAutoListData(TDCAUTOLISTDATA& tldActive, TDCAUTOLISTDATA& tldAll, TDC_ATTRIBUTE nAttribID) const;
+	void GetActiveAutoListData(TDC_ATTRIBUTE nAttribID, TDCAUTOLISTDATA& tld) const;
+	void GetAllAutoListData(TDC_ATTRIBUTE nAttribID, TDCAUTOLISTDATA& tld) const;
+	void GetLoadedAutoListData(TDC_ATTRIBUTE nAttribID, TDCAUTOLISTDATA& tld) const;
 
 	CString UpdateTabItemText(int nIndex);
 	CString GetTabItemText(int nIndex) const;
 	CString GetTabItemTooltip(int nIndex) const;
 	COLORREF GetTabColor(int nIndex) const;
 	BOOL SetTabColor(int nIndex, COLORREF crTab);
+	int SortToDoCtrlsByName();
 
 	BOOL ArchiveDoneTasks(int nIndex);
 	BOOL ArchiveSelectedTasks(int nIndex);
@@ -141,6 +143,7 @@ public:
 	void PreparePopupMenu(CMenu& menu, UINT nID1, int nMax = 20) const;
 
 	int GetAllCustomAttributeDefinitions(CTDCCustomAttribDefinitionArray& aAttribDefs) const;
+	int GetLoadedCustomAttributeDefinitions(CTDCCustomAttribDefinitionArray& aAttribDefs) const;
 	BOOL AnyHasCustomAttributeFeature(DWORD dwFeature) const;
 
 protected:
@@ -194,6 +197,8 @@ protected:
 	BOOL AreToDoCtrlsSortedByName() const;
 
 	int UpdateTabItemImage(int nIndex) const;
+	int GetAllCustomAttributeDefinitions(CTDCCustomAttribDefinitionArray& aAttribDefs, BOOL bIncDelayLoaded) const;
+	void GetAllAutoListData(TDC_ATTRIBUTE nAttribID, BOOL bIncDelayLoaded, TDCAUTOLISTDATA& tld) const;
 
 	static CFilteredToDoCtrl& GetFallbackToDoCtrl();
 };
