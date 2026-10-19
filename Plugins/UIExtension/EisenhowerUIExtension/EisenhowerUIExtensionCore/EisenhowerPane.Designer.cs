@@ -54,9 +54,9 @@
 			// 
 			this.m_Icon.Location = new System.Drawing.Point(2, 1);
 			this.m_Icon.Margin = new System.Windows.Forms.Padding(0);
-			this.m_Icon.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
 			this.m_Icon.Name = "m_Icon";
-			this.m_Icon.Size = new System.Drawing.Size(17, 17);
+			this.m_Icon.Size = new System.Drawing.Size(16, 16);
+			this.m_Icon.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
 			this.m_Icon.TabIndex = 2;
 			this.m_Icon.TabStop = false;
 			// 
@@ -69,6 +69,7 @@
             this.columnHeader2,
             this.columnHeader3});
 			this.m_List.EnableHeaderTracking = false;
+			this.m_List.Font = new System.Drawing.Font("Tahoma", 8.25F);
 			this.m_List.GridlineColor = System.Drawing.Color.Empty;
 			this.m_List.HideSelection = false;
 			this.m_List.LabelEdit = true;
@@ -83,9 +84,11 @@
 			this.m_List.ShowCompletionCheckboxes = false;
 			this.m_List.ShowGroups = false;
 			this.m_List.ShowLabelTips = false;
+			this.m_List.ShowMixedCompletionState = false;
 			this.m_List.ShowParentsAsFolders = false;
 			this.m_List.Size = new System.Drawing.Size(433, 356);
 			this.m_List.SizeTaskColumnToFit = true;
+			this.m_List.StrikeThruCompletedTasks = true;
 			this.m_List.TabIndex = 0;
 			this.m_List.TaskColorIsBackground = false;
 			this.m_List.UseCompatibleStateImageBehavior = false;
@@ -94,7 +97,7 @@
 			// columnHeader1
 			// 
 			this.columnHeader1.Text = "Task";
-			this.columnHeader1.Width = 267;
+			this.columnHeader1.Width = 250;
 			// 
 			// columnHeader2
 			// 
