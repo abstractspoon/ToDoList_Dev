@@ -5136,6 +5136,9 @@ void CTDLTaskCtrlBase::GetAttributesAffectedByMod(TDC_ATTRIBUTE nAttribID, CTDCA
 			{
 				mapAttribIDs.Add(TDCA_DUEDATE);
 				mapAttribIDs.Add(TDCA_STARTDATE);
+
+				// Time spent is zeroed
+				GetAttributesAffectedByMod(TDCA_TIMESPENT, mapAttribIDs); // RECURSIVE CALL
 			}
 
 			if (HasStyle(TDCS_DONEHAVELOWESTRISK) ||
@@ -5178,6 +5181,13 @@ void CTDLTaskCtrlBase::GetAttributesAffectedByMod(TDC_ATTRIBUTE nAttribID, CTDCA
 			mapAttribIDs.Add(TDCA_DUETIME);
 			mapAttribIDs.Add(TDCA_STARTDATE);
 			mapAttribIDs.Add(TDCA_STARTTIME);
+		}
+		break;
+
+	case TDCA_TIMESPENT: // ----------------------------------------------------
+		if (HasStyle(TDCS_AUTOCALCPERCENTDONE))
+		{
+			mapAttribIDs.Add(TDCA_PERCENT);
 		}
 		break;
 

@@ -4857,10 +4857,13 @@ void CToDoListWnd::UpdateFindDialogCustomAttributes(const CFilteredToDoCtrl* pTD
 	CTDCCustomAttribDefinitionArray aAllAttribDefs;
 	m_mgrToDoCtrls.GetAllCustomAttributeDefinitions(aAllAttribDefs);
 	
+	CTDCCustomAttribDefinitionArray aLoadedAttribDefs;
+	m_mgrToDoCtrls.GetLoadedCustomAttributeDefinitions(aAllAttribDefs);
+
 	CTDCCustomAttribDefinitionArray aTDCAttribDefs;
 	pTDC->GetCustomAttributeDefs(aTDCAttribDefs);
 
-	m_dlgFindTasks.SetCustomAttributes(aTDCAttribDefs, aAllAttribDefs);
+	m_dlgFindTasks.SetCustomAttributes(aTDCAttribDefs, aAllAttribDefs, aLoadedAttribDefs);
 }
 
 void CToDoListWnd::UpdateFindDialogActiveTasklist(const CFilteredToDoCtrl* pTDC)
@@ -8549,10 +8552,16 @@ void CToDoListWnd::UpdateFindTasksListData(TDC_ATTRIBUTE nAttribID)
 
 	if (bRefreshAll || !bCustAttrib)
 	{
-		TDCAUTOLISTDATA tldActive, tldAll;
+		TDCAUTOLISTDATA tldActive;
+		m_mgrToDoCtrls.GetActiveAutoListData(nAttribID, tldActive);
 
-		m_mgrToDoCtrls.GetAutoListData(tldActive, tldAll, nAttribID);
-		m_dlgFindTasks.SetAttributeListData(tldActive, tldAll, nAttribID);
+		TDCAUTOLISTDATA tldAll;
+		m_mgrToDoCtrls.GetAllAutoListData(nAttribID, tldActive);
+
+		TDCAUTOLISTDATA tldLoaded;
+		m_mgrToDoCtrls.GetLoadedAutoListData(nAttribID, tldActive);
+
+		m_dlgFindTasks.SetAttributeListData(nAttribID, tldActive, tldAll, tldLoaded);
 	}
 }
 
@@ -10893,11 +10902,11 @@ LRESULT CToDoListWnd::OnFindDlgClose(WPARAM /*wp*/, LPARAM /*lp*/)
 LRESULT CToDoListWnd::OnFindDlgFind(WPARAM /*wp*/, LPARAM /*lp*/)
 {
 	// set up the search
-	BOOL bSearchAll = m_dlgFindTasks.GetSearchAllTasklists();
-	int nSelTaskList = GetSelToDoCtrl();
-	
-	int nFrom = bSearchAll ? 0 : nSelTaskList;
-	int nTo = bSearchAll ? GetTDCCount() - 1 : nSelTaskList;
+	TDC_FINDTASKSOURCE nSrcTasklists = m_dlgFindTasks.GetSourceTasklists();
+// 	int nSelTaskList = GetSelToDoCtrl();
+// 	
+// 	int nFrom = bSearchAll ? 0 : nSelTaskList;
+// 	int nTo = bSearchAll ? GetTDCCount() - 1 : nSelTaskList;
 	
 	// search params
 	SEARCHPARAMS params;
@@ -10905,26 +10914,49 @@ LRESULT CToDoListWnd::OnFindDlgFind(WPARAM /*wp*/, LPARAM /*lp*/)
 	if (m_dlgFindTasks.GetSearchParams(params))
 	{
 		CWaitCursor cursor;
-
-		int nSel = GetSelToDoCtrl();
 		BOOL bMultiAttribFind = params.HasMultipleAttributes();
+
+		int nSelTDC = GetSelToDoCtrl(), nTDCCount = GetTDCCount();
 		
-		for (int nCtrl = nFrom; nCtrl <= nTo; nCtrl++)
+		for (int nTDC = 0; nTDC < nTDCCount; nTDC++)
 		{
-			// load or verify password unless tasklist is already active
-			if (nCtrl != nSel)
+			// Load or verify password as required unless tasklist is already active
+			switch (nSrcTasklists)
 			{
-				// load if necessary (in which case the password will have been checked)
-				if (!m_mgrToDoCtrls.IsLoaded(nCtrl))
+			case FTS_ACTIVETASKLIST:
+				if (nTDC != nSelTDC)
+					continue;
+				break;
+
+			case FTS_LOADEDTASKLISTS:
+				if (nTDC != nSelTDC)
 				{
-					if (!VerifyTaskListOpen(nCtrl, FALSE))
+					if (!m_mgrToDoCtrls.IsLoaded(nTDC))
+						continue;
+					
+					if (!VerifyToDoCtrlPassword(nTDC))
 						continue;
 				}
-				else if (!VerifyToDoCtrlPassword(nCtrl))
-					continue;
+				break;
+
+			case FTS_ALLTASKLISTS:
+				if (nTDC != nSelTDC)
+				{
+					if (m_mgrToDoCtrls.IsLoaded(nTDC))
+					{
+						if (!VerifyToDoCtrlPassword(nTDC))
+							continue;
+					}
+					else
+					{
+						if (!VerifyTaskListOpen(nTDC, FALSE))
+							continue;
+					}
+				}
+				break;
 			}
-			
-			const CFilteredToDoCtrl& tdc = GetToDoCtrl(nCtrl);
+						
+			const CFilteredToDoCtrl& tdc = GetToDoCtrl(nTDC);
 			CResultArray aResults;
 			
 			if (tdc.FindTasks(params, aResults))
@@ -10937,7 +10969,7 @@ LRESULT CToDoListWnd::OnFindDlgFind(WPARAM /*wp*/, LPARAM /*lp*/)
 
 				CHoldRedraw hr(hwndHold);
 
-				m_dlgFindTasks.AddResults(&tdc, aResults, !bMultiAttribFind, m_mgrToDoCtrls.GetTabItemText(nCtrl));
+				m_dlgFindTasks.AddResults(&tdc, aResults, !bMultiAttribFind, m_mgrToDoCtrls.GetTabItemText(nTDC));
 			}
 		}
 	}	

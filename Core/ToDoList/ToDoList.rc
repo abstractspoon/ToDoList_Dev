@@ -5200,7 +5200,6 @@ BEGIN
     IDS_OK                  "OK"
     IDS_CANCEL              "Cancel"
     IDS_ENABLEENCRYPTION    "Enter the password for encrypting this tasklist and then confirm it."
-    IDS_SELECTENCRYPTED     "The tasklist '%s' is password protected.\n\nPlease enter the required password below."
     IDS_TDC_COLUMN_POS      "Pos."
     IDS_TDLBC_TITLE         "Title"
     IDS_ED_CONFIRMEXPORTPATHMULTI 
@@ -6066,6 +6065,7 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
+    IDS_FIND_LOADEDTASKLISTS "All loaded tasklists"
     IDS_EDIT_VALUEVARIES    "<value varies>"
     IDS_ATTRIBTIP_TIMEOFDAY "Time of day"
     IDS_ATTRIBTIP_DEFCOLOR  "Default colour"

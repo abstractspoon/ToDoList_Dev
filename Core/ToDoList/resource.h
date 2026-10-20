@@ -1942,7 +1942,6 @@
 #define IDS_OK                          50993
 #define IDS_CANCEL                      50994
 #define IDS_ENABLEENCRYPTION            50995
-#define IDS_SELECTENCRYPTED             50996
 #define IDS_TDC_COLUMN_POS              50997
 #define IDS_TDLBC_TITLE                 50998
 #define IDS_ED_CONFIRMEXPORTPATHMULTI   50999
@@ -2542,6 +2541,7 @@
 #define IDS_FIND_TASKS                  51629
 #define IDS_RECURS_WEEKDAY              51630
 #define IDS_TDLBC_COMMENTSFORMAT        51631
+#define IDS_FIND_LOADEDTASKLISTS        51632
 #define IDS_EDIT_VALUEVARIES            51633
 #define IDS_ATTRIBTIP_TIMEOFDAY         51634
 #define IDS_ATTRIBTIP_DEFCOLOR          51635
