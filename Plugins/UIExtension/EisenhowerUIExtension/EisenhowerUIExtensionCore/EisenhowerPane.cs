@@ -73,12 +73,9 @@ namespace EisenhowerUIExtension
 			m_List.EditTaskIcon += new EditTaskIconEventHandler(OnListEditTaskIcon);
 			m_List.EditTaskLabel += new EditTaskLabelEventHandler(OnListEditTaskLabel);
 			m_List.IsTaskDraggable += new IsTaskDraggableEventHandler(OnListIsTaskDraggable);
-
 			m_List.ItemDrag += new ItemDragEventHandler(OnListBeginItemDrag);
-			m_List.SelectedIndexChanged += new EventHandler(OnListSelectionChange);
-			m_List.KeyUp += new KeyEventHandler(OnListKeyUp);
 
-			m_List.BoundSelectionEnded += (s, e) => { SelectionChange?.Invoke(this, SelectedTaskIds); };
+			m_List.SelectionChange += (s, e) => { SelectionChange?.Invoke(this, SelectedTaskIds); };
 			m_List.GotFocus += (s, e) => { GotFocus?.Invoke(this, new EventArgs()); };
 
 			base.DragOver += new DragEventHandler(OnDragOver);
@@ -137,7 +134,7 @@ namespace EisenhowerUIExtension
 		public bool ShowLabelTips				{ set { m_List.ShowLabelTips = value; } }
 
 		public bool HasSelection				{ get { return m_List.HasSelection; } }
-		public List<uint> SelectedTaskIds		{ get {	return m_List.SelectedTaskIds; } }
+		public IList<uint> SelectedTaskIds		{ get {	return m_List.SelectedTaskIds; } }
 		public uint FirstTaskId					{ get { return m_List.FirstTaskId; } }
 		public uint LastTaskId					{ get { return m_List.LastTaskId; } }
 		public uint FirstSelectedTaskId			{ get { return m_List.FirstSelectedTaskId; } }
@@ -247,9 +244,7 @@ namespace EisenhowerUIExtension
 
 		public bool RebuildTaskList()
 		{
-			var selTaskIds = (Selected ? SelectedTaskIds : null);
-
-			m_List.BeginUpdate();
+			var state = m_List.BeginUpdate();
 			m_List.RemoveAll();
 
 			if ((m_Tasks == null) || (m_Matrix == null))
@@ -262,17 +257,7 @@ namespace EisenhowerUIExtension
 				AddTask(task);
 
 			m_List.RefreshColumnWidths();
-			m_List.EndUpdate();
-
-			// Restore as much of the previous selection as possible
-			if (selTaskIds?.Count > 0)
-			{
-				bool change = (selTaskIds.RemoveAll(id => !m_List.HasTaskId(id)) != 0);
-				m_List.SelectTasks(selTaskIds);
-
-				if (change)
-					SelectionChange?.Invoke(this, selTaskIds);
-			}
+			m_List.EndUpdate(state);
 
 			return true;
 		}
@@ -455,42 +440,6 @@ namespace EisenhowerUIExtension
 			{
 				using (var pen = new Pen(TitleBorderColor))
 					e.Graphics.DrawRectangle(pen, titleRect);
-			}
-		}
-
-		private void OnListSelectionChange(object sender, EventArgs e)
-		{
-			// Don't forward selection changes:
-
-			// 1. If bounds selecting
-			if (m_List.IsBoundSelecting)
-				return;
-
-			// 2. Nothing is selected and the control key is NOT pressed
-			//    ie. It's not a deliberate deselection
-			if ((m_List.SelectionCount == 0) && !ModifierKeys.HasFlag(Keys.Control))
-				return;
-
-			// 3. During keyboard navigation
-			if (System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.Up) ||
-				System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.Down) ||
-				System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.PageUp) ||
-				System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.PageDown))
-				return;
-
-			SelectionChange?.Invoke(this, m_List.SelectedTaskIds);
-		}
-
-		private void OnListKeyUp(object sender, KeyEventArgs e)
-		{
-			switch (e.KeyCode)
-			{
-			case Keys.Up:
-			case Keys.Down:
-			case Keys.PageUp:
-			case Keys.PageDown:
-				SelectionChange?.Invoke(this, m_List.SelectedTaskIds);
-				return;
 			}
 		}
 

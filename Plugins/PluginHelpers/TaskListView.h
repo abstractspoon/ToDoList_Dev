@@ -26,14 +26,17 @@ namespace Abstractspoon
 				virtual property bool IsLocked	{ bool get(); }
 				virtual property bool IsParent	{ bool get(); }
 				virtual property bool IsDone	{ bool get(); }
+				
+				virtual String^ GetGroupValue(Object^ groupById);
 			};
-			
+
 			// ---------------------------------------------
 
 			public delegate bool EditTaskLabelEventHandler(Object^ sender, IListViewTask^ task);
 			public delegate bool EditTaskIconEventHandler(Object^ sender, IListViewTask^ task);
 			public delegate bool EditTaskCompletionEventHandler(Object^ sender, IListViewTask^ task);
 			public delegate bool IsTaskDraggableEventHandler(Object^ sender, IListViewTask^ task);
+			public delegate void SelectionChangeEventHandler(Object^ sender, IList<UInt32>^ taskIds);
 
 			// ---------------------------------------------
 
@@ -44,16 +47,34 @@ namespace Abstractspoon
 
 			public ref class TaskListView : Windows::Forms::ListView, ILabelTipHandler
 			{
+
+			public:
+				interface class IItemComparer : System::Collections::IComparer
+				{
+				public:
+					virtual property int Column { int get(); void set(int col); }
+					virtual property bool Ascending { bool get(); void set(bool ascending); }
+				};
+
+				// ---------------------------------------------------
+
 			public:
 				TaskListView();
 
 				void Initialize(Translator^ trans, UIExtension::TaskIcon^ taskIcons);
+				void Initialize(Translator^ trans, UIExtension::TaskIcon^ taskIcons, IItemComparer^ comparer);
 
 				Windows::Forms::ListViewItem^ AddTask(IListViewTask^ base);
-				bool RemoveTask(UInt32 taskId);
+				Windows::Forms::ListViewItem^ AddTask(IListViewTask^ task, String^ key);
 
-				IListViewTask^ GetTask(int index);
+				void EnableGrouping(Object^ groupById);
+				Windows::Forms::ListViewItem^ AddGroup(String^ title, String^ value);
+				bool RemoveGroup(String^ value);
+				int RemoveAllGroups();
+
 				bool HitTest(Drawing::Point ptScreen, UIExtension::HitTest^ hitTest);
+				bool RemoveTask(UInt32 taskId);
+				IListViewTask^ GetTask(int index);
 				UInt32 GetTaskId(int index);
 				UInt32 GetTaskIdEx(UIExtension::GetTask getTask, bool fromSelTask);
 				UInt32 GetNextTaskId(int index, bool next, bool topLevel);
@@ -67,7 +88,7 @@ namespace Abstractspoon
 
 				bool SelectTask(UInt32 taskId);
 				bool SelectTaskEx(String^ words, UIExtension::SelectTask selectTask, bool caseSensitive, bool wholeWord, bool findReplace);
-				bool SelectTasks(IList<UInt32>^ taskIDs);
+				bool SelectTasks(IList<UInt32>^ taskIds);
 				void EnsureSelectionVisible();
 
 				property UInt32 SelectedTaskId { UInt32 get(); }
@@ -76,7 +97,8 @@ namespace Abstractspoon
 
 				property int SelectionCount { int get(); }
 				property bool HasSelection { bool get(); }
-				property List<UInt32>^ SelectedTaskIds { List<UInt32>^ get(); }
+				property IList<UInt32>^ SelectedTaskIds { IList<UInt32>^ get(); }
+				property IList<IListViewTask^>^ SelectedTasks { IList<IListViewTask^>^ get(); }
 
 				property bool TaskColorIsBackground { bool get(); void set(bool value); }
 				property bool ShowParentsAsFolders { bool get(); void set(bool value); }
@@ -87,6 +109,7 @@ namespace Abstractspoon
 				property bool EnableHeaderTracking { bool get(); void set(bool value); }
 				property bool SizeTaskColumnToFit { bool get(); void set(bool value); }
 				property bool ReadOnly { bool get(); void set(bool value); }
+				property bool GroupingEnabled { bool get(); }
 
 				property int MinTaskColumnWidth;
 
@@ -103,11 +126,27 @@ namespace Abstractspoon
 				event EditTaskIconEventHandler^ EditTaskIcon;
 				event EditTaskCompletionEventHandler^ EditTaskDone;
 				event IsTaskDraggableEventHandler^ IsTaskDraggable;
+				event SelectionChangeEventHandler^ SelectionChange;
 
-				event EventHandler^ BoundSelectionEnded;
+				// -----------------------------------------------
+
+				ref class UpdateState
+				{
+				public:
+					System::Collections::IComparer^ Sorter;
+					Windows::Forms::ListViewItem^ TopItem;
+					IList<UInt32>^ SelectedTaskIds;
+#if _DEBUG
+					UInt32 StartTick;
+#endif
+				};
+
+				UpdateState^ BeginUpdate();
+				void EndUpdate(UpdateState^ state);
 
 			private:
 				HeaderControl^ m_HeaderCtrl;
+				bool m_Updating;
 
 			protected:
 				Translator^ m_Trans;
@@ -129,6 +168,7 @@ namespace Abstractspoon
 				bool m_SavingToImage;
 
 				int m_CheckBoxSize;
+				Object^ m_GroupById;
 
 			protected:
 				void WndProc(Windows::Forms::Message% m) override;
@@ -137,6 +177,8 @@ namespace Abstractspoon
 				void OnBeforeLabelEdit(Windows::Forms::LabelEditEventArgs^ e) override;
 				void OnDrawItem(Windows::Forms::DrawListViewItemEventArgs^ e) override;
 				void OnItemDrag(Windows::Forms::ItemDragEventArgs^ e) override;
+				void OnItemSelectionChanged(Windows::Forms::ListViewItemSelectionChangedEventArgs^ e) override;
+				void OnKeyUp(Windows::Forms::KeyEventArgs^ e) override;
 				void OnColumnClick(Windows::Forms::ColumnClickEventArgs^ e) override;
 
 				void OnGotFocus(EventArgs^ e) override;
@@ -144,6 +186,7 @@ namespace Abstractspoon
 				void OnSizeChanged(EventArgs^ e) override;
 				void OnFontChanged(EventArgs^ e) override;
 				void OnHandleCreated(EventArgs^ e) override;
+				void OnSelectedIndexChanged(EventArgs^ e) override;
 
 				void OnBoundSelectionTimer(Object^ sender, EventArgs^ e);
 
@@ -158,19 +201,26 @@ namespace Abstractspoon
 				Drawing::Rectangle CalcLabelRect(Windows::Forms::ListViewItem^ item, LabelExtents extents);
 				Drawing::Rectangle CalcCheckboxRect(Drawing::Rectangle labelRect);
 				Drawing::Rectangle CalcIconRect(Drawing::Rectangle labelRect);
+				Drawing::Color GetTextColor(IListViewTask^ task, bool selected);
+				Drawing::Color GetBackColor(IListViewTask^ task, int row);
+				Drawing::Font^ GetFont(IListViewTask^ task, bool title);
 
 				String^ Translate(String^ text, Translator::Type type);
 				bool IsTaskEditable(IListViewTask^ task) { return (!m_ReadOnly && (task != nullptr) && !task->IsLocked); }
 				int FindTask(String^ phrase, int startIndex, bool forward, bool caseSensitive, bool wholeWord, bool findReplace);
-				Windows::Forms::ListViewItem^ FindItem(UInt32 taskId);
-				Drawing::Color GetTextColor(IListViewTask^ task, bool selected);
-				Drawing::Color GetBackColor(IListViewTask^ task, int row);
-				Drawing::Font^ GetFont(IListViewTask^ task, bool title);
+				Windows::Forms::ListViewItem^ FindTaskItem(UInt32 taskId);
+				void CheckNotifySelectionChanged();
+				int MapDisplayIndexToColumn(int index);
+				void DrawGroupHeader(Drawing::Graphics^ g, String^ text, Drawing::Rectangle rect);
+				bool IsTaskItem(Windows::Forms::ListViewItem^ lvi);
+				bool IsGroupHeaderItem(Windows::Forms::ListViewItem^ lvi);
+				void RedrawGroupHeaders();
 
 				// Derived classes optionally override
 				virtual bool TaskMatches(IListViewTask^ task, String^ phrase, bool caseSensitive, bool wholeWord, bool findReplace);
 				virtual Windows::Forms::VisualStyles::CheckBoxState GetTaskCheckboxState(IListViewTask^ task);
 				virtual bool IsItemSelected(Windows::Forms::ListViewItem^ lvItem) { return (!m_SavingToImage && lvItem->Selected); }
+				virtual Windows::Forms::TextFormatFlags GetTextAlignment(int column) { return Windows::Forms::TextFormatFlags::Left; }
 				virtual void ResizeTaskColumnToFit(int width);
 
 				property UIExtension::TaskIcon^ TaskIcons { UIExtension::TaskIcon^ get() { return m_TaskIcons; } }
@@ -182,7 +232,40 @@ namespace Abstractspoon
 				property int FirstSelectedIndex { int get(); }
 				property int LastSelectedIndex { int get(); }
 				property int LastIndex { int get(); }
+
+				// ---------------------------------------------------
+
+				ref class DefaultItemComparer : IItemComparer
+				{
+				public:
+					DefaultItemComparer();
+
+					// IComparer
+					virtual int Compare(Object^ x, Object^ y);
+
+					// IItemComparer
+					virtual property int Column { int get(); void set(int col); }
+					virtual property bool Ascending { bool get(); void set(bool ascending); }
+					
+					bool SortNoneGroupBelow = false;
+					bool SortGroupsAscending = false;
+
+				protected:
+					virtual int CompareItems(Windows::Forms::ListViewItem^ lvi1,
+											 Windows::Forms::ListViewItem^ lvi2);
+
+					String^ GetItemGroupValue(Windows::Forms::ListViewItem^ lvi);
+
+				private:
+					int m_Column;
+					bool m_Ascending;
+				};
+
 			};
+
+			///////////////////////////////////////////////////////////
+
+
 		}
 	}
 }

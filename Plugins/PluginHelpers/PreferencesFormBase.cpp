@@ -122,3 +122,9 @@ void PreferencesFormBase::OnSizeChanged(EventArgs^ e)
 
 	Invalidate(false);
 }
+
+void PreferencesFormBase::EnableOK(bool enable)
+{
+	m_Error->Visible = !enable;
+	m_OK->Enabled = enable;
+}

@@ -45,10 +45,7 @@ namespace EisenhowerUIExtension
 			// Note: just because we prevent invalid matrices
 			// within this dialog, there's no guarantee that
 			// they're valid on receipt
-			bool valid = (Matrices.Find(f => f.HasNullVar) == null);
-
-			m_OK.Enabled = valid;
-			m_Error.Visible = !valid;
+			EnableOK(Matrices.Find(f => f.HasNullVar) == null);
 
 			if (base.ShowDialog() == DialogResult.OK)
 			{

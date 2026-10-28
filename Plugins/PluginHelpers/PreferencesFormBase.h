@@ -34,6 +34,7 @@ namespace Abstractspoon
 
 			protected:
 				void InitializeComponent();
+				void EnableOK(bool enable);
 
 			};
 		}

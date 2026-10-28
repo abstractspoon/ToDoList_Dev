@@ -5201,7 +5201,6 @@ void CTDLTaskCtrlBase::GetAttributesAffectedByMod(TDC_ATTRIBUTE nAttribID, CTDCA
 	} // -------------------------------------------------------------------------
 
 	// Add 'last modified' if the attributes contain a task attribute
-	// but it's not a 'new task edit'
 	if (!mapAttribIDs.IsEmpty() && TDC::IsTaskAttribute(mapAttribIDs.GetFirst()))
 	{
 		mapAttribIDs.Add(TDCA_LASTMODBY);

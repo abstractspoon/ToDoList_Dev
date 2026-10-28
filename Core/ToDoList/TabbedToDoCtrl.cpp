@@ -3979,7 +3979,7 @@ void CTabbedToDoCtrl::PrepareAttributesForExtensionViewUpdate(CTDCAttributeMap& 
 			{
 				// NOTE: I think the only time this can occur is if 
 				// the map ONLY contains a SINGLE custom attribute
-				// together with 'Last Mod' attributes
+				// other than 'last modified'
 				ASSERT((mapAttribIDs.GetCount() == 3) &&
 						mapAttribIDs.Has(TDCA_LASTMODBY) &&
 						mapAttribIDs.Has(TDCA_LASTMODDATE));

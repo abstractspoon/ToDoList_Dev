@@ -25,17 +25,19 @@ namespace WordCloudUIExtension
 			return Title;
 		}
         
-		// IListViewTask --------------------------------------
+		// ITaskBase
 		public uint Id				{ get; private set; }
 		public String Title			{ get; private set; }
 		public bool HasIcon			{ get; private set; }
-		public bool IsLocked		{ get; private set; }
-		public bool IsParent		{ get; private set; }
 		public Color TextColor		{ get; private set; }
 		public String Position		{ get; private set; }
+
+		// IListViewTask
+		public bool IsLocked		{ get; private set; }
+		public bool IsParent		{ get; private set; }
         public bool IsDone			{ get { return (DoneDate != String.Empty); } }
 
-		// Local attributes -------------------------------
+		// Local attributes
 		public String DoneDate;
 		public String DueDate;
 		public String StartDate;
@@ -50,7 +52,13 @@ namespace WordCloudUIExtension
 		public List<String> Tags;
         public bool IsPartlyDone;
 
-        public bool SetDone(bool done)
+		// IListViewTask		
+		public string GetGroupValue(object groupById)
+		{
+			return string.Empty;
+		}
+
+		public bool SetDone(bool done)
         {
 			if (done == IsDone)
 				return false;

@@ -129,7 +129,7 @@ copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\Core\ToDoList\unicode_$(Con
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\EisenhowerUIExtensionCore\EisenhowerUIExtensionCore.csproj">
-      <Project>{828b1da8-d72c-446b-abcd-5117985691ad}</Project>
+      <Project>{2ea5f87a-cd7d-4eca-ac91-b8180c3b0ce3}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

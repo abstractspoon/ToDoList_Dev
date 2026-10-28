@@ -238,10 +238,10 @@ namespace WordCloudUIExtension
 			Invalidate();
 		}
 		
-		public event SelectionChangeEventHandler SelectionChange;
+		public event SelectedWordChangeEventHandler SelectionChange;
 
 	}
-	public delegate void SelectionChangeEventHandler(object sender);
+	public delegate void SelectedWordChangeEventHandler(object sender);
 
     ///////////////////////////////////////////////////////////////////////////
 

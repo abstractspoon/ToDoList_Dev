@@ -23,7 +23,7 @@ namespace Abstractspoon
 
 				virtual property Drawing::Color TextColor { Drawing::Color get(); }
 			};
-
+			
 			//////////////////////////////////////////////////////////////
 			
 			[ExtensionAttribute]

@@ -8,6 +8,7 @@
 
 #include <shared\Clipboard.h>
 #include <shared\Misc.h>
+#include <shared\FileMisc.h>
 #include <shared\GraphicsMisc.h>
 #include <shared\CopyWndContents.h>
 
@@ -32,30 +33,6 @@ namespace Abstractspoon
 	{
 		namespace PluginHelpers
 		{
-			ref class DefaultItemComparer : System::Collections::IComparer
-			{
-			public:
-				DefaultItemComparer() : m_Column(0), m_Ascending(true) {}
-				DefaultItemComparer(int column, bool ascending) : m_Column(column), m_Ascending(ascending) {}
-
-				virtual int Compare(Object^ x, Object^ y)
-				{
-					int res = StringUtil::NaturalCompare(ASTYPE(x, ListViewItem)->SubItems[m_Column]->Text, 
-														 ASTYPE(y, ListViewItem)->SubItems[m_Column]->Text);
-
-					return (m_Ascending ? res : -res);
-				}
-
-				property int Column { int get() { return m_Column; } }
-				property bool Ascending { bool get() { return m_Ascending; } }
-
-			private:
-				int m_Column;
-				bool m_Ascending;
-			};
-
-			////////////////////////////////////////////////////////////////////////////////////////////////
-
 			// Private class (for now)
 			ref class HeaderControl : Windows::Forms::NativeWindow
 			{
@@ -79,6 +56,12 @@ namespace Abstractspoon
 					return (rWindow.PtInRect({ptScreen.X, ptScreen.Y}) != FALSE);
 				}
 
+				void Redraw()
+				{
+					::InvalidateRect(Win32::GetHwnd(Handle), NULL, FALSE);
+					::UpdateWindow(Win32::GetHwnd(Handle));
+				}
+
 			public:
 				property bool EnableTracking;
 
@@ -90,7 +73,7 @@ namespace Abstractspoon
 				{
 					Debug::Assert(sender == m_List);
 
-					auto sorter = ASTYPE(m_List->ListViewItemSorter, DefaultItemComparer);
+					auto sorter = ASTYPE(m_List->ListViewItemSorter, TaskListView::IItemComparer);
 
 					if ((sorter == nullptr) || (sorter->Column != e->ColumnIndex))
 					{
@@ -117,10 +100,14 @@ namespace Abstractspoon
 					case HorizontalAlignment::Right: flags = (flags | TextFormatFlags::Right); break;
 					}
 
+					auto textRect = Rectangle::Inflate(e->Bounds, -2, 0);
+					textRect.Height--;
+					textRect.Width--;
+
 					TextRenderer::DrawText(e->Graphics,
 										   e->Header->Text,
 										   e->Font,
-										   Rectangle::Inflate(e->Bounds, -2/*LabelPadding*/, -1),
+										   textRect,
 										   e->ForeColor,
 										   flags);
 
@@ -198,6 +185,134 @@ namespace Abstractspoon
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
+public ref class GroupHeaderItem
+{
+public:
+	GroupHeaderItem(String^ title, String^ value)
+	{
+		if (title != nullptr)
+			m_Title = title;
+
+		if (value != nullptr)
+			m_Value = value;
+	}
+
+	property String^ Title { String^ get() { return m_Title; } }
+	property String^ Value { String^ get() { return m_Value; } }
+
+private:
+	String^ m_Title;
+	String^ m_Value;
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+TaskListView::DefaultItemComparer::DefaultItemComparer() 
+	: 
+	m_Column(-1), 
+	m_Ascending(true) 
+{
+}
+
+int TaskListView::DefaultItemComparer::Column::get()
+{
+	return m_Column;
+}
+
+void TaskListView::DefaultItemComparer::Column::set(int column)
+{
+	m_Column = column;
+}
+
+bool TaskListView::DefaultItemComparer::Ascending::get()
+{
+	return m_Ascending;
+}
+
+void TaskListView::DefaultItemComparer::Ascending::set(bool ascending)
+{
+	m_Ascending = ascending;
+}
+
+String^ TaskListView::DefaultItemComparer::GetItemGroupValue(Windows::Forms::ListViewItem^ lvi)
+{
+	auto listView = ASTYPE(lvi->ListView, TaskListView);
+
+	if (listView->IsGroupHeaderItem(lvi))
+		return ASTYPE(lvi->Tag, GroupHeaderItem)->Value;
+
+	if (listView->IsTaskItem(lvi))
+		return ASTYPE(lvi->Tag, IListViewTask)->GetGroupValue(listView->m_GroupById);
+
+	// else
+	return String::Empty;
+}
+
+int TaskListView::DefaultItemComparer::Compare(Object^ x, Object^ y)
+{
+	if (m_Column == -1)
+		return 0; // not an error
+
+	auto lvi1 = ASTYPE(x, ListViewItem);
+	auto lvi2 = ASTYPE(y, ListViewItem);
+
+	auto listView = ASTYPE(lvi1->ListView, TaskListView);
+
+	if (listView->GroupingEnabled)
+	{
+		auto task1Text = GetItemGroupValue(lvi1);
+		auto task2Text = GetItemGroupValue(lvi2);
+
+		int nCompare = StringUtil::NaturalCompare(task1Text, task2Text);
+
+		if (nCompare == 0) // Same group
+		{
+			// Always sort the group header item higher
+			if (listView->IsGroupHeaderItem(lvi1))
+				return -1;
+
+			if (listView->IsGroupHeaderItem(lvi2))
+				return 1;
+		}
+		else  // different groups
+		{
+			// 'sort <none> below' has no effect without 'sort ascending'
+			// because '<none>' will already be at the bottom
+			if (SortNoneGroupBelow && SortGroupsAscending)
+			{
+				if (String::IsNullOrEmpty(task1Text))
+					return 1;
+
+				if (String::IsNullOrEmpty(task2Text))
+					return -1;
+			}
+
+			return (SortGroupsAscending ? nCompare : -nCompare);
+		}
+	}
+
+	return CompareItems(lvi1, lvi2);
+}
+
+int TaskListView::DefaultItemComparer::CompareItems(ListViewItem^ lvi1, ListViewItem^ lvi2)
+{
+	if ((lvi1 == nullptr) || 
+		(lvi2 == nullptr) ||
+		(m_Column < 0) || 
+		(m_Column >= lvi1->SubItems->Count) || 
+		(m_Column >= lvi2->SubItems->Count))
+	{
+		Debug::Assert(false);
+		return 0;
+	}
+	
+	int res = StringUtil::NaturalCompare(lvi1->SubItems[m_Column]->Text, lvi2->SubItems[m_Column]->Text);
+
+	return (m_Ascending ? res : -res);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
 const int ImageSize = DPIScaling::Scale(16);
 const int LvItemPadding = 2;
 
@@ -221,6 +336,8 @@ TaskListView::TaskListView()
 	m_SizeTaskColumnToFit(false),
 	m_ReadOnly(false),
 	m_SavingToImage(false),
+	m_GroupById(nullptr),
+	m_Updating(false),
 	m_CheckBoxSize(-1)
 {
 	m_LabelTip = gcnew LabelTip(this);
@@ -230,6 +347,11 @@ TaskListView::TaskListView()
 }
 
 void TaskListView::Initialize(Translator^ trans, UIExtension::TaskIcon^ taskIcons)
+{
+	Initialize(trans, taskIcons, gcnew DefaultItemComparer());
+}
+
+void TaskListView::Initialize(Translator^ trans, UIExtension::TaskIcon^ taskIcons, TaskListView::IItemComparer^ comparer)
 {
 	m_Trans = trans;
 	m_TaskIcons = taskIcons;
@@ -243,35 +365,29 @@ void TaskListView::Initialize(Translator^ trans, UIExtension::TaskIcon^ taskIcon
 	DoubleBuffered = true;
 	HotTracking = false;
 	HoverSelection = false;
-	ListViewItemSorter = gcnew DefaultItemComparer();
+	ListViewItemSorter = comparer;
 	CheckBoxes = false;
 }
 
 void TaskListView::OnColumnClick(ColumnClickEventArgs^ e)
 {
-	auto sorter = ASTYPE(ListViewItemSorter, DefaultItemComparer);
+	auto sorter = ASTYPE(ListViewItemSorter, TaskListView::IItemComparer);
 
-	if (sorter == nullptr)
+	if (sorter != nullptr)
 	{
-		if (ListViewItemSorter != nullptr)
-			return; // not 'our' sorter
+		if (e->Column != sorter->Column)
+		{
+			sorter->Column = e->Column;
+			sorter->Ascending = true;
+		}
+		else
+		{
+			sorter->Ascending = !sorter->Ascending;
+		}
 
-					// else 
-		sorter = gcnew DefaultItemComparer(e->Column, true);
+		m_HeaderCtrl->Redraw();
+		Sort();
 	}
-	else if (e->Column != sorter->Column)
-	{
-		sorter = gcnew DefaultItemComparer(e->Column, true);
-
-		// Clear the previous sort arrow
-		::InvalidateRect(Win32::GetHwnd(Handle), NULL, FALSE);
-	}
-	else
-	{
-		sorter = gcnew DefaultItemComparer(e->Column, !sorter->Ascending);
-	}
-
-	ListViewItemSorter = sorter;
 }
 
 void TaskListView::OnHandleCreated(EventArgs^ e)
@@ -313,10 +429,15 @@ void TaskListView::SizeTaskColumnToFit::set(bool value)
 
 ListViewItem^ TaskListView::AddTask(IListViewTask^ task)
 {
+	return AddTask(task, String::Empty);
+}
+
+ListViewItem^ TaskListView::AddTask(IListViewTask^ task, String^ key)
+{
 	if (Items->Count == 0)
 		ItemsHaveIcons = false;
 
-	auto lvItem = gcnew ListViewItem(task->Title);
+	auto lvItem = Items->Add(key, task->Title, -1);
 
 	lvItem->Tag = task;
 	lvItem->Selected = false;
@@ -327,18 +448,66 @@ ListViewItem^ TaskListView::AddTask(IListViewTask^ task)
 		ItemsHaveIcons = true;
 	}
 
-	return Items->Add(lvItem);
+	return lvItem;
 }
 
 bool TaskListView::RemoveTask(UInt32 taskId)
 {
-	auto lvItem = FindItem(taskId);
+	auto lvItem = FindTaskItem(taskId);
 
 	if (lvItem == nullptr)
 		return false;
 
 	Items->Remove(lvItem);
 	return true;
+}
+
+ListViewItem^ TaskListView::AddGroup(String^ title, String^ value)
+{
+	Debug::Assert(GroupingEnabled);
+
+	auto group = gcnew GroupHeaderItem(title, value);
+
+	auto lvi = Items->Add(title);
+	lvi->Tag = group;
+
+	return lvi;
+}
+
+int TaskListView::RemoveAllGroups()
+{
+	int item = Items->Count;
+	int numRemoved = 0;
+
+	while (item-- > 0)
+	{
+		if (ISTYPE(Items[item]->Tag, GroupHeaderItem))
+		{
+			Items->RemoveAt(item);
+			numRemoved++;
+		}
+	}
+
+	return numRemoved;
+}
+
+bool TaskListView::RemoveGroup(String^ value)
+{
+	int item = Items->Count;
+
+	while (item-- > 0)
+	{
+		auto group = ASTYPE(Items[item]->Tag, GroupHeaderItem);
+
+		if ((group != nullptr) && (group->Value == value))
+		{
+			Items->RemoveAt(item);
+			return true;
+		}
+	}
+
+	// Not found
+	return false;
 }
 
 UInt32 TaskListView::GetTaskIdEx(UIExtension::GetTask getTask, bool fromSelTask)
@@ -400,7 +569,7 @@ UInt32 TaskListView::GetNextTaskId(int index, bool next, bool topLevel)
 
 bool TaskListView::HasTaskId(UInt32 taskId)
 {
-	return (FindItem(taskId) != nullptr);
+	return (FindTaskItem(taskId) != nullptr);
 }
 
 IListViewTask^ TaskListView::GetTask(int index)
@@ -436,7 +605,7 @@ bool TaskListView::SelectTasks(IList<UInt32>^ taskIds)
 
 	for each(auto taskId in taskIds)
 	{
-		ListViewItem^ lvItem = FindItem(taskId);
+		ListViewItem^ lvItem = FindTaskItem(taskId);
 
 		if (lvItem == nullptr)
 			return false;
@@ -480,14 +649,30 @@ bool TaskListView::HasSelection::get()
 	return (SelectionCount > 0);
 }
 
-List<UInt32>^ TaskListView::SelectedTaskIds::get()
+IList<UInt32>^ TaskListView::SelectedTaskIds::get()
 {
 	auto taskIds = gcnew List<UInt32>();
 
 	for each (int index in SelectedIndices)
-		taskIds->Add(GetTaskId(index));
+	{
+		if (IsTaskItem(Items[index]))
+			taskIds->Add(GetTaskId(index));
+	}
 
 	return taskIds;
+}
+
+IList<IListViewTask^>^ TaskListView::SelectedTasks::get()
+{
+	auto tasks = gcnew List<IListViewTask^>();
+
+	for each (int index in SelectedIndices)
+	{
+		if (IsTaskItem(Items[index]))
+			tasks->Add(GetTask(index));
+	}
+
+	return tasks;
 }
 
 UInt32 TaskListView::SelectedTaskId::get()
@@ -526,7 +711,7 @@ Drawing::Rectangle TaskListView::SelectedTaskLabelRect::get()
 
 Drawing::Rectangle TaskListView::GetTaskLabelRect(UInt32 taskId)
 {
-	auto item = FindItem(taskId);
+	auto item = FindTaskItem(taskId);
 
 	if (item == nullptr)
 		return Drawing::Rectangle::Empty;
@@ -535,7 +720,7 @@ Drawing::Rectangle TaskListView::GetTaskLabelRect(UInt32 taskId)
 	return CalcLabelRect(item, TaskListView::LabelExtents::TitleColumn);
 }
 
-ListViewItem^ TaskListView::FindItem(UInt32 taskId)
+ListViewItem^ TaskListView::FindTaskItem(UInt32 taskId)
 {
 	for each(ListViewItem^ lvItem in Items)
 	{
@@ -558,6 +743,9 @@ Drawing::Bitmap^ TaskListView::SaveToImage(int reqWidth)
 {
 	if (Columns->Count == 0)
 		return nullptr;
+
+	if (reqWidth <= 0)
+		reqWidth = GetRequiredWidthForImage();
 
 	CBitmap bmp;
 	{
@@ -636,7 +824,7 @@ bool TaskListView::HitTest(Drawing::Point ptScreen, UIExtension::HitTest^ hitTes
 	if (htInfo == nullptr)
 		return false;
 
-	if (htInfo->Item == nullptr)
+	if ((htInfo->Item == nullptr) || !IsTaskItem(htInfo->Item))
 	{
 		hitTest->result = UIExtension::HitTestResult::Tasklist;
 	}
@@ -860,6 +1048,22 @@ void TaskListView::ReadOnly::set(bool value)
 	}
 }
 
+bool TaskListView::GroupingEnabled::get()
+{
+	return (m_GroupById != nullptr);
+}
+
+void TaskListView::EnableGrouping(Object^ groupById)
+{
+	if (m_GroupById != groupById)
+	{
+		m_GroupById = groupById;
+
+		if (groupById == nullptr)
+			RemoveAllGroups();
+	}
+}
+
 bool TaskListView::ShowLabelTips::get()
 {
 	return ((m_LabelTip != nullptr) ? m_LabelTip->Active : false);
@@ -919,6 +1123,140 @@ void TaskListView::AlternateLineColor::set(Color value)
 	}
 }
 
+TaskListView::UpdateState^ TaskListView::BeginUpdate()
+{
+	auto state = gcnew UpdateState();
+
+	state->SelectedTaskIds = SelectedTaskIds;
+	state->TopItem = TopItem;
+	state->Sorter = ListViewItemSorter;
+#if _DEBUG
+	state->StartTick = ::GetTickCount();
+#endif
+
+	ListViewItemSorter = nullptr;
+	ListView::BeginUpdate(); // => SetRedraw(FALSE)
+
+	m_Updating = true;
+	
+	return state;
+}
+
+void TaskListView::EndUpdate(UpdateState^ state)
+{
+	ListViewItemSorter = state->Sorter;
+
+	if ((state->TopItem != nullptr) && Items->Contains(state->TopItem))
+		TopItem = state->TopItem;
+
+	// Restore as much of the previous selection as possible
+	bool selChange = false;
+
+	if (state->SelectedTaskIds && state->SelectedTaskIds->Count)
+	{
+		int i = state->SelectedTaskIds->Count;
+
+		while (i-- > 0)
+		{
+			if (!HasTaskId(state->SelectedTaskIds[i]))
+			{
+				state->SelectedTaskIds->RemoveAt(i);
+				selChange = true;
+			}
+		}
+
+		SelectTasks(state->SelectedTaskIds);
+	}
+
+#if _DEBUG
+	FileMisc::EnableLogging(TRUE);
+	FileMisc::LogText(L"TaskListView update took %ld ms", (::GetTickCount() - state->StartTick));
+#endif
+
+	ListView::EndUpdate(); // => SetRedraw(TRUE)
+
+	m_Updating = false;
+
+	if (selChange)
+		SelectionChange(this, SelectedTaskIds);
+}
+
+void TaskListView::OnSelectedIndexChanged(EventArgs^ e)
+{
+	CheckNotifySelectionChanged();
+}
+
+void TaskListView::OnItemSelectionChanged(ListViewItemSelectionChangedEventArgs^ e)
+{
+	CheckNotifySelectionChanged();
+}
+
+void TaskListView::OnKeyUp(KeyEventArgs^ e)
+{
+	switch (e->KeyCode)
+	{
+	case Keys::Up:
+	case Keys::Down:
+	case Keys::PageUp:
+	case Keys::PageDown:
+		SelectionChange(this, SelectedTaskIds);
+		return;
+	}
+
+	ListView::OnKeyUp(e);
+}
+
+void TaskListView::CheckNotifySelectionChanged()
+{
+	// Don't forward selection changes if:
+
+	// 1. Updating
+	if (m_Updating)
+		return;
+
+	// 2. Bounds selecting
+	if (IsBoundSelecting)
+		return;
+
+	// 3. Nothing is selected and the control key is NOT pressed
+	//    ie. It's not a deliberate deselection
+	if ((SelectionCount == 0) && !ModifierKeys.HasFlag(Keys::Control))
+		return;
+
+	// 4. During keyboard navigation
+	if (Win32::IsCursorKeyPressed(true, false))
+		return;
+
+	SelectionChange(this, SelectedTaskIds);
+}
+
+int TaskListView::MapDisplayIndexToColumn(int index)
+{
+	if (!AllowColumnReorder)
+		return index;
+
+	for (int col = 0; col < Columns->Count; col++)
+	{
+		if (Columns[col]->DisplayIndex == index)
+			return col;
+	}
+
+	return -1;
+}
+
+void TaskListView::DrawGroupHeader(Drawing::Graphics^ g, String^ text, Drawing::Rectangle rect)
+{
+	CDC* pDC = CDC::FromHandle(Win32::GetHdc(g->GetHdc()));
+	CRect rRow(rect.Left, rect.Top, rect.Right, rect.Bottom);
+	
+	GraphicsMisc::DrawGroupHeaderRow(pDC, Win32::GetHwnd(Handle), rRow, (LPCWSTR)MS(text));
+
+	if (!m_GridlineColor.IsEmpty)
+		GraphicsMisc::DrawHorzLine(pDC, rRow.left, rRow.right, rRow.bottom, DrawingColor::ToRgb(m_GridlineColor));
+
+	g->ReleaseHdc();
+}
+
 void TaskListView::OnDrawItem(DrawListViewItemEventArgs^ e)
 {
 	e->DrawDefault = false;
@@ -926,9 +1264,19 @@ void TaskListView::OnDrawItem(DrawListViewItemEventArgs^ e)
 	if (e->Item == nullptr)
 		return;
 
+	if (IsGroupHeaderItem(e->Item))
+	{
+		DrawGroupHeader(e->Graphics, ASTYPE(e->Item->Tag, GroupHeaderItem)->Title, e->Bounds);
+		return;
+	}
+
 	// Background color full width
 	auto task = ASTYPE(e->Item->Tag, IListViewTask);
 
+	if (task == nullptr)
+		return;
+
+	// Background color full width
 	auto backColor = GetBackColor(task, e->Item->Index);
 	auto itemRect = e->Item->Bounds;
 
@@ -963,17 +1311,18 @@ void TaskListView::OnDrawItem(DrawListViewItemEventArgs^ e)
 	auto textColor = GetTextColor(task, selected);
 	auto subItemRect = itemRect;
 
-	for (int colIndex = 0; colIndex < e->Item->SubItems->Count; colIndex++)
+	for (int i = 0; i < e->Item->SubItems->Count; i++) // display items
 	{
-		auto subItem = e->Item->SubItems[colIndex];
-		auto horzAlign = StringAlignment::Near;
-
-		subItemRect.Width = Columns[colIndex]->Width;
+		int col = MapDisplayIndexToColumn(i);
+		Debug::Assert(col != -1);
+		
+		auto subItem = e->Item->SubItems[col];
+		subItemRect.Width = Columns[col]->Width;
 
 		auto textRect = Rectangle::Inflate(subItemRect, -LabelPadding, -1);
-		auto flags = (TextFormatFlags::SingleLine | TextFormatFlags::VerticalCenter | TextFormatFlags::Left);
+		auto flags = (GetTextAlignment(col) | TextFormatFlags::SingleLine | TextFormatFlags::VerticalCenter);
 
-		if (colIndex == 0)
+		if (col == 0)
 		{
 			flags = (flags | TextFormatFlags::EndEllipsis);
 
@@ -1001,14 +1350,10 @@ void TaskListView::OnDrawItem(DrawListViewItemEventArgs^ e)
 				textRect.Width -= TextIconOffset;
 			}
 		}
-		else // numbers
-		{
-			flags = (flags | TextFormatFlags::Right);
-		}
 
 		TextRenderer::DrawText(e->Graphics, 
 							   subItem->Text, 
-							   GetFont(task, (colIndex == 0)),
+							   GetFont(task, (col == 0)),
 							   textRect, 
 							   textColor, 
 							   flags);
@@ -1070,6 +1415,16 @@ Drawing::Color TaskListView::GetBackColor(IListViewTask^ task, int row)
 	return SystemColors::Window;
 }
 
+bool TaskListView::IsTaskItem(Windows::Forms::ListViewItem^ lvi)
+{
+	return ((lvi != nullptr) && ISTYPE(lvi->Tag, IListViewTask));
+}
+
+bool TaskListView::IsGroupHeaderItem(Windows::Forms::ListViewItem^ lvi)
+{
+	return ((lvi != nullptr) && ISTYPE(lvi->Tag, GroupHeaderItem));
+}
+
 void TaskListView::WndProc(Message% m)
 {
 	if (m_LabelTip != nullptr)
@@ -1103,7 +1458,12 @@ void TaskListView::WndProc(Message% m)
 					return; // We handled it
 				}
 			}
-			else
+			else if (IsGroupHeaderItem(lvHit))
+			{
+				// Prevent selection change
+				return;
+			}
+			else if (IsTaskItem(lvHit))
 			{
 				auto task = ASTYPE(lvHit->Tag, IListViewTask);
 
@@ -1147,13 +1507,13 @@ void TaskListView::WndProc(Message% m)
 			Point pos = Win32::GetPoint(m.LParam);
 			auto lvHit = HitTest(pos)->Item;
 
-			if (lvHit != nullptr)
+			if (IsTaskItem(lvHit))
 			{
 				Debug::Assert(lvHit->Selected);
 
 				auto task = ASTYPE(lvHit->Tag, IListViewTask);
 
-				if (IsTaskEditable(task) && GetTaskLabelRect(task->Id).Contains(pos))
+				if (IsTaskEditable(task) && CalcLabelRect(lvHit, TaskListView::LabelExtents::TitleColumn).Contains(pos))
 					EditTaskLabel(this, task);
 
 				return; // We handled it
@@ -1167,7 +1527,7 @@ void TaskListView::WndProc(Message% m)
 			// loss of selection
 			Point pos = Win32::GetPoint(m.LParam);
 
-			if (HitTest(pos)->Item == nullptr)
+			if (!IsTaskItem(HitTest(pos)->Item))
 				return;
 		}
 		break;
@@ -1180,7 +1540,7 @@ void TaskListView::WndProc(Message% m)
 			Point pos = Win32::GetPoint(m.LParam);
 
 			// When clicking on whitespace...
-			if (HitTest(pos)->Item == nullptr)
+			if (!IsTaskItem(HitTest(pos)->Item))
 			{
 				Focus();
 
@@ -1193,10 +1553,95 @@ void TaskListView::WndProc(Message% m)
 			}
 		}
 		break;
+
+	case WM_HSCROLL:
+		if (GroupingEnabled)
+			RedrawGroupHeaders();
+		break;
+
+	case WM_KEYDOWN:
+		// Leapfrog group headers with simple navigation
+		if (GroupingEnabled && (ModifierKeys == Keys::None))
+		{
+			if (FocusedItem != nullptr)
+			{
+				switch (m.WParam.ToInt32())
+				{
+				case VK_UP:
+				case VK_PRIOR:
+				case VK_HOME:
+					// If we are already on item 1 and moving 'up'
+					// then we eat the message because we are guaranteed
+					// to hit the first group header which causes a flicker
+					// when we subsequently fix it up.
+					if (FocusedItem->Index == 1)
+						return;
+				}
+			}
+
+			// else do default and then fix it up as necessary
+			ListView::WndProc(m);
+			
+			if (IsGroupHeaderItem(FocusedItem))
+			{
+				int selIndex = FocusedItem->Index;
+
+				switch (m.WParam.ToInt32())
+				{
+				case VK_DOWN:
+				case VK_NEXT:
+					// group header can never be last item so we can always go down
+					selIndex++;
+					break;
+
+				case VK_END:
+					// This should be impossible because group header can never be last item
+					ASSERT(0);
+					break;
+
+				case VK_UP:
+				case VK_PRIOR:
+				case VK_HOME:
+					if (selIndex == 0)
+						selIndex++;
+					else
+						selIndex--;
+					break;
+				}
+				FocusedItem = Items[selIndex];
+
+				SelectedIndices->Clear();
+				SelectedIndices->Add(selIndex);
+
+				//CheckNotifySelectionChanged();
+			}
+			return;
+		}
+		break;
 	}
 
 	// else default handling
 	ListView::WndProc(m);
+}
+
+
+void TaskListView::RedrawGroupHeaders()
+{
+	Debug::Assert(GroupingEnabled);
+
+	int item = Items->Count;
+	auto clientRect = ClientRectangle;
+
+	while (item-- > 0)
+	{
+		auto lvi = Items[item];
+
+		if (IsGroupHeaderItem(lvi))
+		{
+			if (clientRect.IntersectsWith(lvi->Bounds))
+				Invalidate(lvi->Bounds, false);
+		}
+	}
 }
 
 void TaskListView::OnBoundSelectionTimer(Object^ sender, EventArgs^ e)
@@ -1207,7 +1652,7 @@ void TaskListView::OnBoundSelectionTimer(Object^ sender, EventArgs^ e)
 		m_BoundSelectionTimer->Enabled = false;
 		m_BoundSelectionTimer = nullptr;
 
-		BoundSelectionEnded(this, gcnew EventArgs());
+		SelectionChange(this, SelectedTaskIds);
 	}
 }
 
@@ -1218,7 +1663,7 @@ void TaskListView::OnMouseMove(MouseEventArgs^ e)
 	auto lvHit = HitTest(e->Location)->Item;
 	Windows::Forms::Cursor^ cursor = nullptr;
 
-	if (lvHit != nullptr)
+	if (IsTaskItem(lvHit))
 	{
 		auto task = ASTYPE(lvHit->Tag, IListViewTask);
 

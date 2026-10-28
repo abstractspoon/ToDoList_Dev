@@ -8,6 +8,7 @@
 #include "DPIScaling.h"
 
 #include <Shared\MessageBox.h>
+#include <Shared\Misc.h>
 #include <Shared\GraphicsMisc.h>
 #include <Shared\Themed.h>
 #include <Shared\WinClasses.h>
@@ -326,6 +327,20 @@ bool Win32::SetFocus(IntPtr hWnd)
 	::SetFocus(GetHwnd(hWnd));
 
 	return (::GetFocus() == GetHwnd(hWnd));
+}
+
+bool Win32::IsCursorKeyPressed(bool upDown, bool leftRight)
+{
+	if (upDown && leftRight)
+		return (Misc::IsCursorKeyPressed(MKC_ANY) != FALSE);
+
+	if (upDown)
+		return (Misc::IsCursorKeyPressed(MKC_UPDOWN) != FALSE);
+
+	if (leftRight)
+		return (Misc::IsCursorKeyPressed(MKC_LEFTRIGHT) != FALSE);
+
+	return false;
 }
 
 bool Win32::LockUpdates(IntPtr hWnd)

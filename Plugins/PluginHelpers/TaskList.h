@@ -172,6 +172,9 @@ namespace Abstractspoon
 				String^ GetLastModifiedDateString();
 				String^ GetLastModifiedBy();
 
+				DateTime GetDate(Attribute attrib, bool calculated);
+				String^ GetDateString(Attribute attrib, bool calculated);
+
 				bool IsDone();
 				bool IsDue();
 				bool IsGoodAsDone();
@@ -312,13 +315,13 @@ namespace Abstractspoon
 
 				bool IsCustom();
 
-				String^ ToString() override { return Label; }
-
 			public:
 				String^ Label;
 				Task::Attribute AttributeId;
 				String^ CustomAttributeId;
 				CustomAttributeDefinition::Attribute CustomAttributeType;
+
+				String^ ToString() override { return Label; }
 			};
 
 			////////////////////////////////////////////////////////////////////////////////////////////////
